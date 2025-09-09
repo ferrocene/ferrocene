@@ -582,8 +582,8 @@ macro_rules! arbitrary {
 }
 
 impl <A: Arbitrary> $crate::arbitrary::Arbitrary for Vec<A> {
-    type Parameters = RangedParams1<A::Parameters>;
-    type Strategy = VecStrategy<A::Strategy>;
+    type Parameters = RangedParams1<A::Parameters> ;
+    type Strategy = VecStrategy<A::Strategy> ;
     fn arbitrary_with(args: Self::Parameters) -> Self::Strategy { {
             let product_unpack![range, a] = args;
             vec(any_with::<A>(a), range)
@@ -784,7 +784,7 @@ macro_rules! delegate_impl {
         }
     }
 }
-impl <> Data for &'amut G where G: Data {}
+impl <> Data for &'a mut G where G: Data {}
 "#]],
     );
 }
@@ -931,11 +931,12 @@ pub fn new() {
 //                             PATH_TYPE@23..26
 //                               PATH@23..26
 //                                 PATH_SEGMENT@23..26
-//                                   L_ANGLE@23..24 "<"
-//                                   PAREN_TYPE@24..26
-//                                     L_PAREN@24..25 "("
-//                                     ERROR@25..26
-//                                       INT_NUMBER@25..26 "8"
+//                                   TYPE_ANCHOR@23..26
+//                                     L_ANGLE@23..24 "<"
+//                                     PAREN_TYPE@24..26
+//                                       L_PAREN@24..25 "("
+//                                       ERROR@25..26
+//                                         INT_NUMBER@25..26 "8"
 //                           PLUS@26..27 "+"
 //                     CONST_ARG@27..28
 //                       LITERAL@27..28

@@ -6,7 +6,6 @@ pub(crate) mod flip_link;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::rc::Rc;
 
 use serde_json::json;
@@ -18,6 +17,7 @@ use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
+use crate::utils::exec::command;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use crate::{FileType, t};
 
@@ -39,7 +39,7 @@ fn add_copyright_files(subsetter: &mut Subsetter<'_>, builder: &Builder<'_>) {
 impl Step for Docs {
     type Output = Vec<GeneratedTarball>;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let default = run.builder.config.docs;
@@ -52,7 +52,7 @@ impl Step for Docs {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         // Build all of the documentation.
-        builder.default_doc(&[]);
+        builder.run_default_doc_steps();
         let doc_out = builder.out.join(&self.target.triple).join("doc");
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
@@ -71,7 +71,7 @@ pub(crate) struct DocsDoctrees {
 impl Step for DocsDoctrees {
     type Output = GeneratedTarball;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let default = run.builder.config.docs;
@@ -100,7 +100,7 @@ pub(crate) struct SourceTarball;
 impl Step for SourceTarball {
     type Output = Vec<GeneratedTarball>;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let builder = run.builder;
@@ -140,6 +140,8 @@ impl Step for SourceTarball {
             "src/tools/cargo/Cargo.toml",
             "src/tools/rust-analyzer/Cargo.toml",
             "src/tools/rustc-perf/site/Cargo.toml",
+            "src/tools/rustbook/Cargo.toml",
+            "src/doc/book/packages/trpl/Cargo.toml",
         ];
         const UV_PROJECTS: &[&str] = &["ferrocene/doc"];
 
@@ -168,18 +170,18 @@ impl Step for SourceTarball {
             crate::utils::channel::write_commit_info_file(&dest_dir, info);
         }
 
-        // Vendor Rust dependencies
-        let mut vendor = Command::new(&builder.initial_cargo);
-        vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
-        vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
-        // Resolver 3 needs the `rustc` binary to fetch the compiler version
-        vendor.env("RUSTC", &builder.initial_rustc);
-        for extra in EXTRA_CARGO_TOMLS {
-            vendor.arg("--sync").arg(&builder.src.join(extra));
-        }
-        vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
         if !builder.config.dry_run() {
-            let config = crate::output(&mut vendor);
+            // Vendor Rust dependencies
+            let mut vendor = command(&builder.initial_cargo);
+            vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
+            vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
+            // Resolver 3 needs the `rustc` binary to fetch the compiler version
+            vendor.env("RUSTC", &builder.initial_rustc);
+            for extra in EXTRA_CARGO_TOMLS {
+                vendor.arg("--sync").arg(&builder.src.join(extra));
+            }
+            vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
+            let config = vendor.run_in_dry_run().run_capture_stdout(&builder).stdout();
             builder.create_dir(&dest_dir.join(".cargo"));
             builder.create(&dest_dir.join(".cargo").join("config.toml"), &config);
         }
@@ -205,6 +207,15 @@ impl Step for SourceTarball {
                 .env("UV_CACHE_DIR", &uv_cache_dir)
                 .env("UV_PROJECT_ENVIRONMENT", venv)
                 .run(&builder);
+        }
+
+        // The docker images contain a `/ferrocene/packages` directory with listings of dependency
+        // versions, include that as it's needed for certification.
+        let build_env_src = Path::new("/ferrocene/packages");
+        if build_env_src.exists() {
+            let build_env_dst = &dest_dir.join("vendor/build-environment");
+            builder.create_dir(build_env_dst);
+            builder.cp_link_r(build_env_src, build_env_dst);
         }
 
         drop(generic_tarball);
@@ -340,7 +351,7 @@ pub(crate) struct SelfTest {
 impl Step for SelfTest {
     type Output = GeneratedTarball;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-self-test")
@@ -367,7 +378,7 @@ pub(crate) struct TestOutcomes;
 impl Step for TestOutcomes {
     type Output = Option<GeneratedTarball>;
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-test-outcomes")
@@ -392,7 +403,7 @@ pub(crate) struct CoverageOutcomes;
 impl Step for CoverageOutcomes {
     type Output = GeneratedTarball;
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-coverage-outcomes")
@@ -419,7 +430,7 @@ pub(crate) struct GenerateBuildMetadata;
 impl Step for GenerateBuildMetadata {
     type Output = ();
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-build-metadata")

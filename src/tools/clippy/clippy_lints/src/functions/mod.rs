@@ -1,3 +1,4 @@
+mod duplicate_underscore_argument;
 mod impl_trait_in_params;
 mod misnamed_getters;
 mod must_use;
@@ -9,15 +10,39 @@ mod too_many_arguments;
 mod too_many_lines;
 
 use clippy_config::Conf;
-use clippy_utils::def_path_def_ids;
 use clippy_utils::msrvs::Msrv;
+use clippy_utils::paths::{PathNS, lookup_path_str};
+use rustc_ast::{self as ast, visit};
 use rustc_hir as hir;
 use rustc_hir::intravisit;
-use rustc_lint::{LateContext, LateLintPass};
+use rustc_lint::{EarlyContext, EarlyLintPass, LateContext, LateLintPass};
 use rustc_middle::ty::TyCtxt;
-use rustc_session::impl_lint_pass;
+use rustc_session::{declare_lint_pass, impl_lint_pass};
 use rustc_span::Span;
 use rustc_span::def_id::{DefIdSet, LocalDefId};
+
+declare_clippy_lint! {
+    /// ### What it does
+    /// Checks for function arguments having the similar names
+    /// differing by an underscore.
+    ///
+    /// ### Why is this bad?
+    /// It affects code readability.
+    ///
+    /// ### Example
+    /// ```no_run
+    /// fn foo(a: i32, _a: i32) {}
+    /// ```
+    ///
+    /// Use instead:
+    /// ```no_run
+    /// fn bar(a: i32, _b: i32) {}
+    /// ```
+    #[clippy::version = "pre 1.29.0"]
+    pub DUPLICATE_UNDERSCORE_ARGUMENT,
+    style,
+    "function arguments having names which only differ by an underscore"
+}
 
 declare_clippy_lint! {
     /// ### What it does
@@ -303,7 +328,7 @@ declare_clippy_lint! {
     /// to the name of the method, when there is a field's whose name matches that of the method.
     ///
     /// ### Why is this bad?
-    /// It is most likely that such a  method is a bug caused by a typo or by copy-pasting.
+    /// It is most likely that such a method is a bug caused by a typo or by copy-pasting.
     ///
     /// ### Example
 
@@ -448,6 +473,14 @@ declare_clippy_lint! {
     "function signature uses `&Option<T>` instead of `Option<&T>`"
 }
 
+declare_lint_pass!(EarlyFunctions => [DUPLICATE_UNDERSCORE_ARGUMENT]);
+
+impl EarlyLintPass for EarlyFunctions {
+    fn check_fn(&mut self, cx: &EarlyContext<'_>, fn_kind: visit::FnKind<'_>, _: Span, _: ast::NodeId) {
+        duplicate_underscore_argument::check(cx, fn_kind);
+    }
+}
+
 pub struct Functions {
     too_many_arguments_threshold: u64,
     too_many_lines_threshold: u64,
@@ -469,7 +502,7 @@ impl Functions {
             trait_ids: conf
                 .allow_renamed_params_for
                 .iter()
-                .flat_map(|p| def_path_def_ids(tcx, &p.split("::").collect::<Vec<_>>()))
+                .flat_map(|p| lookup_path_str(tcx, PathNS::Type, p))
                 .collect(),
             msrv: conf.msrv,
         }
@@ -503,7 +536,7 @@ impl<'tcx> LateLintPass<'tcx> for Functions {
     ) {
         let hir_id = cx.tcx.local_def_id_to_hir_id(def_id);
         too_many_arguments::check_fn(cx, kind, decl, span, hir_id, self.too_many_arguments_threshold);
-        too_many_lines::check_fn(cx, kind, span, body, self.too_many_lines_threshold);
+        too_many_lines::check_fn(cx, kind, body, span, def_id, self.too_many_lines_threshold);
         not_unsafe_ptr_arg_deref::check_fn(cx, kind, decl, body, def_id);
         misnamed_getters::check_fn(cx, kind, decl, body, span);
         impl_trait_in_params::check_fn(cx, &kind, body, hir_id);

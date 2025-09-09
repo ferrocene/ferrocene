@@ -1,4 +1,4 @@
-use crate::{adjusted_display_range, Diagnostic, DiagnosticsContext};
+use crate::{Diagnostic, DiagnosticsContext, adjusted_display_range};
 
 // Diagnostic: await-outside-of-async
 //
@@ -14,6 +14,7 @@ pub(crate) fn await_outside_of_async(
         format!("`await` is used inside {}, which is not an `async` context", d.location),
         display_range,
     )
+    .stable()
 }
 
 #[cfg(test)]

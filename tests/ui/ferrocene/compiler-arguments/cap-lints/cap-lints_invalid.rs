@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --cap-lints invalid
-//~? unknown lint level
+//~? ERROR unknown lint level
 
 fn main() {}
 

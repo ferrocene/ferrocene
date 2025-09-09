@@ -6,7 +6,6 @@ name = "ferrocene-sphinx-shared-resources"
 requires-python = ">=3.10"
 dependencies = [
     "sphinx ~= 8.0",
-    "sphinx-needs ~= 4.2",
     "tomli ~= 2.2",
 ]
 

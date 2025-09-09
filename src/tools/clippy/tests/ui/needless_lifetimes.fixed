@@ -10,7 +10,7 @@
     clippy::unnecessary_wraps,
     dyn_drop,
     clippy::get_first,
-    elided_named_lifetimes
+    mismatched_lifetime_syntaxes
 )]
 
 extern crate proc_macros;
@@ -532,6 +532,13 @@ mod issue13749bis {
     // Non elidable lifetime
     #[expect(clippy::extra_unused_lifetimes)]
     impl<'a, T: 'a> Generic<T> {}
+}
+
+pub fn issue14607<'s>(x: &'s u8) {
+    #[expect(clippy::redundant_closure_call)]
+    (|| {
+        let _: &'s u8 = x;
+    })();
 }
 
 fn main() {}

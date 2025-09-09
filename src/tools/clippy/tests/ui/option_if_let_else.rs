@@ -351,3 +351,33 @@ mod issue13964 {
         };
     }
 }
+
+mod issue11059 {
+    use std::fmt::Debug;
+
+    fn box_coercion_unsize(o: Option<i32>) -> Box<dyn Debug> {
+        if let Some(o) = o { Box::new(o) } else { Box::new("foo") }
+    }
+
+    static S: String = String::new();
+
+    fn deref_with_overload(o: Option<&str>) -> &str {
+        if let Some(o) = o { o } else { &S }
+    }
+}
+
+fn issue15379() {
+    let opt = Some(0usize);
+    let opt_raw_ptr = &opt as *const Option<usize>;
+    let _ = unsafe { if let Some(o) = *opt_raw_ptr { o } else { 1 } };
+    //~^ option_if_let_else
+}
+
+fn issue15002() {
+    let res: Result<String, ()> = Ok("_".to_string());
+    let _ = match res {
+        //~^ option_if_let_else
+        Ok(s) => s.clone(),
+        Err(_) => String::new(),
+    };
+}

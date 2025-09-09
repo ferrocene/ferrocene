@@ -4,18 +4,20 @@
 //! but we can't process `.rlib` and need source code instead. The source code
 //! is typically installed with `rustup component add rust-src` command.
 
+use core::fmt;
 use std::{env, fs, ops::Not, path::Path, process::Command};
 
-use anyhow::{format_err, Result};
+use anyhow::{Result, format_err};
 use itertools::Itertools;
-use paths::{AbsPath, AbsPathBuf, Utf8PathBuf};
+use paths::{AbsPath, AbsPathBuf, Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 use stdx::format_to;
-use toolchain::{probe_for_binary, Tool};
+use toolchain::{Tool, probe_for_binary};
 
 use crate::{
-    cargo_workspace::CargoMetadataConfig, utf8_stdout, CargoWorkspace, ManifestPath, ProjectJson,
-    RustSourceWorkspaceConfig,
+    CargoWorkspace, ManifestPath, ProjectJson, RustSourceWorkspaceConfig,
+    cargo_workspace::{CargoMetadataConfig, FetchMetadata},
+    utf8_stdout,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,6 +34,19 @@ pub enum RustLibSrcWorkspace {
     Json(ProjectJson),
     Stitched(stitched::Stitched),
     Empty,
+}
+
+impl fmt::Display for RustLibSrcWorkspace {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            RustLibSrcWorkspace::Workspace(ws) => write!(f, "workspace {}", ws.workspace_root()),
+            RustLibSrcWorkspace::Json(json) => write!(f, "json {}", json.manifest_or_root()),
+            RustLibSrcWorkspace::Stitched(stitched) => {
+                write!(f, "stitched with {} crates", stitched.crates.len())
+            }
+            RustLibSrcWorkspace::Empty => write!(f, "empty"),
+        }
+    }
 }
 
 impl Sysroot {
@@ -86,7 +101,7 @@ impl Sysroot {
 
 impl Sysroot {
     /// Attempts to discover the toolchain's sysroot from the given `dir`.
-    pub fn discover(dir: &AbsPath, extra_env: &FxHashMap<String, String>) -> Sysroot {
+    pub fn discover(dir: &AbsPath, extra_env: &FxHashMap<String, Option<String>>) -> Sysroot {
         let sysroot_dir = discover_sysroot_dir(dir, extra_env);
         let rust_lib_src_dir = sysroot_dir.as_ref().ok().map(|sysroot_dir| {
             discover_rust_lib_src_dir_or_add_component(sysroot_dir, dir, extra_env)
@@ -96,7 +111,7 @@ impl Sysroot {
 
     pub fn discover_with_src_override(
         current_dir: &AbsPath,
-        extra_env: &FxHashMap<String, String>,
+        extra_env: &FxHashMap<String, Option<String>>,
         rust_lib_src_dir: AbsPathBuf,
     ) -> Sysroot {
         let sysroot_dir = discover_sysroot_dir(current_dir, extra_env);
@@ -118,39 +133,48 @@ impl Sysroot {
     }
 
     /// Returns a command to run a tool preferring the cargo proxies if the sysroot exists.
-    pub fn tool(&self, tool: Tool, current_dir: impl AsRef<Path>) -> Command {
+    pub fn tool(
+        &self,
+        tool: Tool,
+        current_dir: impl AsRef<Path>,
+        envs: &FxHashMap<String, Option<String>>,
+    ) -> Command {
         match self.root() {
             Some(root) => {
                 // special case rustc, we can look that up directly in the sysroot's bin folder
                 // as it should never invoke another cargo binary
-                if let Tool::Rustc = tool {
-                    if let Some(path) =
+                if let Tool::Rustc = tool
+                    && let Some(path) =
                         probe_for_binary(root.join("bin").join(Tool::Rustc.name()).into())
-                    {
-                        return toolchain::command(path, current_dir);
-                    }
+                {
+                    return toolchain::command(path, current_dir, envs);
                 }
 
-                let mut cmd = toolchain::command(tool.prefer_proxy(), current_dir);
-                cmd.env("RUSTUP_TOOLCHAIN", AsRef::<std::path::Path>::as_ref(root));
+                let mut cmd = toolchain::command(tool.prefer_proxy(), current_dir, envs);
+                if !envs.contains_key("RUSTUP_TOOLCHAIN")
+                    && std::env::var_os("RUSTUP_TOOLCHAIN").is_none()
+                {
+                    cmd.env("RUSTUP_TOOLCHAIN", AsRef::<std::path::Path>::as_ref(root));
+                }
+
                 cmd
             }
-            _ => toolchain::command(tool.path(), current_dir),
+            _ => toolchain::command(tool.path(), current_dir, envs),
         }
     }
 
-    pub fn discover_proc_macro_srv(&self) -> anyhow::Result<AbsPathBuf> {
-        let Some(root) = self.root() else {
-            return Err(anyhow::format_err!("no sysroot",));
-        };
-        ["libexec", "lib"]
-            .into_iter()
-            .map(|segment| root.join(segment).join("rust-analyzer-proc-macro-srv"))
-            .find_map(|server_path| probe_for_binary(server_path.into()))
-            .map(AbsPathBuf::assert)
-            .ok_or_else(|| {
-                anyhow::format_err!("cannot find proc-macro server in sysroot `{}`", root)
-            })
+    pub fn discover_proc_macro_srv(&self) -> Option<anyhow::Result<AbsPathBuf>> {
+        let root = self.root()?;
+        Some(
+            ["libexec", "lib"]
+                .into_iter()
+                .map(|segment| root.join(segment).join("rust-analyzer-proc-macro-srv"))
+                .find_map(|server_path| probe_for_binary(server_path.into()))
+                .map(AbsPathBuf::assert)
+                .ok_or_else(|| {
+                    anyhow::format_err!("cannot find proc-macro server in sysroot `{}`", root)
+                }),
+        )
     }
 
     fn assemble(
@@ -185,6 +209,10 @@ impl Sysroot {
     pub fn load_workspace(
         &self,
         sysroot_source_config: &RustSourceWorkspaceConfig,
+        no_deps: bool,
+        current_dir: &AbsPath,
+        target_dir: &Utf8Path,
+        progress: &dyn Fn(String),
     ) -> Option<RustLibSrcWorkspace> {
         assert!(matches!(self.workspace, RustLibSrcWorkspace::Empty), "workspace already loaded");
         let Self { root: _, rust_lib_src_root: Some(src_root), workspace: _, error: _ } = self
@@ -194,10 +222,18 @@ impl Sysroot {
         if let RustSourceWorkspaceConfig::CargoMetadata(cargo_config) = sysroot_source_config {
             let library_manifest = ManifestPath::try_from(src_root.join("Cargo.toml")).unwrap();
             if fs::metadata(&library_manifest).is_ok() {
-                if let Some(loaded) =
-                    self.load_library_via_cargo(library_manifest, src_root, cargo_config)
-                {
-                    return Some(loaded);
+                match self.load_library_via_cargo(
+                    &library_manifest,
+                    current_dir,
+                    target_dir,
+                    cargo_config,
+                    no_deps,
+                    progress,
+                ) {
+                    Ok(loaded) => return Some(loaded),
+                    Err(e) => {
+                        tracing::error!("`cargo metadata` failed on `{library_manifest}` : {e}")
+                    }
                 }
             }
             tracing::debug!("Stitching sysroot library: {src_root}");
@@ -254,62 +290,52 @@ impl Sysroot {
 
     pub fn set_workspace(&mut self, workspace: RustLibSrcWorkspace) {
         self.workspace = workspace;
-        if self.error.is_none() {
-            if let Some(src_root) = &self.rust_lib_src_root {
-                let has_core = match &self.workspace {
-                    RustLibSrcWorkspace::Workspace(ws) => {
-                        ws.packages().any(|p| ws[p].name == "core")
-                    }
-                    RustLibSrcWorkspace::Json(project_json) => project_json
-                        .crates()
-                        .filter_map(|(_, krate)| krate.display_name.clone())
-                        .any(|name| name.canonical_name().as_str() == "core"),
-                    RustLibSrcWorkspace::Stitched(stitched) => stitched.by_name("core").is_some(),
-                    RustLibSrcWorkspace::Empty => true,
+        if self.error.is_none()
+            && let Some(src_root) = &self.rust_lib_src_root
+        {
+            let has_core = match &self.workspace {
+                RustLibSrcWorkspace::Workspace(ws) => ws.packages().any(|p| ws[p].name == "core"),
+                RustLibSrcWorkspace::Json(project_json) => project_json
+                    .crates()
+                    .filter_map(|(_, krate)| krate.display_name.clone())
+                    .any(|name| name.canonical_name().as_str() == "core"),
+                RustLibSrcWorkspace::Stitched(stitched) => stitched.by_name("core").is_some(),
+                RustLibSrcWorkspace::Empty => true,
+            };
+            if !has_core {
+                let var_note = if env::var_os("RUST_SRC_PATH").is_some() {
+                    " (env var `RUST_SRC_PATH` is set and may be incorrect, try unsetting it)"
+                } else {
+                    ", try running `rustup component add rust-src` to possibly fix this"
                 };
-                if !has_core {
-                    let var_note = if env::var_os("RUST_SRC_PATH").is_some() {
-                        " (env var `RUST_SRC_PATH` is set and may be incorrect, try unsetting it)"
-                    } else {
-                        ", try running `rustup component add rust-src` to possibly fix this"
-                    };
-                    self.error = Some(format!(
-                        "sysroot at `{src_root}` is missing a `core` library{var_note}",
-                    ));
-                }
+                self.error =
+                    Some(format!("sysroot at `{src_root}` is missing a `core` library{var_note}",));
             }
         }
     }
 
     fn load_library_via_cargo(
         &self,
-        library_manifest: ManifestPath,
-        rust_lib_src_dir: &AbsPathBuf,
+        library_manifest: &ManifestPath,
+        current_dir: &AbsPath,
+        target_dir: &Utf8Path,
         cargo_config: &CargoMetadataConfig,
-    ) -> Option<RustLibSrcWorkspace> {
+        no_deps: bool,
+        progress: &dyn Fn(String),
+    ) -> Result<RustLibSrcWorkspace> {
         tracing::debug!("Loading library metadata: {library_manifest}");
         let mut cargo_config = cargo_config.clone();
         // the sysroot uses `public-dependency`, so we make cargo think it's a nightly
         cargo_config.extra_env.insert(
             "__CARGO_TEST_CHANNEL_OVERRIDE_DO_NOT_USE_THIS".to_owned(),
-            "nightly".to_owned(),
+            Some("nightly".to_owned()),
         );
 
-        let (mut res, _) = match CargoWorkspace::fetch_metadata(
-            &library_manifest,
-            rust_lib_src_dir,
-            &cargo_config,
-            self,
-            // Make sure we never attempt to write to the sysroot
-            true,
-            &|_| (),
-        ) {
-            Ok(it) => it,
-            Err(e) => {
-                tracing::error!("`cargo metadata` failed on `{library_manifest}` : {e}");
-                return None;
-            }
-        };
+        // Make sure we never attempt to write to the sysroot
+        let locked = true;
+        let (mut res, _) =
+            FetchMetadata::new(library_manifest, current_dir, &cargo_config, self, no_deps)
+                .exec(target_dir, locked, progress)?;
 
         // Patch out `rustc-std-workspace-*` crates to point to the real crates.
         // This is done prior to `CrateGraph` construction to prevent de-duplication logic from failing.
@@ -328,7 +354,7 @@ impl Sysroot {
                     Some(_) => {
                         tracing::warn!("unknown rustc-std-workspace-* crate: {}", package.name)
                     }
-                    None => match &*package.name {
+                    None => match &**package.name {
                         "core" => real_core = Some(package.id.clone()),
                         "alloc" => real_alloc = Some(package.id.clone()),
                         "std" => real_std = Some(package.id.clone()),
@@ -360,17 +386,17 @@ impl Sysroot {
             res.packages.remove(idx);
         });
 
-        let cargo_workspace = CargoWorkspace::new(res, library_manifest, Default::default());
-        Some(RustLibSrcWorkspace::Workspace(cargo_workspace))
+        let cargo_workspace =
+            CargoWorkspace::new(res, library_manifest.clone(), Default::default(), true);
+        Ok(RustLibSrcWorkspace::Workspace(cargo_workspace))
     }
 }
 
 fn discover_sysroot_dir(
     current_dir: &AbsPath,
-    extra_env: &FxHashMap<String, String>,
+    extra_env: &FxHashMap<String, Option<String>>,
 ) -> Result<AbsPathBuf> {
-    let mut rustc = toolchain::command(Tool::Rustc.path(), current_dir);
-    rustc.envs(extra_env);
+    let mut rustc = toolchain::command(Tool::Rustc.path(), current_dir, extra_env);
     rustc.current_dir(current_dir).args(["--print", "sysroot"]);
     tracing::debug!("Discovering sysroot by {:?}", rustc);
     let stdout = utf8_stdout(&mut rustc)?;
@@ -397,12 +423,11 @@ fn discover_rust_lib_src_dir(sysroot_path: &AbsPathBuf) -> Option<AbsPathBuf> {
 fn discover_rust_lib_src_dir_or_add_component(
     sysroot_path: &AbsPathBuf,
     current_dir: &AbsPath,
-    extra_env: &FxHashMap<String, String>,
+    extra_env: &FxHashMap<String, Option<String>>,
 ) -> Result<AbsPathBuf> {
     discover_rust_lib_src_dir(sysroot_path)
         .or_else(|| {
-            let mut rustup = toolchain::command(Tool::Rustup.prefer_proxy(), current_dir);
-            rustup.envs(extra_env);
+            let mut rustup = toolchain::command(Tool::Rustup.prefer_proxy(), current_dir, extra_env);
             rustup.args(["component", "add", "rust-src"]);
             tracing::info!("adding rust-src component by {:?}", rustup);
             utf8_stdout(&mut rustup).ok()?;
@@ -424,21 +449,13 @@ fn get_rustc_src(sysroot_path: &AbsPath) -> Option<ManifestPath> {
     let rustc_src = sysroot_path.join("lib/rustlib/rustc-src/rust/compiler/rustc/Cargo.toml");
     let rustc_src = ManifestPath::try_from(rustc_src).ok()?;
     tracing::debug!("checking for rustc source code: {rustc_src}");
-    if fs::metadata(&rustc_src).is_ok() {
-        Some(rustc_src)
-    } else {
-        None
-    }
+    if fs::metadata(&rustc_src).is_ok() { Some(rustc_src) } else { None }
 }
 
 fn get_rust_lib_src(sysroot_path: &AbsPath) -> Option<AbsPathBuf> {
     let rust_lib_src = sysroot_path.join("lib/rustlib/src/rust/library");
     tracing::debug!("checking sysroot library: {rust_lib_src}");
-    if fs::metadata(&rust_lib_src).is_ok() {
-        Some(rust_lib_src)
-    } else {
-        None
-    }
+    if fs::metadata(&rust_lib_src).is_ok() { Some(rust_lib_src) } else { None }
 }
 
 // FIXME: Remove this, that will bump our project MSRV to 1.82

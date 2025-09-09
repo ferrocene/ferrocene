@@ -1,5 +1,6 @@
+use std::ops::Range;
+
 use parse::Position::ArgumentNamed;
-use rustc_ast::ptr::P;
 use rustc_ast::tokenstream::TokenStream;
 use rustc_ast::{
     Expr, ExprKind, FormatAlignment, FormatArgPosition, FormatArgPositionKind, FormatArgs,
@@ -9,11 +10,12 @@ use rustc_ast::{
 };
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::{
-    Applicability, Diag, MultiSpan, PResult, SingleLabelManySpans, listify, pluralize,
+    Applicability, BufferedEarlyLint, Diag, MultiSpan, PResult, SingleLabelManySpans, listify,
+    pluralize,
 };
 use rustc_expand::base::*;
 use rustc_lint_defs::builtin::NAMED_ARGUMENTS_USED_POSITIONALLY;
-use rustc_lint_defs::{BufferedEarlyLint, BuiltinLintDiag, LintId};
+use rustc_lint_defs::{BuiltinLintDiag, LintId};
 use rustc_parse::exp;
 use rustc_parse_format as parse;
 use rustc_span::{BytePos, ErrorGuaranteed, Ident, InnerSpan, Span, Symbol};
@@ -43,7 +45,7 @@ use PositionUsedAs::*;
 
 #[derive(Debug)]
 struct MacroInput {
-    fmtstr: P<Expr>,
+    fmtstr: Box<Expr>,
     args: FormatArguments,
     /// Whether the first argument was a string literal or a result from eager macro expansion.
     /// If it's not a string literal, we disallow implicit argument capturing.
@@ -335,7 +337,7 @@ fn make_format_args(
         return ExpandResult::Ready(Err(guar));
     }
 
-    let to_span = |inner_span: parse::InnerSpan| {
+    let to_span = |inner_span: Range<usize>| {
         is_source_literal.then(|| {
             fmt_span.from_inner(InnerSpan { start: inner_span.start, end: inner_span.end })
         })
@@ -407,7 +409,7 @@ fn make_format_args(
     let mut placeholder_index = 0;
 
     for piece in &pieces {
-        match *piece {
+        match piece.clone() {
             parse::Piece::Lit(s) => {
                 unfinished_literal.push_str(s);
             }
@@ -417,7 +419,8 @@ fn make_format_args(
                     unfinished_literal.clear();
                 }
 
-                let span = parser.arg_places.get(placeholder_index).and_then(|&s| to_span(s));
+                let span =
+                    parser.arg_places.get(placeholder_index).and_then(|s| to_span(s.clone()));
                 placeholder_index += 1;
 
                 let position_span = to_span(position_span);
@@ -593,7 +596,8 @@ fn make_format_args(
                     named_arg_sp: arg_name.span,
                     named_arg_name: arg_name.name.to_string(),
                     is_formatting_arg: matches!(used_as, Width | Precision),
-                },
+                }
+                .into(),
             });
         }
     }
@@ -603,13 +607,14 @@ fn make_format_args(
         template,
         arguments: args,
         uncooked_fmt_str,
+        is_source_literal,
     }))
 }
 
 fn invalid_placeholder_type_error(
     ecx: &ExtCtxt<'_>,
     ty: &str,
-    ty_span: Option<parse::InnerSpan>,
+    ty_span: Option<Range<usize>>,
     fmt_span: Span,
 ) {
     let sp = ty_span.map(|sp| fmt_span.from_inner(InnerSpan::new(sp.start, sp.end)));
@@ -1014,7 +1019,7 @@ fn expand_format_args_impl<'cx>(
             };
             match mac {
                 Ok(format_args) => {
-                    MacEager::expr(ecx.expr(sp, ExprKind::FormatArgs(P(format_args))))
+                    MacEager::expr(ecx.expr(sp, ExprKind::FormatArgs(Box::new(format_args))))
                 }
                 Err(guar) => MacEager::expr(DummyResult::raw_expr(sp, Some(guar))),
             }

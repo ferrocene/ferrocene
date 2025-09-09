@@ -4,8 +4,8 @@ use rustc_hir::def_id::LocalDefId;
 use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_middle::ty::{
-    self, DefiningScopeKind, GenericArgKind, GenericArgs, OpaqueTypeKey, TyCtxt, TypeVisitableExt,
-    TypingMode, fold_regions,
+    self, DefiningScopeKind, GenericArgKind, GenericArgs, OpaqueTypeKey, Ty, TyCtxt,
+    TypeVisitableExt, TypingMode, fold_regions,
 };
 use rustc_span::{ErrorGuaranteed, Span};
 
@@ -13,36 +13,78 @@ use crate::errors::NonGenericOpaqueTypeParam;
 use crate::regions::OutlivesEnvironmentBuildExt;
 use crate::traits::ObligationCtxt;
 
+#[derive(Debug)]
+pub enum NonDefiningUseReason<'tcx> {
+    Tainted(ErrorGuaranteed),
+    NotAParam { opaque_type_key: OpaqueTypeKey<'tcx>, param_index: usize, span: Span },
+    DuplicateParam { opaque_type_key: OpaqueTypeKey<'tcx>, param_indices: Vec<usize>, span: Span },
+}
+impl From<ErrorGuaranteed> for NonDefiningUseReason<'_> {
+    fn from(guar: ErrorGuaranteed) -> Self {
+        NonDefiningUseReason::Tainted(guar)
+    }
+}
+impl<'tcx> NonDefiningUseReason<'tcx> {
+    pub fn report(self, infcx: &InferCtxt<'tcx>) -> ErrorGuaranteed {
+        let tcx = infcx.tcx;
+        match self {
+            NonDefiningUseReason::Tainted(guar) => guar,
+            NonDefiningUseReason::NotAParam { opaque_type_key, param_index, span } => {
+                let opaque_generics = tcx.generics_of(opaque_type_key.def_id);
+                let opaque_param = opaque_generics.param_at(param_index, tcx);
+                let kind = opaque_param.kind.descr();
+                infcx.dcx().emit_err(NonGenericOpaqueTypeParam {
+                    arg: opaque_type_key.args[param_index],
+                    kind,
+                    span,
+                    param_span: tcx.def_span(opaque_param.def_id),
+                })
+            }
+            NonDefiningUseReason::DuplicateParam { opaque_type_key, param_indices, span } => {
+                let opaque_generics = tcx.generics_of(opaque_type_key.def_id);
+                let descr = opaque_generics.param_at(param_indices[0], tcx).kind.descr();
+                let spans: Vec<_> = param_indices
+                    .into_iter()
+                    .map(|i| tcx.def_span(opaque_generics.param_at(i, tcx).def_id))
+                    .collect();
+                infcx
+                    .dcx()
+                    .struct_span_err(span, "non-defining opaque type use in defining scope")
+                    .with_span_note(spans, format!("{descr} used multiple times"))
+                    .emit()
+            }
+        }
+    }
+}
+
 /// Opaque type parameter validity check as documented in the [rustc-dev-guide chapter].
+/// With the new solver, uses which fail this check are simply treated as non-defining
+/// and we only emit an error if no defining use exists.
 ///
 /// [rustc-dev-guide chapter]:
 /// https://rustc-dev-guide.rust-lang.org/opaque-types-region-infer-restrictions.html
-pub fn check_opaque_type_parameter_valid<'tcx>(
+pub fn opaque_type_has_defining_use_args<'tcx>(
     infcx: &InferCtxt<'tcx>,
     opaque_type_key: OpaqueTypeKey<'tcx>,
     span: Span,
     defining_scope_kind: DefiningScopeKind,
-) -> Result<(), ErrorGuaranteed> {
+) -> Result<(), NonDefiningUseReason<'tcx>> {
     let tcx = infcx.tcx;
-    let opaque_generics = tcx.generics_of(opaque_type_key.def_id);
     let opaque_env = LazyOpaqueTyEnv::new(tcx, opaque_type_key.def_id);
     let mut seen_params: FxIndexMap<_, Vec<_>> = FxIndexMap::default();
 
     // Avoid duplicate errors in case the opaque has already been malformed in
     // HIR typeck.
     if let DefiningScopeKind::MirBorrowck = defining_scope_kind {
-        if let Err(guar) = infcx
+        infcx
             .tcx
             .type_of_opaque_hir_typeck(opaque_type_key.def_id)
             .instantiate_identity()
-            .error_reported()
-        {
-            return Err(guar);
-        }
+            .error_reported()?;
     }
 
     for (i, arg) in opaque_type_key.iter_captured_args(tcx) {
-        let arg_is_param = match arg.unpack() {
+        let arg_is_param = match arg.kind() {
             GenericArgKind::Lifetime(lt) => match defining_scope_kind {
                 DefiningScopeKind::HirTypeck => continue,
                 DefiningScopeKind::MirBorrowck => {
@@ -64,32 +106,18 @@ pub fn check_opaque_type_parameter_valid<'tcx>(
             }
         } else {
             // Prevent `fn foo() -> Foo<u32>` from being defining.
-            let opaque_param = opaque_generics.param_at(i, tcx);
-            let kind = opaque_param.kind.descr();
-
             opaque_env.param_is_error(i)?;
-
-            return Err(infcx.dcx().emit_err(NonGenericOpaqueTypeParam {
-                arg,
-                kind,
-                span,
-                param_span: tcx.def_span(opaque_param.def_id),
-            }));
+            return Err(NonDefiningUseReason::NotAParam { opaque_type_key, param_index: i, span });
         }
     }
 
-    for (_, indices) in seen_params {
-        if indices.len() > 1 {
-            let descr = opaque_generics.param_at(indices[0], tcx).kind.descr();
-            let spans: Vec<_> = indices
-                .into_iter()
-                .map(|i| tcx.def_span(opaque_generics.param_at(i, tcx).def_id))
-                .collect();
-            return Err(infcx
-                .dcx()
-                .struct_span_err(span, "non-defining opaque type use in defining scope")
-                .with_span_note(spans, format!("{descr} used multiple times"))
-                .emit());
+    for (_, param_indices) in seen_params {
+        if param_indices.len() > 1 {
+            return Err(NonDefiningUseReason::DuplicateParam {
+                opaque_type_key,
+                param_indices,
+                span,
+            });
         }
     }
 
@@ -179,4 +207,28 @@ impl<'tcx> LazyOpaqueTyEnv<'tcx> {
         self.canonical_args.set(canonical_args).unwrap();
         canonical_args
     }
+}
+
+pub fn report_item_does_not_constrain_error<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    item_def_id: LocalDefId,
+    def_id: LocalDefId,
+    non_defining_use: Option<(OpaqueTypeKey<'tcx>, Span)>,
+) -> ErrorGuaranteed {
+    let span = tcx.def_ident_span(item_def_id).unwrap_or_else(|| tcx.def_span(item_def_id));
+    let opaque_type_span = tcx.def_span(def_id);
+    let opaque_type_name = tcx.def_path_str(def_id);
+
+    let mut err =
+        tcx.dcx().struct_span_err(span, format!("item does not constrain `{opaque_type_name}`"));
+    err.note("consider removing `#[define_opaque]` or adding an empty `#[define_opaque()]`");
+    err.span_note(opaque_type_span, "this opaque type is supposed to be constrained");
+    if let Some((key, span)) = non_defining_use {
+        let opaque_ty = Ty::new_opaque(tcx, key.def_id.into(), key.args);
+        err.span_note(
+            span,
+            format!("this use of `{opaque_ty}` does not have unique universal generic arguments"),
+        );
+    }
+    err.emit()
 }

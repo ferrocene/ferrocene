@@ -39,6 +39,7 @@ macro_rules! panic {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "assert_eq_macro"]
 #[allow_internal_unstable(panic_internals)]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! assert_eq {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -95,6 +96,7 @@ macro_rules! assert_eq {
 #[stable(feature = "assert_ne", since = "1.13.0")]
 #[rustc_diagnostic_item = "assert_ne_macro"]
 #[allow_internal_unstable(panic_internals)]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! assert_ne {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -169,6 +171,7 @@ macro_rules! assert_ne {
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         match $left {
@@ -196,23 +199,21 @@ pub macro assert_matches {
     },
 }
 
-/// A macro for defining `#[cfg]` match-like statements.
+/// Selects code at compile-time based on `cfg` predicates.
 ///
-/// It is similar to the `if/elif` C preprocessor macro by allowing definition of a cascade of
-/// `#[cfg]` cases, emitting the implementation which matches first.
+/// This macro evaluates, at compile-time, a series of `cfg` predicates,
+/// selects the first that is true, and emits the code guarded by that
+/// predicate. The code guarded by other predicates is not emitted.
 ///
-/// This allows you to conveniently provide a long list `#[cfg]`'d blocks of code
-/// without having to rewrite each clause multiple times.
-///
-/// Trailing `_` wildcard match arms are **optional** and they indicate a fallback branch when
-/// all previous declarations do not evaluate to true.
+/// An optional trailing `_` wildcard can be used to specify a fallback. If
+/// none of the predicates are true, a [`compile_error`] is emitted.
 ///
 /// # Example
 ///
 /// ```
-/// #![feature(cfg_match)]
+/// #![feature(cfg_select)]
 ///
-/// cfg_match! {
+/// cfg_select! {
 ///     unix => {
 ///         fn foo() { /* unix specific functionality */ }
 ///     }
@@ -225,37 +226,23 @@ pub macro assert_matches {
 /// }
 /// ```
 ///
-/// If desired, it is possible to return expressions through the use of surrounding braces:
+/// The `cfg_select!` macro can also be used in expression position, with or without braces on the
+/// right-hand side:
 ///
 /// ```
-/// #![feature(cfg_match)]
+/// #![feature(cfg_select)]
 ///
-/// let _some_string = cfg_match! {{
-///     unix => { "With great power comes great electricity bills" }
+/// let _some_string = cfg_select! {
+///     unix => "With great power comes great electricity bills",
 ///     _ => { "Behind every successful diet is an unwatched pizza" }
-/// }};
+/// };
 /// ```
-#[unstable(feature = "cfg_match", issue = "115585")]
-#[rustc_diagnostic_item = "cfg_match"]
-#[rustc_macro_transparency = "semitransparent"]
-pub macro cfg_match {
-    ({ $($tt:tt)* }) => {{
-        $crate::cfg_match! { $($tt)* }
-    }},
-    (_ => { $($output:tt)* }) => {
-        $($output)*
-    },
-    (
-        $cfg:meta => $output:tt
-        $($( $rest:tt )+)?
-    ) => {
-        #[cfg($cfg)]
-        $crate::cfg_match! { _ => $output }
-        $(
-            #[cfg(not($cfg))]
-            $crate::cfg_match! { $($rest)+ }
-        )?
-    },
+#[unstable(feature = "cfg_select", issue = "115585")]
+#[rustc_diagnostic_item = "cfg_select"]
+#[rustc_builtin_macro]
+#[cfg(not(feature = "ferrocene_certified"))]
+pub macro cfg_select($($tt:tt)*) {
+    /* compiler built-in */
 }
 
 /// Asserts that a boolean expression is `true` at runtime.
@@ -289,7 +276,10 @@ pub macro cfg_match {
 /// // expression given.
 /// debug_assert!(true);
 ///
-/// fn some_expensive_computation() -> bool { true } // a very simple function
+/// fn some_expensive_computation() -> bool {
+///     // Some expensive computation here
+///     true
+/// }
 /// debug_assert!(some_expensive_computation());
 ///
 /// // assert with a custom message
@@ -303,6 +293,7 @@ pub macro cfg_match {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "debug_assert_macro"]
 #[allow_internal_unstable(edition_panic)]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! debug_assert {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -333,6 +324,7 @@ macro_rules! debug_assert {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "debug_assert_eq_macro"]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! debug_assert_eq {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -363,6 +355,7 @@ macro_rules! debug_assert_eq {
 #[macro_export]
 #[stable(feature = "assert_ne", since = "1.13.0")]
 #[rustc_diagnostic_item = "debug_assert_ne_macro"]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! debug_assert_ne {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -416,6 +409,7 @@ macro_rules! debug_assert_ne {
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(assert_matches)]
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro debug_assert_matches($($arg:tt)*) {
     if $crate::cfg!(debug_assertions) {
         $crate::assert_matches::assert_matches!($($arg)*);
@@ -444,8 +438,10 @@ pub macro debug_assert_matches($($arg:tt)*) {
 #[macro_export]
 #[stable(feature = "matches_macro", since = "1.42.0")]
 #[rustc_diagnostic_item = "matches_macro"]
+#[allow_internal_unstable(non_exhaustive_omitted_patterns_lint, stmt_expr_attributes)]
 macro_rules! matches {
     ($expression:expr, $pattern:pat $(if $guard:expr)? $(,)?) => {
+        #[allow(non_exhaustive_omitted_patterns)]
         match $expression {
             $pattern $(if $guard)? => true,
             _ => false
@@ -519,6 +515,7 @@ macro_rules! matches {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(since = "1.39.0", note = "use the `?` operator instead")]
 #[doc(alias = "?")]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! r#try {
     ($expr:expr $(,)?) => {
         match $expr {
@@ -619,6 +616,7 @@ macro_rules! r#try {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "write_macro"]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! write {
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args!($($arg)*))
@@ -654,6 +652,7 @@ macro_rules! write {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "writeln_macro"]
 #[allow_internal_unstable(format_args_nl)]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! writeln {
     ($dst:expr $(,)?) => {
         $crate::write!($dst, "\n")
@@ -720,6 +719,7 @@ macro_rules! writeln {
 #[allow_internal_unstable(edition_panic)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "unreachable_macro"]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! unreachable {
     // Expands to either `$crate::panic::unreachable_2015` or `$crate::panic::unreachable_2021`
     // depending on the edition of the caller.
@@ -806,6 +806,7 @@ macro_rules! unreachable {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "unimplemented_macro"]
 #[allow_internal_unstable(panic_internals)]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! unimplemented {
     () => {
         $crate::panicking::panic("not implemented")
@@ -886,6 +887,7 @@ macro_rules! unimplemented {
 #[stable(feature = "todo_macro", since = "1.40.0")]
 #[rustc_diagnostic_item = "todo_macro"]
 #[allow_internal_unstable(panic_internals)]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! todo {
     () => {
         $crate::panicking::panic("not yet implemented")
@@ -1109,41 +1111,6 @@ pub(crate) mod builtin {
         ($name:expr $(,)?) => {{ /* compiler built-in */ }};
     }
 
-    /// Concatenates identifiers into one identifier.
-    ///
-    /// This macro takes any number of comma-separated identifiers, and
-    /// concatenates them all into one, yielding an expression which is a new
-    /// identifier. Note that hygiene makes it such that this macro cannot
-    /// capture local variables. Also, as a general rule, macros are only
-    /// allowed in item, statement or expression position. That means while
-    /// you may use this macro for referring to existing variables, functions or
-    /// modules etc, you cannot define a new one with it.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #![feature(concat_idents)]
-    ///
-    /// # fn main() {
-    /// fn foobar() -> u32 { 23 }
-    ///
-    /// let f = concat_idents!(foo, bar);
-    /// println!("{}", f());
-    ///
-    /// // fn concat_idents!(new, fun, name) { } // not usable in this way!
-    /// # }
-    /// ```
-    #[unstable(
-        feature = "concat_idents",
-        issue = "29599",
-        reason = "`concat_idents` is not stable enough for use and is subject to change"
-    )]
-    #[rustc_builtin_macro]
-    #[macro_export]
-    macro_rules! concat_idents {
-        ($($e:ident),+ $(,)?) => {{ /* compiler built-in */ }};
-    }
-
     /// Concatenates literals into a byte slice.
     ///
     /// This macro takes any number of comma-separated literals, and concatenates them all into
@@ -1188,6 +1155,7 @@ pub(crate) mod builtin {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
+    #[rustc_diagnostic_item = "macro_concat"]
     #[macro_export]
     macro_rules! concat {
         ($($e:expr),* $(,)?) => {{ /* compiler built-in */ }};
@@ -1268,6 +1236,19 @@ pub(crate) mod builtin {
     /// is not the invocation of the `file!` macro itself, but rather the
     /// first macro invocation leading up to the invocation of the `file!`
     /// macro.
+    ///
+    /// The file name is derived from the crate root's source path passed to the Rust compiler
+    /// and the sequence the compiler takes to get from the crate root to the
+    /// module containing `file!`, modified by any flags passed to the Rust compiler (e.g.
+    /// `--remap-path-prefix`).  If the crate's source path is relative, the initial base
+    /// directory will be the working directory of the Rust compiler.  For example, if the source
+    /// path passed to the compiler is `./src/lib.rs` which has a `mod foo;` with a source path of
+    /// `src/foo/mod.rs`, then calling `file!` inside `mod foo;` will return `./src/foo/mod.rs`.
+    ///
+    /// Future compiler options might make further changes to the behavior of `file!`,
+    /// including potentially making it entirely empty. Code (e.g. test libraries)
+    /// relying on `file!` producing an openable file path would be incompatible
+    /// with such options, and might wish to recommend not using those options.
     ///
     /// # Examples
     ///
@@ -1515,20 +1496,41 @@ pub(crate) mod builtin {
         ($file:expr $(,)?) => {{ /* compiler built-in */ }};
     }
 
-    /// Automatic Differentiation macro which allows generating a new function to compute
-    /// the derivative of a given function. It may only be applied to a function.
-    /// The expected usage syntax is
-    /// `#[autodiff(NAME, MODE, INPUT_ACTIVITIES, OUTPUT_ACTIVITY)]`
-    /// where:
-    /// NAME is a string that represents a valid function name.
-    /// MODE is any of Forward, Reverse, ForwardFirst, ReverseFirst.
-    /// INPUT_ACTIVITIES consists of one valid activity for each input parameter.
-    /// OUTPUT_ACTIVITY must not be set if we implicitly return nothing (or explicitly return
-    /// `-> ()`). Otherwise it must be set to one of the allowed activities.
+    /// This macro uses forward-mode automatic differentiation to generate a new function.
+    /// It may only be applied to a function. The new function will compute the derivative
+    /// of the function to which the macro was applied.
+    ///
+    /// The expected usage syntax is:
+    /// `#[autodiff_forward(NAME, INPUT_ACTIVITIES, OUTPUT_ACTIVITY)]`
+    ///
+    /// - `NAME`: A string that represents a valid function name.
+    /// - `INPUT_ACTIVITIES`: Specifies one valid activity for each input parameter.
+    /// - `OUTPUT_ACTIVITY`: Must not be set if the function implicitly returns nothing
+    ///   (or explicitly returns `-> ()`). Otherwise, it must be set to one of the allowed activities.
     #[unstable(feature = "autodiff", issue = "124509")]
     #[allow_internal_unstable(rustc_attrs)]
+    #[allow_internal_unstable(core_intrinsics)]
     #[rustc_builtin_macro]
-    pub macro autodiff($item:item) {
+    pub macro autodiff_forward($item:item) {
+        /* compiler built-in */
+    }
+
+    /// This macro uses reverse-mode automatic differentiation to generate a new function.
+    /// It may only be applied to a function. The new function will compute the derivative
+    /// of the function to which the macro was applied.
+    ///
+    /// The expected usage syntax is:
+    /// `#[autodiff_reverse(NAME, INPUT_ACTIVITIES, OUTPUT_ACTIVITY)]`
+    ///
+    /// - `NAME`: A string that represents a valid function name.
+    /// - `INPUT_ACTIVITIES`: Specifies one valid activity for each input parameter.
+    /// - `OUTPUT_ACTIVITY`: Must not be set if the function implicitly returns nothing
+    ///   (or explicitly returns `-> ()`). Otherwise, it must be set to one of the allowed activities.
+    #[unstable(feature = "autodiff", issue = "124509")]
+    #[allow_internal_unstable(rustc_attrs)]
+    #[allow_internal_unstable(core_intrinsics)]
+    #[rustc_builtin_macro]
+    pub macro autodiff_reverse($item:item) {
         /* compiler built-in */
     }
 
@@ -1565,7 +1567,10 @@ pub(crate) mod builtin {
     /// // expression given.
     /// assert!(true);
     ///
-    /// fn some_computation() -> bool { true } // a very simple function
+    /// fn some_computation() -> bool {
+    ///     // Some expensive computation here
+    ///     true
+    /// }
     ///
     /// assert!(some_computation());
     ///
@@ -1635,7 +1640,7 @@ pub(crate) mod builtin {
     /// See [the reference] for more info.
     ///
     /// [the reference]: ../../../reference/attributes/derive.html
-    #[unstable(feature = "derive_const", issue = "none")]
+    #[unstable(feature = "derive_const", issue = "118304")]
     #[rustc_builtin_macro]
     pub macro derive_const($item:item) {
         /* compiler built-in */
@@ -1657,7 +1662,6 @@ pub(crate) mod builtin {
     #[unstable(
         feature = "test",
         issue = "50297",
-        soft,
         reason = "`bench` is a part of custom test frameworks which are unstable"
     )]
     #[allow_internal_unstable(test, rustc_attrs, coverage_attribute)]
@@ -1744,8 +1748,8 @@ pub(crate) mod builtin {
         /* compiler built-in */
     }
 
-    /// Provide a list of type aliases and other opaque-type-containing type definitions.
-    /// This list will be used in the body of the item it is applied to define opaque
+    /// Provide a list of type aliases and other opaque-type-containing type definitions
+    /// to an item with a body. This list will be used in that body to define opaque
     /// types' hidden types.
     /// Can only be applied to things that have bodies.
     #[unstable(
@@ -1779,5 +1783,16 @@ pub(crate) mod builtin {
     )]
     pub macro deref($pat:pat) {
         builtin # deref($pat)
+    }
+
+    /// Derive macro generating an impl of the trait `From`.
+    /// Currently, it can only be used on single-field structs.
+    // Note that the macro is in a different module than the `From` trait,
+    // to avoid triggering an unstable feature being used if someone imports
+    // `std::convert::From`.
+    #[rustc_builtin_macro]
+    #[unstable(feature = "derive_from", issue = "144889")]
+    pub macro From($item: item) {
+        /* compiler built-in */
     }
 }

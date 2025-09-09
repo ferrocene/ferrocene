@@ -137,8 +137,8 @@ use rustc_index::interval::SparseIntervalMatrix;
 use rustc_middle::bug;
 use rustc_middle::mir::visit::{MutVisitor, PlaceContext, Visitor};
 use rustc_middle::mir::{
-    Body, HasLocalDecls, InlineAsmOperand, Local, LocalKind, Location, Operand, PassWhere, Place,
-    Rvalue, Statement, StatementKind, TerminatorKind, dump_mir, traversal,
+    Body, HasLocalDecls, InlineAsmOperand, Local, LocalKind, Location, MirDumper, Operand,
+    PassWhere, Place, Rvalue, Statement, StatementKind, TerminatorKind, traversal,
 };
 use rustc_middle::ty::TyCtxt;
 use rustc_mir_dataflow::Analysis;
@@ -171,7 +171,7 @@ impl<'tcx> crate::MirPass<'tcx> for DestinationPropagation {
 
         let live = MaybeLiveLocals.iterate_to_fixpoint(tcx, body, Some("MaybeLiveLocals-DestProp"));
         let points = DenseLocationMap::new(body);
-        let mut live = save_as_intervals(&points, body, live);
+        let mut live = save_as_intervals(&points, body, live.analysis, live.results);
 
         // In order to avoid having to collect data for every single pair of locals in the body, we
         // do not allow doing more than one merge for places that are derived from the same local at
@@ -810,11 +810,15 @@ fn dest_prop_mir_dump<'tcx>(
         let location = points.point_from_location(location);
         live.rows().filter(|&r| live.contains(r, location)).collect::<Vec<_>>()
     };
-    dump_mir(tcx, false, "DestinationPropagation-dataflow", &round, body, |pass_where, w| {
-        if let PassWhere::BeforeLocation(loc) = pass_where {
-            writeln!(w, "        // live: {:?}", locals_live_at(loc))?;
-        }
 
-        Ok(())
-    });
+    if let Some(dumper) = MirDumper::new(tcx, "DestinationPropagation-dataflow", body) {
+        let extra_data = &|pass_where, w: &mut dyn std::io::Write| {
+            if let PassWhere::BeforeLocation(loc) = pass_where {
+                writeln!(w, "        // live: {:?}", locals_live_at(loc))?;
+            }
+            Ok(())
+        };
+
+        dumper.set_disambiguator(&round).set_extra_data(extra_data).dump_mir(body)
+    }
 }

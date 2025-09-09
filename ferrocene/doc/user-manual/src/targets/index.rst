@@ -47,7 +47,7 @@ qualified upon request.
    :header-rows: 1
 
    * - Target
-     - Triple
+     - Tuple
      - Kind
      - Standard library
      - Notes
@@ -107,7 +107,7 @@ Quality managed targets are not qualified, but can usually be qualified on reque
    :header-rows: 1
 
    * - Target
-     - Triple
+     - Tuple
      - Kind
      - Standard library
      - Notes
@@ -131,7 +131,7 @@ should not be used in production.
    :header-rows: 1
 
    * - Target
-     - Triple
+     - Tuple
      - Kind
      - Standard library
      - Notes
@@ -139,6 +139,12 @@ should not be used in production.
    * - :target:`aarch64-unknown-linux-gnu`
      - ``aarch64-unknown-linux-gnu``
      - Host platform
+     - Full
+     - \-
+
+   * - :target:`aarch64-unknown-linux-musl`
+     - ``aarch64-unknown-linux-musl``
+     - Cross-compilation
      - Full
      - \-
 
@@ -196,15 +202,15 @@ should not be used in production.
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
 
-   * - :target:`x86_64-apple-darwin`
-     - ``x86_64-apple-darwin``
-     - Cross-compilation
-     - Full
-     - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
-
    * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``
      - Host platform
+     - Full
+     - \-
+
+   * - :target:`x86_64-unknown-linux-musl`
+     - ``x86_64-unknown-linux-musl``
+     - Cross-compilation
      - Full
      - \-
 

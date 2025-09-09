@@ -1,9 +1,7 @@
 //@ only-x86_64
-//@ build-pass
-//@ ignore-pass (test emits codegen-time warnings)
+//@ build-fail
 //@ compile-flags: -C target-feature=-avx
 
-#![feature(avx512_target_feature)]
 #![feature(portable_simd)]
 #![feature(simd_ffi)]
 #![allow(improper_ctypes_definitions)]
@@ -14,20 +12,17 @@ use std::arch::x86_64::*;
 struct Wrapper(__m256);
 
 unsafe extern "C" fn w(_: Wrapper) {
-    //~^ WARN requires the `avx` target feature, which is not enabled
-    //~| WARNING this was previously accepted by the compiler
+    //~^ ERROR: requires the `avx` target feature, which is not enabled
     todo!()
 }
 
 unsafe extern "C" fn f(_: __m256) {
-    //~^ WARN requires the `avx` target feature, which is not enabled
-    //~| WARNING this was previously accepted by the compiler
+    //~^ ERROR: requires the `avx` target feature, which is not enabled
     todo!()
 }
 
 unsafe extern "C" fn g() -> __m256 {
-    //~^ WARN requires the `avx` target feature, which is not enabled
-    //~| WARNING this was previously accepted by the compiler
+    //~^ ERROR: requires the `avx` target feature, which is not enabled
     todo!()
 }
 
@@ -56,25 +51,20 @@ unsafe fn test() {
 unsafe fn in_closure() -> impl FnOnce() -> __m256 {
     #[inline(always)] // this disables target-feature inheritance
     || g()
-    //~^ WARNING requires the `avx` target feature, which is not enabled in the caller
-    //~| WARNING this was previously accepted by the compiler
+    //~^ ERROR requires the `avx` target feature, which is not enabled in the caller
 }
 
 fn main() {
     unsafe {
         f(g());
-        //~^ WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING this was previously accepted by the compiler
-        //~| WARNING this was previously accepted by the compiler
+        //~^ ERROR requires the `avx` target feature, which is not enabled in the caller
+        //~| ERROR requires the `avx` target feature, which is not enabled in the caller
     }
 
     unsafe {
         gavx(favx());
-        //~^ WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING this was previously accepted by the compiler
-        //~| WARNING this was previously accepted by the compiler
+        //~^ ERROR requires the `avx` target feature, which is not enabled in the caller
+        //~| ERROR requires the `avx` target feature, which is not enabled in the caller
     }
 
     unsafe {
@@ -83,10 +73,8 @@ fn main() {
 
     unsafe {
         w(Wrapper(g()));
-        //~^ WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING this was previously accepted by the compiler
-        //~| WARNING this was previously accepted by the compiler
+        //~^ ERROR requires the `avx` target feature, which is not enabled in the caller
+        //~| ERROR requires the `avx` target feature, which is not enabled in the caller
     }
 
     unsafe {
@@ -99,8 +87,7 @@ fn main() {
             fn some_extern() -> __m256;
         }
         some_extern();
-        //~^ WARNING requires the `avx` target feature, which is not enabled in the caller
-        //~| WARNING this was previously accepted by the compiler
+        //~^ ERROR requires the `avx` target feature, which is not enabled in the caller
     }
 }
 
@@ -109,3 +96,6 @@ fn main() {
 fn some_extern() -> __m256 {
     todo!()
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

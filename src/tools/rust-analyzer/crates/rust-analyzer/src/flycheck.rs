@@ -4,8 +4,9 @@
 use std::{fmt, io, process::Command, time::Duration};
 
 use cargo_metadata::PackageId;
-use crossbeam_channel::{select_biased, unbounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, select_biased, unbounded};
 use ide_db::FxHashSet;
+use itertools::Itertools;
 use paths::{AbsPath, AbsPathBuf, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 use serde::Deserialize as _;
@@ -17,7 +18,7 @@ pub(crate) use cargo_metadata::diagnostic::{
 use toolchain::Tool;
 use triomphe::Arc;
 
-use crate::command::{CommandHandle, ParseFromLine};
+use crate::command::{CargoParser, CommandHandle};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) enum InvocationStrategy {
@@ -30,12 +31,13 @@ pub(crate) enum InvocationStrategy {
 pub(crate) struct CargoOptions {
     pub(crate) target_tuples: Vec<String>,
     pub(crate) all_targets: bool,
+    pub(crate) set_test: bool,
     pub(crate) no_default_features: bool,
     pub(crate) all_features: bool,
     pub(crate) features: Vec<String>,
     pub(crate) extra_args: Vec<String>,
     pub(crate) extra_test_bin_args: Vec<String>,
-    pub(crate) extra_env: FxHashMap<String, String>,
+    pub(crate) extra_env: FxHashMap<String, Option<String>>,
     pub(crate) target_dir: Option<Utf8PathBuf>,
 }
 
@@ -53,7 +55,13 @@ impl CargoOptions {
             cmd.args(["--target", target.as_str()]);
         }
         if self.all_targets {
-            cmd.arg("--all-targets");
+            if self.set_test {
+                cmd.arg("--all-targets");
+            } else {
+                // No --benches unfortunately, as this implies --tests (see https://github.com/rust-lang/cargo/issues/6454),
+                // and users setting `cfg.seTest = false` probably prefer disabling benches than enabling tests.
+                cmd.args(["--lib", "--bins", "--examples"]);
+            }
         }
         if self.all_features {
             cmd.arg("--all-features");
@@ -69,7 +77,6 @@ impl CargoOptions {
         if let Some(target_dir) = &self.target_dir {
             cmd.arg("--target-dir").arg(target_dir);
         }
-        cmd.envs(&self.extra_env);
     }
 }
 
@@ -83,7 +90,7 @@ pub(crate) enum FlycheckConfig {
     CustomCommand {
         command: String,
         args: Vec<String>,
-        extra_env: FxHashMap<String, String>,
+        extra_env: FxHashMap<String, Option<String>>,
         invocation_strategy: InvocationStrategy,
     },
 }
@@ -104,7 +111,18 @@ impl fmt::Display for FlycheckConfig {
         match self {
             FlycheckConfig::CargoCommand { command, .. } => write!(f, "cargo {command}"),
             FlycheckConfig::CustomCommand { command, args, .. } => {
-                write!(f, "{command} {}", args.join(" "))
+                // Don't show `my_custom_check --foo $saved_file` literally to the user, as it
+                // looks like we've forgotten to substitute $saved_file.
+                //
+                // Instead, show `my_custom_check --foo ...`. The
+                // actual path is often too long to be worth showing
+                // in the IDE (e.g. in the VS Code status bar).
+                let display_args = args
+                    .iter()
+                    .map(|arg| if arg == SAVED_FILE_PLACEHOLDER { "..." } else { arg })
+                    .collect::<Vec<_>>();
+
+                write!(f, "{command} {}", display_args.join(" "))
             }
         }
     }
@@ -134,10 +152,10 @@ impl FlycheckHandle {
         let actor =
             FlycheckActor::new(id, sender, config, sysroot_root, workspace_root, manifest_path);
         let (sender, receiver) = unbounded::<StateChange>();
-        let thread = stdx::thread::Builder::new(stdx::thread::ThreadIntent::Worker)
-            .name("Flycheck".to_owned())
-            .spawn(move || actor.run(receiver))
-            .expect("failed to spawn thread");
+        let thread =
+            stdx::thread::Builder::new(stdx::thread::ThreadIntent::Worker, format!("Flycheck{id}"))
+                .spawn(move || actor.run(receiver))
+                .expect("failed to spawn thread");
         FlycheckHandle { id, sender, _thread: thread }
     }
 
@@ -329,7 +347,7 @@ impl FlycheckActor {
 
                     tracing::debug!(?command, "will restart flycheck");
                     let (sender, receiver) = unbounded();
-                    match CommandHandle::spawn(command, sender) {
+                    match CommandHandle::spawn(command, CargoCheckParser, sender) {
                         Ok(command_handle) => {
                             tracing::debug!(command = formatted_command, "did restart flycheck");
                             self.command_handle = Some(command_handle);
@@ -380,7 +398,11 @@ impl FlycheckActor {
                             package_id = msg.package_id.repr,
                             "artifact received"
                         );
-                        self.report_progress(Progress::DidCheckCrate(msg.target.name));
+                        self.report_progress(Progress::DidCheckCrate(format!(
+                            "{} ({})",
+                            msg.target.name,
+                            msg.target.kind.iter().format_with(", ", |kind, f| f(&kind)),
+                        )));
                         let package_id = Arc::new(msg.package_id);
                         if self.diagnostics_cleared_for.insert(package_id.clone()) {
                             tracing::trace!(
@@ -401,7 +423,9 @@ impl FlycheckActor {
                             package_id = package_id.as_ref().map(|it| &it.repr),
                             "diagnostic received"
                         );
-                        self.diagnostics_received = DiagnosticsReceived::Yes;
+                        if self.diagnostics_received == DiagnosticsReceived::No {
+                            self.diagnostics_received = DiagnosticsReceived::Yes;
+                        }
                         if let Some(package_id) = &package_id {
                             if self.diagnostics_cleared_for.insert(package_id.clone()) {
                                 tracing::trace!(
@@ -466,8 +490,12 @@ impl FlycheckActor {
     ) -> Option<Command> {
         match &self.config {
             FlycheckConfig::CargoCommand { command, options, ansi_color_output } => {
-                let mut cmd = toolchain::command(Tool::Cargo.path(), &*self.root);
-                if let Some(sysroot_root) = &self.sysroot_root {
+                let mut cmd =
+                    toolchain::command(Tool::Cargo.path(), &*self.root, &options.extra_env);
+                if let Some(sysroot_root) = &self.sysroot_root
+                    && !options.extra_env.contains_key("RUSTUP_TOOLCHAIN")
+                    && std::env::var_os("RUSTUP_TOOLCHAIN").is_none()
+                {
                     cmd.env("RUSTUP_TOOLCHAIN", AsRef::<std::path::Path>::as_ref(sysroot_root));
                 }
                 cmd.arg(command);
@@ -514,8 +542,7 @@ impl FlycheckActor {
                         &*self.root
                     }
                 };
-                let mut cmd = toolchain::command(command, root);
-                cmd.envs(extra_env);
+                let mut cmd = toolchain::command(command, root, extra_env);
 
                 // If the custom command has a $saved_file placeholder, and
                 // we're saving a file, replace the placeholder in the arguments.
@@ -556,8 +583,10 @@ enum CargoCheckMessage {
     Diagnostic { diagnostic: Diagnostic, package_id: Option<Arc<PackageId>> },
 }
 
-impl ParseFromLine for CargoCheckMessage {
-    fn from_line(line: &str, error: &mut String) -> Option<Self> {
+struct CargoCheckParser;
+
+impl CargoParser<CargoCheckMessage> for CargoCheckParser {
+    fn from_line(&self, line: &str, error: &mut String) -> Option<CargoCheckMessage> {
         let mut deserializer = serde_json::Deserializer::from_str(line);
         deserializer.disable_recursion_limit();
         if let Ok(message) = JsonMessage::deserialize(&mut deserializer) {
@@ -586,7 +615,7 @@ impl ParseFromLine for CargoCheckMessage {
         None
     }
 
-    fn from_eof() -> Option<Self> {
+    fn from_eof(&self) -> Option<CargoCheckMessage> {
         None
     }
 }

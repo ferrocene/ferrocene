@@ -2,11 +2,14 @@
 
 use std::fmt;
 
-use rustc_hir::def::{CtorOf, DefKind};
+use rustc_hir::def::{CtorOf, DefKind, MacroKinds};
 use rustc_span::hygiene::MacroKind;
-use serde::{Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
 use crate::clean;
+
+macro_rules! item_type {
+    ($($variant:ident = $number:literal,)+) => {
 
 /// Item type. Corresponds to `clean::ItemEnum` variants.
 ///
@@ -29,6 +32,44 @@ use crate::clean;
 #[derive(Copy, PartialEq, Eq, Hash, Clone, Debug, PartialOrd, Ord)]
 #[repr(u8)]
 pub(crate) enum ItemType {
+    $($variant = $number,)+
+}
+
+impl Serialize for ItemType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        (*self as u8).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for ItemType {
+    fn deserialize<D>(deserializer: D) -> Result<ItemType, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ItemTypeVisitor;
+        impl<'de> de::Visitor<'de> for ItemTypeVisitor {
+            type Value = ItemType;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(formatter, "an integer between 0 and 27")
+            }
+            fn visit_u64<E: de::Error>(self, v: u64) -> Result<ItemType, E> {
+                Ok(match v {
+                    $($number => ItemType::$variant,)+
+                    _ => return Err(E::missing_field("unknown number for `ItemType` enum")),
+                })
+            }
+        }
+        deserializer.deserialize_any(ItemTypeVisitor)
+    }
+}
+
+    }
+}
+
+item_type! {
     Keyword = 0,
     Primitive = 1,
     Module = 2,
@@ -57,25 +98,17 @@ pub(crate) enum ItemType {
     TraitAlias = 25,
     // This number is reserved for use in JavaScript
     // Generic = 26,
-}
-
-impl Serialize for ItemType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        (*self as u8).serialize(serializer)
-    }
+    Attribute = 27,
 }
 
 impl<'a> From<&'a clean::Item> for ItemType {
     fn from(item: &'a clean::Item) -> ItemType {
-        let kind = match item.kind {
-            clean::StrippedItem(box ref item) => item,
-            ref kind => kind,
+        let kind = match &item.kind {
+            clean::StrippedItem(box item) => item,
+            kind => kind,
         };
 
-        match *kind {
+        match kind {
             clean::ModuleItem(..) => ItemType::Module,
             clean::ExternCrateItem { .. } => ItemType::ExternCrate,
             clean::ImportItem(..) => ItemType::Import,
@@ -102,8 +135,9 @@ impl<'a> From<&'a clean::Item> for ItemType {
             clean::RequiredAssocTypeItem(..) | clean::AssocTypeItem(..) => ItemType::AssocType,
             clean::ForeignTypeItem => ItemType::ForeignType,
             clean::KeywordItem => ItemType::Keyword,
+            clean::AttributeItem => ItemType::Attribute,
             clean::TraitAliasItem(..) => ItemType::TraitAlias,
-            clean::ProcMacroItem(ref mac) => match mac.kind {
+            clean::ProcMacroItem(mac) => match mac.kind {
                 MacroKind::Bang => ItemType::Macro,
                 MacroKind::Attr => ItemType::ProcAttribute,
                 MacroKind::Derive => ItemType::ProcDerive,
@@ -134,22 +168,16 @@ impl ItemType {
             DefKind::Trait => Self::Trait,
             DefKind::TyAlias => Self::TypeAlias,
             DefKind::TraitAlias => Self::TraitAlias,
-            DefKind::Macro(kind) => match kind {
-                MacroKind::Bang => ItemType::Macro,
-                MacroKind::Attr => ItemType::ProcAttribute,
-                MacroKind::Derive => ItemType::ProcDerive,
-            },
+            DefKind::Macro(MacroKinds::BANG) => ItemType::Macro,
+            DefKind::Macro(MacroKinds::ATTR) => ItemType::ProcAttribute,
+            DefKind::Macro(MacroKinds::DERIVE) => ItemType::ProcDerive,
+            DefKind::Macro(_) => todo!("Handle macros with multiple kinds"),
             DefKind::ForeignTy => Self::ForeignType,
             DefKind::Variant => Self::Variant,
             DefKind::Field => Self::StructField,
             DefKind::AssocTy => Self::AssocType,
-            DefKind::AssocFn => {
-                if let Some(DefKind::Trait) = parent_kind {
-                    Self::TyMethod
-                } else {
-                    Self::Method
-                }
-            }
+            DefKind::AssocFn if let Some(DefKind::Trait) = parent_kind => Self::TyMethod,
+            DefKind::AssocFn => Self::Method,
             DefKind::Ctor(CtorOf::Struct, _) => Self::Struct,
             DefKind::Ctor(CtorOf::Variant, _) => Self::Variant,
             DefKind::AssocConst => Self::AssocConst,
@@ -170,7 +198,7 @@ impl ItemType {
     }
 
     pub(crate) fn as_str(&self) -> &'static str {
-        match *self {
+        match self {
             ItemType::Module => "mod",
             ItemType::ExternCrate => "externcrate",
             ItemType::Import => "import",
@@ -196,13 +224,18 @@ impl ItemType {
             ItemType::ProcAttribute => "attr",
             ItemType::ProcDerive => "derive",
             ItemType::TraitAlias => "traitalias",
+            ItemType::Attribute => "attribute",
         }
     }
     pub(crate) fn is_method(&self) -> bool {
-        matches!(*self, ItemType::Method | ItemType::TyMethod)
+        matches!(self, ItemType::Method | ItemType::TyMethod)
     }
     pub(crate) fn is_adt(&self) -> bool {
-        matches!(*self, ItemType::Struct | ItemType::Union | ItemType::Enum)
+        matches!(self, ItemType::Struct | ItemType::Union | ItemType::Enum)
+    }
+    /// Keep this the same as isFnLikeTy in search.js
+    pub(crate) fn is_fn_like(&self) -> bool {
+        matches!(self, ItemType::Function | ItemType::Method | ItemType::TyMethod)
     }
 }
 

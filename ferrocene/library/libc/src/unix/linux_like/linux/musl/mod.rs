@@ -142,6 +142,19 @@ s! {
         __dummy4: [c_char; 16],
     }
 
+    #[repr(align(8))]
+    pub struct fanotify_event_metadata {
+        pub event_len: c_uint,
+        pub vers: c_uchar,
+        pub reserved: c_uchar,
+        pub metadata_len: c_ushort,
+        pub mask: c_ulonglong,
+        pub fd: c_int,
+        pub pid: c_int,
+    }
+
+    // FIXME(1.0): This should not implement `PartialEq`
+    #[allow(unpredictable_function_pointer_comparisons)]
     pub struct sigaction {
         pub sa_sigaction: crate::sighandler_t,
         pub sa_mask: crate::sigset_t,
@@ -155,10 +168,10 @@ s! {
     // FIXME(union): C implementation uses unions
     pub struct siginfo_t {
         pub si_signo: c_int,
-        #[cfg(not(target_arch = "mips"))]
+        #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
         pub si_errno: c_int,
         pub si_code: c_int,
-        #[cfg(target_arch = "mips")]
+        #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
         pub si_errno: c_int,
         #[doc(hidden)]
         #[deprecated(
@@ -210,6 +223,8 @@ s! {
         __f_reserved: [c_int; 6],
     }
 
+    // PowerPC implementations are special, see the subfolders
+    #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
     pub struct termios {
         pub c_iflag: crate::tcflag_t,
         pub c_oflag: crate::tcflag_t,
@@ -323,16 +338,11 @@ s! {
         pub tcpi_probes: u8,
         pub tcpi_backoff: u8,
         pub tcpi_options: u8,
-        /*
-         * FIXME(musl): enable on all targets once musl headers are more up to date
-         */
         /// This contains the bitfields `tcpi_snd_wscale` and `tcpi_rcv_wscale`.
         /// Each is 4 bits.
-        #[cfg(target_arch = "loongarch64")]
         pub tcpi_snd_rcv_wscale: u8,
         /// This contains the bitfields `tcpi_delivery_rate_app_limited` (1 bit) and
         /// `tcpi_fastopen_client_fail` (2 bits).
-        #[cfg(target_arch = "loongarch64")]
         pub tcpi_delivery_fastopen_bitfields: u8,
         pub tcpi_rto: u32,
         pub tcpi_ato: u32,
@@ -378,15 +388,12 @@ s! {
         pub tcpi_bytes_retrans: u64,
         pub tcpi_dsack_dups: u32,
         pub tcpi_reord_seen: u32,
-        // FIXME(musl): enable on all targets once CI musl is updated
-        #[cfg(target_arch = "loongarch64")]
         pub tcpi_rcv_ooopack: u32,
-        #[cfg(target_arch = "loongarch64")]
         pub tcpi_snd_wnd: u32,
     }
 
     // MIPS implementation is special (see mips arch folders)
-    #[cfg(not(target_arch = "mips"))]
+    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
     pub struct statfs {
         pub f_type: c_ulong,
         pub f_bsize: c_ulong,
@@ -403,7 +410,7 @@ s! {
     }
 
     // MIPS implementation is special (see mips arch folders)
-    #[cfg(not(target_arch = "mips"))]
+    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
     pub struct statfs64 {
         pub f_type: c_ulong,
         pub f_bsize: c_ulong,
@@ -438,13 +445,6 @@ s_no_extra_traits! {
         pub __reserved: [c_char; 256],
     }
 
-    // FIXME(musl): musl added paddings and adjusted
-    // layout in 1.2.0 but our CI is still 1.1.24.
-    // So, I'm leaving some fields as cfg for now.
-    // ref. https://github.com/bminor/musl/commit/
-    // 1e7f0fcd7ff2096904fd93a2ee6d12a2392be392
-    //
-    // OpenHarmony uses the musl 1.2 layout.
     pub struct utmpx {
         pub ut_type: c_short,
         __ut_pad1: c_short,
@@ -455,31 +455,24 @@ s_no_extra_traits! {
         pub ut_host: [c_char; 256],
         pub ut_exit: __exit_status,
 
-        #[cfg(target_env = "musl")]
-        #[cfg(not(target_arch = "loongarch64"))]
+        #[cfg(not(musl_v1_2_3))]
+        #[deprecated(
+            since = "0.2.173",
+            note = "The ABI of this field has changed from c_long to c_int with padding, \
+                we'll follow that change in the future release. See #4443 for more info."
+        )]
         pub ut_session: c_long,
 
-        #[cfg(target_env = "musl")]
-        #[cfg(target_arch = "loongarch64")]
-        pub ut_session: c_int,
-
-        #[cfg(target_env = "musl")]
-        #[cfg(target_arch = "loongarch64")]
-        __ut_pad2: c_int,
-
-        #[cfg(target_env = "ohos")]
-        #[cfg(target_endian = "little")]
-        pub ut_session: c_int,
-        #[cfg(target_env = "ohos")]
-        #[cfg(target_endian = "little")]
-        __ut_pad2: c_int,
-
-        #[cfg(target_env = "ohos")]
+        #[cfg(musl_v1_2_3)]
         #[cfg(not(target_endian = "little"))]
         __ut_pad2: c_int,
-        #[cfg(target_env = "ohos")]
-        #[cfg(not(target_endian = "little"))]
+
+        #[cfg(musl_v1_2_3)]
         pub ut_session: c_int,
+
+        #[cfg(musl_v1_2_3)]
+        #[cfg(target_endian = "little")]
+        __ut_pad2: c_int,
 
         pub ut_tv: crate::timeval,
         pub ut_addr_v6: [c_uint; 4],
@@ -514,27 +507,6 @@ cfg_if! {
 
         impl Eq for sysinfo {}
 
-        impl fmt::Debug for sysinfo {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sysinfo")
-                    .field("uptime", &self.uptime)
-                    .field("loads", &self.loads)
-                    .field("totalram", &self.totalram)
-                    .field("freeram", &self.freeram)
-                    .field("sharedram", &self.sharedram)
-                    .field("bufferram", &self.bufferram)
-                    .field("totalswap", &self.totalswap)
-                    .field("freeswap", &self.freeswap)
-                    .field("procs", &self.procs)
-                    .field("pad", &self.pad)
-                    .field("totalhigh", &self.totalhigh)
-                    .field("freehigh", &self.freehigh)
-                    .field("mem_unit", &self.mem_unit)
-                    // FIXME(debug): .field("__reserved", &self.__reserved)
-                    .finish()
-            }
-        }
-
         impl hash::Hash for sysinfo {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.uptime.hash(state);
@@ -555,6 +527,7 @@ cfg_if! {
         }
 
         impl PartialEq for utmpx {
+            #[allow(deprecated)]
             fn eq(&self, other: &utmpx) -> bool {
                 self.ut_type == other.ut_type
                     //&& self.__ut_pad1 == other.__ut_pad1
@@ -578,27 +551,8 @@ cfg_if! {
 
         impl Eq for utmpx {}
 
-        impl fmt::Debug for utmpx {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("utmpx")
-                    .field("ut_type", &self.ut_type)
-                    //.field("__ut_pad1", &self.__ut_pad1)
-                    .field("ut_pid", &self.ut_pid)
-                    .field("ut_line", &self.ut_line)
-                    .field("ut_id", &self.ut_id)
-                    .field("ut_user", &self.ut_user)
-                    //FIXME(debug): .field("ut_host", &self.ut_host)
-                    .field("ut_exit", &self.ut_exit)
-                    .field("ut_session", &self.ut_session)
-                    //.field("__ut_pad2", &self.__ut_pad2)
-                    .field("ut_tv", &self.ut_tv)
-                    .field("ut_addr_v6", &self.ut_addr_v6)
-                    .field("__unused", &self.__unused)
-                    .finish()
-            }
-        }
-
         impl hash::Hash for utmpx {
+            #[allow(deprecated)]
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.ut_type.hash(state);
                 //self.__ut_pad1.hash(state);
@@ -658,7 +612,10 @@ pub const ACCOUNTING: c_short = 9;
 
 pub const SFD_CLOEXEC: c_int = 0x080000;
 
+#[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
 pub const NCCS: usize = 32;
+#[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
+pub const NCCS: usize = 19;
 
 pub const O_TRUNC: c_int = 512;
 pub const O_NOATIME: c_int = 0o1000000;
@@ -729,6 +686,7 @@ pub const __SIZEOF_PTHREAD_MUTEXATTR_T: usize = 4;
 pub const __SIZEOF_PTHREAD_RWLOCKATTR_T: usize = 8;
 pub const __SIZEOF_PTHREAD_BARRIERATTR_T: usize = 4;
 
+// FIXME(musl): Value is 1024 for all architectures since 1.2.4
 #[cfg(not(target_arch = "loongarch64"))]
 pub const CPU_SETSIZE: c_int = 128;
 #[cfg(target_arch = "loongarch64")]
@@ -766,12 +724,6 @@ pub const PTRACE_PEEKSIGINFO: c_int = 0x4209;
 pub const PTRACE_GETSIGMASK: c_uint = 0x420a;
 pub const PTRACE_SETSIGMASK: c_uint = 0x420b;
 
-pub const RWF_HIPRI: c_int = 0x00000001;
-pub const RWF_DSYNC: c_int = 0x00000002;
-pub const RWF_SYNC: c_int = 0x00000004;
-pub const RWF_NOWAIT: c_int = 0x00000008;
-pub const RWF_APPEND: c_int = 0x00000010;
-
 pub const AF_IB: c_int = 27;
 pub const AF_MPLS: c_int = 28;
 pub const AF_NFC: c_int = 39;
@@ -786,8 +738,6 @@ pub const PF_XDP: c_int = AF_XDP;
 pub const EFD_NONBLOCK: c_int = crate::O_NONBLOCK;
 
 pub const SFD_NONBLOCK: c_int = crate::O_NONBLOCK;
-
-pub const PIDFD_NONBLOCK: c_uint = O_NONBLOCK as c_uint;
 
 pub const TCSANOW: c_int = 0;
 pub const TCSADRAIN: c_int = 1;

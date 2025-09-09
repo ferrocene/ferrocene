@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 // Based off ../core/build_steps/install.rs
 
 //! Implementation of the install aspects of the compiler.
@@ -11,6 +14,7 @@ use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 use crate::core::build_steps::dist;
+use crate::core::build_steps::tool::RustcPrivateCompilers;
 use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::{Config, TargetSelection};
 use crate::utils::tarball::GeneratedTarball;
@@ -23,7 +27,13 @@ fn install(
     host: Option<TargetSelection>,
     tarball: &GeneratedTarball,
 ) {
-    let _guard = builder.msg(Kind::Install, stage, package, host, host);
+    let _guard = builder.msg(
+        Kind::Install,
+        package,
+        None,
+        (host.unwrap_or(builder.host_target), stage),
+        host,
+    );
 
     let tarball_output = tarball.work_dir();
     let image_dir = tarball_output.join("image");
@@ -116,7 +126,7 @@ macro_rules! install {
         impl Step for $name {
             type Output = ();
             const DEFAULT: bool = true;
-            const ONLY_HOSTS: bool = $only_hosts;
+            const IS_HOST: bool = $only_hosts;
             $(const $c: bool = true;)*
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -126,7 +136,7 @@ macro_rules! install {
 
             fn make_run(run: RunConfig<'_>) {
                 run.builder.ensure($name {
-                    compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+                    compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
                     target: run.target,
                 });
             }
@@ -143,20 +153,20 @@ install!((self, builder, _config),
         // `expect` should be safe, only None when host != build, but this
         // only runs when host == build
         let tarball = builder.ensure(dist::Std {
-            compiler: self.compiler,
+            build_compiler: self.compiler,
             target: self.target
         }).expect("missing std");
         install(builder, "std", self.compiler.stage, Some(self.target), &tarball);
     };
     Cargo, alias = "cargo", Self::should_build(_config), only_hosts: true, {
         let tarball = builder
-            .ensure(dist::Cargo { compiler: self.compiler, target: self.target })
+            .ensure(dist::Cargo { build_compiler: self.compiler, target: self.target })
             .expect("missing cargo");
         install(builder, "cargo", self.compiler.stage, Some(self.target), &tarball);
     };
     RustAnalyzer, alias = "rust-analyzer", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) =
-            builder.ensure(dist::RustAnalyzer { compiler: self.compiler, target: self.target })
+            builder.ensure(dist::RustAnalyzer { compilers: RustcPrivateCompilers::from_build_compiler( builder, self.compiler, self.target), target: self.target })
         {
             install(builder, "rust-analyzer", self.compiler.stage, Some(self.target), &tarball);
         } else {
@@ -167,12 +177,12 @@ install!((self, builder, _config),
     };
     Clippy, alias = "clippy", Self::should_build(_config), only_hosts: true, {
         let tarball = builder
-            .ensure(dist::Clippy { compiler: self.compiler, target: self.target })
+            .ensure(dist::Clippy { compilers: RustcPrivateCompilers::from_build_compiler(builder, self.compiler, self.target), target: self.target })
             .expect("missing clippy");
         install(builder, "clippy", self.compiler.stage, Some(self.target), &tarball);
     };
     Miri, alias = "miri", Self::should_build(_config), only_hosts: true, {
-        if let Some(tarball) = builder.ensure(dist::Miri { compiler: self.compiler, target: self.target }) {
+        if let Some(tarball) = builder.ensure(dist::Miri {  compilers: RustcPrivateCompilers::from_build_compiler(builder,self.compiler, self.target), target: self.target }) {
             install(builder, "miri", self.compiler.stage, Some(self.target), &tarball);
         } else {
             // Miri is only available on nightly
@@ -192,7 +202,7 @@ install!((self, builder, _config),
     };
     Rustfmt, alias = "rustfmt", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::Rustfmt {
-            compiler: self.compiler,
+            compilers:  RustcPrivateCompilers::from_build_compiler(builder, self.compiler, self.target),
             target: self.target
         }) {
             install(builder, "rustfmt", self.compiler.stage, Some(self.target), &tarball);
@@ -204,14 +214,14 @@ install!((self, builder, _config),
     };
     Rustc, path = "compiler/rustc", true, only_hosts: true, {
         let tarball = builder.ensure(dist::Rustc {
-            compiler: builder.compiler(builder.top_stage, self.target),
+            target_compiler: builder.compiler(builder.top_stage, self.target),
         });
         install(builder, "rustc", self.compiler.stage, Some(self.target), &tarball);
     };
     RustcCodegenCranelift, alias = "rustc-codegen-cranelift", Self::should_build(_config), only_hosts: true, {
-        if let Some(tarball) = builder.ensure(dist::CodegenBackend {
-            compiler: self.compiler,
-            backend: "cranelift".to_string(),
+        if let Some(tarball) = builder.ensure(dist::CraneliftCodegenBackend {
+            compilers: RustcPrivateCompilers::from_build_compiler(builder, self.compiler, self.target),
+            target: self.target,
         }) {
             install(builder, "rustc-codegen-cranelift", self.compiler.stage, Some(self.target), &tarball);
         } else {
@@ -222,7 +232,7 @@ install!((self, builder, _config),
         }
     };
     LlvmBitcodeLinker, alias = "llvm-bitcode-linker", Self::should_build(_config), only_hosts: true, {
-        if let Some(tarball) = builder.ensure(dist::LlvmBitcodeLinker { compiler: self.compiler, target: self.target }) {
+        if let Some(tarball) = builder.ensure(dist::LlvmBitcodeLinker { build_compiler: self.compiler, target: self.target }) {
             install(builder, "llvm-bitcode-linker", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
@@ -254,7 +264,7 @@ pub struct Src {
 impl Step for Src {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let config = &run.builder.config;

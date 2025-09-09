@@ -5,6 +5,12 @@ name = "sysroot"
 version = "0.0.0"
 edition = "2024"
 
+[lib]
+test = false
+bench = false
+# make sure this crate isn't included in public standard library docs
+doc = false
+
 # this is a dummy crate to ensure that all required crates appear in the sysroot
 [dependencies]
 proc_macro = { path = "../proc_macro", public = true }
@@ -12,7 +18,7 @@ profiler_builtins = { path = "../profiler_builtins", optional = true }
 std = { path = "../std", public = true }
 test = { path = "../test", public = true }
 
-# Ferrocene addition: in bootstrap we need to set a libcore feature for code coverage testing, so we
+# Ferrocene addition: in bootstrap we need to set a core library feature for code coverage testing, so we
 # need to add it as an explicit dependency here to do `--features core/$foo`.
 core = { path = "../core" }
 
@@ -20,20 +26,20 @@ core = { path = "../core" }
 [features]
 default = ["std_detect_file_io", "std_detect_dlsym_getauxval", "panic-unwind"]
 backtrace = ["std/backtrace"]
+backtrace-trace-only = ["std/backtrace-trace-only"]
 compiler-builtins-c = ["std/compiler-builtins-c"]
 compiler-builtins-mem = ["std/compiler-builtins-mem"]
-compiler-builtins-no-asm = ["std/compiler-builtins-no-asm"]
 compiler-builtins-no-f16-f128 = ["std/compiler-builtins-no-f16-f128"]
-compiler-builtins-mangled-names = ["std/compiler-builtins-mangled-names"]
 debug_refcell = ["std/debug_refcell"]
-debug_typeid = ["std/debug_typeid"]
 llvm-libunwind = ["std/llvm-libunwind"]
 system-llvm-libunwind = ["std/system-llvm-libunwind"]
 optimize_for_size = ["std/optimize_for_size"]
-panic-unwind = ["std/panic_unwind"]
+panic-unwind = ["std/panic-unwind"]
 panic_immediate_abort = ["std/panic_immediate_abort"]
 profiler = ["dep:profiler_builtins"]
 std_detect_file_io = ["std/std_detect_file_io"]
 std_detect_dlsym_getauxval = ["std/std_detect_dlsym_getauxval"]
-std_detect_env_override = ["std/std_detect_env_override"]
 windows_raw_dylib = ["std/windows_raw_dylib"]
+
+# Ferrocene addition: enable "ferrocene_certified" feature in the core library
+ferrocene_certified = ["std/ferrocene_certified"]

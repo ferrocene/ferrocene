@@ -27,7 +27,7 @@ pub enum StrStep<'a> {
 impl LexedStr<'_> {
     pub fn to_input(&self, edition: Edition) -> crate::Input {
         let _p = tracing::info_span!("LexedStr::to_input").entered();
-        let mut res = crate::Input::default();
+        let mut res = crate::Input::with_capacity(self.len());
         let mut was_joint = false;
         for i in 0..self.len() {
             let kind = self.kind(i);
@@ -252,10 +252,10 @@ fn n_attached_trivias<'a>(
                     WHITESPACE if text.contains("\n\n") => {
                         // we check whether the next token is a doc-comment
                         // and skip the whitespace in this case
-                        if let Some((COMMENT, peek_text)) = trivias.peek().map(|(_, pair)| pair) {
-                            if is_outer(peek_text) {
-                                continue;
-                            }
+                        if let Some((COMMENT, peek_text)) = trivias.peek().map(|(_, pair)| pair)
+                            && is_outer(peek_text)
+                        {
+                            continue;
                         }
                         break;
                     }

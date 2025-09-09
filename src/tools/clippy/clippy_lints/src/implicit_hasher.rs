@@ -10,10 +10,10 @@ use rustc_middle::hir::nested_filter;
 use rustc_middle::ty::{Ty, TypeckResults};
 use rustc_session::declare_lint_pass;
 use rustc_span::Span;
-use rustc_span::symbol::sym;
 
 use clippy_utils::diagnostics::span_lint_and_then;
 use clippy_utils::source::{IntoSpan, SpanRangeExt, snippet};
+use clippy_utils::sym;
 use clippy_utils::ty::is_type_diagnostic_item;
 
 declare_clippy_lint! {
@@ -119,7 +119,7 @@ impl<'tcx> LateLintPass<'tcx> for ImplicitHasher {
                     }
 
                     let generics_suggestion_span = impl_.generics.span.substitute_dummy({
-                        let range = (item.span.lo()..target.span().lo()).map_range(cx, |src, range| {
+                        let range = (item.span.lo()..target.span().lo()).map_range(cx, |_, src, range| {
                             Some(src.get(range.clone())?.find("impl")? + 4..range.end)
                         });
                         if let Some(range) = range {
@@ -130,7 +130,7 @@ impl<'tcx> LateLintPass<'tcx> for ImplicitHasher {
                     });
 
                     let mut ctr_vis = ImplicitHasherConstructorVisitor::new(cx, target);
-                    for item in impl_.items.iter().map(|item| cx.tcx.hir_impl_item(item.id)) {
+                    for item in impl_.items.iter().map(|&item| cx.tcx.hir_impl_item(item)) {
                         ctr_vis.visit_impl_item(item);
                     }
 
@@ -165,11 +165,12 @@ impl<'tcx> LateLintPass<'tcx> for ImplicitHasher {
                             continue;
                         }
                         let generics_suggestion_span = generics.span.substitute_dummy({
-                            let range = (item.span.lo()..body.params[0].pat.span.lo()).map_range(cx, |src, range| {
-                                let (pre, post) = src.get(range.clone())?.split_once("fn")?;
-                                let pos = post.find('(')? + pre.len() + 2;
-                                Some(pos..pos)
-                            });
+                            let range =
+                                (item.span.lo()..body.params[0].pat.span.lo()).map_range(cx, |_, src, range| {
+                                    let (pre, post) = src.get(range.clone())?.split_once("fn")?;
+                                    let pos = post.find('(')? + pre.len() + 2;
+                                    Some(pos..pos)
+                                });
                             if let Some(range) = range {
                                 range.with_ctxt(item.span.ctxt())
                             } else {
@@ -326,6 +327,7 @@ impl<'tcx> Visitor<'tcx> for ImplicitHasherConstructorVisitor<'_, '_, 'tcx> {
     fn visit_expr(&mut self, e: &'tcx Expr<'_>) {
         if let ExprKind::Call(fun, args) = e.kind
             && let ExprKind::Path(QPath::TypeRelative(ty, method)) = fun.kind
+            && matches!(method.ident.name, sym::new | sym::with_capacity)
             && let TyKind::Path(QPath::Resolved(None, ty_path)) = ty.kind
             && let Some(ty_did) = ty_path.res.opt_def_id()
         {
@@ -333,10 +335,11 @@ impl<'tcx> Visitor<'tcx> for ImplicitHasherConstructorVisitor<'_, '_, 'tcx> {
                 return;
             }
 
-            if self.cx.tcx.is_diagnostic_item(sym::HashMap, ty_did) {
-                if method.ident.name == sym::new {
+            match (self.cx.tcx.get_diagnostic_name(ty_did), method.ident.name) {
+                (Some(sym::HashMap), sym::new) => {
                     self.suggestions.insert(e.span, "HashMap::default()".to_string());
-                } else if method.ident.name.as_str() == "with_capacity" {
+                },
+                (Some(sym::HashMap), sym::with_capacity) => {
                     self.suggestions.insert(
                         e.span,
                         format!(
@@ -344,11 +347,11 @@ impl<'tcx> Visitor<'tcx> for ImplicitHasherConstructorVisitor<'_, '_, 'tcx> {
                             snippet(self.cx, args[0].span, "capacity"),
                         ),
                     );
-                }
-            } else if self.cx.tcx.is_diagnostic_item(sym::HashSet, ty_did) {
-                if method.ident.name == sym::new {
+                },
+                (Some(sym::HashSet), sym::new) => {
                     self.suggestions.insert(e.span, "HashSet::default()".to_string());
-                } else if method.ident.name.as_str() == "with_capacity" {
+                },
+                (Some(sym::HashSet), sym::with_capacity) => {
                     self.suggestions.insert(
                         e.span,
                         format!(
@@ -356,7 +359,8 @@ impl<'tcx> Visitor<'tcx> for ImplicitHasherConstructorVisitor<'_, '_, 'tcx> {
                             snippet(self.cx, args[0].span, "capacity"),
                         ),
                     );
-                }
+                },
+                _ => {},
             }
         }
 

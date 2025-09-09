@@ -59,7 +59,6 @@ s! {
 
 s_no_extra_traits! {
     #[repr(packed)]
-    #[cfg_attr(feature = "extra_traits", allow(missing_debug_implementations))]
     pub struct door_desc_t__d_data__d_desc {
         pub d_descriptor: c_int,
         pub d_id: crate::door_id_t,
@@ -70,13 +69,11 @@ s_no_extra_traits! {
         d_resv: [c_int; 5], /* Check out /usr/include/sys/door.h */
     }
 
-    #[cfg_attr(feature = "extra_traits", allow(missing_debug_implementations))]
     pub struct door_desc_t {
         pub d_attributes: door_attr_t,
         pub d_data: door_desc_t__d_data,
     }
 
-    #[cfg_attr(feature = "extra_traits", allow(missing_debug_implementations))]
     pub struct door_arg_t {
         pub data_ptr: *const c_char,
         pub data_size: size_t,
@@ -124,24 +121,6 @@ cfg_if! {
         }
 
         impl Eq for utmpx {}
-
-        impl fmt::Debug for utmpx {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("utmpx")
-                    .field("ut_user", &self.ut_user)
-                    .field("ut_id", &self.ut_id)
-                    .field("ut_line", &self.ut_line)
-                    .field("ut_pid", &self.ut_pid)
-                    .field("ut_type", &self.ut_type)
-                    .field("ut_exit", &self.ut_exit)
-                    .field("ut_tv", &self.ut_tv)
-                    .field("ut_session", &self.ut_session)
-                    .field("pad", &self.pad)
-                    .field("ut_syslen", &self.ut_syslen)
-                    .field("ut_host", &&self.ut_host[..])
-                    .finish()
-            }
-        }
 
         impl hash::Hash for utmpx {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {

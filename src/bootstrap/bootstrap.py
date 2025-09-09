@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+import sysconfig
 import tarfile
 import tempfile
 
@@ -311,6 +312,12 @@ def default_build_triple(verbose):
 
     kernel, cputype, processor = uname.decode(default_encoding).split(maxsplit=2)
 
+    # ON NetBSD, use `uname -p` to set the CPU type
+    if kernel == "NetBSD":
+        cputype = (
+            subprocess.check_output(["uname", "-p"]).strip().decode(default_encoding)
+        )
+
     # The goal here is to come up with the same triple as LLVM would,
     # at least for the subset of platforms we're willing to target.
     kerneltype_mapper = {
@@ -333,7 +340,11 @@ def default_build_triple(verbose):
         if ostype == "Android":
             kernel = "linux-android"
         else:
-            kernel = "unknown-linux-gnu"
+            python_soabi = sysconfig.get_config_var("SOABI")
+            if python_soabi is not None and "musl" in python_soabi:
+                kernel = "unknown-linux-musl"
+            else:
+                kernel = "unknown-linux-gnu"
     elif kernel == "SunOS":
         kernel = "pc-solaris"
         # On Solaris, uname -m will return a machine classification instead
@@ -394,6 +405,7 @@ def default_build_triple(verbose):
         "i686": "i686",
         "i686-AT386": "i686",
         "i786": "i686",
+        "loongarch32": "loongarch32",
         "loongarch64": "loongarch64",
         "m68k": "m68k",
         "csky": "csky",
@@ -427,10 +439,16 @@ def default_build_triple(verbose):
             kernel = "linux-androideabi"
         else:
             kernel += "eabihf"
-    elif cputype in {"armv7l", "armv8l"}:
+    elif cputype in {"armv6hf", "earmv6hf"}:
+        cputype = "armv6"
+        if kernel == "unknown-netbsd":
+            kernel += "-eabihf"
+    elif cputype in {"armv7l", "earmv7hf", "armv8l"}:
         cputype = "armv7"
         if kernel == "linux-android":
             kernel = "linux-androideabi"
+        elif kernel == "unknown-netbsd":
+            kernel += "-eabihf"
         else:
             kernel += "eabihf"
     elif cputype == "mips":
@@ -1118,7 +1136,6 @@ class RustBuild(object):
         if "RUSTFLAGS_BOOTSTRAP" in env:
             env["RUSTFLAGS"] += " " + env["RUSTFLAGS_BOOTSTRAP"]
 
-        env["PATH"] = os.path.join(self.bin_root(), "bin") + os.pathsep + env["PATH"]
         if not os.path.isfile(self.cargo()):
             raise Exception("no cargo executable found at `{}`".format(self.cargo()))
         args = [

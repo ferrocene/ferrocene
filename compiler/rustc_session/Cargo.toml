@@ -22,18 +22,19 @@ rustc_macros = { path = "../rustc_macros" }
 rustc_serialize = { path = "../rustc_serialize" }
 rustc_span = { path = "../rustc_span" }
 rustc_target = { path = "../rustc_target" }
-smallvec = "1.8.1"
-termize = "0.1.1"
+termize = "0.2"
 tracing = "0.1"
 # tidy-alphabetical-end
 
 [target.'cfg(unix)'.dependencies]
+# FIXME: Remove this pin once this rustix issue is resolved
+# https://github.com/bytecodealliance/rustix/issues/1496
 # tidy-alphabetical-start
-libc = "0.2"
+libc = "=0.2.174"
 # tidy-alphabetical-end
 
 [target.'cfg(windows)'.dependencies.windows]
-version = "0.59.0"
+version = "0.61.0"
 features = [
     "Win32_Foundation",
     "Win32_System_LibraryLoader",

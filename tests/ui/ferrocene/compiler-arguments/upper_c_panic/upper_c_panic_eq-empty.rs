@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Cpanic=
-//~? incorrect value
+//~? ERROR incorrect value
 
 fn main() {}
 

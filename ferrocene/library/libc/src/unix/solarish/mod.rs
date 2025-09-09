@@ -1,5 +1,3 @@
-use core::mem::size_of;
-
 use crate::prelude::*;
 
 pub type caddr_t = *mut c_char;
@@ -96,7 +94,7 @@ s! {
         pub gid: crate::gid_t,
         pub cuid: crate::uid_t,
         pub cgid: crate::gid_t,
-        pub mode: crate::mode_t,
+        pub mode: mode_t,
         pub seq: c_uint,
         pub key: crate::key_t,
     }
@@ -328,7 +326,7 @@ s! {
     pub struct stat {
         pub st_dev: crate::dev_t,
         pub st_ino: crate::ino_t,
-        pub st_mode: crate::mode_t,
+        pub st_mode: mode_t,
         pub st_nlink: crate::nlink_t,
         pub st_uid: crate::uid_t,
         pub st_gid: crate::gid_t,
@@ -585,14 +583,6 @@ cfg_if! {
             }
         }
         impl Eq for sockaddr_un {}
-        impl fmt::Debug for sockaddr_un {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sockaddr_un")
-                    .field("sun_family", &self.sun_family)
-                    // FIXME(debug): .field("sun_path", &self.sun_path)
-                    .finish()
-            }
-        }
         impl hash::Hash for sockaddr_un {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.sun_family.hash(state);
@@ -629,17 +619,6 @@ cfg_if! {
             }
         }
         impl Eq for utsname {}
-        impl fmt::Debug for utsname {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("utsname")
-                    // FIXME(debug): .field("sysname", &self.sysname)
-                    // FIXME(debug): .field("nodename", &self.nodename)
-                    // FIXME(debug): .field("release", &self.release)
-                    // FIXME(debug): .field("version", &self.version)
-                    // FIXME(debug): .field("machine", &self.machine)
-                    .finish()
-            }
-        }
         impl hash::Hash for utsname {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.sysname.hash(state);
@@ -659,13 +638,6 @@ cfg_if! {
             }
         }
         impl Eq for fd_set {}
-        impl fmt::Debug for fd_set {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("fd_set")
-                    // FIXME(debug): .field("fds_bits", &self.fds_bits)
-                    .finish()
-            }
-        }
         impl hash::Hash for fd_set {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.fds_bits.hash(state);
@@ -685,16 +657,6 @@ cfg_if! {
             }
         }
         impl Eq for sockaddr_storage {}
-        impl fmt::Debug for sockaddr_storage {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sockaddr_storage")
-                    .field("ss_family", &self.ss_family)
-                    .field("__ss_pad1", &self.__ss_pad1)
-                    .field("__ss_align", &self.__ss_align)
-                    // FIXME(debug): .field("__ss_pad2", &self.__ss_pad2)
-                    .finish()
-            }
-        }
         impl hash::Hash for sockaddr_storage {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.ss_family.hash(state);
@@ -754,16 +716,6 @@ cfg_if! {
             }
         }
         impl Eq for siginfo_t {}
-        impl fmt::Debug for siginfo_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("siginfo_t")
-                    .field("si_signo", &self.si_signo)
-                    .field("si_code", &self.si_code)
-                    .field("si_errno", &self.si_errno)
-                    // FIXME(debug): .field("__pad", &self.__pad)
-                    .finish()
-            }
-        }
         impl hash::Hash for siginfo_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.si_signo.hash(state);
@@ -794,19 +746,6 @@ cfg_if! {
             }
         }
         impl Eq for sockaddr_dl {}
-        impl fmt::Debug for sockaddr_dl {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sockaddr_dl")
-                    .field("sdl_family", &self.sdl_family)
-                    .field("sdl_index", &self.sdl_index)
-                    .field("sdl_type", &self.sdl_type)
-                    .field("sdl_nlen", &self.sdl_nlen)
-                    .field("sdl_alen", &self.sdl_alen)
-                    .field("sdl_slen", &self.sdl_slen)
-                    // FIXME(debug): .field("sdl_data", &self.sdl_data)
-                    .finish()
-            }
-        }
         impl hash::Hash for sockaddr_dl {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.sdl_family.hash(state);
@@ -829,17 +768,6 @@ cfg_if! {
             }
         }
         impl Eq for sigevent {}
-        impl fmt::Debug for sigevent {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sigevent")
-                    .field("sigev_notify", &self.sigev_notify)
-                    .field("sigev_signo", &self.sigev_signo)
-                    .field("sigev_value", &self.sigev_value)
-                    .field("ss_sp", &self.ss_sp)
-                    .field("sigev_notify_attributes", &self.sigev_notify_attributes)
-                    .finish()
-            }
-        }
         impl hash::Hash for sigevent {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.sigev_notify.hash(state);
@@ -2478,12 +2406,12 @@ f! {
     }
 
     pub {const} fn CMSG_LEN(length: c_uint) -> c_uint {
-        _CMSG_DATA_ALIGN(mem::size_of::<cmsghdr>()) as c_uint + length
+        _CMSG_DATA_ALIGN(size_of::<cmsghdr>()) as c_uint + length
     }
 
     pub fn CMSG_FIRSTHDR(mhdr: *const crate::msghdr) -> *mut cmsghdr {
         if ((*mhdr).msg_controllen as usize) < size_of::<cmsghdr>() {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         } else {
             (*mhdr).msg_control as *mut cmsghdr
         }
@@ -2492,12 +2420,12 @@ f! {
     pub fn CMSG_NXTHDR(mhdr: *const crate::msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
         if cmsg.is_null() {
             return crate::CMSG_FIRSTHDR(mhdr);
-        };
+        }
         let next =
             _CMSG_HDR_ALIGN(cmsg as usize + (*cmsg).cmsg_len as usize + size_of::<cmsghdr>());
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         } else {
             _CMSG_HDR_ALIGN(cmsg as usize + (*cmsg).cmsg_len as usize) as *mut cmsghdr
         }
@@ -2508,20 +2436,20 @@ f! {
     }
 
     pub fn FD_CLR(fd: c_int, set: *mut fd_set) -> () {
-        let bits = mem::size_of_val(&(*set).fds_bits[0]) * 8;
+        let bits = size_of_val(&(*set).fds_bits[0]) * 8;
         let fd = fd as usize;
         (*set).fds_bits[fd / bits] &= !(1 << (fd % bits));
         return;
     }
 
     pub fn FD_ISSET(fd: c_int, set: *const fd_set) -> bool {
-        let bits = mem::size_of_val(&(*set).fds_bits[0]) * 8;
+        let bits = size_of_val(&(*set).fds_bits[0]) * 8;
         let fd = fd as usize;
         return ((*set).fds_bits[fd / bits] & (1 << (fd % bits))) != 0;
     }
 
     pub fn FD_SET(fd: c_int, set: *mut fd_set) -> () {
-        let bits = mem::size_of_val(&(*set).fds_bits[0]) * 8;
+        let bits = size_of_val(&(*set).fds_bits[0]) * 8;
         let fd = fd as usize;
         (*set).fds_bits[fd / bits] |= 1 << (fd % bits);
         return;
@@ -2648,9 +2576,8 @@ extern "C" {
     pub fn getpriority(which: c_int, who: c_int) -> c_int;
     pub fn setpriority(which: c_int, who: c_int, prio: c_int) -> c_int;
 
-    pub fn mknodat(dirfd: c_int, pathname: *const c_char, mode: crate::mode_t, dev: dev_t)
-        -> c_int;
-    pub fn mkfifoat(dirfd: c_int, pathname: *const c_char, mode: crate::mode_t) -> c_int;
+    pub fn mknodat(dirfd: c_int, pathname: *const c_char, mode: mode_t, dev: dev_t) -> c_int;
+    pub fn mkfifoat(dirfd: c_int, pathname: *const c_char, mode: mode_t) -> c_int;
     pub fn sethostname(name: *const c_char, len: c_int) -> c_int;
     pub fn if_nameindex() -> *mut if_nameindex;
     pub fn if_freenameindex(ptr: *mut if_nameindex);
@@ -2727,7 +2654,7 @@ extern "C" {
         fildes: c_int,
         path: *const c_char,
         oflag: c_int,
-        mode: crate::mode_t,
+        mode: mode_t,
     ) -> c_int;
     pub fn posix_spawn_file_actions_addclose(
         file_actions: *mut posix_spawn_file_actions_t,
@@ -2810,7 +2737,7 @@ extern "C" {
 
     pub fn shmget(key: key_t, size: size_t, shmflg: c_int) -> c_int;
 
-    pub fn shm_open(name: *const c_char, oflag: c_int, mode: crate::mode_t) -> c_int;
+    pub fn shm_open(name: *const c_char, oflag: c_int, mode: mode_t) -> c_int;
     pub fn shm_unlink(name: *const c_char) -> c_int;
 
     pub fn seekdir(dirp: *mut crate::DIR, loc: c_long);
@@ -3203,6 +3130,21 @@ extern "C" {
     pub fn arc4random_uniform(upper_bound: u32) -> u32;
 
     pub fn secure_getenv(name: *const c_char) -> *mut c_char;
+
+    #[cfg_attr(target_os = "solaris", link_name = "__strftime_xpg7")]
+    pub fn strftime(
+        s: *mut c_char,
+        maxsize: size_t,
+        format: *const c_char,
+        timeptr: *const crate::tm,
+    ) -> size_t;
+    pub fn strftime_l(
+        s: *mut c_char,
+        maxsize: size_t,
+        format: *const c_char,
+        timeptr: *const crate::tm,
+        loc: crate::locale_t,
+    ) -> size_t;
 }
 
 #[link(name = "sendfile")]

@@ -4,15 +4,18 @@
 
 mod block;
 
+use itertools::Itertools;
 use rowan::Direction;
-use rustc_literal_escaper::{unescape_mixed, unescape_unicode, EscapeError, Mode};
+use rustc_literal_escaper::{
+    EscapeError, unescape_byte, unescape_byte_str, unescape_c_str, unescape_char, unescape_str,
+};
 
 use crate::{
-    algo,
-    ast::{self, HasAttrs, HasVisibility, IsString, RangeItem},
-    match_ast, AstNode, SyntaxError,
+    AstNode, SyntaxError,
     SyntaxKind::{CONST, FN, INT_NUMBER, TYPE_ALIAS},
-    SyntaxNode, SyntaxToken, TextSize, T,
+    SyntaxNode, SyntaxToken, T, TextSize, algo,
+    ast::{self, HasAttrs, HasVisibility, IsString, RangeItem},
+    match_ast,
 };
 
 pub(crate) fn validate(root: &SyntaxNode, errors: &mut Vec<SyntaxError>) {
@@ -37,7 +40,8 @@ pub(crate) fn validate(root: &SyntaxNode, errors: &mut Vec<SyntaxError>) {
                 ast::FnPtrType(it) => validate_trait_object_fn_ptr_ret_ty(it, errors),
                 ast::MacroRules(it) => validate_macro_rules(it, errors),
                 ast::LetExpr(it) => validate_let_expr(it, errors),
-                ast::ImplTraitType(it) => validate_impl_object_ty(it, errors),
+                ast::DynTraitType(it) => errors.extend(validate_trait_object_ty(it)),
+                ast::ImplTraitType(it) => errors.extend(validate_impl_object_ty(it)),
                 _ => (),
             }
         }
@@ -45,7 +49,7 @@ pub(crate) fn validate(root: &SyntaxNode, errors: &mut Vec<SyntaxError>) {
 }
 
 fn rustc_unescape_error_to_string(err: EscapeError) -> (&'static str, bool) {
-    use rustc_literal_escaper::EscapeError as EE;
+    use EscapeError as EE;
 
     #[rustfmt::skip]
     let err_message = match err {
@@ -138,54 +142,50 @@ fn validate_literal(literal: ast::Literal, acc: &mut Vec<SyntaxError>) {
 
     match literal.kind() {
         ast::LiteralKind::String(s) => {
-            if !s.is_raw() {
-                if let Some(without_quotes) = unquote(text, 1, '"') {
-                    unescape_unicode(without_quotes, Mode::Str, &mut |range, char| {
-                        if let Err(err) = char {
-                            push_err(1, range.start, err);
-                        }
-                    });
-                }
-            }
-        }
-        ast::LiteralKind::ByteString(s) => {
-            if !s.is_raw() {
-                if let Some(without_quotes) = unquote(text, 2, '"') {
-                    unescape_unicode(without_quotes, Mode::ByteStr, &mut |range, char| {
-                        if let Err(err) = char {
-                            push_err(1, range.start, err);
-                        }
-                    });
-                }
-            }
-        }
-        ast::LiteralKind::CString(s) => {
-            if !s.is_raw() {
-                if let Some(without_quotes) = unquote(text, 2, '"') {
-                    unescape_mixed(without_quotes, Mode::CStr, &mut |range, char| {
-                        if let Err(err) = char {
-                            push_err(1, range.start, err);
-                        }
-                    });
-                }
-            }
-        }
-        ast::LiteralKind::Char(_) => {
-            if let Some(without_quotes) = unquote(text, 1, '\'') {
-                unescape_unicode(without_quotes, Mode::Char, &mut |range, char| {
+            if !s.is_raw()
+                && let Some(without_quotes) = unquote(text, 1, '"')
+            {
+                unescape_str(without_quotes, |range, char| {
                     if let Err(err) = char {
                         push_err(1, range.start, err);
                     }
                 });
             }
         }
-        ast::LiteralKind::Byte(_) => {
-            if let Some(without_quotes) = unquote(text, 2, '\'') {
-                unescape_unicode(without_quotes, Mode::Byte, &mut |range, char| {
+        ast::LiteralKind::ByteString(s) => {
+            if !s.is_raw()
+                && let Some(without_quotes) = unquote(text, 2, '"')
+            {
+                unescape_byte_str(without_quotes, |range, char| {
                     if let Err(err) = char {
-                        push_err(2, range.start, err);
+                        push_err(1, range.start, err);
                     }
                 });
+            }
+        }
+        ast::LiteralKind::CString(s) => {
+            if !s.is_raw()
+                && let Some(without_quotes) = unquote(text, 2, '"')
+            {
+                unescape_c_str(without_quotes, |range, char| {
+                    if let Err(err) = char {
+                        push_err(1, range.start, err);
+                    }
+                });
+            }
+        }
+        ast::LiteralKind::Char(_) => {
+            if let Some(without_quotes) = unquote(text, 1, '\'')
+                && let Err(err) = unescape_char(without_quotes)
+            {
+                push_err(1, 0, err);
+            }
+        }
+        ast::LiteralKind::Byte(_) => {
+            if let Some(without_quotes) = unquote(text, 2, '\'')
+                && let Err(err) = unescape_byte(without_quotes)
+            {
+                push_err(2, 0, err);
             }
         }
         ast::LiteralKind::IntNumber(_)
@@ -224,14 +224,14 @@ pub(crate) fn validate_block_structure(root: &SyntaxNode) {
 }
 
 fn validate_numeric_name(name_ref: Option<ast::NameRef>, errors: &mut Vec<SyntaxError>) {
-    if let Some(int_token) = int_token(name_ref) {
-        if int_token.text().chars().any(|c| !c.is_ascii_digit()) {
-            errors.push(SyntaxError::new(
-                "Tuple (struct) field access is only allowed through \
+    if let Some(int_token) = int_token(name_ref)
+        && int_token.text().chars().any(|c| !c.is_ascii_digit())
+    {
+        errors.push(SyntaxError::new(
+            "Tuple (struct) field access is only allowed through \
                 decimal integers with no underscores or suffix",
-                int_token.text_range(),
-            ));
-        }
+            int_token.text_range(),
+        ));
     }
 
     fn int_token(name_ref: Option<ast::NameRef>) -> Option<SyntaxToken> {
@@ -285,13 +285,13 @@ fn validate_path_keywords(segment: ast::PathSegment, errors: &mut Vec<SyntaxErro
                 token.text_range(),
             ));
         }
-    } else if let Some(token) = segment.crate_token() {
-        if !is_path_start || use_prefix(path).is_some() {
-            errors.push(SyntaxError::new(
-                "The `crate` keyword is only allowed as the first segment of a path",
-                token.text_range(),
-            ));
-        }
+    } else if let Some(token) = segment.crate_token()
+        && (!is_path_start || use_prefix(path).is_some())
+    {
+        errors.push(SyntaxError::new(
+            "The `crate` keyword is only allowed as the first segment of a path",
+            token.text_range(),
+        ));
     }
 
     fn use_prefix(mut path: ast::Path) -> Option<ast::Path> {
@@ -316,58 +316,104 @@ fn validate_path_keywords(segment: ast::PathSegment, errors: &mut Vec<SyntaxErro
 }
 
 fn validate_trait_object_ref_ty(ty: ast::RefType, errors: &mut Vec<SyntaxError>) {
-    if let Some(ast::Type::DynTraitType(ty)) = ty.ty() {
-        if let Some(err) = validate_trait_object_ty(ty) {
-            errors.push(err);
+    match ty.ty() {
+        Some(ast::Type::DynTraitType(ty)) => {
+            if let Some(err) = validate_trait_object_ty_plus(ty) {
+                errors.push(err);
+            }
         }
+        Some(ast::Type::ImplTraitType(ty)) => {
+            if let Some(err) = validate_impl_object_ty_plus(ty) {
+                errors.push(err);
+            }
+        }
+        _ => (),
     }
 }
 
 fn validate_trait_object_ptr_ty(ty: ast::PtrType, errors: &mut Vec<SyntaxError>) {
-    if let Some(ast::Type::DynTraitType(ty)) = ty.ty() {
-        if let Some(err) = validate_trait_object_ty(ty) {
-            errors.push(err);
+    match ty.ty() {
+        Some(ast::Type::DynTraitType(ty)) => {
+            if let Some(err) = validate_trait_object_ty_plus(ty) {
+                errors.push(err);
+            }
         }
+        Some(ast::Type::ImplTraitType(ty)) => {
+            if let Some(err) = validate_impl_object_ty_plus(ty) {
+                errors.push(err);
+            }
+        }
+        _ => (),
     }
 }
 
 fn validate_trait_object_fn_ptr_ret_ty(ty: ast::FnPtrType, errors: &mut Vec<SyntaxError>) {
-    if let Some(ast::Type::DynTraitType(ty)) = ty.ret_type().and_then(|ty| ty.ty()) {
-        if let Some(err) = validate_trait_object_ty(ty) {
-            errors.push(err);
+    match ty.ret_type().and_then(|ty| ty.ty()) {
+        Some(ast::Type::DynTraitType(ty)) => {
+            if let Some(err) = validate_trait_object_ty_plus(ty) {
+                errors.push(err);
+            }
         }
+        Some(ast::Type::ImplTraitType(ty)) => {
+            if let Some(err) = validate_impl_object_ty_plus(ty) {
+                errors.push(err);
+            }
+        }
+        _ => (),
     }
 }
 
 fn validate_trait_object_ty(ty: ast::DynTraitType) -> Option<SyntaxError> {
     let tbl = ty.type_bound_list()?;
-    let bounds_count = tbl.bounds().count();
+    let no_bounds = tbl.bounds().filter_map(|it| it.ty()).next().is_none();
 
-    match bounds_count {
-        0 => Some(SyntaxError::new(
+    match no_bounds {
+        true => Some(SyntaxError::new(
             "At least one trait is required for an object type",
             ty.syntax().text_range(),
         )),
-        _ if bounds_count > 1 => {
-            let dyn_token = ty.dyn_token()?;
-            let preceding_token =
-                algo::skip_trivia_token(dyn_token.prev_token()?, Direction::Prev)?;
-
-            if !matches!(preceding_token.kind(), T!['('] | T![<] | T![=]) {
-                return Some(SyntaxError::new("ambiguous `+` in a type", ty.syntax().text_range()));
-            }
-            None
-        }
-        _ => None,
+        false => None,
     }
 }
 
-fn validate_impl_object_ty(ty: ast::ImplTraitType, errors: &mut Vec<SyntaxError>) {
-    if ty.type_bound_list().map_or(0, |tbl| tbl.bounds().count()) == 0 {
-        errors.push(SyntaxError::new(
-            "At least one trait must be specified",
+fn validate_impl_object_ty(ty: ast::ImplTraitType) -> Option<SyntaxError> {
+    let tbl = ty.type_bound_list()?;
+    let no_bounds = tbl.bounds().filter_map(|it| it.ty()).next().is_none();
+
+    match no_bounds {
+        true => Some(SyntaxError::new(
+            "At least one trait is required for an object type",
             ty.syntax().text_range(),
-        ));
+        )),
+        false => None,
+    }
+}
+
+// FIXME: This is not a validation error, this is a context dependent parse error
+fn validate_trait_object_ty_plus(ty: ast::DynTraitType) -> Option<SyntaxError> {
+    let dyn_token = ty.dyn_token()?;
+    let preceding_token = algo::skip_trivia_token(dyn_token.prev_token()?, Direction::Prev)?;
+    let tbl = ty.type_bound_list()?;
+    let more_than_one_bound = tbl.bounds().next_tuple::<(_, _)>().is_some();
+
+    if more_than_one_bound && !matches!(preceding_token.kind(), T!['('] | T![<] | T![=]) {
+        Some(SyntaxError::new("ambiguous `+` in a type", ty.syntax().text_range()))
+    } else {
+        None
+    }
+}
+
+// FIXME: This is not a validation error, this is a context dependent parse error
+fn validate_impl_object_ty_plus(ty: ast::ImplTraitType) -> Option<SyntaxError> {
+    let dyn_token = ty.impl_token()?;
+    let preceding_token = algo::skip_trivia_token(dyn_token.prev_token()?, Direction::Prev)?;
+    let tbl = ty.type_bound_list()?;
+    let more_than_one_bound = tbl.bounds().next_tuple::<(_, _)>().is_some();
+
+    if more_than_one_bound && !matches!(preceding_token.kind(), T!['('] | T![<] | T![=]) {
+        Some(SyntaxError::new("ambiguous `+` in a type", ty.syntax().text_range()))
+    } else {
+        None
     }
 }
 

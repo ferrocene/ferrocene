@@ -42,11 +42,11 @@ fn needs_async_drop_raw<'tcx>(
     let adt_has_async_dtor =
         |adt_def: ty::AdtDef<'tcx>| adt_def.async_destructor(tcx).map(|_| DtorType::Significant);
     let res = drop_tys_helper(tcx, query.value, query.typing_env, adt_has_async_dtor, false, false)
-        .filter(filter_array_elements(tcx, query.typing_env))
+        .filter(filter_array_elements_async(tcx, query.typing_env))
         .next()
         .is_some();
 
-    debug!("needs_drop_raw({:?}) = {:?}", query, res);
+    debug!("needs_async_drop_raw({:?}) = {:?}", query, res);
     res
 }
 
@@ -61,6 +61,18 @@ fn filter_array_elements<'tcx>(
     move |ty| match ty {
         Ok(ty) => match *ty.kind() {
             ty::Array(elem, _) => tcx.needs_drop_raw(typing_env.as_query_input(elem)),
+            _ => true,
+        },
+        Err(AlwaysRequiresDrop) => true,
+    }
+}
+fn filter_array_elements_async<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    typing_env: ty::TypingEnv<'tcx>,
+) -> impl Fn(&Result<Ty<'tcx>, AlwaysRequiresDrop>) -> bool {
+    move |ty| match ty {
+        Ok(ty) => match *ty.kind() {
+            ty::Array(elem, _) => tcx.needs_async_drop_raw(typing_env.as_query_input(elem)),
             _ => true,
         },
         Err(AlwaysRequiresDrop) => true,
@@ -89,9 +101,6 @@ fn has_significant_drop_raw<'tcx>(
 struct NeedsDropTypes<'tcx, F> {
     tcx: TyCtxt<'tcx>,
     typing_env: ty::TypingEnv<'tcx>,
-    /// Whether to reveal coroutine witnesses, this is set
-    /// to `false` unless we compute `needs_drop` for a coroutine witness.
-    reveal_coroutine_witnesses: bool,
     query_ty: Ty<'tcx>,
     seen_tys: FxHashSet<Ty<'tcx>>,
     /// A stack of types left to process, and the recursion depth when we
@@ -103,6 +112,15 @@ struct NeedsDropTypes<'tcx, F> {
     adt_components: F,
     /// Set this to true if an exhaustive list of types involved in
     /// drop obligation is requested.
+    // FIXME: Calling this bool `exhaustive` is confusing and possibly a footgun,
+    // since it does two things: It makes the iterator yield *all* of the types
+    // that need drop, and it also affects the computation of the drop components
+    // on `Coroutine`s. The latter is somewhat confusing, and probably should be
+    // a function of `typing_env`. See the HACK comment below for why this is
+    // necessary. If this isn't possible, then we probably should turn this into
+    // a `NeedsDropMode` so that we can have a variant like `CollectAllSignificantDrops`,
+    // which will more accurately indicate that we want *all* of the *significant*
+    // drops, which are the two important behavioral changes toggled by this bool.
     exhaustive: bool,
 }
 
@@ -119,7 +137,6 @@ impl<'tcx, F> NeedsDropTypes<'tcx, F> {
         Self {
             tcx,
             typing_env,
-            reveal_coroutine_witnesses: exhaustive,
             seen_tys,
             query_ty: ty,
             unchecked_tys: vec![(ty, 0)],
@@ -183,23 +200,27 @@ where
                     // for the coroutine witness and check whether any of the contained types
                     // need to be dropped, and only require the captured types to be live
                     // if they do.
-                    ty::Coroutine(_, args) => {
-                        if self.reveal_coroutine_witnesses {
-                            queue_type(self, args.as_coroutine().witness());
+                    ty::Coroutine(def_id, args) => {
+                        // FIXME: See FIXME on `exhaustive` field above.
+                        if self.exhaustive {
+                            for upvar in args.as_coroutine().upvar_tys() {
+                                queue_type(self, upvar);
+                            }
+                            queue_type(self, args.as_coroutine().resume_ty());
+                            if let Some(witness) = tcx.mir_coroutine_witnesses(def_id) {
+                                for field_ty in &witness.field_tys {
+                                    queue_type(
+                                        self,
+                                        EarlyBinder::bind(field_ty.ty).instantiate(tcx, args),
+                                    );
+                                }
+                            }
                         } else {
                             return Some(self.always_drop_component(ty));
                         }
                     }
-                    ty::CoroutineWitness(def_id, args) => {
-                        if let Some(witness) = tcx.mir_coroutine_witnesses(def_id) {
-                            self.reveal_coroutine_witnesses = true;
-                            for field_ty in &witness.field_tys {
-                                queue_type(
-                                    self,
-                                    EarlyBinder::bind(field_ty.ty).instantiate(tcx, args),
-                                );
-                            }
-                        }
+                    ty::CoroutineWitness(..) => {
+                        unreachable!("witness should be handled in parent");
                     }
 
                     ty::UnsafeBinder(bound_ty) => {
@@ -414,6 +435,27 @@ fn adt_drop_tys<'tcx>(
     .collect::<Result<Vec<_>, _>>()
     .map(|components| tcx.mk_type_list(&components))
 }
+
+fn adt_async_drop_tys<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+) -> Result<&'tcx ty::List<Ty<'tcx>>, AlwaysRequiresDrop> {
+    // This is for the "adt_async_drop_tys" query, that considers all `AsyncDrop` impls.
+    let adt_has_dtor =
+        |adt_def: ty::AdtDef<'tcx>| adt_def.async_destructor(tcx).map(|_| DtorType::Significant);
+    // `tcx.type_of(def_id)` identical to `tcx.make_adt(def, identity_args)`
+    drop_tys_helper(
+        tcx,
+        tcx.type_of(def_id).instantiate_identity(),
+        ty::TypingEnv::non_body_analysis(tcx, def_id),
+        adt_has_dtor,
+        false,
+        false,
+    )
+    .collect::<Result<Vec<_>, _>>()
+    .map(|components| tcx.mk_type_list(&components))
+}
+
 // If `def_id` refers to a generic ADT, the queries above and below act as if they had been handed
 // a `tcx.make_ty(def, identity_args)` and as such it is legal to instantiate the generic parameters
 // of the ADT into the outputted `ty`s.
@@ -458,6 +500,7 @@ pub(crate) fn provide(providers: &mut Providers) {
         needs_async_drop_raw,
         has_significant_drop_raw,
         adt_drop_tys,
+        adt_async_drop_tys,
         adt_significant_drop_tys,
         list_significant_drop_tys,
         ..*providers

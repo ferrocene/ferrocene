@@ -22,8 +22,9 @@ use rustc_infer::infer::{DefineOpaqueTypes, InferResult};
 use rustc_lint::builtin::SELF_CONSTRUCTOR_FROM_OUTER_ITEM;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, AutoBorrow, AutoBorrowMutability};
 use rustc_middle::ty::{
-    self, AdtKind, CanonicalUserType, GenericArgKind, GenericArgsRef, GenericParamDefKind,
-    IsIdentity, Ty, TyCtxt, TypeFoldable, TypeVisitable, TypeVisitableExt, UserArgs, UserSelfTy,
+    self, AdtKind, CanonicalUserType, GenericArgsRef, GenericParamDefKind, IsIdentity,
+    SizedTraitKind, Ty, TyCtxt, TypeFoldable, TypeVisitable, TypeVisitableExt, UserArgs,
+    UserSelfTy,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint;
@@ -50,12 +51,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
 
         match span.desugaring_kind() {
-            // If span arose from a desugaring of `if` or `while`, then it is the condition
-            // itself, which diverges, that we are about to lint on. This gives suboptimal
-            // diagnostics. Instead, stop here so that the `if`- or `while`-expression's
-            // block is linted instead.
-            Some(DesugaringKind::CondTemporary) => return,
-
             // Don't lint if the result of an async block or async function is `!`.
             // This does not affect the unreachable lints *within* the body.
             Some(DesugaringKind::Async) => return,
@@ -280,7 +275,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     );
                 }
                 Adjust::Deref(None) => {
-                    // FIXME(const_trait_impl): We *could* enforce `&T: ~const Deref` here.
+                    // FIXME(const_trait_impl): We *could* enforce `&T: [const] Deref` here.
                 }
                 Adjust::Pointer(_pointer_coercion) => {
                     // FIXME(const_trait_impl): We should probably enforce these.
@@ -409,7 +404,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         code: traits::ObligationCauseCode<'tcx>,
     ) {
         if !ty.references_error() {
-            let lang_item = self.tcx.require_lang_item(LangItem::Sized, None);
+            let lang_item = self.tcx.require_lang_item(LangItem::Sized, span);
             self.require_type_meets(ty, span, code, lang_item);
         }
     }
@@ -439,11 +434,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 || {},
             );
             // Sized types have static alignment, and so do slices.
-            if tail.is_trivially_sized(self.tcx) || matches!(tail.kind(), ty::Slice(..)) {
+            if tail.has_trivial_sizedness(self.tcx, SizedTraitKind::Sized)
+                || matches!(tail.kind(), ty::Slice(..))
+            {
                 // Nothing else is required here.
             } else {
                 // We can't be sure, let's required full `Sized`.
-                let lang_item = self.tcx.require_lang_item(LangItem::Sized, None);
+                let lang_item = self.tcx.require_lang_item(LangItem::Sized, span);
                 self.require_type_meets(ty, span, ObligationCauseCode::Misc, lang_item);
             }
         }
@@ -573,7 +570,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// Registers an obligation for checking later, during regionck, that `arg` is well-formed.
     pub(crate) fn register_wf_obligation(
         &self,
-        arg: ty::GenericArg<'tcx>,
+        term: ty::Term<'tcx>,
         span: Span,
         code: traits::ObligationCauseCode<'tcx>,
     ) {
@@ -583,16 +580,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             self.tcx,
             cause,
             self.param_env,
-            ty::Binder::dummy(ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(arg))),
+            ty::ClauseKind::WellFormed(term),
         ));
     }
 
     /// Registers obligations that all `args` are well-formed.
     pub(crate) fn add_wf_bounds(&self, args: GenericArgsRef<'tcx>, span: Span) {
-        for arg in args.iter().filter(|arg| {
-            matches!(arg.unpack(), GenericArgKind::Type(..) | GenericArgKind::Const(..))
-        }) {
-            self.register_wf_obligation(arg, span, ObligationCauseCode::WellFormed(None));
+        for term in args.iter().filter_map(ty::GenericArg::as_term) {
+            self.register_wf_obligation(term, span, ObligationCauseCode::WellFormed(None));
         }
     }
 
@@ -630,45 +625,23 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // trigger query cycle ICEs, as doing so requires MIR.
         self.select_obligations_where_possible(|_| {});
 
-        let coroutines = std::mem::take(&mut *self.deferred_coroutine_interiors.borrow_mut());
-        debug!(?coroutines);
+        let ty::TypingMode::Analysis { defining_opaque_types_and_generators } = self.typing_mode()
+        else {
+            bug!();
+        };
 
-        let mut obligations = vec![];
-
-        for &(coroutine_def_id, interior) in coroutines.iter() {
-            debug!(?coroutine_def_id);
-
-            // Create the `CoroutineWitness` type that we will unify with `interior`.
-            let args = ty::GenericArgs::identity_for_item(
-                self.tcx,
-                self.tcx.typeck_root_def_id(coroutine_def_id.to_def_id()),
+        if defining_opaque_types_and_generators
+            .iter()
+            .any(|def_id| self.tcx.is_coroutine(def_id.to_def_id()))
+        {
+            self.typeck_results.borrow_mut().coroutine_stalled_predicates.extend(
+                self.fulfillment_cx
+                    .borrow_mut()
+                    .drain_stalled_obligations_for_coroutines(&self.infcx)
+                    .into_iter()
+                    .map(|o| (o.predicate, o.cause)),
             );
-            let witness = Ty::new_coroutine_witness(self.tcx, coroutine_def_id.to_def_id(), args);
-
-            // Unify `interior` with `witness` and collect all the resulting obligations.
-            let span = self.tcx.hir_body_owned_by(coroutine_def_id).value.span;
-            let ty::Infer(ty::InferTy::TyVar(_)) = interior.kind() else {
-                span_bug!(span, "coroutine interior witness not infer: {:?}", interior.kind())
-            };
-            let ok = self
-                .at(&self.misc(span), self.param_env)
-                // Will never define opaque types, as all we do is instantiate a type variable.
-                .eq(DefineOpaqueTypes::Yes, interior, witness)
-                .expect("Failed to unify coroutine interior type");
-
-            obligations.extend(ok.obligations);
         }
-
-        // FIXME: Use a real visitor for unstalled obligations in the new solver.
-        if !coroutines.is_empty() {
-            obligations
-                .extend(self.fulfillment_cx.borrow_mut().drain_unstalled_obligations(&self.infcx));
-        }
-
-        self.typeck_results
-            .borrow_mut()
-            .coroutine_stalled_predicates
-            .extend(obligations.into_iter().map(|o| (o.predicate, o.cause)));
     }
 
     #[instrument(skip(self), level = "debug")]
@@ -729,7 +702,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         span: Span,
         hir_id: HirId,
     ) -> (Res, Ty<'tcx>) {
-        let def_id = self.tcx.require_lang_item(lang_item, Some(span));
+        let def_id = self.tcx.require_lang_item(lang_item, span);
         let def_kind = self.tcx.def_kind(def_id);
 
         let item_ty = if let DefKind::Variant = def_kind {
@@ -1315,27 +1288,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 infer_args: bool,
             ) -> ty::GenericArg<'tcx> {
                 let tcx = self.fcx.tcx();
-                match param.kind {
-                    GenericParamDefKind::Lifetime => self
-                        .fcx
-                        .re_infer(
-                            self.span,
-                            rustc_hir_analysis::hir_ty_lowering::RegionInferReason::Param(param),
-                        )
-                        .into(),
-                    GenericParamDefKind::Type { .. } | GenericParamDefKind::Const { .. } => {
-                        if !infer_args && let Some(default) = param.default_value(tcx) {
-                            // If we have a default, then it doesn't matter that we're not inferring
-                            // the type/const arguments: We provide the default where any is missing.
-                            return default.instantiate(tcx, preceding_args);
-                        }
-                        // If no type/const arguments were provided, we have to infer them.
-                        // This case also occurs as a result of some malformed input, e.g.,
-                        // a lifetime argument being given instead of a type/const parameter.
-                        // Using inference instead of `Error` gives better error messages.
-                        self.fcx.var_for_def(self.span, param)
-                    }
+                if !infer_args && let Some(default) = param.default_value(tcx) {
+                    // If we have a default, then it doesn't matter that we're not inferring
+                    // the type/const arguments: We provide the default where any is missing.
+                    return default.instantiate(tcx, preceding_args);
                 }
+                // If no type/const arguments were provided, we have to infer them.
+                // This case also occurs as a result of some malformed input, e.g.,
+                // a lifetime argument being given instead of a type/const parameter.
+                // Using inference instead of `Error` gives better error messages.
+                self.fcx.var_for_def(self.span, param)
             }
         }
 
@@ -1444,8 +1406,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// in this case.
     #[instrument(level = "debug", skip(self, sp), ret)]
     pub(crate) fn try_structurally_resolve_type(&self, sp: Span, ty: Ty<'tcx>) -> Ty<'tcx> {
-        let ty = self.resolve_vars_with_obligations(ty);
-
         if self.next_trait_solver()
             && let ty::Alias(..) = ty.kind()
         {
@@ -1463,7 +1423,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
             }
         } else {
-            ty
+            self.resolve_vars_with_obligations(ty)
         }
     }
 

@@ -31,6 +31,15 @@ scope, in accordance to the standards above.
    rustc/unsafety
    rustc/degraded-environment
 
+.. toctree::
+   :maxdepth: 2
+   :caption: core library
+   :numbered:
+
+   core/usage
+   core/constraints
+
+
 .. appendices::
    :maxdepth: 2
    :caption: Appendices:

@@ -6,10 +6,15 @@
 mod libc {
     #[link(name = "c")]
     extern "C" {
-        pub fn puts(s: *const u8) -> i32;
-
         pub fn sigaction(signum: i32, act: *const sigaction, oldact: *mut sigaction) -> i32;
-        pub fn mmap(addr: *mut (), len: usize, prot: i32, flags: i32, fd: i32, offset: i64) -> *mut ();
+        pub fn mmap(
+            addr: *mut (),
+            len: usize,
+            prot: i32,
+            flags: i32,
+            fd: i32,
+            offset: i64,
+        ) -> *mut ();
         pub fn mprotect(addr: *mut (), len: usize, prot: i32) -> i32;
     }
 
@@ -56,12 +61,13 @@ fn main() {
             libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
             -1,
             0,
-        ).cast();
+        )
+        .cast();
         if STORAGE == libc::MAP_FAILED {
             panic!("error: mmap failed");
         }
 
-        let p_count = (&mut COUNT) as *mut u32;
+        let p_count = (&raw mut COUNT) as *mut u32;
         p_count.write_volatile(0);
 
         // Trigger segfaults
@@ -94,7 +100,7 @@ fn main() {
 }
 
 unsafe extern "C" fn segv_handler(_: i32, _: *mut (), _: *mut ()) {
-    let p_count = (&mut COUNT) as *mut u32;
+    let p_count = (&raw mut COUNT) as *mut u32;
     p_count.write_volatile(p_count.read_volatile() + 1);
     let count = p_count.read_volatile();
 

@@ -14,7 +14,7 @@ autoexamples = true
 autotests = true
 edition = "2021"
 exclude = ["/ci/"]
-rust-version = "1.79.0"
+rust-version = "1.82.0"
 
 [workspace]
 members = ['crates/cpp_smoke_test', 'crates/as-if-std']
@@ -38,17 +38,17 @@ cpp_demangle = { default-features = false, version = "0.4.0", optional = true, f
   "alloc",
 ] }
 
-[target.'cfg(windows)'.dependencies]
+[target.'cfg(any(windows, target_os = "cygwin"))'.dependencies]
 windows-targets = "0.52.6"
 
 [target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies]
 miniz_oxide = { version = "0.8", default-features = false }
-ruzstd = { version = "0.7.3", default-features = false, optional = true }
-addr2line = { version = "0.24.0", default-features = false }
+ruzstd = { version = "0.8.1", default-features = false, optional = true }
+addr2line = { version = "0.25.0", default-features = false }
 libc = { version = "0.2.156", default-features = false }
 
 [target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies.object]
-version = "0.36.0"
+version = "0.37.0"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 

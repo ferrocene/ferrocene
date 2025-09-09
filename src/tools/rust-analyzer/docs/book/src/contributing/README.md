@@ -3,7 +3,7 @@
 rust-analyzer is an ordinary Rust project, which is organized as a Cargo workspace, builds on stable and doesn't depend on C libraries.
 So, just
 
-```
+```bash
 $ cargo test
 ```
 
@@ -13,7 +13,7 @@ To learn more about how rust-analyzer works, see [Architecture](architecture.md)
 It also explains the high-level layout of the source code.
 Do skim through that document.
 
-We also publish rustdoc docs to pages: https://rust-lang.github.io/rust-analyzer/ide/.
+We also publish rustdoc docs to <https://rust-lang.github.io/rust-analyzer/ide/>.
 Note though, that the internal documentation is very incomplete.
 
 Various organizational and process issues are discussed in this document.
@@ -30,7 +30,7 @@ Discussion happens in this Zulip stream:
 
 # Issue Labels
 
-* [good-first-issue](https://github.com/rust-lang/rust-analyzer/labels/good%20first%20issue)
+* [good-first-issue](https://github.com/rust-lang/rust-analyzer/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
   are good issues to get into the project.
 * [E-has-instructions](https://github.com/rust-lang/rust-analyzer/issues?q=is%3Aopen+is%3Aissue+label%3AE-has-instructions)
   issues have links to the code in question and tests.
@@ -140,21 +140,24 @@ By default, log goes to stderr, but the stderr itself is processed by VS Code.
 `--log-file <PATH>` CLI argument allows logging to file.
 Setting the `RA_LOG_FILE=<PATH>` environment variable will also log to file, it will also override `--log-file`.
 
-To see stderr in the running VS Code instance, go to the "Output" tab of the panel and select `rust-analyzer`.
+To see the server stderr output in the running VS Code instance, go to the "Output" tab of the panel
+and select `rust-analyzer Language Server`.
 This shows `eprintln!` as well.
-Note that `stdout` is used for the actual protocol, so `println!` will break things.
+Note that `stdout` is used by LSP messages, so using `println!`—or anything that writes to `stdout`—will break rust-analyzer!
 
 To log all communication between the server and the client, there are two choices:
 
 * You can log on the server side, by running something like
 
-  ```
+  ```bash
   env RA_LOG=lsp_server=debug code .
   ```
 
 * You can log on the client side, by the `rust-analyzer: Toggle LSP Logs` command or enabling `"rust-analyzer.trace.server": "verbose"` workspace setting.
-  These logs are shown in a separate tab in the output and could be used with LSP inspector.
+  These logs are shown in a separate tab named `rust-analyzer LSP Trace` in the output and could be used with LSP inspector.
   Kudos to [@DJMcNab](https://github.com/DJMcNab) for setting this awesome infra up!
+
+Finally there are the logs of the VSCode extension itself which go into the `rust-analyzer Extension` output tab.
 
 There are also several VS Code commands which might be of interest:
 
@@ -180,7 +183,7 @@ There are also several VS Code commands which might be of interest:
 
 We have a built-in hierarchical profiler, you can enable it by using `RA_PROFILE` env-var:
 
-```
+```bash
 RA_PROFILE=*             // dump everything
 RA_PROFILE=foo|bar|baz   // enabled only selected entries
 RA_PROFILE=*@3>10        // dump everything, up to depth 3, if it takes more than 10 ms
@@ -191,7 +194,7 @@ Some rust-analyzer contributors have `export RA_PROFILE='*>10'` in my shell prof
 For machine-readable JSON output, we have the `RA_PROFILE_JSON` env variable. We support
 filtering only by span name:
 
-```
+```bash
 RA_PROFILE=* // dump everything
 RA_PROFILE_JSON="vfs_load|parallel_prime_caches|discover_command" // dump selected spans
 ```
@@ -201,13 +204,13 @@ It is enabled by `RA_COUNT=1`.
 
 To measure time for from-scratch analysis, use something like this:
 
-```
+```bash
 $ cargo run --release -p rust-analyzer -- analysis-stats ../chalk/
 ```
 
 For measuring time of incremental analysis, use either of these:
 
-```
+```bash
 $ cargo run --release -p rust-analyzer -- analysis-bench ../chalk/ --highlight ../chalk/chalk-engine/src/logic.rs
 $ cargo run --release -p rust-analyzer -- analysis-bench ../chalk/ --complete ../chalk/chalk-engine/src/logic.rs:94:0
 ```
@@ -220,7 +223,7 @@ Release process is handled by `release`, `dist`, `publish-release-notes` and `pr
 
 `release` assumes that you have checkouts of `rust-analyzer`, `rust-analyzer.github.io`, and `rust-lang/rust` in the same directory:
 
-```
+```bash
 ./rust-analyzer
 ./rust-analyzer.github.io
 ./rust-rust-analyzer  # Note the name!
@@ -249,18 +252,8 @@ Release steps:
 4. Commit & push the changelog.
 5. Run `cargo xtask publish-release-notes <CHANGELOG>` -- this will convert the changelog entry in AsciiDoc to Markdown and update the body of GitHub Releases entry.
 6. Tweet.
-7. Make a new branch and run `cargo xtask rustc-pull`, open a PR, and merge it.
-   This will pull any changes from `rust-lang/rust` into `rust-analyzer`.
-8. Switch to `master`, pull, then run `cargo xtask rustc-push --rust-path ../rust-rust-analyzer --rust-fork matklad/rust`.
-   Replace `matklad/rust` with your own fork of `rust-lang/rust`.
-   You can use the token to authenticate when you get prompted for a password, since `josh` will push over HTTPS, not SSH.
-   This will push the `rust-analyzer` changes to your fork.
-   You can then open a PR against `rust-lang/rust`.
-
-Note: besides the `rust-rust-analyzer` clone, the Josh cache (stored under `~/.cache/rust-analyzer-josh`) will contain a bare clone of `rust-lang/rust`.
-This currently takes about 3.5 GB.
-
-This [HackMD](https://hackmd.io/7pOuxnkdQDaL1Y1FQr65xg) has details about how `josh` syncs work.
+7. Perform a subtree [pull](#performing-a-pull).
+8. Perform a subtree [push](#performing-a-push).
 
 If the GitHub Actions release fails because of a transient problem like a timeout, you can re-run the job from the Actions console.
 If it fails because of something that needs to be fixed, remove the release tag (if needed), fix the problem, then start over.
@@ -285,3 +278,43 @@ There are two sets of people with extra permissions:
   If you don't feel like reviewing for whatever reason, someone else will pick the review up (but please speak up if you don't feel like it)!
 * The [rust-lang](https://github.com/rust-lang) team [t-rust-analyzer-contributors]([https://github.com/orgs/rust-analyzer/teams/triage](https://github.com/rust-lang/team/blob/master/teams/rust-analyzer-contributors.toml)).
   This team has general triaging permissions allowing to label, close and re-open issues.
+
+## Synchronizing subtree changes
+`rust-analyzer` is a [josh](https://josh-project.github.io/josh/intro.html) subtree of the [rust-lang/rust](https://github.com/rust-lang/rust)
+repository. We use the [rustc-josh-sync](https://github.com/rust-lang/josh-sync) tool to perform synchronization between these two
+repositories. You can find documentation of the tool [here](https://github.com/rust-lang/josh-sync).
+
+You can install the synchronization tool using the following commands:
+```
+cargo install --locked --git https://github.com/rust-lang/josh-sync
+```
+
+Both pulls (synchronizing changes from rust-lang/rust into rust-analyzer) and pushes (synchronizing
+changes from rust-analyzer into rust-lang/rust) are performed from this repository.
+changes from rust-analyzer to rust-lang/rust) are performed from this repository.
+
+Usually we first perform a pull, wait for it to be merged, and then perform a push.
+
+### Performing a pull
+1) Checkout a new branch that will be used to create a PR against rust-analyzer
+2) Run the pull command
+    ```
+    rustc-josh-sync pull
+    ```
+3) Push the branch to your fork of `rust-analyzer` and create a PR
+  - If you have the `gh` CLI installed, `rustc-josh-sync` can create the PR for you.
+
+### Performing a push
+
+Wait for the previous pull to be merged.
+
+1) Switch to `master` and pull
+2) Run the push command to create a branch named `<branch-name>` in a `rustc` fork under the `<gh-username>` account
+    ```
+    rustc-josh-sync push <branch-name> <gh-username>
+    ```
+   - The push will ask you to download a checkout of the `rust-lang/rust` repository.
+   - If you get prompted for a password, see [this](https://github.com/rust-lang/josh-sync?tab=readme-ov-file#git-peculiarities).
+3) Create a PR from `<branch-name>` into `rust-lang/rust`
+
+> Besides the `rust` checkout, the Josh cache (stored under `~/.cache/rustc-josh`) will contain a bare clone of `rust-lang/rust`. This currently takes several GBs.

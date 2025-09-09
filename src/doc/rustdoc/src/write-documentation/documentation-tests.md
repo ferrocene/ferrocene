@@ -191,6 +191,20 @@ We can document it by escaping the initial `#`:
 /// ## bar # baz";
 ```
 
+Here is an example with a macro rule which matches on tokens starting with `#`:
+
+`````rust,no_run
+/// ```
+/// macro_rules! ignore { (##tag) => {}; }
+/// ignore! {
+///     ###tag
+/// }
+/// ```
+# fn f() {}
+`````
+
+As you can see, the rule is expecting two `#`, so when calling it, we need to add an extra `#`
+because the first one is used as escape.
 
 ## Using `?` in doc tests
 
@@ -426,6 +440,43 @@ should not be merged with the others. So the previous code should use it:
 
 In this case, it means that the line information will not change if you add/remove other
 doctests.
+
+### Ignoring targets
+
+Attributes starting with `ignore-` can be used to ignore doctests for specific
+targets. For example, `ignore-x86_64` will avoid building doctests when the
+target name contains `x86_64`.
+
+```rust
+/// ```ignore-x86_64
+/// assert!(2 == 2);
+/// ```
+struct Foo;
+```
+
+This doctest will not be built for targets such as `x86_64-unknown-linux-gnu`.
+
+Multiple ignore attributes can be specified to ignore multiple targets:
+
+```rust
+/// ```ignore-x86_64,ignore-windows
+/// assert!(2 == 2);
+/// ```
+struct Foo;
+```
+
+If you want to preserve backwards compatibility for older versions of rustdoc,
+you can specify both `ignore` and `ignore-`, such as:
+
+```rust
+/// ```ignore,ignore-x86_64
+/// assert!(2 == 2);
+/// ```
+struct Foo;
+```
+
+In older versions, this will be ignored on all targets, but starting with
+version 1.88.0, `ignore-x86_64` will override `ignore`.
 
 ### Custom CSS classes for code blocks
 

@@ -14,8 +14,8 @@ use rustc_macros::extension;
 use rustc_middle::arena::ArenaAllocatable;
 use rustc_middle::traits::query::NoSolution;
 use rustc_middle::ty::error::TypeError;
+use rustc_middle::ty::relate::Relate;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeFoldable, Upcast, Variance};
-use rustc_type_ir::relate::Relate;
 
 use super::{FromSolverError, FulfillmentContext, ScrubbedTraitError, TraitEngine};
 use crate::error_reporting::InferCtxtErrorExt;
@@ -185,6 +185,20 @@ where
         self.infcx
             .at(cause, param_env)
             .sup(DefineOpaqueTypes::Yes, expected, actual)
+            .map(|infer_ok| self.register_infer_ok_obligations(infer_ok))
+    }
+
+    /// Computes the least-upper-bound, or mutual supertype, of two values.
+    pub fn lub<T: ToTrace<'tcx>>(
+        &self,
+        cause: &ObligationCause<'tcx>,
+        param_env: ty::ParamEnv<'tcx>,
+        expected: T,
+        actual: T,
+    ) -> Result<T, TypeError<'tcx>> {
+        self.infcx
+            .at(cause, param_env)
+            .lub(expected, actual)
             .map(|infer_ok| self.register_infer_ok_obligations(infer_ok))
     }
 

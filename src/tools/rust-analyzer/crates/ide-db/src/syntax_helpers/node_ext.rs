@@ -5,8 +5,8 @@ use itertools::Itertools;
 use parser::T;
 use span::Edition;
 use syntax::{
-    ast::{self, HasLoopBody, MacroCall, PathSegmentKind, VisibilityKind},
     AstNode, AstToken, Preorder, RustLanguage, WalkEvent,
+    ast::{self, HasLoopBody, MacroCall, PathSegmentKind, VisibilityKind},
 };
 
 pub fn expr_as_name_ref(expr: &ast::Expr) -> Option<ast::NameRef> {
@@ -79,14 +79,13 @@ pub fn preorder_expr_with_ctx_checker(
                 continue;
             }
         };
-        if let Some(let_stmt) = node.parent().and_then(ast::LetStmt::cast) {
-            if let_stmt.initializer().map(|it| it.syntax() != &node).unwrap_or(true)
-                && let_stmt.let_else().map(|it| it.syntax() != &node).unwrap_or(true)
-            {
-                // skipping potential const pat expressions in  let statements
-                preorder.skip_subtree();
-                continue;
-            }
+        if let Some(let_stmt) = node.parent().and_then(ast::LetStmt::cast)
+            && let_stmt.initializer().map(|it| it.syntax() != &node).unwrap_or(true)
+            && let_stmt.let_else().map(|it| it.syntax() != &node).unwrap_or(true)
+        {
+            // skipping potential const pat expressions in  let statements
+            preorder.skip_subtree();
+            continue;
         }
 
         match ast::Stmt::cast(node.clone()) {
@@ -121,7 +120,7 @@ pub fn walk_patterns_in_expr(start: &ast::Expr, cb: &mut dyn FnMut(ast::Pat)) {
         match ast::Stmt::cast(node.clone()) {
             Some(ast::Stmt::LetStmt(l)) => {
                 if let Some(pat) = l.pat() {
-                    let _ = walk_pat(&pat, &mut |pat| {
+                    _ = walk_pat(&pat, &mut |pat| {
                         cb(pat);
                         ControlFlow::<(), ()>::Continue(())
                     });
@@ -159,7 +158,7 @@ pub fn walk_patterns_in_expr(start: &ast::Expr, cb: &mut dyn FnMut(ast::Pat)) {
                     }
                 } else if let Some(pat) = ast::Pat::cast(node) {
                     preorder.skip_subtree();
-                    let _ = walk_pat(&pat, &mut |pat| {
+                    _ = walk_pat(&pat, &mut |pat| {
                         cb(pat);
                         ControlFlow::<(), ()>::Continue(())
                     });
@@ -306,10 +305,10 @@ pub fn for_each_tail_expr(expr: &ast::Expr, cb: &mut dyn FnMut(&ast::Expr)) {
                 Some(ast::BlockModifier::AsyncGen(_)) => (),
                 None => (),
             }
-            if let Some(stmt_list) = b.stmt_list() {
-                if let Some(e) = stmt_list.tail_expr() {
-                    for_each_tail_expr(&e, cb);
-                }
+            if let Some(stmt_list) = b.stmt_list()
+                && let Some(e) = stmt_list.tail_expr()
+            {
+                for_each_tail_expr(&e, cb);
             }
         }
         ast::Expr::IfExpr(if_) => {
@@ -484,7 +483,7 @@ pub fn parse_tt_as_comma_sep_paths(
             None => None,
             Some(tok) => Some(tok),
         });
-    let input_expressions = tokens.group_by(|tok| tok.kind() == T![,]);
+    let input_expressions = tokens.chunk_by(|tok| tok.kind() == T![,]);
     let paths = input_expressions
         .into_iter()
         .filter_map(|(is_sep, group)| (!is_sep).then_some(group))

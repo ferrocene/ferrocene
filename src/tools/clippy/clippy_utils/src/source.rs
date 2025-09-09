@@ -7,13 +7,14 @@ use std::sync::Arc;
 use rustc_ast::{LitKind, StrStyle};
 use rustc_errors::Applicability;
 use rustc_hir::{BlockCheckMode, Expr, ExprKind, UnsafeSource};
+use rustc_lexer::{FrontmatterAllowed, LiteralKind, TokenKind, tokenize};
 use rustc_lint::{EarlyContext, LateContext};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
 use rustc_span::source_map::{SourceMap, original_sp};
 use rustc_span::{
-    BytePos, DUMMY_SP, FileNameDisplayPreference, Pos, SourceFile, SourceFileAndLine, Span, SpanData, SyntaxContext,
-    hygiene,
+    BytePos, DUMMY_SP, FileNameDisplayPreference, Pos, RelativeBytePos, SourceFile, SourceFileAndLine, Span, SpanData,
+    SyntaxContext, hygiene,
 };
 use std::borrow::Cow;
 use std::fmt;
@@ -137,12 +138,25 @@ pub trait SpanRangeExt: SpanRange {
     fn map_range(
         self,
         cx: &impl HasSession,
-        f: impl for<'a> FnOnce(&'a str, Range<usize>) -> Option<Range<usize>>,
+        f: impl for<'a> FnOnce(&'a SourceFile, &'a str, Range<usize>) -> Option<Range<usize>>,
     ) -> Option<Range<BytePos>> {
         map_range(cx.sess().source_map(), self.into_range(), f)
     }
 
+    #[allow(rustdoc::invalid_rust_codeblocks, reason = "The codeblock is intentionally broken")]
     /// Extends the range to include all preceding whitespace characters.
+    ///
+    /// The range will not be expanded if it would cross a line boundary, the line the range would
+    /// be extended to ends with a line comment and the text after the range contains a
+    /// non-whitespace character on the same line. e.g.
+    ///
+    /// ```ignore
+    /// ( // Some comment
+    /// foo)
+    /// ```
+    ///
+    /// When the range points to `foo`, suggesting to remove the range after it's been extended will
+    /// cause the `)` to be placed inside the line comment as `( // Some comment)`.
     fn with_leading_whitespace(self, cx: &impl HasSession) -> Range<BytePos> {
         with_leading_whitespace(cx.sess().source_map(), self.into_range())
     }
@@ -241,11 +255,11 @@ fn with_source_text_and_range<T>(
 fn map_range(
     sm: &SourceMap,
     sp: Range<BytePos>,
-    f: impl for<'a> FnOnce(&'a str, Range<usize>) -> Option<Range<usize>>,
+    f: impl for<'a> FnOnce(&'a SourceFile, &'a str, Range<usize>) -> Option<Range<usize>>,
 ) -> Option<Range<BytePos>> {
     if let Some(src) = get_source_range(sm, sp.clone())
         && let Some(text) = &src.sf.src
-        && let Some(range) = f(text, src.range.clone())
+        && let Some(range) = f(&src.sf, text, src.range.clone())
     {
         debug_assert!(
             range.start <= text.len() && range.end <= text.len(),
@@ -262,15 +276,58 @@ fn map_range(
     }
 }
 
+fn ends_with_line_comment_or_broken(text: &str) -> bool {
+    let Some(last) = tokenize(text, FrontmatterAllowed::No).last() else {
+        return false;
+    };
+    match last.kind {
+        // Will give the wrong result on text like `" // "` where the first quote ends a string
+        // started earlier. The only workaround is to lex the whole file which we don't really want
+        // to do.
+        TokenKind::LineComment { .. } | TokenKind::BlockComment { terminated: false, .. } => true,
+        TokenKind::Literal { kind, .. } => matches!(
+            kind,
+            LiteralKind::Byte { terminated: false }
+                | LiteralKind::ByteStr { terminated: false }
+                | LiteralKind::CStr { terminated: false }
+                | LiteralKind::Char { terminated: false }
+                | LiteralKind::RawByteStr { n_hashes: None }
+                | LiteralKind::RawCStr { n_hashes: None }
+                | LiteralKind::RawStr { n_hashes: None }
+        ),
+        _ => false,
+    }
+}
+
+fn with_leading_whitespace_inner(lines: &[RelativeBytePos], src: &str, range: Range<usize>) -> Option<usize> {
+    debug_assert!(lines.is_empty() || lines[0].to_u32() == 0);
+
+    let start = src.get(..range.start)?.trim_end();
+    let next_line = lines.partition_point(|&pos| pos.to_usize() <= start.len());
+    if let Some(line_end) = lines.get(next_line)
+        && line_end.to_usize() <= range.start
+        && let prev_start = lines.get(next_line - 1).map_or(0, |&x| x.to_usize())
+        && ends_with_line_comment_or_broken(&start[prev_start..])
+        && let next_line = lines.partition_point(|&pos| pos.to_usize() < range.end)
+        && let next_start = lines.get(next_line).map_or(src.len(), |&x| x.to_usize())
+        && tokenize(src.get(range.end..next_start)?, FrontmatterAllowed::No)
+            .any(|t| !matches!(t.kind, TokenKind::Whitespace))
+    {
+        Some(range.start)
+    } else {
+        Some(start.len())
+    }
+}
+
 fn with_leading_whitespace(sm: &SourceMap, sp: Range<BytePos>) -> Range<BytePos> {
-    map_range(sm, sp.clone(), |src, range| {
-        Some(src.get(..range.start)?.trim_end().len()..range.end)
+    map_range(sm, sp.clone(), |sf, src, range| {
+        Some(with_leading_whitespace_inner(sf.lines(), src, range.clone())?..range.end)
     })
     .unwrap_or(sp)
 }
 
 fn trim_start(sm: &SourceMap, sp: Range<BytePos>) -> Range<BytePos> {
-    map_range(sm, sp.clone(), |src, range| {
+    map_range(sm, sp.clone(), |_, src, range| {
         let src = src.get(range.clone())?;
         Some(range.start + (src.len() - src.trim_start().len())..range.end)
     })
@@ -285,11 +342,8 @@ impl SourceFileRange {
     /// Attempts to get the text from the source file. This can fail if the source text isn't
     /// loaded.
     pub fn as_str(&self) -> Option<&str> {
-        self.sf
-            .src
-            .as_ref()
-            .map(|src| src.as_str())
-            .or_else(|| self.sf.external_src.get().and_then(|src| src.get_source()))
+        (self.sf.src.as_ref().map(|src| src.as_str()))
+            .or_else(|| self.sf.external_src.get()?.get_source())
             .and_then(|x| x.get(self.range.clone()))
     }
 }
@@ -384,10 +438,10 @@ pub fn snippet_indent(sess: &impl HasSession, span: Span) -> Option<String> {
 // For some reason these attributes don't have any expansion info on them, so
 // we have to check it this way until there is a better way.
 pub fn is_present_in_source(sess: &impl HasSession, span: Span) -> bool {
-    if let Some(snippet) = snippet_opt(sess, span) {
-        if snippet.is_empty() {
-            return false;
-        }
+    if let Some(snippet) = snippet_opt(sess, span)
+        && snippet.is_empty()
+    {
+        return false;
     }
     true
 }
@@ -408,11 +462,11 @@ pub fn position_before_rarrow(s: &str) -> Option<usize> {
         let mut rpos = rpos;
         let chars: Vec<char> = s.chars().collect();
         while rpos > 1 {
-            if let Some(c) = chars.get(rpos - 1) {
-                if c.is_whitespace() {
-                    rpos -= 1;
-                    continue;
-                }
+            if let Some(c) = chars.get(rpos - 1)
+                && c.is_whitespace()
+            {
+                rpos -= 1;
+                continue;
             }
             break;
         }

@@ -8,8 +8,8 @@ use crate::fmt;
 
 /// A thread local storage (TLS) key which owns its contents.
 ///
-/// This key uses the fastest possible implementation available to it for the
-/// target platform. It is instantiated with the [`thread_local!`] macro and the
+/// This key uses the fastest implementation available on the target platform.
+/// It is instantiated with the [`thread_local!`] macro and the
 /// primary method is the [`with`] method, though there are helpers to make
 /// working with [`Cell`] types easier.
 ///
@@ -24,10 +24,10 @@ use crate::fmt;
 /// [`with`]) within a thread, and values that implement [`Drop`] get
 /// destructed when a thread exits. Some platform-specific caveats apply, which
 /// are explained below.
-/// Note that, should the destructor panics, the whole process will be [aborted].
+/// Note that if the destructor panics, the whole process will be [aborted].
 ///
 /// A `LocalKey`'s initializer cannot recursively depend on itself. Using a
-/// `LocalKey` in this way may cause panics, aborts or infinite recursion on
+/// `LocalKey` in this way may cause panics, aborts, or infinite recursion on
 /// the first call to `with`.
 ///
 /// [aborted]: crate::process::abort
@@ -468,6 +468,29 @@ impl<T: 'static> LocalKey<Cell<T>> {
     #[rustc_confusables("swap")]
     pub fn replace(&'static self, value: T) -> T {
         self.with(|cell| cell.replace(value))
+    }
+
+    /// Updates the contained value using a function.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(local_key_cell_update)]
+    /// use std::cell::Cell;
+    ///
+    /// thread_local! {
+    ///     static X: Cell<i32> = const { Cell::new(5) };
+    /// }
+    ///
+    /// X.update(|x| x + 1);
+    /// assert_eq!(X.get(), 6);
+    /// ```
+    #[unstable(feature = "local_key_cell_update", issue = "143989")]
+    pub fn update(&'static self, f: impl FnOnce(T) -> T)
+    where
+        T: Copy,
+    {
+        self.with(|cell| cell.update(f))
     }
 }
 

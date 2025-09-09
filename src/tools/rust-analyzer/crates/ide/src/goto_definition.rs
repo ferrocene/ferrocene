@@ -1,28 +1,28 @@
 use std::{iter, mem::discriminant};
 
 use crate::{
+    FilePosition, NavigationTarget, RangeInfo, TryToNav, UpmappingResult,
     doc_links::token_as_doc_comment,
     navigation_target::{self, ToNav},
-    FilePosition, NavigationTarget, RangeInfo, TryToNav, UpmappingResult,
 };
 use hir::{
-    sym, AsAssocItem, AssocItem, CallableKind, FileRange, HasCrate, InFile, MacroFileIdExt,
-    ModuleDef, Semantics,
+    AsAssocItem, AssocItem, CallableKind, FileRange, HasCrate, InFile, ModuleDef, Semantics, sym,
 };
 use ide_db::{
-    base_db::{AnchoredPath, FileLoader, SourceDatabase},
+    RootDatabase, SymbolKind,
+    base_db::{AnchoredPath, SourceDatabase},
     defs::{Definition, IdentClass},
     famous_defs::FamousDefs,
     helpers::pick_best_token,
-    RootDatabase, SymbolKind,
 };
 use itertools::Itertools;
 use span::{Edition, FileId};
 use syntax::{
-    ast::{self, HasLoopBody},
-    match_ast, AstNode, AstToken,
+    AstNode, AstToken,
     SyntaxKind::*,
-    SyntaxNode, SyntaxToken, TextRange, T,
+    SyntaxNode, SyntaxToken, T, TextRange,
+    ast::{self, HasLoopBody},
+    match_ast,
 };
 
 // Feature: Go to Definition
@@ -43,7 +43,7 @@ pub(crate) fn goto_definition(
     let sema = &Semantics::new(db);
     let file = sema.parse_guess_edition(file_id).syntax().clone();
     let edition =
-        sema.attach_first_edition(file_id).map(|it| it.edition()).unwrap_or(Edition::CURRENT);
+        sema.attach_first_edition(file_id).map(|it| it.edition(db)).unwrap_or(Edition::CURRENT);
     let original_token = pick_best_token(file.token_at_offset(offset), |kind| match kind {
         IDENT
         | INT_NUMBER
@@ -67,7 +67,7 @@ pub(crate) fn goto_definition(
         });
     }
 
-    if let Some((range, resolution)) =
+    if let Some((range, _, _, resolution)) =
         sema.check_for_format_args_template(original_token.clone(), offset)
     {
         return Some(RangeInfo::new(
@@ -88,21 +88,23 @@ pub(crate) fn goto_definition(
     }
 
     let navs = sema
-        .descend_into_macros_no_opaque(original_token.clone())
+        .descend_into_macros_no_opaque(original_token.clone(), false)
         .into_iter()
         .filter_map(|token| {
-            let parent = token.parent()?;
+            let parent = token.value.parent()?;
 
-            if let Some(token) = ast::String::cast(token.clone()) {
-                if let Some(x) = try_lookup_include_path(sema, token, file_id) {
-                    return Some(vec![x]);
-                }
+            let token_file_id = token.file_id;
+            if let Some(token) = ast::String::cast(token.value.clone())
+                && let Some(x) =
+                    try_lookup_include_path(sema, InFile::new(token_file_id, token), file_id)
+            {
+                return Some(vec![x]);
             }
 
-            if ast::TokenTree::can_cast(parent.kind()) {
-                if let Some(x) = try_lookup_macro_def_in_macro_use(sema, token) {
-                    return Some(vec![x]);
-                }
+            if ast::TokenTree::can_cast(parent.kind())
+                && let Some(x) = try_lookup_macro_def_in_macro_use(sema, token.value)
+            {
+                return Some(vec![x]);
             }
 
             Some(
@@ -204,20 +206,22 @@ fn find_definition_for_known_blanket_dual_impls(
 
 fn try_lookup_include_path(
     sema: &Semantics<'_, RootDatabase>,
-    token: ast::String,
+    token: InFile<ast::String>,
     file_id: FileId,
 ) -> Option<NavigationTarget> {
-    let file = sema.hir_file_for(&token.syntax().parent()?).macro_file()?;
+    let file = token.file_id.macro_file()?;
+
+    // Check that we are in the eager argument expansion of an include macro
+    // that is we are the string input of it
     if !iter::successors(Some(file), |file| file.parent(sema.db).macro_file())
-        // Check that we are in the eager argument expansion of an include macro
         .any(|file| file.is_include_like_macro(sema.db) && file.eager_arg(sema.db).is_none())
     {
         return None;
     }
-    let path = token.value().ok()?;
+    let path = token.value.value().ok()?;
 
     let file_id = sema.db.resolve_path(AnchoredPath { anchor: file_id, path: &path })?;
-    let size = sema.db.file_text(file_id).len().try_into().ok()?;
+    let size = sema.db.file_text(file_id).text(sema.db).len().try_into().ok()?;
     Some(NavigationTarget {
         file_id,
         full_range: TextRange::new(0.into(), size),
@@ -240,12 +244,11 @@ fn try_lookup_macro_def_in_macro_use(
     let krate = extern_crate.resolved_crate(sema.db)?;
 
     for mod_def in krate.root_module().declarations(sema.db) {
-        if let ModuleDef::Macro(mac) = mod_def {
-            if mac.name(sema.db).as_str() == token.text() {
-                if let Some(nav) = mac.try_to_nav(sema.db) {
-                    return Some(nav.call_site);
-                }
-            }
+        if let ModuleDef::Macro(mac) = mod_def
+            && mac.name(sema.db).as_str() == token.text()
+            && let Some(nav) = mac.try_to_nav(sema.db)
+        {
+            return Some(nav.call_site);
         }
     }
 
@@ -286,13 +289,14 @@ fn handle_control_flow_keywords(
     token: &SyntaxToken,
 ) -> Option<Vec<NavigationTarget>> {
     match token.kind() {
-        // For `fn` / `loop` / `while` / `for` / `async`, return the keyword it self,
+        // For `fn` / `loop` / `while` / `for` / `async` / `match`, return the keyword it self,
         // so that VSCode will find the references when using `ctrl + click`
         T![fn] | T![async] | T![try] | T![return] => nav_for_exit_points(sema, token),
         T![loop] | T![while] | T![break] | T![continue] => nav_for_break_points(sema, token),
         T![for] if token.parent().and_then(ast::ForExpr::cast).is_some() => {
             nav_for_break_points(sema, token)
         }
+        T![match] | T![=>] | T![if] => nav_for_branch_exit_points(sema, token),
         _ => None,
     }
 }
@@ -358,7 +362,7 @@ fn nav_for_exit_points(
 
                         if let Some(FileRange { file_id, range }) = focus_frange {
                             let contains_frange = |nav: &NavigationTarget| {
-                                nav.file_id == file_id && nav.full_range.contains_range(range)
+                                nav.file_id == file_id.file_id(db) && nav.full_range.contains_range(range)
                             };
 
                             if let Some(def_site) = nav.def_site.as_mut() {
@@ -398,6 +402,91 @@ fn nav_for_exit_points(
         })
         .flatten()
         .collect_vec();
+
+    Some(navs)
+}
+
+pub(crate) fn find_branch_root(
+    sema: &Semantics<'_, RootDatabase>,
+    token: &SyntaxToken,
+) -> Vec<SyntaxNode> {
+    let find_nodes = |node_filter: fn(SyntaxNode) -> Option<SyntaxNode>| {
+        sema.descend_into_macros(token.clone())
+            .into_iter()
+            .filter_map(|token| node_filter(token.parent()?))
+            .collect_vec()
+    };
+
+    match token.kind() {
+        T![match] => find_nodes(|node| Some(ast::MatchExpr::cast(node)?.syntax().clone())),
+        T![=>] => find_nodes(|node| Some(ast::MatchArm::cast(node)?.syntax().clone())),
+        T![if] => find_nodes(|node| {
+            let if_expr = ast::IfExpr::cast(node)?;
+
+            let root_if = iter::successors(Some(if_expr.clone()), |if_expr| {
+                let parent_if = if_expr.syntax().parent().and_then(ast::IfExpr::cast)?;
+                let ast::ElseBranch::IfExpr(else_branch) = parent_if.else_branch()? else {
+                    return None;
+                };
+
+                (else_branch.syntax() == if_expr.syntax()).then_some(parent_if)
+            })
+            .last()?;
+
+            Some(root_if.syntax().clone())
+        }),
+        _ => vec![],
+    }
+}
+
+fn nav_for_branch_exit_points(
+    sema: &Semantics<'_, RootDatabase>,
+    token: &SyntaxToken,
+) -> Option<Vec<NavigationTarget>> {
+    let db = sema.db;
+
+    let navs = match token.kind() {
+        T![match] => find_branch_root(sema, token)
+            .into_iter()
+            .filter_map(|node| {
+                let file_id = sema.hir_file_for(&node);
+                let match_expr = ast::MatchExpr::cast(node)?;
+                let focus_range = match_expr.match_token()?.text_range();
+                let match_expr_in_file = InFile::new(file_id, match_expr.into());
+                Some(expr_to_nav(db, match_expr_in_file, Some(focus_range)))
+            })
+            .flatten()
+            .collect_vec(),
+
+        T![=>] => find_branch_root(sema, token)
+            .into_iter()
+            .filter_map(|node| {
+                let match_arm = ast::MatchArm::cast(node)?;
+                let match_expr = sema
+                    .ancestors_with_macros(match_arm.syntax().clone())
+                    .find_map(ast::MatchExpr::cast)?;
+                let file_id = sema.hir_file_for(match_expr.syntax());
+                let focus_range = match_arm.fat_arrow_token()?.text_range();
+                let match_expr_in_file = InFile::new(file_id, match_expr.into());
+                Some(expr_to_nav(db, match_expr_in_file, Some(focus_range)))
+            })
+            .flatten()
+            .collect_vec(),
+
+        T![if] => find_branch_root(sema, token)
+            .into_iter()
+            .filter_map(|node| {
+                let file_id = sema.hir_file_for(&node);
+                let if_expr = ast::IfExpr::cast(node)?;
+                let focus_range = if_expr.if_token()?.text_range();
+                let if_expr_in_file = InFile::new(file_id, if_expr.into());
+                Some(expr_to_nav(db, if_expr_in_file, Some(focus_range)))
+            })
+            .flatten()
+            .collect_vec(),
+
+        _ => return Some(Vec::new()),
+    };
 
     Some(navs)
 }
@@ -991,7 +1080,7 @@ macro_rules! define_fn {
 }
 
   define_fn!();
-//^^^^^^^^^^^^^
+//^^^^^^^^^^
 fn bar() {
    $0foo();
 }
@@ -1918,6 +2007,74 @@ pub fn foo() { }
     }
 
     #[test]
+    fn goto_def_for_intra_doc_link_outer_same_file() {
+        check(
+            r#"
+/// [`S$0`]
+mod m {
+    //! [`super::S`]
+}
+struct S;
+     //^
+            "#,
+        );
+
+        check(
+            r#"
+/// [`S$0`]
+mod m {}
+struct S;
+     //^
+            "#,
+        );
+
+        check(
+            r#"
+/// [`S$0`]
+fn f() {
+    //! [`S`]
+}
+struct S;
+     //^
+            "#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_intra_doc_link_inner_same_file() {
+        check(
+            r#"
+/// [`S`]
+mod m {
+    //! [`super::S$0`]
+}
+struct S;
+     //^
+            "#,
+        );
+
+        check(
+            r#"
+mod m {
+    //! [`super::S$0`]
+}
+struct S;
+     //^
+            "#,
+        );
+
+        check(
+            r#"
+fn f() {
+    //! [`S$0`]
+}
+struct S;
+     //^
+            "#,
+        );
+    }
+
+    #[test]
     fn goto_def_for_intra_doc_link_inner() {
         check(
             r#"
@@ -2047,7 +2204,10 @@ fn main() {
         );
     }
 
+    // macros in this position are not yet supported
     #[test]
+    // FIXME
+    #[should_panic]
     fn goto_doc_include_str() {
         check(
             r#"
@@ -2190,8 +2350,8 @@ where T : Bound
 struct A;
 impl Bound for A{}
 fn f() {
-    let gen = Gen::<A>(A);
-    gen.g$0();
+    let g = Gen::<A>(A);
+    g.g$0();
 }
                 "#,
             );
@@ -2216,8 +2376,8 @@ where T : Bound
 struct A;
 impl Bound for A{}
 fn f() {
-    let gen = Gen::<A>(A);
-    gen.g$0();
+    let g = Gen::<A>(A);
+    g.g$0();
 }
 "#,
             );
@@ -3066,7 +3226,7 @@ mod bar {
     use crate::m;
 
     m!();
- // ^^^^^
+ // ^^
 
     fn qux() {
         Foo$0;
@@ -3320,6 +3480,443 @@ pub fn foo() {}
 
 fn main() {
     let s = st$0r::f();
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn struct_shadow_by_module() {
+        check(
+            r#"
+mod foo {
+    pub mod bar {
+         // ^^^
+        pub type baz = usize;
+    }
+}
+struct bar;
+fn main() {
+    use foo::bar;
+    let x: ba$0r::baz = 5;
+
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn type_alias_shadow_by_module() {
+        check(
+            r#"
+mod foo {
+    pub mod bar {
+         // ^^^
+        pub fn baz() {}
+    }
+}
+
+trait Qux {}
+
+fn item<bar: Qux>() {
+    use foo::bar;
+    ba$0r::baz();
+}
+}
+"#,
+        );
+
+        check(
+            r#"
+mod foo {
+    pub mod bar {
+         // ^^^
+        pub fn baz() {}
+    }
+}
+
+fn item<bar>(x: bar) {
+    use foo::bar;
+    let x: bar$0 = x;
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn trait_shadow_by_module() {
+        check(
+            r#"
+pub mod foo {
+    pub mod Bar {}
+         // ^^^
+}
+
+trait Bar {}
+
+fn main() {
+    use foo::Bar;
+    fn f<Qux: B$0ar>() {}
+}
+            "#,
+        );
+    }
+
+    #[test]
+    fn const_shadow_by_module() {
+        check(
+            r#"
+pub mod foo {
+    pub struct u8 {}
+    pub mod bar {
+        pub mod u8 {}
+    }
+}
+
+fn main() {
+    use foo::u8;
+    {
+        use foo::bar::u8;
+
+        fn f1<const N: u$08>() {}
+    }
+    fn f2<const N: u8>() {}
+}
+"#,
+        );
+
+        check(
+            r#"
+pub mod foo {
+    pub struct u8 {}
+            // ^^
+    pub mod bar {
+        pub mod u8 {}
+    }
+}
+
+fn main() {
+    use foo::u8;
+    {
+        use foo::bar::u8;
+
+        fn f1<const N: u8>() {}
+    }
+    fn f2<const N: u$08>() {}
+}
+"#,
+        );
+
+        check(
+            r#"
+pub mod foo {
+    pub struct buz {}
+    pub mod bar {
+        pub mod buz {}
+             // ^^^
+    }
+}
+
+fn main() {
+    use foo::buz;
+    {
+        use foo::bar::buz;
+
+        fn f1<const N: buz$0>() {}
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn offset_of() {
+        check(
+            r#"
+//- minicore: offset_of
+struct Foo {
+    field: i32,
+ // ^^^^^
+}
+
+fn foo() {
+    let _ = core::mem::offset_of!(Foo, fiel$0d);
+}
+        "#,
+        );
+
+        check(
+            r#"
+//- minicore: offset_of
+struct Bar(Foo);
+struct Foo {
+    field: i32,
+ // ^^^^^
+}
+
+fn foo() {
+    let _ = core::mem::offset_of!(Bar, 0.fiel$0d);
+}
+        "#,
+        );
+
+        check(
+            r#"
+//- minicore: offset_of
+struct Bar(Baz);
+enum Baz {
+    Abc(Foo),
+    None,
+}
+struct Foo {
+    field: i32,
+ // ^^^^^
+}
+
+fn foo() {
+    let _ = core::mem::offset_of!(Bar, 0.Abc.0.fiel$0d);
+}
+        "#,
+        );
+
+        check(
+            r#"
+//- minicore: offset_of
+struct Bar(Baz);
+enum Baz {
+    Abc(Foo),
+ // ^^^
+    None,
+}
+struct Foo {
+    field: i32,
+}
+
+fn foo() {
+    let _ = core::mem::offset_of!(Bar, 0.Ab$0c.0.field);
+}
+        "#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_match_keyword() {
+        check(
+            r#"
+fn main() {
+    match$0 0 {
+ // ^^^^^
+        0 => {},
+        _ => {},
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_match_arm_fat_arrow() {
+        check(
+            r#"
+fn main() {
+    match 0 {
+        0 =>$0 {},
+       // ^^
+        _ => {},
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_if_keyword() {
+        check(
+            r#"
+fn main() {
+    if$0 true {
+ // ^^
+        ()
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_match_nested_in_if() {
+        check(
+            r#"
+fn main() {
+    if true {
+        match$0 0 {
+     // ^^^^^
+            0 => {},
+            _ => {},
+        }
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_multiple_match_expressions() {
+        check(
+            r#"
+fn main() {
+    match 0 {
+        0 => {},
+        _ => {},
+    };
+
+    match$0 1 {
+ // ^^^^^
+        1 => {},
+        _ => {},
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_nested_match_expressions() {
+        check(
+            r#"
+fn main() {
+    match 0 {
+        0 => match$0 1 {
+          // ^^^^^
+            1 => {},
+            _ => {},
+        },
+        _ => {},
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_if_else_chains() {
+        check(
+            r#"
+fn main() {
+    if true {
+ // ^^
+        ()
+    } else if$0 false {
+        ()
+    } else {
+        ()
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_match_with_guards() {
+        check(
+            r#"
+fn main() {
+    match 42 {
+        x if x > 0 =>$0 {},
+                // ^^
+        _ => {},
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_def_for_match_with_macro_arm() {
+        check(
+            r#"
+macro_rules! arm {
+    () => { 0 => {} };
+}
+
+fn main() {
+    match$0 0 {
+ // ^^^^^
+        arm!(),
+        _ => {},
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_const_from_match_pat_with_tuple_struct() {
+        check(
+            r#"
+struct Tag(u8);
+struct Path {}
+
+const Path: u8 = 0;
+   // ^^^^
+fn main() {
+    match Tag(Path) {
+        Tag(Path$0) => {}
+        _ => {}
+    }
+}
+
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_const_from_match_pat() {
+        check(
+            r#"
+type T1 = u8;
+const T1: u8 = 0;
+   // ^^
+fn main() {
+    let x = 0;
+    match x {
+        T1$0 => {}
+        _ => {}
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn goto_struct_from_match_pat() {
+        check(
+            r#"
+struct T1;
+    // ^^
+fn main() {
+    let x = 0;
+    match x {
+        T1$0 => {}
+        _ => {}
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn no_goto_trait_from_match_pat() {
+        check(
+            r#"
+trait T1 {}
+fn main() {
+    let x = 0;
+    match x {
+        T1$0 => {}
+     // ^^
+        _ => {}
+    }
 }
 "#,
         );

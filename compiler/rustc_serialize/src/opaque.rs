@@ -10,6 +10,8 @@ use crate::int_overflow::DebugStrictAdd;
 use crate::leb128;
 use crate::serialize::{Decodable, Decoder, Encodable, Encoder};
 
+pub mod mem_encoder;
+
 // -----------------------------------------------------------------------------
 // Encoder
 // -----------------------------------------------------------------------------
@@ -87,10 +89,12 @@ impl FileEncoder {
         self.buffered = 0;
     }
 
+    #[inline]
     pub fn file(&self) -> &File {
         &self.file
     }
 
+    #[inline]
     pub fn path(&self) -> &Path {
         &self.path
     }

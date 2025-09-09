@@ -3,7 +3,7 @@
 // test that errors in a (selection) of macros don't kill compilation
 // immediately, so that we get more errors listed at a time.
 
-#![feature(trace_macros, concat_idents)]
+#![feature(trace_macros)]
 #![feature(stmt_expr_attributes)]
 
 use std::arch::asm;
@@ -103,8 +103,6 @@ enum NonExhaustiveDefault {
 fn main() {
     asm!(invalid); //~ ERROR
     llvm_asm!(invalid); //~ ERROR
-
-    concat_idents!("not", "idents"); //~ ERROR
 
     option_env!(invalid); //~ ERROR
     env!(invalid); //~ ERROR

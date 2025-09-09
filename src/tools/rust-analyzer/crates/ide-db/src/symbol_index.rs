@@ -27,16 +27,13 @@ use std::{
     ops::ControlFlow,
 };
 
-use base_db::{
-    ra_salsa::{self, ParallelDatabase},
-    SourceRootDatabase, SourceRootId, Upcast,
-};
-use fst::{raw::IndexedValue, Automaton, Streamer};
+use base_db::{RootQueryDb, SourceDatabase, SourceRootId};
+use fst::{Automaton, Streamer, raw::IndexedValue};
 use hir::{
+    Crate, Module,
     db::HirDatabase,
     import_map::{AssocSearchMode, SearchMode},
     symbols::{FileSymbol, SymbolCollector},
-    Crate, Module,
 };
 use rayon::prelude::*;
 use rustc_hash::FxHashSet;
@@ -53,6 +50,7 @@ pub struct Query {
     case_sensitive: bool,
     only_types: bool,
     libs: bool,
+    exclude_imports: bool,
 }
 
 impl Query {
@@ -66,6 +64,7 @@ impl Query {
             mode: SearchMode::Fuzzy,
             assoc_mode: AssocSearchMode::Include,
             case_sensitive: false,
+            exclude_imports: false,
         }
     }
 
@@ -97,40 +96,48 @@ impl Query {
     pub fn case_sensitive(&mut self) {
         self.case_sensitive = true;
     }
+
+    pub fn exclude_imports(&mut self) {
+        self.exclude_imports = true;
+    }
 }
 
-#[ra_salsa::query_group(SymbolsDatabaseStorage)]
-pub trait SymbolsDatabase: HirDatabase + SourceRootDatabase + Upcast<dyn HirDatabase> {
+#[query_group::query_group]
+pub trait SymbolsDatabase: HirDatabase + SourceDatabase {
     /// The symbol index for a given module. These modules should only be in source roots that
     /// are inside local_roots.
+    // FIXME: Is it worth breaking the encapsulation boundary of `hir`, and make this take a `ModuleId`,
+    // in order for it to be a non-interned query?
+    #[salsa::invoke_interned(module_symbols)]
     fn module_symbols(&self, module: Module) -> Arc<SymbolIndex>;
 
     /// The symbol index for a given source root within library_roots.
+    #[salsa::invoke_interned(library_symbols)]
     fn library_symbols(&self, source_root_id: SourceRootId) -> Arc<SymbolIndex>;
 
-    #[ra_salsa::transparent]
+    #[salsa::transparent]
     /// The symbol indices of modules that make up a given crate.
     fn crate_symbols(&self, krate: Crate) -> Box<[Arc<SymbolIndex>]>;
 
     /// The set of "local" (that is, from the current workspace) roots.
     /// Files in local roots are assumed to change frequently.
-    #[ra_salsa::input]
+    #[salsa::input]
     fn local_roots(&self) -> Arc<FxHashSet<SourceRootId>>;
 
     /// The set of roots for crates.io libraries.
     /// Files in libraries are assumed to never change.
-    #[ra_salsa::input]
+    #[salsa::input]
     fn library_roots(&self) -> Arc<FxHashSet<SourceRootId>>;
 }
 
 fn library_symbols(db: &dyn SymbolsDatabase, source_root_id: SourceRootId) -> Arc<SymbolIndex> {
     let _p = tracing::info_span!("library_symbols").entered();
 
-    let mut symbol_collector = SymbolCollector::new(db.upcast());
+    let mut symbol_collector = SymbolCollector::new(db);
 
     db.source_root_crates(source_root_id)
         .iter()
-        .flat_map(|&krate| Crate::from(krate).modules(db.upcast()))
+        .flat_map(|&krate| Crate::from(krate).modules(db))
         // we specifically avoid calling other SymbolsDatabase queries here, even though they do the same thing,
         // as the index for a library is not going to really ever change, and we do not want to store each
         // the module or crate indices for those in salsa unless we need to.
@@ -142,32 +149,12 @@ fn library_symbols(db: &dyn SymbolsDatabase, source_root_id: SourceRootId) -> Ar
 fn module_symbols(db: &dyn SymbolsDatabase, module: Module) -> Arc<SymbolIndex> {
     let _p = tracing::info_span!("module_symbols").entered();
 
-    Arc::new(SymbolIndex::new(SymbolCollector::new_module(db.upcast(), module)))
+    Arc::new(SymbolIndex::new(SymbolCollector::new_module(db, module)))
 }
 
 pub fn crate_symbols(db: &dyn SymbolsDatabase, krate: Crate) -> Box<[Arc<SymbolIndex>]> {
     let _p = tracing::info_span!("crate_symbols").entered();
-    krate.modules(db.upcast()).into_iter().map(|module| db.module_symbols(module)).collect()
-}
-
-/// Need to wrap Snapshot to provide `Clone` impl for `map_with`
-struct Snap<DB>(DB);
-impl<DB: ParallelDatabase> Snap<ra_salsa::Snapshot<DB>> {
-    fn new(db: &DB) -> Self {
-        Self(db.snapshot())
-    }
-}
-impl<DB: ParallelDatabase> Clone for Snap<ra_salsa::Snapshot<DB>> {
-    fn clone(&self) -> Snap<ra_salsa::Snapshot<DB>> {
-        Snap(self.0.snapshot())
-    }
-}
-impl<DB> std::ops::Deref for Snap<DB> {
-    type Target = DB;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    krate.modules(db).into_iter().map(|module| db.module_symbols(module)).collect()
 }
 
 // Feature: Workspace Symbol
@@ -201,7 +188,7 @@ pub fn world_symbols(db: &RootDatabase, query: Query) -> Vec<FileSymbol> {
     let indices: Vec<_> = if query.libs {
         db.library_roots()
             .par_iter()
-            .map_with(Snap::new(db), |snap, &root| snap.library_symbols(root))
+            .map_with(db.clone(), |snap, &root| snap.library_symbols(root))
             .collect()
     } else {
         let mut crates = Vec::new();
@@ -211,7 +198,7 @@ pub fn world_symbols(db: &RootDatabase, query: Query) -> Vec<FileSymbol> {
         }
         let indices: Vec<_> = crates
             .into_par_iter()
-            .map_with(Snap::new(db), |snap, krate| snap.crate_symbols(krate.into()))
+            .map_with(db.clone(), |snap, krate| snap.crate_symbols(krate.into()))
             .collect();
         indices.iter().flat_map(|indices| indices.iter().cloned()).collect()
     };
@@ -265,10 +252,10 @@ impl SymbolIndex {
         let mut last_batch_start = 0;
 
         for idx in 0..symbols.len() {
-            if let Some(next_symbol) = symbols.get(idx + 1) {
-                if cmp(&symbols[last_batch_start], next_symbol) == Ordering::Equal {
-                    continue;
-                }
+            if let Some(next_symbol) = symbols.get(idx + 1)
+                && cmp(&symbols[last_batch_start], next_symbol) == Ordering::Equal
+            {
+                continue;
             }
 
             let start = last_batch_start;
@@ -381,10 +368,13 @@ impl Query {
                     if ignore_underscore_prefixed && symbol_name.starts_with("__") {
                         continue;
                     }
-                    if self.mode.check(&self.query, self.case_sensitive, symbol_name) {
-                        if let Some(b) = cb(symbol).break_value() {
-                            return Some(b);
-                        }
+                    if self.exclude_imports && symbol.is_import {
+                        continue;
+                    }
+                    if self.mode.check(&self.query, self.case_sensitive, symbol_name)
+                        && let Some(b) = cb(symbol).break_value()
+                    {
+                        return Some(b);
                     }
                 }
             }
@@ -404,7 +394,8 @@ impl Query {
 mod tests {
 
     use expect_test::expect_file;
-    use test_fixture::WithFixture;
+    use salsa::Durability;
+    use test_fixture::{WORKSPACE, WithFixture};
 
     use super::*;
 
@@ -524,5 +515,32 @@ struct Duplicate;
             .collect();
 
         expect_file!["./test_data/test_doc_alias.txt"].assert_debug_eq(&symbols);
+    }
+
+    #[test]
+    fn test_exclude_imports() {
+        let (mut db, _) = RootDatabase::with_many_files(
+            r#"
+//- /lib.rs
+mod foo;
+pub use foo::Foo;
+
+//- /foo.rs
+pub struct Foo;
+"#,
+        );
+
+        let mut local_roots = FxHashSet::default();
+        local_roots.insert(WORKSPACE);
+        db.set_local_roots_with_durability(Arc::new(local_roots), Durability::HIGH);
+
+        let mut query = Query::new("Foo".to_owned());
+        let mut symbols = world_symbols(&db, query.clone());
+        symbols.sort_by_key(|x| x.is_import);
+        expect_file!["./test_data/test_symbols_with_imports.txt"].assert_debug_eq(&symbols);
+
+        query.exclude_imports();
+        let symbols = world_symbols(&db, query);
+        expect_file!["./test_data/test_symbols_exclude_imports.txt"].assert_debug_eq(&symbols);
     }
 }

@@ -6,8 +6,11 @@ use toml::Value;
 
 pub fn check(path: &Path, bad: &mut bool) {
     let triagebot_path = path.join("triagebot.toml");
+
+    // This check is mostly to catch broken path filters *within* `triagebot.toml`, and not enforce
+    // the existence of `triagebot.toml` itself (which is more obvious), as distribution tarballs
+    // will not include non-essential bits like `triagebot.toml`.
     if !triagebot_path.exists() {
-        tidy_error!(bad, "triagebot.toml file not found");
         return;
     }
 
@@ -16,7 +19,12 @@ pub fn check(path: &Path, bad: &mut bool) {
 
     // Check [mentions."*"] sections, i.e. [mentions."compiler/rustc_const_eval/src/"]
     if let Some(Value::Table(mentions)) = config.get("mentions") {
-        for path_str in mentions.keys() {
+        for (entry_key, entry_val) in mentions.iter() {
+            // If the type is set to something other than "filename", then this is not a path.
+            if entry_val.get("type").is_some_and(|t| t.as_str().unwrap_or_default() != "filename") {
+                continue;
+            }
+            let path_str = entry_key;
             // Remove quotes from the path
             let clean_path = path_str.trim_matches('"');
             let full_path = path.join(clean_path);

@@ -155,7 +155,7 @@ impl RawVecInner<Global> {
 }
 
 // Tiny Vecs are dumb. Skip to:
-// - 8 if the element size is 1, because any heap allocators is likely
+// - 8 if the element size is 1, because any heap allocator is likely
 //   to round up a request of less than 8 bytes to at least 8 bytes.
 // - 4 if elements are moderate-sized (<= 1 KiB).
 // - 1 otherwise, to avoid wasting too much space for very short Vecs.
@@ -287,7 +287,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     }
 
     #[inline]
-    pub(crate) fn non_null(&self) -> NonNull<T> {
+    pub(crate) const fn non_null(&self) -> NonNull<T> {
         self.inner.non_null()
     }
 
@@ -466,10 +466,6 @@ impl<A: Allocator> RawVecInner<A> {
         // Don't allocate here because `Drop` will not deallocate when `capacity` is 0.
         if layout.size() == 0 {
             return Ok(Self::new_in(alloc, elem_layout.alignment()));
-        }
-
-        if let Err(err) = alloc_guard(layout.size()) {
-            return Err(err);
         }
 
         let result = match init {
@@ -662,7 +658,7 @@ impl<A: Allocator> RawVecInner<A> {
         let new_layout = layout_array(cap, elem_layout)?;
 
         let ptr = finish_grow(new_layout, self.current_memory(elem_layout), &mut self.alloc)?;
-        // SAFETY: finish_grow would have resulted in a capacity overflow if we tried to allocate more than `isize::MAX` items
+        // SAFETY: layout_array would have resulted in a capacity overflow if we tried to allocate more than `isize::MAX` items
 
         unsafe { self.set_ptr_and_cap(ptr, cap) };
         Ok(())
@@ -684,7 +680,7 @@ impl<A: Allocator> RawVecInner<A> {
         let new_layout = layout_array(cap, elem_layout)?;
 
         let ptr = finish_grow(new_layout, self.current_memory(elem_layout), &mut self.alloc)?;
-        // SAFETY: finish_grow would have resulted in a capacity overflow if we tried to allocate more than `isize::MAX` items
+        // SAFETY: layout_array would have resulted in a capacity overflow if we tried to allocate more than `isize::MAX` items
         unsafe {
             self.set_ptr_and_cap(ptr, cap);
         }
@@ -761,7 +757,7 @@ impl<A: Allocator> RawVecInner<A> {
 }
 
 // not marked inline(never) since we want optimizers to be able to observe the specifics of this
-// function, see tests/codegen/vec-reserve-extend.rs.
+// function, see tests/codegen-llvm/vec-reserve-extend.rs.
 #[cold]
 fn finish_grow<A>(
     new_layout: Layout,
@@ -771,8 +767,6 @@ fn finish_grow<A>(
 where
     A: Allocator,
 {
-    alloc_guard(new_layout.size())?;
-
     let memory = if let Some((ptr, old_layout)) = current_memory {
         debug_assert_eq!(old_layout.align(), new_layout.align());
         unsafe {
@@ -796,23 +790,6 @@ fn handle_error(e: TryReserveError) -> ! {
     match e.kind() {
         CapacityOverflow => capacity_overflow(),
         AllocError { layout, .. } => handle_alloc_error(layout),
-    }
-}
-
-// We need to guarantee the following:
-// * We don't ever allocate `> isize::MAX` byte-size objects.
-// * We don't overflow `usize::MAX` and actually allocate too little.
-//
-// On 64-bit we just need to check for overflow since trying to allocate
-// `> isize::MAX` bytes will surely fail. On 32-bit and 16-bit we need to add
-// an extra guard for this in case we're running on a platform which can use
-// all 4GB in user-space, e.g., PAE or x32.
-#[inline]
-fn alloc_guard(alloc_size: usize) -> Result<(), TryReserveError> {
-    if usize::BITS < 64 && alloc_size > isize::MAX as usize {
-        Err(CapacityOverflow.into())
-    } else {
-        Ok(())
     }
 }
 

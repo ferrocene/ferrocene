@@ -19,6 +19,7 @@ pub(crate) fn macro_error(ctx: &DiagnosticsContext<'_>, d: &hir::MacroError) -> 
         d.message.clone(),
         display_range,
     )
+    .stable()
 }
 
 // Diagnostic: macro-def-error
@@ -33,13 +34,14 @@ pub(crate) fn macro_def_error(ctx: &DiagnosticsContext<'_>, d: &hir::MacroDefErr
         d.message.clone(),
         display_range,
     )
+    .stable()
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        tests::{check_diagnostics, check_diagnostics_with_config},
         DiagnosticsConfig,
+        tests::{check_diagnostics, check_diagnostics_with_config},
     };
 
     #[test]
@@ -123,6 +125,7 @@ include!("foo/bar.rs");
 
     #[test]
     fn good_out_dir_diagnostic() {
+        // FIXME: The diagnostic here is duplicated for each eager expansion
         check_diagnostics(
             r#"
 #[rustc_builtin_macro]
@@ -134,6 +137,8 @@ macro_rules! concat { () => {} }
 
   include!(concat!(env!("OUT_DIR"), "/out.rs"));
                       //^^^^^^^^^ error: `OUT_DIR` not set, build scripts may have failed to run
+                 //^^^^^^^^^^^^^^^ error: `OUT_DIR` not set, build scripts may have failed to run
+         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `OUT_DIR` not set, build scripts may have failed to run
 "#,
         );
     }
@@ -237,7 +242,8 @@ macro_rules! outer {
 
 fn f() {
     outer!();
-} //^^^^^^^^ error: leftover tokens
+} //^^^^^^ error: leftover tokens
+  //^^^^^^ error: Syntax Error in Expansion: expected expression
 "#,
         )
     }

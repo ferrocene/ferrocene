@@ -51,7 +51,6 @@ s_no_extra_traits! {
         __fpregs_mem: _libc_fpstate,
     }
 
-    #[allow(missing_debug_implementations)]
     #[repr(align(8))]
     pub struct max_align_t {
         priv_: [f64; 2],
@@ -67,14 +66,6 @@ cfg_if! {
             }
         }
         impl Eq for __c_anonymous_uc_sigmask_with_padding {}
-        impl fmt::Debug for __c_anonymous_uc_sigmask_with_padding {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("uc_sigmask_with_padding")
-                    .field("uc_sigmask_with_padding", &self.uc_sigmask)
-                    // Ignore padding
-                    .finish()
-            }
-        }
         impl hash::Hash for __c_anonymous_uc_sigmask_with_padding {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.uc_sigmask.hash(state)
@@ -105,21 +96,6 @@ cfg_if! {
             }
         }
         impl Eq for ucontext_t {}
-        impl fmt::Debug for ucontext_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("ucontext_t")
-                    .field("uc_flags", &self.uc_flags)
-                    .field("uc_link", &self.uc_link)
-                    .field("uc_stack", &self.uc_stack)
-                    .field("uc_mcontext", &self.uc_mcontext)
-                    .field(
-                        "uc_sigmask__c_anonymous_union",
-                        &self.uc_sigmask__c_anonymous_union,
-                    )
-                    // Ignore padding field
-                    .finish()
-            }
-        }
         impl hash::Hash for ucontext_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.uc_flags.hash(state);

@@ -114,7 +114,7 @@ lib/libpci.so.2.3|' "${ifsbuild}"
 
     echo
     echo "===> building and copying remote-test-server into rootfs"
-    stage="${REMOTE_TEST_SERVER_STAGE-0}"
+    stage="${REMOTE_TEST_SERVER_STAGE-1}"
     ./x build src/tools/remote-test-server --target "${nto_target}" --stage "${stage}"
     mkdir -p "${emulatordir}"/shared/
     cp build/host/"stage${stage}-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/shared/

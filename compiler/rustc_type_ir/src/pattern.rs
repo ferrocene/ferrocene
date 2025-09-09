@@ -5,7 +5,7 @@ use rustc_type_ir_macros::{Lift_Generic, TypeFoldable_Generic, TypeVisitable_Gen
 
 use crate::Interner;
 
-#[derive_where(Clone, Copy, Hash, PartialEq, Eq; I: Interner)]
+#[derive_where(Clone, Copy, Hash, PartialEq; I: Interner)]
 #[derive(TypeVisitable_Generic, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
@@ -13,4 +13,7 @@ use crate::Interner;
 )]
 pub enum PatternKind<I: Interner> {
     Range { start: I::Const, end: I::Const },
+    Or(I::PatList),
 }
+
+impl<I: Interner> Eq for PatternKind<I> {}

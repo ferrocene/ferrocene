@@ -16,6 +16,7 @@ fn in_mod_item_list() {
             kw extern
             kw fn
             kw impl
+            kw impl for
             kw mod
             kw pub
             kw pub(crate)
@@ -50,6 +51,7 @@ fn in_source_file_item_list() {
             kw extern
             kw fn
             kw impl
+            kw impl for
             kw mod
             kw pub
             kw pub(crate)
@@ -83,6 +85,7 @@ fn in_item_list_after_attr() {
             kw extern
             kw fn
             kw impl
+            kw impl for
             kw mod
             kw pub
             kw pub(crate)
@@ -122,6 +125,7 @@ fn after_unsafe_token() {
             kw extern
             kw fn
             kw impl
+            kw impl for
             kw trait
         "#]],
     );
@@ -385,6 +389,7 @@ fn after_unit_struct() {
             kw extern
             kw fn
             kw impl
+            kw impl for
             kw mod
             kw pub
             kw pub(crate)
@@ -445,6 +450,33 @@ type O;
 }
 impl B for A {
 type O = $0;
+}
+"#,
+    );
+    check_edit(
+        "type O",
+        r"
+struct A;
+trait B {
+type O<'a>
+where
+Self: 'a;
+}
+impl B for A {
+$0
+}
+",
+        r#"
+struct A;
+trait B {
+type O<'a>
+where
+Self: 'a;
+}
+impl B for A {
+type O<'a> = $0
+where
+Self: 'a;
 }
 "#,
     );
@@ -544,4 +576,31 @@ fn inside_extern_blocks() {
             kw static
         "#]],
     )
+}
+
+#[test]
+fn tokens_from_macro() {
+    check_edit(
+        "fn as_ref",
+        r#"
+//- proc_macros: identity
+//- minicore: as_ref
+struct Foo;
+
+#[proc_macros::identity]
+impl<'a> AsRef<&'a i32> for Foo {
+    $0
+}
+    "#,
+        r#"
+struct Foo;
+
+#[proc_macros::identity]
+impl<'a> AsRef<&'a i32> for Foo {
+    fn as_ref(&self) -> &&'a i32 {
+    $0
+}
+}
+    "#,
+    );
 }

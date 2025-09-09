@@ -6,8 +6,6 @@
 // be interpreted as integers; signedness does not make sense for them, but
 // __mXXXi happens to be defined in terms of signed integers.
 #![allow(overflowing_literals)]
-#![feature(avx512_target_feature)]
-#![feature(stdarch_x86_avx512)]
 
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
@@ -368,7 +366,7 @@ unsafe fn load_m256i_word<T>(data: &[T], word_index: usize) -> __m256i {
 #[target_feature(enable = "avx512f")]
 unsafe fn load_m512i_word<T>(data: &[T], word_index: usize) -> __m512i {
     let byte_offset = word_index * 64 / size_of::<T>();
-    let pointer = data.as_ptr().add(byte_offset) as *const i32;
+    let pointer = data.as_ptr().add(byte_offset) as *const __m512i;
     _mm512_loadu_si512(black_box(pointer))
 }
 

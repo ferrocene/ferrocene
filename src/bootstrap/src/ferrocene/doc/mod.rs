@@ -14,8 +14,9 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::utils::exec::BootstrapCommand;
-use crate::{FileType, t};
+use crate::utils::exec::{BootstrapCommand, ExecutionContext};
+use crate::utils::helpers::git;
+use crate::{Compiler, FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -191,15 +192,21 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         // containing conf.py even if a different current directory is passed.
         let mut cmd = venv.cmd(if should_serve { "sphinx-autobuild" } else { "sphinx-build" });
         cmd.current_dir(&src)
-            .arg(relative_path(&src, &src))
-            .arg(relative_path(&src, &out))
+            .arg(relative_path(&src, &src, builder.config.dry_run()))
+            .arg(relative_path(&src, &out, builder.config.dry_run()))
             // Store doctrees outside the output directory:
             .arg("-d")
-            .arg(relative_path(&src, &doctrees))
+            .arg(relative_path(&src, &doctrees, builder.config.dry_run()))
             // Provide the correct substitutions:
-            .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
+            .arg(path_define(
+                "ferrocene_substitutions_path",
+                &relative_path(&src, &substitutions, builder.config.dry_run()),
+            ))
             // Provide the correct target names:
-            .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
+            .arg(path_define(
+                "ferrocene_target_names_path",
+                &relative_path(&src, &target_names, builder.config.dry_run()),
+            ))
             // Toolchain versions
             .arg(format!("-Dferrocene_version={ferrocene_version}"))
             .arg(format!(
@@ -209,16 +216,36 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "-Drustfmt_version={}",
                 builder.crates.get("rustfmt-nightly").unwrap().version,
+            ))
+            .arg(format!(
+                "-Dgrcov_version={}",
+                get_submodule_version("ferrocene/tools/grcov", builder)
+                    .as_deref()
+                    .unwrap_or("not found")
+            ))
+            .arg(format!(
+                "-Dllvm_version={}",
+                get_submodule_version("src/llvm-project", builder)
+                    .as_deref()
+                    .unwrap_or("not found")
             ));
 
         // Include the breadcrumbs in the generated documentation.
         css_files.push("ferrocene-breadcrumbs.css".into());
-        include_in_header.push(relative_path(&src, &breadcrumbs.join("sphinx-template.html")));
+        include_in_header.push(relative_path(
+            &src,
+            &breadcrumbs.join("sphinx-template.html"),
+            builder.config.dry_run(),
+        ));
         cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
 
         // Include the public-docs warning message.
         css_files.push(format!("{path_to_root}/../public-docs-warning.css"));
-        include_in_header.push(relative_path(&src, &public_docs_warning.join("header.html")));
+        include_in_header.push(relative_path(
+            &src,
+            &public_docs_warning.join("header.html"),
+            builder.config.dry_run(),
+        ));
 
         cmd.arg(path_define("html_css_files", comma_separated_paths(&css_files)));
         cmd.arg(path_define(
@@ -239,7 +266,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         if self.require_relnotes {
             cmd.arg(path_define(
                 "rust_release_notes",
-                &relative_path(&src, &builder.src.join("RELEASES.md")),
+                &relative_path(&src, &builder.src.join("RELEASES.md"), builder.config.dry_run()),
             ));
         }
 
@@ -259,7 +286,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         match self.mode {
             SphinxMode::Html => {
                 intersphinx_ensure_steps(builder, self.target);
-                add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
 
                 builder.info(&format!("Building {}", P::SOURCE));
 
@@ -273,7 +299,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             }
             SphinxMode::XmlDoctrees => {
                 intersphinx_ensure_steps(builder, self.target);
-                add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
 
                 builder.info(&format!("Building XML doctrees of {}", P::SOURCE));
                 cmd.args(&["-b", "xml"]);
@@ -323,7 +348,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 // Provide the directory containing the cached private signature files:
                 cmd.arg(path_define(
                     "ferrocene_private_signature_files_dir",
-                    &relative_path(&src, &private_signature_files_dir),
+                    &relative_path(&src, &private_signature_files_dir, builder.config.dry_run()),
                 ));
             }
             (_, SignatureStatus::Missing) => {
@@ -405,7 +430,7 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
         inventories.push(Inventory {
             name: config.name.into(),
             html_root,
-            inventory: relative_path(src, &inv),
+            inventory: relative_path(src, &inv, builder.config.dry_run()),
         });
     }
 
@@ -416,72 +441,6 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     // extension then takes care of registering the mappings with InterSphinx.
     let serialized = serde_json::to_string(&inventories).unwrap();
     cmd.arg(format!("-Dferrocene_intersphinx_mappings={serialized}"));
-}
-
-fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
-    book: &SphinxBook<P>,
-    builder: &Builder<'_>,
-    src: &Path,
-    cmd: &mut BootstrapCommand,
-) {
-    #[derive(serde_derive::Serialize)]
-    struct ExternalNeed {
-        base_url: String,
-        json_path: PathBuf,
-    }
-
-    #[derive(serde_derive::Deserialize)]
-    struct NeedsJson {
-        versions: HashMap<String, serde_json::Value>,
-    }
-
-    match book.mode {
-        SphinxMode::Html | SphinxMode::XmlDoctrees => {}
-        SphinxMode::OnlyObjectsInv => return,
-    }
-    if builder.config.dry_run() {
-        return;
-    }
-
-    let path_to_root = std::iter::repeat("..")
-        .take(P::DEST.chars().filter(|c| *c == '/').count() + 1)
-        .collect::<Vec<_>>()
-        .join("/");
-
-    let mut needs = Vec::new();
-    for config in intersphinx_configs() {
-        // Sphinx-needs complains if you provide the same document's needs.json as external.
-        if config.dest == P::DEST {
-            continue;
-        }
-
-        let json_path = builder
-            .out
-            .join(book.target.triple)
-            .join("ferrocene")
-            .join("objectsinv-out")
-            .join(config.dest)
-            .join("needs.json");
-
-        // When there are no requirements defined in a document, sphinx-needs still generates a
-        // needs.json file, but it doesn't contain information about any version. This results in
-        // the sphinx-needs extension then failing to load the external needs.json, as it expects
-        // the version to be there. We thus parse the files before including them in the array to
-        // discard any empty one.
-        let json_raw = std::fs::read(&json_path).unwrap();
-        let json_contents: NeedsJson = serde_json::from_slice(&json_raw).unwrap();
-        if json_contents.versions.is_empty() {
-            continue;
-        }
-
-        needs.push(ExternalNeed {
-            base_url: format!("{path_to_root}/{}", config.dest),
-            json_path: relative_path(src, &json_path),
-        });
-    }
-
-    let serialized = serde_json::to_string(&needs).unwrap();
-    cmd.arg(format!("-Dferrocene_external_needs={serialized}"));
 }
 
 fn path_define(key: &str, value: impl AsRef<OsStr>) -> OsString {
@@ -754,16 +713,17 @@ sphinx_books! [
         dest: "qualification/internal-procedures",
     },
     {
-        ty: Requirements,
-        name: "requirements",
-        src: "ferrocene/doc/requirements",
-        dest: "requirements",
+        ty: CoreCertification,
+        name: "core-certification",
+        src: "ferrocene/doc/core-certification",
+        dest: "certification/core",
     },
 ];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
     target: TargetSelection,
+    compiler: Compiler,
 }
 
 impl Step for TraceabilityMatrix {
@@ -776,11 +736,15 @@ impl Step for TraceabilityMatrix {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(TraceabilityMatrix { target: run.target });
+        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
+        run.builder.ensure(TraceabilityMatrix { target: run.target, compiler });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.ensure(crate::ferrocene::run::TraceabilityMatrix { target: self.target });
+        builder.ensure(crate::ferrocene::run::TraceabilityMatrix {
+            target: self.target,
+            compiler: self.compiler,
+        });
     }
 }
 
@@ -792,7 +756,7 @@ pub(crate) struct CopyrightFiles {
 impl Step for CopyrightFiles {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = false;
+    const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("copyright-files")
@@ -819,37 +783,92 @@ impl Step for CopyrightFiles {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub(crate) struct TechnicalReport {
+pub(crate) struct CompilerTechnicalReport {
     target: TargetSelection,
 }
 
-impl Step for TechnicalReport {
+impl Step for CompilerTechnicalReport {
     type Output = ();
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let builder = run.builder;
-        run.alias("ferrocene-technical-report").default_condition(
-            builder.config.docs && builder.config.ferrocene_technical_report_url.is_some(),
+        run.alias("ferrocene-compiler-technical-report").default_condition(
+            builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some(),
         )
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(TechnicalReport { target: run.target });
+        run.builder.ensure(CompilerTechnicalReport { target: run.target });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let url = builder
             .config
-            .ferrocene_technical_report_url
+            .ferrocene_compiler_technical_report_url
             .as_deref()
-            .expect("ferrocene.technical-report-url is not configured");
+            .expect("ferrocene.technical-compiler-report-url is not configured");
         let cache_path = builder
             .out
             .join("cache")
             .join("ferrocene")
             .join(url.rsplit_once('/').map(|(_, name)| name).unwrap_or(url));
         let output_dir = builder.doc_out(self.target).join("qualification");
+
+        if builder.config.dry_run() {
+            return;
+        }
+
+        if !cache_path.exists() {
+            if let Some(parent) = cache_path.parent() {
+                fs::create_dir_all(parent).unwrap();
+            }
+            builder.config.download_file(url, &cache_path, "");
+        }
+
+        let mut output_file = output_dir.join("technical-report.pdf");
+
+        builder.create_dir(&output_dir);
+        builder.copy_link(&cache_path, &output_file, FileType::Regular);
+
+        // Include the technical report file only in the signatures subset.
+        output_file.as_mut_os_string().push(".ferrocene-subset");
+        builder.create(&output_file, "signatures");
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub(crate) struct CoreTechnicalReport {
+    target: TargetSelection,
+}
+
+impl Step for CoreTechnicalReport {
+    type Output = ();
+    const DEFAULT: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        let builder = run.builder;
+        run.alias("ferrocene-core-technical-report").default_condition(
+            builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some(),
+        )
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(CoreTechnicalReport { target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let url = builder
+            .config
+            .ferrocene_core_technical_report_url
+            .as_deref()
+            .expect("ferrocene.core-technical-report-url is not configured");
+        let cache_path = builder
+            .out
+            .join("cache")
+            .join("ferrocene")
+            .join(url.rsplit_once('/').map(|(_, name)| name).unwrap_or(url));
+        let output_dir = builder.doc_out(self.target).join("certification").join("core");
 
         if builder.config.dry_run() {
             return;
@@ -929,7 +948,16 @@ impl Step for Index {
 
 // Note: this function is correct for the use made in this module, but it will not work correctly
 // if the paths do not have any segments in common.
-fn relative_path(base: &Path, path: &Path) -> PathBuf {
+fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
+    // In dry run situations (notably, just bootstrap tests) the out folder is not necessarily
+    // relative to the source directory.
+    //
+    // In 'real' builds, Sphinx needs relative paths to the conf.py for reproducability,
+    // but in dry run situations, don't need to do this, returning the `path` is enough.
+    if dry_run {
+        return path.into();
+    }
+
     let base = absolute(base).unwrap_or_else(|_| base.to_owned());
     let path = absolute(path).unwrap_or_else(|_| path.to_owned());
 
@@ -950,4 +978,19 @@ fn relative_path(base: &Path, path: &Path) -> PathBuf {
     }
 
     if result.components().count() == 0 { PathBuf::from(".") } else { result }
+}
+
+fn get_submodule_version(
+    submodule_path: &str,
+    exec_ctx: impl AsRef<ExecutionContext>,
+) -> Option<String> {
+    let submodule_status = git(None).args(["submodule", "status"]).run_capture(exec_ctx).stdout();
+    let mut submodule_version = None;
+    for line in submodule_status.lines() {
+        if line.contains(submodule_path) {
+            let (commit, _) = line.trim().split_once(' ').unwrap();
+            submodule_version = Some(commit.to_string())
+        }
+    }
+    submodule_version
 }

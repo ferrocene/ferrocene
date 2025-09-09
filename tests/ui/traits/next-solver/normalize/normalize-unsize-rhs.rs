@@ -19,3 +19,6 @@ fn main() {
     let x = Box::new(1usize) as Box<<dyn B as Mirror>::Assoc>;
     let y = x as Box<<dyn A as Mirror>::Assoc>;
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

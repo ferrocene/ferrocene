@@ -1,19 +1,17 @@
 //@ check-pass
 //@ compile-flags: --error-format=json --json=future-incompat
+//@ dont-require-annotations: WARN
 
-// From https://github.com/rust-lang/rust/issues/79813
+// From compiler/rustc_lint_defs/src/builtin.rs
 
-macro_rules! foo {
-    () => {
-        true;
-    };
+struct S;
+
+impl S {
+    fn late(self, _: &u8, _: &u8) {}
 }
 
 fn main() {
-    let val = match true {
-        true => false,
-        _ => foo!(),
-    };
+    S.late::<'static>(&0, &0);
 }
 
 // ferrocene-annotations: um_rustc_json

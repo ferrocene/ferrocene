@@ -13,12 +13,13 @@ use object::read::archive::ArchiveFile;
 use object::read::macho::FatArch;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::memmap::Mmap;
+use rustc_fs_util::TempDirBuilder;
+use rustc_metadata::EncodedMetadata;
 use rustc_session::Session;
 use rustc_span::Symbol;
-use tempfile::Builder as TempFileBuilder;
 use tracing::trace;
 
-use super::metadata::search_for_section;
+use super::metadata::{create_compressed_metadata_file, search_for_section};
 use crate::common;
 // Re-exporting for rustc_codegen_llvm::back::archive
 pub use crate::errors::{ArchiveBuildFailure, ExtractBundledLibsError, UnknownArchiveKind};
@@ -39,16 +40,18 @@ pub struct ImportLibraryItem {
     pub is_data: bool,
 }
 
-impl From<ImportLibraryItem> for COFFShortExport {
-    fn from(item: ImportLibraryItem) -> Self {
+impl ImportLibraryItem {
+    fn into_coff_short_export(self, sess: &Session) -> COFFShortExport {
+        let import_name = (sess.target.arch == "arm64ec").then(|| self.name.clone());
         COFFShortExport {
-            name: item.name,
+            name: self.name,
             ext_name: None,
-            symbol_name: item.symbol_name,
-            alias_target: None,
-            ordinal: item.ordinal.unwrap_or(0),
-            noname: item.ordinal.is_some(),
-            data: item.is_data,
+            symbol_name: self.symbol_name,
+            import_name,
+            export_as: None,
+            ordinal: self.ordinal.unwrap_or(0),
+            noname: self.ordinal.is_some(),
+            data: self.is_data,
             private: false,
             constant: false,
         }
@@ -57,6 +60,15 @@ impl From<ImportLibraryItem> for COFFShortExport {
 
 pub trait ArchiveBuilderBuilder {
     fn new_archive_builder<'a>(&self, sess: &'a Session) -> Box<dyn ArchiveBuilder + 'a>;
+
+    fn create_dylib_metadata_wrapper(
+        &self,
+        sess: &Session,
+        metadata: &EncodedMetadata,
+        symbol_name: &str,
+    ) -> Vec<u8> {
+        create_compressed_metadata_file(sess, metadata, symbol_name)
+    }
 
     /// Creates a DLL Import Library <https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-creation#creating-an-import-library>.
     /// and returns the path on disk to that import library.
@@ -103,7 +115,8 @@ pub trait ArchiveBuilderBuilder {
                     .emit_fatal(ErrorCreatingImportLibrary { lib_name, error: error.to_string() }),
             };
 
-            let exports = items.into_iter().map(Into::into).collect::<Vec<_>>();
+            let exports =
+                items.into_iter().map(|item| item.into_coff_short_export(sess)).collect::<Vec<_>>();
             let machine = match &*sess.target.arch {
                 "x86_64" => MachineTypes::AMD64,
                 "x86" => MachineTypes::I386,
@@ -124,6 +137,7 @@ pub trait ArchiveBuilderBuilder {
                 // when linking a rust staticlib using `/WHOLEARCHIVE`.
                 // See #129020
                 true,
+                &[],
             ) {
                 sess.dcx()
                     .emit_fatal(ErrorCreatingImportLibrary { lib_name, error: error.to_string() });
@@ -501,7 +515,7 @@ impl<'a> ArArchiveBuilder<'a> {
         // it creates. We need it to be the default mode for back compat reasons however. (See
         // #107495) To handle this we are telling tempfile to create a temporary directory instead
         // and then inside this directory create a file using File::create.
-        let archive_tmpdir = TempFileBuilder::new()
+        let archive_tmpdir = TempDirBuilder::new()
             .suffix(".temp-archive")
             .tempdir_in(output.parent().unwrap_or_else(|| Path::new("")))
             .map_err(|err| {
@@ -517,7 +531,7 @@ impl<'a> ArArchiveBuilder<'a> {
             &entries,
             archive_kind,
             false,
-            /* is_ec = */ self.sess.target.arch == "arm64ec",
+            /* is_ec = */ Some(self.sess.target.arch == "arm64ec"),
         )?;
         archive_tmpfile.flush()?;
         drop(archive_tmpfile);

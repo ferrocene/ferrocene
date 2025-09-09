@@ -36,7 +36,7 @@ fn init_compiler_benchmarks(
         profiles.join(",").as_str(),
         "--scenarios",
         scenarios.join(",").as_str(),
-        "--include",
+        "--exact-match",
         crates.join(",").as_str(),
     ])
     .env("RUST_LOG", "collector=debug")
@@ -163,7 +163,9 @@ pub fn gather_rustc_profiles(
     let merged_profile = env.artifact_dir().join("rustc-pgo.profdata");
     log::info!("Merging Rustc PGO profiles to {merged_profile}");
 
-    merge_llvm_profiles(env, &merged_profile, profile_root, LlvmProfdata::Target)?;
+    let llvm_profdata = if env.build_llvm() { LlvmProfdata::Target } else { LlvmProfdata::Host };
+
+    merge_llvm_profiles(env, &merged_profile, profile_root, llvm_profdata)?;
     log_profile_stats("Rustc", &merged_profile, profile_root)?;
 
     // We don't need the individual .profraw files now that they have been merged
@@ -193,7 +195,8 @@ pub fn gather_bolt_profiles(
     let profiles: Vec<_> =
         glob::glob(&format!("{profile_prefix}*"))?.collect::<Result<Vec<_>, _>>()?;
 
-    let mut merge_args = vec!["merge-fdata"];
+    let fdata = env.merge_fdata();
+    let mut merge_args = vec![fdata.as_str()];
     merge_args.extend(profiles.iter().map(|p| p.to_str().unwrap()));
 
     with_log_group("Merging BOLT profiles", || {

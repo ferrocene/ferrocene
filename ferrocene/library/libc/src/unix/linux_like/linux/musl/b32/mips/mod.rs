@@ -57,6 +57,14 @@ s! {
     }
 
     pub struct ipc_perm {
+        #[cfg(musl_v1_2_3)]
+        pub __key: crate::key_t,
+        #[cfg(not(musl_v1_2_3))]
+        #[deprecated(
+            since = "0.2.173",
+            note = "This field is incorrectly named and will be changed
+                to __key in a future release."
+        )]
         pub __ipc_perm_key: crate::key_t,
         pub uid: crate::uid_t,
         pub gid: crate::gid_t,
@@ -139,7 +147,6 @@ s! {
 }
 
 s_no_extra_traits! {
-    #[allow(missing_debug_implementations)]
     #[repr(align(8))]
     pub struct max_align_t {
         priv_: [f32; 4],

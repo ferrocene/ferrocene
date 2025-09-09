@@ -4,6 +4,17 @@ use crate::prelude::*;
 pub type wchar_t = i32;
 
 s! {
+    pub struct termios {
+        pub c_iflag: crate::tcflag_t,
+        pub c_oflag: crate::tcflag_t,
+        pub c_cflag: crate::tcflag_t,
+        pub c_lflag: crate::tcflag_t,
+        pub c_cc: [crate::cc_t; crate::NCCS],
+        pub c_line: crate::cc_t,
+        pub __c_ispeed: crate::speed_t,
+        pub __c_ospeed: crate::speed_t,
+    }
+
     pub struct stat {
         pub st_dev: crate::dev_t,
         pub st_ino: crate::ino_t,
@@ -53,6 +64,14 @@ s! {
     }
 
     pub struct ipc_perm {
+        #[cfg(musl_v1_2_3)]
+        pub __key: crate::key_t,
+        #[cfg(not(musl_v1_2_3))]
+        #[deprecated(
+            since = "0.2.173",
+            note = "This field is incorrectly named and will be changed
+                to __key in a future release."
+        )]
         pub __ipc_perm_key: crate::key_t,
         pub uid: crate::uid_t,
         pub gid: crate::gid_t,

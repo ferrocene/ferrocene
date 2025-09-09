@@ -2,9 +2,9 @@ use ast::StaticItem;
 use itertools::{Itertools, Position};
 use rustc_ast as ast;
 use rustc_ast::ModKind;
-use rustc_ast::ptr::P;
 use rustc_span::Ident;
 
+use crate::pp::BoxMarker;
 use crate::pp::Breaks::Inconsistent;
 use crate::pprust::state::fixup::FixupContext;
 use crate::pprust::state::{AnnNode, INDENT_UNIT, PrintState, State};
@@ -27,7 +27,7 @@ impl<'a> State<'a> {
         }
     }
 
-    fn print_foreign_item(&mut self, item: &ast::ForeignItem) {
+    pub(crate) fn print_foreign_item(&mut self, item: &ast::ForeignItem) {
         let ast::Item { id, span, ref attrs, ref kind, ref vis, tokens: _ } = *item;
         self.ann.pre(self, AnnNode::SubItem(id));
         self.hardbreak_if_not_bol();
@@ -96,7 +96,7 @@ impl<'a> State<'a> {
         define_opaque: Option<&[(ast::NodeId, ast::Path)]>,
     ) {
         self.print_define_opaques(define_opaque);
-        self.head("");
+        let (cb, ib) = self.head("");
         self.print_visibility(vis);
         self.print_safety(safety);
         self.print_defaultness(defaultness);
@@ -113,14 +113,14 @@ impl<'a> State<'a> {
         if body.is_some() {
             self.space();
         }
-        self.end(); // end the head-ibox
+        self.end(ib);
         if let Some(body) = body {
             self.word_space("=");
             self.print_expr(body, FixupContext::default());
         }
         self.print_where_clause(&generics.where_clause);
         self.word(";");
-        self.end(); // end the outer cbox
+        self.end(cb);
     }
 
     fn print_associated_type(
@@ -135,7 +135,7 @@ impl<'a> State<'a> {
     ) {
         let (before_predicates, after_predicates) =
             generics.where_clause.predicates.split_at(where_clauses.split);
-        self.head("");
+        let (cb, ib) = self.head("");
         self.print_visibility(vis);
         self.print_defaultness(defaultness);
         self.word_space("type");
@@ -153,19 +153,23 @@ impl<'a> State<'a> {
         }
         self.print_where_clause_parts(where_clauses.after.has_where_token, after_predicates);
         self.word(";");
-        self.end(); // end inner head-block
-        self.end(); // end outer head-block
+        self.end(ib);
+        self.end(cb);
     }
 
     /// Pretty-prints an item.
     pub(crate) fn print_item(&mut self, item: &ast::Item) {
+        if self.is_sdylib_interface && item.span.is_dummy() {
+            // Do not print prelude for interface files.
+            return;
+        }
         self.hardbreak_if_not_bol();
         self.maybe_print_comment(item.span.lo());
         self.print_outer_attributes(&item.attrs);
         self.ann.pre(self, AnnNode::Item(item));
         match &item.kind {
             ast::ItemKind::ExternCrate(orig_name, ident) => {
-                self.head(visibility_qualified(&item.vis, "extern crate"));
+                let (cb, ib) = self.head(visibility_qualified(&item.vis, "extern crate"));
                 if let &Some(orig_name) = orig_name {
                     self.print_name(orig_name);
                     self.space();
@@ -174,8 +178,8 @@ impl<'a> State<'a> {
                 }
                 self.print_ident(*ident);
                 self.word(";");
-                self.end(); // end inner head-block
-                self.end(); // end outer head-block
+                self.end(ib);
+                self.end(cb);
             }
             ast::ItemKind::Use(tree) => {
                 self.print_visibility(&item.vis);
@@ -228,7 +232,7 @@ impl<'a> State<'a> {
                 self.print_fn_full(&item.vis, &item.attrs, &*func);
             }
             ast::ItemKind::Mod(safety, ident, mod_kind) => {
-                self.head(Self::to_string(|s| {
+                let (cb, ib) = self.head(Self::to_string(|s| {
                     s.print_visibility(&item.vis);
                     s.print_safety(*safety);
                     s.word("mod");
@@ -238,23 +242,23 @@ impl<'a> State<'a> {
                 match mod_kind {
                     ModKind::Loaded(items, ..) => {
                         self.nbsp();
-                        self.bopen();
+                        self.bopen(ib);
                         self.print_inner_attributes(&item.attrs);
                         for item in items {
                             self.print_item(item);
                         }
                         let empty = item.attrs.is_empty() && items.is_empty();
-                        self.bclose(item.span, empty);
+                        self.bclose(item.span, empty, cb);
                     }
                     ModKind::Unloaded => {
                         self.word(";");
-                        self.end(); // end inner head-block
-                        self.end(); // end outer head-block
+                        self.end(ib);
+                        self.end(cb);
                     }
                 }
             }
             ast::ItemKind::ForeignMod(nmod) => {
-                self.head(Self::to_string(|s| {
+                let (cb, ib) = self.head(Self::to_string(|s| {
                     s.print_safety(nmod.safety);
                     s.word("extern");
                 }));
@@ -262,18 +266,18 @@ impl<'a> State<'a> {
                     self.print_token_literal(abi.as_token_lit(), abi.span);
                     self.nbsp();
                 }
-                self.bopen();
+                self.bopen(ib);
                 self.print_foreign_mod(nmod, &item.attrs);
                 let empty = item.attrs.is_empty() && nmod.items.is_empty();
-                self.bclose(item.span, empty);
+                self.bclose(item.span, empty, cb);
             }
             ast::ItemKind::GlobalAsm(asm) => {
                 // FIXME: Print `builtin # global_asm` once macro `global_asm` uses `builtin_syntax`.
-                self.head(visibility_qualified(&item.vis, "global_asm!"));
+                let (cb, ib) = self.head(visibility_qualified(&item.vis, "global_asm!"));
                 self.print_inline_asm(asm);
                 self.word(";");
-                self.end();
-                self.end();
+                self.end(ib);
+                self.end(cb);
             }
             ast::ItemKind::TyAlias(box ast::TyAlias {
                 defaultness,
@@ -293,65 +297,68 @@ impl<'a> State<'a> {
                     *defaultness,
                 );
             }
-            ast::ItemKind::Enum(ident, enum_definition, params) => {
-                self.print_enum_def(enum_definition, params, *ident, item.span, &item.vis);
+            ast::ItemKind::Enum(ident, generics, enum_definition) => {
+                self.print_enum_def(enum_definition, generics, *ident, item.span, &item.vis);
             }
-            ast::ItemKind::Struct(ident, struct_def, generics) => {
-                self.head(visibility_qualified(&item.vis, "struct"));
-                self.print_struct(struct_def, generics, *ident, item.span, true);
+            ast::ItemKind::Struct(ident, generics, struct_def) => {
+                let (cb, ib) = self.head(visibility_qualified(&item.vis, "struct"));
+                self.print_struct(struct_def, generics, *ident, item.span, true, cb, ib);
             }
-            ast::ItemKind::Union(ident, struct_def, generics) => {
-                self.head(visibility_qualified(&item.vis, "union"));
-                self.print_struct(struct_def, generics, *ident, item.span, true);
+            ast::ItemKind::Union(ident, generics, struct_def) => {
+                let (cb, ib) = self.head(visibility_qualified(&item.vis, "union"));
+                self.print_struct(struct_def, generics, *ident, item.span, true, cb, ib);
             }
-            ast::ItemKind::Impl(box ast::Impl {
-                safety,
-                polarity,
-                defaultness,
-                constness,
-                generics,
-                of_trait,
-                self_ty,
-                items,
-            }) => {
-                self.head("");
+            ast::ItemKind::Impl(ast::Impl { generics, of_trait, self_ty, items }) => {
+                let (cb, ib) = self.head("");
                 self.print_visibility(&item.vis);
-                self.print_defaultness(*defaultness);
-                self.print_safety(*safety);
-                self.word("impl");
 
-                if generics.params.is_empty() {
-                    self.nbsp();
-                } else {
-                    self.print_generic_params(&generics.params);
-                    self.space();
-                }
+                let impl_generics = |this: &mut Self| {
+                    this.word("impl");
 
-                self.print_constness(*constness);
+                    if generics.params.is_empty() {
+                        this.nbsp();
+                    } else {
+                        this.print_generic_params(&generics.params);
+                        this.space();
+                    }
+                };
 
-                if let ast::ImplPolarity::Negative(_) = polarity {
-                    self.word("!");
-                }
-
-                if let Some(t) = of_trait {
-                    self.print_trait_ref(t);
+                if let Some(box of_trait) = of_trait {
+                    let ast::TraitImplHeader {
+                        defaultness,
+                        safety,
+                        constness,
+                        polarity,
+                        ref trait_ref,
+                    } = *of_trait;
+                    self.print_defaultness(defaultness);
+                    self.print_safety(safety);
+                    impl_generics(self);
+                    self.print_constness(constness);
+                    if let ast::ImplPolarity::Negative(_) = polarity {
+                        self.word("!");
+                    }
+                    self.print_trait_ref(trait_ref);
                     self.space();
                     self.word_space("for");
+                } else {
+                    impl_generics(self);
                 }
 
                 self.print_type(self_ty);
                 self.print_where_clause(&generics.where_clause);
 
                 self.space();
-                self.bopen();
+                self.bopen(ib);
                 self.print_inner_attributes(&item.attrs);
                 for impl_item in items {
                     self.print_assoc_item(impl_item);
                 }
                 let empty = item.attrs.is_empty() && items.is_empty();
-                self.bclose(item.span, empty);
+                self.bclose(item.span, empty, cb);
             }
             ast::ItemKind::Trait(box ast::Trait {
+                constness,
                 safety,
                 is_auto,
                 ident,
@@ -359,8 +366,9 @@ impl<'a> State<'a> {
                 bounds,
                 items,
             }) => {
-                self.head("");
+                let (cb, ib) = self.head("");
                 self.print_visibility(&item.vis);
+                self.print_constness(*constness);
                 self.print_safety(*safety);
                 self.print_is_auto(*is_auto);
                 self.word_nbsp("trait");
@@ -372,16 +380,16 @@ impl<'a> State<'a> {
                 }
                 self.print_where_clause(&generics.where_clause);
                 self.word(" ");
-                self.bopen();
+                self.bopen(ib);
                 self.print_inner_attributes(&item.attrs);
                 for trait_item in items {
                     self.print_assoc_item(trait_item);
                 }
                 let empty = item.attrs.is_empty() && items.is_empty();
-                self.bclose(item.span, empty);
+                self.bclose(item.span, empty, cb);
             }
             ast::ItemKind::TraitAlias(ident, generics, bounds) => {
-                self.head(visibility_qualified(&item.vis, "trait"));
+                let (cb, ib) = self.head(visibility_qualified(&item.vis, "trait"));
                 self.print_ident(*ident);
                 self.print_generic_params(&generics.params);
                 self.nbsp();
@@ -391,8 +399,8 @@ impl<'a> State<'a> {
                 }
                 self.print_where_clause(&generics.where_clause);
                 self.word(";");
-                self.end(); // end inner head-block
-                self.end(); // end outer head-block
+                self.end(ib);
+                self.end(cb);
             }
             ast::ItemKind::MacCall(mac) => {
                 self.print_mac(mac);
@@ -433,28 +441,24 @@ impl<'a> State<'a> {
         span: rustc_span::Span,
         visibility: &ast::Visibility,
     ) {
-        self.head(visibility_qualified(visibility, "enum"));
+        let (cb, ib) = self.head(visibility_qualified(visibility, "enum"));
         self.print_ident(ident);
         self.print_generic_params(&generics.params);
         self.print_where_clause(&generics.where_clause);
         self.space();
-        self.print_variants(&enum_definition.variants, span)
-    }
-
-    fn print_variants(&mut self, variants: &[ast::Variant], span: rustc_span::Span) {
-        self.bopen();
-        for v in variants {
+        self.bopen(ib);
+        for v in enum_definition.variants.iter() {
             self.space_if_not_bol();
             self.maybe_print_comment(v.span.lo());
             self.print_outer_attributes(&v.attrs);
-            self.ibox(0);
+            let ib = self.ibox(0);
             self.print_variant(v);
             self.word(",");
-            self.end();
+            self.end(ib);
             self.maybe_print_trailing_comment(v.span, None);
         }
-        let empty = variants.is_empty();
-        self.bclose(span, empty)
+        let empty = enum_definition.variants.is_empty();
+        self.bclose(span, empty, cb)
     }
 
     pub(crate) fn print_visibility(&mut self, vis: &ast::Visibility) {
@@ -478,33 +482,6 @@ impl<'a> State<'a> {
         }
     }
 
-    pub(crate) fn print_record_struct_body(
-        &mut self,
-        fields: &[ast::FieldDef],
-        span: rustc_span::Span,
-    ) {
-        self.nbsp();
-        self.bopen();
-
-        let empty = fields.is_empty();
-        if !empty {
-            self.hardbreak_if_not_bol();
-
-            for field in fields {
-                self.hardbreak_if_not_bol();
-                self.maybe_print_comment(field.span.lo());
-                self.print_outer_attributes(&field.attrs);
-                self.print_visibility(&field.vis);
-                self.print_ident(field.ident.unwrap());
-                self.word_nbsp(":");
-                self.print_type(&field.ty);
-                self.word(",");
-            }
-        }
-
-        self.bclose(span, empty);
-    }
-
     fn print_struct(
         &mut self,
         struct_def: &ast::VariantData,
@@ -512,6 +489,8 @@ impl<'a> State<'a> {
         ident: Ident,
         span: rustc_span::Span,
         print_finalizer: bool,
+        cb: BoxMarker,
+        ib: BoxMarker,
     ) {
         self.print_ident(ident);
         self.print_generic_params(&generics.params);
@@ -531,21 +510,40 @@ impl<'a> State<'a> {
                 if print_finalizer {
                     self.word(";");
                 }
-                self.end();
-                self.end(); // Close the outer-box.
+                self.end(ib);
+                self.end(cb);
             }
             ast::VariantData::Struct { fields, .. } => {
                 self.print_where_clause(&generics.where_clause);
-                self.print_record_struct_body(fields, span);
+                self.nbsp();
+                self.bopen(ib);
+
+                let empty = fields.is_empty();
+                if !empty {
+                    self.hardbreak_if_not_bol();
+
+                    for field in fields {
+                        self.hardbreak_if_not_bol();
+                        self.maybe_print_comment(field.span.lo());
+                        self.print_outer_attributes(&field.attrs);
+                        self.print_visibility(&field.vis);
+                        self.print_ident(field.ident.unwrap());
+                        self.word_nbsp(":");
+                        self.print_type(&field.ty);
+                        self.word(",");
+                    }
+                }
+
+                self.bclose(span, empty, cb);
             }
         }
     }
 
     pub(crate) fn print_variant(&mut self, v: &ast::Variant) {
-        self.head("");
+        let (cb, ib) = self.head("");
         self.print_visibility(&v.vis);
         let generics = ast::Generics::default();
-        self.print_struct(&v.data, &generics, v.ident, v.span, false);
+        self.print_struct(&v.data, &generics, v.ident, v.span, false, cb, ib);
         if let Some(d) = &v.disr_expr {
             self.space();
             self.word_space("=");
@@ -553,7 +551,7 @@ impl<'a> State<'a> {
         }
     }
 
-    fn print_assoc_item(&mut self, item: &ast::AssocItem) {
+    pub(crate) fn print_assoc_item(&mut self, item: &ast::AssocItem) {
         let ast::Item { id, span, ref attrs, ref kind, ref vis, tokens: _ } = *item;
         self.ann.pre(self, AnnNode::SubItem(id));
         self.hardbreak_if_not_bol();
@@ -631,14 +629,12 @@ impl<'a> State<'a> {
         &mut self,
         attrs: &[ast::Attribute],
         vis: &ast::Visibility,
-        qself: &Option<P<ast::QSelf>>,
+        qself: &Option<Box<ast::QSelf>>,
         path: &ast::Path,
         kind: DelegationKind<'_>,
-        body: &Option<P<ast::Block>>,
+        body: &Option<Box<ast::Block>>,
     ) {
-        if body.is_some() {
-            self.head("");
-        }
+        let body_cb_ib = body.as_ref().map(|body| (body, self.head("")));
         self.print_visibility(vis);
         self.word_nbsp("reuse");
 
@@ -670,9 +666,9 @@ impl<'a> State<'a> {
                 self.word("*");
             }
         }
-        if let Some(body) = body {
+        if let Some((body, (cb, ib))) = body_cb_ib {
             self.nbsp();
-            self.print_block_with_attrs(body, attrs);
+            self.print_block_with_attrs(body, attrs, cb, ib);
         } else {
             self.word(";");
         }
@@ -683,9 +679,8 @@ impl<'a> State<'a> {
 
         self.print_define_opaques(define_opaque.as_deref());
 
-        if body.is_some() {
-            self.head("");
-        }
+        let body_cb_ib = body.as_ref().map(|body| (body, self.head("")));
+
         self.print_visibility(vis);
         self.print_defaultness(*defaultness);
         self.print_fn(&sig.decl, sig.header, Some(*ident), generics);
@@ -693,9 +688,16 @@ impl<'a> State<'a> {
             self.nbsp();
             self.print_contract(contract);
         }
-        if let Some(body) = body {
+        if let Some((body, (cb, ib))) = body_cb_ib {
+            if self.is_sdylib_interface {
+                self.word(";");
+                self.end(ib); // end inner head-block
+                self.end(cb); // end outer head-block
+                return;
+            }
+
             self.nbsp();
-            self.print_block_with_attrs(body, attrs);
+            self.print_block_with_attrs(body, attrs, cb, ib);
         } else {
             self.word(";");
         }
@@ -851,10 +853,10 @@ impl<'a> State<'a> {
                 } else if let [(item, _)] = items.as_slice() {
                     self.print_use_tree(item);
                 } else {
-                    self.cbox(INDENT_UNIT);
+                    let cb = self.cbox(INDENT_UNIT);
                     self.word("{");
                     self.zerobreak();
-                    self.ibox(0);
+                    let ib = self.ibox(0);
                     for (pos, use_tree) in items.iter().with_position() {
                         let is_last = matches!(pos, Position::Last | Position::Only);
                         self.print_use_tree(&use_tree.0);
@@ -867,11 +869,11 @@ impl<'a> State<'a> {
                             }
                         }
                     }
-                    self.end();
+                    self.end(ib);
                     self.trailing_comma();
                     self.offset(-INDENT_UNIT);
                     self.word("}");
-                    self.end();
+                    self.end(cb);
                 }
             }
         }

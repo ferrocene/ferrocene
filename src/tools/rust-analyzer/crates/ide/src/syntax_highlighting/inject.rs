@@ -3,21 +3,20 @@
 use std::mem;
 
 use either::Either;
-use hir::{sym, HirFileId, InFile, Semantics};
+use hir::{EditionedFileId, HirFileId, InFile, Semantics, sym};
 use ide_db::{
-    active_parameter::ActiveParameter, defs::Definition, documentation::docs_with_rangemap,
-    rust_doc::is_rust_fence, SymbolKind,
+    SymbolKind, active_parameter::ActiveParameter, defs::Definition,
+    documentation::docs_with_rangemap, rust_doc::is_rust_fence,
 };
-use span::EditionedFileId;
 use syntax::{
-    ast::{self, AstNode, IsString, QuoteOffsets},
     AstToken, NodeOrToken, SyntaxNode, TextRange, TextSize,
+    ast::{self, AstNode, IsString, QuoteOffsets},
 };
 
 use crate::{
-    doc_links::{doc_attributes, extract_definitions_from_docs, resolve_doc_path_for_def},
-    syntax_highlighting::{highlights::Highlights, injector::Injector, HighlightConfig},
     Analysis, HlMod, HlRange, HlTag, RootDatabase,
+    doc_links::{doc_attributes, extract_definitions_from_docs, resolve_doc_path_for_def},
+    syntax_highlighting::{HighlightConfig, highlights::Highlights, injector::Injector},
 };
 
 pub(super) fn ra_fixture(
@@ -130,11 +129,18 @@ pub(super) fn doc_comment(
         extract_definitions_from_docs(&docs)
             .into_iter()
             .filter_map(|(range, link, ns)| {
-                doc_mapping.map(range).filter(|mapping| mapping.file_id == src_file_id).and_then(
-                    |InFile { value: mapped_range, .. }| {
-                        Some(mapped_range).zip(resolve_doc_path_for_def(sema.db, def, &link, ns))
-                    },
-                )
+                doc_mapping
+                    .map(range)
+                    .filter(|(mapping, _)| mapping.file_id == src_file_id)
+                    .and_then(|(InFile { value: mapped_range, .. }, attr_id)| {
+                        Some(mapped_range).zip(resolve_doc_path_for_def(
+                            sema.db,
+                            def,
+                            &link,
+                            ns,
+                            attr_id.is_inner_attr(),
+                        ))
+                    })
             })
             .for_each(|(range, def)| {
                 hl.add(HlRange {
@@ -161,7 +167,7 @@ pub(super) fn doc_comment(
     let mut new_comments = Vec::new();
     let mut string;
 
-    for attr in attributes.by_key(&sym::doc).attrs() {
+    for attr in attributes.by_key(sym::doc).attrs() {
         let InFile { file_id, value: src } = attrs_source_map.source_of(attr);
         if file_id != src_file_id {
             continue;

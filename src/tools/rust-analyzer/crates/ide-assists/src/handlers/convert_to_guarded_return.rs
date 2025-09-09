@@ -5,20 +5,20 @@ use ide_db::{
     ty_filter::TryEnum,
 };
 use syntax::{
+    AstNode,
+    SyntaxKind::{FN, FOR_EXPR, LOOP_EXPR, WHILE_EXPR, WHITESPACE},
+    T,
     ast::{
         self,
         edit::{AstNodeEdit, IndentLevel},
         make,
     },
-    ted, AstNode,
-    SyntaxKind::{FN, FOR_EXPR, LOOP_EXPR, WHILE_EXPR, WHITESPACE},
-    T,
 };
 
 use crate::{
+    AssistId,
     assist_context::{AssistContext, Assists},
     utils::invert_boolean_expression_legacy,
-    AssistId, AssistKind,
 };
 
 // Assist: convert_to_guarded_return
@@ -116,7 +116,7 @@ fn if_expr_to_guarded_return(
 
     then_block.syntax().last_child_or_token().filter(|t| t.kind() == T!['}'])?;
 
-    let then_block_items = then_block.dedent(IndentLevel(1)).clone_for_update();
+    let then_block_items = then_block.dedent(IndentLevel(1));
 
     let end_of_then = then_block_items.syntax().last_child_or_token()?;
     let end_of_then = if end_of_then.prev_sibling_or_token().map(|n| n.kind()) == Some(WHITESPACE) {
@@ -127,11 +127,10 @@ fn if_expr_to_guarded_return(
 
     let target = if_expr.syntax().text_range();
     acc.add(
-        AssistId("convert_to_guarded_return", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("convert_to_guarded_return"),
         "Convert to guarded return",
         target,
         |edit| {
-            let if_expr = edit.make_mut(if_expr);
             let if_indent_level = IndentLevel::from_node(if_expr.syntax());
             let replacement = match if_let_pat {
                 None => {
@@ -142,7 +141,7 @@ fn if_expr_to_guarded_return(
                         let cond = invert_boolean_expression_legacy(cond_expr);
                         make::expr_if(cond, then_branch, None).indent(if_indent_level)
                     };
-                    new_expr.syntax().clone_for_update()
+                    new_expr.syntax().clone()
                 }
                 Some(pat) => {
                     // If-let.
@@ -153,7 +152,7 @@ fn if_expr_to_guarded_return(
                         ast::make::tail_only_block_expr(early_expression),
                     );
                     let let_else_stmt = let_else_stmt.indent(if_indent_level);
-                    let_else_stmt.syntax().clone_for_update()
+                    let_else_stmt.syntax().clone()
                 }
             };
 
@@ -167,8 +166,9 @@ fn if_expr_to_guarded_return(
                         .take_while(|i| *i != end_of_then),
                 )
                 .collect();
-
-            ted::replace_with_many(if_expr.syntax(), then_statements)
+            let mut editor = edit.make_editor(if_expr.syntax());
+            editor.replace_with_many(if_expr.syntax(), then_statements);
+            edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
 }
@@ -209,11 +209,10 @@ fn let_stmt_to_guarded_return(
     };
 
     acc.add(
-        AssistId("convert_to_guarded_return", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("convert_to_guarded_return"),
         "Convert to guarded return",
         target,
         |edit| {
-            let let_stmt = edit.make_mut(let_stmt);
             let let_indent_level = IndentLevel::from_node(let_stmt.syntax());
 
             let replacement = {
@@ -224,10 +223,11 @@ fn let_stmt_to_guarded_return(
                     ast::make::tail_only_block_expr(early_expression),
                 );
                 let let_else_stmt = let_else_stmt.indent(let_indent_level);
-                let_else_stmt.syntax().clone_for_update()
+                let_else_stmt.syntax().clone()
             };
-
-            ted::replace(let_stmt.syntax(), replacement)
+            let mut editor = edit.make_editor(let_stmt.syntax());
+            editor.replace(let_stmt.syntax(), replacement);
+            edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
 }

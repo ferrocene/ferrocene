@@ -1,10 +1,10 @@
 use crate::support::{Project, Server};
 use crate::testdir::TestDir;
 use lsp_types::{
-    notification::{DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument},
     DidChangeTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
     TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, Url,
     VersionedTextDocumentIdentifier,
+    notification::{DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument},
 };
 use paths::Utf8PathBuf;
 
@@ -82,11 +82,8 @@ impl RatomlTest {
         }
 
         Url::parse(
-            format!(
-                "file://{}",
-                path.into_string().to_owned().replace("C:\\", "/c:/").replace('\\', "/")
-            )
-            .as_str(),
+            format!("file://{}", path.into_string().replace("C:\\", "/c:/").replace('\\', "/"))
+                .as_str(),
         )
         .unwrap()
     }
@@ -442,6 +439,7 @@ assist.emitMustUse = true"#,
 }
 
 #[test]
+#[ignore = "flaky test that tends to hang"]
 fn ratoml_inherit_config_from_ws_root() {
     if skip_slow_tests() {
         return;

@@ -87,7 +87,6 @@ fn test_and() {
     assert_eq!(x.and(Some(2)), None);
     assert_eq!(x.and(None::<isize>), None);
 
-    /* FIXME(#110395)
     const FOO: Option<isize> = Some(1);
     const A: Option<isize> = FOO.and(Some(2));
     const B: Option<isize> = FOO.and(None);
@@ -99,7 +98,6 @@ fn test_and() {
     const D: Option<isize> = BAR.and(None);
     assert_eq!(C, None);
     assert_eq!(D, None);
-    */
 }
 
 #[test]
@@ -194,6 +192,19 @@ fn test_or_else() {
 }
 
 #[test]
+fn test_ok_or_else() {
+    assert_eq!(Some(1).ok_or_else(|| panic!()), Ok(1));
+    assert_eq!(None::<i32>.ok_or_else(|| 1), Err(1));
+}
+
+#[test]
+fn test_filter() {
+    assert_eq!(Some(1).filter(|&x| x > 1), None);
+    assert_eq!(Some(1).filter(|&x| x <= 1), Some(1));
+    assert_eq!(None::<i32>.filter(|_| panic!()), None);
+}
+
+#[test]
 fn test_unwrap() {
     assert_eq!(Some(1).unwrap(), 1);
     let s = Some("hello".to_string()).unwrap();
@@ -248,6 +259,12 @@ fn test_unwrap_or_else() {
     assert_eq!(A, 1);
     assert_eq!(B, 2);
     */
+}
+
+#[test]
+fn test_unwrap_or_default() {
+    assert_eq!(Some(666u32).unwrap_or_default(), 666);
+    assert_eq!(None::<u32>.unwrap_or_default(), 0);
 }
 
 #[test]

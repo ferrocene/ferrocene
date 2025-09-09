@@ -8,19 +8,15 @@
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(assert_matches)]
-#![feature(autodiff)]
 #![feature(box_patterns)]
 #![feature(decl_macro)]
 #![feature(if_let_guard)]
-#![feature(let_chains)]
 #![feature(proc_macro_internals)]
 #![feature(proc_macro_quote)]
 #![feature(rustdoc_internals)]
-#![feature(string_from_utf8_lossy_owned)]
 #![feature(try_blocks)]
+#![recursion_limit = "256"]
 // tidy-alphabetical-end
-
-extern crate proc_macro;
 
 use std::sync::Arc;
 
@@ -36,10 +32,10 @@ mod autodiff;
 mod cfg;
 mod cfg_accessible;
 mod cfg_eval;
+mod cfg_select;
 mod compile_error;
 mod concat;
 mod concat_bytes;
-mod concat_idents;
 mod define_opaque;
 mod derive;
 mod deriving;
@@ -49,6 +45,7 @@ mod errors;
 mod format;
 mod format_foreign;
 mod global_allocator;
+mod iter;
 mod log_syntax;
 mod pattern_type;
 mod source_util;
@@ -82,11 +79,11 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         asm: asm::expand_asm,
         assert: assert::expand_assert,
         cfg: cfg::expand_cfg,
+        cfg_select: cfg_select::expand_cfg_select,
         column: source_util::expand_column,
         compile_error: compile_error::expand_compile_error,
         concat: concat::expand_concat,
         concat_bytes: concat_bytes::expand_concat_bytes,
-        concat_idents: concat_idents::expand_concat_idents,
         const_format_args: format::expand_format_args,
         core_panic: edition_panic::expand_panic,
         env: env::expand_env,
@@ -97,6 +94,7 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         include: source_util::expand_include,
         include_bytes: source_util::expand_include_bytes,
         include_str: source_util::expand_include_str,
+        iter: iter::expand,
         line: source_util::expand_line,
         log_syntax: log_syntax::expand_log_syntax,
         module_path: source_util::expand_mod,
@@ -111,8 +109,10 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
     }
 
     register_attr! {
+        // tidy-alphabetical-start
         alloc_error_handler: alloc_error_handler::expand,
-        autodiff: autodiff::expand,
+        autodiff_forward: autodiff::expand_forward,
+        autodiff_reverse: autodiff::expand_reverse,
         bench: test::expand_bench,
         cfg_accessible: cfg_accessible::Expander,
         cfg_eval: cfg_eval::expand,
@@ -122,6 +122,7 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         global_allocator: global_allocator::expand,
         test: test::expand_test,
         test_case: test::expand_test_case,
+        // tidy-alphabetical-end
     }
 
     register_derive! {
@@ -137,9 +138,10 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         PartialEq: partial_eq::expand_deriving_partial_eq,
         PartialOrd: partial_ord::expand_deriving_partial_ord,
         CoercePointee: coerce_pointee::expand_deriving_coerce_pointee,
+        From: from::expand_deriving_from,
     }
 
-    let client = proc_macro::bridge::client::Client::expand1(proc_macro::quote);
+    let client = rustc_proc_macro::bridge::client::Client::expand1(rustc_proc_macro::quote);
     register(sym::quote, SyntaxExtensionKind::Bang(Arc::new(BangProcMacro { client })));
     let requires = SyntaxExtensionKind::Attr(Arc::new(contracts::ExpandRequires));
     register(sym::contracts_requires, requires);

@@ -15,7 +15,7 @@
 // We unfortunately accept this today, and due to how opaque type relating is implemented
 // in the NLL type relation, this defines `Opaque<T> = T`.
 fn build<T>(x: T) -> impl Sized {
-    //[current]~^ WARN function cannot return without recursing
+    //[current]~^ ERROR cannot resolve opaque type
     let (x,) = (build(x),);
     //[next]~^ ERROR type annotations needed
     build(x)
@@ -26,28 +26,19 @@ fn build<T>(x: T) -> impl Sized {
 // Not allowed today. Detected as recursive.
 fn build2<T>(x: T) -> impl Sized {
     //[current]~^ ERROR cannot resolve opaque type
-    //[current]~| WARN function cannot return without recursing
     let (x,) = (build2(x),);
+    //[next]~^ ERROR type annotations needed
     (build2(x),)
-    //[next]~^ ERROR type mismatch resolving
-    //[next]~| ERROR type mismatch resolving
-    //[next]~| ERROR the size for values of type
 }
 
 // Opaque<T> = Opaque<(T,)>
 //
 // Not allowed today. Detected as not defining.
 fn build3<T>(x: T) -> impl Sized {
-    //[current]~^ WARN function cannot return without recursing
+    //[current]~^ ERROR cannot resolve opaque type
     let (x,) = (build3((x,)),);
-    //[next]~^ ERROR type mismatch resolving
-    //[next]~| ERROR type mismatch resolving
-    //[next]~| ERROR type mismatch resolving
-    //[next]~| ERROR type mismatch resolving
-    //[next]~| ERROR the size for values of type
-    //[next]~| ERROR mismatched types
     build3(x)
-    //[current]~^ ERROR expected generic type parameter, found `(T,)`
+    //[next]~^ ERROR type annotations needed
 }
 
 fn main() {}

@@ -10,9 +10,10 @@ trait Foo {}
 
 #[define_opaque(A, B)]
 fn muh(x: A) -> B {
-    //[next]~^ ERROR: cannot satisfy `_ == A`
+    //[next]~^ ERROR: type annotations needed
     x // B's hidden type is A (opaquely)
-    //[current]~^ ERROR opaque type's hidden type cannot be another opaque type
+    //[next]~^ ERROR: type annotations needed
+    //[current]~^^ ERROR opaque type's hidden type cannot be another opaque type
 }
 
 struct Bar;

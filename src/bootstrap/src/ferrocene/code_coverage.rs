@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
 use build_helper::exit;
@@ -9,8 +14,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
-use crate::utils::build_stamp::libstd_stamp;
-use crate::{BootstrapCommand, Compiler, DependencyType, GitRepo, t};
+use crate::{BootstrapCommand, Compiler, GitRepo, Mode, RemapScheme, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -82,29 +86,32 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(paths.profraw_dir);
     cmd.fail_fast().run(builder);
 
-    // llvm-cov needs to receive the path to the binary that was instrumented. The path depends
-    // on what we are gathering the coverage for: when adding a variant of FerroceneCoverageFor,
-    // you'll need to calculate the path to the binary you called instrument_coverage() on.
-    let instrumented_binary = match state.coverage_for {
-        // When gathering the code coverage for the standard library, the instrumented binary is
-        // the libstd-HASH.so shared library the tests link to.
+    // FIXME(@pvdrz): llvm-cov needs to receive the path to the binaries that were instrumented.
+    // However there is no quick and easy way to fetch those. For now, we just go inside the
+    // dependencies and assume that every executable file is an instrumented binary.
+    //
+    // A possible improvement would be to capture `cargo test` stderr and fetch the path of every
+    // binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
+    let instrumented_binaries = match state.coverage_for {
         FerroceneCoverageFor::Library => {
-            let mut libstd = None;
-            let stamp = libstd_stamp(builder, state.compiler, state.target);
-            for (path, kind) in builder.read_stamp_file(&stamp) {
-                match kind {
-                    DependencyType::Host => continue,
-                    DependencyType::Target | DependencyType::TargetSelfContained => {}
-                }
-                let name = path.file_name().unwrap().to_str().unwrap();
-                if name.starts_with("libstd-")
-                    && (name.ends_with(".so") || name.ends_with(".dll") || name.ends_with(".dylib"))
-                {
-                    libstd = Some(path);
-                    break;
+            let mut instrumented_binaries = vec![];
+            let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
+            for res in std::fs::read_dir(out_dir).expect("cannot read deps directory") {
+                let path = res.expect("cannot inspect deps file").path();
+
+                #[cfg(target_os = "windows")]
+                let is_executable = path.extension().is_some_and(|e| e == "exe");
+                #[cfg(target_family = "unix")]
+                let is_executable = path.is_file() /* directories can have the executable flag set */
+                    && path.extension().is_none() /* filter `.so` files */
+                    && (path.metadata().expect("cannot fetch metadata for deps file").permissions().mode() & 0o111 != 0);
+
+                if is_executable {
+                    instrumented_binaries.push(path);
                 }
             }
-            libstd.expect("could not find the libstd dynamic library in the sysroot")
+            assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
+            instrumented_binaries
         }
     };
 
@@ -124,7 +131,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     builder.info("Generating lcov dump of the code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
-    cmd.arg("export").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
+    cmd.arg("export").args(instrumented_binaries).arg("--instr-profile").arg(&paths.profdata_file);
     cmd.arg("--format").arg("lcov");
 
     // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
@@ -144,7 +151,9 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let metadata = CoverageMetadata {
         metadata_version: CoverageMetadata::CURRENT_VERSION,
-        path_prefix: if let Some(path) = builder.debuginfo_map_to(GitRepo::Rustc) {
+        path_prefix: if let Some(path) =
+            builder.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
+        {
             path.into()
         } else {
             builder.src.clone()

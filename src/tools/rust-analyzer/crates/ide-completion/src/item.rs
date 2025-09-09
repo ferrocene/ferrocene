@@ -5,17 +5,17 @@ use std::{fmt, mem};
 use hir::Mutability;
 use ide_db::text_edit::TextEdit;
 use ide_db::{
-    documentation::Documentation, imports::import_assets::LocatedImport, RootDatabase, SnippetCap,
-    SymbolKind,
+    RootDatabase, SnippetCap, SymbolKind, documentation::Documentation,
+    imports::import_assets::LocatedImport,
 };
 use itertools::Itertools;
 use smallvec::SmallVec;
 use stdx::{format_to, impl_from, never};
-use syntax::{format_smolstr, Edition, SmolStr, TextRange, TextSize};
+use syntax::{Edition, SmolStr, TextRange, TextSize, format_smolstr};
 
 use crate::{
     context::{CompletionContext, PathCompletionCtx},
-    render::{render_path_resolution, RenderContext},
+    render::{RenderContext, render_path_resolution},
 };
 
 /// `CompletionItem` describes a single completion entity which expands to 1 or more entries in the
@@ -135,7 +135,7 @@ impl fmt::Debug for CompletionItem {
                 },
                 CompletionItemRefMode::Dereference => "*",
             };
-            s.field("ref_match", &format!("{}@{offset:?}", prefix));
+            s.field("ref_match", &format!("{prefix}@{offset:?}"));
         }
         if self.trigger_call_info {
             s.field("trigger_call_info", &true);
@@ -502,7 +502,7 @@ pub(crate) struct Builder {
 impl Builder {
     pub(crate) fn from_resolution(
         ctx: &CompletionContext<'_>,
-        path_ctx: &PathCompletionCtx,
+        path_ctx: &PathCompletionCtx<'_>,
         local_name: hir::Name,
         resolution: hir::ScopeDef,
     ) -> Self {
@@ -636,10 +636,10 @@ impl Builder {
     }
     pub(crate) fn set_detail(&mut self, detail: Option<impl Into<String>>) -> &mut Builder {
         self.detail = detail.map(Into::into);
-        if let Some(detail) = &self.detail {
-            if never!(detail.contains('\n'), "multiline detail:\n{}", detail) {
-                self.detail = Some(detail.split('\n').next().unwrap().to_owned());
-            }
+        if let Some(detail) = &self.detail
+            && never!(detail.contains('\n'), "multiline detail:\n{}", detail)
+        {
+            self.detail = Some(detail.split('\n').next().unwrap().to_owned());
         }
         self
     }

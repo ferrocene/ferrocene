@@ -4,8 +4,8 @@ use clippy_utils::diagnostics::span_lint_and_sugg;
 use clippy_utils::sugg::Sugg;
 use clippy_utils::ty::is_copy;
 use clippy_utils::{
-    CaptureKind, can_move_expr_to_closure, eager_or_lazy, higher, is_else_clause, is_in_const_context,
-    is_res_lang_ctor, peel_blocks, peel_hir_expr_while,
+    CaptureKind, can_move_expr_to_closure, eager_or_lazy, expr_requires_coercion, higher, is_else_clause,
+    is_in_const_context, is_res_lang_ctor, peel_blocks, peel_hir_expr_while,
 };
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::Applicability;
@@ -106,7 +106,7 @@ struct OptionOccurrence {
 fn format_option_in_sugg(cond_sugg: Sugg<'_>, as_ref: bool, as_mut: bool) -> String {
     format!(
         "{}{}",
-        cond_sugg.maybe_par(),
+        cond_sugg.maybe_paren(),
         if as_mut {
             ".as_mut()"
         } else if as_ref {
@@ -127,7 +127,8 @@ fn try_get_option_occurrence<'tcx>(
     if_else: &'tcx Expr<'_>,
 ) -> Option<OptionOccurrence> {
     let cond_expr = match expr.kind {
-        ExprKind::Unary(UnOp::Deref, inner_expr) | ExprKind::AddrOf(_, _, inner_expr) => inner_expr,
+        ExprKind::AddrOf(_, _, inner_expr) => inner_expr,
+        ExprKind::Unary(UnOp::Deref, inner_expr) if !cx.typeck_results().expr_ty(inner_expr).is_raw_ptr() => inner_expr,
         _ => expr,
     };
     let (inner_pat, is_result) = try_get_inner_pat_and_is_result(cx, pat)?;
@@ -212,10 +213,19 @@ fn try_get_option_occurrence<'tcx>(
             }
         }
 
+        let some_body_ty = cx.typeck_results().expr_ty(some_body);
+        let none_body_ty = cx.typeck_results().expr_ty(none_body);
+        // Check if coercion is needed for the `None` arm. If so, we cannot suggest because it will
+        // introduce a type mismatch. A special case is when both arms have the same type, then
+        // coercion is fine.
+        if some_body_ty != none_body_ty && expr_requires_coercion(cx, none_body) {
+            return None;
+        }
+
         let mut app = Applicability::Unspecified;
 
-        let (none_body, is_argless_call) = match none_body.kind {
-            ExprKind::Call(call_expr, []) if !none_body.span.from_expansion() => (call_expr, true),
+        let (none_body, can_omit_arg) = match none_body.kind {
+            ExprKind::Call(call_expr, []) if !none_body.span.from_expansion() && !is_result => (call_expr, true),
             _ => (none_body, false),
         };
 
@@ -232,7 +242,7 @@ fn try_get_option_occurrence<'tcx>(
             ),
             none_expr: format!(
                 "{}{}",
-                if method_sugg == "map_or" || is_argless_call {
+                if method_sugg == "map_or" || can_omit_arg {
                     ""
                 } else if is_result {
                     "|_| "

@@ -1,4 +1,5 @@
 //@ build-fail
+//@ dont-require-annotations: NOTE
 
 // a test demonstrating that const qualification cannot prevent monomorphization time errors
 
@@ -7,7 +8,7 @@ trait Foo {
 }
 
 trait Bar<U: Foo> {
-    const F: u32 = 100 / U::X; //~ ERROR evaluation of `<std::string::String as Bar<std::string::String>>::F` failed
+    const F: u32 = 100 / U::X; //~ ERROR attempt to divide `100_u32` by zero
 }
 
 impl Foo for () {
@@ -24,5 +25,5 @@ impl Bar<String> for String {}
 fn main() {
     let x = <() as Bar<()>>::F;
     // this test only causes errors due to the line below, so post-monomorphization
-    let y = <String as Bar<String>>::F; //~ constant
+    let y = <String as Bar<String>>::F; //~ NOTE constant
 }

@@ -1,11 +1,13 @@
+use std::slice;
+
 use ide_db::assists::GroupLabel;
 use stdx::to_lower_snake_case;
 use syntax::ast::HasVisibility;
 use syntax::ast::{self, AstNode, HasName};
 
 use crate::{
+    AssistContext, AssistId, Assists,
     utils::{add_method_to_adt, find_struct_impl},
-    AssistContext, AssistId, AssistKind, Assists,
 };
 
 // Assist: generate_enum_is_method
@@ -52,12 +54,12 @@ pub(crate) fn generate_enum_is_method(acc: &mut Assists, ctx: &AssistContext<'_>
     let fn_name = format!("is_{}", &to_lower_snake_case(&variant_name.text()));
 
     // Return early if we've found an existing new fn
-    let impl_def = find_struct_impl(ctx, &parent_enum, &[fn_name.clone()])?;
+    let impl_def = find_struct_impl(ctx, &parent_enum, slice::from_ref(&fn_name))?;
 
     let target = variant.syntax().text_range();
     acc.add_group(
         &GroupLabel("Generate an `is_`,`as_`, or `try_into_` for this enum variant".to_owned()),
-        AssistId("generate_enum_is_method", AssistKind::Generate),
+        AssistId::generate("generate_enum_is_method"),
         "Generate an `is_` method for this enum variant",
         target,
         |builder| {

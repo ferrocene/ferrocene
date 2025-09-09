@@ -1,12 +1,12 @@
 //! The underlying OsString/OsStr implementation on Windows is a
 //! wrapper around the "WTF-8" encoding; see the `wtf8` module for more.
+use alloc::wtf8::{Wtf8, Wtf8Buf};
 use core::clone::CloneToUninit;
 
 use crate::borrow::Cow;
 use crate::collections::TryReserveError;
 use crate::rc::Rc;
 use crate::sync::Arc;
-use crate::sys_common::wtf8::{Wtf8, Wtf8Buf, check_utf8_boundary};
 use crate::sys_common::{AsInner, FromInner, IntoInner};
 use crate::{fmt, mem};
 
@@ -92,7 +92,7 @@ impl Buf {
     }
 
     #[inline]
-    pub fn from_string(s: String) -> Buf {
+    pub const fn from_string(s: String) -> Buf {
         Buf { inner: Wtf8Buf::from_string(s) }
     }
 
@@ -195,20 +195,34 @@ impl Buf {
         self.as_slice().into_rc()
     }
 
-    /// Provides plumbing to core `Vec::truncate`.
-    /// More well behaving alternative to allowing outer types
-    /// full mutable access to the core `Vec`.
+    /// Provides plumbing to `Vec::truncate` without giving full mutable access
+    /// to the `Vec`.
+    ///
+    /// # Safety
+    ///
+    /// The length must be at an `OsStr` boundary, according to
+    /// `Slice::check_public_boundary`.
     #[inline]
-    pub(crate) fn truncate(&mut self, len: usize) {
+    pub unsafe fn truncate_unchecked(&mut self, len: usize) {
         self.inner.truncate(len);
     }
 
-    /// Provides plumbing to core `Vec::extend_from_slice`.
-    /// More well behaving alternative to allowing outer types
-    /// full mutable access to the core `Vec`.
+    /// Provides plumbing to `Vec::extend_from_slice` without giving full
+    /// mutable access to the `Vec`.
+    ///
+    /// # Safety
+    ///
+    /// The slice must be valid for the platform encoding (as described in
+    /// [`Slice::from_encoded_bytes_unchecked`]).
+    ///
+    /// This bypasses the WTF-8 surrogate joining, so either `self` must not
+    /// end with a leading surrogate half, or `other` must not start with a
+    /// trailing surrogate half.
     #[inline]
-    pub(crate) fn extend_from_slice(&mut self, other: &[u8]) {
-        self.inner.extend_from_slice(other);
+    pub unsafe fn extend_from_slice_unchecked(&mut self, other: &[u8]) {
+        unsafe {
+            self.inner.extend_from_slice_unchecked(other);
+        }
     }
 }
 
@@ -226,7 +240,7 @@ impl Slice {
     #[track_caller]
     #[inline]
     pub fn check_public_boundary(&self, index: usize) {
-        check_utf8_boundary(&self.inner, index);
+        self.inner.check_utf8_boundary(index);
     }
 
     #[inline]

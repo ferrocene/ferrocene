@@ -1084,24 +1084,6 @@ cfg_if! {
 
         impl Eq for utmpx {}
 
-        impl fmt::Debug for utmpx {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("utmpx")
-                    .field("ut_type", &self.ut_type)
-                    .field("ut_pid", &self.ut_pid)
-                    .field("ut_line", &self.ut_line)
-                    .field("ut_id", &self.ut_id)
-                    .field("ut_user", &self.ut_user)
-                    // FIXME(debug): .field("ut_host", &self.ut_host)
-                    .field("ut_exit", &self.ut_exit)
-                    .field("ut_session", &self.ut_session)
-                    .field("ut_tv", &self.ut_tv)
-                    .field("ut_addr_v6", &self.ut_addr_v6)
-                    .field("__glibc_reserved", &self.__glibc_reserved)
-                    .finish()
-            }
-        }
-
         impl hash::Hash for utmpx {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.ut_type.hash(state);
@@ -1612,12 +1594,12 @@ pub const SEM_VALUE_MAX: c_int = 2147483647;
 pub const MAXNAMLEN: usize = 255;
 
 // netdb.h
-pub const _PATH_HEQUIV: &'static [u8; 17usize] = b"/etc/hosts.equiv\0";
-pub const _PATH_HOSTS: &'static [u8; 11usize] = b"/etc/hosts\0";
-pub const _PATH_NETWORKS: &'static [u8; 14usize] = b"/etc/networks\0";
-pub const _PATH_NSSWITCH_CONF: &'static [u8; 19usize] = b"/etc/nsswitch.conf\0";
-pub const _PATH_PROTOCOLS: &'static [u8; 15usize] = b"/etc/protocols\0";
-pub const _PATH_SERVICES: &'static [u8; 14usize] = b"/etc/services\0";
+pub const _PATH_HEQUIV: &[u8; 17usize] = b"/etc/hosts.equiv\0";
+pub const _PATH_HOSTS: &[u8; 11usize] = b"/etc/hosts\0";
+pub const _PATH_NETWORKS: &[u8; 14usize] = b"/etc/networks\0";
+pub const _PATH_NSSWITCH_CONF: &[u8; 19usize] = b"/etc/nsswitch.conf\0";
+pub const _PATH_PROTOCOLS: &[u8; 15usize] = b"/etc/protocols\0";
+pub const _PATH_SERVICES: &[u8; 14usize] = b"/etc/services\0";
 pub const HOST_NOT_FOUND: c_int = 1;
 pub const TRY_AGAIN: c_int = 2;
 pub const NO_RECOVERY: c_int = 3;
@@ -2150,35 +2132,35 @@ pub const SF_NOUNLINK: c_uint = 1048576;
 pub const SF_SNAPSHOT: c_uint = 2097152;
 pub const UTIME_NOW: c_long = -1;
 pub const UTIME_OMIT: c_long = -2;
-pub const S_IFMT: crate::mode_t = 0o17_0000;
-pub const S_IFDIR: crate::mode_t = 0o4_0000;
-pub const S_IFCHR: crate::mode_t = 0o2_0000;
-pub const S_IFBLK: crate::mode_t = 0o6_0000;
-pub const S_IFREG: crate::mode_t = 0o10_0000;
-pub const S_IFIFO: crate::mode_t = 0o1_0000;
-pub const S_IFLNK: crate::mode_t = 0o12_0000;
-pub const S_IFSOCK: crate::mode_t = 0o14_0000;
-pub const S_ISUID: crate::mode_t = 0o4000;
-pub const S_ISGID: crate::mode_t = 0o2000;
-pub const S_ISVTX: crate::mode_t = 0o1000;
-pub const S_IRUSR: crate::mode_t = 0o0400;
-pub const S_IWUSR: crate::mode_t = 0o0200;
-pub const S_IXUSR: crate::mode_t = 0o0100;
-pub const S_IRWXU: crate::mode_t = 0o0700;
-pub const S_IREAD: crate::mode_t = 0o0400;
-pub const S_IWRITE: crate::mode_t = 0o0200;
-pub const S_IEXEC: crate::mode_t = 0o0100;
-pub const S_IRGRP: crate::mode_t = 0o0040;
-pub const S_IWGRP: crate::mode_t = 0o0020;
-pub const S_IXGRP: crate::mode_t = 0o0010;
-pub const S_IRWXG: crate::mode_t = 0o0070;
-pub const S_IROTH: crate::mode_t = 0o0004;
-pub const S_IWOTH: crate::mode_t = 0o0002;
-pub const S_IXOTH: crate::mode_t = 0o0001;
-pub const S_IRWXO: crate::mode_t = 0o0007;
-pub const ACCESSPERMS: crate::mode_t = 511;
-pub const ALLPERMS: crate::mode_t = 4095;
-pub const DEFFILEMODE: crate::mode_t = 438;
+pub const S_IFMT: mode_t = 0o17_0000;
+pub const S_IFDIR: mode_t = 0o4_0000;
+pub const S_IFCHR: mode_t = 0o2_0000;
+pub const S_IFBLK: mode_t = 0o6_0000;
+pub const S_IFREG: mode_t = 0o10_0000;
+pub const S_IFIFO: mode_t = 0o1_0000;
+pub const S_IFLNK: mode_t = 0o12_0000;
+pub const S_IFSOCK: mode_t = 0o14_0000;
+pub const S_ISUID: mode_t = 0o4000;
+pub const S_ISGID: mode_t = 0o2000;
+pub const S_ISVTX: mode_t = 0o1000;
+pub const S_IRUSR: mode_t = 0o0400;
+pub const S_IWUSR: mode_t = 0o0200;
+pub const S_IXUSR: mode_t = 0o0100;
+pub const S_IRWXU: mode_t = 0o0700;
+pub const S_IREAD: mode_t = 0o0400;
+pub const S_IWRITE: mode_t = 0o0200;
+pub const S_IEXEC: mode_t = 0o0100;
+pub const S_IRGRP: mode_t = 0o0040;
+pub const S_IWGRP: mode_t = 0o0020;
+pub const S_IXGRP: mode_t = 0o0010;
+pub const S_IRWXG: mode_t = 0o0070;
+pub const S_IROTH: mode_t = 0o0004;
+pub const S_IWOTH: mode_t = 0o0002;
+pub const S_IXOTH: mode_t = 0o0001;
+pub const S_IRWXO: mode_t = 0o0007;
+pub const ACCESSPERMS: mode_t = 511;
+pub const ALLPERMS: mode_t = 4095;
+pub const DEFFILEMODE: mode_t = 438;
 pub const S_BLKSIZE: usize = 512;
 pub const STATX_TYPE: c_uint = 1;
 pub const STATX_MODE: c_uint = 2;
@@ -3434,50 +3416,50 @@ const _UTSNAME_LENGTH: usize = 1024;
 
 const_fn! {
     {const} fn CMSG_ALIGN(len: usize) -> usize {
-        len + mem::size_of::<usize>() - 1 & !(mem::size_of::<usize>() - 1)
+        (len + size_of::<usize>() - 1) & !(size_of::<usize>() - 1)
     }
 }
 
 // functions
 f! {
     pub fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr {
-        if (*mhdr).msg_controllen as usize >= mem::size_of::<cmsghdr>() {
-            (*mhdr).msg_control as *mut cmsghdr
+        if (*mhdr).msg_controllen as usize >= size_of::<cmsghdr>() {
+            (*mhdr).msg_control.cast::<cmsghdr>()
         } else {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         }
     }
 
     pub fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
-        (cmsg as *mut c_uchar).offset(CMSG_ALIGN(mem::size_of::<cmsghdr>()) as isize)
+        (cmsg as *mut c_uchar).offset(CMSG_ALIGN(size_of::<cmsghdr>()) as isize)
     }
 
     pub {const} fn CMSG_SPACE(length: c_uint) -> c_uint {
-        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(mem::size_of::<cmsghdr>())) as c_uint
+        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(size_of::<cmsghdr>())) as c_uint
     }
 
     pub {const} fn CMSG_LEN(length: c_uint) -> c_uint {
-        CMSG_ALIGN(mem::size_of::<cmsghdr>()) as c_uint + length
+        CMSG_ALIGN(size_of::<cmsghdr>()) as c_uint + length
     }
 
     pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
-        if ((*cmsg).cmsg_len as usize) < mem::size_of::<cmsghdr>() {
-            return 0 as *mut cmsghdr;
-        };
+        if ((*cmsg).cmsg_len as usize) < size_of::<cmsghdr>() {
+            return core::ptr::null_mut::<cmsghdr>();
+        }
         let next = (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr;
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if (next.offset(1)) as usize > max
             || next as usize + CMSG_ALIGN((*next).cmsg_len as usize) > max
         {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         } else {
-            next as *mut cmsghdr
+            next.cast::<cmsghdr>()
         }
     }
 
     pub fn CPU_ALLOC_SIZE(count: c_int) -> size_t {
         let _dummy: cpu_set_t = mem::zeroed();
-        let size_in_bits = 8 * mem::size_of_val(&_dummy.bits[0]);
+        let size_in_bits = 8 * size_of_val(&_dummy.bits[0]);
         ((count as size_t + size_in_bits - 1) / 8) as size_t
     }
 
@@ -3488,28 +3470,26 @@ f! {
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
-        let size_in_bits = 8 * mem::size_of_val(&cpuset.bits[0]); // 32, 64 etc
+        let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] |= 1 << offset;
-        ()
     }
 
     pub fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
-        let size_in_bits = 8 * mem::size_of_val(&cpuset.bits[0]); // 32, 64 etc
+        let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] &= !(1 << offset);
-        ()
     }
 
     pub fn CPU_ISSET(cpu: usize, cpuset: &cpu_set_t) -> bool {
-        let size_in_bits = 8 * mem::size_of_val(&cpuset.bits[0]);
+        let size_in_bits = 8 * size_of_val(&cpuset.bits[0]);
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         0 != (cpuset.bits[idx] & (1 << offset))
     }
 
     pub fn CPU_COUNT_S(size: usize, cpuset: &cpu_set_t) -> c_int {
         let mut s: u32 = 0;
-        let size_of_mask = mem::size_of_val(&cpuset.bits[0]);
+        let size_of_mask = size_of_val(&cpuset.bits[0]);
         for i in cpuset.bits[..(size / size_of_mask)].iter() {
             s += i.count_ones();
         }
@@ -3517,7 +3497,7 @@ f! {
     }
 
     pub fn CPU_COUNT(cpuset: &cpu_set_t) -> c_int {
-        CPU_COUNT_S(mem::size_of::<cpu_set_t>(), cpuset)
+        CPU_COUNT_S(size_of::<cpu_set_t>(), cpuset)
     }
 
     pub fn CPU_EQUAL(set1: &cpu_set_t, set2: &cpu_set_t) -> bool {
@@ -3534,20 +3514,20 @@ f! {
 
     pub fn FD_CLR(fd: c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
-        let size = mem::size_of_val(&(*set).fds_bits[0]) * 8;
+        let size = size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] &= !(1 << (fd % size));
         return;
     }
 
     pub fn FD_ISSET(fd: c_int, set: *const fd_set) -> bool {
         let fd = fd as usize;
-        let size = mem::size_of_val(&(*set).fds_bits[0]) * 8;
+        let size = size_of_val(&(*set).fds_bits[0]) * 8;
         return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0;
     }
 
     pub fn FD_SET(fd: c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
-        let size = mem::size_of_val(&(*set).fds_bits[0]) * 8;
+        let size = size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] |= 1 << (fd % size);
         return;
     }
@@ -3574,8 +3554,7 @@ extern "C" {
 
     pub fn mkfifoat(__fd: c_int, __path: *const c_char, __mode: __mode_t) -> c_int;
 
-    pub fn mknodat(dirfd: c_int, pathname: *const c_char, mode: crate::mode_t, dev: dev_t)
-        -> c_int;
+    pub fn mknodat(dirfd: c_int, pathname: *const c_char, mode: mode_t, dev: dev_t) -> c_int;
 
     pub fn __libc_current_sigrtmin() -> c_int;
 
@@ -4248,7 +4227,7 @@ extern "C" {
         fd: c_int,
         path: *const c_char,
         oflag: c_int,
-        mode: crate::mode_t,
+        mode: mode_t,
     ) -> c_int;
     pub fn posix_spawn_file_actions_addclose(
         actions: *mut posix_spawn_file_actions_t,

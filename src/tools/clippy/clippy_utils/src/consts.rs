@@ -4,20 +4,18 @@
 //! executable MIR bodies, so we have to do this instead.
 #![allow(clippy::float_cmp)]
 
-use std::sync::Arc;
-
 use crate::source::{SpanRangeExt, walk_span_to_context};
 use crate::{clip, is_direct_expn_of, sext, unsext};
 
 use rustc_abi::Size;
 use rustc_apfloat::Float;
 use rustc_apfloat::ieee::{Half, Quad};
-use rustc_ast::ast::{self, LitFloatType, LitKind};
+use rustc_ast::ast::{LitFloatType, LitKind};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::{
     BinOpKind, Block, ConstBlock, Expr, ExprKind, HirId, Item, ItemKind, Node, PatExpr, PatExprKind, QPath, UnOp,
 };
-use rustc_lexer::tokenize;
+use rustc_lexer::{FrontmatterAllowed, tokenize};
 use rustc_lint::LateContext;
 use rustc_middle::mir::ConstValue;
 use rustc_middle::mir::interpret::{Scalar, alloc_range};
@@ -38,19 +36,21 @@ pub enum Constant<'tcx> {
     /// A `String` (e.g., "abc").
     Str(String),
     /// A binary string (e.g., `b"abc"`).
-    Binary(Arc<[u8]>),
+    Binary(Vec<u8>),
     /// A single `char` (e.g., `'a'`).
     Char(char),
     /// An integer's bit representation.
     Int(u128),
-    /// An `f16`.
-    F16(f16),
+    /// An `f16` bitcast to a `u16`.
+    // FIXME(f16_f128): use `f16` once builtins are available on all host tools platforms.
+    F16(u16),
     /// An `f32`.
     F32(f32),
     /// An `f64`.
     F64(f64),
-    /// An `f128`.
-    F128(f128),
+    /// An `f128` bitcast to a `u128`.
+    // FIXME(f16_f128): use `f128` once builtins are available on all host tools platforms.
+    F128(u128),
     /// `true` or `false`.
     Bool(bool),
     /// An array of constants.
@@ -177,7 +177,7 @@ impl Hash for Constant<'_> {
             },
             Self::F16(f) => {
                 // FIXME(f16_f128): once conversions to/from `f128` are available on all platforms,
-                f.to_bits().hash(state);
+                f.hash(state);
             },
             Self::F32(f) => {
                 f64::from(f).to_bits().hash(state);
@@ -186,7 +186,7 @@ impl Hash for Constant<'_> {
                 f.to_bits().hash(state);
             },
             Self::F128(f) => {
-                f.to_bits().hash(state);
+                f.hash(state);
             },
             Self::Bool(b) => {
                 b.hash(state);
@@ -233,9 +233,7 @@ impl Constant<'_> {
                 _ => None,
             },
             (Self::Vec(l), Self::Vec(r)) => {
-                let (ty::Array(cmp_type, _) | ty::Slice(cmp_type)) = *cmp_type.kind() else {
-                    return None;
-                };
+                let cmp_type = cmp_type.builtin_index()?;
                 iter::zip(l, r)
                     .map(|(li, ri)| Self::partial_cmp(tcx, cmp_type, li, ri))
                     .find(|r| r.is_none_or(|o| o != Ordering::Equal))
@@ -292,12 +290,12 @@ impl Constant<'_> {
 
     fn parse_f16(s: &str) -> Self {
         let f: Half = s.parse().unwrap();
-        Self::F16(f16::from_bits(f.to_bits().try_into().unwrap()))
+        Self::F16(f.to_bits().try_into().unwrap())
     }
 
     fn parse_f128(s: &str) -> Self {
         let f: Quad = s.parse().unwrap();
-        Self::F128(f128::from_bits(f.to_bits()))
+        Self::F128(f.to_bits())
     }
 }
 
@@ -306,15 +304,15 @@ pub fn lit_to_mir_constant<'tcx>(lit: &LitKind, ty: Option<Ty<'tcx>>) -> Constan
     match *lit {
         LitKind::Str(ref is, _) => Constant::Str(is.to_string()),
         LitKind::Byte(b) => Constant::Int(u128::from(b)),
-        LitKind::ByteStr(ref s, _) | LitKind::CStr(ref s, _) => Constant::Binary(Arc::clone(s)),
+        LitKind::ByteStr(ref s, _) | LitKind::CStr(ref s, _) => Constant::Binary(s.as_byte_str().to_vec()),
         LitKind::Char(c) => Constant::Char(c),
         LitKind::Int(n, _) => Constant::Int(n.get()),
         LitKind::Float(ref is, LitFloatType::Suffixed(fty)) => match fty {
             // FIXME(f16_f128): just use `parse()` directly when available for `f16`/`f128`
-            ast::FloatTy::F16 => Constant::parse_f16(is.as_str()),
-            ast::FloatTy::F32 => Constant::F32(is.as_str().parse().unwrap()),
-            ast::FloatTy::F64 => Constant::F64(is.as_str().parse().unwrap()),
-            ast::FloatTy::F128 => Constant::parse_f128(is.as_str()),
+            FloatTy::F16 => Constant::parse_f16(is.as_str()),
+            FloatTy::F32 => Constant::F32(is.as_str().parse().unwrap()),
+            FloatTy::F64 => Constant::F64(is.as_str().parse().unwrap()),
+            FloatTy::F128 => Constant::parse_f128(is.as_str()),
         },
         LitKind::Float(ref is, LitFloatType::Unsuffixed) => match ty.expect("type of float is known").kind() {
             ty::Float(FloatTy::F16) => Constant::parse_f16(is.as_str()),
@@ -485,7 +483,7 @@ impl<'tcx> ConstEvalCtxt<'tcx> {
             ExprKind::Path(ref qpath) => self.qpath(qpath, e.hir_id),
             ExprKind::Block(block, _) => self.block(block),
             ExprKind::Lit(lit) => {
-                if is_direct_expn_of(e.span, "cfg").is_some() {
+                if is_direct_expn_of(e.span, sym::cfg).is_some() {
                     None
                 } else {
                     Some(lit_to_mir_constant(&lit.node, self.typeck.expr_ty_opt(e)))
@@ -563,12 +561,12 @@ impl<'tcx> ConstEvalCtxt<'tcx> {
                 })
             },
             ExprKind::Lit(lit) => {
-                if is_direct_expn_of(e.span, "cfg").is_some() {
+                if is_direct_expn_of(e.span, sym::cfg).is_some() {
                     None
                 } else {
                     match &lit.node {
                         LitKind::Str(is, _) => Some(is.is_empty()),
-                        LitKind::ByteStr(s, _) | LitKind::CStr(s, _) => Some(s.is_empty()),
+                        LitKind::ByteStr(s, _) | LitKind::CStr(s, _) => Some(s.as_byte_str().is_empty()),
                         _ => None,
                     }
                 }
@@ -652,7 +650,7 @@ impl<'tcx> ConstEvalCtxt<'tcx> {
                         span,
                         ..
                     }) = self.tcx.hir_node(body_id.hir_id)
-                    && is_direct_expn_of(*span, "cfg").is_some()
+                    && is_direct_expn_of(*span, sym::cfg).is_some()
                 {
                     return None;
                 }
@@ -713,7 +711,7 @@ impl<'tcx> ConstEvalCtxt<'tcx> {
                     && let Some(src) = src.as_str()
                 {
                     use rustc_lexer::TokenKind::{BlockComment, LineComment, OpenBrace, Semi, Whitespace};
-                    if !tokenize(src)
+                    if !tokenize(src, FrontmatterAllowed::No)
                         .map(|t| t.kind)
                         .filter(|t| !matches!(t, Whitespace | LineComment { .. } | BlockComment { .. } | Semi))
                         .eq([OpenBrace])
@@ -868,10 +866,10 @@ pub fn mir_to_const<'tcx>(tcx: TyCtxt<'tcx>, result: mir::Const<'tcx>) -> Option
             ty::Adt(adt_def, _) if adt_def.is_struct() => Some(Constant::Adt(result)),
             ty::Bool => Some(Constant::Bool(int == ScalarInt::TRUE)),
             ty::Uint(_) | ty::Int(_) => Some(Constant::Int(int.to_bits(int.size()))),
-            ty::Float(FloatTy::F16) => Some(Constant::F16(f16::from_bits(int.into()))),
+            ty::Float(FloatTy::F16) => Some(Constant::F16(int.into())),
             ty::Float(FloatTy::F32) => Some(Constant::F32(f32::from_bits(int.into()))),
             ty::Float(FloatTy::F64) => Some(Constant::F64(f64::from_bits(int.into()))),
-            ty::Float(FloatTy::F128) => Some(Constant::F128(f128::from_bits(int.into()))),
+            ty::Float(FloatTy::F128) => Some(Constant::F128(int.into())),
             ty::RawPtr(_, _) => Some(Constant::RawPtr(int.to_bits(int.size()))),
             _ => None,
         },
@@ -892,10 +890,10 @@ pub fn mir_to_const<'tcx>(tcx: TyCtxt<'tcx>, result: mir::Const<'tcx>) -> Option
                 let range = alloc_range(offset + size * idx, size);
                 let val = alloc.read_scalar(&tcx, range, /* read_provenance */ false).ok()?;
                 res.push(match flt {
-                    FloatTy::F16 => Constant::F16(f16::from_bits(val.to_u16().discard_err()?)),
+                    FloatTy::F16 => Constant::F16(val.to_u16().discard_err()?),
                     FloatTy::F32 => Constant::F32(f32::from_bits(val.to_u32().discard_err()?)),
                     FloatTy::F64 => Constant::F64(f64::from_bits(val.to_u64().discard_err()?)),
-                    FloatTy::F128 => Constant::F128(f128::from_bits(val.to_u128().discard_err()?)),
+                    FloatTy::F128 => Constant::F128(val.to_u128().discard_err()?),
                 });
             }
             Some(Constant::Vec(res))
@@ -916,7 +914,7 @@ fn mir_is_empty<'tcx>(tcx: TyCtxt<'tcx>, result: mir::Const<'tcx>) -> Option<boo
                     // Get the length from the slice, using the same formula as
                     // [`ConstValue::try_get_slice_bytes_for_diagnostics`].
                     let a = tcx.global_alloc(alloc_id).unwrap_memory().inner();
-                    let ptr_size = tcx.data_layout.pointer_size;
+                    let ptr_size = tcx.data_layout.pointer_size();
                     if a.size() < offset + 2 * ptr_size {
                         // (partially) dangling reference
                         return None;
@@ -957,4 +955,19 @@ fn field_of_struct<'tcx>(
     } else {
         None
     }
+}
+
+/// If `expr` evaluates to an integer constant, return its value.
+pub fn integer_const(cx: &LateContext<'_>, expr: &Expr<'_>) -> Option<u128> {
+    if let Some(Constant::Int(value)) = ConstEvalCtxt::new(cx).eval_simple(expr) {
+        Some(value)
+    } else {
+        None
+    }
+}
+
+/// Check if `expr` evaluates to an integer constant of 0.
+#[inline]
+pub fn is_zero_integer_const(cx: &LateContext<'_>, expr: &Expr<'_>) -> bool {
+    integer_const(cx, expr) == Some(0)
 }

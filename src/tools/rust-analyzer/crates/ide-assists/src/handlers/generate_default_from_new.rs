@@ -1,13 +1,13 @@
 use ide_db::famous_defs::FamousDefs;
 use stdx::format_to;
 use syntax::{
-    ast::{self, make, HasGenericParams, HasName, Impl},
     AstNode,
+    ast::{self, HasGenericParams, HasName, HasTypeBounds, Impl, make},
 };
 
 use crate::{
-    assist_context::{AssistContext, Assists},
     AssistId,
+    assist_context::{AssistContext, Assists},
 };
 
 // Assist: generate_default_from_new
@@ -65,7 +65,7 @@ pub(crate) fn generate_default_from_new(acc: &mut Assists, ctx: &AssistContext<'
     let insert_location = impl_.syntax().text_range();
 
     acc.add(
-        AssistId("generate_default_from_new", crate::AssistKind::Generate),
+        AssistId::generate("generate_default_from_new"),
         "Generate a Default impl from a new fn",
         insert_location,
         move |builder| {
@@ -88,20 +88,19 @@ fn generate_trait_impl_text_from_impl(
     let generic_params = impl_.generic_param_list().map(|generic_params| {
         let lifetime_params =
             generic_params.lifetime_params().map(ast::GenericParam::LifetimeParam);
-        let ty_or_const_params = generic_params.type_or_const_params().map(|param| {
+        let ty_or_const_params = generic_params.type_or_const_params().filter_map(|param| {
             // remove defaults since they can't be specified in impls
-            match param {
+            let param = match param {
                 ast::TypeOrConstParam::Type(param) => {
-                    let param = param.clone_for_update();
-                    param.remove_default();
+                    let param = make::type_param(param.name()?, param.type_bound_list());
                     ast::GenericParam::TypeParam(param)
                 }
                 ast::TypeOrConstParam::Const(param) => {
-                    let param = param.clone_for_update();
-                    param.remove_default();
+                    let param = make::const_param(param.name()?, param.ty()?);
                     ast::GenericParam::ConstParam(param)
                 }
-            }
+            };
+            Some(param)
         });
 
         make::generic_param_list(itertools::chain(lifetime_params, ty_or_const_params))

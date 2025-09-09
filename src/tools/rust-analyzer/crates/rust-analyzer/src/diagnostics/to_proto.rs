@@ -298,10 +298,10 @@ pub(crate) fn map_rust_diagnostic_to_lsp(
     let mut source = String::from("rustc");
     let mut code = rd.code.as_ref().map(|c| c.code.clone());
 
-    if let Some(code_val) = &code {
-        if config.check_ignore.contains(code_val) {
-            return Vec::new();
-        }
+    if let Some(code_val) = &code
+        && config.check_ignore.contains(code_val)
+    {
+        return Vec::new();
     }
 
     if let Some(code_val) = &code {
@@ -373,10 +373,8 @@ pub(crate) fn map_rust_diagnostic_to_lsp(
             let primary_location = primary_location(config, workspace_root, primary_span, snap);
             let message = {
                 let mut message = message.clone();
-                if needs_primary_span_label {
-                    if let Some(primary_span_label) = &primary_span.label {
-                        format_to!(message, "\n{}", primary_span_label);
-                    }
+                if needs_primary_span_label && let Some(primary_span_label) = &primary_span.label {
+                    format_to!(message, "\n{}", primary_span_label);
                 }
                 message
             };
@@ -455,11 +453,7 @@ pub(crate) fn map_rust_diagnostic_to_lsp(
                             .cloned()
                             .chain(subdiagnostics.iter().map(|sub| sub.related.clone()))
                             .collect::<Vec<_>>();
-                        if info.is_empty() {
-                            None
-                        } else {
-                            Some(info)
-                        }
+                        if info.is_empty() { None } else { Some(info) }
                     },
                     tags: if tags.is_empty() { None } else { Some(tags.clone()) },
                     data: Some(serde_json::json!({ "rendered": rd.rendered })),
@@ -528,7 +522,7 @@ mod tests {
 
     use super::*;
 
-    use expect_test::{expect_file, ExpectFile};
+    use expect_test::{ExpectFile, expect_file};
     use lsp_types::ClientCapabilities;
     use paths::Utf8Path;
 

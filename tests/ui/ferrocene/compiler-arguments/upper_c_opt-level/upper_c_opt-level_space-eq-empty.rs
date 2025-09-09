@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C opt-level=
-//~? level needs to be
+//~? ERROR level needs to be
 
 fn main() {}
 

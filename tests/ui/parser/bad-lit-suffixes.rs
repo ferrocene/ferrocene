@@ -44,6 +44,12 @@ extern "C" {}
 //~^ ERROR invalid suffix `suffix` for number literal
 struct S;
 
+impl S {
+    #[rustc_confusables("blah"suffix)]
+    //~^ ERROR suffixes on string literals are invalid
+    fn woof() { }
+}
+
 // ferrocene-annotations: fls_fqaffyrjob7v
 // Byte String Literals
 //

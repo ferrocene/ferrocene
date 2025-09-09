@@ -4,10 +4,11 @@
 use std::io;
 use std::io::ErrorKind;
 
+use rand::Rng;
 use rustc_abi::Size;
 
-use crate::helpers::check_min_vararg_count;
 use crate::shims::files::FileDescription;
+use crate::shims::sig::check_min_vararg_count;
 use crate::shims::unix::linux_like::epoll::EpollReadyEvents;
 use crate::shims::unix::*;
 use crate::*;
@@ -141,6 +142,8 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         let f_getfd = this.eval_libc_i32("F_GETFD");
         let f_dupfd = this.eval_libc_i32("F_DUPFD");
         let f_dupfd_cloexec = this.eval_libc_i32("F_DUPFD_CLOEXEC");
+        let f_getfl = this.eval_libc_i32("F_GETFL");
+        let f_setfl = this.eval_libc_i32("F_SETFL");
 
         // We only support getting the flags for a descriptor.
         match cmd {
@@ -174,6 +177,25 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 } else {
                     this.set_last_error_and_return_i32(LibcError("EBADF"))
                 }
+            }
+            cmd if cmd == f_getfl => {
+                // Check if this is a valid open file descriptor.
+                let Some(fd) = this.machine.fds.get(fd_num) else {
+                    return this.set_last_error_and_return_i32(LibcError("EBADF"));
+                };
+
+                fd.get_flags(this)
+            }
+            cmd if cmd == f_setfl => {
+                // Check if this is a valid open file descriptor.
+                let Some(fd) = this.machine.fds.get(fd_num) else {
+                    return this.set_last_error_and_return_i32(LibcError("EBADF"));
+                };
+
+                let [flag] = check_min_vararg_count("fcntl(fd, F_SETFL, ...)", varargs)?;
+                let flag = this.read_scalar(flag)?.to_i32()?;
+
+                fd.set_flags(flag, this)
             }
             cmd if this.tcx.sess.target.os == "macos"
                 && cmd == this.eval_libc_i32("F_FULLFSYNC") =>
@@ -226,7 +248,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         trace!("Reading from FD {}, size {}", fd_num, count);
 
         // Check that the *entire* buffer is actually valid memory.
-        this.check_ptr_access(buf, Size::from_bytes(count), CheckInAllocMsg::MemoryAccessTest)?;
+        this.check_ptr_access(buf, Size::from_bytes(count), CheckInAllocMsg::MemoryAccess)?;
 
         // We cap the number of read bytes to the largest value that we are able to fit in both the
         // host's and target's `isize`. This saves us from having to handle overflows later.
@@ -242,9 +264,29 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             return this.set_last_error_and_return(LibcError("EBADF"), dest);
         };
 
+        // Handle the zero-sized case. The man page says:
+        // > If count is zero, read() may detect the errors described below.  In the absence of any
+        // > errors, or if read() does not check for errors, a read() with a count of 0 returns zero
+        // > and has no other effects.
+        if count == 0 {
+            this.write_null(dest)?;
+            return interp_ok(());
+        }
+        // Non-deterministically decide to further reduce the count, simulating a partial read (but
+        // never to 0, that would indicate EOF).
+        let count = if this.machine.short_fd_operations
+            && fd.short_fd_operations()
+            && count >= 2
+            && this.machine.rng.get_mut().random()
+        {
+            count / 2 // since `count` is at least 2, the result is still at least 1
+        } else {
+            count
+        };
+
         trace!("read: FD mapped to {fd:?}");
         // We want to read at most `count` bytes. We are sure that `count` is not negative
-        // because it was a target's `usize`. Also we are sure that its smaller than
+        // because it was a target's `usize`. Also we are sure that it's smaller than
         // `usize::MAX` because it is bounded by the host's `isize`.
 
         let finish = {
@@ -292,7 +334,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         // Isolation check is done via `FileDescription` trait.
 
         // Check that the *entire* buffer is actually valid memory.
-        this.check_ptr_access(buf, Size::from_bytes(count), CheckInAllocMsg::MemoryAccessTest)?;
+        this.check_ptr_access(buf, Size::from_bytes(count), CheckInAllocMsg::MemoryAccess)?;
 
         // We cap the number of written bytes to the largest value that we are able to fit in both the
         // host's and target's `isize`. This saves us from having to handle overflows later.
@@ -305,6 +347,30 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         // We temporarily dup the FD to be able to retain mutable access to `this`.
         let Some(fd) = this.machine.fds.get(fd_num) else {
             return this.set_last_error_and_return(LibcError("EBADF"), dest);
+        };
+
+        // Handle the zero-sized case. The man page says:
+        // > If count is zero and fd refers to a regular file, then write() may return a failure
+        // > status if one of the errors below is detected.  If no errors are detected, or error
+        // > detection is not performed, 0 is returned without causing any other effect.   If  count
+        // > is  zero  and  fd refers to a file other than a regular file, the results are not
+        // > specified.
+        if count == 0 {
+            // For now let's not open the can of worms of what exactly "not specified" could mean...
+            this.write_null(dest)?;
+            return interp_ok(());
+        }
+        // Non-deterministically decide to further reduce the count, simulating a partial write.
+        // We avoid reducing the write size to 0: the docs seem to be entirely fine with that,
+        // but the standard library is not (https://github.com/rust-lang/rust/issues/145959).
+        let count = if this.machine.short_fd_operations
+            && fd.short_fd_operations()
+            && count >= 2
+            && this.machine.rng.get_mut().random()
+        {
+            count / 2
+        } else {
+            count
         };
 
         let finish = {

@@ -5,11 +5,11 @@ use std::cell::Cell;
 use drop_bomb::DropBomb;
 
 use crate::{
-    event::Event,
-    input::Input,
     Edition,
     SyntaxKind::{self, EOF, ERROR, TOMBSTONE},
-    TokenSet, T,
+    T, TokenSet,
+    event::Event,
+    input::Input,
 };
 
 /// `Parser` struct provides the low-level API for
@@ -29,7 +29,7 @@ pub(crate) struct Parser<'t> {
     edition: Edition,
 }
 
-const PARSER_STEP_LIMIT: usize = 15_000_000;
+const PARSER_STEP_LIMIT: usize = if cfg!(debug_assertions) { 150_000 } else { 15_000_000 };
 
 impl<'t> Parser<'t> {
     pub(super) fn new(inp: &'t Input, edition: Edition) -> Parser<'t> {
@@ -254,7 +254,10 @@ impl<'t> Parser<'t> {
 
     /// Create an error node and consume the next token.
     pub(crate) fn err_and_bump(&mut self, message: &str) {
-        self.err_recover(message, TokenSet::EMPTY);
+        let m = self.start();
+        self.error(message);
+        self.bump_any();
+        m.complete(self, ERROR);
     }
 
     /// Create an error node and consume the next token unless it is in the recovery set.

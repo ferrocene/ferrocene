@@ -1,3 +1,4 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use super::TrustedLen;
 
 /// Conversion from an [`Iterator`].
@@ -97,32 +98,32 @@ use super::TrustedLen;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_on_unimplemented(
     on(
-        _Self = "&[{A}]",
+        Self = "&[{A}]",
         message = "a slice of type `{Self}` cannot be built since we need to store the elements somewhere",
         label = "try explicitly collecting into a `Vec<{A}>`",
     ),
     on(
-        all(A = "{integer}", any(_Self = "&[{integral}]",)),
+        all(A = "{integer}", any(Self = "&[{integral}]",)),
         message = "a slice of type `{Self}` cannot be built since we need to store the elements somewhere",
         label = "try explicitly collecting into a `Vec<{A}>`",
     ),
     on(
-        _Self = "[{A}]",
+        Self = "[{A}]",
         message = "a slice of type `{Self}` cannot be built since `{Self}` has no definite size",
         label = "try explicitly collecting into a `Vec<{A}>`",
     ),
     on(
-        all(A = "{integer}", any(_Self = "[{integral}]",)),
+        all(A = "{integer}", any(Self = "[{integral}]",)),
         message = "a slice of type `{Self}` cannot be built since `{Self}` has no definite size",
         label = "try explicitly collecting into a `Vec<{A}>`",
     ),
     on(
-        _Self = "[{A}; _]",
+        Self = "[{A}; _]",
         message = "an array of type `{Self}` cannot be built directly from an iterator",
         label = "try collecting into a `Vec<{A}>`, then using `.try_into()`",
     ),
     on(
-        all(A = "{integer}", any(_Self = "[{integral}; _]",)),
+        all(A = "{integer}", any(Self = "[{integral}; _]",)),
         message = "an array of type `{Self}` cannot be built directly from an iterator",
         label = "try collecting into a `Vec<{A}>`, then using `.try_into()`",
     ),
@@ -131,6 +132,7 @@ use super::TrustedLen;
     label = "value of type `{Self}` cannot be built from `std::iter::Iterator<Item={A}>`"
 )]
 #[rustc_diagnostic_item = "FromIterator"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait FromIterator<A>: Sized {
     /// Creates a value from an iterator.
     ///
@@ -239,41 +241,38 @@ pub trait FromIterator<A>: Sized {
 #[rustc_diagnostic_item = "IntoIterator"]
 #[rustc_on_unimplemented(
     on(
-        _Self = "core::ops::range::RangeTo<Idx>",
+        Self = "core::ops::range::RangeTo<Idx>",
         label = "if you meant to iterate until a value, add a starting value",
         note = "`..end` is a `RangeTo`, which cannot be iterated on; you might have meant to have a \
               bounded `Range`: `0..end`"
     ),
     on(
-        _Self = "core::ops::range::RangeToInclusive<Idx>",
+        Self = "core::ops::range::RangeToInclusive<Idx>",
         label = "if you meant to iterate until a value (including it), add a starting value",
         note = "`..=end` is a `RangeToInclusive`, which cannot be iterated on; you might have meant \
               to have a bounded `RangeInclusive`: `0..=end`"
     ),
     on(
-        _Self = "[]",
+        Self = "[]",
         label = "`{Self}` is not an iterator; try calling `.into_iter()` or `.iter()`"
     ),
-    on(_Self = "&[]", label = "`{Self}` is not an iterator; try calling `.iter()`"),
+    on(Self = "&[]", label = "`{Self}` is not an iterator; try calling `.iter()`"),
     on(
-        _Self = "alloc::vec::Vec<T, A>",
+        Self = "alloc::vec::Vec<T, A>",
         label = "`{Self}` is not an iterator; try calling `.into_iter()` or `.iter()`"
     ),
+    on(Self = "&str", label = "`{Self}` is not an iterator; try calling `.chars()` or `.bytes()`"),
     on(
-        _Self = "&str",
+        Self = "alloc::string::String",
         label = "`{Self}` is not an iterator; try calling `.chars()` or `.bytes()`"
     ),
     on(
-        _Self = "alloc::string::String",
-        label = "`{Self}` is not an iterator; try calling `.chars()` or `.bytes()`"
-    ),
-    on(
-        _Self = "{integral}",
+        Self = "{integral}",
         note = "if you want to iterate between `start` until a value `end`, use the exclusive range \
               syntax `start..end` or the inclusive range syntax `start..=end`"
     ),
     on(
-        _Self = "{float}",
+        Self = "{float}",
         note = "if you want to iterate between `start` until a value `end`, use the exclusive range \
               syntax `start..end` or the inclusive range syntax `start..=end`"
     ),
@@ -314,6 +313,7 @@ pub trait IntoIterator {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Iterator> IntoIterator for I {
     type Item = I::Item;
     type IntoIter = I;
@@ -394,6 +394,7 @@ impl<I: Iterator> IntoIterator for I {
 /// assert_eq!("MyCollection([5, 6, 7, 1, 2, 3])", format!("{c:?}"));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Extend<A> {
     /// Extends a collection with the contents of an iterator.
     ///
@@ -439,7 +440,6 @@ pub trait Extend<A> {
     /// **For implementors:** For a collection to unsafely rely on this method's safety precondition (that is,
     /// invoke UB if they are violated), it must implement `extend_reserve` correctly. In other words,
     /// callers may assume that if they `extend_reserve`ed enough space they can call this method.
-
     // This method is for internal usage only. It is only on the trait because of specialization's limitations.
     #[unstable(feature = "extend_one_unchecked", issue = "none")]
     #[doc(hidden)]
@@ -452,6 +452,7 @@ pub trait Extend<A> {
 }
 
 #[stable(feature = "extend_for_unit", since = "1.28.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Extend<()> for () {
     fn extend<T: IntoIterator<Item = ()>>(&mut self, iter: T) {
         iter.into_iter().for_each(drop)
@@ -521,6 +522,7 @@ macro_rules! spec_tuple_impl {
         #[$meta]
         $(#[$doctext])?
         #[stable(feature = "extend_for_tuple", since = "1.56.0")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)*> Extend<($($ty_names,)*)> for ($($extend_ty_names,)*)
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -568,10 +570,12 @@ macro_rules! spec_tuple_impl {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         trait $trait_name<$($ty_names),*> {
             fn extend(self, $($var_names: &mut $ty_names,)*);
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         fn $default_fn_name<$($ty_names,)* $($extend_ty_names,)*>(
             iter: impl Iterator<Item = ($($ty_names,)*)>,
             $($var_names: &mut $extend_ty_names,)*
@@ -595,6 +599,7 @@ macro_rules! spec_tuple_impl {
             iter.fold((), extend($($var_names,)*));
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)* Iter> $trait_name<$($extend_ty_names),*> for Iter
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -605,6 +610,7 @@ macro_rules! spec_tuple_impl {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)* Iter> $trait_name<$($extend_ty_names),*> for Iter
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -661,6 +667,7 @@ macro_rules! spec_tuple_impl {
         #[$meta]
         $(#[$doctext])?
         #[stable(feature = "from_iterator_for_tuple", since = "1.79.0")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)*> FromIterator<($($extend_ty_names,)*)> for ($($ty_names,)*)
         where
             $($ty_names: Default + Extend<$extend_ty_names>,)*

@@ -87,7 +87,7 @@ JOBS_DEFINITION: JobsDefinition = {
 
         "oxidos": ["ferrocene-oxidos"],
 
-        "tools": ["rust-analyzer", "clippy", "rustfmt", "flip-link"],
+        "tools": ["clippy", "rustfmt", "flip-link", "miri"],
     },
 
     "test": {
@@ -142,7 +142,7 @@ JOBS_DEFINITION: JobsDefinition = {
         # like 'test:compiletest' minus the ONLY_HOSTS test groups
         # the ONLY_HOSTS tests will run on the host even when
         # `--target $NOT_THE_HOST` is passed to `x.py test`
-        # this avoids re-running tests on the same host triple across
+        # this avoids re-running tests on the same host tuple across
         # different CI jobs
         #
         # this is in a separate category and not under `test:` because that
@@ -172,6 +172,7 @@ JOBS_DEFINITION: JobsDefinition = {
     },
 }
 # fmt: on
+
 
 def sorted_tasks(tasks: Iterable[str | Task]) -> list[Task]:
     tasks = list(tasks)

@@ -7,7 +7,7 @@ The tracking issue for this feature is: [#87121]
 ------------------------
 
 > **Note**: This feature is incomplete. In the future, it is meant to supersede
-> [`box_patterns`](./box-patterns.md) and [`string_deref_patterns`](./string-deref-patterns.md).
+> [`box_patterns`] and [`string_deref_patterns`].
 
 This feature permits pattern matching on [smart pointers in the standard library] through their
 `Deref` target types, either implicitly or with explicit `deref!(_)` patterns (the syntax of which
@@ -54,4 +54,54 @@ if let [b] = &mut *v {
 assert_eq!(v, [Box::new(Some(2))]);
 ```
 
+Like [`box_patterns`], deref patterns may move out of boxes:
+
+```rust
+# #![feature(deref_patterns)]
+# #![allow(incomplete_features)]
+struct NoCopy;
+let deref!(x) = Box::new(NoCopy);
+drop::<NoCopy>(x);
+```
+
+Additionally, `deref_patterns` implements changes to string and byte string literal patterns,
+allowing then to be used in deref patterns:
+
+```rust
+# #![feature(deref_patterns)]
+# #![allow(incomplete_features)]
+match ("test".to_string(), Box::from("test"), b"test".to_vec()) {
+    ("test", "test", b"test") => {}
+    _ => panic!(),
+}
+
+// This works through multiple layers of reference and smart pointer:
+match (&Box::new(&"test".to_string()), &&&"test") {
+    ("test", "test") => {}
+    _ => panic!(),
+}
+
+// `deref!("...")` syntax may also be used:
+match "test".to_string() {
+    deref!("test") => {}
+    _ => panic!(),
+}
+
+// Matching on slices and arrays using literals is possible elsewhere as well:
+match *"test" {
+    "test" => {}
+    _ => panic!(),
+}
+match *b"test" {
+    b"test" => {}
+    _ => panic!(),
+}
+match *(b"test" as &[u8]) {
+    b"test" => {}
+    _ => panic!(),
+}
+```
+
+[`box_patterns`]: ./box-patterns.md
+[`string_deref_patterns`]: ./string-deref-patterns.md
 [smart pointers in the standard library]: https://doc.rust-lang.org/std/ops/trait.DerefPure.html#implementors

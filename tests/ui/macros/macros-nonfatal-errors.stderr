@@ -165,32 +165,26 @@ error: asm template must be a string literal
 LL |     asm!(invalid);
    |          ^^^^^^^
 
-error: `concat_idents!()` requires ident args
-  --> $DIR/macros-nonfatal-errors.rs:107:5
-   |
-LL |     concat_idents!("not", "idents");
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 error: argument must be a string literal
-  --> $DIR/macros-nonfatal-errors.rs:109:17
+  --> $DIR/macros-nonfatal-errors.rs:107:17
    |
 LL |     option_env!(invalid);
    |                 ^^^^^^^
 
 error: expected string literal
-  --> $DIR/macros-nonfatal-errors.rs:110:10
+  --> $DIR/macros-nonfatal-errors.rs:108:10
    |
 LL |     env!(invalid);
    |          ^^^^^^^
 
 error: `env!()` takes 1 or 2 arguments
-  --> $DIR/macros-nonfatal-errors.rs:111:5
+  --> $DIR/macros-nonfatal-errors.rs:109:5
    |
 LL |     env!(foo, abr, baz);
    |     ^^^^^^^^^^^^^^^^^^^
 
 error: environment variable `RUST_HOPEFULLY_THIS_DOESNT_EXIST` not defined at compile time
-  --> $DIR/macros-nonfatal-errors.rs:112:5
+  --> $DIR/macros-nonfatal-errors.rs:110:5
    |
 LL |     env!("RUST_HOPEFULLY_THIS_DOESNT_EXIST");
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -198,7 +192,7 @@ LL |     env!("RUST_HOPEFULLY_THIS_DOESNT_EXIST");
    = help: use `std::env::var("RUST_HOPEFULLY_THIS_DOESNT_EXIST")` to read the variable at run time
 
 error: format argument must be a string literal
-  --> $DIR/macros-nonfatal-errors.rs:114:13
+  --> $DIR/macros-nonfatal-errors.rs:112:13
    |
 LL |     format!(invalid);
    |             ^^^^^^^
@@ -209,43 +203,43 @@ LL |     format!("{}", invalid);
    |             +++++
 
 error: argument must be a string literal
-  --> $DIR/macros-nonfatal-errors.rs:116:14
+  --> $DIR/macros-nonfatal-errors.rs:114:14
    |
 LL |     include!(invalid);
    |              ^^^^^^^
 
 error: argument must be a string literal
-  --> $DIR/macros-nonfatal-errors.rs:118:18
+  --> $DIR/macros-nonfatal-errors.rs:116:18
    |
 LL |     include_str!(invalid);
    |                  ^^^^^^^
 
 error: couldn't read `$DIR/i'd be quite surprised if a file with this name existed`: $FILE_NOT_FOUND_MSG
-  --> $DIR/macros-nonfatal-errors.rs:119:5
+  --> $DIR/macros-nonfatal-errors.rs:117:5
    |
 LL |     include_str!("i'd be quite surprised if a file with this name existed");
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: argument must be a string literal
-  --> $DIR/macros-nonfatal-errors.rs:120:20
+  --> $DIR/macros-nonfatal-errors.rs:118:20
    |
 LL |     include_bytes!(invalid);
    |                    ^^^^^^^
 
 error: couldn't read `$DIR/i'd be quite surprised if a file with this name existed`: $FILE_NOT_FOUND_MSG
-  --> $DIR/macros-nonfatal-errors.rs:121:5
+  --> $DIR/macros-nonfatal-errors.rs:119:5
    |
 LL |     include_bytes!("i'd be quite surprised if a file with this name existed");
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: trace_macros! accepts only `true` or `false`
-  --> $DIR/macros-nonfatal-errors.rs:123:5
+  --> $DIR/macros-nonfatal-errors.rs:121:5
    |
 LL |     trace_macros!(invalid);
    |     ^^^^^^^^^^^^^^^^^^^^^^
 
 error: default variant must be exhaustive
-  --> $DIR/macros-nonfatal-errors.rs:133:9
+  --> $DIR/macros-nonfatal-errors.rs:131:9
    |
 LL |         #[non_exhaustive]
    |         ----------------- declared `#[non_exhaustive]` here
@@ -260,6 +254,6 @@ error: cannot find macro `llvm_asm` in this scope
 LL |     llvm_asm!(invalid);
    |     ^^^^^^^^
 
-error: aborting due to 29 previous errors
+error: aborting due to 28 previous errors
 
 For more information about this error, try `rustc --explain E0665`.

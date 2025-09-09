@@ -113,7 +113,7 @@ cmd_prepare() {
 
     echo
     echo "===> building remote-test-server"
-    stage="${REMOTE_TEST_SERVER_STAGE-0}"
+    stage="${REMOTE_TEST_SERVER_STAGE-1}"
     ./x build src/tools/remote-test-server --target "${nto_target}" --stage "${stage}"
     cp build/host/"stage${stage}-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/src/install/aarch64le/sbin
 

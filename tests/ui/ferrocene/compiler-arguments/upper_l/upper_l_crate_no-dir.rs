@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -L crate=
-//~? empty search path
+//~? ERROR empty search path
 
 fn main() {}
 

@@ -5,7 +5,6 @@ use rustc_infer::infer::TyCtxtInferExt;
 use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::traits::{BuiltinImplSource, CodegenObligationError};
-use rustc_middle::ty::util::AsyncDropGlueMorphology;
 use rustc_middle::ty::{
     self, ClosureKind, GenericArgsRef, Instance, PseudoCanonicalInput, TyCtxt, TypeVisitableExt,
 };
@@ -22,7 +21,7 @@ fn resolve_instance_raw<'tcx>(
 ) -> Result<Option<Instance<'tcx>>, ErrorGuaranteed> {
     let PseudoCanonicalInput { typing_env, value: (def_id, args) } = key;
 
-    let result = if let Some(trait_def_id) = tcx.trait_of_item(def_id) {
+    let result = if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
         debug!(" => associated item, attempting to find impl in typing_env {:#?}", typing_env);
         resolve_associated_item(
             tcx,
@@ -41,20 +40,26 @@ fn resolve_instance_raw<'tcx>(
             if ty.needs_drop(tcx, typing_env) {
                 debug!(" => nontrivial drop glue");
                 match *ty.kind() {
+                    ty::Coroutine(coroutine_def_id, ..) => {
+                        // FIXME: sync drop of coroutine with async drop (generate both versions?)
+                        // Currently just ignored
+                        if tcx.optimized_mir(coroutine_def_id).coroutine_drop_async().is_some() {
+                            ty::InstanceKind::DropGlue(def_id, None)
+                        } else {
+                            ty::InstanceKind::DropGlue(def_id, Some(ty))
+                        }
+                    }
                     ty::Closure(..)
                     | ty::CoroutineClosure(..)
-                    | ty::Coroutine(..)
                     | ty::Tuple(..)
                     | ty::Adt(..)
                     | ty::Dynamic(..)
                     | ty::Array(..)
                     | ty::Slice(..)
-                    | ty::UnsafeBinder(..) => {}
+                    | ty::UnsafeBinder(..) => ty::InstanceKind::DropGlue(def_id, Some(ty)),
                     // Drop shims can only be built from ADTs.
                     _ => return Ok(None),
                 }
-
-                ty::InstanceKind::DropGlue(def_id, Some(ty))
             } else {
                 debug!(" => trivial drop glue");
                 ty::InstanceKind::DropGlue(def_id, None)
@@ -62,7 +67,7 @@ fn resolve_instance_raw<'tcx>(
         } else if tcx.is_lang_item(def_id, LangItem::AsyncDropInPlace) {
             let ty = args.type_at(0);
 
-            if ty.async_drop_glue_morphology(tcx) != AsyncDropGlueMorphology::Noop {
+            if ty.needs_async_drop(tcx, typing_env) {
                 match *ty.kind() {
                     ty::Closure(..)
                     | ty::CoroutineClosure(..)
@@ -76,11 +81,14 @@ fn resolve_instance_raw<'tcx>(
                     _ => return Ok(None),
                 }
                 debug!(" => nontrivial async drop glue ctor");
-                ty::InstanceKind::AsyncDropGlueCtorShim(def_id, Some(ty))
+                ty::InstanceKind::AsyncDropGlueCtorShim(def_id, ty)
             } else {
                 debug!(" => trivial async drop glue ctor");
-                ty::InstanceKind::AsyncDropGlueCtorShim(def_id, None)
+                ty::InstanceKind::AsyncDropGlueCtorShim(def_id, ty)
             }
+        } else if tcx.is_async_drop_in_place_coroutine(def_id) {
+            let ty = args.type_at(0);
+            ty::InstanceKind::AsyncDropGlue(def_id, ty)
         } else {
             debug!(" => free item");
             ty::InstanceKind::Item(def_id)
@@ -101,7 +109,7 @@ fn resolve_associated_item<'tcx>(
 ) -> Result<Option<Instance<'tcx>>, ErrorGuaranteed> {
     debug!(?trait_item_id, ?typing_env, ?trait_id, ?rcvr_args, "resolve_associated_item");
 
-    let trait_ref = ty::TraitRef::from_method(tcx, trait_id, rcvr_args);
+    let trait_ref = ty::TraitRef::from_assoc(tcx, trait_id, rcvr_args);
 
     let input = typing_env.as_query_input(trait_ref);
     let vtbl = match tcx.codegen_select_candidate(input) {
@@ -227,10 +235,10 @@ fn resolve_associated_item<'tcx>(
                 tcx.ensure_ok().compare_impl_item(leaf_def_item)?;
             }
 
-            Some(ty::Instance::new(leaf_def.item.def_id, args))
+            Some(ty::Instance::new_raw(leaf_def.item.def_id, args))
         }
         traits::ImplSource::Builtin(BuiltinImplSource::Object(_), _) => {
-            let trait_ref = ty::TraitRef::from_method(tcx, trait_id, rcvr_args);
+            let trait_ref = ty::TraitRef::from_assoc(tcx, trait_id, rcvr_args);
             if trait_ref.has_non_region_infer() || trait_ref.has_non_region_param() {
                 // We only resolve totally substituted vtable entries.
                 None
@@ -272,7 +280,7 @@ fn resolve_associated_item<'tcx>(
 
                     // Use the default `fn clone_from` from `trait Clone`.
                     let args = tcx.erase_regions(rcvr_args);
-                    Some(ty::Instance::new(trait_item_id, args))
+                    Some(ty::Instance::new_raw(trait_item_id, args))
                 }
             } else if tcx.is_lang_item(trait_ref.def_id, LangItem::FnPtrTrait) {
                 if tcx.is_lang_item(trait_item_id, LangItem::FnPtrAddr) {
@@ -321,7 +329,7 @@ fn resolve_associated_item<'tcx>(
                         // sync with the built-in trait implementations (since all of the
                         // implementations return `FnOnce::Output`).
                         if ty::ClosureKind::FnOnce == args.as_coroutine_closure().kind() {
-                            Some(Instance::new(coroutine_closure_def_id, args))
+                            Some(Instance::new_raw(coroutine_closure_def_id, args))
                         } else {
                             Some(Instance {
                                 def: ty::InstanceKind::ConstructCoroutineInClosureShim {
@@ -354,7 +362,7 @@ fn resolve_associated_item<'tcx>(
                                 args,
                             })
                         } else {
-                            Some(Instance::new(coroutine_closure_def_id, args))
+                            Some(Instance::new_raw(coroutine_closure_def_id, args))
                         }
                     }
                     ty::Closure(closure_def_id, args) => {
@@ -373,7 +381,7 @@ fn resolve_associated_item<'tcx>(
                 let name = tcx.item_name(trait_item_id);
                 assert_eq!(name, sym::transmute);
                 let args = tcx.erase_regions(rcvr_args);
-                Some(ty::Instance::new(trait_item_id, args))
+                Some(ty::Instance::new_raw(trait_item_id, args))
             } else {
                 Instance::try_resolve_item_for_coroutine(tcx, trait_item_id, trait_id, rcvr_args)
             }

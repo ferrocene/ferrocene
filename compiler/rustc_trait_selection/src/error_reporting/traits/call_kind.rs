@@ -6,7 +6,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{LangItem, lang_items};
 use rustc_middle::ty::{AssocItemContainer, GenericArgsRef, Instance, Ty, TyCtxt, TypingEnv};
-use rustc_span::{DesugaringKind, Ident, Span, sym};
+use rustc_span::{DUMMY_SP, DesugaringKind, Ident, Span, sym};
 use tracing::debug;
 
 use crate::traits::specialization_graph;
@@ -31,9 +31,9 @@ impl CallDesugaringKind {
     pub fn trait_def_id(self, tcx: TyCtxt<'_>) -> DefId {
         match self {
             Self::ForLoopIntoIter => tcx.get_diagnostic_item(sym::IntoIterator).unwrap(),
-            Self::ForLoopNext => tcx.require_lang_item(LangItem::Iterator, None),
+            Self::ForLoopNext => tcx.require_lang_item(LangItem::Iterator, DUMMY_SP),
             Self::QuestionBranch | Self::TryBlockFromOutput => {
-                tcx.require_lang_item(LangItem::Try, None)
+                tcx.require_lang_item(LangItem::Try, DUMMY_SP)
             }
             Self::QuestionFromResidual => tcx.get_diagnostic_item(sym::FromResidual).unwrap(),
             Self::Await => tcx.get_diagnostic_item(sym::IntoFuture).unwrap(),
@@ -81,9 +81,7 @@ pub fn call_kind<'tcx>(
         }
     });
 
-    let fn_call = parent.and_then(|p| {
-        lang_items::FN_TRAITS.iter().filter_map(|&l| tcx.lang_items().get(l)).find(|&id| id == p)
-    });
+    let fn_call = parent.filter(|&p| tcx.fn_trait_kind_from_def_id(p).is_some());
 
     let operator = if !from_hir_call && let Some(p) = parent {
         lang_items::OPERATORS.iter().filter_map(|&l| tcx.lang_items().get(l)).find(|&id| id == p)

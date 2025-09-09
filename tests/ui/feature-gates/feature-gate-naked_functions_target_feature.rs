@@ -11,3 +11,6 @@ extern "C" fn naked() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

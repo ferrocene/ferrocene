@@ -3,14 +3,14 @@
 use hir::HirDisplay;
 use ide_db::FxHashMap;
 use syntax::{
-    algo,
+    AstNode, Direction, SyntaxKind, TextRange, TextSize, algo,
     ast::{self, HasModuleItem},
-    match_ast, AstNode, Direction, SyntaxKind, TextRange, TextSize,
+    match_ast,
 };
 
 use crate::{
-    context::{ParamContext, ParamKind, PatternContext},
     CompletionContext, CompletionItem, CompletionItemKind, Completions,
+    context::{ParamContext, ParamKind, PatternContext},
 };
 
 // FIXME: Make this a submodule of [`pattern`]
@@ -128,10 +128,10 @@ fn params_from_stmt_list_scope(
     {
         let module = scope.module().into();
         scope.process_all_names(&mut |name, def| {
-            if let hir::ScopeDef::Local(local) = def {
-                if let Ok(ty) = local.ty(ctx.db).display_source_code(ctx.db, module, true) {
-                    cb(name, ty);
-                }
+            if let hir::ScopeDef::Local(local) = def
+                && let Ok(ty) = local.ty(ctx.db).display_source_code(ctx.db, module, true)
+            {
+                cb(name, ty);
             }
         });
     }
@@ -195,5 +195,5 @@ fn comma_wrapper(ctx: &CompletionContext<'_>) -> Option<(impl Fn(&str) -> String
         matches!(prev_token_kind, SyntaxKind::COMMA | SyntaxKind::L_PAREN | SyntaxKind::PIPE);
     let leading = if has_leading_comma { "" } else { ", " };
 
-    Some((move |label: &_| (format!("{leading}{label}{trailing}")), param.text_range()))
+    Some((move |label: &_| format!("{leading}{label}{trailing}"), param.text_range()))
 }

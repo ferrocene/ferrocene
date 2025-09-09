@@ -7,20 +7,22 @@
     ambiguous_glob_reexports, // Ferrocene specific
     unsafe_op_in_unsafe_fn, // Ferrocene specific
     missing_abi, // Ferrocene specific
+    useless_deprecated, // Ferrocene specific
     renamed_and_removed_lints, // Keep this order.
     unknown_lints, // Keep this order.
-    bad_style,
+    nonstandard_style,
     overflowing_literals,
-    improper_ctypes,
-    // This lint is renamed but we run CI for old stable rustc so should be here.
-    redundant_semicolon,
-    redundant_semicolons,
     unused_macros,
     unused_macro_rules,
-    // FIXME(1.0): temporarily allow dead_code to fix CI:
-    // - https://github.com/rust-lang/libc/issues/3740
-    // - https://github.com/rust-lang/rust/pull/126456
-    dead_code,
+)]
+// Prepare for a future upgrade
+#![warn(rust_2024_compatibility)]
+// Things missing for 2024 that are blocked on MSRV or breakage
+#![allow(
+    missing_unsafe_on_extern,
+    edition_2024_expr_fragment_specifier,
+    // Allowed globally, the warning is enabled in individual modules as we work through them
+    unsafe_op_in_unsafe_fn
 )]
 #![cfg_attr(libc_deny_warnings, deny(warnings))]
 // Attributes needed when building as part of the standard library
@@ -36,13 +38,14 @@
 // DIFF(1.0): The thread local references that raise this lint were removed in 1.0
 #![cfg_attr(feature = "rustc-dep-of-std", allow(static_mut_refs))]
 // Enable extra lints:
-#![cfg_attr(feature = "extra_traits", deny(missing_debug_implementations))]
-#![deny(missing_copy_implementations, safe_packed_borrows)]
+#![cfg_attr(feature = "extra_traits", warn(missing_debug_implementations))]
+#![warn(missing_copy_implementations, safe_packed_borrows)]
 #![cfg_attr(not(feature = "rustc-dep-of-std"), no_std)]
 #![cfg_attr(feature = "rustc-dep-of-std", no_core)]
 
 #[macro_use]
 mod macros;
+mod new;
 
 cfg_if! {
     if #[cfg(feature = "rustc-dep-of-std")] {
@@ -51,6 +54,9 @@ cfg_if! {
 }
 
 pub use core::ffi::c_void;
+
+#[allow(unused_imports)] // needed while the module is empty on some platforms
+pub use new::*;
 
 cfg_if! {
     if #[cfg(windows)] {

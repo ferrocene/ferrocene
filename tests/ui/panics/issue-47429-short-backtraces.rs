@@ -6,6 +6,9 @@
 //@ check-run-results
 //@ exec-env:RUST_BACKTRACE=1
 
+// FIXME(#61117): Respect debuginfo-level-tests, do not force debuginfo-level=0
+//@ compile-flags: -Cdebuginfo=0
+
 // This is needed to avoid test output differences across std being built with v0 symbols vs legacy
 // symbols.
 //@ normalize-stderr: "begin_panic::<&str>" -> "begin_panic"
@@ -18,7 +21,7 @@
 //@ ignore-android FIXME #17520
 //@ ignore-openbsd no support for libbacktrace without filename
 //@ ignore-fuchsia Backtraces not symbolized
-//@ ignore-ferrocenecoretest no backtrace support
+//@ ignore-ferrocene.facade no backtrace support
 //@ needs-subprocess
 
 fn main() {

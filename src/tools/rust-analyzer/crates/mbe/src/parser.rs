@@ -4,9 +4,12 @@
 use std::sync::Arc;
 
 use arrayvec::ArrayVec;
-use intern::{sym, Symbol};
-use span::{Edition, Span, SyntaxContextId};
-use tt::iter::{TtElement, TtIter};
+use intern::{Symbol, sym};
+use span::{Edition, Span, SyntaxContext};
+use tt::{
+    MAX_GLUED_PUNCT_LEN,
+    iter::{TtElement, TtIter},
+};
 
 use crate::ParseError;
 
@@ -28,14 +31,14 @@ pub(crate) struct MetaTemplate(pub(crate) Box<[Op]>);
 
 impl MetaTemplate {
     pub(crate) fn parse_pattern(
-        edition: impl Copy + Fn(SyntaxContextId) -> Edition,
+        edition: impl Copy + Fn(SyntaxContext) -> Edition,
         pattern: TtIter<'_, Span>,
     ) -> Result<Self, ParseError> {
         MetaTemplate::parse(edition, pattern, Mode::Pattern)
     }
 
     pub(crate) fn parse_template(
-        edition: impl Copy + Fn(SyntaxContextId) -> Edition,
+        edition: impl Copy + Fn(SyntaxContext) -> Edition,
         template: TtIter<'_, Span>,
     ) -> Result<Self, ParseError> {
         MetaTemplate::parse(edition, template, Mode::Template)
@@ -46,7 +49,7 @@ impl MetaTemplate {
     }
 
     fn parse(
-        edition: impl Copy + Fn(SyntaxContextId) -> Edition,
+        edition: impl Copy + Fn(SyntaxContext) -> Edition,
         mut src: TtIter<'_, Span>,
         mode: Mode,
     ) -> Result<Self, ParseError> {
@@ -96,7 +99,7 @@ pub(crate) enum Op {
         delimiter: tt::Delimiter<Span>,
     },
     Literal(tt::Literal<Span>),
-    Punct(Box<ArrayVec<tt::Punct<Span>, 3>>),
+    Punct(Box<ArrayVec<tt::Punct<Span>, MAX_GLUED_PUNCT_LEN>>),
     Ident(tt::Ident<Span>),
 }
 
@@ -151,7 +154,8 @@ pub(crate) enum MetaVarKind {
 pub(crate) enum Separator {
     Literal(tt::Literal<Span>),
     Ident(tt::Ident<Span>),
-    Puncts(ArrayVec<tt::Punct<Span>, 3>),
+    Puncts(ArrayVec<tt::Punct<Span>, MAX_GLUED_PUNCT_LEN>),
+    Lifetime(tt::Punct<Span>, tt::Ident<Span>),
 }
 
 // Note that when we compare a Separator, we just care about its textual value.
@@ -167,6 +171,7 @@ impl PartialEq for Separator {
                 let b_iter = b.iter().map(|b| b.char);
                 a_iter.eq(b_iter)
             }
+            (Lifetime(_, a), Lifetime(_, b)) => a.sym == b.sym,
             _ => false,
         }
     }
@@ -179,7 +184,7 @@ enum Mode {
 }
 
 fn next_op(
-    edition: impl Copy + Fn(SyntaxContextId) -> Edition,
+    edition: impl Copy + Fn(SyntaxContext) -> Edition,
     first_peeked: TtElement<'_, Span>,
     src: &mut TtIter<'_, Span>,
     mode: Mode,
@@ -194,7 +199,7 @@ fn next_op(
                         let mut res = ArrayVec::new();
                         res.push(*p);
                         Box::new(res)
-                    }))
+                    }));
                 }
                 Some(it) => it,
             };
@@ -212,20 +217,20 @@ fn next_op(
                         Mode::Pattern => {
                             return Err(ParseError::unexpected(
                                 "`${}` metavariable expressions are not allowed in matchers",
-                            ))
+                            ));
                         }
                     },
                     _ => {
                         return Err(ParseError::expected(
                             "expected `$()` repetition or `${}` expression",
-                        ))
+                        ));
                     }
                 },
                 TtElement::Leaf(leaf) => match leaf {
                     tt::Leaf::Ident(ident) if ident.sym == sym::crate_ => {
                         // We simply produce identifier `$crate` here. And it will be resolved when lowering ast to Path.
                         Op::Ident(tt::Ident {
-                            sym: sym::dollar_crate.clone(),
+                            sym: sym::dollar_crate,
                             span: ident.span,
                             is_raw: tt::IdentIsRaw::No,
                         })
@@ -246,7 +251,7 @@ fn next_op(
                         Mode::Pattern => {
                             return Err(ParseError::unexpected(
                                 "`$$` is not allowed on the pattern side",
-                            ))
+                            ));
                         }
                         Mode::Template => Op::Punct({
                             let mut res = ArrayVec::new();
@@ -255,7 +260,7 @@ fn next_op(
                         }),
                     },
                     tt::Leaf::Punct(_) | tt::Leaf::Literal(_) => {
-                        return Err(ParseError::expected("expected ident"))
+                        return Err(ParseError::expected("expected ident"));
                     }
                 },
             }
@@ -287,7 +292,7 @@ fn next_op(
 }
 
 fn eat_fragment_kind(
-    edition: impl Copy + Fn(SyntaxContextId) -> Edition,
+    edition: impl Copy + Fn(SyntaxContext) -> Edition,
     src: &mut TtIter<'_, Span>,
     mode: Mode,
 ) -> Result<Option<MetaVarKind>, ParseError> {
@@ -347,10 +352,19 @@ fn parse_repeat(src: &mut TtIter<'_, Span>) -> Result<(Option<Separator>, Repeat
             _ => true,
         };
         match tt {
-            tt::Leaf::Ident(_) | tt::Leaf::Literal(_) if has_sep => {
-                return Err(ParseError::InvalidRepeat)
-            }
-            tt::Leaf::Ident(ident) => separator = Separator::Ident(ident.clone()),
+            tt::Leaf::Ident(ident) => match separator {
+                Separator::Puncts(puncts) if puncts.is_empty() => {
+                    separator = Separator::Ident(ident.clone());
+                }
+                Separator::Puncts(puncts) => match puncts.as_slice() {
+                    [tt::Punct { char: '\'', .. }] => {
+                        separator = Separator::Lifetime(puncts[0], ident.clone());
+                    }
+                    _ => return Err(ParseError::InvalidRepeat),
+                },
+                _ => return Err(ParseError::InvalidRepeat),
+            },
+            tt::Leaf::Literal(_) if has_sep => return Err(ParseError::InvalidRepeat),
             tt::Leaf::Literal(lit) => separator = Separator::Literal(lit.clone()),
             tt::Leaf::Punct(punct) => {
                 let repeat_kind = match punct.char {

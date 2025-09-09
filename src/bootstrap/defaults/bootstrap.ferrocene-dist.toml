@@ -5,6 +5,10 @@
 # recommended to run this configuration during local development, except if your development
 # configuration cannot reproduce a CI failure.
 
+# This setting matters more during development, which is where a decision on the value is made.
+# Setting it to "ignore" avoids CI warnings.
+change-id = "ignore"
+
 [build]
 # Enable the generation of build metrics, which provide extra information on the duration of each
 # step of the build. This is then used by scripts and tools to analyze how time is spent on CI.
@@ -34,7 +38,7 @@ extended = true
 #
 # NOTE: If you add a new tool here, make sure to also change `ferrocene/packages.toml` to include it
 # in new releases.
-tools = ["rustdoc", "cargo", "llvm-tools", "rustfmt", "rust-analyzer", "rust-analyzer-proc-macro-srv", "clippy"]
+tools = ["rustdoc", "cargo", "llvm-tools", "rustfmt", "rust-analyzer", "rust-analyzer-proc-macro-srv", "clippy", "miri"]
 
 # Build and enable the profiler runtime.
 #
@@ -46,6 +50,13 @@ profiler = true
 build-stage = 2
 test-stage = 2
 doc-stage = 2
+
+# Adds a custom string to the output of `rustc --version` to properly mark this is not the upstream
+# compiler.
+#
+# If this configuration is missing or changed the output of `rustc --version` will change
+# accordingly.
+description = "Ferrocene by Ferrous Systems"
 
 
 
@@ -110,13 +121,6 @@ debug-logging = false
 # compiler bugs or miscompilations not being detected. Never remove this flag.
 debug-assertions = true
 
-# Adds a custom string to the output of `rustc --version` to properly mark this is not the upstream
-# compiler.
-#
-# If this configuration is missing or changed the output of `rustc --version` will change
-# accordingly.
-description = "Ferrocene by Ferrous Systems"
-
 # Use a single codegen unit when compiling the standard library.
 #
 # Rust upstream had issues in the past [1] when compiling the standard library with more than 1
@@ -177,9 +181,9 @@ aarch64-unknown-nto-qnx710.profiler = false
 x86_64-pc-nto-qnx710.profiler = false
 
 # Bare metal targets cannot run the profiler runtime.
-aarch64-unknown-ferrocenecoretest.profiler = false
-thumbv7em-ferrocenecoretest-eabi.profiler = false
-thumbv7em-ferrocenecoretest-eabihf.profiler = false
+"aarch64-unknown-ferrocene.facade".profiler = false
+"thumbv7em-ferrocene.facade-eabi".profiler = false
+"thumbv7em-ferrocene.facade-eabihf".profiler = false
 
 # On Windows, Jemalloc is not tested, and manual testing suggests it is not supported.
 x86_64-pc-windows-msvc.jemalloc = false

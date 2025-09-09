@@ -83,7 +83,9 @@ fn add_move_for_packed_drop<'tcx>(
     is_cleanup: bool,
 ) {
     debug!("add_move_for_packed_drop({:?} @ {:?})", terminator, loc);
-    let TerminatorKind::Drop { ref place, target, unwind, replace } = terminator.kind else {
+    let TerminatorKind::Drop { ref place, target, unwind, replace, drop, async_fut } =
+        terminator.kind
+    else {
         unreachable!();
     };
 
@@ -91,11 +93,11 @@ fn add_move_for_packed_drop<'tcx>(
     let ty = place.ty(body, tcx).ty;
     let temp = patch.new_temp(ty, source_info.span);
 
-    let storage_dead_block = patch.new_block(BasicBlockData {
-        statements: vec![Statement { source_info, kind: StatementKind::StorageDead(temp) }],
-        terminator: Some(Terminator { source_info, kind: TerminatorKind::Goto { target } }),
+    let storage_dead_block = patch.new_block(BasicBlockData::new_stmts(
+        vec![Statement::new(source_info, StatementKind::StorageDead(temp))],
+        Some(Terminator { source_info, kind: TerminatorKind::Goto { target } }),
         is_cleanup,
-    });
+    ));
 
     patch.add_statement(loc, StatementKind::StorageLive(temp));
     patch.add_assign(loc, Place::from(temp), Rvalue::Use(Operand::Move(*place)));
@@ -106,6 +108,8 @@ fn add_move_for_packed_drop<'tcx>(
             target: storage_dead_block,
             unwind,
             replace,
+            drop,
+            async_fut,
         },
     );
 }

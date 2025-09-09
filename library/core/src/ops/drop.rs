@@ -11,7 +11,7 @@
 /// This destructor consists of two components:
 /// - A call to `Drop::drop` for that value, if this special `Drop` trait is implemented for its type.
 /// - The automatically generated "drop glue" which recursively calls the destructors
-///     of all the fields of this value.
+///   of all the fields of this value.
 ///
 /// As Rust automatically calls the destructors of all contained fields,
 /// you don't have to implement `Drop` in most cases. But there are some cases where
@@ -239,11 +239,4 @@ pub trait Drop {
     /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place
     #[stable(feature = "rust1", since = "1.0.0")]
     fn drop(&mut self);
-}
-
-/// Fallback function to call surface level `Drop::drop` function
-#[allow(drop_bounds)]
-#[lang = "fallback_surface_drop"]
-pub(crate) fn fallback_surface_drop<T: Drop + ?Sized>(x: &mut T) {
-    <T as Drop>::drop(x)
 }

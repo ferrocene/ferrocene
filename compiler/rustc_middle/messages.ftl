@@ -1,6 +1,10 @@
+middle_assert_async_resume_after_drop = `async fn` resumed after async drop
+
 middle_assert_async_resume_after_panic = `async fn` resumed after panicking
 
 middle_assert_async_resume_after_return = `async fn` resumed after completion
+
+middle_assert_coroutine_resume_after_drop = coroutine resumed after async drop
 
 middle_assert_coroutine_resume_after_panic = coroutine resumed after panicking
 
@@ -9,7 +13,12 @@ middle_assert_coroutine_resume_after_return = coroutine resumed after completion
 middle_assert_divide_by_zero =
     attempt to divide `{$val}` by zero
 
+middle_assert_gen_resume_after_drop = `gen` fn or block cannot be further iterated on after it async dropped
+
 middle_assert_gen_resume_after_panic = `gen` fn or block cannot be further iterated on after it panicked
+
+middle_assert_invalid_enum_construction =
+    trying to construct an enum from an invalid value `{$source}`
 
 middle_assert_misaligned_ptr_deref =
     misaligned pointer dereference: address must be a multiple of {$required} but is {$found}
@@ -72,6 +81,11 @@ middle_erroneous_constant = erroneous constant encountered
 middle_failed_writing_file =
     failed to write file {$path}: {$error}"
 
+# Note: We only mention patterns here since the error can only occur with references, and those
+# are forbidden in const generics.
+middle_invalid_const_in_valtree = constant {$global_const_id} cannot be used as pattern
+    .note = constants that reference mutable or external memory cannot be used as pattern
+
 middle_layout_cycle =
     a cycle occurred during layout computation
 
@@ -88,6 +102,8 @@ middle_layout_too_generic = the type `{$ty}` does not have a fixed layout
 
 middle_layout_unknown =
     the type `{$ty}` has an unknown layout
+
+middle_max_num_nodes_in_valtree = maximum number of nodes exceeded in constant {$global_const_id}
 
 middle_opaque_hidden_type_mismatch =
     concrete type differs from previous defining opaque type use
@@ -106,8 +122,6 @@ middle_strict_coherence_needs_negative_coherence =
     to use `strict_coherence` on this trait, the `with_negative_coherence` feature must be enabled
     .label = due to this attribute
 
-middle_type_length_limit = reached the type-length limit while instantiating `{$shrunk}`
+middle_type_length_limit = reached the type-length limit while instantiating `{$instance}`
 
 middle_unsupported_union = we don't support unions yet: '{$ty_name}'
-
-middle_written_to_path = the full type name has been written to '{$path}'

@@ -18,61 +18,12 @@ documents the features of each extension.
 This extension implements "global" features that are not tied to any specific
 document, and should be imported in each document.
 
-The extension also enables ``sphinx.ext.intersphinx`` and ``sphinx-needs``
-without the need to manually enable them in ``conf.py``.
+The extension also enables ``sphinx.ext.intersphinx`` without the need to
+manually enable it in ``conf.py``.
 
-``sphinx-needs`` integration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The extension configures `sphinx-needs`_ to load IDs from other qualification
-documents. The following nodes are available:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Sphinx directive
-     - ID prefix
-     - Purpose
-
-   * - ``hazop-use``
-     - ``USE_``
-     - Use cases when building the HazOp
-
-   * - ``hazop-error``
-     - ``ERR_``
-     - Potential errors detected during the HazOp
-
-   * - ``constraint``
-     - ``CONSTR_``
-     - Constraint the user must follow (for example in the safety manual)
-
-The following link types are also available to create relationships between
-needs:
-
-.. list-table::
-
-   * - Role
-     - Purpose
-
-   * - ``:link:``
-     - General purpose link (builtin)
-
-   * - ``:caused_by:``
-     - Points to the node causing this node to exist (for HazOp)
-
-   * - ``:mitigates:``
-     - Points to the node mitigating the existence of this node (for HazOp)
-
-New custom nodes and link types can be added as needed in
-`sphinx_needs_support.py`_.
 
 Defining and linking to IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. caution::
-
-   The use of IDs managed by this extension is deprecated, and should be
-   replaced with the use of `sphinx-needs`_.
 
 Our qualification documents contain IDs defining every concept and item
 referenced across our qualification material for example - ``RUSTC_ERR_DRIVER_04``.
@@ -143,24 +94,24 @@ Mentioning targets
 
 When you need to refer to targets across the documentation, it's better to use
 a human-readable name (like ":target:`aarch64-unknown-none`") than the target
-triple, as the latter is often inconsistent between similar targets and could
+tuple, as the latter is often inconsistent between similar targets and could
 be confusing to customers.
 
 To keep the target names consistent, you can use the ``:target:`` role with the
-target triple as its content, which will be rendered as the human-readable
+target tuple as its content, which will be rendered as the human-readable
 name:
 
 .. code-block:: rst
 
    :target:`x86_64-unknown-linux-gnu`
 
-The ``:target-with-triple:`` role will also add the triple following the
+The ``:target-with-tuple:`` role will also add the tuple following the
 human-readable name, which is best used when customers then need to copy/paste
-the triple:
+the tuple:
 
 .. code-block:: rst
 
-   :target-with-triple:`aarch64-unknown-none`
+   :target-with-tuple:`aarch64-unknown-none`
 
 The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
 referring to a target not defined in that file will emit a warning.
@@ -238,7 +189,7 @@ the CLI option:
 
       .. cli::option: --target <name>
 
-         Used to specify the target triple.
+         Used to specify the target tuple.
 
       .. cli::option: --help
 
@@ -320,9 +271,9 @@ with the :ref:`test outcomes <test-outcomes>` of a tested target. The
 directive accepts a single argument, the path to the template to render. It
 also accepts multiple options:
 
-* ``host`` (required): the target triple of the host platform
-* ``target`` (required): the target triple of the compilation target
-* ``bare_metal_test_target`` (optional): the target triple of the special
+* ``host`` (required): the target tuple of the host platform
+* ``target`` (required): the target tuple of the compilation target
+* ``bare_metal_test_target`` (optional): the target tuple of the special
   target used for bare metal testing; it should be omitted if no special target
   was used
 * ``remote_testing`` (optional): whether the tests were executed on CI or on a
@@ -338,7 +289,7 @@ also accepts multiple options:
    .. render-outcomes-template:: templates/tests.jinja2
       :host: x86_64-unknown-linux-gnu
       :target: aarch64-unknown-none
-      :bare_metal_test_target: aarch64-unknown-ferrocenecoretest
+      :bare_metal_test_target: aarch64-unknown-ferrocene.facade
       :remote_testing:
 
 Rendering a summary of all test outcome pages
@@ -375,6 +326,4 @@ It is possible to inject the Rust changelog for a range of versions with the
       :to: 1.76.0
 
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html
-.. _sphinx-needs: https://sphinx-needs.readthedocs.io/en/latest/
-.. _sphinx_needs_support.py: https://github.com/ferrocene/ferrocene/blob/main/ferrocene/doc/sphinx-shared-resources/exts/ferrocene_qualification/sphinx_needs_support.py
 .. _Jinja: https://palletsprojects.com/p/jinja/

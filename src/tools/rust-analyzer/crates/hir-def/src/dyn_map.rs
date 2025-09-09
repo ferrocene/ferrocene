@@ -27,15 +27,15 @@
 pub mod keys {
     use std::marker::PhantomData;
 
-    use hir_expand::{attrs::AttrId, MacroCallId};
+    use hir_expand::{MacroCallId, attrs::AttrId};
     use rustc_hash::FxHashMap;
-    use syntax::{ast, AstNode, AstPtr};
+    use syntax::{AstNode, AstPtr, ast};
 
     use crate::{
-        dyn_map::{DynMap, Policy},
         BlockId, ConstId, EnumId, EnumVariantId, ExternBlockId, ExternCrateId, FieldId, FunctionId,
         ImplId, LifetimeParamId, Macro2Id, MacroRulesId, ProcMacroId, StaticId, StructId,
         TraitAliasId, TraitId, TypeAliasId, TypeOrConstParamId, UnionId, UseId,
+        dyn_map::{DynMap, Policy},
     };
 
     pub type Key<K, V> = crate::dyn_map::Key<AstPtr<K>, V, AstPtrPolicy<K, V>>;
@@ -67,8 +67,14 @@ pub mod keys {
     pub const PROC_MACRO: Key<ast::Fn, ProcMacroId> = Key::new();
     pub const MACRO_CALL: Key<ast::MacroCall, MacroCallId> = Key::new();
     pub const ATTR_MACRO_CALL: Key<ast::Item, MacroCallId> = Key::new();
-    pub const DERIVE_MACRO_CALL: Key<ast::Attr, (AttrId, MacroCallId, Box<[Option<MacroCallId>]>)> =
-        Key::new();
+    pub const DERIVE_MACRO_CALL: Key<
+        ast::Attr,
+        (
+            AttrId,
+            /* derive() */ MacroCallId,
+            /* actual derive macros */ Box<[Option<MacroCallId>]>,
+        ),
+    > = Key::new();
 
     /// XXX: AST Nodes and SyntaxNodes have identity equality semantics: nodes are
     /// equal if they point to exactly the same object.
@@ -112,6 +118,10 @@ pub struct Key<K, V, P = (K, V)> {
 }
 
 impl<K, V, P> Key<K, V, P> {
+    #[allow(
+        clippy::new_without_default,
+        reason = "this a const fn, so it can't be default yet. See <https://github.com/rust-lang/rust/issues/63065>"
+    )]
     pub(crate) const fn new() -> Key<K, V, P> {
         Key { _phantom: PhantomData }
     }
@@ -148,14 +158,9 @@ impl<K: Hash + Eq + 'static, V: 'static> Policy for (K, V) {
     }
 }
 
+#[derive(Default)]
 pub struct DynMap {
     pub(crate) map: Map,
-}
-
-impl Default for DynMap {
-    fn default() -> Self {
-        DynMap { map: Map::new() }
-    }
 }
 
 #[repr(transparent)]

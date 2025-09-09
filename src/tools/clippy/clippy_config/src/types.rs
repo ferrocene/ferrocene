@@ -1,14 +1,18 @@
-use clippy_utils::def_path_def_ids;
+use clippy_utils::paths::{PathNS, find_crates, lookup_path};
+use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::{Applicability, Diag};
+use rustc_hir::PrimTy;
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefIdMap;
 use rustc_middle::ty::TyCtxt;
-use rustc_span::Span;
+use rustc_span::{Span, Symbol};
 use serde::de::{self, Deserializer, Visitor};
 use serde::{Deserialize, Serialize, ser};
 use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Rename {
     pub path: String,
     pub rename: String,
@@ -21,6 +25,17 @@ pub struct DisallowedPath<const REPLACEMENT_ALLOWED: bool = true> {
     path: String,
     reason: Option<String>,
     replacement: Option<String>,
+    /// Setting `allow_invalid` to true suppresses a warning if `path` does not refer to an existing
+    /// definition.
+    ///
+    /// This could be useful when conditional compilation is used, or when a clippy.toml file is
+    /// shared among multiple projects.
+    allow_invalid: bool,
+    /// The span of the `DisallowedPath`.
+    ///
+    /// Used for diagnostics.
+    #[serde(skip_serializing)]
+    span: Span,
 }
 
 impl<'de, const REPLACEMENT_ALLOWED: bool> Deserialize<'de> for DisallowedPath<REPLACEMENT_ALLOWED> {
@@ -36,6 +51,8 @@ impl<'de, const REPLACEMENT_ALLOWED: bool> Deserialize<'de> for DisallowedPath<R
             path: enum_.path().to_owned(),
             reason: enum_.reason().map(ToOwned::to_owned),
             replacement: enum_.replacement().map(ToOwned::to_owned),
+            allow_invalid: enum_.allow_invalid(),
+            span: Span::default(),
         })
     }
 }
@@ -43,13 +60,15 @@ impl<'de, const REPLACEMENT_ALLOWED: bool> Deserialize<'de> for DisallowedPath<R
 // `DisallowedPathEnum` is an implementation detail to enable the `Deserialize` implementation just
 // above. `DisallowedPathEnum` is not meant to be used outside of this file.
 #[derive(Debug, Deserialize, Serialize)]
-#[serde(untagged)]
+#[serde(untagged, deny_unknown_fields)]
 enum DisallowedPathEnum {
     Simple(String),
     WithReason {
         path: String,
         reason: Option<String>,
         replacement: Option<String>,
+        #[serde(rename = "allow-invalid")]
+        allow_invalid: Option<bool>,
     },
 }
 
@@ -58,7 +77,7 @@ impl<const REPLACEMENT_ALLOWED: bool> DisallowedPath<REPLACEMENT_ALLOWED> {
         &self.path
     }
 
-    pub fn diag_amendment(&self, span: Span) -> impl FnOnce(&mut Diag<'_, ()>) + use<'_, REPLACEMENT_ALLOWED> {
+    pub fn diag_amendment(&self, span: Span) -> impl FnOnce(&mut Diag<'_, ()>) {
         move |diag| {
             if let Some(replacement) = &self.replacement {
                 diag.span_suggestion(
@@ -71,6 +90,14 @@ impl<const REPLACEMENT_ALLOWED: bool> DisallowedPath<REPLACEMENT_ALLOWED> {
                 diag.note(reason.clone());
             }
         }
+    }
+
+    pub fn span(&self) -> Span {
+        self.span
+    }
+
+    pub fn set_span(&mut self, span: Span) {
+        self.span = span;
     }
 }
 
@@ -94,20 +121,78 @@ impl DisallowedPathEnum {
             Self::Simple(_) => None,
         }
     }
+
+    fn allow_invalid(&self) -> bool {
+        match &self {
+            Self::WithReason { allow_invalid, .. } => allow_invalid.unwrap_or_default(),
+            Self::Simple(_) => false,
+        }
+    }
 }
 
 /// Creates a map of disallowed items to the reason they were disallowed.
+#[allow(clippy::type_complexity)]
 pub fn create_disallowed_map<const REPLACEMENT_ALLOWED: bool>(
     tcx: TyCtxt<'_>,
-    disallowed: &'static [DisallowedPath<REPLACEMENT_ALLOWED>],
-) -> DefIdMap<(&'static str, &'static DisallowedPath<REPLACEMENT_ALLOWED>)> {
-    disallowed
-        .iter()
-        .map(|x| (x.path(), x.path().split("::").collect::<Vec<_>>(), x))
-        .flat_map(|(name, path, disallowed_path)| {
-            def_path_def_ids(tcx, &path).map(move |id| (id, (name, disallowed_path)))
-        })
-        .collect()
+    disallowed_paths: &'static [DisallowedPath<REPLACEMENT_ALLOWED>],
+    ns: PathNS,
+    def_kind_predicate: impl Fn(DefKind) -> bool,
+    predicate_description: &str,
+    allow_prim_tys: bool,
+) -> (
+    DefIdMap<(&'static str, &'static DisallowedPath<REPLACEMENT_ALLOWED>)>,
+    FxHashMap<PrimTy, (&'static str, &'static DisallowedPath<REPLACEMENT_ALLOWED>)>,
+) {
+    let mut def_ids: DefIdMap<(&'static str, &'static DisallowedPath<REPLACEMENT_ALLOWED>)> = DefIdMap::default();
+    let mut prim_tys: FxHashMap<PrimTy, (&'static str, &'static DisallowedPath<REPLACEMENT_ALLOWED>)> =
+        FxHashMap::default();
+    for disallowed_path in disallowed_paths {
+        let path = disallowed_path.path();
+        let sym_path: Vec<Symbol> = path.split("::").map(Symbol::intern).collect();
+        let mut resolutions = lookup_path(tcx, ns, &sym_path);
+        resolutions.retain(|&def_id| def_kind_predicate(tcx.def_kind(def_id)));
+
+        let (prim_ty, found_prim_ty) = if let &[name] = sym_path.as_slice()
+            && let Some(prim) = PrimTy::from_name(name)
+        {
+            (allow_prim_tys.then_some(prim), true)
+        } else {
+            (None, false)
+        };
+
+        if resolutions.is_empty()
+            && prim_ty.is_none()
+            && !disallowed_path.allow_invalid
+            // Don't warn about unloaded crates:
+            // https://github.com/rust-lang/rust-clippy/pull/14397#issuecomment-2848328221
+            && (sym_path.len() < 2 || !find_crates(tcx, sym_path[0]).is_empty())
+        {
+            // Relookup the path in an arbitrary namespace to get a good `expected, found` message
+            let found_def_ids = lookup_path(tcx, PathNS::Arbitrary, &sym_path);
+            let message = if let Some(&def_id) = found_def_ids.first() {
+                let (article, description) = tcx.article_and_description(def_id);
+                format!("expected a {predicate_description}, found {article} {description}")
+            } else if found_prim_ty {
+                format!("expected a {predicate_description}, found a primitive type")
+            } else {
+                format!("`{path}` does not refer to a reachable {predicate_description}")
+            };
+            tcx.sess
+                .dcx()
+                .struct_span_warn(disallowed_path.span(), message)
+                .with_help("add `allow-invalid = true` to the entry to suppress this warning")
+                .emit();
+        }
+
+        for def_id in resolutions {
+            def_ids.insert(def_id, (path, disallowed_path));
+        }
+        if let Some(ty) = prim_ty {
+            prim_tys.insert(ty, (path, disallowed_path));
+        }
+    }
+
+    (def_ids, prim_tys)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]

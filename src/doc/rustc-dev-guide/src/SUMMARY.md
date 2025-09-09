@@ -1,6 +1,7 @@
 # Summary
 
 [Getting Started](./getting-started.md)
+
 [About this guide](./about-this-guide.md)
 
 ---
@@ -34,7 +35,6 @@
         - [Cranelift codegen backend](./tests/codegen-backend-tests/cg_clif.md)
         - [GCC codegen backend](./tests/codegen-backend-tests/cg_gcc.md)
     - [Performance testing](./tests/perf.md)
-    - [Suggest tests tool](./tests/suggest-tests.md)
     - [Misc info](./tests/misc.md)
 - [Debugging the compiler](./compiler-debugging.md)
     - [Using the tracing/logging instrumentation](./tracing.md)
@@ -53,7 +53,8 @@
 - [Walkthrough: a typical contribution](./walkthrough.md)
 - [Implementing new language features](./implementing_new_features.md)
 - [Stability attributes](./stability.md)
-- [Stabilizing Features](./stabilization_guide.md)
+- [Stabilizing language features](./stabilization_guide.md)
+    - [Stabilization report template](./stabilization_report_template.md)
 - [Feature Gates](./feature-gates.md)
 - [Coding conventions](./conventions.md)
 - [Procedures for breaking changes](./bug-fix-procedure.md)
@@ -62,10 +63,8 @@
 - [Notification groups](notification-groups/about.md)
     - [Apple](notification-groups/apple.md)
     - [ARM](notification-groups/arm.md)
-    - [Cleanup Crew](notification-groups/cleanup-crew.md)
     - [Emscripten](notification-groups/emscripten.md)
     - [Fuchsia](notification-groups/fuchsia.md)
-    - [LLVM](notification-groups/llvm.md)
     - [RISC-V](notification-groups/risc-v.md)
     - [Rust for Linux](notification-groups/rust-for-linux.md)
     - [WASI](notification-groups/wasi.md)
@@ -100,11 +99,15 @@
 - [Rustdoc internals](./rustdoc-internals.md)
     - [Search](./rustdoc-internals/search.md)
 	- [The `rustdoc` test suite](./rustdoc-internals/rustdoc-test-suite.md)
+	- [The `rustdoc-gui` test suite](./rustdoc-internals/rustdoc-gui-test-suite.md)
+	- [The `rustdoc-json` test suite](./rustdoc-internals/rustdoc-json-test-suite.md)
+- [GPU offload internals](./offload/internals.md)
+    - [Installation](./offload/installation.md)
+    - [Usage](./offload/usage.md)
 - [Autodiff internals](./autodiff/internals.md)
     - [Installation](./autodiff/installation.md)
     - [How to debug](./autodiff/debugging.md)
     - [Autodiff flags](./autodiff/flags.md)
-    - [Current limitations](./autodiff/limitations.md)
 
 # Source Code Representation
 
@@ -120,8 +123,9 @@
     - [Feature gate checking](./feature-gate-ck.md)
     - [Lang Items](./lang-items.md)
 - [The HIR (High-level IR)](./hir.md)
-    - [Lowering AST to HIR](./ast-lowering.md)
-    - [Debugging](./hir-debugging.md)
+    - [Lowering AST to HIR](./hir/lowering.md)
+    - [Ambig/Unambig Types and Consts](./hir/ambig-unambig-ty-and-consts.md)
+    - [Debugging](./hir/debugging.md)
 - [The THIR (Typed High-level IR)](./thir.md)
 - [The MIR (Mid-level IR)](./mir/index.md)
     - [MIR construction](./mir/construction.md)
@@ -133,9 +137,9 @@
 
 - [Command-line arguments](./cli.md)
 - [rustc_driver and rustc_interface](./rustc-driver/intro.md)
+    - [Remarks on perma-unstable features](./rustc-driver/remarks-on-perma-unstable-features.md)
     - [Example: Type checking](./rustc-driver/interacting-with-the-ast.md)
     - [Example: Getting diagnostics](./rustc-driver/getting-diagnostics.md)
-    - [Remarks on perma-unstable features](./rustc-driver/remarks-on-perma-unstable-features.md)
 - [Errors and lints](diagnostics.md)
     - [Diagnostic and subdiagnostic structs](./diagnostics/diagnostic-structs.md)
     - [Translation](./diagnostics/translation.md)
@@ -156,6 +160,7 @@
     - [ADTs and Generic Arguments](./ty_module/generic_arguments.md)
     - [Parameter types/consts/regions](./ty_module/param_ty_const_regions.md)
 - [`TypeFolder` and `TypeFoldable`](./ty-fold.md)
+- [Aliases and Normalization](./normalization.md)
 - [Typing/Param Envs](./typing_parameter_envs.md)
 - [Type inference](./type-inference.md)
 - [Trait solving](./traits/resolution.md)
@@ -171,16 +176,16 @@
     - [Next-gen trait solving](./solve/trait-solving.md)
         - [Invariants of the type system](./solve/invariants.md)
         - [The solver](./solve/the-solver.md)
+        - [Candidate preference](./solve/candidate-preference.md)
         - [Canonicalization](./solve/canonicalization.md)
         - [Coinduction](./solve/coinduction.md)
         - [Caching](./solve/caching.md)
         - [Proof trees](./solve/proof-trees.md)
-        - [Normalization](./solve/normalization.md)
         - [Opaque types](./solve/opaque-types.md)
         - [Significant changes and quirks](./solve/significant-changes.md)
     - [`Unsize` and `CoerceUnsized` traits](./traits/unsize.md)
 - [Type checking](./type-checking.md)
-    - [Method Lookup](./method-lookup.md)
+    - [Method lookup](./method-lookup.md)
     - [Variance](./variance.md)
     - [Coherence checking](./coherence.md)
     - [Opaque types](./opaque-types-type-alias-impl-trait.md)
@@ -188,7 +193,7 @@
         - [Return Position Impl Trait In Trait](./return-position-impl-trait-in-trait.md)
         - [Region inference restrictions][opaque-infer]
 - [Const condition checking](./effects.md)
-- [Pattern and Exhaustiveness Checking](./pat-exhaustive-checking.md)
+- [Pattern and exhaustiveness checking](./pat-exhaustive-checking.md)
 - [Unsafety checking](./unsafety-checking.md)
 - [MIR dataflow](./mir/dataflow.md)
 - [Drop elaboration](./mir/drop-elaboration.md)
@@ -208,7 +213,7 @@
 - [Closure capture inference](./closure.md)
 - [Async closures/"coroutine-closures"](coroutine-closures.md)
 
-# MIR to Binaries
+# MIR to binaries
 
 - [Prologue](./part-5-intro.md)
 - [MIR optimizations](./mir/optimizations.md)
@@ -217,23 +222,27 @@
     - [Interpreter](./const-eval/interpret.md)
 - [Monomorphization](./backend/monomorph.md)
 - [Lowering MIR](./backend/lowering-mir.md)
-- [Code Generation](./backend/codegen.md)
+- [Code generation](./backend/codegen.md)
     - [Updating LLVM](./backend/updating-llvm.md)
     - [Debugging LLVM](./backend/debugging.md)
     - [Backend Agnostic Codegen](./backend/backend-agnostic.md)
-    - [Implicit Caller Location](./backend/implicit-caller-location.md)
-- [Libraries and Metadata](./backend/libs-and-metadata.md)
-- [Profile-guided Optimization](./profile-guided-optimization.md)
-- [LLVM Source-Based Code Coverage](./llvm-coverage-instrumentation.md)
-- [Sanitizers Support](./sanitizers.md)
+    - [Implicit caller location](./backend/implicit-caller-location.md)
+- [Libraries and metadata](./backend/libs-and-metadata.md)
+- [Profile-guided optimization](./profile-guided-optimization.md)
+- [LLVM source-based code coverage](./llvm-coverage-instrumentation.md)
+- [Sanitizers support](./sanitizers.md)
 - [Debugging support in the Rust compiler](./debugging-support-in-rustc.md)
 
 ---
 
 [Appendix A: Background topics](./appendix/background.md)
+
 [Appendix B: Glossary](./appendix/glossary.md)
+
 [Appendix C: Code Index](./appendix/code-index.md)
+
 [Appendix D: Compiler Lecture Series](./appendix/compiler-lecture.md)
+
 [Appendix E: Bibliography](./appendix/bibliography.md)
 
 [Appendix Z: HumorRust](./appendix/humorust.md)

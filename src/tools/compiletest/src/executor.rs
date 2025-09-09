@@ -1,5 +1,9 @@
 //! This module contains a reimplementation of the subset of libtest
 //! functionality needed by compiletest.
+//!
+//! FIXME(Zalathar): Much of this code was originally designed to mimic libtest
+//! as closely as possible, for ease of migration. Now that libtest is no longer
+//! used, we can potentially redesign things to be a better fit for compiletest.
 
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -9,10 +13,11 @@ use std::sync::{Arc, Mutex, mpsc};
 use std::{env, hint, io, mem, panic, thread};
 
 use crate::common::{Config, TestPaths};
+use crate::output_capture::{self, ConsoleOut};
+use crate::panic_hook;
 
 mod deadline;
 mod json;
-pub(crate) mod libtest;
 
 pub(crate) fn run_tests(config: &Config, tests: Vec<CollectedTest>) -> bool {
     let tests_len = tests.len();
@@ -41,9 +46,9 @@ pub(crate) fn run_tests(config: &Config, tests: Vec<CollectedTest>) -> bool {
     // In that case, the tests will effectively be run serially anyway.
     loop {
         // Spawn new test threads, up to the concurrency limit.
-        // FIXME(let_chains): Use a let-chain here when stable in bootstrap.
-        'spawn: while running_tests.len() < concurrency {
-            let Some((id, test)) = fresh_tests.next() else { break 'spawn };
+        while running_tests.len() < concurrency
+            && let Some((id, test)) = fresh_tests.next()
+        {
             listener.test_started(test);
             deadline_queue.push(id, test);
             let join_handle = spawn_test_thread(id, test, completion_tx.clone());
@@ -57,9 +62,11 @@ pub(crate) fn run_tests(config: &Config, tests: Vec<CollectedTest>) -> bool {
         }
 
         let completion = deadline_queue
-            .read_channel_while_checking_deadlines(&completion_rx, |_id, test| {
-                listener.test_timed_out(test);
-            })
+            .read_channel_while_checking_deadlines(
+                &completion_rx,
+                |id| running_tests.contains_key(&id),
+                |_id, test| listener.test_timed_out(test),
+            )
             .expect("receive channel should never be closed early");
 
         let RunningTest { test, join_handle } = running_tests.remove(&completion.id).unwrap();
@@ -114,16 +121,28 @@ fn run_test_inner(
     runnable_test: RunnableTest,
     completion_sender: mpsc::Sender<TestCompletion>,
 ) {
-    let is_capture = !runnable_test.config.nocapture;
-    let capture_buf = is_capture.then(|| Arc::new(Mutex::new(vec![])));
+    let capture = CaptureKind::for_config(&runnable_test.config);
 
-    if let Some(capture_buf) = &capture_buf {
-        io::set_output_capture(Some(Arc::clone(capture_buf)));
+    // Install a panic-capture buffer for use by the custom panic hook.
+    if capture.should_set_panic_hook() {
+        panic_hook::set_capture_buf(Default::default());
     }
 
-    let panic_payload = panic::catch_unwind(move || runnable_test.run()).err();
+    if let CaptureKind::Old { ref buf } = capture {
+        io::set_output_capture(Some(Arc::clone(buf)));
+    }
 
-    if is_capture {
+    let stdout = capture.stdout();
+    let stderr = capture.stderr();
+
+    let panic_payload = panic::catch_unwind(move || runnable_test.run(stdout, stderr)).err();
+
+    if let Some(panic_buf) = panic_hook::take_capture_buf() {
+        let panic_buf = panic_buf.lock().unwrap_or_else(|e| e.into_inner());
+        // Forward any captured panic message to (captured) stderr.
+        write!(stderr, "{panic_buf}");
+    }
+    if matches!(capture, CaptureKind::Old { .. }) {
         io::set_output_capture(None);
     }
 
@@ -134,9 +153,68 @@ fn run_test_inner(
             TestOutcome::Failed { message: Some("test did not panic as expected") }
         }
     };
-    let stdout = capture_buf.map(|mutex| mutex.lock().unwrap_or_else(|e| e.into_inner()).to_vec());
 
+    let stdout = capture.into_inner();
     completion_sender.send(TestCompletion { id, outcome, stdout }).unwrap();
+}
+
+enum CaptureKind {
+    /// Do not capture test-runner output, for `--no-capture`.
+    ///
+    /// (This does not affect `rustc` and other subprocesses spawned by test
+    /// runners, whose output is always captured.)
+    None,
+
+    /// Use the old output-capture implementation, which relies on the unstable
+    /// library feature `#![feature(internal_output_capture)]`.
+    Old { buf: Arc<Mutex<Vec<u8>>> },
+
+    /// Use the new output-capture implementation, which only uses stable Rust.
+    New { buf: output_capture::CaptureBuf },
+}
+
+impl CaptureKind {
+    fn for_config(config: &Config) -> Self {
+        if config.nocapture {
+            Self::None
+        } else if config.new_output_capture {
+            Self::New { buf: output_capture::CaptureBuf::new() }
+        } else {
+            // Create a capure buffer for `io::set_output_capture`.
+            Self::Old { buf: Default::default() }
+        }
+    }
+
+    fn should_set_panic_hook(&self) -> bool {
+        match self {
+            Self::None => false,
+            Self::Old { .. } => true,
+            Self::New { .. } => true,
+        }
+    }
+
+    fn stdout(&self) -> &dyn ConsoleOut {
+        self.capture_buf_or(&output_capture::Stdout)
+    }
+
+    fn stderr(&self) -> &dyn ConsoleOut {
+        self.capture_buf_or(&output_capture::Stderr)
+    }
+
+    fn capture_buf_or<'a>(&'a self, fallback: &'a dyn ConsoleOut) -> &'a dyn ConsoleOut {
+        match self {
+            Self::None | Self::Old { .. } => fallback,
+            Self::New { buf } => buf,
+        }
+    }
+
+    fn into_inner(self) -> Option<Vec<u8>> {
+        match self {
+            Self::None => None,
+            Self::Old { buf } => Some(buf.lock().unwrap_or_else(|e| e.into_inner()).to_vec()),
+            Self::New { buf } => Some(buf.into_inner().into()),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -156,10 +234,12 @@ impl RunnableTest {
         Self { config, testpaths, revision }
     }
 
-    fn run(&self) {
+    fn run(&self, stdout: &dyn ConsoleOut, stderr: &dyn ConsoleOut) {
         __rust_begin_short_backtrace(|| {
             crate::runtest::run(
                 Arc::clone(&self.config),
+                stdout,
+                stderr,
                 &self.testpaths,
                 self.revision.as_deref(),
             );
@@ -206,9 +286,9 @@ impl TestOutcome {
 ///
 /// Adapted from `filter_tests` in libtest.
 ///
-/// FIXME(#139660): After the libtest dependency is removed, redesign the whole
-/// filtering system to do a better job of understanding and filtering _paths_,
-/// instead of being tied to libtest's substring/exact matching behaviour.
+/// FIXME(#139660): Now that libtest has been removed, redesign the whole filtering system to
+/// do a better job of understanding and filtering _paths_, instead of being tied to libtest's
+/// substring/exact matching behaviour.
 fn filter_tests(opts: &Config, tests: Vec<CollectedTest>) -> Vec<CollectedTest> {
     let mut filtered = tests;
 
@@ -234,9 +314,9 @@ fn filter_tests(opts: &Config, tests: Vec<CollectedTest>) -> Vec<CollectedTest> 
 ///
 /// Copied from `get_concurrency` in libtest.
 ///
-/// FIXME(#139660): After the libtest dependency is removed, consider making
-/// bootstrap specify the number of threads on the command-line, instead of
-/// propagating the `RUST_TEST_THREADS` environment variable.
+/// FIXME(#139660): After the libtest dependency is removed, consider making bootstrap specify the
+/// number of threads on the command-line, instead of propagating the `RUST_TEST_THREADS`
+/// environment variable.
 fn get_concurrency() -> usize {
     if let Ok(value) = env::var("RUST_TEST_THREADS") {
         match value.parse::<NonZero<usize>>().ok() {
@@ -248,7 +328,7 @@ fn get_concurrency() -> usize {
     }
 }
 
-/// Information needed to create a `test::TestDescAndFn`.
+/// Information that was historically needed to create a libtest `TestDescAndFn`.
 pub(crate) struct CollectedTest {
     pub(crate) desc: CollectedTestDesc,
     pub(crate) config: Arc<Config>,
@@ -256,7 +336,7 @@ pub(crate) struct CollectedTest {
     pub(crate) revision: Option<String>,
 }
 
-/// Information needed to create a `test::TestDesc`.
+/// Information that was historically needed to create a libtest `TestDesc`.
 pub(crate) struct CollectedTestDesc {
     pub(crate) name: String,
     pub(crate) ignore: bool,
@@ -271,18 +351,6 @@ pub enum ColorConfig {
     AutoColor,
     AlwaysColor,
     NeverColor,
-}
-
-/// Format of the test results output.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
-pub enum OutputFormat {
-    /// Verbose output
-    Pretty,
-    /// Quiet output
-    #[default]
-    Terse,
-    /// JSON output
-    Json,
 }
 
 /// Whether test is expected to panic or not.

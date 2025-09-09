@@ -9,7 +9,7 @@ use rustc_data_structures::fx::FxIndexMap;
 use rustc_errors::DiagCtxtHandle;
 use rustc_session::config::{
     self, CodegenOptions, CrateType, ErrorOutputType, Externs, Input, JsonUnusedExterns,
-    OptionsTargetModifiers, UnstableOptions, get_cmd_lint_options, nightly_options,
+    OptionsTargetModifiers, Sysroot, UnstableOptions, get_cmd_lint_options, nightly_options,
     parse_crate_types_from_list, parse_externs, parse_target_triple,
 };
 use rustc_session::lint::Level;
@@ -103,9 +103,7 @@ pub(crate) struct Options {
     /// compiling doctests from the crate.
     pub(crate) edition: Edition,
     /// The path to the sysroot. Used during the compilation process.
-    pub(crate) sysroot: PathBuf,
-    /// Has the same value as `sysroot` except is `None` when the user didn't pass `---sysroot`.
-    pub(crate) maybe_sysroot: Option<PathBuf>,
+    pub(crate) sysroot: Sysroot,
     /// Lint information passed over the command-line.
     pub(crate) lint_opts: Vec<(String, Level)>,
     /// Whether to ask rustc to describe the lints it knows.
@@ -124,13 +122,9 @@ pub(crate) struct Options {
     /// temporary directory if not set.
     pub(crate) persist_doctests: Option<PathBuf>,
     /// Runtool to run doctests with
-    pub(crate) runtool: Option<String>,
+    pub(crate) test_runtool: Option<String>,
     /// Arguments to pass to the runtool
-    pub(crate) runtool_args: Vec<String>,
-    /// Whether to allow ignoring doctests on a per-target basis
-    /// For example, using ignore-foo to ignore running the doctest on any target that
-    /// contains "foo" as a substring
-    pub(crate) enable_per_target_ignores: bool,
+    pub(crate) test_runtool_args: Vec<String>,
     /// Do not run doctests, compile them if should_test is active.
     pub(crate) no_run: bool,
     /// What sources are being mapped.
@@ -178,7 +172,10 @@ pub(crate) struct Options {
     pub(crate) expanded_args: Vec<String>,
 
     /// Arguments to be used when compiling doctests.
-    pub(crate) doctest_compilation_args: Vec<String>,
+    pub(crate) doctest_build_args: Vec<String>,
+
+    /// Target modifiers.
+    pub(crate) target_modifiers: BTreeMap<OptionsTargetModifiers, String>,
 }
 
 impl fmt::Debug for Options {
@@ -205,7 +202,6 @@ impl fmt::Debug for Options {
             .field("target", &self.target)
             .field("edition", &self.edition)
             .field("sysroot", &self.sysroot)
-            .field("maybe_sysroot", &self.maybe_sysroot)
             .field("lint_opts", &self.lint_opts)
             .field("describe_lints", &self.describe_lints)
             .field("lint_cap", &self.lint_cap)
@@ -215,9 +211,8 @@ impl fmt::Debug for Options {
             .field("persist_doctests", &self.persist_doctests)
             .field("show_coverage", &self.show_coverage)
             .field("crate_version", &self.crate_version)
-            .field("runtool", &self.runtool)
-            .field("runtool_args", &self.runtool_args)
-            .field("enable-per-target-ignores", &self.enable_per_target_ignores)
+            .field("test_runtool", &self.test_runtool)
+            .field("test_runtool_args", &self.test_runtool_args)
             .field("run_check", &self.run_check)
             .field("no_run", &self.no_run)
             .field("test_builder_wrappers", &self.test_builder_wrappers)
@@ -310,6 +305,8 @@ pub(crate) struct RenderOptions {
     pub(crate) parts_out_dir: Option<PathToParts>,
     /// disable minification of CSS/JS
     pub(crate) disable_minification: bool,
+    /// If `true`, HTML source pages will generate the possibility to expand macros.
+    pub(crate) generate_macro_expansion: bool,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -385,7 +382,7 @@ impl Options {
         early_dcx: &mut EarlyDiagCtxt,
         matches: &getopts::Matches,
         args: Vec<String>,
-    ) -> Option<(InputMode, Options, RenderOptions)> {
+    ) -> Option<(InputMode, Options, RenderOptions, Vec<PathBuf>)> {
         // Check for unstable options.
         nightly_options::check_nightly_options(early_dcx, matches, &opts());
 
@@ -457,15 +454,22 @@ impl Options {
             return None;
         }
 
-        let mut emit = Vec::new();
+        let mut emit = FxIndexMap::<_, EmitType>::default();
         for list in matches.opt_strs("emit") {
             for kind in list.split(',') {
                 match kind.parse() {
-                    Ok(kind) => emit.push(kind),
+                    Ok(kind) => {
+                        // De-duplicate emit types and the last wins.
+                        // Only one instance for each type is allowed
+                        // regardless the actual data it carries.
+                        // This matches rustc's `--emit` behavior.
+                        emit.insert(std::mem::discriminant(&kind), kind);
+                    }
                     Err(()) => dcx.fatal(format!("unrecognized emission type: {kind}")),
                 }
             }
         }
+        let emit = emit.into_values().collect::<Vec<_>>();
 
         let show_coverage = matches.opt_present("show-coverage");
         let output_format_s = matches.opt_str("output-format");
@@ -648,10 +652,13 @@ impl Options {
 
         let extension_css = matches.opt_str("e").map(|s| PathBuf::from(&s));
 
-        if let Some(ref p) = extension_css
-            && !p.is_file()
-        {
-            dcx.fatal("option --extend-css argument must be a file");
+        let mut loaded_paths = Vec::new();
+
+        if let Some(ref p) = extension_css {
+            loaded_paths.push(p.clone());
+            if !p.is_file() {
+                dcx.fatal("option --extend-css argument must be a file");
+            }
         }
 
         let mut themes = Vec::new();
@@ -695,6 +702,7 @@ impl Options {
                     ))
                     .emit();
                 }
+                loaded_paths.push(theme_file.clone());
                 themes.push(StylePath { path: theme_file });
             }
         }
@@ -713,6 +721,7 @@ impl Options {
             &mut id_map,
             edition,
             &None,
+            &mut loaded_paths,
         ) else {
             dcx.fatal("`ExternalHtml::load` failed");
         };
@@ -730,16 +739,14 @@ impl Options {
         }
 
         let target = parse_target_triple(early_dcx, matches);
-        let maybe_sysroot = matches.opt_str("sysroot").map(PathBuf::from);
-
-        let sysroot = rustc_session::filesearch::materialize_sysroot(maybe_sysroot.clone());
+        let sysroot = Sysroot::new(matches.opt_str("sysroot").map(PathBuf::from));
 
         let libs = matches
             .opt_strs("L")
             .iter()
             .map(|s| {
                 SearchPath::from_cli_opt(
-                    &sysroot,
+                    sysroot.path(),
                     &target,
                     early_dcx,
                     s,
@@ -779,9 +786,8 @@ impl Options {
         let unstable_opts_strs = matches.opt_strs("Z");
         let lib_strs = matches.opt_strs("L");
         let extern_strs = matches.opt_strs("extern");
-        let runtool = matches.opt_str("runtool");
-        let runtool_args = matches.opt_strs("runtool-arg");
-        let enable_per_target_ignores = matches.opt_present("enable-per-target-ignores");
+        let test_runtool = matches.opt_str("test-runtool");
+        let test_runtool_args = matches.opt_strs("test-runtool-arg");
         let document_private = matches.opt_present("document-private-items");
         let document_hidden = matches.opt_present("document-hidden-items");
         let run_check = matches.opt_present("check");
@@ -789,6 +795,7 @@ impl Options {
         let show_type_layout = matches.opt_present("show-type-layout");
         let nocapture = matches.opt_present("nocapture");
         let generate_link_to_definition = matches.opt_present("generate-link-to-definition");
+        let generate_macro_expansion = matches.opt_present("generate-macro-expansion");
         let extern_html_root_takes_precedence =
             matches.opt_present("extern-html-root-takes-precedence");
         let html_no_source = matches.opt_present("html-no-source");
@@ -804,11 +811,19 @@ impl Options {
             .with_note("`--generate-link-to-definition` option will be ignored")
             .emit();
         }
+        if generate_macro_expansion && (show_coverage || output_format != OutputFormat::Html) {
+            dcx.struct_warn(
+                "`--generate-macro-expansion` option can only be used with HTML output format",
+            )
+            .with_note("`--generate-macro-expansion` option will be ignored")
+            .emit();
+        }
 
         let scrape_examples_options = ScrapeExamplesOptions::new(matches, dcx);
         let with_examples = matches.opt_strs("with-examples");
-        let call_locations = crate::scrape_examples::load_call_locations(with_examples, dcx);
-        let doctest_compilation_args = matches.opt_strs("doctest-compilation-args");
+        let call_locations =
+            crate::scrape_examples::load_call_locations(with_examples, dcx, &mut loaded_paths);
+        let doctest_build_args = matches.opt_strs("doctest-build-arg");
 
         let unstable_features =
             rustc_feature::UnstableFeatures::from_environment(crate_name.as_deref());
@@ -833,7 +848,6 @@ impl Options {
             target,
             edition,
             sysroot,
-            maybe_sysroot,
             lint_opts,
             describe_lints,
             lint_cap,
@@ -843,9 +857,8 @@ impl Options {
             crate_version,
             test_run_directory,
             persist_doctests,
-            runtool,
-            runtool_args,
-            enable_per_target_ignores,
+            test_runtool,
+            test_runtool_args,
             test_builder,
             run_check,
             no_run,
@@ -858,7 +871,8 @@ impl Options {
             scrape_examples_options,
             unstable_features,
             expanded_args: args,
-            doctest_compilation_args,
+            doctest_build_args,
+            target_modifiers,
         };
         let render_options = RenderOptions {
             output,
@@ -885,6 +899,7 @@ impl Options {
             unstable_features,
             emit,
             generate_link_to_definition,
+            generate_macro_expansion,
             call_locations,
             no_emit_shared: false,
             html_no_source,
@@ -894,7 +909,7 @@ impl Options {
             parts_out_dir,
             disable_minification,
         };
-        Some((input, options, render_options))
+        Some((input, options, render_options, loaded_paths))
     }
 }
 

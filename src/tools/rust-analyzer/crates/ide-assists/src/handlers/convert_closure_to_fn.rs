@@ -1,23 +1,20 @@
 use either::Either;
 use hir::{CaptureKind, ClosureCapture, FileRangeWrapper, HirDisplay};
 use ide_db::{
-    assists::{AssistId, AssistKind},
-    base_db::SourceDatabase,
-    defs::Definition,
-    search::FileReferenceNode,
-    source_change::SourceChangeBuilder,
-    FxHashSet,
+    FxHashSet, assists::AssistId, base_db::SourceDatabase, defs::Definition,
+    search::FileReferenceNode, source_change::SourceChangeBuilder,
 };
 use stdx::format_to;
 use syntax::{
+    AstNode, Direction, SyntaxKind, SyntaxNode, T, TextSize, ToSmolStr,
     algo::{skip_trivia_token, skip_whitespace_token},
     ast::{
-        self,
+        self, HasArgList, HasGenericParams, HasName,
         edit::{AstNodeEdit, IndentLevel},
-        make, HasArgList, HasGenericParams, HasName,
+        make,
     },
     hacks::parse_expr_from_str,
-    ted, AstNode, Direction, SyntaxKind, SyntaxNode, TextSize, ToSmolStr, T,
+    ted,
 };
 
 use crate::assist_context::{AssistContext, Assists};
@@ -104,21 +101,21 @@ pub(crate) fn convert_closure_to_fn(acc: &mut Assists, ctx: &AssistContext<'_>) 
     // but we need to locate `AstPtr`s inside the body.
     let mut wrap_body_in_block = true;
     if let ast::Expr::BlockExpr(block) = &body {
-        if let Some(async_token) = block.async_token() {
-            if !is_async {
-                is_async = true;
-                ret_ty = ret_ty.future_output(ctx.db())?;
-                let token_idx = async_token.index();
-                let whitespace_tokens_after_count = async_token
-                    .siblings_with_tokens(Direction::Next)
-                    .skip(1)
-                    .take_while(|token| token.kind() == SyntaxKind::WHITESPACE)
-                    .count();
-                body.syntax().splice_children(
-                    token_idx..token_idx + whitespace_tokens_after_count + 1,
-                    Vec::new(),
-                );
-            }
+        if let Some(async_token) = block.async_token()
+            && !is_async
+        {
+            is_async = true;
+            ret_ty = ret_ty.future_output(ctx.db())?;
+            let token_idx = async_token.index();
+            let whitespace_tokens_after_count = async_token
+                .siblings_with_tokens(Direction::Next)
+                .skip(1)
+                .take_while(|token| token.kind() == SyntaxKind::WHITESPACE)
+                .count();
+            body.syntax().splice_children(
+                token_idx..token_idx + whitespace_tokens_after_count + 1,
+                Vec::new(),
+            );
         }
         if let Some(gen_token) = block.gen_token() {
             is_gen = true;
@@ -146,7 +143,7 @@ pub(crate) fn convert_closure_to_fn(acc: &mut Assists, ctx: &AssistContext<'_>) 
     };
 
     acc.add(
-        AssistId("convert_closure_to_fn", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("convert_closure_to_fn"),
         "Convert closure to fn",
         closure.param_list()?.syntax().text_range(),
         |builder| {
@@ -252,7 +249,7 @@ pub(crate) fn convert_closure_to_fn(acc: &mut Assists, ctx: &AssistContext<'_>) 
             );
             fn_ = fn_.dedent(IndentLevel::from_token(&fn_.syntax().last_token().unwrap()));
 
-            builder.edit_file(ctx.file_id());
+            builder.edit_file(ctx.vfs_file_id());
             match &closure_name {
                 Some((closure_decl, _, _)) => {
                     fn_ = fn_.indent(closure_decl.indent_level());
@@ -509,18 +506,17 @@ fn wrap_capture_in_deref_if_needed(
 }
 
 fn capture_as_arg(ctx: &AssistContext<'_>, capture: &ClosureCapture) -> ast::Expr {
-    let place =
-        parse_expr_from_str(&capture.display_place_source_code(ctx.db()), ctx.file_id().edition())
-            .expect("`display_place_source_code()` produced an invalid expr");
+    let place = parse_expr_from_str(&capture.display_place_source_code(ctx.db()), ctx.edition())
+        .expect("`display_place_source_code()` produced an invalid expr");
     let needs_mut = match capture.kind() {
         CaptureKind::SharedRef => false,
         CaptureKind::MutableRef | CaptureKind::UniqueSharedRef => true,
         CaptureKind::Move => return place,
     };
-    if let ast::Expr::PrefixExpr(expr) = &place {
-        if expr.op_kind() == Some(ast::UnaryOp::Deref) {
-            return expr.expr().expect("`display_place_source_code()` produced an invalid expr");
-        }
+    if let ast::Expr::PrefixExpr(expr) = &place
+        && expr.op_kind() == Some(ast::UnaryOp::Deref)
+    {
+        return expr.expr().expect("`display_place_source_code()` produced an invalid expr");
     }
     make::expr_ref(place, needs_mut)
 }
@@ -590,7 +586,7 @@ fn handle_call(
     let indent =
         if insert_newlines { first_arg_indent.unwrap().to_string() } else { String::new() };
     // FIXME: This text manipulation seems risky.
-    let text = ctx.db().file_text(file_id.file_id());
+    let text = ctx.db().file_text(file_id.file_id(ctx.db())).text(ctx.db());
     let mut text = text[..u32::from(range.end()).try_into().unwrap()].trim_end();
     if !text.ends_with(')') {
         return None;
@@ -633,7 +629,7 @@ fn handle_call(
         to_insert.push(',');
     }
 
-    builder.edit_file(file_id);
+    builder.edit_file(file_id.file_id(ctx.db()));
     builder.insert(offset, to_insert);
 
     Some(())
@@ -646,11 +642,11 @@ fn peel_blocks_and_refs_and_parens(mut expr: ast::Expr) -> ast::Expr {
             expr = ast::Expr::cast(parent).unwrap();
             continue;
         }
-        if let Some(stmt_list) = ast::StmtList::cast(parent) {
-            if let Some(block) = stmt_list.syntax().parent().and_then(ast::BlockExpr::cast) {
-                expr = ast::Expr::BlockExpr(block);
-                continue;
-            }
+        if let Some(stmt_list) = ast::StmtList::cast(parent)
+            && let Some(block) = stmt_list.syntax().parent().and_then(ast::BlockExpr::cast)
+        {
+            expr = ast::Expr::BlockExpr(block);
+            continue;
         }
         break;
     }
@@ -666,12 +662,11 @@ fn expr_of_pat(pat: ast::Pat) -> Option<ast::Expr> {
             if let Some(let_stmt) = ast::LetStmt::cast(ancestor.clone()) {
                 break 'find_expr let_stmt.initializer();
             }
-            if ast::MatchArm::can_cast(ancestor.kind()) {
-                if let Some(match_) =
+            if ast::MatchArm::can_cast(ancestor.kind())
+                && let Some(match_) =
                     ancestor.parent().and_then(|it| it.parent()).and_then(ast::MatchExpr::cast)
-                {
-                    break 'find_expr match_.expr();
-                }
+            {
+                break 'find_expr match_.expr();
             }
             if ast::ExprStmt::can_cast(ancestor.kind()) {
                 break;
@@ -1070,7 +1065,7 @@ fn foo() {
             r#"
 fn foo() {
     let (mut a, b) = (0.1, "abc");
-    fn closure(p1: i32, p2: &mut bool, a: &mut f64, b: &&str) {
+    fn closure(p1: i32, p2: &mut bool, a: &mut f64, b: &&'static str) {
         *a = 1.2;
         let c = *b;
     }
@@ -1102,7 +1097,7 @@ fn foo() {
             r#"
 fn foo() {
     let (mut a, b) = (0.1, "abc");
-    fn closure(p1: i32, p2: &mut bool, a: &mut f64, b: &&str) {
+    fn closure(p1: i32, p2: &mut bool, a: &mut f64, b: &&'static str) {
         let _: &mut bool = p2;
         *a = 1.2;
         let c = *b;
@@ -1140,7 +1135,7 @@ fn foo() {
             r#"
 fn foo() {
     let (mut a, b) = (0.1, "abc");
-    fn closure(p1: i32, p2: &mut bool, a: &mut f64, b: &&str) {
+    fn closure(p1: i32, p2: &mut bool, a: &mut f64, b: &&'static str) {
         let _: &mut bool = p2;
         *a = 1.2;
         let c = *b;

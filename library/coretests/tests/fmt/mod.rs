@@ -3,6 +3,21 @@ mod float;
 mod num;
 
 #[test]
+fn test_lifetime() {
+    // Trigger all different forms of expansion,
+    // and check that each of them can be stored as a variable.
+    let a = format_args!("hello");
+    let a = format_args!("hello {a}");
+    let a = format_args!("hello {a:1}");
+    let a = format_args!("hello {a} {a:?}");
+    assert_eq!(a.to_string(), "hello hello hello hello hello hello hello");
+
+    // Without arguments, it should also work in consts.
+    const A: std::fmt::Arguments<'static> = format_args!("hello");
+    assert_eq!(A.to_string(), "hello");
+}
+
+#[test]
 fn test_format_flags() {
     // No residual flags left by pointer formatting
     let p = "".as_ptr();
@@ -40,6 +55,36 @@ fn test_fmt_debug_of_raw_pointers() {
     let vtable = &mut 500 as &mut dyn Debug;
     check_fmt(vtable as *mut dyn Debug, "Pointer { addr: ", ", metadata: DynMetadata(");
     check_fmt(vtable as *const dyn Debug, "Pointer { addr: ", ", metadata: DynMetadata(");
+}
+
+#[test]
+fn test_fmt_debug_of_mut_reference() {
+    let mut x: u32 = 0;
+
+    assert_eq!(format!("{:?}", &mut x), "0");
+}
+
+#[test]
+fn test_default_write_impls() {
+    use core::fmt::Write;
+
+    struct Buf(String);
+
+    impl Write for Buf {
+        fn write_str(&mut self, s: &str) -> core::fmt::Result {
+            self.0.write_str(s)
+        }
+    }
+
+    let mut buf = Buf(String::new());
+    buf.write_char('a').unwrap();
+
+    assert_eq!(buf.0, "a");
+
+    let mut buf = Buf(String::new());
+    buf.write_fmt(format_args!("a")).unwrap();
+
+    assert_eq!(buf.0, "a");
 }
 
 #[test]

@@ -1,5 +1,10 @@
+#![allow(
+    clippy::no_effect,
+    clippy::uninlined_format_args,
+    clippy::unit_arg,
+    clippy::unnecessary_operation
+)]
 #![warn(clippy::dbg_macro)]
-#![allow(clippy::unnecessary_operation, clippy::no_effect, clippy::unit_arg)]
 
 fn foo(n: u32) -> u32 {
     if let Some(n) = dbg!(n.checked_sub(4)) { n } else { n }
@@ -115,6 +120,22 @@ mod issue12131 {
         //~^ dbg_macro
 
         print!("{}", dbg!(s));
+        //~^ dbg_macro
+    }
+}
+
+mod issue14914 {
+    use std::future::Future;
+
+    fn takes_async_fn<F, Fut>(_f: F)
+    where
+        F: FnOnce(i32) -> Fut,
+        Fut: Future<Output = i32>,
+    {
+    }
+
+    fn should_not_panic() {
+        takes_async_fn(async |val| dbg!(val));
         //~^ dbg_macro
     }
 }

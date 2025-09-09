@@ -1,11 +1,12 @@
 //! Dealing with host effect goals, i.e. enforcing the constness in
-//! `T: const Trait` or `T: ~const Trait`.
+//! `T: const Trait` or `T: [const] Trait`.
 
 use rustc_type_ir::fast_reject::DeepRejectCtxt;
 use rustc_type_ir::inherent::*;
-use rustc_type_ir::lang_items::TraitSolverLangItem;
+use rustc_type_ir::lang_items::SolverTraitLangItem;
+use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::solve::inspect::ProbeKind;
-use rustc_type_ir::{self as ty, Interner, elaborate};
+use rustc_type_ir::{self as ty, Interner, TypingMode, elaborate};
 use tracing::instrument;
 
 use super::assembly::{Candidate, structural_traits};
@@ -28,53 +29,51 @@ where
         self.trait_ref
     }
 
-    fn with_self_ty(self, cx: I, self_ty: I::Ty) -> Self {
-        self.with_self_ty(cx, self_ty)
+    fn with_replaced_self_ty(self, cx: I, self_ty: I::Ty) -> Self {
+        self.with_replaced_self_ty(cx, self_ty)
     }
 
-    fn trait_def_id(self, _: I) -> I::DefId {
+    fn trait_def_id(self, _: I) -> I::TraitId {
         self.def_id()
     }
 
-    fn probe_and_match_goal_against_assumption(
+    fn fast_reject_assumption(
         ecx: &mut EvalCtxt<'_, D>,
-        source: rustc_type_ir::solve::CandidateSource<I>,
         goal: Goal<I, Self>,
-        assumption: <I as Interner>::Clause,
-        then: impl FnOnce(&mut EvalCtxt<'_, D>) -> QueryResult<I>,
-    ) -> Result<Candidate<I>, NoSolution> {
-        if let Some(host_clause) = assumption.as_host_effect_clause() {
-            if host_clause.def_id() == goal.predicate.def_id()
-                && host_clause.constness().satisfies(goal.predicate.constness)
-            {
-                if !DeepRejectCtxt::relate_rigid_rigid(ecx.cx()).args_may_unify(
-                    goal.predicate.trait_ref.args,
-                    host_clause.skip_binder().trait_ref.args,
-                ) {
-                    return Err(NoSolution);
-                }
-
-                ecx.probe_trait_candidate(source).enter(|ecx| {
-                    let assumption_trait_pred = ecx.instantiate_binder_with_infer(host_clause);
-                    ecx.eq(
-                        goal.param_env,
-                        goal.predicate.trait_ref,
-                        assumption_trait_pred.trait_ref,
-                    )?;
-                    then(ecx)
-                })
-            } else {
-                Err(NoSolution)
-            }
+        assumption: I::Clause,
+    ) -> Result<(), NoSolution> {
+        if let Some(host_clause) = assumption.as_host_effect_clause()
+            && host_clause.def_id() == goal.predicate.def_id()
+            && host_clause.constness().satisfies(goal.predicate.constness)
+            && DeepRejectCtxt::relate_rigid_rigid(ecx.cx()).args_may_unify(
+                goal.predicate.trait_ref.args,
+                host_clause.skip_binder().trait_ref.args,
+            )
+        {
+            Ok(())
         } else {
             Err(NoSolution)
         }
     }
 
-    /// Register additional assumptions for aliases corresponding to `~const` item bounds.
+    fn match_assumption(
+        ecx: &mut EvalCtxt<'_, D>,
+        goal: Goal<I, Self>,
+        assumption: I::Clause,
+        then: impl FnOnce(&mut EvalCtxt<'_, D>) -> QueryResult<I>,
+    ) -> QueryResult<I> {
+        let host_clause = assumption.as_host_effect_clause().unwrap();
+
+        let assumption_trait_pred = ecx.instantiate_binder_with_infer(host_clause);
+        ecx.eq(goal.param_env, goal.predicate.trait_ref, assumption_trait_pred.trait_ref)?;
+
+        then(ecx)
+    }
+
+    /// Register additional assumptions for aliases corresponding to `[const]` item bounds.
     ///
     /// Unlike item bounds, they are not simply implied by the well-formedness of the alias.
-    /// Instead, they only hold if the const conditons on the alias also hold. This is why
+    /// Instead, they only hold if the const conditions on the alias also hold. This is why
     /// we also register the const conditions of the alias after matching the goal against
     /// the assumption.
     fn consider_additional_alias_assumptions(
@@ -124,7 +123,7 @@ where
     fn consider_impl_candidate(
         ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
-        impl_def_id: <I as Interner>::DefId,
+        impl_def_id: I::DefId,
     ) -> Result<Candidate<I>, NoSolution> {
         let cx = ecx.cx();
 
@@ -136,12 +135,16 @@ where
         }
 
         let impl_polarity = cx.impl_polarity(impl_def_id);
-        match impl_polarity {
+        let certainty = match impl_polarity {
             ty::ImplPolarity::Negative => return Err(NoSolution),
-            ty::ImplPolarity::Reservation => {
-                unimplemented!("reservation impl for const trait: {:?}", goal)
-            }
-            ty::ImplPolarity::Positive => {}
+            ty::ImplPolarity::Reservation => match ecx.typing_mode() {
+                TypingMode::Coherence => Certainty::AMBIGUOUS,
+                TypingMode::Analysis { .. }
+                | TypingMode::Borrowck { .. }
+                | TypingMode::PostBorrowckAnalysis { .. }
+                | TypingMode::PostAnalysis => return Err(NoSolution),
+            },
+            ty::ImplPolarity::Positive => Certainty::Yes,
         };
 
         if !cx.impl_is_const(impl_def_id) {
@@ -160,7 +163,7 @@ where
                 .map(|pred| goal.with(cx, pred));
             ecx.add_goals(GoalSource::ImplWhereBound, where_clause_bounds);
 
-            // For this impl to be `const`, we need to check its `~const` bounds too.
+            // For this impl to be `const`, we need to check its `[const]` bounds too.
             let const_conditions = cx
                 .const_conditions(impl_def_id)
                 .iter_instantiated(cx, impl_args)
@@ -172,13 +175,13 @@ where
                 });
             ecx.add_goals(GoalSource::ImplWhereBound, const_conditions);
 
-            ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+            ecx.evaluate_added_goals_and_make_canonical_response(certainty)
         })
     }
 
     fn consider_error_guaranteed_candidate(
         ecx: &mut EvalCtxt<'_, D>,
-        _guar: <I as Interner>::ErrorGuaranteed,
+        _guar: I::ErrorGuaranteed,
     ) -> Result<Candidate<I>, NoSolution> {
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
             .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
@@ -198,11 +201,12 @@ where
         unreachable!("trait aliases are never const")
     }
 
-    fn consider_builtin_sized_candidate(
+    fn consider_builtin_sizedness_candidates(
         _ecx: &mut EvalCtxt<'_, D>,
         _goal: Goal<I, Self>,
+        _sizedness: SizedTraitKind,
     ) -> Result<Candidate<I>, NoSolution> {
-        unreachable!("Sized is never const")
+        unreachable!("Sized/MetaSized is never const")
     }
 
     fn consider_builtin_copy_clone_candidate(
@@ -233,7 +237,7 @@ where
         // A built-in `Fn` impl only holds if the output is sized.
         // (FIXME: technically we only need to check this if the type is a fn ptr...)
         let output_is_sized_pred = inputs_and_output.map_bound(|(_, output)| {
-            ty::TraitRef::new(cx, cx.require_lang_item(TraitSolverLangItem::Sized), [output])
+            ty::TraitRef::new(cx, cx.require_trait_lang_item(SolverTraitLangItem::Sized), [output])
         });
         let requirements = cx
             .const_conditions(def_id)
@@ -334,13 +338,6 @@ where
         _goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         unreachable!("DiscriminantKind is not const")
-    }
-
-    fn consider_builtin_async_destruct_candidate(
-        _ecx: &mut EvalCtxt<'_, D>,
-        _goal: Goal<I, Self>,
-    ) -> Result<Candidate<I>, NoSolution> {
-        unreachable!("AsyncDestruct is not const")
     }
 
     fn consider_builtin_destruct_candidate(

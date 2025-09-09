@@ -31,32 +31,6 @@
               {
                 "children": [
                   {
-                    "directories": [],
-                    "files": [
-                      "Dockerfile",
-                      "sudoers"
-                    ],
-                    "license": {
-                      "copyright": [
-                        "The Ferrocene Developers"
-                      ],
-                      "spdx": "Apache-2.0 OR MIT"
-                    },
-                    "type": "group"
-                  }
-                ],
-                "license": {
-                  "copyright": [
-                    "Colin Watson"
-                  ],
-                  "spdx": "GPL-3.0-or-later"
-                },
-                "name": "ci/docker-images/ubuntu-20",
-                "type": "directory"
-              },
-              {
-                "children": [
-                  {
                     "license": {
                       "copyright": [
                         "The Ferrocene Developers"
@@ -197,6 +171,20 @@
                 "type": "directory"
               },
               {
+                "directories": [],
+                "files": [
+                  "ci/docker-images/ubuntu-20/binfmt-qemu-aarch64",
+                  "ci/docker-images/ubuntu-20/binfmt-qemu-arm"
+                ],
+                "license": {
+                  "copyright": [
+                    "Colin Watson"
+                  ],
+                  "spdx": "GPL-3.0-or-later"
+                },
+                "type": "group"
+              },
+              {
                 "license": {
                   "copyright": [
                     "The Ferrocene Authors"
@@ -226,6 +214,17 @@
                   "spdx": "Apache-2.0 OR MIT"
                 },
                 "name": "doc/specification/src/licenses.rst",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/version.rst",
                 "type": "file"
               },
               {
@@ -447,7 +446,8 @@
           },
           {
             "directories": [
-              ".circleci"
+              ".circleci",
+              "src/bootstrap/src/ferrocene"
             ],
             "files": [
               ".dockerignore",

@@ -6,8 +6,7 @@
 //! ```
 use hir::Semantics;
 use ide_db::text_edit::TextEdit;
-use ide_db::{famous_defs::FamousDefs, RootDatabase};
-use span::EditionedFileId;
+use ide_db::{RootDatabase, famous_defs::FamousDefs};
 use syntax::ast::{self, AstNode, HasName};
 
 use crate::{
@@ -19,7 +18,6 @@ pub(super) fn enum_hints(
     acc: &mut Vec<InlayHint>,
     FamousDefs(sema, _): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig,
-    _: EditionedFileId,
     enum_: ast::Enum,
 ) -> Option<()> {
     if let DiscriminantHints::Never = config.discriminant_hints {
@@ -107,8 +105,8 @@ mod tests {
     use expect_test::expect;
 
     use crate::inlay_hints::{
-        tests::{check_edit, check_with_config, DISABLED_CONFIG},
         DiscriminantHints, InlayHintsConfig,
+        tests::{DISABLED_CONFIG, check_edit, check_with_config},
     };
 
     #[track_caller]

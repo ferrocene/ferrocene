@@ -119,7 +119,7 @@ fn insert_required_predicates_to_be_wf<'tcx>(
     explicit_map: &mut ExplicitPredicatesMap<'tcx>,
 ) {
     for arg in ty.walk() {
-        let leaf_ty = match arg.unpack() {
+        let leaf_ty = match arg.kind() {
             GenericArgKind::Type(ty) => ty,
 
             // No predicates from lifetimes or constants, except potentially
@@ -157,10 +157,10 @@ fn insert_required_predicates_to_be_wf<'tcx>(
                 );
             }
 
-            ty::Alias(ty::Weak, alias) => {
+            ty::Alias(ty::Free, alias) => {
                 // This corresponds to a type like `Type<'a, T>`.
                 // We check inferred and explicit predicates.
-                debug!("Weak");
+                debug!("Free");
                 check_inferred_predicates(
                     tcx,
                     alias.def_id,
@@ -299,7 +299,7 @@ fn check_explicit_predicates<'tcx>(
         // binding) and thus infer an outlives requirement that `X:
         // 'b`.
         if let Some(self_ty) = ignored_self_ty
-            && let GenericArgKind::Type(ty) = outlives_predicate.0.unpack()
+            && let GenericArgKind::Type(ty) = outlives_predicate.0.kind()
             && ty.walk().any(|arg| arg == self_ty.into())
         {
             debug!("skipping self ty = {ty:?}");

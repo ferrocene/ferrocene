@@ -10,50 +10,74 @@ use crate::linkers::Linker;
 use crate::report::Reporter;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
+    // Targets with architecture specific tuning
     #[cfg(target_arch = "x86_64")]
     TargetSpec {
-        triple: "aarch64-unknown-linux-gnu",
+        tuple: "aarch64-unknown-linux-gnu",
         std: true,
         linker: Linker::CrossCc(&["aarch64-linux-gnu-"]),
     },
     #[cfg(target_arch = "aarch64")]
-    TargetSpec { triple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
-    TargetSpec { triple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
-    TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
-    TargetSpec { triple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
+    #[cfg(target_arch = "x86_64")]
     TargetSpec {
-        triple: "riscv64gc-unknown-linux-gnu",
+        tuple: "aarch64-unknown-linux-musl",
+        std: true,
+        linker: Linker::CrossCc(&["aarch64-linux-musl-"]),
+    },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec { tuple: "aarch64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec {
+        tuple: "x86_64-unknown-linux-gnu",
+        std: true,
+        linker: Linker::CrossCc(&["x86_64-linux-gnu-"]),
+    },
+    #[cfg(target_arch = "x86_64")]
+    TargetSpec { tuple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec {
+        tuple: "x86_64-unknown-linux-musl",
+        std: true,
+        linker: Linker::CrossCc(&["x86_64-linux-musl-"]),
+    },
+    #[cfg(target_arch = "x86_64")]
+    TargetSpec { tuple: "x86_64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
+    // Targets without architecture specific tuning
+    TargetSpec { tuple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "aarch64-unknown-ferrocene.facade", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec {
+        tuple: "riscv64gc-unknown-linux-gnu",
         std: true,
         // https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux's toolchains use
         // the `riscv64-unknown-linux-gnu-` prefix instead of `riscv64-linux-gnu-`
         linker: Linker::CrossCc(&["riscv64-unknown-linux-gnu-"]),
     },
-    TargetSpec { triple: "thumbv6m-none-eabi", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "thumbv8m.base-none-eabi", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::BundledLld },
-    TargetSpec { triple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
-    TargetSpec { triple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
-    #[cfg(target_arch = "aarch64")]
+    TargetSpec { tuple: "thumbv6m-none-eabi", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "thumbv7em-ferrocene.facade-eabi", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec {
-        triple: "x86_64-unknown-linux-gnu",
+        tuple: "thumbv7em-ferrocene.facade-eabihf",
         std: true,
-        linker: Linker::CrossCc(&["x86_64-linux-gnu-"]),
+        linker: Linker::BundledLld,
     },
-    #[cfg(target_arch = "x86_64")]
-    TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
+    TargetSpec { tuple: "thumbv8m.base-none-eabi", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
 ];
 
 #[derive(Debug)]
 pub(crate) struct TargetSpec {
-    /// The rustc triple for the target
-    pub(crate) triple: &'static str,
+    /// The rustc tuple for the target
+    pub(crate) tuple: &'static str,
     /// Indicates if the target provides libstd.
     pub(crate) std: bool,
     /// Indicates if the target requires a system C compiler as a linker driver
@@ -92,7 +116,7 @@ fn check_target(
     sysroot: &Path,
     target: &TargetSpec,
 ) -> Result<CheckTargetOutcome, Error> {
-    let target_dir = sysroot.join("lib").join("rustlib").join(target.triple);
+    let target_dir = sysroot.join("lib").join("rustlib").join(target.tuple);
     if !target_dir.is_dir() {
         // Target not present, ignore it.
         return Ok(CheckTargetOutcome::Missing);
@@ -104,7 +128,7 @@ fn check_target(
     };
     check_libraries(target, &target_dir, expected_libs)?;
 
-    reporter.success(&format!("target installed correctly: {}", target.triple));
+    reporter.success(&format!("target installed correctly: {}", target.tuple));
     Ok(CheckTargetOutcome::Found)
 }
 
@@ -120,14 +144,14 @@ fn check_libraries(target: &TargetSpec, target_dir: &Path, expected: &[&str]) ->
     let mut expected_to_find = expected.iter().cloned().collect::<HashSet<_>>();
     for (library, count) in find_libraries_in(&lib_dir)?.into_iter() {
         if count > 1 {
-            return Err(Error::DuplicateTargetLibrary { target: target.triple.into(), library });
+            return Err(Error::DuplicateTargetLibrary { target: target.tuple.into(), library });
         }
         expected_to_find.remove(library.as_str());
     }
 
     if let Some(library) = expected_to_find.iter().next() {
         Err(Error::TargetLibraryMissing {
-            target: target.triple.into(),
+            target: target.tuple.into(),
             library: library.to_string(),
         })
     } else {
@@ -172,12 +196,12 @@ mod tests {
 
     #[test]
     fn test_check_target_std() {
-        let triple = "x86_64-unknown-linux-gnu";
-        let target = TargetSpec { triple, std: true, linker: Linker::HostCc };
+        let tuple = "x86_64-unknown-linux-gnu";
+        let target = TargetSpec { tuple, std: true, linker: Linker::HostCc };
 
         let utils = TestUtils::new();
         utils
-            .target(triple)
+            .target(tuple)
             .lib("core", "0123456789abcdef")
             .lib("alloc", "0123456789abcdef")
             .lib("std", "0123456789abcdef")
@@ -195,12 +219,12 @@ mod tests {
 
     #[test]
     fn test_check_target_no_std() {
-        let triple = "x86_64-unknown-none";
-        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
+        let tuple = "x86_64-unknown-none";
+        let target = TargetSpec { tuple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
-            .target(triple)
+            .target(tuple)
             .lib("core", "0123456789abcdef")
             .lib("alloc", "0123456789abcdef")
             .lib("other", "0123456789abcdef") // Unknown libraries are ignored
@@ -210,20 +234,20 @@ mod tests {
             CheckTargetOutcome::Found,
             check_target(utils.reporter(), utils.sysroot(), &target).unwrap()
         );
-        utils.assert_report_success(format!("target installed correctly: {triple}").as_str());
+        utils.assert_report_success(format!("target installed correctly: {tuple}").as_str());
     }
 
     #[test]
     fn test_check_target_missing_library() {
-        let triple = "x86_64-unknown-none";
-        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
+        let tuple = "x86_64-unknown-none";
+        let target = TargetSpec { tuple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
-        utils.target(triple).lib("core", "0123456789abcdef").create();
+        utils.target(tuple).lib("core", "0123456789abcdef").create();
 
         match check_target(utils.reporter(), utils.sysroot(), &target) {
             Err(Error::TargetLibraryMissing { target, library }) => {
-                assert_eq!(target, triple);
+                assert_eq!(target, tuple);
                 assert_eq!(library, "alloc");
             }
             other => panic!("unexpected result: {other:?}"),
@@ -233,12 +257,12 @@ mod tests {
 
     #[test]
     fn test_check_target_duplicate_required_library() {
-        let triple = "x86_64-unknown-none";
-        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
+        let tuple = "x86_64-unknown-none";
+        let target = TargetSpec { tuple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
-            .target(triple)
+            .target(tuple)
             .lib("core", "0123456789abcdef")
             .lib("core", "abcdef0123456789")
             .lib("alloc", "0123456789abcdef")
@@ -246,7 +270,7 @@ mod tests {
 
         match check_target(utils.reporter(), utils.sysroot(), &target) {
             Err(Error::DuplicateTargetLibrary { target, library }) => {
-                assert_eq!(target, triple);
+                assert_eq!(target, tuple);
                 assert_eq!(library, "core");
             }
             other => panic!("unexpected result: {other:?}"),
@@ -256,12 +280,12 @@ mod tests {
 
     #[test]
     fn test_check_target_duplicate_other_library() {
-        let triple = "x86_64-unknown-none";
-        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
+        let tuple = "x86_64-unknown-none";
+        let target = TargetSpec { tuple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
-            .target(triple)
+            .target(tuple)
             .lib("core", "0123456789abcdef")
             .lib("other", "0123456789abcdef")
             .lib("other", "abcdef0123456789")
@@ -270,7 +294,7 @@ mod tests {
 
         match check_target(utils.reporter(), utils.sysroot(), &target) {
             Err(Error::DuplicateTargetLibrary { target, library }) => {
-                assert_eq!(target, triple);
+                assert_eq!(target, tuple);
                 assert_eq!(library, "other");
             }
             other => panic!("unexpected result: {other:?}"),
@@ -280,18 +304,18 @@ mod tests {
 
     #[test]
     fn test_find_libraries_in() {
-        let triple = "x86_64-unknown-linux-gnu";
+        let tuple = "x86_64-unknown-linux-gnu";
 
         let utils = TestUtils::new();
         utils
-            .target(triple)
+            .target(tuple)
             .lib("core", "0123456789abcdef")
             .lib("core", "abcdef0123456789")
             .lib("alloc", "0123456789abcdef")
             .lib("proc_macro", "0123456789abcdef")
             .create();
 
-        let lib_dir = utils.target_dir(triple).join("lib");
+        let lib_dir = utils.target_dir(tuple).join("lib");
         std::fs::write(lib_dir.join("foo-0123456789abcdef.so"), b"").unwrap(); // Invalid files are not counted.
 
         let output = find_libraries_in(&lib_dir).unwrap();

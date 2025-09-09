@@ -25,10 +25,13 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod bytewise;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use bytewise::BytewiseEq;
 
 use self::Ordering::*;
+use crate::marker::PointeeSized;
 use crate::ops::ControlFlow;
 
 /// Trait for comparisons using the equality operator.
@@ -246,7 +249,9 @@ use crate::ops::ControlFlow;
     append_const_msg
 )]
 #[rustc_diagnostic_item = "PartialEq"]
-pub trait PartialEq<Rhs: ?Sized = Self> {
+#[const_trait]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+pub trait PartialEq<Rhs: PointeeSized = Self>: PointeeSized {
     /// Tests for `self` and `other` values to be equal, and is used by `==`.
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -332,7 +337,7 @@ pub macro PartialEq($item:item) {
 #[doc(alias = "!=")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Eq"]
-pub trait Eq: PartialEq<Self> {
+pub trait Eq: PartialEq<Self> + PointeeSized {
     // this method is used solely by `impl Eq or #[derive(Eq)]` to assert that every component of a
     // type implements `Eq` itself. The current deriving infrastructure means doing this assertion
     // without using a method on this trait is nearly impossible.
@@ -361,7 +366,8 @@ pub macro Eq($item:item) {
 #[doc(hidden)]
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
-pub struct AssertParamIsEq<T: Eq + ?Sized> {
+#[cfg(not(feature = "ferrocene_certified"))]
+pub struct AssertParamIsEq<T: Eq + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
 
@@ -378,7 +384,11 @@ pub struct AssertParamIsEq<T: Eq + ?Sized> {
 ///
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified"),
+    derive(Clone, Copy, Eq, PartialOrd, Ord, Debug, Hash)
+)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(PartialEq))]
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.
 // It has no special behavior, but does require that the three variants
@@ -632,6 +642,7 @@ impl Ordering {
     #[inline]
     #[must_use]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn then_with<F: FnOnce() -> Ordering>(self, f: F) -> Ordering {
         match self {
             Equal => f(),
@@ -659,9 +670,11 @@ impl Ordering {
 #[derive(PartialEq, Eq, Debug, Copy, Default, Hash)]
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[repr(transparent)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] pub T);
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PartialOrd> PartialOrd for Reverse<T> {
     #[inline]
     fn partial_cmp(&self, other: &Reverse<T>) -> Option<Ordering> {
@@ -687,6 +700,7 @@ impl<T: PartialOrd> PartialOrd for Reverse<T> {
 }
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Ord> Ord for Reverse<T> {
     #[inline]
     fn cmp(&self, other: &Reverse<T>) -> Ordering {
@@ -695,6 +709,7 @@ impl<T: Ord> Ord for Reverse<T> {
 }
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone> Clone for Reverse<T> {
     #[inline]
     fn clone(&self) -> Reverse<T> {
@@ -954,7 +969,7 @@ impl<T: Clone> Clone for Reverse<T> {
 #[doc(alias = ">=")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Ord"]
-pub trait Ord: Eq + PartialOrd<Self> {
+pub trait Ord: Eq + PartialOrd<Self> + PointeeSized {
     /// This method returns an [`Ordering`] between `self` and `other`.
     ///
     /// By convention, `self.cmp(&other)` returns the ordering matching the expression
@@ -1091,6 +1106,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro Ord($item:item) {
     /* compiler built-in */
 }
@@ -1337,7 +1353,8 @@ pub macro Ord($item:item) {
     append_const_msg
 )]
 #[rustc_diagnostic_item = "PartialOrd"]
-pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
+#[allow(multiple_supertrait_upcastable)] // FIXME(sized_hierarchy): remove this
+pub trait PartialOrd<Rhs: PointeeSized = Self>: PartialEq<Rhs> + PointeeSized {
     /// This method returns an ordering between `self` and `other` values if one exists.
     ///
     /// # Examples
@@ -1445,7 +1462,6 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// check `==` and `<` separately to do rather than needing to calculate
     /// (then optimize out) the three-way `Ordering` result.
     #[inline]
-    #[must_use]
     // Added to improve the behaviour of tuples; not necessarily stabilization-track.
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
@@ -1455,7 +1471,6 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
 
     /// Same as `__chaining_lt`, but for `<=` instead of `<`.
     #[inline]
-    #[must_use]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
     fn __chaining_le(&self, other: &Rhs) -> ControlFlow<bool> {
@@ -1464,7 +1479,6 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
 
     /// Same as `__chaining_lt`, but for `>` instead of `<`.
     #[inline]
-    #[must_use]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
     fn __chaining_gt(&self, other: &Rhs) -> ControlFlow<bool> {
@@ -1473,7 +1487,6 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
 
     /// Same as `__chaining_lt`, but for `>=` instead of `<`.
     #[inline]
-    #[must_use]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
     fn __chaining_ge(&self, other: &Rhs) -> ControlFlow<bool> {
@@ -1481,13 +1494,14 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     }
 }
 
-fn default_chaining_impl<T: ?Sized, U: ?Sized>(
+fn default_chaining_impl<T, U>(
     lhs: &T,
     rhs: &U,
     p: impl FnOnce(Ordering) -> bool,
 ) -> ControlFlow<bool>
 where
-    T: PartialOrd<U>,
+    T: PartialOrd<U> + PointeeSized,
+    U: PointeeSized,
 {
     // It's important that this only call `partial_cmp` once, not call `eq` then
     // one of the relational operators.  We don't want to `bcmp`-then-`memcp` a
@@ -1504,6 +1518,7 @@ where
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro PartialOrd($item:item) {
     /* compiler built-in */
 }
@@ -1552,6 +1567,9 @@ pub fn min<T: Ord>(v1: T, v2: T) -> T {
 ///
 /// Returns the first argument if the comparison determines them to be equal.
 ///
+/// The parameter order is preserved when calling the `compare` function, i.e. `v1` is
+/// always passed as the first argument and `v2` as the second.
+///
 /// # Examples
 ///
 /// ```
@@ -1571,8 +1589,9 @@ pub fn min<T: Ord>(v1: T, v2: T) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
-    if compare(&v2, &v1).is_lt() { v2 } else { v1 }
+    if compare(&v1, &v2).is_le() { v1 } else { v2 }
 }
 
 /// Returns the element that gives the minimum value from the specified function.
@@ -1596,6 +1615,7 @@ pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
     if f(&v2) < f(&v1) { v2 } else { v1 }
 }
@@ -1644,6 +1664,9 @@ pub fn max<T: Ord>(v1: T, v2: T) -> T {
 ///
 /// Returns the second argument if the comparison determines them to be equal.
 ///
+/// The parameter order is preserved when calling the `compare` function, i.e. `v1` is
+/// always passed as the first argument and `v2` as the second.
+///
 /// # Examples
 ///
 /// ```
@@ -1663,8 +1686,9 @@ pub fn max<T: Ord>(v1: T, v2: T) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
-    if compare(&v2, &v1).is_lt() { v1 } else { v2 }
+    if compare(&v1, &v2).is_gt() { v1 } else { v2 }
 }
 
 /// Returns the element that gives the maximum value from the specified function.
@@ -1688,6 +1712,7 @@ pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
     if f(&v2) < f(&v1) { v1 } else { v2 }
 }
@@ -1732,6 +1757,7 @@ pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn minmax<T>(v1: T, v2: T) -> [T; 2]
 where
     T: Ord,
@@ -1742,6 +1768,9 @@ where
 /// Returns minimum and maximum values with respect to the specified comparison function.
 ///
 /// Returns `[v1, v2]` if the comparison determines them to be equal.
+///
+/// The parameter order is preserved when calling the `compare` function, i.e. `v1` is
+/// always passed as the first argument and `v2` as the second.
 ///
 /// # Examples
 ///
@@ -1763,11 +1792,12 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn minmax_by<T, F>(v1: T, v2: T, compare: F) -> [T; 2]
 where
     F: FnOnce(&T, &T) -> Ordering,
 {
-    if compare(&v2, &v1).is_lt() { [v2, v1] } else { [v1, v2] }
+    if compare(&v1, &v2).is_le() { [v1, v2] } else { [v2, v1] }
 }
 
 /// Returns minimum and maximum values with respect to the specified key function.
@@ -1791,6 +1821,7 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn minmax_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> [T; 2]
 where
     F: FnMut(&T) -> K,
@@ -1803,12 +1834,15 @@ where
 mod impls {
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
     use crate::hint::unreachable_unchecked;
+    #[cfg(not(feature = "ferrocene_certified"))]
+    use crate::marker::PointeeSized;
     use crate::ops::ControlFlow::{self, Break, Continue};
 
     macro_rules! partial_eq_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
-            impl PartialEq for $t {
+            #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+            impl const PartialEq for $t {
                 #[inline]
                 fn eq(&self, other: &Self) -> bool { *self == *other }
                 #[inline]
@@ -1818,6 +1852,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialEq for () {
         #[inline]
         fn eq(&self, _other: &()) -> bool {
@@ -1829,8 +1864,14 @@ mod impls {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     partial_eq_impl! {
         bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128
+    }
+
+    #[cfg(feature = "ferrocene_certified")]
+    partial_eq_impl! {
+        bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64
     }
 
     macro_rules! eq_impl {
@@ -1840,7 +1881,11 @@ mod impls {
         )*)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     eq_impl! { () bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
+
+    #[cfg(feature = "ferrocene_certified")]
+    eq_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[rustfmt::skip]
     macro_rules! partial_ord_methods_primitive_impl {
@@ -1901,6 +1946,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialOrd for () {
         #[inline]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
@@ -1918,7 +1964,11 @@ mod impls {
         partial_ord_methods_primitive_impl!();
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     partial_ord_impl! { f16 f32 f64 f128 }
+
+    #[cfg(feature = "ferrocene_certified")]
+    partial_ord_impl! { f32 f64 }
 
     macro_rules! ord_impl {
         ($($t:ty)*) => ($(
@@ -1943,6 +1993,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Ord for () {
         #[inline]
         fn cmp(&self, _other: &()) -> Ordering {
@@ -1961,6 +2012,9 @@ mod impls {
                 -1 => Less,
                 0 => Equal,
                 1 => Greater,
+                // Ferrocene annotation: This match arm cannot be covered because it is unreachable.
+                // See the safety comment below.
+                //
                 // SAFETY: bool as i8 returns 0 or 1, so the difference can't be anything else
                 _ => unsafe { unreachable_unchecked() },
             }
@@ -1983,9 +2037,14 @@ mod impls {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     ord_impl! { char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
+    #[cfg(feature = "ferrocene_certified")]
+    ord_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
+
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialEq for ! {
         #[inline]
         fn eq(&self, _: &!) -> bool {
@@ -1994,9 +2053,11 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Eq for ! {}
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialOrd for ! {
         #[inline]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
@@ -2005,6 +2066,7 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Ord for ! {
         #[inline]
         fn cmp(&self, _: &!) -> Ordering {
@@ -2015,9 +2077,11 @@ mod impls {
     // & pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &A
+    #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &A
     where
-        A: PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&B) -> bool {
@@ -2029,7 +2093,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized, B: ?Sized> PartialOrd<&B> for &A
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized, B: PointeeSized> PartialOrd<&B> for &A
     where
         A: PartialOrd<B>,
     {
@@ -2071,7 +2136,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized> Ord for &A
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized> Ord for &A
     where
         A: Ord,
     {
@@ -2081,14 +2147,17 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized> Eq for &A where A: Eq {}
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized> Eq for &A where A: Eq {}
 
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &mut A
+    #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &mut A
     where
-        A: PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&mut B) -> bool {
@@ -2100,7 +2169,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized, B: ?Sized> PartialOrd<&mut B> for &mut A
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized, B: PointeeSized> PartialOrd<&mut B> for &mut A
     where
         A: PartialOrd<B>,
     {
@@ -2142,7 +2212,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized> Ord for &mut A
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized> Ord for &mut A
     where
         A: Ord,
     {
@@ -2152,12 +2223,15 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized> Eq for &mut A where A: Eq {}
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized> Eq for &mut A where A: Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &A
+    #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &A
     where
-        A: PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&mut B) -> bool {
@@ -2170,9 +2244,11 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &mut A
+    #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &mut A
     where
-        A: PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&B) -> bool {

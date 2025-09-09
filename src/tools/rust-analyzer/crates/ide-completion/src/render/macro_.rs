@@ -1,8 +1,8 @@
 //! Renderer for macro invocations.
 
 use hir::HirDisplay;
-use ide_db::{documentation::Documentation, SymbolKind};
-use syntax::{format_smolstr, SmolStr, ToSmolStr};
+use ide_db::{SymbolKind, documentation::Documentation};
+use syntax::{SmolStr, ToSmolStr, format_smolstr};
 
 use crate::{
     context::{PathCompletionCtx, PathKind, PatternContext},
@@ -12,7 +12,7 @@ use crate::{
 
 pub(crate) fn render_macro(
     ctx: RenderContext<'_>,
-    PathCompletionCtx { kind, has_macro_bang, has_call_parens, .. }: &PathCompletionCtx,
+    PathCompletionCtx { kind, has_macro_bang, has_call_parens, .. }: &PathCompletionCtx<'_>,
 
     name: hir::Name,
     macro_: hir::Macro,

@@ -57,8 +57,14 @@ add() {
     done
 }
 
-# Load the generic configuration from our dist profile.
-add --set profile=ferrocene-dist
+# On unprivileged CI we use a downloaded LLVM, meaning we cannot set options like
+# rust.lld = true, so don't enable the `ferrocene-dist` profile
+if [[ -n "${FERROCENE_UNPRIVILEGED_CI+x}" ]]; then
+    echo "Using unprivileged CI, not setting profile to \`ferrocene-dist\`"
+else
+    # Load the generic configuration from our dist profile.
+    add --set profile=ferrocene-dist
+fi
 
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.
@@ -112,9 +118,28 @@ add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
-add --set target.aarch64-unknown-ferrocenecoretest.cc=aarch64-linux-gnu-gcc
-add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
-add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
+add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
+add --set target."aarch64-unknown-ferrocene\.certified".cc=aarch64-linux-gnu-gcc
+add --set target."thumbv7em-ferrocene\.certified-eabi".cc=arm-none-eabi-gcc
+add --set target."thumbv7em-ferrocene\.certified-eabihf".cc=arm-none-eabi-gcc
+
+# musl toolchains use the architecture, also we need to set the `musl-root`
+add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/
+add --set target.x86_64-unknown-linux-musl.cc=x86_64-linux-musl-gcc
+add --set target.aarch64-unknown-linux-musl.musl-root=/usr/local/aarch64-linux-musl/
+add --set target.aarch64-unknown-linux-musl.cc=aarch64-linux-musl-gcc
+
+# disable sanitizers (defaults to true in ferrocene-dist profile) on MUSL as
+# LLVM does not support MUSL
+add --set target.aarch64-unknown-linux-musl.sanitizers=false
+add --set target.x86_64-unknown-linux-musl.sanitizers=false
+
+# experiment to enable code coverage
+add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
+add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
+add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).
@@ -184,13 +209,19 @@ else
     # source code automatically from a public repository.
     #
     # This will not work for non-employees of Ferrous Systems
-    add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2023-09-21.tar.xz"
+    add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2025-04-30.tar.xz"
 
-    # Include the technical report from the assessor in the documentation.
+    # Include the compiler technical report from the assessor in the documentation.
     #
     # If this is not provided, the report will not be included in the generated
     # documentation. This should only be set in stable, qualified releases.
-    #add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-technical-report.pdf"
+    #add --set ferrocene.compiler-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf"
+
+    # Include the core library technical report from the assessor in the documentation.
+    #
+    # If this is not provided, the report will not be included in the generated
+    # documentation. This should only be set in stable, qualified releases.
+    #add --set ferrocene.core-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf"
 fi
 
 ./configure ${configure_args[@]}

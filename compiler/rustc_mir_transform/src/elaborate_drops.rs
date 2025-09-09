@@ -62,12 +62,14 @@ impl<'tcx> crate::MirPass<'tcx> for ElaborateDrops {
             let env = MoveDataTypingEnv { move_data, typing_env };
 
             let mut inits = MaybeInitializedPlaces::new(tcx, body, &env.move_data)
+                .exclude_inactive_in_otherwise()
                 .skipping_unreachable_unwind()
                 .iterate_to_fixpoint(tcx, body, Some("elaborate_drops"))
                 .into_results_cursor(body);
             let dead_unwinds = compute_dead_unwinds(body, &mut inits);
 
             let uninits = MaybeUninitializedPlaces::new(tcx, body, &env.move_data)
+                .include_inactive_in_otherwise()
                 .mark_inactive_variants_as_uninit()
                 .skipping_unreachable_unwind(dead_unwinds)
                 .iterate_to_fixpoint(tcx, body, Some("elaborate_drops"))
@@ -158,6 +160,14 @@ impl<'a, 'tcx> DropElaborator<'a, 'tcx> for ElaborateDropsCtxt<'a, 'tcx> {
         self.env.typing_env
     }
 
+    fn allow_async_drops(&self) -> bool {
+        true
+    }
+
+    fn terminator_loc(&self, bb: BasicBlock) -> Location {
+        self.patch.terminator_loc(self.body, bb)
+    }
+
     #[instrument(level = "debug", skip(self), ret)]
     fn drop_style(&self, path: Self::Path, mode: DropFlagMode) -> DropStyle {
         let ((maybe_init, maybe_uninit), multipart) = match mode {
@@ -243,8 +253,8 @@ struct ElaborateDropsCtxt<'a, 'tcx> {
 }
 
 impl fmt::Debug for ElaborateDropsCtxt<'_, '_> {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Ok(())
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ElaborateDropsCtxt").finish_non_exhaustive()
     }
 }
 
@@ -328,7 +338,9 @@ impl<'a, 'tcx> ElaborateDropsCtxt<'a, 'tcx> {
         // This function should mirror what `collect_drop_flags` does.
         for (bb, data) in self.body.basic_blocks.iter_enumerated() {
             let terminator = data.terminator();
-            let TerminatorKind::Drop { place, target, unwind, replace } = terminator.kind else {
+            let TerminatorKind::Drop { place, target, unwind, replace, drop, async_fut: _ } =
+                terminator.kind
+            else {
                 continue;
             };
 
@@ -364,7 +376,16 @@ impl<'a, 'tcx> ElaborateDropsCtxt<'a, 'tcx> {
                         }
                     };
                     self.init_data.seek_before(self.body.terminator_loc(bb));
-                    elaborate_drop(self, terminator.source_info, place, path, target, unwind, bb)
+                    elaborate_drop(
+                        self,
+                        terminator.source_info,
+                        place,
+                        path,
+                        target,
+                        unwind,
+                        bb,
+                        drop,
+                    )
                 }
                 LookupResult::Parent(None) => {}
                 LookupResult::Parent(Some(_)) => {

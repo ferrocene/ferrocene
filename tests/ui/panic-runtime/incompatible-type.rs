@@ -21,6 +21,14 @@ pub fn test(_: DropMe) {
 }
 
 #[rustc_std_internal_symbol]
-pub unsafe extern "C" fn rust_eh_personality() {}
+pub unsafe extern "C" fn rust_eh_personality(
+    _version: i32,
+    _actions: i32,
+    _exception_class: u64,
+    _exception_object: *mut (),
+    _context: *mut (),
+) -> i32 {
+    loop {}
+}
 
 // ferrocene-annotations: um_rustc_C_codegen_units

@@ -1,6 +1,6 @@
 //! See [`FamousDefs`].
 
-use base_db::{CrateOrigin, LangCrateOrigin, SourceDatabase};
+use base_db::{CrateOrigin, LangCrateOrigin};
 use hir::{Crate, Enum, Function, Macro, Module, ScopeDef, Semantics, Trait};
 
 use crate::RootDatabase;
@@ -106,6 +106,18 @@ impl FamousDefs<'_, '_> {
         self.find_trait("core:convert:AsRef")
     }
 
+    pub fn core_convert_AsMut(&self) -> Option<Trait> {
+        self.find_trait("core:convert:AsMut")
+    }
+
+    pub fn core_borrow_Borrow(&self) -> Option<Trait> {
+        self.find_trait("core:borrow:Borrow")
+    }
+
+    pub fn core_borrow_BorrowMut(&self) -> Option<Trait> {
+        self.find_trait("core:borrow:BorrowMut")
+    }
+
     pub fn core_ops_ControlFlow(&self) -> Option<Enum> {
         self.find_enum("core:ops:ControlFlow")
     }
@@ -198,11 +210,10 @@ impl FamousDefs<'_, '_> {
     fn find_lang_crate(&self, origin: LangCrateOrigin) -> Option<Crate> {
         let krate = self.1;
         let db = self.0.db;
-        let crate_graph = self.0.db.crate_graph();
         let res = krate
             .dependencies(db)
             .into_iter()
-            .find(|dep| crate_graph[dep.krate.into()].origin == CrateOrigin::Lang(origin))?
+            .find(|dep| dep.krate.origin(db) == CrateOrigin::Lang(origin))?
             .krate;
         Some(res)
     }
@@ -221,11 +232,7 @@ impl FamousDefs<'_, '_> {
         for segment in path {
             module = module.children(db).find_map(|child| {
                 let name = child.name(db)?;
-                if name.as_str() == segment {
-                    Some(child)
-                } else {
-                    None
-                }
+                if name.as_str() == segment { Some(child) } else { None }
             })?;
         }
         let def =

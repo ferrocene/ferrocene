@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C codegen-units
-//~? requires a number
+//~? ERROR requires a number
 
 fn main() {}
 

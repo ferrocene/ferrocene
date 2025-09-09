@@ -1,28 +1,27 @@
 //! Renderer for `enum` variants.
 
-use hir::{db::HirDatabase, StructKind};
+use hir::{StructKind, db::HirDatabase};
 use ide_db::{
-    documentation::{Documentation, HasDocs},
     SymbolKind,
+    documentation::{Documentation, HasDocs},
 };
 
 use crate::{
+    CompletionItemKind, CompletionRelevance, CompletionRelevanceReturnType,
     context::{CompletionContext, PathCompletionCtx, PathKind},
     item::{Builder, CompletionItem, CompletionRelevanceFn},
     render::{
-        compute_type_match,
+        RenderContext, compute_type_match,
         variant::{
-            format_literal_label, format_literal_lookup, render_record_lit, render_tuple_lit,
-            visible_fields, RenderedLiteral,
+            RenderedLiteral, format_literal_label, format_literal_lookup, render_record_lit,
+            render_tuple_lit, visible_fields,
         },
-        RenderContext,
     },
-    CompletionItemKind, CompletionRelevance, CompletionRelevanceReturnType,
 };
 
 pub(crate) fn render_variant_lit(
     ctx: RenderContext<'_>,
-    path_ctx: &PathCompletionCtx,
+    path_ctx: &PathCompletionCtx<'_>,
     local_name: Option<hir::Name>,
     variant: hir::Variant,
     path: Option<hir::ModPath>,
@@ -36,7 +35,7 @@ pub(crate) fn render_variant_lit(
 
 pub(crate) fn render_struct_literal(
     ctx: RenderContext<'_>,
-    path_ctx: &PathCompletionCtx,
+    path_ctx: &PathCompletionCtx<'_>,
     strukt: hir::Struct,
     path: Option<hir::ModPath>,
     local_name: Option<hir::Name>,
@@ -50,7 +49,7 @@ pub(crate) fn render_struct_literal(
 
 fn render(
     ctx @ RenderContext { completion, .. }: RenderContext<'_>,
-    path_ctx: &PathCompletionCtx,
+    path_ctx: &PathCompletionCtx<'_>,
     thing: Variant,
     name: hir::Name,
     path: Option<hir::ModPath>,
@@ -164,11 +163,7 @@ impl Variant {
             Variant::Struct(it) => visible_fields(ctx, &fields, it)?,
             Variant::EnumVariant(it) => visible_fields(ctx, &fields, it)?,
         };
-        if !fields_omitted {
-            Some(visible_fields)
-        } else {
-            None
-        }
+        if !fields_omitted { Some(visible_fields) } else { None }
     }
 
     fn kind(self, db: &dyn HirDatabase) -> StructKind {
@@ -199,7 +194,7 @@ impl Variant {
         }
     }
 
-    fn ty(self, db: &dyn HirDatabase) -> hir::Type {
+    fn ty(self, db: &dyn HirDatabase) -> hir::Type<'_> {
         match self {
             Variant::Struct(it) => it.ty(db),
             Variant::EnumVariant(it) => it.parent_enum(db).ty(db),

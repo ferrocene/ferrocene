@@ -27,6 +27,12 @@ impl Command {
                 "nul byte found in provided data",
             ));
         }
+        if self.get_chroot().is_some() {
+            return Err(io::const_error!(
+                ErrorKind::Unsupported,
+                "chroot not supported by vxworks",
+            ));
+        }
         let (ours, theirs) = self.setup_io(default, needs_stdin)?;
         let mut p = Process { pid: 0, status: None };
 
@@ -67,7 +73,7 @@ impl Command {
             let c_envp = envp
                 .as_ref()
                 .map(|c| c.as_ptr())
-                .unwrap_or_else(|| *sys::os::environ() as *const _);
+                .unwrap_or_else(|| *sys::env::environ() as *const _);
             let stack_size = crate::cmp::max(
                 crate::env::var_os("RUST_MIN_STACK")
                     .and_then(|s| s.to_str().and_then(|s| s.parse().ok()))
@@ -76,7 +82,7 @@ impl Command {
             );
 
             // ensure that access to the environment is synchronized
-            let _lock = sys::os::env_read_lock();
+            let _lock = sys::env::env_read_lock();
 
             let ret = libc::rtpSpawn(
                 self.get_program_cstr().as_ptr(),
@@ -112,11 +118,6 @@ impl Command {
         }
     }
 
-    pub fn output(&mut self) -> io::Result<(ExitStatus, Vec<u8>, Vec<u8>)> {
-        let (proc, pipes) = self.spawn(Stdio::MakePipe, false)?;
-        crate::sys_common::process::wait_with_output(proc, pipes)
-    }
-
     pub fn exec(&mut self, default: Stdio) -> io::Error {
         let ret = Command::spawn(self, default, false);
         match ret {
@@ -145,14 +146,18 @@ impl Process {
         self.pid as u32
     }
 
-    pub fn kill(&mut self) -> io::Result<()> {
-        // If we've already waited on this process then the pid can be recycled
-        // and used for another process, and we probably shouldn't be killing
+    pub fn kill(&self) -> io::Result<()> {
+        self.send_signal(libc::SIGKILL)
+    }
+
+    pub fn send_signal(&self, signal: i32) -> io::Result<()> {
+        // If we've already waited on this process then the pid can be recycled and
+        // used for another process, and we probably shouldn't be sending signals to
         // random processes, so return Ok because the process has exited already.
         if self.status.is_some() {
             Ok(())
         } else {
-            cvt(unsafe { libc::kill(self.pid, libc::SIGKILL) }).map(drop)
+            cvt(unsafe { libc::kill(self.pid, signal) }).map(drop)
         }
     }
 

@@ -7,12 +7,13 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use span::{Edition, SpanAnchor, SpanData, SpanMap};
 use stdx::{format_to, never};
 use syntax::{
-    ast::{self, make::tokens::doc_comment},
-    format_smolstr, AstToken, Parse, PreorderWithTokens, SmolStr, SyntaxElement,
+    AstToken, Parse, PreorderWithTokens, SmolStr, SyntaxElement,
     SyntaxKind::{self, *},
-    SyntaxNode, SyntaxToken, SyntaxTreeBuilder, TextRange, TextSize, WalkEvent, T,
+    SyntaxNode, SyntaxToken, SyntaxTreeBuilder, T, TextRange, TextSize, WalkEvent,
+    ast::{self, make::tokens::doc_comment},
+    format_smolstr,
 };
-use tt::{buffer::Cursor, token_to_literal, Punct};
+use tt::{Punct, buffer::Cursor, token_to_literal};
 
 pub mod prettify_macro_expansion;
 mod to_parser_input;
@@ -45,7 +46,7 @@ impl<S: Copy, SM: SpanMapper<S>> SpanMapper<S> for &SM {
 /// Dummy things for testing where spans don't matter.
 pub mod dummy_test_span_utils {
 
-    use span::{Span, SyntaxContextId};
+    use span::{Span, SyntaxContext};
 
     use super::*;
 
@@ -58,7 +59,7 @@ pub mod dummy_test_span_utils {
             ),
             ast_id: span::ROOT_ERASED_FILE_AST_ID,
         },
-        ctx: SyntaxContextId::root(Edition::CURRENT),
+        ctx: SyntaxContext::root(Edition::CURRENT),
     };
 
     pub struct DummyTestSpanMap;
@@ -74,7 +75,7 @@ pub mod dummy_test_span_utils {
                     ),
                     ast_id: span::ROOT_ERASED_FILE_AST_ID,
                 },
-                ctx: SyntaxContextId::root(Edition::CURRENT),
+                ctx: SyntaxContext::root(Edition::CURRENT),
             }
         }
     }
@@ -126,11 +127,11 @@ where
 
 // The following items are what `rustc` macro can be parsed into :
 // link: https://github.com/rust-lang/rust/blob/9ebf47851a357faa4cd97f4b1dc7835f6376e639/src/libsyntax/ext/expand.rs#L141
-// * Expr(P<ast::Expr>)                     -> token_tree_to_expr
-// * Pat(P<ast::Pat>)                       -> token_tree_to_pat
-// * Ty(P<ast::Ty>)                         -> token_tree_to_ty
+// * Expr(Box<ast::Expr>)                     -> token_tree_to_expr
+// * Pat(Box<ast::Pat>)                       -> token_tree_to_pat
+// * Ty(Box<ast::Ty>)                         -> token_tree_to_ty
 // * Stmts(SmallVec<[ast::Stmt; 1]>)        -> token_tree_to_stmts
-// * Items(SmallVec<[P<ast::Item>; 1]>)     -> token_tree_to_items
+// * Items(SmallVec<[Box<ast::Item>; 1]>)     -> token_tree_to_items
 //
 // * TraitItems(SmallVec<[ast::TraitItem; 1]>)
 // * AssocItems(SmallVec<[ast::AssocItem; 1]>)
@@ -767,17 +768,17 @@ where
     }
 
     fn bump(&mut self) -> Option<(Self::Token, TextRange)> {
-        if let Some((punct, offset)) = self.punct_offset.clone() {
-            if usize::from(offset) + 1 < punct.text().len() {
-                let offset = offset + TextSize::of('.');
-                let range = punct.text_range();
-                self.punct_offset = Some((punct.clone(), offset));
-                let range = TextRange::at(range.start() + offset, TextSize::of('.'));
-                return Some((
-                    SynToken::Punct { token: punct, offset: u32::from(offset) as usize },
-                    range,
-                ));
-            }
+        if let Some((punct, offset)) = self.punct_offset.clone()
+            && usize::from(offset) + 1 < punct.text().len()
+        {
+            let offset = offset + TextSize::of('.');
+            let range = punct.text_range();
+            self.punct_offset = Some((punct.clone(), offset));
+            let range = TextRange::at(range.start() + offset, TextSize::of('.'));
+            return Some((
+                SynToken::Punct { token: punct, offset: u32::from(offset) as usize },
+                range,
+            ));
         }
 
         if let Some(leaf) = self.current_leaves.pop() {

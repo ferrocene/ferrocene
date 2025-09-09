@@ -1,28 +1,18 @@
 use super::*;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
+// Ferrocene addition: imports used by certified subset
+#[cfg(feature = "ferrocene_certified")]
+use crate::{intrinsics::const_eval_select, mem};
 
-impl<T: ?Sized> *const T {
-    /// Returns `true` if the pointer is null.
-    ///
-    /// Note that unsized types have many possible null pointers, as only the
-    /// raw data pointer is considered, not their length, vtable, etc.
-    /// Therefore, two pointers that are null may still not compare equal to
-    /// each other.
-    ///
-    /// # Panics during const evaluation
-    ///
-    /// If this method is used during const evaluation, and `self` is a pointer
-    /// that is offset beyond the bounds of the memory it initially pointed to,
-    /// then there might not be enough information to determine whether the
-    /// pointer is null. This is because the absolute address in memory is not
-    /// known at compile time. If the nullness of the pointer cannot be
-    /// determined, this method will panic.
-    ///
-    /// In-bounds pointers are never null, so the method will never panic for
-    /// such pointers.
+impl<T: PointeeSized> *const T {
+    #[doc = include_str!("docs/is_null.md")]
     ///
     /// # Examples
     ///
@@ -46,7 +36,7 @@ impl<T: ?Sized> *const T {
             if const #[rustc_allow_const_fn_unstable(const_raw_ptr_comparison)] {
                 match (ptr).guaranteed_eq(null_mut()) {
                     Some(res) => res,
-                    // To remain maximally convervative, we stop execution when we don't
+                    // To remain maximally conservative, we stop execution when we don't
                     // know whether the pointer is null or not.
                     // We can *not* return `false` here, that would be unsound in `NonNull::new`!
                     None => panic!("null-ness of this pointer cannot be determined in const context"),
@@ -64,6 +54,32 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     pub const fn cast<U>(self) -> *const U {
         self as _
+    }
+
+    /// Try to cast to a pointer of another type by checking alignment.
+    ///
+    /// If the pointer is properly aligned to the target type, it will be
+    /// cast to the target type. Otherwise, `None` is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// #![feature(pointer_try_cast_aligned)]
+    ///
+    /// let x = 0u64;
+    ///
+    /// let aligned: *const u64 = &x;
+    /// let unaligned = unsafe { aligned.byte_add(1) };
+    ///
+    /// assert!(aligned.try_cast_aligned::<u32>().is_some());
+    /// assert!(unaligned.try_cast_aligned::<u32>().is_none());
+    /// ```
+    #[unstable(feature = "pointer_try_cast_aligned", issue = "141221")]
+    #[must_use = "this returns the result of the operation, \
+                  without modifying the original"]
+    #[inline]
+    pub fn try_cast_aligned<U>(self) -> Option<*const U> {
+        if self.is_aligned_to(align_of::<U>()) { Some(self.cast()) } else { None }
     }
 
     /// Uses the address value in a new pointer of another type.
@@ -118,9 +134,10 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
-        U: ?Sized,
+        U: PointeeSized,
     {
         from_raw_parts::<U>(self as *const (), metadata(meta))
     }
@@ -133,6 +150,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_mut"]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn cast_mut(self) -> *mut T {
         self as _
     }
@@ -195,6 +213,7 @@ impl<T: ?Sized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -213,6 +232,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
         // meanwhile, we can implement it with `wrapping_offset`, which preserves the pointer's
@@ -232,6 +252,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -241,6 +262,7 @@ impl<T: ?Sized> *const T {
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }
@@ -292,6 +314,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid
         // for a reference if it isn't null.
@@ -324,6 +347,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
         unsafe { &*self }
@@ -362,6 +386,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
         T: Sized,
@@ -371,35 +396,7 @@ impl<T: ?Sized> *const T {
         if self.is_null() { None } else { Some(unsafe { &*(self as *const MaybeUninit<T>) }) }
     }
 
-    /// Adds a signed offset to a pointer.
-    ///
-    /// `count` is in units of T; e.g., a `count` of 3 represents a pointer
-    /// offset of `3 * size_of::<T>()` bytes.
-    ///
-    /// # Safety
-    ///
-    /// If any of the following conditions are violated, the result is Undefined Behavior:
-    ///
-    /// * The offset in bytes, `count * size_of::<T>()`, computed on mathematical integers (without
-    ///   "wrapping around"), must fit in an `isize`.
-    ///
-    /// * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some
-    ///   [allocated object], and the entire memory range between `self` and the result must be in
-    ///   bounds of that allocated object. In particular, this range must not "wrap around" the edge
-    ///   of the address space. Note that "range" here refers to a half-open range as usual in Rust,
-    ///   i.e., `self..result` for non-negative offsets and `result..self` for negative offsets.
-    ///
-    /// Allocated objects can never be larger than `isize::MAX` bytes, so if the computed offset
-    /// stays in bounds of the allocated object, it is guaranteed to satisfy the first requirement.
-    /// This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always
-    /// safe.
-    ///
-    /// Consider using [`wrapping_offset`] instead if these constraints are
-    /// difficult to satisfy. The only advantage of this method is that it
-    /// enables more aggressive compiler optimizations.
-    ///
-    /// [`wrapping_offset`]: #method.wrapping_offset
-    /// [allocated object]: crate::ptr#allocated-object
+    #[doc = include_str!("./docs/offset.md")]
     ///
     /// # Examples
     ///
@@ -416,7 +413,8 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -469,7 +467,8 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset`.
         unsafe { self.cast::<u8>().offset(count).with_metadata_of(self) }
@@ -484,16 +483,17 @@ impl<T: ?Sized> *const T {
     ///
     /// This operation itself is always safe, but using the resulting pointer is not.
     ///
-    /// The resulting pointer "remembers" the [allocated object] that `self` points to; it must not
-    /// be used to read or write other allocated objects.
+    /// The resulting pointer "remembers" the [allocation] that `self` points to
+    /// (this is called "[Provenance](ptr/index.html#provenance)").
+    /// The pointer must not be used to read or write other allocations.
     ///
     /// In other words, `let z = x.wrapping_offset((y as isize) - (x as isize))` does *not* make `z`
     /// the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still
     /// attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless
-    /// `x` and `y` point into the same allocated object.
+    /// `x` and `y` point into the same allocation.
     ///
     /// Compared to [`offset`], this method basically delays the requirement of staying within the
-    /// same allocated object: [`offset`] is immediate Undefined Behavior when crossing object
+    /// same allocation: [`offset`] is immediate Undefined Behavior when crossing object
     /// boundaries; `wrapping_offset` produces a pointer but still leads to Undefined Behavior if a
     /// pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`offset`]
     /// can be optimized better and is thus preferable in performance-sensitive code.
@@ -501,10 +501,10 @@ impl<T: ?Sized> *const T {
     /// The delayed check only considers the value of the pointer that was dereferenced, not the
     /// intermediate values used during the computation of the final result. For example,
     /// `x.wrapping_offset(o).wrapping_offset(o.wrapping_neg())` is always the same as `x`. In other
-    /// words, leaving the allocated object and then re-entering it later is permitted.
+    /// words, leaving the allocation and then re-entering it later is permitted.
     ///
     /// [`offset`]: #method.offset
-    /// [allocated object]: crate::ptr#allocated-object
+    /// [allocation]: crate::ptr#allocation
     ///
     /// # Examples
     ///
@@ -530,6 +530,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -552,6 +553,7 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_byte_offset(self, count: isize) -> Self {
         self.cast::<u8>().wrapping_offset(count).with_metadata_of(self)
     }
@@ -590,6 +592,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "ptr_mask", issue = "98290")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn mask(self, mask: usize) -> *const T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)
     }
@@ -617,7 +620,7 @@ impl<T: ?Sized> *const T {
     /// * `self` and `origin` must either
     ///
     ///   * point to the same address, or
-    ///   * both be [derived from][crate::ptr#provenance] a pointer to the same [allocated object], and the memory range between
+    ///   * both be [derived from][crate::ptr#provenance] a pointer to the same [allocation], and the memory range between
     ///     the two pointers must be in bounds of that object. (See below for an example.)
     ///
     /// * The distance between the pointers, in bytes, must be an exact multiple
@@ -625,10 +628,10 @@ impl<T: ?Sized> *const T {
     ///
     /// As a consequence, the absolute distance between the pointers, in bytes, computed on
     /// mathematical integers (without "wrapping around"), cannot overflow an `isize`. This is
-    /// implied by the in-bounds requirement, and the fact that no allocated object can be larger
+    /// implied by the in-bounds requirement, and the fact that no allocation can be larger
     /// than `isize::MAX` bytes.
     ///
-    /// The requirement for pointers to be derived from the same allocated object is primarily
+    /// The requirement for pointers to be derived from the same allocation is primarily
     /// needed for `const`-compatibility: the distance between pointers into *different* allocated
     /// objects is not known at compile-time. However, the requirement also exists at
     /// runtime and may be exploited by optimizations. If you wish to compute the difference between
@@ -637,7 +640,7 @@ impl<T: ?Sized> *const T {
     // FIXME: recommend `addr()` instead of `as usize` once that is stable.
     ///
     /// [`add`]: #method.add
-    /// [allocated object]: crate::ptr#allocated-object
+    /// [allocation]: crate::ptr#allocation
     ///
     /// # Panics
     ///
@@ -679,6 +682,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset_from", since = "1.65.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from(self, origin: *const T) -> isize
     where
         T: Sized,
@@ -702,6 +706,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: *const U) -> isize {
         // SAFETY: the caller must uphold the safety contract for `offset_from`.
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
@@ -767,7 +772,8 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -804,17 +810,18 @@ impl<T: ?Sized> *const T {
     /// units of **bytes**.
     ///
     /// This is purely a convenience for casting to a `u8` pointer and
-    /// using [`sub_ptr`][pointer::offset_from_unsigned] on it. See that method for
-    /// documentation and safety requirements.
+    /// using [`offset_from_unsigned`][pointer::offset_from_unsigned] on it.
+    /// See that method for documentation and safety requirements.
     ///
     /// For non-`Sized` pointees this operation considers only the data pointers,
     /// ignoring the metadata.
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {
-        // SAFETY: the caller must uphold the safety contract for `sub_ptr`.
+        // SAFETY: the caller must uphold the safety contract for `offset_from_unsigned`.
         unsafe { self.cast::<u8>().offset_from_unsigned(origin.cast::<u8>()) }
     }
 
@@ -868,6 +875,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn guaranteed_ne(self, other: *const T) -> Option<bool>
     where
         T: Sized,
@@ -878,38 +886,7 @@ impl<T: ?Sized> *const T {
         }
     }
 
-    /// Adds an unsigned offset to a pointer.
-    ///
-    /// This can only move the pointer forward (or not move it). If you need to move forward or
-    /// backward depending on the value, then you might want [`offset`](#method.offset) instead
-    /// which takes a signed offset.
-    ///
-    /// `count` is in units of T; e.g., a `count` of 3 represents a pointer
-    /// offset of `3 * size_of::<T>()` bytes.
-    ///
-    /// # Safety
-    ///
-    /// If any of the following conditions are violated, the result is Undefined Behavior:
-    ///
-    /// * The offset in bytes, `count * size_of::<T>()`, computed on mathematical integers (without
-    ///   "wrapping around"), must fit in an `isize`.
-    ///
-    /// * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some
-    ///   [allocated object], and the entire memory range between `self` and the result must be in
-    ///   bounds of that allocated object. In particular, this range must not "wrap around" the edge
-    ///   of the address space.
-    ///
-    /// Allocated objects can never be larger than `isize::MAX` bytes, so if the computed offset
-    /// stays in bounds of the allocated object, it is guaranteed to satisfy the first requirement.
-    /// This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always
-    /// safe.
-    ///
-    /// Consider using [`wrapping_add`] instead if these constraints are
-    /// difficult to satisfy. The only advantage of this method is that it
-    /// enables more aggressive compiler optimizations.
-    ///
-    /// [`wrapping_add`]: #method.wrapping_add
-    /// [allocated object]: crate::ptr#allocated-object
+    #[doc = include_str!("./docs/add.md")]
     ///
     /// # Examples
     ///
@@ -926,7 +903,8 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -978,7 +956,8 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
@@ -1001,12 +980,12 @@ impl<T: ?Sized> *const T {
     ///   "wrapping around"), must fit in an `isize`.
     ///
     /// * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some
-    ///   [allocated object], and the entire memory range between `self` and the result must be in
-    ///   bounds of that allocated object. In particular, this range must not "wrap around" the edge
+    ///   [allocation], and the entire memory range between `self` and the result must be in
+    ///   bounds of that allocation. In particular, this range must not "wrap around" the edge
     ///   of the address space.
     ///
-    /// Allocated objects can never be larger than `isize::MAX` bytes, so if the computed offset
-    /// stays in bounds of the allocated object, it is guaranteed to satisfy the first requirement.
+    /// Allocations can never be larger than `isize::MAX` bytes, so if the computed offset
+    /// stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.
     /// This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always
     /// safe.
     ///
@@ -1015,7 +994,7 @@ impl<T: ?Sized> *const T {
     /// enables more aggressive compiler optimizations.
     ///
     /// [`wrapping_sub`]: #method.wrapping_sub
-    /// [allocated object]: crate::ptr#allocated-object
+    /// [allocation]: crate::ptr#allocation
     ///
     /// # Examples
     ///
@@ -1032,7 +1011,8 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1090,7 +1070,8 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub`.
         unsafe { self.cast::<u8>().sub(count).with_metadata_of(self) }
@@ -1105,16 +1086,16 @@ impl<T: ?Sized> *const T {
     ///
     /// This operation itself is always safe, but using the resulting pointer is not.
     ///
-    /// The resulting pointer "remembers" the [allocated object] that `self` points to; it must not
-    /// be used to read or write other allocated objects.
+    /// The resulting pointer "remembers" the [allocation] that `self` points to; it must not
+    /// be used to read or write other allocations.
     ///
     /// In other words, `let z = x.wrapping_add((y as usize) - (x as usize))` does *not* make `z`
     /// the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still
     /// attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless
-    /// `x` and `y` point into the same allocated object.
+    /// `x` and `y` point into the same allocation.
     ///
     /// Compared to [`add`], this method basically delays the requirement of staying within the
-    /// same allocated object: [`add`] is immediate Undefined Behavior when crossing object
+    /// same allocation: [`add`] is immediate Undefined Behavior when crossing object
     /// boundaries; `wrapping_add` produces a pointer but still leads to Undefined Behavior if a
     /// pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`add`]
     /// can be optimized better and is thus preferable in performance-sensitive code.
@@ -1122,10 +1103,10 @@ impl<T: ?Sized> *const T {
     /// The delayed check only considers the value of the pointer that was dereferenced, not the
     /// intermediate values used during the computation of the final result. For example,
     /// `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the
-    /// allocated object and then re-entering it later is permitted.
+    /// allocation and then re-entering it later is permitted.
     ///
     /// [`add`]: #method.add
-    /// [allocated object]: crate::ptr#allocated-object
+    /// [allocation]: crate::ptr#allocation
     ///
     /// # Examples
     ///
@@ -1151,6 +1132,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1171,6 +1153,7 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_byte_add(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_add(count).with_metadata_of(self)
     }
@@ -1184,16 +1167,16 @@ impl<T: ?Sized> *const T {
     ///
     /// This operation itself is always safe, but using the resulting pointer is not.
     ///
-    /// The resulting pointer "remembers" the [allocated object] that `self` points to; it must not
-    /// be used to read or write other allocated objects.
+    /// The resulting pointer "remembers" the [allocation] that `self` points to; it must not
+    /// be used to read or write other allocations.
     ///
     /// In other words, `let z = x.wrapping_sub((x as usize) - (y as usize))` does *not* make `z`
     /// the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still
     /// attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless
-    /// `x` and `y` point into the same allocated object.
+    /// `x` and `y` point into the same allocation.
     ///
     /// Compared to [`sub`], this method basically delays the requirement of staying within the
-    /// same allocated object: [`sub`] is immediate Undefined Behavior when crossing object
+    /// same allocation: [`sub`] is immediate Undefined Behavior when crossing object
     /// boundaries; `wrapping_sub` produces a pointer but still leads to Undefined Behavior if a
     /// pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`sub`]
     /// can be optimized better and is thus preferable in performance-sensitive code.
@@ -1201,10 +1184,10 @@ impl<T: ?Sized> *const T {
     /// The delayed check only considers the value of the pointer that was dereferenced, not the
     /// intermediate values used during the computation of the final result. For example,
     /// `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the
-    /// allocated object and then re-entering it later is permitted.
+    /// allocation and then re-entering it later is permitted.
     ///
     /// [`sub`]: #method.sub
-    /// [allocated object]: crate::ptr#allocated-object
+    /// [allocation]: crate::ptr#allocation
     ///
     /// # Examples
     ///
@@ -1230,6 +1213,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1250,6 +1234,7 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_byte_sub(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_sub(count).with_metadata_of(self)
     }
@@ -1263,7 +1248,8 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1284,7 +1270,8 @@ impl<T: ?Sized> *const T {
     /// [`ptr::read_volatile`]: crate::ptr::read_volatile()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
@@ -1304,7 +1291,8 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1324,7 +1312,8 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1344,7 +1333,8 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1392,6 +1382,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "align_offset", since = "1.36.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1430,6 +1421,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_aligned(self) -> bool
     where
         T: Sized,
@@ -1479,6 +1471,31 @@ impl<T: ?Sized> *const T {
     }
 }
 
+impl<T> *const T {
+    /// Casts from a type to its maybe-uninitialized version.
+    #[must_use]
+    #[inline(always)]
+    #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    pub const fn cast_uninit(self) -> *const MaybeUninit<T> {
+        self as _
+    }
+}
+#[cfg(not(feature = "ferrocene_certified"))]
+impl<T> *const MaybeUninit<T> {
+    /// Casts from a maybe-uninitialized type to its initialized version.
+    ///
+    /// This is always safe, since UB can only occur if the pointer is read
+    /// before being initialized.
+    #[must_use]
+    #[inline(always)]
+    #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    pub const fn cast_init(self) -> *const T {
+        self as _
+    }
+}
+
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *const [T] {
     /// Returns the length of a raw slice.
     ///
@@ -1573,59 +1590,17 @@ impl<T> *const [T] {
     /// }
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
-    pub unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
+    pub const unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
     where
-        I: SliceIndex<[T]>,
+        I: [const] SliceIndex<[T]>,
     {
         // SAFETY: the caller ensures that `self` is dereferenceable and `index` in-bounds.
         unsafe { index.get_unchecked(self) }
     }
 
-    /// Returns `None` if the pointer is null, or else returns a shared slice to
-    /// the value wrapped in `Some`. In contrast to [`as_ref`], this does not require
-    /// that the value has to be initialized.
-    ///
-    /// [`as_ref`]: #method.as_ref
-    ///
-    /// # Safety
-    ///
-    /// When calling this method, you have to ensure that *either* the pointer is null *or*
-    /// all of the following is true:
-    ///
-    /// * The pointer must be [valid] for reads for `ptr.len() * size_of::<T>()` many bytes,
-    ///   and it must be properly aligned. This means in particular:
-    ///
-    ///     * The entire memory range of this slice must be contained within a single [allocated object]!
-    ///       Slices can never span across multiple allocated objects.
-    ///
-    ///     * The pointer must be aligned even for zero-length slices. One
-    ///       reason for this is that enum layout optimizations may rely on references
-    ///       (including slices of any length) being aligned and non-null to distinguish
-    ///       them from other data. You can obtain a pointer that is usable as `data`
-    ///       for zero-length slices using [`NonNull::dangling()`].
-    ///
-    /// * The total size `ptr.len() * size_of::<T>()` of the slice must be no larger than `isize::MAX`.
-    ///   See the safety documentation of [`pointer::offset`].
-    ///
-    /// * You must enforce Rust's aliasing rules, since the returned lifetime `'a` is
-    ///   arbitrarily chosen and does not necessarily reflect the actual lifetime of the data.
-    ///   In particular, while this reference exists, the memory the pointer points to must
-    ///   not get mutated (except inside `UnsafeCell`).
-    ///
-    /// This applies even if the result of this method is unused!
-    ///
-    /// See also [`slice::from_raw_parts`][].
-    ///
-    /// [valid]: crate::ptr#safety
-    /// [allocated object]: crate::ptr#allocated-object
-    ///
-    /// # Panics during const evaluation
-    ///
-    /// This method will panic during const evaluation if the pointer cannot be
-    /// determined to be null or not. See [`is_null`] for more information.
-    ///
-    /// [`is_null`]: #method.is_null
+    #[doc = include_str!("docs/as_uninit_slice.md")]
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice<'a>(self) -> Option<&'a [MaybeUninit<T>]> {
@@ -1638,6 +1613,16 @@ impl<T> *const [T] {
     }
 }
 
+impl<T> *const T {
+    /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
+    #[inline]
+    #[unstable(feature = "ptr_cast_array", issue = "144514")]
+    pub const fn cast_array<const N: usize>(self) -> *const [T; N] {
+        self.cast()
+    }
+}
+
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> *const [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///
@@ -1678,7 +1663,7 @@ impl<T, const N: usize> *const [T; N] {
 
 /// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized> PartialEq for *const T {
+impl<T: PointeeSized> PartialEq for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn eq(&self, other: &*const T) -> bool {
@@ -1688,11 +1673,12 @@ impl<T: ?Sized> PartialEq for *const T {
 
 /// Pointer equality is an equivalence relation.
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized> Eq for *const T {}
+impl<T: PointeeSized> Eq for *const T {}
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized> Ord for *const T {
+#[cfg(not(feature = "ferrocene_certified"))]
+impl<T: PointeeSized> Ord for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &*const T) -> Ordering {
@@ -1708,7 +1694,8 @@ impl<T: ?Sized> Ord for *const T {
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized> PartialOrd for *const T {
+#[cfg(not(feature = "ferrocene_certified"))]
+impl<T: PointeeSized> PartialOrd for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn partial_cmp(&self, other: &*const T) -> Option<Ordering> {
@@ -1740,7 +1727,8 @@ impl<T: ?Sized> PartialOrd for *const T {
     }
 }
 
-#[stable(feature = "raw_ptr_default", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "raw_ptr_default", since = "1.88.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Thin> Default for *const T {
     /// Returns the default value of [`null()`][crate::ptr::null].
     fn default() -> Self {

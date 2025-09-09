@@ -1,14 +1,15 @@
 use hir::AsAssocItem;
 use ide_db::{
     helpers::mod_path_to_ast,
-    imports::insert_use::{insert_use, ImportScope},
+    imports::insert_use::{ImportScope, insert_use},
 };
 use syntax::{
-    ast::{self, make, HasGenericArgs},
-    match_ast, ted, AstNode, Edition, SyntaxNode,
+    AstNode, Edition, SyntaxNode,
+    ast::{self, HasGenericArgs, make},
+    match_ast, ted,
 };
 
-use crate::{AssistContext, AssistId, AssistKind, Assists};
+use crate::{AssistContext, AssistId, Assists};
 
 // Assist: replace_qualified_name_with_use
 //
@@ -74,17 +75,13 @@ pub(crate) fn replace_qualified_name_with_use(
     let scope = ImportScope::find_insert_use_container(original_path.syntax(), &ctx.sema)?;
     let target = original_path.syntax().text_range();
     acc.add(
-        AssistId("replace_qualified_name_with_use", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("replace_qualified_name_with_use"),
         "Replace qualified path with use",
         target,
         |builder| {
             // Now that we've brought the name into scope, re-qualify all paths that could be
             // affected (that is, all paths inside the node we added the `use` to).
-            let scope = match scope {
-                ImportScope::File(it) => ImportScope::File(builder.make_mut(it)),
-                ImportScope::Module(it) => ImportScope::Module(builder.make_mut(it)),
-                ImportScope::Block(it) => ImportScope::Block(builder.make_mut(it)),
-            };
+            let scope = builder.make_import_scope_mut(scope);
             shorten_paths(scope.as_syntax_node(), &original_path);
             let path = drop_generic_args(&original_path);
             let edition = ctx
@@ -105,10 +102,10 @@ pub(crate) fn replace_qualified_name_with_use(
 
 fn drop_generic_args(path: &ast::Path) -> ast::Path {
     let path = path.clone_for_update();
-    if let Some(segment) = path.segment() {
-        if let Some(generic_args) = segment.generic_arg_list() {
-            ted::remove(generic_args.syntax());
-        }
+    if let Some(segment) = path.segment()
+        && let Some(generic_args) = segment.generic_arg_list()
+    {
+        ted::remove(generic_args.syntax());
     }
     path
 }

@@ -2,14 +2,13 @@
 
 use std::fmt;
 
-use base_db::ra_salsa::Cycle;
 use chalk_ir::{AdtId, FloatTy, IntTy, TyKind, UintTy};
 use hir_def::{
+    LocalFieldId, StructId,
     layout::{
         Float, Integer, LayoutCalculator, LayoutCalculatorError, LayoutData, Primitive,
         ReprOptions, Scalar, StructKind, TargetDataLayout, WrappingRange,
     },
-    LocalFieldId, StructId,
 };
 use la_arena::{Idx, RawIdx};
 use rustc_abi::AddressSpace;
@@ -18,17 +17,15 @@ use rustc_index::IndexVec;
 use triomphe::Arc;
 
 use crate::{
+    Interner, ProjectionTy, Substitution, TraitEnvironment, Ty,
     consteval::try_const_usize,
     db::{HirDatabase, InternedClosure},
     infer::normalize,
     utils::ClosureSubst,
-    Interner, ProjectionTy, Substitution, TraitEnvironment, Ty,
 };
 
-pub use self::{
-    adt::{layout_of_adt_query, layout_of_adt_recover},
-    target::target_data_layout_query,
-};
+pub(crate) use self::adt::layout_of_adt_cycle_result;
+pub use self::{adt::layout_of_adt_query, target::target_data_layout_query};
 
 mod adt;
 mod target;
@@ -168,7 +165,7 @@ pub fn layout_of_ty_query(
     let result = match kind {
         TyKind::Adt(AdtId(def), subst) => {
             if let hir_def::AdtId::StructId(s) = def {
-                let data = db.struct_data(*s);
+                let data = db.struct_signature(*s);
                 let repr = data.repr.unwrap_or_default();
                 if repr.simd() {
                     return layout_of_simd_ty(db, *s, repr.packed(), subst, trait_env, &target);
@@ -264,14 +261,14 @@ pub fn layout_of_ty_query(
         }
         // Potentially-wide pointers.
         TyKind::Ref(_, _, pointee) | TyKind::Raw(_, pointee) => {
-            let mut data_ptr = scalar_unit(dl, Primitive::Pointer(AddressSpace::DATA));
+            let mut data_ptr = scalar_unit(dl, Primitive::Pointer(AddressSpace::ZERO));
             if matches!(ty.kind(Interner), TyKind::Ref(..)) {
                 data_ptr.valid_range_mut().start = 1;
             }
 
             // let pointee = tcx.normalize_erasing_regions(param_env, pointee);
             // if pointee.is_sized(tcx.at(DUMMY_SP), param_env) {
-            //     return Ok(tcx.mk_layout(LayoutS::scalar(cx, data_ptr)));
+            //     return Ok(tcx.mk_layout(LayoutData::scalar(cx, data_ptr)));
             // }
 
             let mut unsized_part = struct_tail_erasing_lifetimes(db, pointee.clone());
@@ -288,7 +285,7 @@ pub fn layout_of_ty_query(
                     scalar_unit(dl, Primitive::Int(dl.ptr_sized_integer(), false))
                 }
                 TyKind::Dyn(..) => {
-                    let mut vtable = scalar_unit(dl, Primitive::Pointer(AddressSpace::DATA));
+                    let mut vtable = scalar_unit(dl, Primitive::Pointer(AddressSpace::ZERO));
                     vtable.valid_range_mut().start = 1;
                     vtable
                 }
@@ -322,7 +319,7 @@ pub fn layout_of_ty_query(
                     return Err(LayoutError::NotImplemented);
                 }
                 crate::ImplTraitId::AsyncBlockTypeImplTrait(_, _) => {
-                    return Err(LayoutError::NotImplemented)
+                    return Err(LayoutError::NotImplemented);
                 }
             }
         }
@@ -344,7 +341,7 @@ pub fn layout_of_ty_query(
             cx.calc.univariant(&fields, &ReprOptions::default(), StructKind::AlwaysSized)?
         }
         TyKind::Coroutine(_, _) | TyKind::CoroutineWitness(_, _) => {
-            return Err(LayoutError::NotImplemented)
+            return Err(LayoutError::NotImplemented);
         }
         TyKind::Error => return Err(LayoutError::HasErrorType),
         TyKind::AssociatedType(id, subst) => {
@@ -367,26 +364,34 @@ pub fn layout_of_ty_query(
     Ok(Arc::new(result))
 }
 
-pub fn layout_of_ty_recover(
+pub(crate) fn layout_of_ty_cycle_result(
     _: &dyn HirDatabase,
-    _: &Cycle,
-    _: &Ty,
-    _: &Arc<TraitEnvironment>,
+    _: Ty,
+    _: Arc<TraitEnvironment>,
 ) -> Result<Arc<Layout>, LayoutError> {
     Err(LayoutError::RecursiveTypeWithoutIndirection)
 }
 
 fn struct_tail_erasing_lifetimes(db: &dyn HirDatabase, pointee: Ty) -> Ty {
     match pointee.kind(Interner) {
-        TyKind::Adt(AdtId(hir_def::AdtId::StructId(i)), subst) => {
-            let data = db.struct_data(*i);
-            let mut it = data.variant_data.fields().iter().rev();
+        &TyKind::Adt(AdtId(hir_def::AdtId::StructId(i)), ref subst) => {
+            let data = i.fields(db);
+            let mut it = data.fields().iter().rev();
             match it.next() {
                 Some((f, _)) => {
-                    let last_field_ty = field_ty(db, (*i).into(), f, subst);
+                    let last_field_ty = field_ty(db, i.into(), f, subst);
                     struct_tail_erasing_lifetimes(db, last_field_ty)
                 }
                 None => pointee,
+            }
+        }
+        TyKind::Tuple(_, subst) => {
+            if let Some(last_field_ty) =
+                subst.iter(Interner).last().and_then(|arg| arg.ty(Interner))
+            {
+                struct_tail_erasing_lifetimes(db, last_field_ty.clone())
+            } else {
+                pointee
             }
         }
         _ => pointee,

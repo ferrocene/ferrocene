@@ -151,6 +151,45 @@ pub fn debug_assertions() {
     debug_assert_ne!(1, 2);
 }
 
+pub fn partially_const<const N: usize>(n: usize) {
+    //~^ missing_panics_doc
+
+    const {
+        assert!(N > 5);
+    }
+
+    assert!(N > n);
+}
+
+pub fn expect_allow(i: Option<isize>) {
+    #[expect(clippy::missing_panics_doc)]
+    i.unwrap();
+
+    #[allow(clippy::missing_panics_doc)]
+    i.unwrap();
+}
+
+pub fn expect_allow_with_error(i: Option<isize>) {
+    //~^ missing_panics_doc
+
+    #[expect(clippy::missing_panics_doc)]
+    i.unwrap();
+
+    #[allow(clippy::missing_panics_doc)]
+    i.unwrap();
+
+    i.unwrap();
+}
+
+pub fn expect_after_error(x: Option<u32>, y: Option<u32>) {
+    //~^ missing_panics_doc
+
+    let x = x.unwrap();
+
+    #[expect(clippy::missing_panics_doc)]
+    let y = y.unwrap();
+}
+
 // all function must be triggered the lint.
 // `pub` is required, because the lint does not consider unreachable items
 pub mod issue10240 {
@@ -210,4 +249,32 @@ pub fn issue_12760<const N: usize>() {
             panic!();
         }
     }
+}
+
+/// This needs documenting
+pub fn unwrap_expect_etc_in_const() {
+    let a = const { std::num::NonZeroUsize::new(1).unwrap() };
+    // This should still pass the lint even if it is guaranteed to panic at compile-time
+    let b = const { std::num::NonZeroUsize::new(0).unwrap() };
+}
+
+/// This needs documenting
+pub const fn unwrap_expect_etc_in_const_fn_fails() {
+    //~^ missing_panics_doc
+    let a = std::num::NonZeroUsize::new(1).unwrap();
+}
+
+/// This needs documenting
+pub const fn assert_in_const_fn_fails() {
+    //~^ missing_panics_doc
+    let x = 0;
+    if x == 0 {
+        panic!();
+    }
+}
+
+/// This needs documenting
+pub const fn in_const_fn<const N: usize>(n: usize) {
+    //~^ missing_panics_doc
+    assert!(N > n);
 }

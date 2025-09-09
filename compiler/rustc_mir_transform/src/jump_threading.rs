@@ -45,7 +45,6 @@ use rustc_middle::bug;
 use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
-use rustc_middle::ty::layout::LayoutOf;
 use rustc_middle::ty::{self, ScalarInt, TyCtxt};
 use rustc_mir_dataflow::lattice::HasBottom;
 use rustc_mir_dataflow::value_analysis::{Map, PlaceIndex, State, TrackElem};
@@ -89,7 +88,7 @@ impl<'tcx> crate::MirPass<'tcx> for JumpThreading {
             opportunities: Vec::new(),
         };
 
-        for bb in body.basic_blocks.indices() {
+        for (bb, _) in traversal::preorder(body) {
             finder.start_from_switch(bb);
         }
 
@@ -177,16 +176,8 @@ impl<'a> ConditionSet<'a> {
         arena: &'a DroplessArena,
         f: impl Fn(Condition) -> Option<Condition>,
     ) -> Option<ConditionSet<'a>> {
-        let mut all_ok = true;
-        let set = arena.alloc_from_iter(self.iter().map_while(|c| {
-            if let Some(c) = f(c) {
-                Some(c)
-            } else {
-                all_ok = false;
-                None
-            }
-        }));
-        all_ok.then_some(ConditionSet(set))
+        let set = arena.try_alloc_from_iter(self.iter().map(|c| f(c).ok_or(()))).ok()?;
+        Some(ConditionSet(set))
     }
 }
 
@@ -396,7 +387,7 @@ impl<'a, 'tcx> TOFinder<'a, 'tcx> {
             lhs,
             constant,
             &mut |elem, op| match elem {
-                TrackElem::Field(idx) => self.ecx.project_field(op, idx.as_usize()).discard_err(),
+                TrackElem::Field(idx) => self.ecx.project_field(op, idx).discard_err(),
                 TrackElem::Variant(idx) => self.ecx.project_downcast(op, idx).discard_err(),
                 TrackElem::Discriminant => {
                     let variant = self.ecx.read_discriminant(op).discard_err()?;
@@ -765,12 +756,12 @@ impl OpportunitySet {
 
             // Replace `succ` by `new_succ` where it appears.
             let mut num_edges = 0;
-            for s in basic_blocks[current].terminator_mut().successors_mut() {
+            basic_blocks[current].terminator_mut().successors_mut(|s| {
                 if *s == succ {
                     *s = new_succ;
                     num_edges += 1;
                 }
-            }
+            });
 
             // Update predecessors with the new block.
             let _new_succ = self.predecessors.push(num_edges);

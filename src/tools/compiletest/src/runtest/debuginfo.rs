@@ -10,7 +10,6 @@ use super::debugger::DebuggerCommands;
 use super::{Debugger, Emit, ProcRes, TestCx, Truncated, WillExecute};
 use crate::common::Config;
 use crate::debuggers::{extract_gdb_version, is_android_gdb_target};
-use crate::util::logv;
 
 impl TestCx<'_> {
     pub(super) fn run_debuginfo_test(&self) {
@@ -49,7 +48,7 @@ impl TestCx<'_> {
             std::fs::remove_file(pdb_file).unwrap();
         }
 
-        // compile test file (it should have 'compile-flags:-g' in the header)
+        // compile test file (it should have 'compile-flags:-g' in the directive)
         let should_run = self.run_if_enabled();
         let compile_result = self.compile_test(should_run, Emit::None);
         if !compile_result.status.success() {
@@ -135,7 +134,7 @@ impl TestCx<'_> {
             .unwrap_or_else(|e| self.fatal(&e));
         let mut cmds = dbg_cmds.commands.join("\n");
 
-        // compile test file (it should have 'compile-flags:-g' in the header)
+        // compile test file (it should have 'compile-flags:-g' in the directive)
         let should_run = self.run_if_enabled();
         let compiler_run_result = self.compile_test(should_run, Emit::None);
         if !compiler_run_result.status.success() {
@@ -234,7 +233,7 @@ impl TestCx<'_> {
                 gdb.args(debugger_opts);
                 // FIXME(jieyouxu): don't pass an empty Path
                 let cmdline = self.make_cmdline(&gdb, Utf8Path::new(""));
-                logv(self.config, format!("executing {}", cmdline));
+                self.logv(format_args!("executing {cmdline}"));
                 cmdline
             };
 
@@ -246,7 +245,7 @@ impl TestCx<'_> {
                 cmdline,
             };
             if adb.kill().is_err() {
-                println!("Adb process is already finished.");
+                writeln!(self.stdout, "Adb process is already finished.");
             }
         } else {
             let rust_pp_module_abs_path = self.config.src_root.join("src").join("etc");
@@ -257,9 +256,15 @@ impl TestCx<'_> {
 
             match self.config.gdb_version {
                 Some(version) => {
-                    println!("NOTE: compiletest thinks it is using GDB version {}", version);
+                    writeln!(
+                        self.stdout,
+                        "NOTE: compiletest thinks it is using GDB version {}",
+                        version
+                    );
 
-                    if version > extract_gdb_version("7.4").unwrap() {
+                    if !self.props.disable_gdb_pretty_printers
+                        && version > extract_gdb_version("7.4").unwrap()
+                    {
                         // Add the directory containing the pretty printers to
                         // GDB's script auto loading safe path
                         script_str.push_str(&format!(
@@ -277,7 +282,8 @@ impl TestCx<'_> {
                     }
                 }
                 _ => {
-                    println!(
+                    writeln!(
+                        self.stdout,
                         "NOTE: compiletest does not know which version of \
                          GDB it is using"
                     );
@@ -322,6 +328,8 @@ impl TestCx<'_> {
                 &["-quiet".as_ref(), "-batch".as_ref(), "-nx".as_ref(), &debugger_script];
 
             let mut gdb = Command::new(self.config.gdb.as_ref().unwrap());
+
+            // FIXME: we are propagating `PYTHONPATH` from the environment, not a compiletest flag!
             let pythonpath = if let Ok(pp) = std::env::var("PYTHONPATH") {
                 format!("{pp}:{rust_pp_module_abs_path}")
             } else {
@@ -359,7 +367,7 @@ impl TestCx<'_> {
     }
 
     fn run_debuginfo_lldb_test_no_opt(&self) {
-        // compile test file (it should have 'compile-flags:-g' in the header)
+        // compile test file (it should have 'compile-flags:-g' in the directive)
         let should_run = self.run_if_enabled();
         let compile_result = self.compile_test(should_run, Emit::None);
         if !compile_result.status.success() {
@@ -373,10 +381,15 @@ impl TestCx<'_> {
 
         match self.config.lldb_version {
             Some(ref version) => {
-                println!("NOTE: compiletest thinks it is using LLDB version {}", version);
+                writeln!(
+                    self.stdout,
+                    "NOTE: compiletest thinks it is using LLDB version {}",
+                    version
+                );
             }
             _ => {
-                println!(
+                writeln!(
+                    self.stdout,
                     "NOTE: compiletest does not know which version of \
                      LLDB it is using"
                 );
@@ -390,6 +403,35 @@ impl TestCx<'_> {
         // Write debugger script:
         // We don't want to hang when calling `quit` while the process is still running
         let mut script_str = String::from("settings set auto-confirm true\n");
+
+        // macOS has a system for restricting access to files and peripherals
+        // called Transparency, Consent, and Control (TCC), which can be
+        // configured using the "Security & Privacy" tab in your settings.
+        //
+        // This system is provenance-based: if Terminal.app is given access to
+        // your Desktop, and you launch a binary within Terminal.app, the new
+        // binary also has access to the files on your Desktop.
+        //
+        // By default though, LLDB launches binaries in very isolated
+        // contexts. This includes resetting any TCC grants that might
+        // otherwise have been inherited.
+        //
+        // In effect, this means that if the developer has placed the rust
+        // repository under one of the system-protected folders, they will get
+        // a pop-up _for each binary_ asking for permissions to access the
+        // folder - quite annoying.
+        //
+        // To avoid this, we tell LLDB to spawn processes with TCC grants
+        // inherited from the parent process.
+        //
+        // Setting this also avoids unnecessary overhead from XprotectService
+        // when running with the Developer Tool grant.
+        //
+        // TIP: If you want to allow launching `lldb ~/Desktop/my_binary`
+        // without being prompted, you can put this in your `~/.lldbinit` too.
+        if self.config.host.contains("darwin") {
+            script_str.push_str("settings set target.inherit-tcc true\n");
+        }
 
         // Make LLDB emit its version, so we have it documented in the test output
         script_str.push_str("version\n");
@@ -443,6 +485,8 @@ impl TestCx<'_> {
     fn run_lldb(&self, test_executable: &Utf8Path, debugger_script: &Utf8Path) -> ProcRes {
         // Prepare the lldb_batchmode which executes the debugger script
         let lldb_script_path = self.config.src_root.join("src/etc/lldb_batchmode.py");
+
+        // FIXME: `PYTHONPATH` takes precedence over the flag...?
         let pythonpath = if let Ok(pp) = std::env::var("PYTHONPATH") {
             format!("{pp}:{}", self.config.lldb_python_dir.as_ref().unwrap())
         } else {

@@ -1,32 +1,31 @@
 use std::iter;
 
 use either::Either;
-use hir::{db::ExpandDatabase, Adt, FileRange, HasSource, HirDisplay, InFile, Struct, Union};
+use hir::{Adt, FileRange, HasSource, HirDisplay, InFile, Struct, Union, db::ExpandDatabase};
 use ide_db::text_edit::TextEdit;
 use ide_db::{
-    assists::{Assist, AssistId, AssistKind},
+    assists::{Assist, AssistId},
     helpers::is_editable_crate,
     label::Label,
     source_change::{SourceChange, SourceChangeBuilder},
 };
 use syntax::{
-    algo,
-    ast::{self, edit::IndentLevel, make, FieldList, Name, Visibility},
-    AstNode, AstPtr, Direction, SyntaxKind, TextSize,
+    AstNode, AstPtr, Direction, SyntaxKind, TextSize, algo,
+    ast::{self, FieldList, Name, Visibility, edit::IndentLevel, make},
 };
 use syntax::{
-    ast::{edit::AstNodeEdit, Type},
     SyntaxNode,
+    ast::{Type, edit::AstNodeEdit},
 };
 
-use crate::{adjusted_display_range, Diagnostic, DiagnosticCode, DiagnosticsContext};
+use crate::{Diagnostic, DiagnosticCode, DiagnosticsContext, adjusted_display_range};
 
 // Diagnostic: unresolved-field
 //
 // This diagnostic is triggered if a field does not exist on a given type.
 pub(crate) fn unresolved_field(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::UnresolvedField,
+    d: &hir::UnresolvedField<'_>,
 ) -> Diagnostic {
     let method_suffix = if d.method_with_same_name_exists {
         ", but a method with a similar name exists"
@@ -53,24 +52,19 @@ pub(crate) fn unresolved_field(
         }),
     )
     .with_fixes(fixes(ctx, d))
-    .experimental()
 }
 
-fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedField) -> Option<Vec<Assist>> {
+fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedField<'_>) -> Option<Vec<Assist>> {
     let mut fixes = Vec::new();
     if d.method_with_same_name_exists {
         fixes.extend(method_fix(ctx, &d.expr));
     }
     fixes.extend(field_fix(ctx, d));
-    if fixes.is_empty() {
-        None
-    } else {
-        Some(fixes)
-    }
+    if fixes.is_empty() { None } else { Some(fixes) }
 }
 
 // FIXME: Add Snippet Support
-fn field_fix(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedField) -> Option<Assist> {
+fn field_fix(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedField<'_>) -> Option<Assist> {
     // Get the FileRange of the invalid field access
     let root = ctx.sema.db.parse_or_expand(d.expr.file_id);
     let expr = d.expr.value.to_node(&root).left()?;
@@ -124,10 +118,10 @@ fn add_variant_to_union(
     let (offset, record_field) =
         record_field_layout(None, field_name, suggested_type, field_list, adt_syntax.value)?;
 
-    let mut src_change_builder = SourceChangeBuilder::new(range.file_id);
+    let mut src_change_builder = SourceChangeBuilder::new(range.file_id.file_id(ctx.sema.db));
     src_change_builder.insert(offset, record_field);
     Some(Assist {
-        id: AssistId("add-variant-to-union", AssistKind::QuickFix),
+        id: AssistId::quick_fix("add-variant-to-union"),
         label: Label::new("Add field to union".to_owned()),
         group: None,
         target: error_range.range,
@@ -170,12 +164,13 @@ fn add_field_to_struct_fix(
                 struct_syntax.value,
             )?;
 
-            let mut src_change_builder = SourceChangeBuilder::new(struct_range.file_id);
+            let mut src_change_builder =
+                SourceChangeBuilder::new(struct_range.file_id.file_id(ctx.sema.db));
 
             // FIXME: Allow for choosing a visibility modifier see https://github.com/rust-lang/rust-analyzer/issues/11563
             src_change_builder.insert(offset, record_field);
             Some(Assist {
-                id: AssistId("add-field-to-record-struct", AssistKind::QuickFix),
+                id: AssistId::quick_fix("add-field-to-record-struct"),
                 label: Label::new("Add field to Record Struct".to_owned()),
                 group: None,
                 target: error_range.range,
@@ -185,7 +180,8 @@ fn add_field_to_struct_fix(
         }
         None => {
             // Add a field list to the Unit Struct
-            let mut src_change_builder = SourceChangeBuilder::new(struct_range.file_id);
+            let mut src_change_builder =
+                SourceChangeBuilder::new(struct_range.file_id.file_id(ctx.sema.db));
             let field_name = match field_name.chars().next() {
                 // FIXME : See match arm below regarding tuple structs.
                 Some(ch) if ch.is_numeric() => return None,
@@ -211,7 +207,7 @@ fn add_field_to_struct_fix(
             src_change_builder.replace(semi_colon.text_range(), record_field_list.to_string());
 
             Some(Assist {
-                id: AssistId("convert-unit-struct-to-record-struct", AssistKind::QuickFix),
+                id: AssistId::quick_fix("convert-unit-struct-to-record-struct"),
                 label: Label::new("Convert Unit Struct to Record Struct and add field".to_owned()),
                 group: None,
                 target: error_range.range,
@@ -270,12 +266,12 @@ fn method_fix(
     let expr = expr_ptr.value.to_node(&root);
     let FileRange { range, file_id } = ctx.sema.original_range_opt(expr.syntax())?;
     Some(Assist {
-        id: AssistId("expected-field-found-method-call-fix", AssistKind::QuickFix),
+        id: AssistId::quick_fix("expected-field-found-method-call-fix"),
         label: Label::new("Use parentheses to call the method".to_owned()),
         group: None,
         target: range,
         source_change: Some(SourceChange::from_text_edit(
-            file_id,
+            file_id.file_id(ctx.sema.db),
             TextEdit::insert(range.end(), "()".to_owned()),
         )),
         command: None,
@@ -285,11 +281,11 @@ fn method_fix(
 mod tests {
 
     use crate::{
+        DiagnosticsConfig,
         tests::{
             check_diagnostics, check_diagnostics_with_config, check_diagnostics_with_disabled,
             check_fix, check_no_fix,
         },
-        DiagnosticsConfig,
     };
 
     #[test]

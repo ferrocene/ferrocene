@@ -16,14 +16,14 @@ pub(crate) mod tool;
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
-use build_helper::git::get_closest_merge_commit;
+use build_helper::ci::CiEnv;
+use build_helper::git::get_closest_upstream_commit;
 
 use crate::builder::Builder;
 use crate::core::config::{Config, TargetSelection};
 use crate::t;
-use crate::utils::exec::BootstrapCommand;
+use crate::utils::exec::{BootstrapCommand, command};
 
 /// Helper function used to download files from S3. This is used to be able to download artifacts
 /// from our buckets for download-ci-llvm and download-rustc.
@@ -41,11 +41,10 @@ pub(crate) fn download_from_s3(config: &Config, url: &str, tempfile: &Path, help
         None => &[],
     };
 
-    #[allow(deprecated)]
-    let success = config
-        .try_run(Command::new("aws").args(["s3", "cp"]).args(profile_flags).arg(url).arg(tempfile));
+    let success =
+        command("aws").args(["s3", "cp"]).args(profile_flags).arg(url).arg(tempfile).run(config);
 
-    if success.is_err() {
+    if !success {
         if !help_on_error.is_empty() {
             eprintln!("{help_on_error}");
         }
@@ -168,8 +167,9 @@ fn download_and_extract_ci_outcomes(builder: &Builder<'_>, kind: &str) -> PathBu
 
     let name = format!("{kind}-outcomes");
     let prefix = "s3://ferrocene-ci-artifacts/ferrocene/dist";
-    let commit = get_closest_merge_commit(None, &builder.config.git_config(), &[])
-        .expect(&format!("failed to retrieve git commit for ferrocene.{name}=download-ci"));
+    let commit = get_closest_upstream_commit(None, &builder.config.git_config(), CiEnv::None)
+        .expect(&format!("failed to retrieve git commit for ferrocene.{name}=download-ci"))
+        .expect("did not find a commit by merge bot");
 
     let base = builder.out.join("cache").join("ferrocene").join(&name);
     let extracted_dir = base.join("extracted");

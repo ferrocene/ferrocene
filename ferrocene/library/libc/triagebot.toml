@@ -11,10 +11,12 @@ allow-unauthenticated = [
 warn_non_default_branch.enable = true
 contributing_url = "https://github.com/rust-lang/libc/blob/HEAD/CONTRIBUTING.md"
 
-[assign.owners]
-"*" = [
-    "@tgross35",
-]
+# Ensure issue links link to this repo
+[issue-links]
+check-commits = false # don't forbid links to issues
+
+# Prevents mentions in commits to avoid users being spammed
+[no-mentions]
 
 [autolabel."A-CI"]
 trigger_files = [
@@ -59,7 +61,10 @@ trigger_files = [
 trigger_files = ["src/unix/solarish/illumos.rs"]
 
 [autolabel."O-linux"]
-trigger_files = ["src/unix/linux_like/linux"]
+trigger_files = [
+    "src/unix/linux_like/linux",
+    "src/reorg/linux_uapi",
+]
 
 [autolabel."O-linux-like"]
 trigger_files = ["src/unix/linux_like/mod.rs"]
@@ -84,6 +89,24 @@ trigger_files = ["src/unix/linux_like/linux/musl"]
 
 [autolabel."O-newlib"]
 trigger_files = ["src/unix/newlib"]
+
+[autolabel."O-powerpc"]
+trigger_files = [
+    "src/unix/aix/powerpc64.rs",
+    "src/unix/bsd/freebsdlike/freebsd/powerpc.rs",
+    "src/unix/bsd/freebsdlike/freebsd/powerpc64.rs",
+    "src/unix/bsd/netbsdlike/netbsd/powerpc.rs",
+    "src/unix/bsd/netbsdlike/openbsd/powerpc.rs",
+    "src/unix/bsd/netbsdlike/openbsd/powerpc64.rs",
+    "src/unix/linux_like/linux/arch/powerpc/",
+    "src/unix/linux_like/linux/gnu/b32/powerpc.rs",
+    "src/unix/linux_like/linux/gnu/b64/powerpc64/",
+    "src/unix/linux_like/linux/musl/b32/powerpc.rs",
+    "src/unix/linux_like/linux/musl/b64/powerpc64.rs",
+    "src/unix/newlib/powerpc/",
+    "src/vxworks/powerpc.rs",
+    "src/vxworks/powerpc64.rs",
+]
 
 [autolabel."O-redox"]
 trigger_files = ["src/unix/redox"]

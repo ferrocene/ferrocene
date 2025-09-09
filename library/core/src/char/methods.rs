@@ -4,6 +4,7 @@ use super::*;
 use crate::panic::const_panic;
 use crate::slice;
 use crate::str::from_utf8_unchecked_mut;
+use crate::ub_checks::assert_unsafe_precondition;
 use crate::unicode::printable::is_printable;
 use crate::unicode::{self, conversions};
 
@@ -394,6 +395,7 @@ impl char {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
+    #[rustc_diagnostic_item = "char_to_digit"]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
@@ -918,7 +920,11 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     pub fn is_alphanumeric(self) -> bool {
-        self.is_alphabetic() || self.is_numeric()
+        if self.is_ascii() {
+            self.is_ascii_alphanumeric()
+        } else {
+            unicode::Alphabetic(self) || unicode::N(self)
+        }
     }
 
     /// Returns `true` if this `char` has the general category for control codes.
@@ -944,7 +950,11 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     pub fn is_control(self) -> bool {
-        unicode::Cc(self)
+        // According to
+        // https://www.unicode.org/policies/stability_policy.html#Property_Value,
+        // the set of codepoints in `Cc` will never change.
+        // So we can just hard-code the patterns to match against instead of using a table.
+        matches!(self, '\0'..='\x1f' | '\x7f'..='\u{9f}')
     }
 
     /// Returns `true` if this `char` has the `Grapheme_Extend` property.
@@ -1200,6 +1210,26 @@ impl char {
         } else {
             None
         }
+    }
+
+    /// Converts this char into an [ASCII character](`ascii::Char`), without
+    /// checking whether it is valid.
+    ///
+    /// # Safety
+    ///
+    /// This char must be within the ASCII range, or else this is UB.
+    #[must_use]
+    #[unstable(feature = "ascii_char", issue = "110998")]
+    #[inline]
+    pub const unsafe fn as_ascii_unchecked(&self) -> ascii::Char {
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "as_ascii_unchecked requires that the char is valid ASCII",
+            (it: &char = self) => it.is_ascii()
+        );
+
+        // SAFETY: the caller promised that this char is ASCII.
+        unsafe { ascii::Char::from_u8_unchecked(*self as u8) }
     }
 
     /// Makes a copy of the value in its ASCII upper case equivalent.
@@ -1846,28 +1876,33 @@ pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8) {
     // SAFETY: The caller must guarantee that the buffer pointed to by `dst`
     // is at least `len` bytes long.
     unsafe {
-        match len {
-            1 => {
-                *dst = code as u8;
-            }
-            2 => {
-                *dst = (code >> 6 & 0x1F) as u8 | TAG_TWO_B;
-                *dst.add(1) = (code & 0x3F) as u8 | TAG_CONT;
-            }
-            3 => {
-                *dst = (code >> 12 & 0x0F) as u8 | TAG_THREE_B;
-                *dst.add(1) = (code >> 6 & 0x3F) as u8 | TAG_CONT;
-                *dst.add(2) = (code & 0x3F) as u8 | TAG_CONT;
-            }
-            4 => {
-                *dst = (code >> 18 & 0x07) as u8 | TAG_FOUR_B;
-                *dst.add(1) = (code >> 12 & 0x3F) as u8 | TAG_CONT;
-                *dst.add(2) = (code >> 6 & 0x3F) as u8 | TAG_CONT;
-                *dst.add(3) = (code & 0x3F) as u8 | TAG_CONT;
-            }
-            // SAFETY: `char` always takes between 1 and 4 bytes to encode in UTF-8.
-            _ => crate::hint::unreachable_unchecked(),
+        if len == 1 {
+            *dst = code as u8;
+            return;
         }
+
+        let last1 = (code >> 0 & 0x3F) as u8 | TAG_CONT;
+        let last2 = (code >> 6 & 0x3F) as u8 | TAG_CONT;
+        let last3 = (code >> 12 & 0x3F) as u8 | TAG_CONT;
+        let last4 = (code >> 18 & 0x3F) as u8 | TAG_FOUR_B;
+
+        if len == 2 {
+            *dst = last2 | TAG_TWO_B;
+            *dst.add(1) = last1;
+            return;
+        }
+
+        if len == 3 {
+            *dst = last3 | TAG_THREE_B;
+            *dst.add(1) = last2;
+            *dst.add(2) = last1;
+            return;
+        }
+
+        *dst = last4;
+        *dst.add(1) = last3;
+        *dst.add(2) = last2;
+        *dst.add(3) = last1;
     }
 }
 

@@ -158,6 +158,7 @@ function createCommands(): Record<string, CommandFactory> {
         matchingBrace: { enabled: commands.matchingBrace },
         joinLines: { enabled: commands.joinLines },
         parentModule: { enabled: commands.parentModule },
+        childModules: { enabled: commands.childModules },
         viewHir: { enabled: commands.viewHir },
         viewMir: { enabled: commands.viewMir },
         interpretFunction: { enabled: commands.interpretFunction },
@@ -166,7 +167,7 @@ function createCommands(): Record<string, CommandFactory> {
         viewCrateGraph: { enabled: commands.viewCrateGraph },
         viewFullCrateGraph: { enabled: commands.viewFullCrateGraph },
         expandMacro: { enabled: commands.expandMacro },
-        run: { enabled: commands.run },
+        run: { enabled: (ctx) => (mode?: "cursor") => commands.run(ctx, mode)() },
         copyRunCommandLine: { enabled: commands.copyRunCommandLine },
         debug: { enabled: commands.debug },
         newDebugConfig: { enabled: commands.newDebugConfig },
@@ -187,7 +188,9 @@ function createCommands(): Record<string, CommandFactory> {
         openWalkthrough: { enabled: commands.openWalkthrough },
         // Internal commands which are invoked by the server.
         applyActionGroup: { enabled: commands.applyActionGroup },
-        applySnippetWorkspaceEdit: { enabled: commands.applySnippetWorkspaceEditCommand },
+        applySnippetWorkspaceEdit: {
+            enabled: commands.applySnippetWorkspaceEditCommand,
+        },
         debugSingle: { enabled: commands.debugSingle },
         gotoLocation: { enabled: commands.gotoLocation },
         hoverRefCommandProxy: { enabled: commands.hoverRefCommandProxy },
@@ -200,8 +203,12 @@ function createCommands(): Record<string, CommandFactory> {
         revealDependency: { enabled: commands.revealDependency },
         syntaxTreeReveal: { enabled: commands.syntaxTreeReveal },
         syntaxTreeCopy: { enabled: commands.syntaxTreeCopy },
-        syntaxTreeHideWhitespace: { enabled: commands.syntaxTreeHideWhitespace },
-        syntaxTreeShowWhitespace: { enabled: commands.syntaxTreeShowWhitespace },
+        syntaxTreeHideWhitespace: {
+            enabled: commands.syntaxTreeHideWhitespace,
+        },
+        syntaxTreeShowWhitespace: {
+            enabled: commands.syntaxTreeShowWhitespace,
+        },
     };
 }
 

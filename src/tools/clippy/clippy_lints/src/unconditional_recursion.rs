@@ -23,8 +23,8 @@ declare_clippy_lint! {
     /// implementations.
     ///
     /// ### Why is this bad?
-    /// This is a hard to find infinite recursion that will crash any code
-    /// using it.
+    /// Infinite recursion in trait implementation will either cause crashes
+    /// or result in an infinite loop, and it is hard to detect.
     ///
     /// ### Example
     /// ```no_run
@@ -39,9 +39,31 @@ declare_clippy_lint! {
     ///     }
     /// }
     /// ```
+    ///
     /// Use instead:
     ///
-    /// In such cases, either use `#[derive(PartialEq)]` or don't implement it.
+    /// ```no_run
+    /// #[derive(PartialEq)]
+    /// enum Foo {
+    ///     A,
+    ///     B,
+    /// }
+    /// ```
+    ///
+    /// As an alternative, rewrite the logic without recursion:
+    ///
+    /// ```no_run
+    /// enum Foo {
+    ///     A,
+    ///     B,
+    /// }
+    ///
+    /// impl PartialEq for Foo {
+    ///     fn eq(&self, other: &Self) -> bool {
+    ///         matches!((self, other), (Foo::A, Foo::A) | (Foo::B, Foo::B))
+    ///     }
+    /// }
+    /// ```
     #[clippy::version = "1.77.0"]
     pub UNCONDITIONAL_RECURSION,
     suspicious,
@@ -113,11 +135,11 @@ fn get_impl_trait_def_id(cx: &LateContext<'_>, method_def_id: LocalDefId) -> Opt
         }),
     )) = cx.tcx.hir_parent_iter(hir_id).next()
         // We exclude `impl` blocks generated from rustc's proc macros.
-        && !cx.tcx.has_attr(*owner_id, sym::automatically_derived)
+        && !cx.tcx.is_automatically_derived(owner_id.to_def_id())
         // It is a implementation of a trait.
-        && let Some(trait_) = impl_.of_trait
+        && let Some(of_trait) = impl_.of_trait
     {
-        trait_.trait_def_id()
+        of_trait.trait_ref.trait_def_id()
     } else {
         None
     }
@@ -184,7 +206,7 @@ fn check_partial_eq(cx: &LateContext<'_>, method_span: Span, method_def_id: Loca
                 let arg_ty = cx.typeck_results().expr_ty_adjusted(arg);
 
                 if let Some(fn_id) = cx.typeck_results().type_dependent_def_id(expr.hir_id)
-                    && let Some(trait_id) = cx.tcx.trait_of_item(fn_id)
+                    && let Some(trait_id) = cx.tcx.trait_of_assoc(fn_id)
                     && trait_id == trait_def_id
                     && matches_ty(receiver_ty, arg_ty, self_arg, other_arg)
                 {
@@ -218,17 +240,17 @@ fn check_to_string(cx: &LateContext<'_>, method_span: Span, method_def_id: Local
             }),
         )) = cx.tcx.hir_parent_iter(hir_id).next()
         // We exclude `impl` blocks generated from rustc's proc macros.
-        && !cx.tcx.has_attr(*owner_id, sym::automatically_derived)
+        && !cx.tcx.is_automatically_derived(owner_id.to_def_id())
         // It is a implementation of a trait.
-        && let Some(trait_) = impl_.of_trait
-        && let Some(trait_def_id) = trait_.trait_def_id()
+        && let Some(of_trait) = impl_.of_trait
+        && let Some(trait_def_id) = of_trait.trait_ref.trait_def_id()
         // The trait is `ToString`.
         && cx.tcx.is_diagnostic_item(sym::ToString, trait_def_id)
     {
         let is_bad = match expr.kind {
             ExprKind::MethodCall(segment, _receiver, &[_arg], _) if segment.ident.name == name.name => {
                 if let Some(fn_id) = cx.typeck_results().type_dependent_def_id(expr.hir_id)
-                    && let Some(trait_id) = cx.tcx.trait_of_item(fn_id)
+                    && let Some(trait_id) = cx.tcx.trait_of_assoc(fn_id)
                     && trait_id == trait_def_id
                 {
                     true
@@ -296,7 +318,7 @@ where
             && let ExprKind::Path(qpath) = f.kind
             && is_default_method_on_current_ty(self.cx.tcx, qpath, self.implemented_ty_id)
             && let Some(method_def_id) = path_def_id(self.cx, f)
-            && let Some(trait_def_id) = self.cx.tcx.trait_of_item(method_def_id)
+            && let Some(trait_def_id) = self.cx.tcx.trait_of_assoc(method_def_id)
             && self.cx.tcx.is_diagnostic_item(sym::Default, trait_def_id)
         {
             span_error(self.cx, self.method_span, expr);
@@ -315,7 +337,7 @@ impl UnconditionalRecursion {
             for (ty, impl_def_ids) in impls.non_blanket_impls() {
                 let Some(self_def_id) = ty.def() else { continue };
                 for impl_def_id in impl_def_ids {
-                    if !cx.tcx.has_attr(*impl_def_id, sym::automatically_derived) &&
+                    if !cx.tcx.is_automatically_derived(*impl_def_id) &&
                         let Some(assoc_item) = cx
                             .tcx
                             .associated_items(impl_def_id)
@@ -404,7 +426,7 @@ fn check_from(cx: &LateContext<'_>, method_span: Span, method_def_id: LocalDefId
     if let Some((fn_def_id, node_args)) = fn_def_id_with_node_args(cx, expr)
         && let [s1, s2] = **node_args
         && let (Some(s1), Some(s2)) = (s1.as_type(), s2.as_type())
-        && let Some(trait_def_id) = cx.tcx.trait_of_item(fn_def_id)
+        && let Some(trait_def_id) = cx.tcx.trait_of_assoc(fn_def_id)
         && cx.tcx.is_diagnostic_item(sym::Into, trait_def_id)
         && get_impl_trait_def_id(cx, method_def_id) == cx.tcx.get_diagnostic_item(sym::From)
         && s1 == sig.inputs()[0]

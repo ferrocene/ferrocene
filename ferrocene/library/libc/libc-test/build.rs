@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::match_like_matches_macro)]
 
 extern crate ctest2 as ctest;
 
@@ -52,24 +53,25 @@ fn do_cc() {
 
 fn do_ctest() {
     match &env::var("TARGET").unwrap() {
-        t if t.contains("android") => return test_android(t),
-        t if t.contains("apple") => return test_apple(t),
-        t if t.contains("dragonfly") => return test_dragonflybsd(t),
-        t if t.contains("emscripten") => return test_emscripten(t),
-        t if t.contains("freebsd") => return test_freebsd(t),
-        t if t.contains("haiku") => return test_haiku(t),
-        t if t.contains("linux") => return test_linux(t),
-        t if t.contains("netbsd") => return test_netbsd(t),
-        t if t.contains("openbsd") => return test_openbsd(t),
-        t if t.contains("cygwin") => return test_cygwin(t),
-        t if t.contains("redox") => return test_redox(t),
-        t if t.contains("solaris") => return test_solarish(t),
-        t if t.contains("illumos") => return test_solarish(t),
-        t if t.contains("wasi") => return test_wasi(t),
-        t if t.contains("windows") => return test_windows(t),
-        t if t.contains("vxworks") => return test_vxworks(t),
-        t if t.contains("nto-qnx") => return test_neutrino(t),
-        t => panic!("unknown target {}", t),
+        t if t.contains("android") => test_android(t),
+        t if t.contains("apple") => test_apple(t),
+        t if t.contains("dragonfly") => test_dragonflybsd(t),
+        t if t.contains("emscripten") => test_emscripten(t),
+        t if t.contains("freebsd") => test_freebsd(t),
+        t if t.contains("haiku") => test_haiku(t),
+        t if t.contains("linux") => test_linux(t),
+        t if t.contains("netbsd") => test_netbsd(t),
+        t if t.contains("openbsd") => test_openbsd(t),
+        t if t.contains("cygwin") => test_cygwin(t),
+        t if t.contains("redox") => test_redox(t),
+        t if t.contains("solaris") => test_solarish(t),
+        t if t.contains("illumos") => test_solarish(t),
+        t if t.contains("wasi") => test_wasi(t),
+        t if t.contains("windows") => test_windows(t),
+        t if t.contains("vxworks") => test_vxworks(t),
+        t if t.contains("nto-qnx") => test_neutrino(t),
+        t if t.contains("aix") => return test_aix(t),
+        t => panic!("unknown target {t}"),
     }
 }
 
@@ -101,7 +103,9 @@ fn do_semver() {
     // NOTE: Android doesn't include the unix file (or the Linux file) because
     // there are some many definitions missing it's actually easier just to
     // maintain a file for Android.
-    if family != os && os != "android" {
+    // NOTE: AIX doesn't include the unix file because there are definitions
+    // missing on AIX. It is easier to maintain a file for AIX.
+    if family != os && !matches!(os.as_str(), "android" | "aix") {
         process_semver_file(&mut output, &mut semver_root, &family);
     }
     // We don't do semver for unknown targets.
@@ -109,13 +113,13 @@ fn do_semver() {
         process_semver_file(&mut output, &mut semver_root, &vendor);
     }
     process_semver_file(&mut output, &mut semver_root, &os);
-    let os_arch = format!("{}-{}", os, arch);
+    let os_arch = format!("{os}-{arch}");
     process_semver_file(&mut output, &mut semver_root, &os_arch);
-    if target_env != "" {
-        let os_env = format!("{}-{}", os, target_env);
+    if !target_env.is_empty() {
+        let os_env = format!("{os}-{target_env}");
         process_semver_file(&mut output, &mut semver_root, &os_env);
 
-        let os_env_arch = format!("{}-{}-{}", os, target_env, arch);
+        let os_env_arch = format!("{os}-{target_env}-{arch}");
         process_semver_file(&mut output, &mut semver_root, &os_env_arch);
     }
 }
@@ -132,25 +136,25 @@ fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut Path
             path.pop();
             return;
         }
-        Err(err) => panic!("unexpected error opening file: {}", err),
+        Err(err) => panic!("unexpected error opening file: {err}"),
     };
     let input = BufReader::new(input_file);
 
-    write!(output, "// Source: {}.\n", path.display()).unwrap();
-    output.write(b"use libc::{\n").unwrap();
+    writeln!(output, "// Source: {}.", path.display()).unwrap();
+    output.write_all(b"use libc::{\n").unwrap();
     for line in input.lines() {
         let line = line.unwrap().into_bytes();
         match line.first() {
             // Ignore comments and empty lines.
             Some(b'#') | None => continue,
             _ => {
-                output.write(b"    ").unwrap();
-                output.write(&line).unwrap();
-                output.write(b",\n").unwrap();
+                output.write_all(b"    ").unwrap();
+                output.write_all(&line).unwrap();
+                output.write_all(b",\n").unwrap();
             }
         }
     }
-    output.write(b"};\n\n").unwrap();
+    output.write_all(b"};\n\n").unwrap();
     path.pop();
 }
 
@@ -172,8 +176,10 @@ fn main() {
     do_semver();
 }
 
+// FIXME(clippy): removing `replace` somehow fails the `Test tier1 (x86_64-pc-windows-msvc, windows-2022)` CI job
+#[allow(clippy::only_used_in_recursion)]
 fn copy_dir_hotfix(src: &Path, dst: &Path, regex: &regex::bytes::Regex, replace: &[u8]) {
-    std::fs::create_dir(&dst).unwrap();
+    std::fs::create_dir(dst).unwrap();
     for entry in src.read_dir().unwrap() {
         let entry = entry.unwrap();
         let src_path = entry.path();
@@ -471,9 +477,9 @@ fn test_apple(target: &str) {
             // OSX calls this something else
             "sighandler_t" => "sig_t".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
             t if t.ends_with("_t") => t.to_string(),
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
             t => t.to_string(),
         }
     });
@@ -498,7 +504,7 @@ fn test_apple(target: &str) {
         "uuid_t" | "vol_capabilities_set_t" => true,
         _ => false,
     });
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_openbsd(target: &str) {
@@ -616,8 +622,11 @@ fn test_openbsd(target: &str) {
             "KERN_MAXID" | "NET_RT_MAXID" => true,
             "EV_SYSFLAGS" => true,
 
-            // Removed in OpenBSD 7.7 (unused since 1991)
+            // Removed in OpenBSD 7.7
             "ATF_COM" | "ATF_PERM" | "ATF_PUBL" | "ATF_USETRAILERS" => true,
+
+            // Removed in OpenBSD 7.8
+            "CTL_FS" | "SO_NETPROC" => true,
 
             _ => false,
         }
@@ -654,9 +663,9 @@ fn test_openbsd(target: &str) {
             // OSX calls this something else
             "sighandler_t" => "sig_t".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
             t if t.ends_with("_t") => t.to_string(),
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
             t => t.to_string(),
         }
     });
@@ -685,7 +694,7 @@ fn test_openbsd(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_cygwin(target: &str) {
@@ -753,15 +762,15 @@ fn test_cygwin(target: &str) {
 
             "Ioctl" => "int".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t if t.ends_with("_t") => t.to_string(),
 
             // sigval is a struct in Rust, but a union in C:
-            "sigval" => format!("union sigval"),
+            "sigval" => "union sigval".to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             t => t.to_string(),
         }
@@ -857,7 +866,7 @@ fn test_cygwin(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_windows(target: &str) {
@@ -905,7 +914,7 @@ fn test_windows(target: &str) {
             "sighandler_t" if !gnu => "_crt_signal_t".to_string(),
             "sighandler_t" if gnu => "__p_sig_fn_t".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
             t if t.ends_with("_t") => t.to_string(),
 
             // Windows uppercase structs don't have `struct` in front:
@@ -918,7 +927,7 @@ fn test_windows(target: &str) {
                     "struct __utimbuf64".to_string()
                 } else {
                     // put `struct` in front of all structs:
-                    format!("struct {}", t)
+                    format!("struct {t}")
                 }
             }
             t => t.to_string(),
@@ -986,7 +995,7 @@ fn test_windows(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_redox(target: &str) {
@@ -1036,7 +1045,7 @@ fn test_redox(target: &str) {
         "wchar.h",
     }
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_solarish(target: &str) {
@@ -1164,8 +1173,8 @@ fn test_solarish(target: &str) {
         "FILE" => "__FILE".to_string(),
         "DIR" | "Dl_info" => ty.to_string(),
         t if t.ends_with("_t") => t.to_string(),
-        t if is_struct => format!("struct {}", t),
-        t if is_union => format!("union {}", t),
+        t if is_struct => format!("struct {t}"),
+        t if is_union => format!("union {t}"),
         t => t.to_string(),
     });
 
@@ -1326,7 +1335,7 @@ fn test_solarish(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_netbsd(target: &str) {
@@ -1434,12 +1443,12 @@ fn test_netbsd(target: &str) {
             // OSX calls this something else
             "sighandler_t" => "sig_t".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t if t.ends_with("_t") => t.to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             t => t.to_string(),
         }
@@ -1505,6 +1514,7 @@ fn test_netbsd(target: &str) {
     });
 
     cfg.skip_fn(move |name| {
+        #[expect(clippy::wildcard_in_or_patterns)]
         match name {
             // FIXME(netbsd): https://github.com/rust-lang/libc/issues/1272
             "execv" | "execve" | "execvp" => true,
@@ -1541,7 +1551,7 @@ fn test_netbsd(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_dragonflybsd(target: &str) {
@@ -1650,15 +1660,15 @@ fn test_dragonflybsd(target: &str) {
             // FIXME(dragonflybsd): OSX calls this something else
             "sighandler_t" => "sig_t".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t if t.ends_with("_t") => t.to_string(),
 
             // sigval is a struct in Rust, but a union in C:
-            "sigval" => format!("union sigval"),
+            "sigval" => "union sigval".to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             t => t.to_string(),
         }
@@ -1766,7 +1776,7 @@ fn test_dragonflybsd(target: &str) {
         (struct_ == "sigevent" && field == "sigev_notify_thread_id")
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_wasi(target: &str) {
@@ -1828,11 +1838,11 @@ fn test_wasi(target: &str) {
 
     cfg.type_name(move |ty, is_struct, is_union| match ty {
         "FILE" | "fd_set" | "DIR" => ty.to_string(),
-        t if is_union => format!("union {}", t),
-        t if t.starts_with("__wasi") && t.ends_with("_u") => format!("union {}", t),
-        t if t.starts_with("__wasi") && is_struct => format!("struct {}", t),
+        t if is_union => format!("union {t}"),
+        t if t.starts_with("__wasi") && t.ends_with("_u") => format!("union {t}"),
+        t if t.starts_with("__wasi") && is_struct => format!("struct {t}"),
         t if t.ends_with("_t") => t.to_string(),
-        t if is_struct => format!("struct {}", t),
+        t if is_struct => format!("struct {t}"),
         t => t.to_string(),
     });
 
@@ -1873,7 +1883,7 @@ fn test_wasi(target: &str) {
     // doesn't support sizeof.
     cfg.skip_field(|s, field| s == "dirent" && field == "d_name");
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_android(target: &str) {
@@ -1881,7 +1891,7 @@ fn test_android(target: &str) {
     let target_pointer_width = match target {
         t if t.contains("aarch64") || t.contains("x86_64") => 64,
         t if t.contains("i686") || t.contains("arm") => 32,
-        t => panic!("unsupported target: {}", t),
+        t => panic!("unsupported target: {t}"),
     };
     let x86 = target.contains("i686") || target.contains("x86_64");
     let aarch64 = target.contains("aarch64");
@@ -2040,15 +2050,17 @@ fn test_android(target: &str) {
             // Just pass all these through, no need for a "struct" prefix
             "FILE" | "fd_set" | "Dl_info" | "Elf32_Phdr" | "Elf64_Phdr" => ty.to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t if t.ends_with("_t") => t.to_string(),
 
             // sigval is a struct in Rust, but a union in C:
-            "sigval" => format!("union sigval"),
+            "sigval" => "union sigval".to_string(),
+
+            "Ioctl" => "int".to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             t => t.to_string(),
         }
@@ -2378,7 +2390,7 @@ fn test_android(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 
     test_linux_like_apis(target);
 }
@@ -2404,18 +2416,9 @@ fn test_freebsd(target: &str) {
     // Required for making freebsd11_stat available in the headers
     cfg.define("_WANT_FREEBSD11_STAT", None);
 
-    let freebsd13 = match freebsd_ver {
-        Some(n) if n >= 13 => true,
-        _ => false,
-    };
-    let freebsd14 = match freebsd_ver {
-        Some(n) if n >= 14 => true,
-        _ => false,
-    };
-    let freebsd15 = match freebsd_ver {
-        Some(n) if n >= 15 => true,
-        _ => false,
-    };
+    let freebsd13 = matches!(freebsd_ver, Some(n) if n >= 13);
+    let freebsd14 = matches!(freebsd_ver, Some(n) if n >= 14);
+    let freebsd15 = matches!(freebsd_ver, Some(n) if n >= 15);
 
     headers! { cfg:
                 "aio.h",
@@ -2499,6 +2502,9 @@ fn test_freebsd(target: &str) {
                 "sys/sem.h",
                 "sys/shm.h",
                 "sys/socket.h",
+                "sys/socketvar.h",
+                [freebsd15]:"sys/ktls.h",
+                "netinet/in_pcb.h",	// must be after sys/socketvar.h, sys/ktls.h
                 "sys/stat.h",
                 "sys/statvfs.h",
                 "sys/sysctl.h",
@@ -2553,15 +2559,15 @@ fn test_freebsd(target: &str) {
             // FIXME(freebsd): https://github.com/rust-lang/libc/issues/1273
             "sighandler_t" => "sig_t".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t if t.ends_with("_t") => t.to_string(),
 
             // sigval is a struct in Rust, but a union in C:
-            "sigval" => format!("union sigval"),
+            "sigval" => "union sigval".to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             t => t.to_string(),
         }
@@ -2580,6 +2586,8 @@ fn test_freebsd(target: &str) {
             "type_" if struct_ == "sockstat" => "type".to_string(),
             "type_" if struct_ == "devstat_match_table" => "type".to_string(),
             "type_" if struct_ == "input_event" => "type".to_string(),
+            // Field is named `gennum` in Rust because `gen` is a keyword
+            "gennum" if struct_ == "xktls_session_onedir" => "gen".to_string(),
             s => s.to_string(),
         }
     });
@@ -2636,7 +2644,7 @@ fn test_freebsd(target: &str) {
             "TDF_CANSWAP" | "TDF_SWAPINREQ" => true,
 
             // Unaccessible in FreeBSD 15
-            "TDI_SWAPPED" | "P_SWAPPINGOUT" | "P_SWAPPINGIN" => true,
+            "TDI_SWAPPED" | "P_SWAPPINGOUT" | "P_SWAPPINGIN" | "P_UNUSED3" => true,
 
             // Removed in FreeBSD 14 (git a6b55ee6be1)
             "IFF_KNOWSEPOCH" => true,
@@ -2858,6 +2866,9 @@ fn test_freebsd(target: &str) {
             // FIXME(freebsd): Removed in FreeBSD 15, deprecated in libc
             "TCP_PCAP_OUT" | "TCP_PCAP_IN" => true,
 
+            // Added in FreeBSD 14.2
+            "SO_SPLICE" if Some(14) > freebsd_ver => true,
+
             _ => false,
         }
     });
@@ -2908,6 +2919,12 @@ fn test_freebsd(target: &str) {
 
             // FIXME(freebsd): Changed in FreeBSD 15
             "tcp_info" | "sockstat" if Some(15) >= freebsd_ver => true,
+
+            // `splice` introduced in FreeBSD 14.2
+            "splice" if Some(14) > freebsd_ver => true,
+
+            // Those are introduced in FreeBSD 15.
+            "xktls_session_onedir" | "xktls_session" if Some(15) > freebsd_ver => true,
 
             _ => false,
         }
@@ -3048,6 +3065,8 @@ fn test_freebsd(target: &str) {
             // `tcp_snd_wscale` and `tcp_rcv_wscale` are bitfields
             ("tcp_info", "tcp_snd_wscale") => true,
             ("tcp_info", "tcp_rcv_wscale") => true,
+            // mc_spare can change in size between OS releases.  It's a spare field, after all.
+            ("__mcontext", "mc_spare") => true,
 
             _ => false,
         }
@@ -3060,7 +3079,7 @@ fn test_freebsd(target: &str) {
         });
     }
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_emscripten(target: &str) {
@@ -3158,10 +3177,10 @@ fn test_emscripten(target: &str) {
             t if t.ends_with("_t") => t.to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             // put `union` in front of all unions:
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t => t.to_string(),
         }
@@ -3300,7 +3319,7 @@ fn test_emscripten(target: &str) {
         ].contains(&field))
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_neutrino(target: &str) {
@@ -3308,7 +3327,7 @@ fn test_neutrino(target: &str) {
 
     let mut cfg = ctest_cfg();
     if target.ends_with("_iosock") {
-        let qnx_target_val = std::env::var("QNX_TARGET")
+        let qnx_target_val = env::var("QNX_TARGET")
             .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
 
         cfg.include(qnx_target_val + "/usr/include/io-sock");
@@ -3438,12 +3457,12 @@ fn test_neutrino(target: &str) {
 
             "Ioctl" => "int".to_string(),
 
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t if t.ends_with("_t") => t.to_string(),
 
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
 
             t => t.to_string(),
         }
@@ -3558,22 +3577,22 @@ fn test_neutrino(target: &str) {
         struct_ == "_idle_hook" && field == "time"
     });
 
-    cfg.skip_field(move |struct_, field| {
-        (struct_ == "__sched_param" && field == "reserved") ||
-        (struct_ == "sched_param" && field == "reserved") ||
-        (struct_ == "sigevent" && field == "__padding1") || // ensure alignment
-        (struct_ == "sigevent" && field == "__padding2") || // union
-        (struct_ == "sigevent" && field == "__sigev_un2") || // union
-        // sighandler_t type is super weird
-        (struct_ == "sigaction" && field == "sa_sigaction") ||
-        // does not exist
-        (struct_ == "syspage_entry" && field == "__reserved") ||
-        false // keep me for smaller diffs when something is added above
+    cfg.skip_field(|struct_, field| {
+        matches!(
+            (struct_, field),
+            ("__sched_param", "reserved")
+            | ("sched_param", "reserved")
+            | ("sigevent", "__padding1") // ensure alignment
+            | ("sigevent", "__padding2") // union
+            | ("sigevent", "__sigev_un2") // union
+            | ("sigaction", "sa_sigaction") // sighandler_t type is super weird
+            | ("syspage_entry", "__reserved") // does not exist
+        )
     });
 
-    cfg.skip_static(move |name| (name == "__dso_handle"));
+    cfg.skip_static(move |name| name == "__dso_handle");
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_vxworks(target: &str) {
@@ -3658,15 +3677,13 @@ fn test_vxworks(target: &str) {
         _ => false,
     });
 
-    cfg.skip_roundtrip(move |s| match s {
-        _ => false,
-    });
+    cfg.skip_roundtrip(|_| false);
 
     cfg.type_name(move |ty, is_struct, is_union| match ty {
         "DIR" | "FILE" | "Dl_info" | "RTP_DESC" => ty.to_string(),
-        t if is_union => format!("union {}", t),
+        t if is_union => format!("union {t}"),
         t if t.ends_with("_t") => t.to_string(),
-        t if is_struct => format!("struct {}", t),
+        t if is_struct => format!("struct {t}"),
         t => t.to_string(),
     });
 
@@ -3681,26 +3698,41 @@ fn test_vxworks(target: &str) {
         _ => false,
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
-    match env::var("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS") {
-        Ok(val) if val == "64" => {
-            if target.contains("gnu")
-                && target.contains("linux")
-                && !target.ends_with("x32")
-                && !target.contains("riscv32")
-                && env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32"
-            {
+    let pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap_or_default();
+    if target.contains("gnu")
+        && target.contains("linux")
+        && !target.ends_with("x32")
+        && !target.contains("riscv32")
+        && pointer_width == "32"
+    {
+        match env::var("RUST_LIBC_UNSTABLE_GNU_TIME_BITS") {
+            Ok(val) if val == "64" => {
                 cfg.define("_FILE_OFFSET_BITS", Some("64"));
+                cfg.define("_TIME_BITS", Some("64"));
                 cfg.cfg("gnu_file_offset_bits64", None);
+                cfg.cfg("linux_time_bits64", None);
+                cfg.cfg("gnu_time_bits64", None);
+            }
+            Ok(val) if val != "32" => {
+                panic!("RUST_LIBC_UNSTABLE_GNU_TIME_BITS may only be set to '32' or '64'")
+            }
+            _ => {
+                match env::var("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS") {
+                    Ok(val) if val == "64" => {
+                        cfg.define("_FILE_OFFSET_BITS", Some("64"));
+                        cfg.cfg("gnu_file_offset_bits64", None);
+                    }
+                    Ok(val) if val != "32" => {
+                        panic!("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS may only be set to '32' or '64'")
+                    }
+                    _ => {}
+                }
             }
         }
-        Ok(val) if val != "32" => {
-            panic!("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS may only be set to '32' or '64'")
-        }
-        _ => {}
     }
 }
 
@@ -3716,10 +3748,7 @@ fn test_linux(target: &str) {
         (true, false, false) => (),
         (false, true, false) => (),
         (false, false, true) => (),
-        (_, _, _) => panic!(
-            "linux target lib is gnu: {}, musl: {}, uclibc: {}",
-            gnu, musl, uclibc
-        ),
+        (_, _, _) => panic!("linux target lib is gnu: {gnu}, musl: {musl}, uclibc: {uclibc}"),
     }
 
     let arm = target.contains("arm");
@@ -3732,7 +3761,6 @@ fn test_linux(target: &str) {
     let x32 = target.contains("x32");
     let x86_32 = target.contains("i686");
     let x86_64 = target.contains("x86_64");
-    let aarch64_musl = aarch64 && musl;
     let gnueabihf = target.contains("gnueabihf");
     let x86_64_gnux32 = target.contains("gnux32") && x86_64;
     let riscv64 = target.contains("riscv64");
@@ -3740,7 +3768,13 @@ fn test_linux(target: &str) {
     let wasm32 = target.contains("wasm32");
     let uclibc = target.contains("uclibc");
 
+    let musl_v1_2_3 = env::var("RUST_LIBC_UNSTABLE_MUSL_V1_2_3").is_ok();
+    let old_musl = musl && !musl_v1_2_3;
+
     let mut cfg = ctest_cfg();
+    if musl_v1_2_3 {
+        cfg.cfg("musl_v1_2_3", None);
+    }
     cfg.define("_GNU_SOURCE", None);
     // This macro re-defines fscanf,scanf,sscanf to link to the symbols that are
     // deprecated since glibc >= 2.29. This allows Rust binaries to link against
@@ -3873,6 +3907,8 @@ fn test_linux(target: &str) {
             "linux/can.h",
             "linux/can/raw.h",
             "linux/can/j1939.h",
+            "linux/cn_proc.h",
+            "linux/connector.h",
             "linux/dccp.h",
             "linux/errqueue.h",
             "linux/falloc.h",
@@ -3909,6 +3945,7 @@ fn test_linux(target: &str) {
             "linux/netfilter_ipv6.h",
             "linux/netfilter_ipv6/ip6_tables.h",
             "linux/netlink.h",
+            "linux/nsfs.h",
             "linux/openat2.h",
             // FIXME(linux): some items require Linux >= 5.6:
             "linux/ptp_clock.h",
@@ -3920,6 +3957,7 @@ fn test_linux(target: &str) {
             "linux/sched.h",
             "linux/sctp.h",
             "linux/seccomp.h",
+            "linux/securebits.h",
             "linux/sock_diag.h",
             "linux/sockios.h",
             "linux/tls.h",
@@ -3959,9 +3997,9 @@ fn test_linux(target: &str) {
             // typedefs don't need any keywords
             t if t.ends_with("_t") => t.to_string(),
             // put `struct` in front of all structs:.
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
             // put `union` in front of all unions:
-            t if is_union => format!("union {}", t),
+            t if is_union => format!("union {t}"),
 
             t => t.to_string(),
         }
@@ -4123,6 +4161,10 @@ fn test_linux(target: &str) {
             // Might differ between kernel versions
             "open_how" => true,
 
+            // Linux >= 6.13 (pidfd_info.exit_code: Linux >= 6.15)
+            // Might differ between kernel versions
+            "pidfd_info" => true,
+
             "sctp_initmsg" | "sctp_sndrcvinfo" | "sctp_sndinfo" | "sctp_rcvinfo"
             | "sctp_nxtinfo" | "sctp_prinfo" | "sctp_authinfo" => true,
 
@@ -4198,8 +4240,14 @@ fn test_linux(target: &str) {
             // FIXME(linux): Requires >= 6.12 kernel headers.
             "dmabuf_cmsg" | "dmabuf_token" => true,
 
+            // FIXME(linux): Requires >= 6.12 kernel headers.
+            "mnt_ns_info" => true,
+
             // FIXME(linux): Requires >= 6.4 kernel headers.
             "ptrace_sud_config" => true,
+
+            // Struct has changed for new musl versions
+            "tcp_info" if old_musl => true,
 
             _ => false,
         }
@@ -4229,6 +4277,7 @@ fn test_linux(target: &str) {
                 || name.starts_with("OPEN_TREE_")
                 || name.starts_with("P_")
                 || name.starts_with("PF_")
+                || name.starts_with("PIDFD_")
                 || name.starts_with("RLIMIT_")
                 || name.starts_with("RTEXT_FILTER_")
                 || name.starts_with("SOL_")
@@ -4297,9 +4346,13 @@ fn test_linux(target: &str) {
             if loongarch64 && (name == "MFD_NOEXEC_SEAL" || name == "MFD_EXEC") {
                 return true;
             }
-            // FIXME(musl): Requires musl >= 1.2
-            if name == "SO_PREFER_BUSY_POLL"
-                || name == "SO_BUSY_POLL_BUDGET"
+            // FIXME: Requires >= 6.3 (6.6) kernel headers
+            if name == "PR_GET_MDWE" || name == "PR_MDWE_NO_INHERIT" || name == "PR_MDWE_REFUSE_EXEC_GAIN" || name == "PR_SET_MDWE" {
+                return true;
+            }
+            // Requires musl >= 1.2
+            if old_musl && (name == "SO_PREFER_BUSY_POLL"
+                || name == "SO_BUSY_POLL_BUDGET")
             {
                 return true;
             }
@@ -4322,6 +4375,19 @@ fn test_linux(target: &str) {
                 || name == "SCM_DEVMEM_DMABUF"
             {
                         return true;
+            }
+            // Values changed in newer musl versions on these arches
+            if old_musl && (riscv64 || x86_64) && name == "O_LARGEFILE" {
+                return true;
+            }
+            // Values changed in newer musl versions
+            if old_musl && name == "RLIM_NLIMITS" {
+                return true;
+            }
+            // FIXME: Does not exist on non-x86 architectures, slated for removal
+            // in libc in 1.0
+            if ppc64 && name == "MAP_32BIT" {
+                return true;
             }
         }
         match name {
@@ -4432,6 +4498,30 @@ fn test_linux(target: &str) {
 
             // headers conflicts with linux/pidfd.h
             "PIDFD_NONBLOCK" => true,
+            // Linux >= 6.9
+            "PIDFD_THREAD"
+            | "PIDFD_SIGNAL_THREAD"
+            | "PIDFD_SIGNAL_THREAD_GROUP"
+            | "PIDFD_SIGNAL_PROCESS_GROUP" => true,
+            // Linux >= 6.11
+            "PIDFD_GET_CGROUP_NAMESPACE"
+            | "PIDFD_GET_IPC_NAMESPACE"
+            | "PIDFD_GET_MNT_NAMESPACE"
+            | "PIDFD_GET_NET_NAMESPACE"
+            | "PIDFD_GET_PID_NAMESPACE"
+            | "PIDFD_GET_PID_FOR_CHILDREN_NAMESPACE"
+            | "PIDFD_GET_TIME_NAMESPACE"
+            | "PIDFD_GET_TIME_FOR_CHILDREN_NAMESPACE"
+            | "PIDFD_GET_USER_NAMESPACE"
+            | "PIDFD_GET_UTS_NAMESPACE" => true,
+            // Linux >= 6.13
+            "PIDFD_GET_INFO"
+            | "PIDFD_INFO_PID"
+            | "PIDFD_INFO_CREDS"
+            | "PIDFD_INFO_CGROUPID"
+            | "PIDFD_INFO_SIZE_VER0" => true,
+            // Linux >= 6.15
+            "PIDFD_INFO_EXIT" | "PIDFD_SELF" | "PIDFD_SELF_PROCESS" => true,
 
             // is a private value for kernel usage normally
             "FUSE_SUPER_MAGIC" => true,
@@ -4499,6 +4589,15 @@ fn test_linux(target: &str) {
             // kernel 6.2 minimum
             "TUN_F_USO4" | "TUN_F_USO6" | "IFF_NO_CARRIER" => true,
 
+            // kernel 6.9 minimum
+            "RWF_NOAPPEND" => true,
+
+            // kernel 6.11 minimum
+            "RWF_ATOMIC" => true,
+
+            // kernel 6.14 minimum
+            "RWF_DONTCACHE" => true,
+
             // FIXME(linux): Requires more recent kernel headers
             | "IFLA_PARENT_DEV_NAME"     // linux v5.13+
             | "IFLA_PARENT_DEV_BUS_NAME" // linux v5.13+
@@ -4554,6 +4653,9 @@ fn test_linux(target: &str) {
                 true
             }
 
+            // FIXME(linux): Requires >= 6.6 kernel headers.
+            "PR_MDWE_NO_INHERIT" => true,
+
             // FIXME(linux): Requires >= 6.8 kernel headers.
             "XDP_UMEM_TX_SW_CSUM"
             | "XDP_TXMD_FLAGS_TIMESTAMP"
@@ -4570,6 +4672,11 @@ fn test_linux(target: &str) {
             {
                 true
             }
+
+            // FIXME(linux): Requires >= 6.11 kernel headers.
+            "NS_GET_MNTNS_ID" | "NS_GET_PID_FROM_PIDNS" | "NS_GET_TGID_FROM_PIDNS" | "NS_GET_PID_IN_PIDNS" | "NS_GET_TGID_IN_PIDNS" => true,
+            // FIXME(linux): Requires >= 6.12 kernel headers.
+            "MNT_NS_INFO_SIZE_VER0" | "NS_MNT_GET_INFO" | "NS_MNT_GET_NEXT" | "NS_MNT_GET_PREV" => true,
 
             // FIXME(linux): Requires >= 6.6 kernel headers.
             "SYS_fchmodat2" => true,
@@ -4627,6 +4734,19 @@ fn test_linux(target: &str) {
             | "SCM_DEVMEM_DMABUF" => true,
             // FIXME(linux): Requires >= 6.4 kernel headers.
             "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG" | "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG" => true,
+
+            // FIXME(linux): Requires >= 6.6 kernel headers.
+            "PROC_EVENT_NONZERO_EXIT" => true,
+
+            // FIXME(linux): Requires >= 6.14 kernel headers.
+            "SECBIT_EXEC_DENY_INTERACTIVE"
+            | "SECBIT_EXEC_DENY_INTERACTIVE_LOCKED"
+            | "SECBIT_EXEC_RESTRICT_FILE"
+            | "SECBIT_EXEC_RESTRICT_FILE_LOCKED"
+            | "SECURE_ALL_UNPRIVILEGED" => true,
+
+            // FIXME(linux): Value changed in 6.14
+            "SECURE_ALL_BITS" | "SECURE_ALL_LOCKS" => true,
 
             _ => false,
         }
@@ -4699,18 +4819,18 @@ fn test_linux(target: &str) {
             "getnameinfo" if uclibc => true,
 
             // FIXME(musl): This needs musl 1.2.2 or later.
-            "gettid" if musl => true,
+            "gettid" if old_musl => true,
 
             // Needs glibc 2.33 or later.
             "mallinfo2" => true,
 
-            "reallocarray" if musl => true,
+            "reallocarray" if old_musl => true,
 
             // Not defined in uclibc as of 1.0.34
             "gettid" if uclibc => true,
 
             // Needs musl 1.2.3 or later.
-            "pthread_getname_np" if musl => true,
+            "pthread_getname_np" if old_musl => true,
 
             // pthread_sigqueue uses sigval, which was initially declared
             // as a struct but should be defined as a union. However due
@@ -4804,8 +4924,8 @@ fn test_linux(target: &str) {
             "sched_ss_init_budget",
             "sched_ss_max_repl",
         ].contains(&field) && musl) ||
-        // FIXME(musl): After musl 1.1.24, the type becomes `int` instead of `unsigned short`.
-        (struct_ == "ipc_perm" && field == "__seq" && aarch64_musl) ||
+        // After musl 1.1.24, the type becomes `int` instead of `unsigned short`.
+        (struct_ == "ipc_perm" && field == "__seq" && old_musl && aarch64) ||
         // glibc uses unnamed fields here and Rust doesn't support that yet
         (struct_ == "timex" && field.starts_with("__unused")) ||
         // FIXME(linux): It now takes mode_t since glibc 2.31 on some targets.
@@ -4851,7 +4971,9 @@ fn test_linux(target: &str) {
         (struct_ == "statvfs" && field == "__f_spare") ||
         (struct_ == "statvfs64" && field == "__f_spare") ||
         // the `xsk_tx_metadata_union` field is an anonymous union
-        (struct_ == "xsk_tx_metadata" && field == "xsk_tx_metadata_union")
+        (struct_ == "xsk_tx_metadata" && field == "xsk_tx_metadata_union") ||
+        // After musl 1.2.0, the type becomes `int` instead of `long`.
+        (old_musl && struct_ == "utmpx" && field == "ut_session")
     });
 
     cfg.skip_roundtrip(move |s| match s {
@@ -4897,7 +5019,7 @@ fn test_linux(target: &str) {
         _ => false,
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 
     test_linux_like_apis(target);
 }
@@ -4952,8 +5074,8 @@ fn test_linux_like_apis(target: &str) {
                 _ => true,
             })
             .type_name(move |ty, is_struct, is_union| match ty {
-                t if is_struct => format!("struct {}", t),
-                t if is_union => format!("union {}", t),
+                t if is_struct => format!("struct {t}"),
+                t if is_union => format!("union {t}"),
                 t => t.to_string(),
             });
 
@@ -4978,8 +5100,8 @@ fn test_linux_like_apis(target: &str) {
             .type_name(move |ty, is_struct, is_union| match ty {
                 "Ioctl" if gnu => "unsigned long".to_string(),
                 "Ioctl" => "int".to_string(),
-                t if is_struct => format!("struct {}", t),
-                t if is_union => format!("union {}", t),
+                t if is_struct => format!("struct {t}"),
+                t if is_union => format!("union {t}"),
                 t => t.to_string(),
             });
         cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_termios.rs");
@@ -5007,8 +5129,8 @@ fn test_linux_like_apis(target: &str) {
                 _ => true,
             })
             .type_name(move |ty, is_struct, is_union| match ty {
-                t if is_struct => format!("struct {}", t),
-                t if is_union => format!("union {}", t),
+                t if is_struct => format!("struct {t}"),
+                t if is_union => format!("union {t}"),
                 t => t.to_string(),
             });
         cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_ipv6.rs");
@@ -5394,10 +5516,10 @@ fn test_haiku(target: &str) {
             }
 
             // is actually a union
-            "sigval" => format!("union sigval"),
-            t if is_union => format!("union {}", t),
+            "sigval" => "union sigval".to_string(),
+            t if is_union => format!("union {t}"),
             t if t.ends_with("_t") => t.to_string(),
-            t if is_struct => format!("struct {}", t),
+            t if is_struct => format!("struct {t}"),
             t => t.to_string(),
         }
     });
@@ -5415,5 +5537,302 @@ fn test_haiku(target: &str) {
             s => s.to_string(),
         }
     });
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
+}
+
+fn test_aix(target: &str) {
+    assert!(target.contains("aix"));
+
+    // ctest generates arguments supported only by clang, so make sure to
+    // run with CC=clang. While debugging, "CFLAGS=-ferror-limit=<large num>"
+    // is useful to get more error output.
+    let mut cfg = ctest_cfg();
+    cfg.define("_THREAD_SAFE", None);
+
+    // Avoid the error for definitions such as '{0, 0, 0, 1}' for
+    // 'IN6ADDR_LOOPBACK_INIT' in netinent/in.h.
+    cfg.flag("-Wno-missing-braces");
+
+    headers! { cfg:
+               "aio.h",
+               "ctype.h",
+               "dirent.h",
+               "dlfcn.h",
+               "errno.h",
+               "fcntl.h",
+               "fnmatch.h",
+               "glob.h",
+               "grp.h",
+               "iconv.h",
+               "langinfo.h",
+               "libgen.h",
+               "limits.h",
+               "locale.h",
+               "malloc.h",
+               "mntent.h",
+               "mqueue.h",
+               "netinet/in.h", // this needs be before net/if.h
+               "poll.h", // this needs be before net/if.h
+               "sys/pollset.h", // this needs to be before net/if.h
+               "net/if.h",
+               "net/bpf.h", // this needs to be after net/if.h
+               "net/if_dl.h",
+               "netdb.h",
+               "netinet/tcp.h",
+               "pthread.h",
+               "pwd.h",
+               "rpcsvc/mount.h",
+               "rpcsvc/rstat.h",
+               "regex.h",
+               "resolv.h",
+               "sched.h",
+               "search.h",
+               "semaphore.h",
+               "signal.h",
+               "spawn.h",
+               "stddef.h",
+               "stdint.h",
+               "stdio.h",
+               "stdlib.h",
+               "string.h",
+               "strings.h",
+               "sys/aacct.h",
+               "sys/acct.h",
+               "sys/dr.h",
+               "sys/file.h",
+               "sys/io.h",
+               "sys/ioctl.h",
+               "sys/ipc.h",
+               "sys/ldr.h",
+               "sys/mman.h",
+               "sys/msg.h",
+               "sys/reg.h",
+               "sys/resource.h",
+               "sys/sem.h",
+               "sys/shm.h",
+               "sys/socket.h",
+               "sys/stat.h",
+               "sys/statfs.h",
+               "sys/statvfs.h",
+               "sys/stropts.h",
+               "sys/termio.h",
+               "sys/time.h",
+               "sys/times.h",
+               "sys/types.h",
+               "sys/uio.h",
+               "sys/un.h",
+               "sys/user.h",
+               "sys/utsname.h",
+               "sys/vattr.h",
+               "sys/vminfo.h",
+               "sys/wait.h",
+               "sys/xti.h",
+               "syslog.h",
+               "termios.h",
+               "thread.h",
+               "time.h",
+               "ucontext.h",
+               "unistd.h",
+               "utime.h",
+               "utmp.h",
+               "utmpx.h",
+               "wchar.h",
+    }
+
+    cfg.skip_type(move |ty| match ty {
+        // AIX does not define type 'sighandler_t'.
+        "sighandler_t" => true,
+
+        // The alignment of 'double' does not agree between C and Rust for AIX.
+        // We are working on a resolution.
+        "c_double" => true,
+
+        _ => false,
+    });
+
+    cfg.type_name(move |ty, is_struct, is_union| match ty {
+        "DIR" => ty.to_string(),
+        "FILE" => ty.to_string(),
+        "ACTION" => ty.to_string(),
+
+        // 'sigval' is a struct in Rust, but a union in C.
+        "sigval" => format!("union sigval"),
+
+        t if t.ends_with("_t") => t.to_string(),
+        t if is_struct => format!("struct {}", t),
+        t if is_union => format!("union {}", t),
+        t => t.to_string(),
+    });
+
+    cfg.skip_const(move |name| match name {
+        // Skip 'sighandler_t' assignments.
+        "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true,
+
+        // _ALL_SOURCE defines these errno values as aliases of other errno
+        // values, but POSIX requires each errno to be unique. Skip these
+        // values because non-unique values are being used which will
+        // fail the test when _ALL_SOURCE is defined.
+        "EWOULDBLOCK" | "ENOTEMPTY" => true,
+
+        // FIXME(ctest): These constants are intended for use as the 'int request' argument
+        // to 'ioctl()'. However, the AIX headers do not explicitly define their types. If a
+        // value has the sign bit set, it gets sign-extended to a 64-bit value in the 64-bit
+        // mode, which fails the comparison with the Rust definitions, where the type is
+        //`c_int`.
+        "BIOCSETF" | "BIOCSBLEN" | "BIOCSRTIMEOUT" | "BIOCIMMEDIATE" | "BIOCSETIF" | "FIONBIO"
+        | "FIOASYNC" | "FIOSETOWN" | "TIOCSETD" | "TIOCMODS" | "TIOCSETP" | "TIOCSETN"
+        | "TIOCFLUSH" | "TIOCSETC" | "SIOCADDMULTI" | "SIOCADDRT" | "SIOCDARP" | "SIOCDELMULTI"
+        | "SIOCGIFADDR" | "SIOCGIFBRDADDR" | "SIOCGIFCONF" | "SIOCGIFDSTADDR" | "SIOCGIFFLAGS"
+        | "SIOCGIFHWADDR" | "SIOCGIFMETRIC" | "SIOCGIFMTU" | "SIOCGIFNETMASK" | "SIOCSARP"
+        | "SIOCSIFADDR" | "SIOCSIFBRDADDR" | "SIOCSIFDSTADDR" | "SIOCSIFFLAGS"
+        | "SIOCSIFMETRIC" | "SIOCSIFMTU" | "SIOCSIFNETMASK" | "TIOCUCNTL" | "TIOCCONS"
+        | "TIOCPKT" | "TIOCSWINSZ" | "TIOCLBIS" | "TIOCLBIC" | "TIOCLSET" | "TIOCSLTC"
+        | "TIOCSPGRP" | "TIOCSTI" | "TIOCMSET" | "TIOCMBIS" | "TIOCMBIC" | "TIOCREMOTE" => true,
+
+        _ => false,
+    });
+
+    cfg.skip_struct(move |ty| {
+        match ty {
+            // FIXME(union): actually a union.
+            "sigval" => true,
+
+            // '__poll_ctl_ext_u' and '__pollfd_ext_u' are for unnamed unions.
+            "__poll_ctl_ext_u" => true,
+            "__pollfd_ext_u" => true,
+
+            // 'struct fpreg_t' is not defined in AIX headers. It is created to
+            // allow type 'double' to be used in signal contexts.
+            "fpreg_t" => true,
+
+            // This type is defined for a union used within `struct ld_info`.
+            // The AIX header does not declare a separate standalone union
+            // type for it.
+            "__ld_info_file" => true,
+
+            // This is a simplified version of the AIX union `_simple_lock`.
+            "_kernel_simple_lock" => true,
+
+            // These structures are guarded by the `_KERNEL` macro in the AIX
+            // header.
+            "fileops_t" | "file" => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.skip_field_type(move |struct_, field| {
+        match (struct_, field) {
+            // AIX does not define 'sighandler_t'.
+            ("sigaction", "sa_sigaction") => true,
+
+            // The type of 'fpr' is 'fpreg_t' which is created to allow type
+            // 'double' to be used in signal contexts.
+            ("__context64", "fpr") => true,
+            ("__tm_context_t", "fpr") => true,
+
+            // The _ALL_SOURCE type of 'f_fsid' differs from POSIX's on AIX.
+            ("statvfs", "f_fsid") => true,
+
+            // The type of `_file` is `__ld_info_file`, which is defined
+            // specifically for the union inside `struct ld_info`. The AIX
+            // header does not define a separate standalone union type for it.
+            ("ld_info", "_file") => true,
+
+            // On AIX, when _ALL_SOURCE is defined, the types of the following fields
+            // differ from those used when _XOPEN_SOURCE is defined. The former uses
+            // 'struct st_timespec', while the latter uses 'struct timespec'.
+            ("stat", "st_atim") => true,
+            ("stat", "st_mtim") => true,
+            ("stat", "st_ctim") => true,
+            ("stat64", "st_atim") => true,
+            ("stat64", "st_mtim") => true,
+            ("stat64", "st_ctim") => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.skip_field(move |s, field| {
+        match s {
+            // The field 'u' is actually a unnamed union in the AIX header.
+            "poll_ctl_ext" if field == "u" => true,
+
+            // The field 'data' is actually a unnamed union in the AIX header.
+            "pollfd_ext" if field == "data" => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.skip_fn(move |name| {
+        match name {
+            // 'sighandler_t' is not defined on AIX.
+            "signal" => true,
+
+            // The function is only available under macro _USE_IRS in 'netdb.h'.
+            "hstrerror" => true,
+
+            // _ALL_SOURCE signatures for these functions differ from POSIX's
+            // on AIX.
+            "poll" => true,
+            "readlinkat" => true,
+            "readlink" => true,
+            "pselect" => true,
+
+            // The AIX signature differs from POSIX's, issue opened.
+            "gai_strerror" => true,
+
+            // AIX implements POSIX-compliant versions of these functions
+            // using 'static' wrappers in the headers, which in turn call
+            // the corresponding system libc functions prefixed with '_posix_'
+            // (e.g., '_posix_aio_read' for 'aio_read').
+            // On the Rust side, these functions resolve directly to the
+            // POSIX-compliant versions in the system libc. As a result,
+            // function pointer comparisons between the C and Rust sides
+            // would fail.
+            "getpwuid_r" | "getpwnam_r" | "getgrgid_r" | "getgrnam_r" | "aio_cancel"
+            | "aio_error" | "aio_fsync" | "aio_read" | "aio_return" | "aio_suspend"
+            | "aio_write" | "select" => true,
+
+            // 'getdtablesize' is a constant in the AIX header but it is
+            // a real function in libc which the Rust side is resolved to.
+            // The function pointer comparison test would fail.
+            "getdtablesize" => true,
+
+            // FIXME(ctest): Our API is unsound. The Rust API allows aliasing
+            // pointers, but the C API requires pointers not to alias.
+            // We should probably be at least using '&'/'&mut' here, see:
+            // https://github.com/gnzlbg/ctest/issues/68.
+            "lio_listio" => true,
+
+            // The function is only available under macro _KERNEL in 'proto_uipc.h'.
+            "getpeereid" => true,
+
+            // The AIX signatures for these non-POSIX functions differ from
+            // those on platforms like Linux: some arguments are not marked
+            // with the 'const' qualifier, even though they are not modified.
+            // To be consistent with other platforms, 'const' is added to the
+            // Rust declarations. However, this causes a mismatch with the AIX
+            // header signatures. Skipping.
+            "setdomainname" | "settimeofday" | "statfs" | "statfs64" | "statx" | "swapoff"
+            | "swapon" | "utmpname" | "setgroups" => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.volatile_item(|i| {
+        use ctest::VolatileItemKind::*;
+        match i {
+            // 'aio_buf' is of type 'volatile void**' but since we cannot
+            // express that in Rust types, we have to explicitly tell the
+            // checker about it here.
+            StructField(ref n, ref f) if n == "aiocb" && f == "aio_buf" => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }

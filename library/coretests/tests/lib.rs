@@ -1,8 +1,7 @@
 // tidy-alphabetical-start
 #![cfg_attr(target_has_atomic = "128", feature(integer_atomics))]
-#![cfg_attr(test, feature(cfg_match))]
+#![cfg_attr(test, feature(cfg_select))]
 #![feature(alloc_layout_extra)]
-#![feature(array_chunks)]
 #![feature(array_ptr_get)]
 #![feature(array_try_from_fn)]
 #![feature(array_windows)]
@@ -11,42 +10,58 @@
 #![feature(async_iter_from_iter)]
 #![feature(async_iterator)]
 #![feature(bigint_helper_methods)]
+#![feature(bool_to_result)]
 #![feature(bstr)]
-#![feature(cell_update)]
+#![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(char_max_len)]
 #![feature(clone_to_uninit)]
+#![feature(const_convert)]
+#![feature(const_destruct)]
 #![feature(const_eval_select)]
-#![feature(const_swap_nonoverlapping)]
+#![feature(const_ops)]
+#![feature(const_option_ops)]
+#![feature(const_ref_cell)]
+#![feature(const_result_trait_fn)]
 #![feature(const_trait_impl)]
+#![feature(control_flow_ok)]
+#![feature(core_float_math)]
 #![feature(core_intrinsics)]
 #![feature(core_intrinsics_fallbacks)]
 #![feature(core_io_borrowed_buf)]
 #![feature(core_private_bignum)]
 #![feature(core_private_diy_float)]
+#![feature(cstr_display)]
 #![feature(dec2flt)]
+#![feature(drop_guard)]
 #![feature(duration_constants)]
 #![feature(duration_constructors)]
+#![feature(duration_from_nanos_u128)]
 #![feature(error_generic_member_access)]
+#![feature(exact_div)]
 #![feature(exact_size_is_empty)]
 #![feature(extend_one)]
 #![feature(extern_types)]
+#![feature(f16)]
+#![feature(f128)]
+#![feature(float_algebraic)]
+#![feature(float_gamma)]
 #![feature(float_minimum_maximum)]
 #![feature(flt2dec)]
 #![feature(fmt_internals)]
 #![feature(formatting_options)]
 #![feature(freeze)]
+#![feature(funnel_shifts)]
 #![feature(future_join)]
 #![feature(generic_assert_internals)]
 #![feature(hasher_prefixfree_extras)]
 #![feature(hashmap_internals)]
+#![feature(int_lowest_highest_one)]
 #![feature(int_roundings)]
 #![feature(ip)]
-#![feature(ip_from)]
 #![feature(is_ascii_octdigit)]
 #![feature(isolate_most_least_significant_one)]
 #![feature(iter_advance_by)]
 #![feature(iter_array_chunks)]
-#![feature(iter_chain)]
 #![feature(iter_collect_into)]
 #![feature(iter_intersperse)]
 #![feature(iter_is_partitioned)]
@@ -64,12 +79,15 @@
 #![feature(min_specialization)]
 #![feature(never_type)]
 #![feature(next_index)]
+#![feature(non_exhaustive_omitted_patterns_lint)]
 #![feature(numfmt)]
+#![feature(option_reduce)]
 #![feature(pattern)]
+#![feature(peekable_next_if_map)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
 #![feature(ptr_metadata)]
-#![feature(select_unpredictable)]
+#![feature(result_option_map_or_default)]
 #![feature(slice_from_ptr_range)]
 #![feature(slice_internals)]
 #![feature(slice_partition_dedup)]
@@ -79,7 +97,6 @@
 #![feature(std_internals)]
 #![feature(step_trait)]
 #![feature(str_internals)]
-#![feature(strict_provenance_atomic_ptr)]
 #![feature(strict_provenance_lints)]
 #![feature(test)]
 #![feature(trusted_len)]
@@ -87,12 +104,21 @@
 #![feature(try_blocks)]
 #![feature(try_find)]
 #![feature(try_trait_v2)]
+#![feature(uint_bit_width)]
 #![feature(unsize)]
 #![feature(unwrap_infallible)]
 // tidy-alphabetical-end
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+// Ferrocene additions:
+//
+// Features we add so we can have better coverage:
+// tidy-alphabetical-start
+#![feature(char_internals)]
+#![feature(debug_closure_helpers)]
+#![feature(one_sided_range)]
+// tidy-alphabetical-end
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {
@@ -146,6 +172,7 @@ mod cmp;
 mod const_ptr;
 mod convert;
 mod ffi;
+mod floats;
 mod fmt;
 mod future;
 mod hash;
@@ -177,6 +204,7 @@ mod time;
 mod tuple;
 mod unicode;
 mod waker;
+mod wtf8;
 
 /// Copied from `std::test_helpers::test_rng`, see that function for rationale.
 #[track_caller]
@@ -193,7 +221,7 @@ pub(crate) fn test_rng() -> rand_xorshift::XorShiftRng {
 
 //ferrocene addition
 #[test]
-#[cfg(ferrocenecoretest_secretsauce)]
+#[cfg(ferrocene_facade_secretsauce)]
 fn check_that_qemu_cpu_was_set() {
     let qemu_cpu = std::env::var("QEMU_CPU").expect("QEMU_CPU env var was not set");
     if cfg!(target_arch = "aarch64") {

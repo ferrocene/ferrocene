@@ -40,6 +40,7 @@ use crate::BorrowckInferCtxt;
 use crate::renumber::RegionCtxt;
 
 #[derive(Debug)]
+#[derive(Clone)] // FIXME(#146079)
 pub(crate) struct UniversalRegions<'tcx> {
     indices: UniversalRegionIndices<'tcx>,
 
@@ -200,6 +201,7 @@ impl<'tcx> DefiningTy<'tcx> {
 }
 
 #[derive(Debug)]
+#[derive(Clone)] // FIXME(#146079)
 struct UniversalRegionIndices<'tcx> {
     /// For those regions that may appear in the parameter environment
     /// ('static and early-bound regions), we maintain a map from the
@@ -217,7 +219,7 @@ struct UniversalRegionIndices<'tcx> {
 
     /// Whether we've encountered an error region. If we have, cancel all
     /// outlives errors, as they are likely bogus.
-    pub tainted_by_errors: Cell<Option<ErrorGuaranteed>>,
+    pub encountered_re_error: Cell<Option<ErrorGuaranteed>>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -442,8 +444,8 @@ impl<'tcx> UniversalRegions<'tcx> {
         self.fr_fn_body
     }
 
-    pub(crate) fn tainted_by_errors(&self) -> Option<ErrorGuaranteed> {
-        self.indices.tainted_by_errors.get()
+    pub(crate) fn encountered_re_error(&self) -> Option<ErrorGuaranteed> {
+        self.indices.encountered_re_error.get()
     }
 }
 
@@ -497,7 +499,7 @@ impl<'cx, 'tcx> UniversalRegionsBuilder<'cx, 'tcx> {
                 |r| {
                     debug!(?r);
                     let region_vid = {
-                        let name = r.get_name_or_anon();
+                        let name = r.get_name_or_anon(self.infcx.tcx);
                         self.infcx.next_nll_region_var(FR, || RegionCtxt::LateBound(name))
                     };
 
@@ -523,7 +525,7 @@ impl<'cx, 'tcx> UniversalRegionsBuilder<'cx, 'tcx> {
                 let kind = ty::LateParamRegionKind::from_bound(ty::BoundVar::from_usize(idx), kind);
                 let r = ty::Region::new_late_param(self.infcx.tcx, self.mir_def.to_def_id(), kind);
                 let region_vid = {
-                    let name = r.get_name_or_anon();
+                    let name = r.get_name_or_anon(self.infcx.tcx);
                     self.infcx.next_nll_region_var(FR, || RegionCtxt::LateBound(name))
                 };
 
@@ -544,10 +546,10 @@ impl<'cx, 'tcx> UniversalRegionsBuilder<'cx, 'tcx> {
         // (as it's created inside the body itself, not passed in from outside).
         if let DefiningTy::FnDef(def_id, _) = defining_ty {
             if self.infcx.tcx.fn_sig(def_id).skip_binder().c_variadic() {
-                let va_list_did = self.infcx.tcx.require_lang_item(
-                    LangItem::VaList,
-                    Some(self.infcx.tcx.def_span(self.mir_def)),
-                );
+                let va_list_did = self
+                    .infcx
+                    .tcx
+                    .require_lang_item(LangItem::VaList, self.infcx.tcx.def_span(self.mir_def));
 
                 let reg_vid = self
                     .infcx
@@ -706,7 +708,7 @@ impl<'cx, 'tcx> UniversalRegionsBuilder<'cx, 'tcx> {
         UniversalRegionIndices {
             indices: global_mapping.chain(arg_mapping).collect(),
             fr_static,
-            tainted_by_errors: Cell::new(None),
+            encountered_re_error: Cell::new(None),
         }
     }
 
@@ -861,7 +863,7 @@ impl<'tcx> BorrowckInferCtxt<'tcx> {
         T: TypeFoldable<TyCtxt<'tcx>>,
     {
         fold_regions(self.infcx.tcx, value, |region, _depth| {
-            let name = region.get_name_or_anon();
+            let name = region.get_name_or_anon(self.infcx.tcx);
             debug!(?region, ?name);
 
             self.next_nll_region_var(origin, || RegionCtxt::Free(name))
@@ -916,7 +918,7 @@ impl<'tcx> UniversalRegionIndices<'tcx> {
         match r.kind() {
             ty::ReVar(..) => r.as_var(),
             ty::ReError(guar) => {
-                self.tainted_by_errors.set(Some(guar));
+                self.encountered_re_error.set(Some(guar));
                 // We use the `'static` `RegionVid` because `ReError` doesn't actually exist in the
                 // `UniversalRegionIndices`. This is fine because 1) it is a fallback only used if
                 // errors are being emitted and 2) it leaves the happy path unaffected.
@@ -969,13 +971,28 @@ fn for_each_late_bound_region_in_item<'tcx>(
     mir_def_id: LocalDefId,
     mut f: impl FnMut(ty::Region<'tcx>),
 ) {
-    if !tcx.def_kind(mir_def_id).is_fn_like() {
-        return;
-    }
+    let bound_vars = match tcx.def_kind(mir_def_id) {
+        DefKind::Fn | DefKind::AssocFn => {
+            tcx.late_bound_vars(tcx.local_def_id_to_hir_id(mir_def_id))
+        }
+        // We extract the bound vars from the deduced closure signature, since we may have
+        // only deduced that a param in the closure signature is late-bound from a constraint
+        // that we discover during typeck.
+        DefKind::Closure => {
+            let ty = tcx.type_of(mir_def_id).instantiate_identity();
+            match *ty.kind() {
+                ty::Closure(_, args) => args.as_closure().sig().bound_vars(),
+                ty::CoroutineClosure(_, args) => {
+                    args.as_coroutine_closure().coroutine_closure_sig().bound_vars()
+                }
+                ty::Coroutine(_, _) | ty::Error(_) => return,
+                _ => unreachable!("unexpected type for closure: {ty}"),
+            }
+        }
+        _ => return,
+    };
 
-    for (idx, bound_var) in
-        tcx.late_bound_vars(tcx.local_def_id_to_hir_id(mir_def_id)).iter().enumerate()
-    {
+    for (idx, bound_var) in bound_vars.iter().enumerate() {
         if let ty::BoundVariableKind::Region(kind) = bound_var {
             let kind = ty::LateParamRegionKind::from_bound(ty::BoundVar::from_usize(idx), kind);
             let liberated_region = ty::Region::new_late_param(tcx, mir_def_id.to_def_id(), kind);

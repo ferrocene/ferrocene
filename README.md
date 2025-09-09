@@ -21,7 +21,12 @@ website][website] for details.
 
 ## Current status
 
-Ferrocene is qualified for ISO 26262 (ASIL D) and IEC 61508 (SIL 4).
+Ferrocene is qualified in accordance with the following standards:
+
+* ISO 26262 (ASIL D)
+* IEC 61508 (SIL 4)
+* IEC 62304
+
 Qualification for other standards and areas, such as railway and aerospace,
 are planned.
 
@@ -54,9 +59,9 @@ your support plan, and how to send support requests.
 
 As a downstream of the Rust project, Ferrocene prefers to keep the compiler
 unmodified. This means that general contributions to the compiler or its tools
-(and discussions) should happen upstream ([`rust-lang/rust`]). However, Ferrocene does
-serve as a community of peers to propose and produce changes useful in
-safety-critical changes towards the project.
+(and discussions) should happen upstream ([`rust-lang/rust`]). However,
+Ferrocene does serve as a community of peers to propose and produce changes
+useful in safety-critical changes towards the project.
 
 Contributions to qualification activities and manuals are welcome, but
 generally gated. Contribution is open to industry and academic partners,

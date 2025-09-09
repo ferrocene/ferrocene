@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::path::PathBuf;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
@@ -15,7 +18,7 @@ const PATH: &str = "ferrocene/tools/flip-link";
 impl Step for FlipLink {
     type Output = PathBuf;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(PATH)
@@ -28,7 +31,7 @@ impl Step for FlipLink {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(format!("Building {PATH}").as_str());
 
-        let compiler = builder.compiler(0, builder.config.build);
+        let compiler = builder.compiler(0, builder.config.host_target);
         let cmd = prepare_tool_cargo(
             builder,
             compiler,

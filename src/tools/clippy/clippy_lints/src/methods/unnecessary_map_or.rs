@@ -62,7 +62,8 @@ pub(super) fn check<'a>(
 
     let ext_def_span = def.span.until(map.span);
 
-    let (sugg, method, applicability) = if let ExprKind::Closure(map_closure) = map.kind
+    let (sugg, method, applicability) = if cx.typeck_results().expr_adjustments(recv).is_empty()
+            && let ExprKind::Closure(map_closure) = map.kind
             && let closure_body = cx.tcx.hir_body(map_closure.body)
             && let closure_body_value = closure_body.value.peel_blocks()
             && let ExprKind::Binary(op, l, r) = closure_body_value.kind
@@ -76,7 +77,7 @@ pub(super) fn check<'a>(
             && ((BinOpKind::Eq == op.node && !def_bool) || (BinOpKind::Ne == op.node && def_bool))
             && let non_binding_location = if path_to_local_id(l, hir_id) { r } else { l }
             && switch_to_eager_eval(cx, non_binding_location)
-            // xor, because if its both then thats a strange edge case and
+            // xor, because if its both then that's a strange edge case and
             // we can just ignore it, since by default clippy will error on this
             && (path_to_local_id(l, hir_id) ^ path_to_local_id(r, hir_id))
             && !is_local_used(cx, non_binding_location, hir_id)
@@ -92,7 +93,7 @@ pub(super) fn check<'a>(
         // we may need to add parens around the suggestion
         // in case the parent expression has additional method calls,
         // since for example `Some(5).map_or(false, |x| x == 5).then(|| 1)`
-        // being converted to `Some(5) == Some(5).then(|| 1)` isnt
+        // being converted to `Some(5) == Some(5).then(|| 1)` isn't
         // the same thing
 
         let inner_non_binding = Sugg::NonParen(Cow::Owned(format!(
@@ -108,10 +109,16 @@ pub(super) fn check<'a>(
         );
 
         let sugg = if let Some(parent_expr) = get_parent_expr(cx, expr) {
-            match parent_expr.kind {
-                ExprKind::Binary(..) | ExprKind::Unary(..) | ExprKind::Cast(..) => binop.maybe_par(),
-                ExprKind::MethodCall(_, receiver, _, _) if receiver.hir_id == expr.hir_id => binop.maybe_par(),
-                _ => binop,
+            if parent_expr.span.eq_ctxt(expr.span) {
+                match parent_expr.kind {
+                    ExprKind::Binary(..) | ExprKind::Unary(..) | ExprKind::Cast(..) => binop.maybe_paren(),
+                    ExprKind::MethodCall(_, receiver, _, _) if receiver.hir_id == expr.hir_id => binop.maybe_paren(),
+                    _ => binop,
+                }
+            } else {
+                // if our parent expr is created by a macro, then it should be the one taking care of
+                // parenthesising us if necessary
+                binop
             }
         } else {
             binop

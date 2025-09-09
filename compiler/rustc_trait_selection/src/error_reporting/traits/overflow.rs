@@ -5,10 +5,9 @@ use rustc_hir::def::Namespace;
 use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_infer::traits::{Obligation, PredicateObligation};
 use rustc_middle::ty::print::{FmtPrinter, Print};
-use rustc_middle::ty::{self, TyCtxt};
+use rustc_middle::ty::{self, TyCtxt, Upcast};
 use rustc_session::Limit;
 use rustc_span::Span;
-use rustc_type_ir::Upcast;
 use tracing::debug;
 
 use crate::error_reporting::TypeErrCtxt;
@@ -67,10 +66,10 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             if s.len() > 50 {
                 // We don't need to save the type to a file, we will be talking about this type already
                 // in a separate note when we explain the obligation, so it will be available that way.
-                let mut cx: FmtPrinter<'_, '_> =
+                let mut p: FmtPrinter<'_, '_> =
                     FmtPrinter::new_with_limit(tcx, Namespace::TypeNS, rustc_session::Limit(6));
-                value.print(&mut cx).unwrap();
-                cx.into_buffer()
+                value.print(&mut p).unwrap();
+                p.into_buffer()
             } else {
                 s
             }

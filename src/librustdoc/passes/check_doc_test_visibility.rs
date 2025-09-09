@@ -67,6 +67,7 @@ pub(crate) fn should_have_doc_example(cx: &DocContext<'_>, item: &clean::Item) -
                 | clean::ImportItem(_)
                 | clean::PrimitiveItem(_)
                 | clean::KeywordItem
+                | clean::AttributeItem
                 | clean::ModuleItem(_)
                 | clean::TraitAliasItem(_)
                 | clean::ForeignFunctionItem(..)
@@ -122,7 +123,7 @@ pub(crate) fn look_for_tests(cx: &DocContext<'_>, dox: &str, item: &Item) {
 
     let mut tests = Tests { found_tests: 0 };
 
-    find_testable_code(dox, &mut tests, ErrorCodes::No, false, None);
+    find_testable_code(dox, &mut tests, ErrorCodes::No, None);
 
     if tests.found_tests == 0 && cx.tcx.features().rustdoc_missing_doc_code_examples() {
         if should_have_doc_example(cx, item) {

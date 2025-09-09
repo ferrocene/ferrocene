@@ -13,3 +13,6 @@ pub extern "C" fn register_something(bind: ExternCallback) -> Struct {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle

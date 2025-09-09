@@ -184,6 +184,10 @@ fn layout_of_uncached<'tcx>(
     }
 
     let tcx = cx.tcx();
+
+    // layout of `async_drop_in_place<T>::{closure}` in case,
+    // when T is a coroutine, contains this internal coroutine's ref
+
     let dl = cx.data_layout();
     let map_layout = |result: Result<_, _>| match result {
         Ok(layout) => Ok(tcx.mk_layout(layout)),
@@ -255,13 +259,95 @@ fn layout_of_uncached<'tcx>(
                         };
 
                         layout.largest_niche = Some(niche);
-
-                        tcx.mk_layout(layout)
                     } else {
                         bug!("pattern type with range but not scalar layout: {ty:?}, {layout:?}")
                     }
                 }
+                ty::PatternKind::Or(variants) => match *variants[0] {
+                    ty::PatternKind::Range { .. } => {
+                        if let BackendRepr::Scalar(scalar) = &mut layout.backend_repr {
+                            let variants: Result<Vec<_>, _> = variants
+                                .iter()
+                                .map(|pat| match *pat {
+                                    ty::PatternKind::Range { start, end } => Ok((
+                                        extract_const_value(cx, ty, start)
+                                            .unwrap()
+                                            .try_to_bits(tcx, cx.typing_env)
+                                            .ok_or_else(|| error(cx, LayoutError::Unknown(ty)))?,
+                                        extract_const_value(cx, ty, end)
+                                            .unwrap()
+                                            .try_to_bits(tcx, cx.typing_env)
+                                            .ok_or_else(|| error(cx, LayoutError::Unknown(ty)))?,
+                                    )),
+                                    ty::PatternKind::Or(_) => {
+                                        unreachable!("mixed or patterns are not allowed")
+                                    }
+                                })
+                                .collect();
+                            let mut variants = variants?;
+                            if !scalar.is_signed() {
+                                let guar = tcx.dcx().err(format!(
+                                    "only signed integer base types are allowed for or-pattern pattern types at present"
+                                ));
+
+                                return Err(error(cx, LayoutError::ReferencesError(guar)));
+                            }
+                            variants.sort();
+                            if variants.len() != 2 {
+                                let guar = tcx
+                                .dcx()
+                                .err(format!("the only or-pattern types allowed are two range patterns that are directly connected at their overflow site"));
+
+                                return Err(error(cx, LayoutError::ReferencesError(guar)));
+                            }
+
+                            // first is the one starting at the signed in range min
+                            let mut first = variants[0];
+                            let mut second = variants[1];
+                            if second.0
+                                == layout.size.truncate(layout.size.signed_int_min() as u128)
+                            {
+                                (second, first) = (first, second);
+                            }
+
+                            if layout.size.sign_extend(first.1) >= layout.size.sign_extend(second.0)
+                            {
+                                let guar = tcx.dcx().err(format!(
+                                    "only non-overlapping pattern type ranges are allowed at present"
+                                ));
+
+                                return Err(error(cx, LayoutError::ReferencesError(guar)));
+                            }
+                            if layout.size.signed_int_max() as u128 != second.1 {
+                                let guar = tcx.dcx().err(format!(
+                                    "one pattern needs to end at `{ty}::MAX`, but was {} instead",
+                                    second.1
+                                ));
+
+                                return Err(error(cx, LayoutError::ReferencesError(guar)));
+                            }
+
+                            // Now generate a wrapping range (which aren't allowed in surface syntax).
+                            scalar.valid_range_mut().start = second.0;
+                            scalar.valid_range_mut().end = first.1;
+
+                            let niche = Niche {
+                                offset: Size::ZERO,
+                                value: scalar.primitive(),
+                                valid_range: scalar.valid_range(cx),
+                            };
+
+                            layout.largest_niche = Some(niche);
+                        } else {
+                            bug!(
+                                "pattern type with range but not scalar layout: {ty:?}, {layout:?}"
+                            )
+                        }
+                    }
+                    ty::PatternKind::Or(..) => bug!("patterns cannot have nested or patterns"),
+                },
             }
+            tcx.mk_layout(layout)
         }
 
         // Basic scalars.
@@ -293,7 +379,7 @@ fn layout_of_uncached<'tcx>(
 
         // Potentially-wide pointers.
         ty::Ref(_, pointee, _) | ty::RawPtr(pointee, _) => {
-            let mut data_ptr = scalar_unit(Pointer(AddressSpace::DATA));
+            let mut data_ptr = scalar_unit(Pointer(AddressSpace::ZERO));
             if !ty.is_raw_ptr() {
                 data_ptr.valid_range_mut().start = 1;
             }
@@ -349,7 +435,7 @@ fn layout_of_uncached<'tcx>(
                     }
                     ty::Slice(_) | ty::Str => scalar_unit(Int(dl.ptr_sized_integer(), false)),
                     ty::Dynamic(..) => {
-                        let mut vtable = scalar_unit(Pointer(AddressSpace::DATA));
+                        let mut vtable = scalar_unit(Pointer(AddressSpace::ZERO));
                         vtable.valid_range_mut().start = 1;
                         vtable
                     }
@@ -361,14 +447,6 @@ fn layout_of_uncached<'tcx>(
 
             // Effectively a (ptr, meta) tuple.
             tcx.mk_layout(LayoutData::scalar_pair(cx, data_ptr, metadata))
-        }
-
-        ty::Dynamic(_, _, ty::DynStar) => {
-            let mut data = scalar_unit(Pointer(AddressSpace::DATA));
-            data.valid_range_mut().start = 0;
-            let mut vtable = scalar_unit(Pointer(AddressSpace::DATA));
-            vtable.valid_range_mut().start = 1;
-            tcx.mk_layout(LayoutData::scalar_pair(cx, data, vtable))
         }
 
         // Arrays and slices.
@@ -406,9 +484,7 @@ fn layout_of_uncached<'tcx>(
         ty::Coroutine(def_id, args) => {
             use rustc_middle::ty::layout::PrimitiveExt as _;
 
-            let Some(info) = tcx.coroutine_layout(def_id, args.as_coroutine().kind_ty()) else {
-                return Err(error(cx, LayoutError::Unknown(ty)));
-            };
+            let info = tcx.coroutine_layout(def_id, args)?;
 
             let local_layouts = info
                 .field_tys
@@ -527,12 +603,6 @@ fn layout_of_uncached<'tcx>(
                     .flatten()
             };
 
-            let dont_niche_optimize_enum = def.repr().inhibit_enum_layout_opt()
-                || def
-                    .variants()
-                    .iter_enumerated()
-                    .any(|(i, v)| v.discr != ty::VariantDiscr::Relative(i.as_u32()));
-
             let maybe_unsized = def.is_struct()
                 && def.non_enum_variant().tail_opt().is_some_and(|last_field| {
                     let typing_env = ty::TypingEnv::post_analysis(tcx, def.did());
@@ -549,7 +619,6 @@ fn layout_of_uncached<'tcx>(
                     tcx.layout_scalar_valid_range(def.did()),
                     get_discriminant_type,
                     discriminants_iter(),
-                    dont_niche_optimize_enum,
                     !maybe_unsized,
                 )
                 .map_err(|err| map_error(cx, ty, err))?;
@@ -575,7 +644,6 @@ fn layout_of_uncached<'tcx>(
                     tcx.layout_scalar_valid_range(def.did()),
                     get_discriminant_type,
                     discriminants_iter(),
-                    dont_niche_optimize_enum,
                     !maybe_unsized,
                 ) else {
                     bug!("failed to compute unsized layout of {ty:?}");
@@ -770,7 +838,7 @@ fn variant_info_for_coroutine<'tcx>(
         return (vec![], None);
     };
 
-    let coroutine = cx.tcx().coroutine_layout(def_id, args.as_coroutine().kind_ty()).unwrap();
+    let coroutine = cx.tcx().coroutine_layout(def_id, args).unwrap();
     let upvar_names = cx.tcx().closure_saved_names_of_captured_variables(def_id);
 
     let mut upvars_size = Size::ZERO;
@@ -812,10 +880,9 @@ fn variant_info_for_coroutine<'tcx>(
                     variant_size = variant_size.max(offset + field_layout.size);
                     FieldInfo {
                         kind: FieldKind::CoroutineLocal,
-                        name: field_name.unwrap_or(Symbol::intern(&format!(
-                            ".coroutine_field{}",
-                            local.as_usize()
-                        ))),
+                        name: field_name.unwrap_or_else(|| {
+                            Symbol::intern(&format!(".coroutine_field{}", local.as_usize()))
+                        }),
                         offset: offset.bytes(),
                         size: field_layout.size.bytes(),
                         align: field_layout.align.abi.bytes(),
@@ -848,7 +915,7 @@ fn variant_info_for_coroutine<'tcx>(
             // However, if the discriminant is placed past the end of the variant, then we need
             // to factor in the size of the discriminant manually. This really should be refactored
             // better, but this "works" for now.
-            if layout.fields.offset(tag_field) >= variant_size {
+            if layout.fields.offset(tag_field.as_usize()) >= variant_size {
                 variant_size += match tag_encoding {
                     TagEncoding::Direct => tag.size(cx),
                     _ => Size::ZERO,

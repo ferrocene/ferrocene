@@ -36,6 +36,9 @@ path = [
     "rustfmt.toml",
     "rust-bors.toml",
     "triagebot.toml",
+    "typos.toml",
+    "package.json",
+    "package-lock.json",
     "x",
     "x.ps1",
     "x.py",
@@ -247,13 +250,13 @@ SPDX-FileCopyrightText = "Jeremy Thomas"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = "requirements.txt"
-precedence = "override"
-SPDX-FileCopyrightText = "The Ferrocene Developers"
-SPDX-License-Identifier = "MIT OR Apache-2.0"
-
-[[annotations]]
-path = ".python-version"
+path = [
+    "requirements.txt",
+    ".python-version",
+    "src/bootstrap/src/ferrocene/**",
+    "ferrocene/doc/core-certification/src/spreadsheets/*",
+    "ferrocene/doc/core-certification/src/_static/**",
+]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"
 SPDX-License-Identifier = "MIT OR Apache-2.0"

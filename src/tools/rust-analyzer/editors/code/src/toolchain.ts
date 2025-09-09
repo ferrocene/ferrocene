@@ -3,7 +3,7 @@ import * as os from "os";
 import * as path from "path";
 import * as readline from "readline";
 import * as vscode from "vscode";
-import { log, memoizeAsync, unwrapUndefinable } from "./util";
+import { Env, log, memoizeAsync, unwrapUndefinable } from "./util";
 import type { CargoRunnableArgs } from "./lsp_ext";
 
 interface CompilationArtifact {
@@ -37,8 +37,7 @@ interface CompilerMessage {
 export class Cargo {
     constructor(
         readonly rootFolder: string,
-        readonly output: vscode.OutputChannel,
-        readonly env: Record<string, string>,
+        readonly env: Env,
     ) {}
 
     // Made public for testing purposes
@@ -93,14 +92,14 @@ export class Cargo {
                             });
                         }
                     } else if (message.reason === "compiler-message") {
-                        this.output.append(message.message.rendered);
+                        log.info(message.message.rendered);
                     }
                 },
-                (stderr) => this.output.append(stderr),
+                (stderr) => log.error(stderr),
                 env,
             );
         } catch (err) {
-            this.output.show(true);
+            log.error(`Cargo invocation has failed: ${err}`);
             throw new Error(`Cargo invocation has failed: ${err}`);
         }
 
@@ -157,7 +156,7 @@ export class Cargo {
 
 /** Mirrors `toolchain::cargo()` implementation */
 // FIXME: The server should provide this
-export function cargoPath(env?: Record<string, string>): Promise<string> {
+export function cargoPath(env?: Env): Promise<string> {
     if (env?.["RUSTC_TOOLCHAIN"]) {
         return Promise.resolve("cargo");
     }

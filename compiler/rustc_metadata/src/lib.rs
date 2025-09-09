@@ -2,13 +2,11 @@
 #![allow(internal_features)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
-#![feature(coroutines)]
 #![feature(decl_macro)]
 #![feature(error_iter)]
 #![feature(file_buffered)]
+#![feature(gen_blocks)]
 #![feature(if_let_guard)]
-#![feature(iter_from_coroutine)]
-#![feature(let_chains)]
 #![feature(macro_metavar_expr)]
 #![feature(min_specialization)]
 #![feature(never_type)]
@@ -16,8 +14,6 @@
 #![feature(rustdoc_internals)]
 #![feature(trusted_len)]
 // tidy-alphabetical-end
-
-extern crate proc_macro;
 
 pub use rmeta::provide;
 

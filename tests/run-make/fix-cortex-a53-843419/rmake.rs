@@ -10,7 +10,7 @@ fn main() {
     let mut compile = rustc();
     compile.input("main.rs").target(target()).print("link-args").panic("abort");
 
-    let linker_type = if target().contains("ferrocenecoretest") {
+    let linker_type = if target().contains("ferrocene.facade") {
         // This target directly uses LLD as the linker
         compile.link_arg("link.x").arg("-Clink-self-contained=no");
         LinkerType::Lld

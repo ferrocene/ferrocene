@@ -36,9 +36,21 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+use crate::marker::{Destruct, PointeeSized};
+
+#[cfg(not(feature = "ferrocene_certified"))]
 mod uninit;
 
-/// A common trait for the ability to explicitly duplicate an object.
+/// A common trait that allows explicit creation of a duplicate value.
+///
+/// Calling [`clone`] always produces a new value.
+/// However, for types that are references to other data (such as smart pointers or references),
+/// the new value may still point to the same underlying data, rather than duplicating it.
+/// See [`Clone::clone`] for more details.
+///
+/// This distinction is especially important when using `#[derive(Clone)]` on structs containing
+/// smart pointers like `Arc<Mutex<T>>` - the cloned struct will share mutable state with the
+/// original.
 ///
 /// Differs from [`Copy`] in that [`Copy`] is implicit and an inexpensive bit-wise copy, while
 /// `Clone` is always explicit and may or may not be expensive. In order to enforce
@@ -128,6 +140,34 @@ mod uninit;
 /// // Note: With the manual implementations the above line will compile.
 /// ```
 ///
+/// ## `Clone` and `PartialEq`/`Eq`
+/// `Clone` is intended for the duplication of objects. Consequently, when implementing
+/// both `Clone` and [`PartialEq`], the following property is expected to hold:
+/// ```text
+/// x == x -> x.clone() == x
+/// ```
+/// In other words, if an object compares equal to itself,
+/// its clone must also compare equal to the original.
+///
+/// For types that also implement [`Eq`] – for which `x == x` always holds –
+/// this implies that `x.clone() == x` must always be true.
+/// Standard library collections such as
+/// [`HashMap`], [`HashSet`], [`BTreeMap`], [`BTreeSet`] and [`BinaryHeap`]
+/// rely on their keys respecting this property for correct behavior.
+/// Furthermore, these collections require that cloning a key preserves the outcome of the
+/// [`Hash`] and [`Ord`] methods. Thankfully, this follows automatically from `x.clone() == x`
+/// if `Hash` and `Ord` are correctly implemented according to their own requirements.
+///
+/// When deriving both `Clone` and [`PartialEq`] using `#[derive(Clone, PartialEq)]`
+/// or when additionally deriving [`Eq`] using `#[derive(Clone, PartialEq, Eq)]`,
+/// then this property is automatically upheld – provided that it is satisfied by
+/// the underlying types.
+///
+/// Violating this property is a logic error. The behavior resulting from a logic error is not
+/// specified, but users of the trait must ensure that such logic errors do *not* result in
+/// undefined behavior. This means that `unsafe` code **must not** rely on this property
+/// being satisfied.
+///
 /// ## Additional implementors
 ///
 /// In addition to the [implementors listed below][impls],
@@ -141,13 +181,29 @@ mod uninit;
 ///   (even if the referent doesn't),
 ///   while variables captured by mutable reference never implement `Clone`.
 ///
+/// [`HashMap`]: ../../std/collections/struct.HashMap.html
+/// [`HashSet`]: ../../std/collections/struct.HashSet.html
+/// [`BTreeMap`]: ../../std/collections/struct.BTreeMap.html
+/// [`BTreeSet`]: ../../std/collections/struct.BTreeSet.html
+/// [`BinaryHeap`]: ../../std/collections/struct.BinaryHeap.html
 /// [impls]: #implementors
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "clone"]
 #[rustc_diagnostic_item = "Clone"]
 #[rustc_trivial_field_reads]
+#[rustc_const_unstable(feature = "const_clone", issue = "142757")]
+#[const_trait]
 pub trait Clone: Sized {
-    /// Returns a copy of the value.
+    /// Returns a duplicate of the value.
+    ///
+    /// Note that what "duplicate" means varies by type:
+    /// - For most types, this creates a deep, independent copy
+    /// - For reference types like `&T`, this creates another reference to the same value
+    /// - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count
+    ///   but still points to the same underlying data
+    ///
+    /// [`Arc`]: ../../std/sync/struct.Arc.html
+    /// [`Rc`]: ../../std/rc/struct.Rc.html
     ///
     /// # Examples
     ///
@@ -156,6 +212,23 @@ pub trait Clone: Sized {
     /// let hello = "Hello"; // &str implements Clone
     ///
     /// assert_eq!("Hello", hello.clone());
+    /// ```
+    ///
+    /// Example with a reference-counted type:
+    ///
+    /// ```
+    /// use std::sync::{Arc, Mutex};
+    ///
+    /// let data = Arc::new(Mutex::new(vec![1, 2, 3]));
+    /// let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex
+    ///
+    /// {
+    ///     let mut lock = data.lock().unwrap();
+    ///     lock.push(4);
+    /// }
+    ///
+    /// // Changes are visible through the clone because they share the same underlying data
+    /// assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "cloning is often expensive and is not expected to have side effects"]
@@ -171,7 +244,10 @@ pub trait Clone: Sized {
     /// allocations.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    fn clone_from(&mut self, source: &Self) {
+    fn clone_from(&mut self, source: &Self)
+    where
+        Self: [const] Destruct,
+    {
         *self = source.clone()
     }
 }
@@ -217,10 +293,12 @@ pub macro Clone($item:item) {
 /// This is similar to have a closure that you would call `.use` over each captured value.
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
 #[lang = "use_cloned"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait UseCloned: Clone {
     // Empty.
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! impl_use_cloned {
     ($($t:ty)*) => {
         $(
@@ -230,6 +308,7 @@ macro_rules! impl_use_cloned {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl_use_cloned! {
     usize u8 u16 u32 u64 u128
     isize i8 i16 i32 i64 i128
@@ -248,7 +327,7 @@ impl_use_cloned! {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
-pub struct AssertParamIsClone<T: Clone + ?Sized> {
+pub struct AssertParamIsClone<T: Clone + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
 #[doc(hidden)]
@@ -258,7 +337,8 @@ pub struct AssertParamIsClone<T: Clone + ?Sized> {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
-pub struct AssertParamIsCopy<T: Copy + ?Sized> {
+#[cfg(not(feature = "ferrocene_certified"))]
+pub struct AssertParamIsCopy<T: Copy + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
 
@@ -398,6 +478,7 @@ pub struct AssertParamIsCopy<T: Copy + ?Sized> {
 /// [DST]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [trait object]: https://doc.rust-lang.org/reference/types/trait-object.html
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait CloneToUninit {
     /// Performs copy-assignment from `self` to `dest`.
     ///
@@ -438,6 +519,7 @@ pub unsafe trait CloneToUninit {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: Clone> CloneToUninit for T {
     #[inline]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -447,6 +529,7 @@ unsafe impl<T: Clone> CloneToUninit for T {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: Clone> CloneToUninit for [T] {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -458,6 +541,7 @@ unsafe impl<T: Clone> CloneToUninit for [T] {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl CloneToUninit for str {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -468,6 +552,7 @@ unsafe impl CloneToUninit for str {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl CloneToUninit for crate::ffi::CStr {
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -480,6 +565,7 @@ unsafe impl CloneToUninit for crate::ffi::CStr {
 }
 
 #[unstable(feature = "bstr", issue = "134915")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl CloneToUninit for crate::bstr::ByteStr {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -495,6 +581,8 @@ unsafe impl CloneToUninit for crate::bstr::ByteStr {
 /// are implemented in `traits::SelectionContext::copy_clone_conditions()`
 /// in `rustc_trait_selection`.
 mod impls {
+    use crate::marker::PointeeSized;
+
     macro_rules! impl_clone {
         ($($t:ty)*) => {
             $(
@@ -509,6 +597,7 @@ mod impls {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl_clone! {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128
@@ -516,7 +605,16 @@ mod impls {
         bool char
     }
 
+    #[cfg(feature = "ferrocene_certified")]
+    impl_clone! {
+        usize u8 u16 u32 u64 u128
+        isize i8 i16 i32 i64 i128
+        f32 f64
+        bool
+    }
+
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Clone for ! {
         #[inline]
         fn clone(&self) -> Self {
@@ -525,7 +623,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> Clone for *const T {
+    impl<T: PointeeSized> Clone for *const T {
         #[inline(always)]
         fn clone(&self) -> Self {
             *self
@@ -533,7 +631,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> Clone for *mut T {
+    impl<T: PointeeSized> Clone for *mut T {
         #[inline(always)]
         fn clone(&self) -> Self {
             *self
@@ -542,15 +640,16 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> Clone for &T {
+    impl<T: PointeeSized> Clone for &T {
         #[inline(always)]
         #[rustc_diagnostic_item = "noop_method_clone"]
         fn clone(&self) -> Self {
-            *self
+            self
         }
     }
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> !Clone for &mut T {}
+    #[cfg(not(feature = "ferrocene_certified"))]
+    impl<T: PointeeSized> !Clone for &mut T {}
 }

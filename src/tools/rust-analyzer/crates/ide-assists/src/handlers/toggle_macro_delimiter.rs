@@ -1,7 +1,7 @@
-use ide_db::assists::{AssistId, AssistKind};
+use ide_db::assists::AssistId;
 use syntax::{
-    ast::{self, make},
-    ted, AstNode, T,
+    AstNode, T,
+    ast::{self, syntax_factory::SyntaxFactory},
 };
 
 use crate::{AssistContext, Assists};
@@ -36,8 +36,7 @@ pub(crate) fn toggle_macro_delimiter(acc: &mut Assists, ctx: &AssistContext<'_>)
         RCur,
     }
 
-    let makro = ctx.find_node_at_offset::<ast::MacroCall>()?.clone_for_update();
-    let makro_text_range = makro.syntax().text_range();
+    let makro = ctx.find_node_at_offset::<ast::MacroCall>()?;
 
     let cursor_offset = ctx.offset();
     let semicolon = makro.semicolon_token();
@@ -62,7 +61,7 @@ pub(crate) fn toggle_macro_delimiter(acc: &mut Assists, ctx: &AssistContext<'_>)
     };
 
     acc.add(
-        AssistId("toggle_macro_delimiter", AssistKind::Refactor),
+        AssistId::refactor("toggle_macro_delimiter"),
         match token {
             MacroDelims::LPar | MacroDelims::RPar => "Replace delimiters with braces",
             MacroDelims::LBra | MacroDelims::RBra => "Replace delimiters with parentheses",
@@ -70,24 +69,28 @@ pub(crate) fn toggle_macro_delimiter(acc: &mut Assists, ctx: &AssistContext<'_>)
         },
         token_tree.syntax().text_range(),
         |builder| {
+            let make = SyntaxFactory::with_mappings();
+            let mut editor = builder.make_editor(makro.syntax());
+
             match token {
                 MacroDelims::LPar | MacroDelims::RPar => {
-                    ted::replace(ltoken, make::token(T!['{']));
-                    ted::replace(rtoken, make::token(T!['}']));
+                    editor.replace(ltoken, make.token(T!['{']));
+                    editor.replace(rtoken, make.token(T!['}']));
                     if let Some(sc) = semicolon {
-                        ted::remove(sc);
+                        editor.delete(sc);
                     }
                 }
                 MacroDelims::LBra | MacroDelims::RBra => {
-                    ted::replace(ltoken, make::token(T!['(']));
-                    ted::replace(rtoken, make::token(T![')']));
+                    editor.replace(ltoken, make.token(T!['(']));
+                    editor.replace(rtoken, make.token(T![')']));
                 }
                 MacroDelims::LCur | MacroDelims::RCur => {
-                    ted::replace(ltoken, make::token(T!['[']));
-                    ted::replace(rtoken, make::token(T![']']));
+                    editor.replace(ltoken, make.token(T!['[']));
+                    editor.replace(rtoken, make.token(T![']']));
                 }
             }
-            builder.replace(makro_text_range, makro.syntax().text());
+            editor.add_mappings(make.finish_with_mappings());
+            builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
 }

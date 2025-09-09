@@ -630,7 +630,7 @@ impl siginfo_t {
             _pad: [c_int; SI_PAD],
             _pid: crate::pid_t,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer))._pid
+        (*(self as *const siginfo_t).cast::<siginfo_timer>())._pid
     }
 
     pub unsafe fn si_uid(&self) -> crate::uid_t {
@@ -643,7 +643,7 @@ impl siginfo_t {
             _pid: crate::pid_t,
             _uid: crate::uid_t,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer))._uid
+        (*(self as *const siginfo_t).cast::<siginfo_timer>())._uid
     }
 
     pub unsafe fn si_value(&self) -> crate::sigval {
@@ -657,7 +657,7 @@ impl siginfo_t {
             _uid: crate::uid_t,
             value: crate::sigval,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer)).value
+        (*(self as *const siginfo_t).cast::<siginfo_timer>()).value
     }
 }
 
@@ -773,19 +773,6 @@ cfg_if! {
 
         impl Eq for dirent {}
 
-        impl fmt::Debug for dirent {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("dirent")
-                    .field("d_fileno", &self.d_fileno)
-                    .field("d_off", &self.d_off)
-                    .field("d_reclen", &self.d_reclen)
-                    .field("d_type", &self.d_type)
-                    .field("d_namlen", &self.d_namlen)
-                    // FIXME(debug): .field("d_name", &self.d_name)
-                    .finish()
-            }
-        }
-
         impl hash::Hash for dirent {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.d_fileno.hash(state);
@@ -805,15 +792,6 @@ cfg_if! {
 
         impl Eq for sockaddr_storage {}
 
-        impl fmt::Debug for sockaddr_storage {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sockaddr_storage")
-                    .field("ss_len", &self.ss_len)
-                    .field("ss_family", &self.ss_family)
-                    .finish()
-            }
-        }
-
         impl hash::Hash for sockaddr_storage {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.ss_len.hash(state);
@@ -831,17 +809,6 @@ cfg_if! {
         }
 
         impl Eq for siginfo_t {}
-
-        impl fmt::Debug for siginfo_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("siginfo_t")
-                    .field("si_signo", &self.si_signo)
-                    .field("si_code", &self.si_code)
-                    .field("si_errno", &self.si_errno)
-                    .field("si_addr", &self.si_addr)
-                    .finish()
-            }
-        }
 
         impl hash::Hash for siginfo_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -869,16 +836,6 @@ cfg_if! {
         }
 
         impl Eq for lastlog {}
-
-        impl fmt::Debug for lastlog {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("lastlog")
-                    .field("ll_time", &self.ll_time)
-                    // FIXME(debug): .field("ll_line", &self.ll_line)
-                    // FIXME(debug): .field("ll_host", &self.ll_host)
-                    .finish()
-            }
-        }
 
         impl hash::Hash for lastlog {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -910,17 +867,6 @@ cfg_if! {
         }
 
         impl Eq for utmp {}
-
-        impl fmt::Debug for utmp {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("utmp")
-                    // FIXME(debug): .field("ut_line", &self.ut_line)
-                    // FIXME(debug): .field("ut_name", &self.ut_name)
-                    // FIXME(debug): .field("ut_host", &self.ut_host)
-                    .field("ut_time", &self.ut_time)
-                    .finish()
-            }
-        }
 
         impl hash::Hash for utmp {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -1028,35 +974,6 @@ cfg_if! {
         }
 
         impl Eq for statfs {}
-
-        impl fmt::Debug for statfs {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("statfs")
-                    .field("f_flags", &self.f_flags)
-                    .field("f_bsize", &self.f_bsize)
-                    .field("f_iosize", &self.f_iosize)
-                    .field("f_blocks", &self.f_blocks)
-                    .field("f_bfree", &self.f_bfree)
-                    .field("f_bavail", &self.f_bavail)
-                    .field("f_files", &self.f_files)
-                    .field("f_ffree", &self.f_ffree)
-                    .field("f_favail", &self.f_favail)
-                    .field("f_syncwrites", &self.f_syncwrites)
-                    .field("f_syncreads", &self.f_syncreads)
-                    .field("f_asyncwrites", &self.f_asyncwrites)
-                    .field("f_asyncreads", &self.f_asyncreads)
-                    .field("f_fsid", &self.f_fsid)
-                    .field("f_namemax", &self.f_namemax)
-                    .field("f_owner", &self.f_owner)
-                    .field("f_ctime", &self.f_ctime)
-                    // FIXME(debug): .field("f_fstypename", &self.f_fstypename)
-                    // FIXME(debug): .field("f_mntonname", &self.f_mntonname)
-                    // FIXME(debug): .field("f_mntfromname", &self.f_mntfromname)
-                    // FIXME(debug): .field("f_mntfromspec", &self.f_mntfromspec)
-                    .field("mount_info", &self.mount_info)
-                    .finish()
-            }
-        }
 
         impl hash::Hash for statfs {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -1716,7 +1633,7 @@ pub const NTFS_MFLAG_ALLNAMES: c_int = 0x2;
 pub const TMPFS_ARGS_VERSION: c_int = 1;
 
 const SI_MAXSZ: size_t = 128;
-const SI_PAD: size_t = (SI_MAXSZ / mem::size_of::<c_int>()) - 3;
+const SI_PAD: size_t = (SI_MAXSZ / size_of::<c_int>()) - 3;
 
 pub const MAP_STACK: c_int = 0x4000;
 pub const MAP_CONCEAL: c_int = 0x8000;
@@ -1820,6 +1737,23 @@ pub const PF_W: u32 = 0x2;
 pub const PF_R: u32 = 0x4;
 pub const PF_MASKOS: u32 = 0x0ff00000;
 pub const PF_MASKPROC: u32 = 0xf0000000;
+
+// sys/ioccom.h
+pub const fn IOCPARM_LEN(x: u32) -> u32 {
+    (x >> 16) & crate::IOCPARM_MASK
+}
+
+pub const fn IOCBASECMD(x: u32) -> u32 {
+    x & (!(crate::IOCPARM_MASK << 16))
+}
+
+pub const fn IOCGROUP(x: u32) -> u32 {
+    (x >> 8) & 0xff
+}
+
+pub const fn _IOC(inout: c_ulong, group: c_ulong, num: c_ulong, len: c_ulong) -> c_ulong {
+    (inout) | (((len) & crate::IOCPARM_MASK as c_ulong) << 16) | ((group) << 8) | (num)
+}
 
 // sys/mount.h
 pub const MNT_NOPERM: c_int = 0x00000020;
@@ -1942,29 +1876,28 @@ const_fn! {
 
 f! {
     pub fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
-        (cmsg as *mut c_uchar).offset(_ALIGN(mem::size_of::<cmsghdr>()) as isize)
+        (cmsg as *mut c_uchar).offset(_ALIGN(size_of::<cmsghdr>()) as isize)
     }
 
     pub {const} fn CMSG_LEN(length: c_uint) -> c_uint {
-        _ALIGN(mem::size_of::<cmsghdr>()) as c_uint + length
+        _ALIGN(size_of::<cmsghdr>()) as c_uint + length
     }
 
     pub fn CMSG_NXTHDR(mhdr: *const crate::msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
         if cmsg.is_null() {
             return crate::CMSG_FIRSTHDR(mhdr);
-        };
-        let next =
-            cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize) + _ALIGN(mem::size_of::<cmsghdr>());
+        }
+        let next = cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize) + _ALIGN(size_of::<cmsghdr>());
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         } else {
             (cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
         }
     }
 
     pub {const} fn CMSG_SPACE(length: c_uint) -> c_uint {
-        (_ALIGN(mem::size_of::<cmsghdr>()) + _ALIGN(length as usize)) as c_uint
+        (_ALIGN(size_of::<cmsghdr>()) + _ALIGN(length as usize)) as c_uint
     }
 }
 

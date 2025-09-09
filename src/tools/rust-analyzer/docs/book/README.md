@@ -8,6 +8,7 @@ To run the documentation site locally:
 
 ```shell
 cargo install mdbook
+cargo xtask codegen
 cd docs/book
 mdbook serve
 # make changes to documentation files in doc/book/src
@@ -18,7 +19,7 @@ mdbook will rebuild the documentation as changes are made.
 
 ## Making updates
 
-While not required, installing the mdbook binary can be helfpul in order to see the changes.
+While not required, installing the mdbook binary can be helpful in order to see the changes.
 Start with the mdbook [User Guide](https://rust-lang.github.io/mdBook/guide/installation.html) to familiarize yourself with the tool.
 
 ## Generated documentation

@@ -1,8 +1,10 @@
 //! Doctest functionality used only for doctests in `.rs` source files.
 
+use std::cell::Cell;
 use std::env;
 use std::sync::Arc;
 
+use rustc_ast_pretty::pprust;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def_id::{CRATE_DEF_ID, LocalDefId};
 use rustc_hir::{self as hir, CRATE_HIR_ID, intravisit};
@@ -10,7 +12,7 @@ use rustc_middle::hir::nested_filter;
 use rustc_middle::ty::TyCtxt;
 use rustc_resolve::rustdoc::span_of_fragments;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{BytePos, DUMMY_SP, FileName, Pos, Span};
+use rustc_span::{BytePos, DUMMY_SP, FileName, Pos, Span, sym};
 
 use super::{DocTestVisitor, ScrapedDocTest};
 use crate::clean::{Attributes, extract_cfg_from_attrs};
@@ -21,6 +23,7 @@ struct RustCollector {
     tests: Vec<ScrapedDocTest>,
     cur_path: Vec<String>,
     position: Span,
+    global_crate_attrs: Vec<String>,
 }
 
 impl RustCollector {
@@ -47,13 +50,34 @@ impl RustCollector {
 
 impl DocTestVisitor for RustCollector {
     fn visit_test(&mut self, test: String, config: LangString, rel_line: MdRelLine) {
-        let line = self.get_base_line() + rel_line.offset();
+        let base_line = self.get_base_line();
+        let line = base_line + rel_line.offset();
+        let count = Cell::new(base_line);
+        let span = if line > base_line {
+            match self.source_map.span_extend_while(self.position, |c| {
+                if c == '\n' {
+                    let count_v = count.get();
+                    count.set(count_v + 1);
+                    if count_v >= line {
+                        return false;
+                    }
+                }
+                true
+            }) {
+                Ok(sp) => self.source_map.span_extend_to_line(sp.shrink_to_hi()),
+                _ => self.position,
+            }
+        } else {
+            self.position
+        };
         self.tests.push(ScrapedDocTest::new(
             self.get_filename(),
             line,
             self.cur_path.clone(),
             config,
             test,
+            span,
+            self.global_crate_attrs.clone(),
         ));
     }
 
@@ -63,19 +87,19 @@ impl DocTestVisitor for RustCollector {
 pub(super) struct HirCollector<'tcx> {
     codes: ErrorCodes,
     tcx: TyCtxt<'tcx>,
-    enable_per_target_ignores: bool,
     collector: RustCollector,
 }
 
 impl<'tcx> HirCollector<'tcx> {
-    pub fn new(codes: ErrorCodes, enable_per_target_ignores: bool, tcx: TyCtxt<'tcx>) -> Self {
+    pub fn new(codes: ErrorCodes, tcx: TyCtxt<'tcx>) -> Self {
         let collector = RustCollector {
             source_map: tcx.sess.psess.clone_source_map(),
             cur_path: vec![],
             position: DUMMY_SP,
             tests: vec![],
+            global_crate_attrs: Vec::new(),
         };
-        Self { codes, enable_per_target_ignores, tcx, collector }
+        Self { codes, tcx, collector }
     }
 
     pub fn collect_crate(mut self) -> Vec<ScrapedDocTest> {
@@ -101,6 +125,26 @@ impl HirCollector<'_> {
             && !cfg.matches(&self.tcx.sess.psess)
         {
             return;
+        }
+
+        // Try collecting `#[doc(test(attr(...)))]`
+        let old_global_crate_attrs_len = self.collector.global_crate_attrs.len();
+        for doc_test_attrs in ast_attrs
+            .iter()
+            .filter(|a| a.has_name(sym::doc))
+            .flat_map(|a| a.meta_item_list().unwrap_or_default())
+            .filter(|a| a.has_name(sym::test))
+        {
+            let Some(doc_test_attrs) = doc_test_attrs.meta_item_list() else { continue };
+            for attr in doc_test_attrs
+                .iter()
+                .filter(|a| a.has_name(sym::attr))
+                .flat_map(|a| a.meta_item_list().unwrap_or_default())
+                .map(pprust::meta_list_item_to_string)
+            {
+                // Add the additional attributes to the global_crate_attrs vector
+                self.collector.global_crate_attrs.push(attr);
+            }
         }
 
         let mut has_name = false;
@@ -131,12 +175,14 @@ impl HirCollector<'_> {
                 &doc,
                 &mut self.collector,
                 self.codes,
-                self.enable_per_target_ignores,
                 Some(&crate::html::markdown::ExtraInfo::new(self.tcx, def_id, span)),
             );
         }
 
         nested(self);
+
+        // Restore global_crate_attrs to it's previous size/content
+        self.collector.global_crate_attrs.truncate(old_global_crate_attrs_len);
 
         if has_name {
             self.collector.cur_path.pop();

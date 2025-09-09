@@ -4,7 +4,6 @@
 
 use std::assert_matches::debug_assert_matches;
 use std::borrow::Cow;
-use std::iter;
 use std::ops::{ControlFlow, Range};
 
 use hir::def::{CtorKind, DefKind};
@@ -16,10 +15,11 @@ use rustc_hir::def_id::DefId;
 use rustc_macros::{HashStable, TyDecodable, TyEncodable, TypeFoldable, extension};
 use rustc_span::{DUMMY_SP, Span, Symbol, sym};
 use rustc_type_ir::TyKind::*;
+use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::walk::TypeWalker;
 use rustc_type_ir::{self as ir, BoundVar, CollectAndApply, DynKind, TypeVisitableExt, elaborate};
 use tracing::instrument;
-use ty::util::{AsyncDropGlueMorphology, IntTypeExt};
+use ty::util::IntTypeExt;
 
 use super::GenericParamDefKind;
 use crate::infer::canonical::Canonical;
@@ -78,8 +78,7 @@ impl<'tcx> ty::CoroutineArgs<TyCtxt<'tcx>> {
     #[inline]
     fn variant_range(&self, def_id: DefId, tcx: TyCtxt<'tcx>) -> Range<VariantIdx> {
         // FIXME requires optimized MIR
-        FIRST_VARIANT
-            ..tcx.coroutine_layout(def_id, tcx.types.unit).unwrap().variant_fields.next_index()
+        FIRST_VARIANT..tcx.coroutine_layout(def_id, self.args).unwrap().variant_fields.next_index()
     }
 
     /// The discriminant for the given variant. Panics if the `variant_index` is
@@ -139,10 +138,14 @@ impl<'tcx> ty::CoroutineArgs<TyCtxt<'tcx>> {
         def_id: DefId,
         tcx: TyCtxt<'tcx>,
     ) -> impl Iterator<Item: Iterator<Item = Ty<'tcx>>> {
-        let layout = tcx.coroutine_layout(def_id, self.kind_ty()).unwrap();
+        let layout = tcx.coroutine_layout(def_id, self.args).unwrap();
         layout.variant_fields.iter().map(move |variant| {
             variant.iter().map(move |field| {
-                ty::EarlyBinder::bind(layout.field_tys[*field].ty).instantiate(tcx, self.args)
+                if tcx.is_async_drop_in_place_coroutine(def_id) {
+                    layout.field_tys[*field].ty
+                } else {
+                    ty::EarlyBinder::bind(layout.field_tys[*field].ty).instantiate(tcx, self.args)
+                }
             })
         })
     }
@@ -343,7 +346,7 @@ impl ParamConst {
     }
 
     #[instrument(level = "debug")]
-    pub fn find_ty_from_env<'tcx>(self, env: ParamEnv<'tcx>) -> Ty<'tcx> {
+    pub fn find_const_ty_from_env<'tcx>(self, env: ParamEnv<'tcx>) -> Ty<'tcx> {
         let mut candidates = env.caller_bounds().iter().filter_map(|clause| {
             // `ConstArgHasType` are never desugared to be higher ranked.
             match clause.kind().skip_binder() {
@@ -359,8 +362,19 @@ impl ParamConst {
             }
         });
 
-        let ty = candidates.next().unwrap();
-        assert!(candidates.next().is_none());
+        // N.B. it may be tempting to fix ICEs by making this function return
+        // `Option<Ty<'tcx>>` instead of `Ty<'tcx>`; however, this is generally
+        // considered to be a bandaid solution, since it hides more important
+        // underlying issues with how we construct generics and predicates of
+        // items. It's advised to fix the underlying issue rather than trying
+        // to modify this function.
+        let ty = candidates.next().unwrap_or_else(|| {
+            bug!("cannot find `{self:?}` in param-env: {env:#?}");
+        });
+        assert!(
+            candidates.next().is_none(),
+            "did not expect duplicate `ConstParamHasTy` for `{self:?}` in param-env: {env:#?}"
+        );
         ty
     }
 }
@@ -386,13 +400,7 @@ impl<'tcx> rustc_type_ir::inherent::BoundVarLike<TyCtxt<'tcx>> for BoundTy {
 #[derive(HashStable)]
 pub enum BoundTyKind {
     Anon,
-    Param(DefId, Symbol),
-}
-
-impl From<BoundVar> for BoundTy {
-    fn from(var: BoundVar) -> Self {
-        BoundTy { var, kind: BoundTyKind::Anon }
-    }
+    Param(DefId),
 }
 
 /// Constructors for `Ty`
@@ -471,7 +479,15 @@ impl<'tcx> Ty<'tcx> {
         index: ty::DebruijnIndex,
         bound_ty: ty::BoundTy,
     ) -> Ty<'tcx> {
-        Ty::new(tcx, Bound(index, bound_ty))
+        // Use a pre-interned one when possible.
+        if let ty::BoundTy { var, kind: ty::BoundTyKind::Anon } = bound_ty
+            && let Some(inner) = tcx.types.anon_bound_tys.get(index.as_usize())
+            && let Some(ty) = inner.get(var.as_usize()).copied()
+        {
+            ty
+        } else {
+            Ty::new(tcx, Bound(index, bound_ty))
+        }
     }
 
     #[inline]
@@ -489,7 +505,7 @@ impl<'tcx> Ty<'tcx> {
             (kind, tcx.def_kind(alias_ty.def_id)),
             (ty::Opaque, DefKind::OpaqueTy)
                 | (ty::Projection | ty::Inherent, DefKind::AssocTy)
-                | (ty::Weak, DefKind::TyAlias)
+                | (ty::Free, DefKind::TyAlias)
         );
         Ty::new(tcx, Alias(kind, alias_ty))
     }
@@ -591,7 +607,7 @@ impl<'tcx> Ty<'tcx> {
         ty: Ty<'tcx>,
         mutbl: ty::Mutability,
     ) -> Ty<'tcx> {
-        let pin = tcx.adt_def(tcx.require_lang_item(LangItem::Pin, None));
+        let pin = tcx.adt_def(tcx.require_lang_item(LangItem::Pin, DUMMY_SP));
         Ty::new_adt(tcx, pin, tcx.mk_args(&[Ty::new_ref(tcx, r, ty, mutbl).into()]))
     }
 
@@ -721,7 +737,10 @@ impl<'tcx> Ty<'tcx> {
         repr: DynKind,
     ) -> Ty<'tcx> {
         if cfg!(debug_assertions) {
-            let projection_count = obj.projection_bounds().count();
+            let projection_count = obj
+                .projection_bounds()
+                .filter(|item| !tcx.generics_require_sized_self(item.item_def_id()))
+                .count();
             let expected_count: usize = obj
                 .principal_def_id()
                 .into_iter()
@@ -802,10 +821,38 @@ impl<'tcx> Ty<'tcx> {
     #[inline]
     pub fn new_coroutine_witness(
         tcx: TyCtxt<'tcx>,
-        id: DefId,
+        def_id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> Ty<'tcx> {
-        Ty::new(tcx, CoroutineWitness(id, args))
+        if cfg!(debug_assertions) {
+            tcx.debug_assert_args_compatible(tcx.typeck_root_def_id(def_id), args);
+        }
+        Ty::new(tcx, CoroutineWitness(def_id, args))
+    }
+
+    pub fn new_coroutine_witness_for_coroutine(
+        tcx: TyCtxt<'tcx>,
+        def_id: DefId,
+        coroutine_args: GenericArgsRef<'tcx>,
+    ) -> Ty<'tcx> {
+        tcx.debug_assert_args_compatible(def_id, coroutine_args);
+        // HACK: Coroutine witness types are lifetime erased, so they
+        // never reference any lifetime args from the coroutine. We erase
+        // the regions here since we may get into situations where a
+        // coroutine is recursively contained within itself, leading to
+        // witness types that differ by region args. This means that
+        // cycle detection in fulfillment will not kick in, which leads
+        // to unnecessary overflows in async code. See the issue:
+        // <https://github.com/rust-lang/rust/issues/145151>.
+        let args =
+            ty::GenericArgs::for_item(tcx, tcx.typeck_root_def_id(def_id), |def, _| {
+                match def.kind {
+                    ty::GenericParamDefKind::Lifetime => tcx.lifetimes.re_erased.into(),
+                    ty::GenericParamDefKind::Type { .. }
+                    | ty::GenericParamDefKind::Const { .. } => coroutine_args[def.index as usize],
+                }
+            });
+        Ty::new_coroutine_witness(tcx, def_id, args)
     }
 
     // misc
@@ -852,19 +899,19 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn new_box(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Ty<'tcx> {
-        let def_id = tcx.require_lang_item(LangItem::OwnedBox, None);
+        let def_id = tcx.require_lang_item(LangItem::OwnedBox, DUMMY_SP);
         Ty::new_generic_adt(tcx, def_id, ty)
     }
 
     #[inline]
     pub fn new_maybe_uninit(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Ty<'tcx> {
-        let def_id = tcx.require_lang_item(LangItem::MaybeUninit, None);
+        let def_id = tcx.require_lang_item(LangItem::MaybeUninit, DUMMY_SP);
         Ty::new_generic_adt(tcx, def_id, ty)
     }
 
     /// Creates a `&mut Context<'_>` [`Ty`] with erased lifetimes.
     pub fn new_task_context(tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
-        let context_did = tcx.require_lang_item(LangItem::Context, None);
+        let context_did = tcx.require_lang_item(LangItem::Context, DUMMY_SP);
         let context_adt_ref = tcx.adt_def(context_did);
         let context_args = tcx.mk_args(&[tcx.lifetimes.re_erased.into()]);
         let context_ty = Ty::new_adt(tcx, context_adt_ref, context_args);
@@ -966,6 +1013,14 @@ impl<'tcx> rustc_type_ir::inherent::Ty<TyCtxt<'tcx>> for Ty<'tcx> {
         Ty::new_coroutine_witness(interner, def_id, args)
     }
 
+    fn new_coroutine_witness_for_coroutine(
+        interner: TyCtxt<'tcx>,
+        def_id: DefId,
+        coroutine_args: ty::GenericArgsRef<'tcx>,
+    ) -> Self {
+        Ty::new_coroutine_witness_for_coroutine(interner, def_id, coroutine_args)
+    }
+
     fn new_ptr(interner: TyCtxt<'tcx>, ty: Self, mutbl: hir::Mutability) -> Self {
         Ty::new_ptr(interner, ty, mutbl)
     }
@@ -1044,10 +1099,6 @@ impl<'tcx> rustc_type_ir::inherent::Ty<TyCtxt<'tcx>> for Ty<'tcx> {
 
     fn discriminant_ty(self, interner: TyCtxt<'tcx>) -> Ty<'tcx> {
         self.discriminant_ty(interner)
-    }
-
-    fn async_destructor_ty(self, interner: TyCtxt<'tcx>) -> Ty<'tcx> {
-        self.async_destructor_ty(interner)
     }
 
     fn has_unsafe_fields(self) -> bool {
@@ -1259,8 +1310,7 @@ impl<'tcx> Ty<'tcx> {
                     return true;
                 };
                 alloc.expect_ty().ty_adt_def().is_some_and(|alloc_adt| {
-                    let global_alloc = tcx.require_lang_item(LangItem::GlobalAlloc, None);
-                    alloc_adt.did() == global_alloc
+                    tcx.is_lang_item(alloc_adt.did(), LangItem::GlobalAlloc)
                 })
             }
             _ => false,
@@ -1307,11 +1357,6 @@ impl<'tcx> Ty<'tcx> {
     #[inline]
     pub fn is_trait(self) -> bool {
         matches!(self.kind(), Dynamic(_, _, ty::Dyn))
-    }
-
-    #[inline]
-    pub fn is_dyn_star(self) -> bool {
-        matches!(self.kind(), Dynamic(_, _, ty::DynStar))
     }
 
     #[inline]
@@ -1419,7 +1464,35 @@ impl<'tcx> Ty<'tcx> {
         cf.is_break()
     }
 
-    /// Returns the type and mutability of `*ty`.
+    /// Returns the deepest `async_drop_in_place::{closure}` implementation.
+    ///
+    /// `async_drop_in_place<T>::{closure}`, when T is a coroutine, is a proxy-impl
+    /// to call async drop poll from impl coroutine.
+    pub fn find_async_drop_impl_coroutine<F: FnMut(Ty<'tcx>)>(
+        self,
+        tcx: TyCtxt<'tcx>,
+        mut f: F,
+    ) -> Ty<'tcx> {
+        assert!(self.is_coroutine());
+        let mut cor_ty = self;
+        let mut ty = cor_ty;
+        loop {
+            if let ty::Coroutine(def_id, args) = ty.kind() {
+                cor_ty = ty;
+                f(ty);
+                if tcx.is_async_drop_in_place_coroutine(*def_id) {
+                    ty = args.first().unwrap().expect_ty();
+                    continue;
+                } else {
+                    return cor_ty;
+                }
+            } else {
+                return cor_ty;
+            }
+        }
+    }
+
+    /// Returns the type of `*ty`.
     ///
     /// The parameter `explicit` indicates if this is an *explicit* dereference.
     /// Some types -- notably raw ptrs -- can only be dereferenced explicitly.
@@ -1521,7 +1594,7 @@ impl<'tcx> Ty<'tcx> {
 
             ty::Param(_) | ty::Alias(..) | ty::Infer(ty::TyVar(_)) => {
                 let assoc_items = tcx.associated_item_def_ids(
-                    tcx.require_lang_item(hir::LangItem::DiscriminantKind, None),
+                    tcx.require_lang_item(hir::LangItem::DiscriminantKind, DUMMY_SP),
                 );
                 Ty::new_projection_from_args(tcx, assoc_items[0], tcx.mk_args(&[self.into()]))
             }
@@ -1560,125 +1633,6 @@ impl<'tcx> Ty<'tcx> {
         }
     }
 
-    /// Returns the type of the async destructor of this type.
-    pub fn async_destructor_ty(self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
-        match self.async_drop_glue_morphology(tcx) {
-            AsyncDropGlueMorphology::Noop => {
-                return Ty::async_destructor_combinator(tcx, LangItem::AsyncDropNoop)
-                    .instantiate_identity();
-            }
-            AsyncDropGlueMorphology::DeferredDropInPlace => {
-                let drop_in_place =
-                    Ty::async_destructor_combinator(tcx, LangItem::AsyncDropDeferredDropInPlace)
-                        .instantiate(tcx, &[self.into()]);
-                return Ty::async_destructor_combinator(tcx, LangItem::AsyncDropFuse)
-                    .instantiate(tcx, &[drop_in_place.into()]);
-            }
-            AsyncDropGlueMorphology::Custom => (),
-        }
-
-        match *self.kind() {
-            ty::Param(_) | ty::Alias(..) | ty::Infer(ty::TyVar(_)) => {
-                let assoc_items = tcx
-                    .associated_item_def_ids(tcx.require_lang_item(LangItem::AsyncDestruct, None));
-                Ty::new_projection(tcx, assoc_items[0], [self])
-            }
-
-            ty::Array(elem_ty, _) | ty::Slice(elem_ty) => {
-                let dtor = Ty::async_destructor_combinator(tcx, LangItem::AsyncDropSlice)
-                    .instantiate(tcx, &[elem_ty.into()]);
-                Ty::async_destructor_combinator(tcx, LangItem::AsyncDropFuse)
-                    .instantiate(tcx, &[dtor.into()])
-            }
-
-            ty::Adt(adt_def, args) if adt_def.is_enum() || adt_def.is_struct() => self
-                .adt_async_destructor_ty(
-                    tcx,
-                    adt_def.variants().iter().map(|v| v.fields.iter().map(|f| f.ty(tcx, args))),
-                ),
-            ty::Tuple(tys) => self.adt_async_destructor_ty(tcx, iter::once(tys)),
-            ty::Closure(_, args) => {
-                self.adt_async_destructor_ty(tcx, iter::once(args.as_closure().upvar_tys()))
-            }
-            ty::CoroutineClosure(_, args) => self
-                .adt_async_destructor_ty(tcx, iter::once(args.as_coroutine_closure().upvar_tys())),
-
-            ty::Adt(adt_def, _) => {
-                assert!(adt_def.is_union());
-
-                let surface_drop = self.surface_async_dropper_ty(tcx).unwrap();
-
-                Ty::async_destructor_combinator(tcx, LangItem::AsyncDropFuse)
-                    .instantiate(tcx, &[surface_drop.into()])
-            }
-
-            ty::Bound(..)
-            | ty::Foreign(_)
-            | ty::Placeholder(_)
-            | ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
-                bug!("`async_destructor_ty` applied to unexpected type: {self:?}")
-            }
-
-            _ => bug!("`async_destructor_ty` is not yet implemented for type: {self:?}"),
-        }
-    }
-
-    fn adt_async_destructor_ty<I>(self, tcx: TyCtxt<'tcx>, variants: I) -> Ty<'tcx>
-    where
-        I: Iterator + ExactSizeIterator,
-        I::Item: IntoIterator<Item = Ty<'tcx>>,
-    {
-        debug_assert_eq!(self.async_drop_glue_morphology(tcx), AsyncDropGlueMorphology::Custom);
-
-        let defer = Ty::async_destructor_combinator(tcx, LangItem::AsyncDropDefer);
-        let chain = Ty::async_destructor_combinator(tcx, LangItem::AsyncDropChain);
-
-        let noop =
-            Ty::async_destructor_combinator(tcx, LangItem::AsyncDropNoop).instantiate_identity();
-        let either = Ty::async_destructor_combinator(tcx, LangItem::AsyncDropEither);
-
-        let variants_dtor = variants
-            .into_iter()
-            .map(|variant| {
-                variant
-                    .into_iter()
-                    .map(|ty| defer.instantiate(tcx, &[ty.into()]))
-                    .reduce(|acc, next| chain.instantiate(tcx, &[acc.into(), next.into()]))
-                    .unwrap_or(noop)
-            })
-            .reduce(|other, matched| {
-                either.instantiate(tcx, &[other.into(), matched.into(), self.into()])
-            })
-            .unwrap();
-
-        let dtor = if let Some(dropper_ty) = self.surface_async_dropper_ty(tcx) {
-            Ty::async_destructor_combinator(tcx, LangItem::AsyncDropChain)
-                .instantiate(tcx, &[dropper_ty.into(), variants_dtor.into()])
-        } else {
-            variants_dtor
-        };
-
-        Ty::async_destructor_combinator(tcx, LangItem::AsyncDropFuse)
-            .instantiate(tcx, &[dtor.into()])
-    }
-
-    fn surface_async_dropper_ty(self, tcx: TyCtxt<'tcx>) -> Option<Ty<'tcx>> {
-        let adt_def = self.ty_adt_def()?;
-        let dropper = adt_def
-            .async_destructor(tcx)
-            .map(|_| LangItem::SurfaceAsyncDropInPlace)
-            .or_else(|| adt_def.destructor(tcx).map(|_| LangItem::AsyncDropSurfaceDropInPlace))?;
-        Some(Ty::async_destructor_combinator(tcx, dropper).instantiate(tcx, &[self.into()]))
-    }
-
-    fn async_destructor_combinator(
-        tcx: TyCtxt<'tcx>,
-        lang_item: LangItem,
-    ) -> ty::EarlyBinder<'tcx, Ty<'tcx>> {
-        tcx.fn_sig(tcx.require_lang_item(lang_item, None))
-            .map_bound(|fn_sig| fn_sig.output().no_bound_vars().unwrap())
-    }
-
     /// Returns the type of metadata for (potentially wide) pointers to this type,
     /// or the struct tail if the metadata type cannot be determined.
     pub fn ptr_metadata_ty_or_tail(
@@ -1708,8 +1662,6 @@ impl<'tcx> Ty<'tcx> {
             | ty::Error(_)
             // Extern types have metadata = ().
             | ty::Foreign(..)
-            // `dyn*` has metadata = ().
-            | ty::Dynamic(_, _, ty::DynStar)
             // If returned by `struct_tail_raw` this is a unit struct
             // without any fields, or not a struct, and therefore is Sized.
             | ty::Adt(..)
@@ -1720,7 +1672,7 @@ impl<'tcx> Ty<'tcx> {
             ty::Str | ty::Slice(_) => Ok(tcx.types.usize),
 
             ty::Dynamic(_, _, ty::Dyn) => {
-                let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, None);
+                let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, DUMMY_SP);
                 Ok(tcx.type_of(dyn_metadata).instantiate(tcx, &[tail.into()]))
             }
 
@@ -1762,21 +1714,19 @@ impl<'tcx> Ty<'tcx> {
     /// This is particularly useful for getting the type of the result of
     /// [`UnOp::PtrMetadata`](crate::mir::UnOp::PtrMetadata).
     ///
-    /// Panics if `self` is not dereferencable.
+    /// Panics if `self` is not dereferenceable.
     #[track_caller]
     pub fn pointee_metadata_ty_or_projection(self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         let Some(pointee_ty) = self.builtin_deref(true) else {
             bug!("Type {self:?} is not a pointer or reference type")
         };
-        if pointee_ty.is_trivially_sized(tcx) {
+        if pointee_ty.has_trivial_sizedness(tcx, SizedTraitKind::Sized) {
             tcx.types.unit
         } else {
             match pointee_ty.ptr_metadata_ty_or_tail(tcx, |x| x) {
                 Ok(metadata_ty) => metadata_ty,
                 Err(tail_ty) => {
-                    let Some(metadata_def_id) = tcx.lang_items().metadata_type() else {
-                        bug!("No metadata_type lang item while looking at {self:?}")
-                    };
+                    let metadata_def_id = tcx.require_lang_item(LangItem::Metadata, DUMMY_SP);
                     Ty::new_projection(tcx, metadata_def_id, [tail_ty])
                 }
             }
@@ -1871,17 +1821,17 @@ impl<'tcx> Ty<'tcx> {
         }
     }
 
-    /// Fast path helper for testing if a type is `Sized`.
+    /// Fast path helper for testing if a type is `Sized` or `MetaSized`.
     ///
-    /// Returning true means the type is known to implement `Sized`. Returning `false` means
-    /// nothing -- could be sized, might not be.
+    /// Returning true means the type is known to implement the sizedness trait. Returning `false`
+    /// means nothing -- could be sized, might not be.
     ///
     /// Note that we could never rely on the fact that a type such as `[_]` is trivially `!Sized`
     /// because we could be in a type environment with a bound such as `[_]: Copy`. A function with
     /// such a bound obviously never can be called, but that doesn't mean it shouldn't typecheck.
     /// This is why this method doesn't return `Option<bool>`.
     #[instrument(skip(tcx), level = "debug")]
-    pub fn is_trivially_sized(self, tcx: TyCtxt<'tcx>) -> bool {
+    pub fn has_trivial_sizedness(self, tcx: TyCtxt<'tcx>, sizedness: SizedTraitKind) -> bool {
         match self.kind() {
             ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
             | ty::Uint(_)
@@ -1901,23 +1851,29 @@ impl<'tcx> Ty<'tcx> {
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
             | ty::Never
-            | ty::Error(_)
-            | ty::Dynamic(_, _, ty::DynStar) => true,
+            | ty::Error(_) => true,
 
-            ty::Str | ty::Slice(_) | ty::Dynamic(_, _, ty::Dyn) | ty::Foreign(..) => false,
+            ty::Str | ty::Slice(_) | ty::Dynamic(_, _, ty::Dyn) => match sizedness {
+                SizedTraitKind::Sized => false,
+                SizedTraitKind::MetaSized => true,
+            },
 
-            ty::Tuple(tys) => tys.last().is_none_or(|ty| ty.is_trivially_sized(tcx)),
+            ty::Foreign(..) => match sizedness {
+                SizedTraitKind::Sized | SizedTraitKind::MetaSized => false,
+            },
+
+            ty::Tuple(tys) => tys.last().is_none_or(|ty| ty.has_trivial_sizedness(tcx, sizedness)),
 
             ty::Adt(def, args) => def
-                .sized_constraint(tcx)
-                .is_none_or(|ty| ty.instantiate(tcx, args).is_trivially_sized(tcx)),
+                .sizedness_constraint(tcx, sizedness)
+                .is_none_or(|ty| ty.instantiate(tcx, args).has_trivial_sizedness(tcx, sizedness)),
 
             ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) | ty::Bound(..) => false,
 
             ty::Infer(ty::TyVar(_)) => false,
 
             ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
-                bug!("`is_trivially_sized` applied to unexpected type: {:?}", self)
+                bug!("`has_trivial_sizedness` applied to unexpected type: {:?}", self)
             }
         }
     }
@@ -1975,11 +1931,55 @@ impl<'tcx> Ty<'tcx> {
             // Needs normalization or revealing to determine, so no is the safe answer.
             ty::Alias(..) => false,
 
-            ty::Param(..) | ty::Infer(..) | ty::Error(..) => false,
-
-            ty::Bound(..) | ty::Placeholder(..) => {
-                bug!("`is_trivially_pure_clone_copy` applied to unexpected type: {:?}", self);
+            ty::Param(..) | ty::Placeholder(..) | ty::Bound(..) | ty::Infer(..) | ty::Error(..) => {
+                false
             }
+        }
+    }
+
+    pub fn is_trivially_wf(self, tcx: TyCtxt<'tcx>) -> bool {
+        match *self.kind() {
+            ty::Bool
+            | ty::Char
+            | ty::Int(_)
+            | ty::Uint(_)
+            | ty::Float(_)
+            | ty::Str
+            | ty::Never
+            | ty::Param(_)
+            | ty::Placeholder(_)
+            | ty::Bound(..) => true,
+
+            ty::Slice(ty) => {
+                ty.is_trivially_wf(tcx) && ty.has_trivial_sizedness(tcx, SizedTraitKind::Sized)
+            }
+            ty::RawPtr(ty, _) => ty.is_trivially_wf(tcx),
+
+            ty::FnPtr(sig_tys, _) => {
+                sig_tys.skip_binder().inputs_and_output.iter().all(|ty| ty.is_trivially_wf(tcx))
+            }
+            ty::Ref(_, ty, _) => ty.is_global() && ty.is_trivially_wf(tcx),
+
+            ty::Infer(infer) => match infer {
+                ty::TyVar(_) => false,
+                ty::IntVar(_) | ty::FloatVar(_) => true,
+                ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => true,
+            },
+
+            ty::Adt(_, _)
+            | ty::Tuple(_)
+            | ty::Array(..)
+            | ty::Foreign(_)
+            | ty::Pat(_, _)
+            | ty::FnDef(..)
+            | ty::UnsafeBinder(..)
+            | ty::Dynamic(..)
+            | ty::Closure(..)
+            | ty::CoroutineClosure(..)
+            | ty::Coroutine(..)
+            | ty::CoroutineWitness(..)
+            | ty::Alias(..)
+            | ty::Error(_) => false,
         }
     }
 
@@ -2018,6 +2018,13 @@ impl<'tcx> Ty<'tcx> {
     pub fn is_c_void(self, tcx: TyCtxt<'_>) -> bool {
         match self.kind() {
             ty::Adt(adt, _) => tcx.is_lang_item(adt.did(), LangItem::CVoid),
+            _ => false,
+        }
+    }
+
+    pub fn is_async_drop_in_place_coroutine(self, tcx: TyCtxt<'_>) -> bool {
+        match self.kind() {
+            ty::Coroutine(def, ..) => tcx.is_async_drop_in_place_coroutine(*def),
             _ => false,
         }
     }
@@ -2063,7 +2070,7 @@ mod size_asserts {
 
     use super::*;
     // tidy-alphabetical-start
-    static_assert_size!(ty::RegionKind<'_>, 24);
-    static_assert_size!(ty::TyKind<'_>, 24);
+    static_assert_size!(TyKind<'_>, 24);
+    static_assert_size!(ty::WithCachedTypeInfo<TyKind<'_>>, 48);
     // tidy-alphabetical-end
 }

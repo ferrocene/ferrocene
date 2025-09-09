@@ -1,16 +1,29 @@
+warning: unknown and unstable feature specified for `-Ctarget-feature`: `foo`
+   |
+   = note: it is still passed through to the codegen backend, but use of this feature might be unsound and the behavior of this feature can change in the future
+   = help: consider filing a feature request
+
+warning: unknown and unstable feature specified for `-Ctarget-feature`: `bar`
+   |
+   = note: it is still passed through to the codegen backend, but use of this feature might be unsound and the behavior of this feature can change in the future
+   = help: consider filing a feature request
+
+warning: unknown and unstable feature specified for `-Ctarget-feature`: `baz`
+   |
+   = note: it is still passed through to the codegen backend, but use of this feature might be unsound and the behavior of this feature can change in the future
+   = help: consider filing a feature request
+
 '-foo' is not a recognized feature for this target (ignoring feature)
 '-bar' is not a recognized feature for this target (ignoring feature)
 '+baz' is not a recognized feature for this target (ignoring feature)
-   |
-   = help: consider filing a feature request
-
-   |
-   = help: consider filing a feature request
-
-   |
-   = help: consider filing a feature request
-
+'-foo' is not a recognized feature for this target (ignoring feature)
+'-bar' is not a recognized feature for this target (ignoring feature)
+'+baz' is not a recognized feature for this target (ignoring feature)
+'-foo' is not a recognized feature for this target (ignoring feature)
+'-bar' is not a recognized feature for this target (ignoring feature)
+'+baz' is not a recognized feature for this target (ignoring feature)
 '-foo' is not a recognized feature for this target (ignoring feature)
 '-bar' is not a recognized feature for this target (ignoring feature)
 '+baz' is not a recognized feature for this target (ignoring feature)
 warning: 3 warnings emitted
+

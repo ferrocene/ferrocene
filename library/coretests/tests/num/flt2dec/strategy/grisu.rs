@@ -4,6 +4,7 @@ use super::super::*;
 
 #[test]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn test_cached_power() {
     assert_eq!(CACHED_POW10.first().unwrap().1, CACHED_POW10_FIRST_E);
     assert_eq!(CACHED_POW10.last().unwrap().1, CACHED_POW10_LAST_E);
@@ -38,6 +39,8 @@ fn test_max_pow10_no_more_than() {
 fn shortest_sanity_test() {
     f64_shortest_sanity_test(format_shortest);
     f32_shortest_sanity_test(format_shortest);
+    #[cfg(target_has_reliable_f16)]
+    f16_shortest_sanity_test(format_shortest);
     more_shortest_sanity_test(format_shortest);
 }
 
@@ -51,6 +54,8 @@ fn exact_sanity_test() {
         f64_exact_sanity_test(format_exact);
     }
     f32_exact_sanity_test(format_exact);
+    #[cfg(target_has_reliable_f16)]
+    f16_exact_sanity_test(format_exact);
 }
 
 #[test]

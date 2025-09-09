@@ -10,12 +10,18 @@
 // Re-exported core operators
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
+pub use crate::marker::{Copy, Send, Sized, Sync};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
 #[stable(feature = "async_closure", since = "1.85.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 
 // Re-exported functions
@@ -24,7 +30,12 @@ pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 pub use crate::mem::drop;
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
+#[stable(feature = "size_of_prelude", since = "1.80.0")]
+#[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
+pub use crate::mem::{size_of, align_of};
 
 // Re-exported types and traits
 #[stable(feature = "core_prelude", since = "1.4.0")]
@@ -41,7 +52,12 @@ pub use crate::convert::{AsMut, AsRef, From, Into};
 pub use crate::default::Default;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator, Iterator};
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
+pub use crate::iter::{IntoIterator, Iterator};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::option::Option::{self, None, Some};
@@ -52,19 +68,25 @@ pub use crate::result::Result::{self, Err, Ok};
 // Re-exported built-in macros
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::fmt::macros::Debug;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::hash::macros::Hash;
 
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[allow(deprecated)]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::{
-    assert, cfg, column, compile_error, concat, concat_idents, env, file, format_args,
+    assert, cfg, column, compile_error, concat, env, file, format_args,
     format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
     stringify, trace_macros,
 };
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+#[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
+pub use crate::{assert, cfg, concat, stringify, include_str};
 
 #[unstable(
     feature = "concat_bytes",
@@ -72,6 +94,7 @@ pub use crate::{
     reason = "`concat_bytes` is not stable enough for use and is subject to change"
 )]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::concat_bytes;
 
 // Do not `doc(no_inline)` so that they become doc items on their own
@@ -81,7 +104,7 @@ pub use crate::macros::builtin::{
     alloc_error_handler, bench, derive, global_allocator, test, test_case,
 };
 
-#[unstable(feature = "derive_const", issue = "none")]
+#[unstable(feature = "derive_const", issue = "118304")]
 pub use crate::macros::builtin::derive_const;
 
 #[unstable(

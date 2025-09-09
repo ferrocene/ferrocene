@@ -1,11 +1,11 @@
-error[E0080]: evaluation of `get_elem::<4>::{constant#0}` failed
-  --> $DIR/const-err-trumps-simd-err.rs:16:13
+error[E0080]: evaluation panicked: assertion failed: LANE < 4
+  --> $DIR/const-err-trumps-simd-err.rs:17:21
    |
 LL |     const { assert!(LANE < 4); } // the error should be here...
-   |             ^^^^^^^^^^^^^^^^^ evaluation panicked: assertion failed: LANE < 4
+   |                     ^^^^^^^^ evaluation of `get_elem::<4>::{constant#0}` failed here
 
 note: erroneous constant encountered
-  --> $DIR/const-err-trumps-simd-err.rs:16:5
+  --> $DIR/const-err-trumps-simd-err.rs:17:5
    |
 LL |     const { assert!(LANE < 4); } // the error should be here...
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

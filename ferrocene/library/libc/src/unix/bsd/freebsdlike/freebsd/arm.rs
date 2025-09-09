@@ -32,16 +32,6 @@ cfg_if! {
             }
         }
         impl Eq for mcontext_t {}
-        impl fmt::Debug for mcontext_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("mcontext_t")
-                    .field("__gregs", &self.__gregs)
-                    .field("mc_vfp_size", &self.mc_vfp_size)
-                    .field("mc_vfp_ptr", &self.mc_vfp_ptr)
-                    .field("mc_spare", &self.mc_spare)
-                    .finish()
-            }
-        }
         impl hash::Hash for mcontext_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.__gregs.hash(state);
@@ -53,7 +43,7 @@ cfg_if! {
     }
 }
 
-pub(crate) const _ALIGNBYTES: usize = mem::size_of::<c_int>() - 1;
+pub(crate) const _ALIGNBYTES: usize = size_of::<c_int>() - 1;
 
 pub const BIOCSRTIMEOUT: c_ulong = 0x8010426d;
 pub const BIOCGRTIMEOUT: c_ulong = 0x4010426e;

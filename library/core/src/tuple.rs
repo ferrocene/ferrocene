@@ -23,10 +23,7 @@ macro_rules! tuple_impls {
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
-            impl<$($T: PartialEq),+> PartialEq for ($($T,)+)
-            where
-                last_type!($($T,)+): ?Sized
-            {
+            impl<$($T: PartialEq),+> PartialEq for ($($T,)+) {
                 #[inline]
                 fn eq(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} == other.${index()} )&&+
@@ -42,8 +39,6 @@ macro_rules! tuple_impls {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
             impl<$($T: Eq),+> Eq for ($($T,)+)
-            where
-                last_type!($($T,)+): ?Sized
             {}
         }
 
@@ -72,8 +67,6 @@ macro_rules! tuple_impls {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
             impl<$($T: PartialOrd),+> PartialOrd for ($($T,)+)
-            where
-                last_type!($($T,)+): ?Sized
             {
                 #[inline]
                 fn partial_cmp(&self, other: &($($T,)+)) -> Option<Ordering> {
@@ -118,8 +111,6 @@ macro_rules! tuple_impls {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
             impl<$($T: Ord),+> Ord for ($($T,)+)
-            where
-                last_type!($($T,)+): ?Sized
             {
                 #[inline]
                 fn cmp(&self, other: &($($T,)+)) -> Ordering {
@@ -142,6 +133,7 @@ macro_rules! tuple_impls {
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "array_tuple_conv", since = "1.71.0")]
+            // can't do const From due to https://github.com/rust-lang/rust/issues/144280
             impl<T> From<[T; ${count($T)}]> for ($(${ignore($T)} T,)+) {
                 #[inline]
                 #[allow(non_snake_case)]
@@ -155,6 +147,7 @@ macro_rules! tuple_impls {
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "array_tuple_conv", since = "1.71.0")]
+            // can't do const From due to https://github.com/rust-lang/rust/issues/144280
             impl<T> From<($(${ignore($T)} T,)+)> for [T; ${count($T)}] {
                 #[inline]
                 #[allow(non_snake_case)]
@@ -232,11 +225,6 @@ macro_rules! lexical_cmp {
         }
     };
     ($a:expr, $b:expr) => { ($a).cmp(&$b) };
-}
-
-macro_rules! last_type {
-    ($a:ident,) => { $a };
-    ($a:ident, $($rest_a:ident,)+) => { last_type!($($rest_a,)+) };
 }
 
 tuple_impls!(E D C B A Z Y X W V U T);

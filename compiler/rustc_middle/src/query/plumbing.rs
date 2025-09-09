@@ -313,8 +313,11 @@ macro_rules! separate_provide_extern_default {
 
 macro_rules! define_callbacks {
     (
-     $($(#[$attr:meta])*
-        [$($modifiers:tt)*] fn $name:ident($($K:tt)*) -> $V:ty,)*) => {
+        $(
+            $(#[$attr:meta])*
+            [$($modifiers:tt)*] fn $name:ident($($K:tt)*) -> $V:ty,
+        )*
+    ) => {
 
         #[allow(unused_lifetimes)]
         pub mod queries {
@@ -366,7 +369,7 @@ macro_rules! define_callbacks {
 
                 pub type Storage<'tcx> = <$($K)* as keys::Key>::Cache<Erase<$V>>;
 
-                // Ensure that keys grow no larger than 80 bytes by accident.
+                // Ensure that keys grow no larger than 88 bytes by accident.
                 // Increase this limit if necessary, but do try to keep the size low if possible
                 #[cfg(target_pointer_width = "64")]
                 const _: () = {

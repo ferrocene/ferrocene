@@ -1,9 +1,7 @@
 //@ compile-flags: -Zlint-mir -Ztreat-err-as-bug
 //@ failure-status: 101
-//@ error-pattern: broken MIR in
-//@ error-pattern: StorageLive(_1) which already has storage here
 //@ normalize-stderr: "note: .*\n\n" -> ""
-//@ normalize-stderr: "thread 'rustc' panicked.*\n" -> ""
+//@ normalize-stderr: "thread 'rustc'.*panicked.*\n" -> ""
 //@ normalize-stderr: "storage_live\[....\]" -> "storage_live[HASH]"
 //@ normalize-stderr: "(delayed at [^:]+):\d+:\d+ - " -> "$1:LL:CC - "
 //@ rustc-env:RUST_BACKTRACE=0
@@ -21,6 +19,7 @@ fn multiple_storage() {
         {
             StorageLive(a);
             StorageLive(a); //~ ERROR broken MIR
+                            //~| ERROR StorageLive(_1) which already has storage here
             Return()
         }
     }

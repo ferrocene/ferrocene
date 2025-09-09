@@ -1,10 +1,11 @@
 #![allow(non_camel_case_types)]
 
 use rustc_hir::LangItem;
+use rustc_hir::attrs::PeImportNameType;
 use rustc_middle::ty::layout::TyAndLayout;
 use rustc_middle::ty::{self, Instance, TyCtxt};
 use rustc_middle::{bug, mir, span_bug};
-use rustc_session::cstore::{DllCallingConvention, DllImport, PeImportNameType};
+use rustc_session::cstore::{DllCallingConvention, DllImport};
 use rustc_span::Span;
 use rustc_target::spec::Target;
 
@@ -60,16 +61,6 @@ pub enum AtomicRmwBinOp {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum AtomicOrdering {
-    Unordered,
-    Relaxed,
-    Acquire,
-    Release,
-    AcquireRelease,
-    SequentiallyConsistent,
-}
-
-#[derive(Copy, Clone, Debug)]
 pub enum SynchronizationScope {
     SingleThread,
     CrossThread,
@@ -120,7 +111,7 @@ mod temp_stable_hash_impls {
 
 pub(crate) fn build_langcall<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
     bx: &Bx,
-    span: Option<Span>,
+    span: Span,
     li: LangItem,
 ) -> (Bx::FnAbiOfResult, Bx::Value, Instance<'tcx>) {
     let tcx = bx.tcx();
@@ -158,7 +149,7 @@ pub(crate) fn shift_mask_val<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 pub fn asm_const_to_str<'tcx>(
     tcx: TyCtxt<'tcx>,
     sp: Span,
-    const_value: mir::ConstValue<'tcx>,
+    const_value: mir::ConstValue,
     ty_and_layout: TyAndLayout<'tcx>,
 ) -> String {
     let mir::ConstValue::Scalar(scalar) = const_value else {

@@ -3,30 +3,32 @@ use std::collections::BTreeSet;
 use ast::make;
 use either::Either;
 use hir::{
+    FileRange, PathResolution, Semantics, TypeInfo,
     db::{ExpandDatabase, HirDatabase},
-    sym, FileRange, PathResolution, Semantics, TypeInfo,
+    sym,
 };
 use ide_db::{
-    base_db::CrateId,
+    EditionedFileId, RootDatabase,
+    base_db::Crate,
     defs::Definition,
     imports::insert_use::remove_path_if_in_use_stmt,
     path_transform::PathTransform,
     search::{FileReference, FileReferenceNode, SearchScope},
     source_change::SourceChangeBuilder,
     syntax_helpers::{node_ext::expr_as_name_ref, prettify_macro_expansion},
-    EditionedFileId, RootDatabase,
 };
-use itertools::{izip, Itertools};
+use itertools::{Itertools, izip};
 use syntax::{
+    AstNode, NodeOrToken, SyntaxKind,
     ast::{
-        self, edit::IndentLevel, edit_in_place::Indent, HasArgList, HasGenericArgs, Pat, PathExpr,
+        self, HasArgList, HasGenericArgs, Pat, PathExpr, edit::IndentLevel, edit_in_place::Indent,
     },
-    ted, AstNode, NodeOrToken, SyntaxKind,
+    ted,
 };
 
 use crate::{
+    AssistId,
     assist_context::{AssistContext, Assists},
-    AssistId, AssistKind,
 };
 
 // Assist: inline_into_callers
@@ -69,6 +71,7 @@ use crate::{
 // ```
 pub(crate) fn inline_into_callers(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
     let def_file = ctx.file_id();
+    let vfs_def_file = ctx.vfs_file_id();
     let name = ctx.find_node_at_offset::<ast::Name>()?;
     let ast_func = name.syntax().parent().and_then(ast::Fn::cast)?;
     let func_body = ast_func.body()?;
@@ -96,7 +99,7 @@ pub(crate) fn inline_into_callers(acc: &mut Assists, ctx: &AssistContext<'_>) ->
     }
 
     acc.add(
-        AssistId("inline_into_callers", AssistKind::RefactorInline),
+        AssistId::refactor_inline("inline_into_callers"),
         "Inline into all callers",
         name.syntax().text_range(),
         |builder| {
@@ -104,7 +107,8 @@ pub(crate) fn inline_into_callers(acc: &mut Assists, ctx: &AssistContext<'_>) ->
             let current_file_usage = usages.references.remove(&def_file);
 
             let mut remove_def = true;
-            let mut inline_refs_for_file = |file_id, refs: Vec<FileReference>| {
+            let mut inline_refs_for_file = |file_id: EditionedFileId, refs: Vec<FileReference>| {
+                let file_id = file_id.file_id(ctx.db());
                 builder.edit_file(file_id);
                 let call_krate = ctx.sema.file_to_module_def(file_id).map(|it| it.krate());
                 let count = refs.len();
@@ -141,7 +145,7 @@ pub(crate) fn inline_into_callers(acc: &mut Assists, ctx: &AssistContext<'_>) ->
             }
             match current_file_usage {
                 Some(refs) => inline_refs_for_file(def_file, refs),
-                None => builder.edit_file(def_file),
+                None => builder.edit_file(vfs_def_file),
             }
             if remove_def {
                 builder.delete(ast_func.syntax().text_range());
@@ -192,7 +196,7 @@ pub(crate) fn inline_call(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<
     let name_ref: ast::NameRef = ctx.find_node_at_offset()?;
     let call_info = CallInfo::from_name_ref(
         name_ref.clone(),
-        ctx.sema.file_to_module_def(ctx.file_id())?.krate().into(),
+        ctx.sema.file_to_module_def(ctx.vfs_file_id())?.krate().into(),
     )?;
     let (function, label) = match &call_info.node {
         ast::CallableExpr::Call(call) => {
@@ -230,32 +234,27 @@ pub(crate) fn inline_call(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<
     }
 
     let syntax = call_info.node.syntax().clone();
-    acc.add(
-        AssistId("inline_call", AssistKind::RefactorInline),
-        label,
-        syntax.text_range(),
-        |builder| {
-            let replacement = inline(&ctx.sema, file_id, function, &fn_body, &params, &call_info);
-            builder.replace_ast(
-                match call_info.node {
-                    ast::CallableExpr::Call(it) => ast::Expr::CallExpr(it),
-                    ast::CallableExpr::MethodCall(it) => ast::Expr::MethodCallExpr(it),
-                },
-                replacement,
-            );
-        },
-    )
+    acc.add(AssistId::refactor_inline("inline_call"), label, syntax.text_range(), |builder| {
+        let replacement = inline(&ctx.sema, file_id, function, &fn_body, &params, &call_info);
+        builder.replace_ast(
+            match call_info.node {
+                ast::CallableExpr::Call(it) => ast::Expr::CallExpr(it),
+                ast::CallableExpr::MethodCall(it) => ast::Expr::MethodCallExpr(it),
+            },
+            replacement,
+        );
+    })
 }
 
 struct CallInfo {
     node: ast::CallableExpr,
     arguments: Vec<ast::Expr>,
     generic_arg_list: Option<ast::GenericArgList>,
-    krate: CrateId,
+    krate: Crate,
 }
 
 impl CallInfo {
-    fn from_name_ref(name_ref: ast::NameRef, krate: CrateId) -> Option<CallInfo> {
+    fn from_name_ref(name_ref: ast::NameRef, krate: Crate) -> Option<CallInfo> {
         let parent = name_ref.syntax().parent()?;
         if let Some(call) = ast::MethodCallExpr::cast(parent.clone()) {
             let receiver = call.receiver()?;
@@ -284,11 +283,11 @@ impl CallInfo {
     }
 }
 
-fn get_fn_params(
-    db: &dyn HirDatabase,
+fn get_fn_params<'db>(
+    db: &'db dyn HirDatabase,
     function: hir::Function,
     param_list: &ast::ParamList,
-) -> Option<Vec<(ast::Pat, Option<ast::Type>, hir::Param)>> {
+) -> Option<Vec<(ast::Pat, Option<ast::Type>, hir::Param<'db>)>> {
     let mut assoc_fn_params = function.assoc_fn_params(db).into_iter();
 
     let mut params = Vec::new();
@@ -317,7 +316,7 @@ fn inline(
     function_def_file_id: EditionedFileId,
     function: hir::Function,
     fn_body: &ast::BlockExpr,
-    params: &[(ast::Pat, Option<ast::Type>, hir::Param)],
+    params: &[(ast::Pat, Option<ast::Type>, hir::Param<'_>)],
     CallInfo { node, arguments, generic_arg_list, krate }: &CallInfo,
 ) -> ast::Expr {
     let file_id = sema.hir_file_for(fn_body.syntax());
@@ -394,19 +393,17 @@ fn inline(
     // `FileReference` incorrect
     if let Some(imp) =
         sema.ancestors_with_macros(fn_body.syntax().clone()).find_map(ast::Impl::cast)
+        && !node.syntax().ancestors().any(|anc| &anc == imp.syntax())
+        && let Some(t) = imp.self_ty()
     {
-        if !node.syntax().ancestors().any(|anc| &anc == imp.syntax()) {
-            if let Some(t) = imp.self_ty() {
-                while let Some(self_tok) = body
-                    .syntax()
-                    .descendants_with_tokens()
-                    .filter_map(NodeOrToken::into_token)
-                    .find(|tok| tok.kind() == SyntaxKind::SELF_TYPE_KW)
-                {
-                    let replace_with = t.clone_subtree().syntax().clone_for_update();
-                    ted::replace(self_tok, replace_with);
-                }
-            }
+        while let Some(self_tok) = body
+            .syntax()
+            .descendants_with_tokens()
+            .filter_map(NodeOrToken::into_token)
+            .find(|tok| tok.kind() == SyntaxKind::SELF_TYPE_KW)
+        {
+            let replace_with = t.clone_subtree().syntax().clone_for_update();
+            ted::replace(self_tok, replace_with);
         }
     }
 
@@ -416,10 +413,10 @@ fn inline(
     for stmt in fn_body.statements() {
         if let Some(let_stmt) = ast::LetStmt::cast(stmt.syntax().to_owned()) {
             for has_token in let_stmt.syntax().children_with_tokens() {
-                if let Some(node) = has_token.as_node() {
-                    if let Some(ident_pat) = ast::IdentPat::cast(node.to_owned()) {
-                        func_let_vars.insert(ident_pat.syntax().text().to_string());
-                    }
+                if let Some(node) = has_token.as_node()
+                    && let Some(ident_pat) = ast::IdentPat::cast(node.to_owned())
+                {
+                    func_let_vars.insert(ident_pat.syntax().text().to_string());
                 }
             }
         }
@@ -452,7 +449,7 @@ fn inline(
 
             let ty = sema.type_of_expr(expr).filter(TypeInfo::has_adjustment).and(param_ty);
 
-            let is_self = param.name(sema.db).is_some_and(|name| name == sym::self_.clone());
+            let is_self = param.name(sema.db).is_some_and(|name| name == sym::self_);
 
             if is_self {
                 let mut this_pat = make::ident_pat(false, false, make::name("this"));
@@ -515,7 +512,7 @@ fn inline(
                     && usage.syntax().parent().and_then(ast::Expr::cast).is_some() =>
             {
                 cov_mark::hit!(inline_call_inline_closure);
-                let expr = make::expr_paren(expr.clone());
+                let expr = make::expr_paren(expr.clone()).into();
                 inline_direct(usage, &expr);
             }
             // inline single use literals
@@ -535,11 +532,15 @@ fn inline(
         }
     }
 
-    if let Some(generic_arg_list) = generic_arg_list.clone() {
-        if let Some((target, source)) = &sema.scope(node.syntax()).zip(sema.scope(fn_body.syntax()))
-        {
+    if let Some(generic_arg_list) = generic_arg_list.clone()
+        && let Some((target, source)) = &sema.scope(node.syntax()).zip(sema.scope(fn_body.syntax()))
+    {
+        body.reindent_to(IndentLevel(0));
+        if let Some(new_body) = ast::BlockExpr::cast(
             PathTransform::function_call(target, source, function, generic_arg_list)
-                .apply(body.syntax());
+                .apply(body.syntax()),
+        ) {
+            body = new_body;
         }
     }
 
@@ -570,7 +571,7 @@ fn inline(
     let no_stmts = body.statements().next().is_none();
     match body.tail_expr() {
         Some(expr) if matches!(expr, ast::Expr::ClosureExpr(_)) && no_stmts => {
-            make::expr_paren(expr).clone_for_update()
+            make::expr_paren(expr).clone_for_update().into()
         }
         Some(expr) if !is_async_fn && no_stmts => expr,
         _ => match node
@@ -580,7 +581,7 @@ fn inline(
             .and_then(|bin_expr| bin_expr.lhs())
         {
             Some(lhs) if lhs.syntax() == node.syntax() => {
-                make::expr_paren(ast::Expr::BlockExpr(body)).clone_for_update()
+                make::expr_paren(ast::Expr::BlockExpr(body)).clone_for_update().into()
             }
             _ => ast::Expr::BlockExpr(body),
         },

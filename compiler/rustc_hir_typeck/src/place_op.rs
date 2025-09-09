@@ -8,7 +8,7 @@ use rustc_middle::ty::adjustment::{
     PointerCoercion,
 };
 use rustc_middle::ty::{self, Ty};
-use rustc_span::{Ident, Span, sym};
+use rustc_span::{Span, sym};
 use tracing::debug;
 use {rustc_ast as ast, rustc_hir as hir};
 
@@ -109,8 +109,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         index_ty: Ty<'tcx>,
         index_expr: &hir::Expr<'_>,
     ) -> Option<(/*index type*/ Ty<'tcx>, /*element type*/ Ty<'tcx>)> {
-        let adjusted_ty =
-            self.structurally_resolve_type(autoderef.span(), autoderef.final_ty(false));
+        let adjusted_ty = self.structurally_resolve_type(autoderef.span(), autoderef.final_ty());
         debug!(
             "try_index_step(expr={:?}, base_expr={:?}, adjusted_ty={:?}, \
              index_ty={:?})",
@@ -211,13 +210,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return None;
         };
 
-        self.lookup_method_in_trait(
-            self.misc(span),
-            Ident::with_dummy_span(imm_op),
-            imm_tr,
-            base_ty,
-            opt_rhs_ty,
-        )
+        self.lookup_method_for_operator(self.misc(span), imm_op, imm_tr, base_ty, opt_rhs_ty)
     }
 
     fn try_mutable_overloaded_place_op(
@@ -237,13 +230,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return None;
         };
 
-        self.lookup_method_in_trait(
-            self.misc(span),
-            Ident::with_dummy_span(mut_op),
-            mut_tr,
-            base_ty,
-            opt_rhs_ty,
-        )
+        self.lookup_method_for_operator(self.misc(span), mut_op, mut_tr, base_ty, opt_rhs_ty)
     }
 
     /// Convert auto-derefs, indices, etc of an expression from `Deref` and `Index`

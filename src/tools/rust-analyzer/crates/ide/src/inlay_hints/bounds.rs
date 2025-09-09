@@ -1,9 +1,8 @@
 //! Implementation of trait bound hints.
 //!
 //! Currently this renders the implied `Sized` bound.
-use ide_db::{famous_defs::FamousDefs, FileRange};
+use ide_db::{FileRange, famous_defs::FamousDefs};
 
-use span::EditionedFileId;
 use syntax::ast::{self, AstNode, HasTypeBounds};
 
 use crate::{
@@ -15,7 +14,6 @@ pub(super) fn hints(
     acc: &mut Vec<InlayHint>,
     famous_defs @ FamousDefs(sema, _): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig,
-    _file_id: EditionedFileId,
     params: ast::GenericParamList,
 ) -> Option<()> {
     if !config.sized_bound {
@@ -86,7 +84,7 @@ mod tests {
 
     use crate::inlay_hints::InlayHintsConfig;
 
-    use crate::inlay_hints::tests::{check_expect, check_with_config, DISABLED_CONFIG};
+    use crate::inlay_hints::tests::{DISABLED_CONFIG, check_expect, check_with_config};
 
     #[track_caller]
     fn check(#[rust_analyzer::rust_fixture] ra_fixture: &str) {
@@ -145,7 +143,7 @@ fn foo<T>() {}
                                             file_id: FileId(
                                                 1,
                                             ),
-                                            range: 135..140,
+                                            range: 446..451,
                                         },
                                     ),
                                 ),

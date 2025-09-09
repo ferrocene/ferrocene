@@ -1,20 +1,26 @@
 use either::Either;
 use hir::{
+    AssocItem, HirDisplay, ImportPathConfig, InFile, Type,
     db::{ExpandDatabase, HirDatabase},
-    sym, AssocItem, HirDisplay, HirFileIdExt, ImportPathConfig, InFile, Type,
+    sym,
 };
 use ide_db::{
-    assists::Assist, famous_defs::FamousDefs, imports::import_assets::item_for_path_search,
-    source_change::SourceChange, syntax_helpers::tree_diff::diff, text_edit::TextEdit,
-    use_trivial_constructor::use_trivial_constructor, FxHashMap,
+    FxHashMap,
+    assists::{Assist, ExprFillDefaultMode},
+    famous_defs::FamousDefs,
+    imports::import_assets::item_for_path_search,
+    source_change::SourceChange,
+    syntax_helpers::tree_diff::diff,
+    text_edit::TextEdit,
+    use_trivial_constructor::use_trivial_constructor,
 };
 use stdx::format_to;
 use syntax::{
-    ast::{self, make},
     AstNode, Edition, SyntaxNode, SyntaxNodePtr, ToSmolStr,
+    ast::{self, make},
 };
 
-use crate::{fix, Diagnostic, DiagnosticCode, DiagnosticsContext};
+use crate::{Diagnostic, DiagnosticCode, DiagnosticsContext, fix};
 
 // Diagnostic: missing-fields
 //
@@ -41,6 +47,7 @@ pub(crate) fn missing_fields(ctx: &DiagnosticsContext<'_>, d: &hir::MissingField
     );
 
     Diagnostic::new_with_syntax_node_ptr(ctx, DiagnosticCode::RustcHardError("E0063"), message, ptr)
+        .stable()
         .with_fixes(fixes(ctx, d))
 }
 
@@ -59,7 +66,7 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::MissingFields) -> Option<Vec<Ass
     let current_module =
         ctx.sema.scope(d.field_list_parent.to_node(&root).syntax()).map(|it| it.module());
     let range = InFile::new(d.file, d.field_list_parent.text_range())
-        .original_node_file_range_rooted(ctx.sema.db);
+        .original_node_file_range_rooted_opt(ctx.sema.db)?;
 
     let build_text_edit = |new_syntax: &SyntaxNode, old_syntax| {
         let edit = {
@@ -83,7 +90,7 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::MissingFields) -> Option<Vec<Ass
         Some(vec![fix(
             "fill_missing_fields",
             "Fill struct fields",
-            SourceChange::from_text_edit(range.file_id, edit),
+            SourceChange::from_text_edit(range.file_id.file_id(ctx.sema.db), edit),
             range.range,
         )])
     };
@@ -99,9 +106,10 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::MissingFields) -> Option<Vec<Ass
                 }
             });
 
-            let generate_fill_expr = |ty: &Type| match ctx.config.expr_fill_default {
-                crate::ExprFillDefaultMode::Todo => make::ext::expr_todo(),
-                crate::ExprFillDefaultMode::Default => {
+            let generate_fill_expr = |ty: &Type<'_>| match ctx.config.expr_fill_default {
+                ExprFillDefaultMode::Todo => make::ext::expr_todo(),
+                ExprFillDefaultMode::Underscore => make::ext::expr_underscore(),
+                ExprFillDefaultMode::Default => {
                     get_default_constructor(ctx, d, ty).unwrap_or_else(make::ext::expr_todo)
                 }
             };
@@ -140,11 +148,7 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::MissingFields) -> Option<Vec<Ass
                         )
                     })();
 
-                    if expr.is_some() {
-                        expr
-                    } else {
-                        Some(generate_fill_expr(ty))
-                    }
+                    if expr.is_some() { expr } else { Some(generate_fill_expr(ty)) }
                 };
                 let field = make::record_expr_field(
                     make::name_ref(&f.name(ctx.sema.db).display_no_db(ctx.edition).to_smolstr()),
@@ -160,9 +164,14 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::MissingFields) -> Option<Vec<Ass
             let old_field_list = field_list_parent.record_pat_field_list()?;
             let new_field_list = old_field_list.clone_for_update();
             for (f, _) in missing_fields.iter() {
-                let field = make::record_pat_field_shorthand(make::name_ref(
-                    &f.name(ctx.sema.db).display_no_db(ctx.edition).to_smolstr(),
-                ));
+                let field = make::record_pat_field_shorthand(
+                    make::ident_pat(
+                        false,
+                        false,
+                        make::name(&f.name(ctx.sema.db).display_no_db(ctx.edition).to_smolstr()),
+                    )
+                    .into(),
+                );
                 new_field_list.add_field(field.clone_for_update());
             }
             build_text_edit(new_field_list.syntax(), old_field_list.syntax())
@@ -171,13 +180,13 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::MissingFields) -> Option<Vec<Ass
 }
 
 fn make_ty(
-    ty: &hir::Type,
+    ty: &hir::Type<'_>,
     db: &dyn HirDatabase,
     module: hir::Module,
     edition: Edition,
 ) -> ast::Type {
     let ty_str = match ty.as_adt() {
-        Some(adt) => adt.name(db).display(db.upcast(), edition).to_string(),
+        Some(adt) => adt.name(db).display(db, edition).to_string(),
         None => {
             ty.display_source_code(db, module.into(), false).ok().unwrap_or_else(|| "_".to_owned())
         }
@@ -189,7 +198,7 @@ fn make_ty(
 fn get_default_constructor(
     ctx: &DiagnosticsContext<'_>,
     d: &hir::MissingFields,
-    ty: &Type,
+    ty: &Type<'_>,
 ) -> Option<ast::Expr> {
     if let Some(builtin_ty) = ty.as_builtin() {
         if builtin_ty.is_int() || builtin_ty.is_uint() {
@@ -209,18 +218,20 @@ fn get_default_constructor(
         }
     }
 
-    let krate = ctx.sema.file_to_module_def(d.file.original_file(ctx.sema.db))?.krate();
+    let krate = ctx
+        .sema
+        .file_to_module_def(d.file.original_file(ctx.sema.db).file_id(ctx.sema.db))?
+        .krate();
     let module = krate.root_module();
 
     // Look for a ::new() associated function
     let has_new_func = ty
         .iterate_assoc_items(ctx.sema.db, krate, |assoc_item| {
-            if let AssocItem::Function(func) = assoc_item {
-                if func.name(ctx.sema.db) == sym::new.clone()
-                    && func.assoc_fn_params(ctx.sema.db).is_empty()
-                {
-                    return Some(());
-                }
+            if let AssocItem::Function(func) = assoc_item
+                && func.name(ctx.sema.db) == sym::new
+                && func.assoc_fn_params(ctx.sema.db).is_empty()
+            {
+                return Some(());
             }
 
             None

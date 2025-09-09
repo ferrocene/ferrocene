@@ -1,7 +1,5 @@
 # Using Git
 
-<!-- toc -->
-
 The Rust project uses [Git] to manage its source code. In order to
 contribute, you'll need some familiarity with its features so that your changes
 can be incorporated into the compiler.
@@ -38,13 +36,13 @@ If you've cloned your fork, then you will be able to reference it with `origin`
 in your local repo. It may be helpful to also set up a remote for the official
 rust-lang/rust repo via
 
-```sh
+```console
 git remote add upstream https://github.com/rust-lang/rust.git
 ```
 
 if you're using HTTPS, or
 
-```sh
+```console
 git remote add upstream git@github.com:rust-lang/rust.git
 ```
 
@@ -112,7 +110,7 @@ See [Rebasing](#rebasing) for more about rebasing.
 This is not a problem from git's perspective. If you run `git remote -v`,
 it will say something like this:
 
-```
+```console
 $ git remote -v
 origin  git@github.com:jyn514/rust.git (fetch)
 origin  git@github.com:jyn514/rust.git (push)
@@ -142,7 +140,8 @@ The most common cause is that you rebased after a change and ran `git add .` wit
 `x` to update the submodules.  Alternatively, you might have run `cargo fmt` instead of `x fmt`
 and modified files in a submodule, then committed the changes.
 
-To fix it, do the following things:
+To fix it, do the following things (if you changed a submodule other than cargo,
+replace `src/tools/cargo` with the path to that submodule):
 
 1. See which commit has the accidental changes: `git log --stat -n1 src/tools/cargo`
 2. Revert the changes to that commit: `git checkout <my-commit>~ src/tools/cargo`. Type `~`
@@ -158,11 +157,11 @@ To fix it, do the following things:
 ### I see "error: cannot rebase" when I try to rebase
 
 These are two common errors to see when rebasing:
-```
+```console
 error: cannot rebase: Your index contains uncommitted changes.
 error: Please commit or stash them.
 ```
-```
+```console
 error: cannot rebase: You have unstaged changes.
 error: Please commit or stash them.
 ```
@@ -174,7 +173,7 @@ commit your changes, or make a temporary commit called a "stash" to have them st
 when you finish rebasing. You may want to configure git to make this "stash" automatically, which
 will prevent the "cannot rebase" error in nearly all cases:
 
-```
+```console
 git config --global rebase.autostash true
 ```
 
@@ -205,7 +204,7 @@ git reset --hard master
 
 `git push` will not work properly and say something like this:
 
-```
+```console
  ! [rejected]        issue-xxxxx -> issue-xxxxx (non-fast-forward)
 error: failed to push some refs to 'https://github.com/username/rust.git'
 hint: Updates were rejected because the tip of your current branch is behind
@@ -226,7 +225,7 @@ didn't write, it likely means you're trying to rebase over the wrong branch. For
 have a `rust-lang/rust` remote `upstream`, but ran `git rebase origin/master` instead of `git rebase
 upstream/master`. The fix is to abort the rebase and use the correct branch instead:
 
-```
+```console
 git rebase --abort
 git rebase -i upstream/master
 ```
@@ -243,7 +242,7 @@ When updating your local repository with `git pull`, you may notice that sometim
 Git says you have modified some files that you have never edited. For example,
 running `git status` gives you something like (note the `new commits` mention):
 
-```
+```console
 On branch master
 Your branch is up to date with 'origin/master'.
 
@@ -256,9 +255,12 @@ Changes not staged for commit:
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
 
-These changes are not changes to files: they are changes to submodules (more on this
-[later](#git-submodules)). To get rid of those, run `./x --help`, which will automatically update
-the submodules.
+These changes are not changes to files: they are changes to submodules (more on this [later](#git-submodules)).
+To get rid of those:
+
+```console
+git submodule update
+```
 
 Some submodules are not actually needed; for example, `src/llvm-project` doesn't need to be checked
 out if you're using `download-ci-llvm`.  To avoid having to keep fetching its history, you can use
@@ -278,12 +280,12 @@ merged. To do that, you need to rebase your work on top of rust-lang/rust.
 To rebase your feature branch on top of the newest version of the master branch
 of rust-lang/rust, checkout your branch, and then run this command:
 
-```
+```console
 git pull --rebase https://github.com/rust-lang/rust.git master
 ```
 
 > If you are met with the following error:
-> ```
+> ```console
 > error: cannot pull with rebase: Your index contains uncommitted changes.
 > error: please commit or stash them.
 > ```
@@ -300,13 +302,13 @@ reapply the changes fails because your changes conflicted with other changes
 that have been made. You can tell that this happened because you'll see
 lines in the output that look like
 
-```
+```console
 CONFLICT (content): Merge conflict in file.rs
 ```
 
 When you open these files, you'll see sections of the form
 
-```
+```console
 <<<<<<< HEAD
 Original code
 =======
@@ -336,17 +338,17 @@ your fork with `git push --force-with-lease`.
 
 ### Keeping things up to date
 
-The above section on [Rebasing](#rebasing) is a specific
+The [above section](#rebasing) is a specific
 guide on rebasing work and dealing with merge conflicts.
 Here is some general advice about how to keep your local repo
 up-to-date with upstream changes:
 
 Using `git pull upstream master` while on your local master branch regularly
-will keep it up-to-date. You will also want to rebase your feature branches
+will keep it up-to-date. You will also want to keep your feature branches
 up-to-date as well. After pulling, you can checkout the feature branches
 and rebase them:
 
-```
+```console
 git checkout master
 git pull upstream master --ff-only # to make certain there are no merge commits
 git rebase master feature_branch
@@ -384,7 +386,7 @@ change the order in which they are applied, or "squash" them into each other.
 
 Alternatively, you can sacrifice the commit history like this:
 
-```
+```console
 # squash all the changes into one commit so you only have to worry about conflicts once
 git rebase -i --keep-base master  # and squash all changes along the way
 git rebase master
@@ -422,7 +424,7 @@ it shows you the differences between your old diff and your new diff.
 Here's an example of `git range-diff` output (taken from [Git's
 docs][range-diff-example-docs]):
 
-```
+```console
 -:  ------- > 1:  0ddba11 Prepare for the inevitable!
 1:  c0debee = 2:  cab005e Add a helpful message at the start
 2:  f00dbal ! 3:  decafe1 Describe a bug
@@ -499,7 +501,7 @@ Git and Github's default diff view for large moves *within* a file is quite poor
 line as deleted and each line as added, forcing you to compare each line yourself. Git has an option
 to show moved lines in a different color:
 
-```
+```console
 git log -p --color-moved=dimmed-zebra --color-moved-ws=allow-indentation-change
 ```
 
@@ -515,7 +517,7 @@ that was force-pushed to make sure there are no unexpected changes.
 Many large files in the repo are autogenerated. To view a diff that ignores changes to those files,
 you can use the following syntax (e.g. Cargo.lock):
 
-```
+```console
 git log -p ':!Cargo.lock'
 ```
 
@@ -545,7 +547,7 @@ The contents of submodules are ignored by Git: submodules are in some sense isol
 from the rest of the repository. However, if you try to `cd src/llvm-project` and then
 run `git status`:
 
-```
+```console
 HEAD detached at 9567f08afc943
 nothing to commit, working tree clean
 ```
@@ -576,7 +578,7 @@ that Git can nicely and fairly conveniently handle for us.
 
 Sometimes you might run into (when you run `git status`)
 
-```
+```console
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
@@ -586,7 +588,7 @@ Changes not staged for commit:
 
 and when you try to run `git submodule update` it breaks horribly with errors like
 
-```
+```console
 error: RPC failed; curl 92 HTTP/2 stream 7 was not closed cleanly: CANCEL (err 8)
 error: 2782 bytes of body are still expected
 fetch-pack: unexpected disconnect while reading sideband packet
@@ -597,8 +599,8 @@ fatal: Fetched in submodule path 'src/llvm-project', but it did not contain 5a51
 
 If you see `(new commits, modified content)` you can run
 
-```bash
-$ git submodule foreach git reset --hard
+```console
+git submodule foreach git reset --hard
 ```
 
 and then try `git submodule update` again.
@@ -607,7 +609,7 @@ and then try `git submodule update` again.
 
 If that doesn't work, you can try to deinit all git submodules...
 
-```
+```console
 git submodule deinit -f --all
 ```
 
@@ -618,7 +620,7 @@ completely messed up for some reason.
 
 Sometimes, for some forsaken reason, you might run into
 
-```text
+```console
 fatal: not a git repository: src/gcc/../../.git/modules/src/gcc
 ```
 

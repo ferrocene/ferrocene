@@ -1119,7 +1119,7 @@ Impl Trait Types
        $$impl$$ UseCaptures? TraitBound
 
    UseCaptures ::=
-        $$<$$ UseCapturesGenericArgs? $$>$$
+       $$use$$ $$<$$ UseCapturesGenericArgs? $$>$$
 
    UseCapturesGenericArgs ::=
        UseCapturesGenericArg ($$,$$ UseCapturesGenericArg)* $$,$$?
@@ -1157,10 +1157,7 @@ of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
 
 :dp:`fls_69hqMjvNno9u`
-An :t:`use capture` is a :t:`generic parameter` referenced via keyword ``use`` within an :t:`anonymous return type`.
-
-:dp:`fls_OnyR0Wsfk7KI`
-:t:`[use capture]s` shall only be used within :t:`[anonymous return type]s`.
+An :t:`use capture` is a :t:`generic parameter` referenced within an :t:`anonymous return type`.
 
 :dp:`fls_KgH6c5cC4S0G`
 An :t:`anonymous return type` that does not specify a list of :t:`[use capture]s` implicitly :t:`[use capture]s` all :t:`[type parameter]s` and :t:`[constant parameter]s` that are in :t:`scope`.
@@ -2048,6 +2045,11 @@ occur when:
 * :dp:`fls_SYnFJBhi0IWj`
   The source :t:`type` is a :t:`trait object type` and the target :t:`type` is a :t:`trait object type` with the same or no :t:`principal trait`, and the target :t:`type` has the same or less non-:t:`principal trait` :t:`[trait bound]s`.
 
+* :dp:`fls_QB4c6FNKxaPl`
+  The source :t:`type` is a :t:`trait object type` with some :t:`principal trait` ``T``
+  and the target :t:`type` is a :t:`trait object type` with some :t:`principal trait` ``U``,
+  where ``U`` is a :t:`supertrait` of ``T``.
+
 :dp:`fls_iiiu2q7pym4p`
 An :t:`unsized coercion` is a :t:`type coercion` that converts a :t:`sized type`
 into an :t:`unsized type`. :t:`Unsized coercion` from a source :t:`type` to a
@@ -2891,6 +2893,7 @@ Trait and Lifetime Bounds
        LifetimeIndication
      | ParenthesizedTraitBound
      | TraitBound
+     | UseCaptures
 
    LifetimeIndication ::=
        Lifetime
@@ -2971,6 +2974,9 @@ bound also applies to the related :t:`abstract data type` as an
 If an :t:`outlives bound` applies to the :t:`type` of a :t:`function parameter`
 or to a :t:`return type`, then this bound also applies to the related
 :t:`function` as an :t:`implied bound`.
+
+:dp:`fls_OnyR0Wsfk7KI`
+:t:`[Use capture]` :t:`[bound]s` shall only be used within :t:`[anonymous return type]s`.
 
 .. rubric:: Examples
 

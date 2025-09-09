@@ -1,5 +1,8 @@
 //@ ignore-windows
 //@ only-x86_64
+//@ needs-target-std
+//@ needs-crate-type: dylib
+
 use run_make_support::object::ObjectSymbol;
 use run_make_support::object::read::{File, Object, Symbol};
 use run_make_support::targets::is_windows;
@@ -98,3 +101,6 @@ fn find_dynamic_symbol<'file, 'data>(
         .filter_map(|e| file.symbol_by_name_bytes(e.name()))
         .collect()
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

@@ -3,7 +3,7 @@ use clippy_utils::source::{snippet_indent, snippet_with_context};
 use clippy_utils::sugg::Sugg;
 use clippy_utils::ty::is_type_diagnostic_item;
 
-use clippy_utils::{can_mut_borrow_both, eq_expr_value, is_in_const_context, std_or_core};
+use clippy_utils::{can_mut_borrow_both, eq_expr_value, is_in_const_context, path_to_local, std_or_core};
 use itertools::Itertools;
 
 use rustc_data_structures::fx::FxIndexSet;
@@ -133,7 +133,7 @@ fn generate_swap_warning<'tcx>(
                             applicability: &mut applicability,
                         }
                         .snippet_index_bindings(&[idx1, idx2, rhs1, rhs2]),
-                        slice.maybe_par(),
+                        slice.maybe_paren(),
                         snippet_with_context(cx, idx1.span, ctxt, "..", &mut applicability).0,
                         snippet_with_context(cx, idx2.span, ctxt, "..", &mut applicability).0,
                     ),
@@ -269,12 +269,11 @@ fn parse<'a, 'hir>(stmt: &'a Stmt<'hir>) -> Option<(ExprOrIdent<'hir>, &'a Expr<
         if let ExprKind::Assign(lhs, rhs, _) = expr.kind {
             return Some((ExprOrIdent::Expr(lhs), rhs));
         }
-    } else if let StmtKind::Let(expr) = stmt.kind {
-        if let Some(rhs) = expr.init {
-            if let PatKind::Binding(_, _, ident_l, _) = expr.pat.kind {
-                return Some((ExprOrIdent::Ident(ident_l), rhs));
-            }
-        }
+    } else if let StmtKind::Let(expr) = stmt.kind
+        && let Some(rhs) = expr.init
+        && let PatKind::Binding(_, _, ident_l, _) = expr.pat.kind
+    {
+        return Some((ExprOrIdent::Ident(ident_l), rhs));
     }
     None
 }
@@ -351,12 +350,21 @@ impl<'tcx> IndexBinding<'_, 'tcx> {
                 format!("{lhs_snippet}{rhs_snippet}")
             },
             ExprKind::Path(QPath::Resolved(_, path)) => {
-                let init = self.cx.expr_or_init(expr);
-
                 let Some(first_segment) = path.segments.first() else {
                     return String::new();
                 };
-                if !self.suggest_span.contains(init.span) || !self.is_used_other_than_swapping(first_segment.ident) {
+
+                let init = self.cx.expr_or_init(expr);
+
+                // We skip suggesting a variable binding in any of these cases:
+                // - Variable initialization is outside the suggestion span
+                // - Variable declaration is outside the suggestion span
+                // - Variable is not used as an index or elsewhere later
+                if !self.suggest_span.contains(init.span)
+                    || path_to_local(expr)
+                        .is_some_and(|hir_id| !self.suggest_span.contains(self.cx.tcx.hir_span(hir_id)))
+                    || !self.is_used_other_than_swapping(first_segment.ident)
+                {
                     return String::new();
                 }
 
@@ -372,7 +380,7 @@ impl<'tcx> IndexBinding<'_, 'tcx> {
         }
     }
 
-    fn is_used_other_than_swapping(&mut self, idx_ident: Ident) -> bool {
+    fn is_used_other_than_swapping(&self, idx_ident: Ident) -> bool {
         if Self::is_used_slice_indexed(self.swap1_idx, idx_ident)
             || Self::is_used_slice_indexed(self.swap2_idx, idx_ident)
         {
@@ -381,7 +389,7 @@ impl<'tcx> IndexBinding<'_, 'tcx> {
         self.is_used_after_swap(idx_ident)
     }
 
-    fn is_used_after_swap(&mut self, idx_ident: Ident) -> bool {
+    fn is_used_after_swap(&self, idx_ident: Ident) -> bool {
         let mut v = IndexBindingVisitor {
             idx: idx_ident,
             suggest_span: self.suggest_span,

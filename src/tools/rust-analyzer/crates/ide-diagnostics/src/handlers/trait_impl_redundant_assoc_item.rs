@@ -1,7 +1,7 @@
-use hir::{db::ExpandDatabase, HasSource, HirDisplay};
+use hir::{HasSource, HirDisplay, db::ExpandDatabase};
 use ide_db::text_edit::TextRange;
 use ide_db::{
-    assists::{Assist, AssistId, AssistKind},
+    assists::{Assist, AssistId},
     label::Label,
     source_change::SourceChangeBuilder,
 };
@@ -54,11 +54,14 @@ pub(crate) fn trait_impl_redundant_assoc_item(
         }
     };
 
+    let hir::FileRange { file_id, range } =
+        hir::InFile::new(d.file_id, diagnostic_range).original_node_file_range_rooted(db);
     Diagnostic::new(
         DiagnosticCode::RustcHardError("E0407"),
         format!("{redundant_item_name} is not a member of trait `{trait_name}`"),
-        hir::InFile::new(d.file_id, diagnostic_range).original_node_file_range_rooted(db),
+        ide_db::FileRange { file_id: file_id.file_id(ctx.sema.db), range },
     )
+    .stable()
     .with_fixes(quickfix_for_redundant_assoc_item(
         ctx,
         d,
@@ -74,6 +77,7 @@ fn quickfix_for_redundant_assoc_item(
     redundant_item_def: String,
     range: TextRange,
 ) -> Option<Vec<Assist>> {
+    let file_id = d.file_id.file_id()?;
     let add_assoc_item_def = |builder: &mut SourceChangeBuilder| -> Option<()> {
         let db = ctx.sema.db;
         let root = db.parse_or_expand(d.file_id);
@@ -87,17 +91,19 @@ fn quickfix_for_redundant_assoc_item(
         let trait_def = d.trait_.source(db)?.value;
         let l_curly = trait_def.assoc_item_list()?.l_curly_token()?.text_range();
         let where_to_insert =
-            hir::InFile::new(d.file_id, l_curly).original_node_file_range_rooted(db).range;
+            hir::InFile::new(d.file_id, l_curly).original_node_file_range_rooted_opt(db)?;
+        if where_to_insert.file_id != file_id {
+            return None;
+        }
 
-        builder.insert(where_to_insert.end(), redundant_item_def);
+        builder.insert(where_to_insert.range.end(), redundant_item_def);
         Some(())
     };
-    let file_id = d.file_id.file_id()?;
-    let mut source_change_builder = SourceChangeBuilder::new(file_id);
+    let mut source_change_builder = SourceChangeBuilder::new(file_id.file_id(ctx.sema.db));
     add_assoc_item_def(&mut source_change_builder)?;
 
     Some(vec![Assist {
-        id: AssistId("add assoc item def into trait def", AssistKind::QuickFix),
+        id: AssistId::quick_fix("add assoc item def into trait def"),
         label: Label::new("Add assoc item def into trait def".to_owned()),
         group: None,
         target: range,

@@ -22,7 +22,7 @@ fn mod_item_path(
 ) -> Option<ModPath> {
     let db = sema_scope.db;
     let m = sema_scope.module();
-    m.find_path(db.upcast(), *def, cfg)
+    m.find_path(db, *def, cfg)
 }
 
 /// Helper function to get path to `ModuleDef` as string
@@ -33,7 +33,7 @@ fn mod_item_path_str(
     edition: Edition,
 ) -> Result<String, DisplaySourceCodeError> {
     let path = mod_item_path(sema_scope, def, cfg);
-    path.map(|it| it.display(sema_scope.db.upcast(), edition).to_string())
+    path.map(|it| it.display(sema_scope.db, edition).to_string())
         .ok_or(DisplaySourceCodeError::PathNotFound)
 }
 
@@ -59,7 +59,7 @@ fn mod_item_path_str(
 /// So in short it pretty much gives us a way to get type `Option<i32>` using the items we have in
 /// scope.
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub enum Expr {
+pub enum Expr<'db> {
     /// Constant
     Const(Const),
     /// Static variable
@@ -69,26 +69,31 @@ pub enum Expr {
     /// Constant generic parameter
     ConstParam(ConstParam),
     /// Well known type (such as `true` for bool)
-    FamousType { ty: Type, value: &'static str },
+    FamousType { ty: Type<'db>, value: &'static str },
     /// Function call (does not take self param)
-    Function { func: Function, generics: Vec<Type>, params: Vec<Expr> },
+    Function { func: Function, generics: Vec<Type<'db>>, params: Vec<Expr<'db>> },
     /// Method call (has self param)
-    Method { func: Function, generics: Vec<Type>, target: Box<Expr>, params: Vec<Expr> },
+    Method {
+        func: Function,
+        generics: Vec<Type<'db>>,
+        target: Box<Expr<'db>>,
+        params: Vec<Expr<'db>>,
+    },
     /// Enum variant construction
-    Variant { variant: Variant, generics: Vec<Type>, params: Vec<Expr> },
+    Variant { variant: Variant, generics: Vec<Type<'db>>, params: Vec<Expr<'db>> },
     /// Struct construction
-    Struct { strukt: Struct, generics: Vec<Type>, params: Vec<Expr> },
+    Struct { strukt: Struct, generics: Vec<Type<'db>>, params: Vec<Expr<'db>> },
     /// Tuple construction
-    Tuple { ty: Type, params: Vec<Expr> },
+    Tuple { ty: Type<'db>, params: Vec<Expr<'db>> },
     /// Struct field access
-    Field { expr: Box<Expr>, field: Field },
+    Field { expr: Box<Expr<'db>>, field: Field },
     /// Passing type as reference (with `&`)
-    Reference(Box<Expr>),
+    Reference(Box<Expr<'db>>),
     /// Indicates possibility of many different options that all evaluate to `ty`
-    Many(Type),
+    Many(Type<'db>),
 }
 
-impl Expr {
+impl<'db> Expr<'db> {
     /// Generate source code for type tree.
     ///
     /// Note that trait imports are not added to generated code.
@@ -96,8 +101,8 @@ impl Expr {
     /// by `traits_used` method are also imported.
     pub fn gen_source_code(
         &self,
-        sema_scope: &SemanticsScope<'_>,
-        many_formatter: &mut dyn FnMut(&Type) -> String,
+        sema_scope: &SemanticsScope<'db>,
+        many_formatter: &mut dyn FnMut(&Type<'db>) -> String,
         cfg: ImportPathConfig,
         display_target: DisplayTarget,
     ) -> Result<String, DisplaySourceCodeError> {
@@ -111,15 +116,15 @@ impl Expr {
                         container_name(container, sema_scope, cfg, edition, display_target)?;
                     let const_name = it
                         .name(db)
-                        .map(|c| c.display(db.upcast(), edition).to_string())
+                        .map(|c| c.display(db, edition).to_string())
                         .unwrap_or(String::new());
                     Ok(format!("{container_name}::{const_name}"))
                 }
                 None => mod_item_path_str(sema_scope, &ModuleDef::Const(*it)),
             },
             Expr::Static(it) => mod_item_path_str(sema_scope, &ModuleDef::Static(*it)),
-            Expr::Local(it) => Ok(it.name(db).display(db.upcast(), edition).to_string()),
-            Expr::ConstParam(it) => Ok(it.name(db).display(db.upcast(), edition).to_string()),
+            Expr::Local(it) => Ok(it.name(db).display(db, edition).to_string()),
+            Expr::ConstParam(it) => Ok(it.name(db).display(db, edition).to_string()),
             Expr::FamousType { value, .. } => Ok(value.to_string()),
             Expr::Function { func, params, .. } => {
                 let args = params
@@ -133,7 +138,7 @@ impl Expr {
                     Some(container) => {
                         let container_name =
                             container_name(container, sema_scope, cfg, edition, display_target)?;
-                        let fn_name = func.name(db).display(db.upcast(), edition).to_string();
+                        let fn_name = func.name(db).display(db, edition).to_string();
                         Ok(format!("{container_name}::{fn_name}({args})"))
                     }
                     None => {
@@ -147,7 +152,7 @@ impl Expr {
                     return Ok(many_formatter(&target.ty(db)));
                 }
 
-                let func_name = func.name(db).display(db.upcast(), edition).to_string();
+                let func_name = func.name(db).display(db, edition).to_string();
                 let self_param = func.self_param(db).unwrap();
                 let target_str =
                     target.gen_source_code(sema_scope, many_formatter, cfg, display_target)?;
@@ -199,7 +204,7 @@ impl Expr {
                             .map(|(a, f)| {
                                 let tmp = format!(
                                     "{}: {}",
-                                    f.name(db).display(db.upcast(), edition),
+                                    f.name(db).display(db, edition),
                                     a.gen_source_code(
                                         sema_scope,
                                         many_formatter,
@@ -241,7 +246,7 @@ impl Expr {
                             .map(|(a, f)| {
                                 let tmp = format!(
                                     "{}: {}",
-                                    f.name(db).display(db.upcast(), edition),
+                                    f.name(db).display(db, edition),
                                     a.gen_source_code(
                                         sema_scope,
                                         many_formatter,
@@ -279,7 +284,7 @@ impl Expr {
 
                 let strukt =
                     expr.gen_source_code(sema_scope, many_formatter, cfg, display_target)?;
-                let field = field.name(db).display(db.upcast(), edition).to_string();
+                let field = field.name(db).display(db, edition).to_string();
                 Ok(format!("{strukt}.{field}"))
             }
             Expr::Reference(expr) => {
@@ -298,7 +303,7 @@ impl Expr {
     /// Get type of the type tree.
     ///
     /// Same as getting the type of root node
-    pub fn ty(&self, db: &dyn HirDatabase) -> Type {
+    pub fn ty(&self, db: &'db dyn HirDatabase) -> Type<'db> {
         match self {
             Expr::Const(it) => it.ty(db),
             Expr::Static(it) => it.ty(db),
@@ -331,10 +336,10 @@ impl Expr {
 
         if let Expr::Method { func, params, .. } = self {
             res.extend(params.iter().flat_map(|it| it.traits_used(db)));
-            if let Some(it) = func.as_assoc_item(db) {
-                if let Some(it) = it.container_or_implemented_trait(db) {
-                    res.push(it);
-                }
+            if let Some(it) = func.as_assoc_item(db)
+                && let Some(it) = it.container_or_implemented_trait(db)
+            {
+                res.push(it);
             }
         }
 
@@ -387,7 +392,7 @@ fn container_name(
             let self_ty = imp.self_ty(sema_scope.db);
             // Should it be guaranteed that `mod_item_path` always exists?
             match self_ty.as_adt().and_then(|adt| mod_item_path(sema_scope, &adt.into(), cfg)) {
-                Some(path) => path.display(sema_scope.db.upcast(), edition).to_string(),
+                Some(path) => path.display(sema_scope.db, edition).to_string(),
                 None => self_ty.display(sema_scope.db, display_target).to_string(),
             }
         }

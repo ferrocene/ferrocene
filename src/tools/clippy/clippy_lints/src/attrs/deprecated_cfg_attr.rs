@@ -61,7 +61,7 @@ pub(super) fn check_clippy(cx: &EarlyContext<'_>, attr: &Attribute) {
 
 fn check_deprecated_cfg_recursively(cx: &EarlyContext<'_>, attr: &rustc_ast::MetaItem) {
     if let Some(ident) = attr.ident() {
-        if ["any", "all", "not"].contains(&ident.name.as_str()) {
+        if matches!(ident.name, sym::any | sym::all | sym::not) {
             let Some(list) = attr.meta_item_list() else { return };
             for item in list.iter().filter_map(|item| item.meta_item()) {
                 check_deprecated_cfg_recursively(cx, item);
@@ -73,7 +73,7 @@ fn check_deprecated_cfg_recursively(cx: &EarlyContext<'_>, attr: &rustc_ast::Met
 }
 
 fn check_cargo_clippy_attr(cx: &EarlyContext<'_>, item: &rustc_ast::MetaItem) {
-    if item.has_name(sym::feature) && item.value_str().is_some_and(|v| v.as_str() == "cargo-clippy") {
+    if item.has_name(sym::feature) && item.value_str() == Some(sym::cargo_clippy) {
         span_lint_and_sugg(
             cx,
             DEPRECATED_CLIPPY_CFG_ATTR,

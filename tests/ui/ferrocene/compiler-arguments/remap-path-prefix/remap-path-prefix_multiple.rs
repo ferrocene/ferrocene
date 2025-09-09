@@ -3,7 +3,7 @@
 //
 //@ check-fail
 //@ compile-flags: --remap-path-prefix={{src-base}}=foo --remap-path-prefix=foo/ferrocene/compiler-arguments/remap-path-prefix=bar
-//~? cannot find value
+//~? ERROR cannot find value
 
 fn main() {
     // We cannot actually put an ERROR marker here because

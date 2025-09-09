@@ -18,15 +18,15 @@ use super::write::WriteBackendMethods;
 use crate::back::archive::ArArchiveBuilderBuilder;
 use crate::back::link::link_binary;
 use crate::back::write::TargetMachineFactoryFn;
-use crate::{CodegenResults, ModuleCodegen};
+use crate::{CodegenResults, ModuleCodegen, TargetConfig};
 
 pub trait BackendTypes {
-    type Value: CodegenObject;
+    type Value: CodegenObject + PartialEq;
     type Metadata: CodegenObject;
     type Function: CodegenObject;
 
     type BasicBlock: Copy;
-    type Type: CodegenObject;
+    type Type: CodegenObject + PartialEq;
     type Funclet;
 
     // FIXME(eddyb) find a common convention for all of the debuginfo-related
@@ -45,13 +45,19 @@ pub trait CodegenBackend {
 
     fn print(&self, _req: &PrintRequest, _out: &mut String, _sess: &Session) {}
 
-    /// Returns two feature sets:
-    /// - The first has the features that should be set in `cfg(target_features)`.
-    /// - The second is like the first, but also includes unstable features.
-    ///
-    /// RUSTC_SPECIFIC_FEATURES should be skipped here, those are handled outside codegen.
-    fn target_features_cfg(&self, _sess: &Session) -> (Vec<Symbol>, Vec<Symbol>) {
-        (vec![], vec![])
+    /// Collect target-specific options that should be set in `cfg(...)`, including
+    /// `target_feature` and support for unstable float types.
+    fn target_config(&self, _sess: &Session) -> TargetConfig {
+        TargetConfig {
+            target_features: vec![],
+            unstable_target_features: vec![],
+            // `true` is used as a default so backends need to acknowledge when they do not
+            // support the float types, rather than accidentally quietly skipping all tests.
+            has_reliable_f16: true,
+            has_reliable_f16_math: true,
+            has_reliable_f128: true,
+            has_reliable_f128_math: true,
+        }
     }
 
     fn print_passes(&self) {}
@@ -68,12 +74,7 @@ pub trait CodegenBackend {
 
     fn provide(&self, _providers: &mut Providers) {}
 
-    fn codegen_crate<'tcx>(
-        &self,
-        tcx: TyCtxt<'tcx>,
-        metadata: EncodedMetadata,
-        need_metadata_module: bool,
-    ) -> Box<dyn Any>;
+    fn codegen_crate<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Box<dyn Any>;
 
     /// This is called on the returned `Box<dyn Any>` from [`codegen_crate`](Self::codegen_crate)
     ///
@@ -88,15 +89,14 @@ pub trait CodegenBackend {
     ) -> (CodegenResults, FxIndexMap<WorkProductId, WorkProduct>);
 
     /// This is called on the returned [`CodegenResults`] from [`join_codegen`](Self::join_codegen).
-    fn link(&self, sess: &Session, codegen_results: CodegenResults, outputs: &OutputFilenames) {
-        link_binary(sess, &ArArchiveBuilderBuilder, codegen_results, outputs);
-    }
-
-    /// Returns `true` if this backend can be safely called from multiple threads.
-    ///
-    /// Defaults to `true`.
-    fn supports_parallel(&self) -> bool {
-        true
+    fn link(
+        &self,
+        sess: &Session,
+        codegen_results: CodegenResults,
+        metadata: EncodedMetadata,
+        outputs: &OutputFilenames,
+    ) {
+        link_binary(sess, &ArArchiveBuilderBuilder, codegen_results, metadata, outputs);
     }
 }
 
@@ -137,5 +137,12 @@ pub trait ExtraBackendMethods:
         T: Send + 'static,
     {
         std::thread::Builder::new().name(name).spawn(f)
+    }
+
+    /// Returns `true` if this backend can be safely called from multiple threads.
+    ///
+    /// Defaults to `true`.
+    fn supports_parallel(&self) -> bool {
+        true
     }
 }

@@ -2,12 +2,12 @@ use hir::Type;
 use ide_db::FxHashMap;
 use std::iter::successors;
 use syntax::{
+    Direction,
     algo::neighbor,
     ast::{self, AstNode, HasName},
-    Direction,
 };
 
-use crate::{AssistContext, AssistId, AssistKind, Assists, TextRange};
+use crate::{AssistContext, AssistId, Assists, TextRange};
 
 // Assist: merge_match_arms
 //
@@ -73,7 +73,7 @@ pub(crate) fn merge_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>) -> Op
     }
 
     acc.add(
-        AssistId("merge_match_arms", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("merge_match_arms"),
         "Merge match arms",
         current_text_range,
         |edit| {
@@ -105,7 +105,7 @@ fn contains_placeholder(a: &ast::MatchArm) -> bool {
 }
 
 fn are_same_types(
-    current_arm_types: &FxHashMap<String, Option<Type>>,
+    current_arm_types: &FxHashMap<String, Option<Type<'_>>>,
     arm: &ast::MatchArm,
     ctx: &AssistContext<'_>,
 ) -> bool {
@@ -121,15 +121,15 @@ fn are_same_types(
     true
 }
 
-fn get_arm_types(
-    context: &AssistContext<'_>,
+fn get_arm_types<'db>(
+    context: &AssistContext<'db>,
     arm: &ast::MatchArm,
-) -> FxHashMap<String, Option<Type>> {
-    let mut mapping: FxHashMap<String, Option<Type>> = FxHashMap::default();
+) -> FxHashMap<String, Option<Type<'db>>> {
+    let mut mapping: FxHashMap<String, Option<Type<'db>>> = FxHashMap::default();
 
-    fn recurse(
-        map: &mut FxHashMap<String, Option<Type>>,
-        ctx: &AssistContext<'_>,
+    fn recurse<'db>(
+        map: &mut FxHashMap<String, Option<Type<'db>>>,
+        ctx: &AssistContext<'db>,
         pat: &Option<ast::Pat>,
     ) {
         if let Some(local_pat) = pat {

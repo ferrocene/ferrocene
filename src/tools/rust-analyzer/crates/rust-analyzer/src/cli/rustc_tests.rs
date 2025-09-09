@@ -7,22 +7,23 @@ use std::{cell::RefCell, fs::read_to_string, panic::AssertUnwindSafe, path::Path
 
 use hir::{ChangeWithProcMacros, Crate};
 use ide::{AnalysisHost, DiagnosticCode, DiagnosticsConfig};
+use ide_db::base_db;
 use itertools::Either;
 use paths::Utf8PathBuf;
 use profile::StopWatch;
-use project_model::toolchain_info::{target_data_layout, QueryConfig};
+use project_model::toolchain_info::{QueryConfig, target_data_layout};
 use project_model::{
     CargoConfig, ManifestPath, ProjectWorkspace, ProjectWorkspaceKind, RustLibSource,
     RustSourceWorkspaceConfig, Sysroot,
 };
 
-use load_cargo::{load_workspace, LoadCargoConfig, ProcMacroServerChoice};
+use load_cargo::{LoadCargoConfig, ProcMacroServerChoice, load_workspace};
 use rustc_hash::FxHashMap;
 use triomphe::Arc;
 use vfs::{AbsPathBuf, FileId};
 use walkdir::WalkDir;
 
-use crate::cli::{flags, report_metric, Result};
+use crate::cli::{Result, flags, report_metric};
 
 struct Tester {
     host: AnalysisHost,
@@ -63,9 +64,9 @@ fn detect_errors_from_rustc_stderr_file(p: PathBuf) -> FxHashMap<DiagnosticCode,
 
 impl Tester {
     fn new() -> Result<Self> {
-        let mut path = std::env::temp_dir();
-        path.push("ra-rustc-test.rs");
-        let tmp_file = AbsPathBuf::try_from(Utf8PathBuf::from_path_buf(path).unwrap()).unwrap();
+        let mut path = AbsPathBuf::assert_utf8(std::env::temp_dir());
+        path.push("ra-rustc-test");
+        let tmp_file = path.join("ra-rustc-test.rs");
         std::fs::write(&tmp_file, "")?;
         let cargo_config = CargoConfig {
             sysroot: Some(RustLibSource::Discover),
@@ -75,7 +76,13 @@ impl Tester {
         };
 
         let mut sysroot = Sysroot::discover(tmp_file.parent().unwrap(), &cargo_config.extra_env);
-        let loaded_sysroot = sysroot.load_workspace(&RustSourceWorkspaceConfig::default_cargo());
+        let loaded_sysroot = sysroot.load_workspace(
+            &RustSourceWorkspaceConfig::default_cargo(),
+            false,
+            &path,
+            &Utf8PathBuf::default(),
+            &|_| (),
+        );
         if let Some(loaded_sysroot) = loaded_sysroot {
             sysroot.set_workspace(loaded_sysroot);
         }
@@ -139,7 +146,7 @@ impl Tester {
             FxHashMap::default()
         };
         let text = read_to_string(&p).unwrap();
-        let mut change = ChangeWithProcMacros::new();
+        let mut change = ChangeWithProcMacros::default();
         // Ignore unstable tests, since they move too fast and we do not intend to support all of them.
         let mut ignore_test = text.contains("#![feature");
         // Ignore test with extern crates, as this infra don't support them yet.
@@ -164,13 +171,13 @@ impl Tester {
                     let analysis = self.host.analysis();
                     let root_file = self.root_file;
                     move || {
-                        let res = std::panic::catch_unwind(move || {
+                        let res = std::panic::catch_unwind(AssertUnwindSafe(move || {
                             analysis.full_diagnostics(
                                 diagnostic_config,
                                 ide::AssistResolveStrategy::None,
                                 root_file,
                             )
-                        });
+                        }));
                         main.unpark();
                         res
                     }
@@ -298,10 +305,10 @@ impl flags::RustcTests {
         for i in walk_dir {
             let i = i?;
             let p = i.into_path();
-            if let Some(f) = &self.filter {
-                if !p.as_os_str().to_string_lossy().contains(f) {
-                    continue;
-                }
+            if let Some(f) = &self.filter
+                && !p.as_os_str().to_string_lossy().contains(f)
+            {
+                continue;
             }
             if p.extension().is_none_or(|x| x != "rs") {
                 continue;
@@ -310,7 +317,7 @@ impl flags::RustcTests {
                 let tester = AssertUnwindSafe(&mut tester);
                 let p = p.clone();
                 move || {
-                    let _guard = stdx::panic_context::enter(p.display().to_string());
+                    let _guard = base_db::DbPanicContext::enter(p.display().to_string());
                     { tester }.0.test(p);
                 }
             }) {

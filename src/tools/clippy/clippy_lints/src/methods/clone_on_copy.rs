@@ -28,7 +28,7 @@ pub(super) fn check(
     if cx
         .typeck_results()
         .type_dependent_def_id(expr.hir_id)
-        .and_then(|id| cx.tcx.trait_of_item(id))
+        .and_then(|id| cx.tcx.trait_of_assoc(id))
         .zip(cx.tcx.lang_items().clone_trait())
         .is_none_or(|(x, y)| x != y)
     {
@@ -40,10 +40,10 @@ pub(super) fn check(
         .map_or_else(|| cx.typeck_results().expr_ty(arg), |a| a.target);
 
     let ty = cx.typeck_results().expr_ty(expr);
-    if let ty::Ref(_, inner, _) = arg_ty.kind() {
-        if let ty::Ref(..) = inner.kind() {
-            return; // don't report clone_on_copy
-        }
+    if let ty::Ref(_, inner, _) = arg_ty.kind()
+        && let ty::Ref(..) = inner.kind()
+    {
+        return; // don't report clone_on_copy
     }
 
     if is_copy(cx, ty) {

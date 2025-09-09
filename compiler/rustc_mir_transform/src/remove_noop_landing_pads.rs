@@ -48,23 +48,22 @@ impl<'tcx> crate::MirPass<'tcx> for RemoveNoopLandingPads {
         let postorder: Vec<_> = traversal::postorder(body).map(|(bb, _)| bb).collect();
         for bb in postorder {
             debug!("  processing {:?}", bb);
-            if let Some(unwind) = body[bb].terminator_mut().unwind_mut() {
-                if let UnwindAction::Cleanup(unwind_bb) = *unwind {
-                    if nop_landing_pads.contains(unwind_bb) {
-                        debug!("    removing noop landing pad");
-                        landing_pads_removed += 1;
-                        *unwind = UnwindAction::Continue;
-                    }
-                }
+            if let Some(unwind) = body[bb].terminator_mut().unwind_mut()
+                && let UnwindAction::Cleanup(unwind_bb) = *unwind
+                && nop_landing_pads.contains(unwind_bb)
+            {
+                debug!("    removing noop landing pad");
+                landing_pads_removed += 1;
+                *unwind = UnwindAction::Continue;
             }
 
-            for target in body[bb].terminator_mut().successors_mut() {
+            body[bb].terminator_mut().successors_mut(|target| {
                 if *target != resume_block && nop_landing_pads.contains(*target) {
                     debug!("    folding noop jump to {:?} to resume block", target);
                     *target = resume_block;
                     jumps_folded += 1;
                 }
-            }
+            });
 
             let is_nop_landing_pad = self.is_nop_landing_pad(bb, body, &nop_landing_pads);
             if is_nop_landing_pad {

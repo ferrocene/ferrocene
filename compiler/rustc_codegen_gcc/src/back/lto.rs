@@ -11,11 +11,12 @@
 // does not remove it?
 //
 // TODO(antoyo): for performance, check which optimizations the C++ frontend enables.
-//
+// cSpell:disable
 // Fix these warnings:
 // /usr/bin/ld: warning: type of symbol `_RNvNvNvNtCs5JWOrf9uCus_5rayon11thread_pool19WORKER_THREAD_STATE7___getit5___KEY' changed from 1 to 6 in /tmp/ccKeUSiR.ltrans0.ltrans.o
 // /usr/bin/ld: warning: type of symbol `_RNvNvNvNvNtNtNtCsAj5i4SGTR7_3std4sync4mpmc5waker17current_thread_id5DUMMY7___getit5___KEY' changed from 1 to 6 in /tmp/ccKeUSiR.ltrans0.ltrans.o
 // /usr/bin/ld: warning: incremental linking of LTO and non-LTO objects; using -flinker-output=nolto-rel which will bypass whole program optimization
+// cSpell:enable
 use std::ffi::{CStr, CString};
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
@@ -23,31 +24,21 @@ use std::sync::Arc;
 
 use gccjit::{Context, OutputKind};
 use object::read::archive::ArchiveFile;
-use rustc_codegen_ssa::back::lto::{LtoModuleCodegen, SerializedModule, ThinModule, ThinShared};
-use rustc_codegen_ssa::back::symbol_export;
+use rustc_codegen_ssa::back::lto::{SerializedModule, ThinModule, ThinShared};
 use rustc_codegen_ssa::back::write::{CodegenContext, FatLtoInput};
 use rustc_codegen_ssa::traits::*;
 use rustc_codegen_ssa::{ModuleCodegen, ModuleKind, looks_like_rust_object_file};
 use rustc_data_structures::memmap::Mmap;
-use rustc_errors::{DiagCtxtHandle, FatalError};
-use rustc_hir::def_id::LOCAL_CRATE;
+use rustc_errors::DiagCtxtHandle;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::WorkProduct;
-use rustc_middle::middle::exported_symbols::{SymbolExportInfo, SymbolExportLevel};
-use rustc_session::config::{CrateType, Lto};
+use rustc_session::config::Lto;
 use rustc_target::spec::RelocModel;
 use tempfile::{TempDir, tempdir};
 
 use crate::back::write::save_temp_bitcode;
-use crate::errors::{DynamicLinkingWithLTO, LtoBitcodeFromRlib, LtoDisallowed, LtoDylib};
+use crate::errors::LtoBitcodeFromRlib;
 use crate::{GccCodegenBackend, GccContext, SyncContext, to_gcc_opt_level};
-
-pub fn crate_type_allows_lto(crate_type: CrateType) -> bool {
-    match crate_type {
-        CrateType::Executable | CrateType::Dylib | CrateType::Staticlib | CrateType::Cdylib => true,
-        CrateType::Rlib | CrateType::ProcMacro => false,
-    }
-}
 
 struct LtoData {
     // TODO(antoyo): use symbols_below_threshold.
@@ -58,39 +49,15 @@ struct LtoData {
 
 fn prepare_lto(
     cgcx: &CodegenContext<GccCodegenBackend>,
+    each_linked_rlib_for_lto: &[PathBuf],
     dcx: DiagCtxtHandle<'_>,
-) -> Result<LtoData, FatalError> {
-    let export_threshold = match cgcx.lto {
-        // We're just doing LTO for our one crate
-        Lto::ThinLocal => SymbolExportLevel::Rust,
-
-        // We're doing LTO for the entire crate graph
-        Lto::Fat | Lto::Thin => symbol_export::crates_export_threshold(&cgcx.crate_types),
-
-        Lto::No => panic!("didn't request LTO but we're doing LTO"),
-    };
-
+) -> LtoData {
     let tmp_path = match tempdir() {
         Ok(tmp_path) => tmp_path,
         Err(error) => {
-            eprintln!("Cannot create temporary directory: {}", error);
-            return Err(FatalError);
+            dcx.fatal(format!("Cannot create temporary directory: {}", error));
         }
     };
-
-    let symbol_filter = &|&(ref name, info): &(String, SymbolExportInfo)| {
-        if info.level.is_below_threshold(export_threshold) || info.used {
-            Some(name.clone())
-        } else {
-            None
-        }
-    };
-    let exported_symbols = cgcx.exported_symbols.as_ref().expect("needs exported symbols for LTO");
-    let mut symbols_below_threshold = {
-        let _timer = cgcx.prof.generic_activity("GCC_lto_generate_symbols_below_threshold");
-        exported_symbols[&LOCAL_CRATE].iter().filter_map(symbol_filter).collect::<Vec<String>>()
-    };
-    info!("{} symbols to preserve in this crate", symbols_below_threshold.len());
 
     // If we're performing LTO for the entire crate graph, then for each of our
     // upstream dependencies, find the corresponding rlib and load the bitcode
@@ -100,32 +67,7 @@ fn prepare_lto(
     // with either fat or thin LTO
     let mut upstream_modules = Vec::new();
     if cgcx.lto != Lto::ThinLocal {
-        // Make sure we actually can run LTO
-        for crate_type in cgcx.crate_types.iter() {
-            if !crate_type_allows_lto(*crate_type) {
-                dcx.emit_err(LtoDisallowed);
-                return Err(FatalError);
-            }
-            if *crate_type == CrateType::Dylib && !cgcx.opts.unstable_opts.dylib_lto {
-                dcx.emit_err(LtoDylib);
-                return Err(FatalError);
-            }
-        }
-
-        if cgcx.opts.cg.prefer_dynamic && !cgcx.opts.unstable_opts.dylib_lto {
-            dcx.emit_err(DynamicLinkingWithLTO);
-            return Err(FatalError);
-        }
-
-        for &(cnum, ref path) in cgcx.each_linked_rlib_for_lto.iter() {
-            let exported_symbols =
-                cgcx.exported_symbols.as_ref().expect("needs exported symbols for LTO");
-            {
-                let _timer = cgcx.prof.generic_activity("GCC_lto_generate_symbols_below_threshold");
-                symbols_below_threshold
-                    .extend(exported_symbols[&cnum].iter().filter_map(symbol_filter));
-            }
-
+        for path in each_linked_rlib_for_lto {
             let archive_data = unsafe {
                 Mmap::map(File::open(path).expect("couldn't open rlib")).expect("couldn't map rlib")
             };
@@ -148,15 +90,14 @@ fn prepare_lto(
                         upstream_modules.push((module, CString::new(name).unwrap()));
                     }
                     Err(e) => {
-                        dcx.emit_err(e);
-                        return Err(FatalError);
+                        dcx.emit_fatal(e);
                     }
                 }
             }
         }
     }
 
-    Ok(LtoData { upstream_modules, tmp_path })
+    LtoData { upstream_modules, tmp_path }
 }
 
 fn save_as_file(obj: &[u8], path: &Path) -> Result<(), LtoBitcodeFromRlib> {
@@ -169,19 +110,18 @@ fn save_as_file(obj: &[u8], path: &Path) -> Result<(), LtoBitcodeFromRlib> {
 /// for further optimization.
 pub(crate) fn run_fat(
     cgcx: &CodegenContext<GccCodegenBackend>,
+    each_linked_rlib_for_lto: &[PathBuf],
     modules: Vec<FatLtoInput<GccCodegenBackend>>,
-    cached_modules: Vec<(SerializedModule<ModuleBuffer>, WorkProduct)>,
-) -> Result<LtoModuleCodegen<GccCodegenBackend>, FatalError> {
+) -> ModuleCodegen<GccContext> {
     let dcx = cgcx.create_dcx();
     let dcx = dcx.handle();
-    let lto_data = prepare_lto(cgcx, dcx)?;
+    let lto_data = prepare_lto(cgcx, each_linked_rlib_for_lto, dcx);
     /*let symbols_below_threshold =
     lto_data.symbols_below_threshold.iter().map(|c| c.as_ptr()).collect::<Vec<_>>();*/
     fat_lto(
         cgcx,
         dcx,
         modules,
-        cached_modules,
         lto_data.upstream_modules,
         lto_data.tmp_path,
         //&lto_data.symbols_below_threshold,
@@ -192,11 +132,10 @@ fn fat_lto(
     cgcx: &CodegenContext<GccCodegenBackend>,
     _dcx: DiagCtxtHandle<'_>,
     modules: Vec<FatLtoInput<GccCodegenBackend>>,
-    cached_modules: Vec<(SerializedModule<ModuleBuffer>, WorkProduct)>,
     mut serialized_modules: Vec<(SerializedModule<ModuleBuffer>, CString)>,
     tmp_path: TempDir,
     //symbols_below_threshold: &[String],
-) -> Result<LtoModuleCodegen<GccCodegenBackend>, FatalError> {
+) -> ModuleCodegen<GccContext> {
     let _timer = cgcx.prof.generic_activity("GCC_fat_lto_build_monolithic_module");
     info!("going for a fat lto");
 
@@ -206,21 +145,12 @@ fn fat_lto(
     //   modules that are serialized in-memory.
     // * `in_memory` contains modules which are already parsed and in-memory,
     //   such as from multi-CGU builds.
-    //
-    // All of `cached_modules` (cached from previous incremental builds) can
-    // immediately go onto the `serialized_modules` modules list and then we can
-    // split the `modules` array into these two lists.
     let mut in_memory = Vec::new();
-    serialized_modules.extend(cached_modules.into_iter().map(|(buffer, wp)| {
-        info!("pushing cached module {:?}", wp.cgu_name);
-        (buffer, CString::new(wp.cgu_name).unwrap())
-    }));
     for module in modules {
         match module {
             FatLtoInput::InMemory(m) => in_memory.push(m),
             FatLtoInput::Serialized { name, buffer } => {
                 info!("pushing serialized module {:?}", name);
-                let buffer = SerializedModule::Local(buffer);
                 serialized_modules.push((buffer, CString::new(name).unwrap()));
             }
         }
@@ -274,7 +204,7 @@ fn fat_lto(
             let path = tmp_path.path().to_path_buf().join(&module.name);
             let path = path.to_str().expect("path");
             let context = &module.module_llvm.context;
-            let config = cgcx.config(module.kind);
+            let config = &cgcx.module_config;
             // NOTE: we need to set the optimization level here in order for LTO to do its job.
             context.set_optimization_level(to_gcc_opt_level(config.opt_level));
             context.add_command_line_option("-flto=auto");
@@ -329,7 +259,7 @@ fn fat_lto(
     // of now.
     module.module_llvm.temp_dir = Some(tmp_path);
 
-    Ok(LtoModuleCodegen::Fat(module))
+    module
 }
 
 pub struct ModuleBuffer(PathBuf);
@@ -351,12 +281,13 @@ impl ModuleBufferMethods for ModuleBuffer {
 /// can simply be copied over from the incr. comp. cache.
 pub(crate) fn run_thin(
     cgcx: &CodegenContext<GccCodegenBackend>,
+    each_linked_rlib_for_lto: &[PathBuf],
     modules: Vec<(String, ThinBuffer)>,
     cached_modules: Vec<(SerializedModule<ModuleBuffer>, WorkProduct)>,
-) -> Result<(Vec<LtoModuleCodegen<GccCodegenBackend>>, Vec<WorkProduct>), FatalError> {
+) -> (Vec<ThinModule<GccCodegenBackend>>, Vec<WorkProduct>) {
     let dcx = cgcx.create_dcx();
     let dcx = dcx.handle();
-    let lto_data = prepare_lto(cgcx, dcx)?;
+    let lto_data = prepare_lto(cgcx, each_linked_rlib_for_lto, dcx);
     if cgcx.opts.cg.linker_plugin_lto.enabled() {
         unreachable!(
             "We should never reach this case if the LTO step \
@@ -422,7 +353,7 @@ fn thin_lto(
     tmp_path: TempDir,
     cached_modules: Vec<(SerializedModule<ModuleBuffer>, WorkProduct)>,
     //_symbols_below_threshold: &[String],
-) -> Result<(Vec<LtoModuleCodegen<GccCodegenBackend>>, Vec<WorkProduct>), FatalError> {
+) -> (Vec<ThinModule<GccCodegenBackend>>, Vec<WorkProduct>) {
     let _timer = cgcx.prof.generic_activity("LLVM_thin_lto_global_analysis");
     info!("going for that thin, thin LTO");
 
@@ -568,8 +499,7 @@ fn thin_lto(
         }*/
 
         info!(" - {}: re-compiled", module_name);
-        opt_jobs
-            .push(LtoModuleCodegen::Thin(ThinModule { shared: shared.clone(), idx: module_index }));
+        opt_jobs.push(ThinModule { shared: shared.clone(), idx: module_index });
     }
 
     // Save the current ThinLTO import information for the next compilation
@@ -586,13 +516,13 @@ fn thin_lto(
     // TODO: save the directory so that it gets deleted later.
     std::mem::forget(tmp_path);
 
-    Ok((opt_jobs, copy_jobs))
+    (opt_jobs, copy_jobs)
 }
 
-pub unsafe fn optimize_thin_module(
+pub fn optimize_thin_module(
     thin_module: ThinModule<GccCodegenBackend>,
     _cgcx: &CodegenContext<GccCodegenBackend>,
-) -> Result<ModuleCodegen<GccContext>, FatalError> {
+) -> ModuleCodegen<GccContext> {
     //let dcx = cgcx.create_dcx();
 
     //let module_name = &thin_module.shared.module_names[thin_module.idx];
@@ -702,7 +632,8 @@ pub unsafe fn optimize_thin_module(
             save_temp_bitcode(cgcx, &module, "thin-lto-after-pm");
         }
     }*/
-    Ok(module)
+    #[allow(clippy::let_and_return)]
+    module
 }
 
 pub struct ThinBuffer {

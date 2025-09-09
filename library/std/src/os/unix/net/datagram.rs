@@ -757,7 +757,8 @@ impl UnixDatagram {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not return the same write_timeout as set
+    /// ```ignore-qnx
     /// use std::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///
@@ -778,7 +779,8 @@ impl UnixDatagram {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not return the same write_timeout as set
+    /// ```ignore-qnx
     /// use std::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///

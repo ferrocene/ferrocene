@@ -5,18 +5,19 @@ use rustc_hash::FxHashMap;
 use span::{Edition, Span};
 use stdx::itertools::Itertools;
 use syntax::{
-    ast::{self, HasName},
     AstNode,
+    ast::{self, HasName},
 };
 use syntax_bridge::{
-    dummy_test_span_utils::{DummyTestSpanMap, DUMMY},
-    syntax_node_to_token_tree, DocCommentDesugarMode,
+    DocCommentDesugarMode,
+    dummy_test_span_utils::{DUMMY, DummyTestSpanMap},
+    syntax_node_to_token_tree,
 };
 use test_utils::{bench, bench_fixture, skip_slow_tests};
 
 use crate::{
-    parser::{MetaVarKind, Op, RepeatKind, Separator},
     DeclarativeMacro,
+    parser::{MetaVarKind, Op, RepeatKind, Separator},
 };
 
 #[test]
@@ -53,7 +54,7 @@ fn benchmark_expand_macro_rules() {
             .map(|(id, tt)| {
                 let res = rules[&id].expand(&tt, |_| (), DUMMY, Edition::CURRENT);
                 assert!(res.err.is_none());
-                res.value.0 .0.len()
+                res.value.0.0.len()
             })
             .sum()
     };
@@ -184,20 +185,22 @@ fn invocation_fixtures(
                     for it in tokens.iter() {
                         collect_from_op(it, builder, seed);
                     }
-                    if i + 1 != cnt {
-                        if let Some(sep) = separator {
-                            match &**sep {
-                                Separator::Literal(it) => {
-                                    builder.push(tt::Leaf::Literal(it.clone()))
+                    if i + 1 != cnt
+                        && let Some(sep) = separator
+                    {
+                        match &**sep {
+                            Separator::Literal(it) => builder.push(tt::Leaf::Literal(it.clone())),
+                            Separator::Ident(it) => builder.push(tt::Leaf::Ident(it.clone())),
+                            Separator::Puncts(puncts) => {
+                                for it in puncts {
+                                    builder.push(tt::Leaf::Punct(*it))
                                 }
-                                Separator::Ident(it) => builder.push(tt::Leaf::Ident(it.clone())),
-                                Separator::Puncts(puncts) => {
-                                    for it in puncts {
-                                        builder.push(tt::Leaf::Punct(*it))
-                                    }
-                                }
-                            };
-                        }
+                            }
+                            Separator::Lifetime(punct, ident) => {
+                                builder.push(tt::Leaf::Punct(*punct));
+                                builder.push(tt::Leaf::Ident(ident.clone()));
+                            }
+                        };
                     }
                 }
             }

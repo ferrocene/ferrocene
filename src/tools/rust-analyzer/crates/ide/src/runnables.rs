@@ -4,28 +4,29 @@ use arrayvec::ArrayVec;
 use ast::HasName;
 use cfg::{CfgAtom, CfgExpr};
 use hir::{
-    db::HirDatabase, sym, symbols::FxIndexSet, AsAssocItem, AttrsWithOwner, HasAttrs, HasCrate,
-    HasSource, HirFileIdExt, ModPath, Name, PathKind, Semantics, Symbol,
+    AsAssocItem, AttrsWithOwner, HasAttrs, HasCrate, HasSource, ModPath, Name, PathKind, Semantics,
+    Symbol, db::HirDatabase, sym,
 };
 use ide_assists::utils::{has_test_related_attribute, test_related_attribute_syn};
 use ide_db::{
-    base_db::SourceDatabase,
+    FilePosition, FxHashMap, FxIndexMap, FxIndexSet, RootDatabase, SymbolKind,
+    base_db::RootQueryDb,
     defs::Definition,
     documentation::docs_from_attrs,
     helpers::visit_file_defs,
     search::{FileReferenceNode, SearchScope},
-    FilePosition, FxHashMap, FxIndexMap, RootDatabase, SymbolKind,
 };
 use itertools::Itertools;
 use smallvec::SmallVec;
 use span::{Edition, TextSize};
 use stdx::format_to;
 use syntax::{
+    SmolStr, SyntaxNode, ToSmolStr,
     ast::{self, AstNode},
-    format_smolstr, SmolStr, SyntaxNode, ToSmolStr,
+    format_smolstr,
 };
 
-use crate::{references, FileId, NavigationTarget, ToNav, TryToNav};
+use crate::{FileId, NavigationTarget, ToNav, TryToNav, references};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Runnable {
@@ -284,8 +285,10 @@ fn find_related_tests_in_module(
 
     let file_id = mod_source.file_id.original_file(sema.db);
     let mod_scope = SearchScope::file_range(hir::FileRange { file_id, range: mod_source.value });
-    let fn_pos =
-        FilePosition { file_id: file_id.into(), offset: fn_name.syntax().text_range().start() };
+    let fn_pos = FilePosition {
+        file_id: file_id.file_id(sema.db),
+        offset: fn_name.syntax().text_range().start(),
+    };
     find_related_tests(sema, syntax, fn_pos, Some(mod_scope), tests)
 }
 
@@ -348,7 +351,7 @@ pub(crate) fn runnable_fn(
     )
     .call_site();
 
-    let file_range = fn_source.syntax().original_file_range_with_macro_call_body(sema.db);
+    let file_range = fn_source.syntax().original_file_range_with_macro_call_input(sema.db);
     let update_test =
         UpdateTest::find_snapshot_macro(sema, &fn_source.file_syntax(sema.db), file_range);
 
@@ -422,7 +425,7 @@ pub(crate) fn runnable_impl(
 
     let impl_source = sema.source(*def)?;
     let impl_syntax = impl_source.syntax();
-    let file_range = impl_syntax.original_file_range_with_macro_call_body(sema.db);
+    let file_range = impl_syntax.original_file_range_with_macro_call_input(sema.db);
     let update_test =
         UpdateTest::find_snapshot_macro(sema, &impl_syntax.file_syntax(sema.db), file_range);
 
@@ -499,7 +502,7 @@ fn module_def_doctest(db: &RootDatabase, def: Definition) -> Option<Runnable> {
     let krate = def.krate(db);
     let edition = krate.map(|it| it.edition(db)).unwrap_or(Edition::CURRENT);
     let display_target = krate
-        .unwrap_or_else(|| (*db.crate_graph().crates_in_topological_order().last().unwrap()).into())
+        .unwrap_or_else(|| (*db.all_crates().last().expect("no crate graph present")).into())
         .to_display_target(db);
     if !has_runnable_doc_test(&attrs) {
         return None;
@@ -511,20 +514,19 @@ fn module_def_doctest(db: &RootDatabase, def: Definition) -> Option<Runnable> {
             .flat_map(|it| it.name(db))
             .for_each(|name| format_to!(path, "{}::", name.display(db, edition)));
         // This probably belongs to canonical_path?
-        if let Some(assoc_item) = def.as_assoc_item(db) {
-            if let Some(ty) = assoc_item.implementing_ty(db) {
-                if let Some(adt) = ty.as_adt() {
-                    let name = adt.name(db);
-                    let mut ty_args = ty.generic_parameters(db, display_target).peekable();
-                    format_to!(path, "{}", name.display(db, edition));
-                    if ty_args.peek().is_some() {
-                        format_to!(path, "<{}>", ty_args.format_with(",", |ty, cb| cb(&ty)));
-                    }
-                    format_to!(path, "::{}", def_name.display(db, edition));
-                    path.retain(|c| c != ' ');
-                    return Some(path);
-                }
+        if let Some(assoc_item) = def.as_assoc_item(db)
+            && let Some(ty) = assoc_item.implementing_ty(db)
+            && let Some(adt) = ty.as_adt()
+        {
+            let name = adt.name(db);
+            let mut ty_args = ty.generic_parameters(db, display_target).peekable();
+            format_to!(path, "{}", name.display(db, edition));
+            if ty_args.peek().is_some() {
+                format_to!(path, "<{}>", ty_args.format_with(",", |ty, cb| cb(&ty)));
             }
+            format_to!(path, "::{}", def_name.display(db, edition));
+            path.retain(|c| c != ' ');
+            return Some(path);
         }
         format_to!(path, "{}", def_name.display(db, edition));
         Some(path)
@@ -694,14 +696,13 @@ impl UpdateTest {
                     continue;
                 };
                 for item in items {
-                    if let hir::ItemInNs::Macros(makro) = item {
-                        if Definition::Macro(makro)
+                    if let hir::ItemInNs::Macros(makro) = item
+                        && Definition::Macro(makro)
                             .usages(sema)
                             .in_scope(&search_scope)
                             .at_least_one()
-                        {
-                            return true;
-                        }
+                    {
+                        return true;
                     }
                 }
             }
@@ -752,7 +753,7 @@ impl UpdateTest {
 
 #[cfg(test)]
 mod tests {
-    use expect_test::{expect, Expect};
+    use expect_test::{Expect, expect};
 
     use crate::fixture;
 
@@ -1209,13 +1210,13 @@ impl Foo {
             r#"
 //- /lib.rs
 $0
-macro_rules! gen {
+macro_rules! generate {
     () => {
         #[test]
         fn foo_test() {}
     }
 }
-macro_rules! gen2 {
+macro_rules! generate2 {
     () => {
         mod tests2 {
             #[test]
@@ -1223,25 +1224,25 @@ macro_rules! gen2 {
         }
     }
 }
-macro_rules! gen_main {
+macro_rules! generate_main {
     () => {
         fn main() {}
     }
 }
 mod tests {
-    gen!();
+    generate!();
 }
-gen2!();
-gen_main!();
+generate2!();
+generate_main!();
 "#,
             expect![[r#"
                 [
-                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 0..315, name: \"\", kind: Module })",
-                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 267..292, focus_range: 271..276, name: \"tests\", kind: Module, description: \"mod tests\" })",
-                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 283..290, name: \"foo_test\", kind: Function })",
-                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 293..301, name: \"tests2\", kind: Module, description: \"mod tests2\" }, true)",
-                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 293..301, name: \"foo_test2\", kind: Function }, true)",
-                    "(Bin, NavigationTarget { file_id: FileId(0), full_range: 302..314, name: \"main\", kind: Function })",
+                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 0..345, name: \"\", kind: Module })",
+                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 282..312, focus_range: 286..291, name: \"tests\", kind: Module, description: \"mod tests\" })",
+                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 298..307, name: \"foo_test\", kind: Function })",
+                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 313..323, name: \"tests2\", kind: Module, description: \"mod tests2\" }, true)",
+                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 313..323, name: \"foo_test2\", kind: Function }, true)",
+                    "(Bin, NavigationTarget { file_id: FileId(0), full_range: 327..341, name: \"main\", kind: Function })",
                 ]
             "#]],
         );
@@ -1269,10 +1270,10 @@ foo!();
 "#,
             expect![[r#"
                 [
-                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 210..217, name: \"foo_tests\", kind: Module, description: \"mod foo_tests\" }, true)",
-                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 210..217, name: \"foo0\", kind: Function }, true)",
-                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 210..217, name: \"foo1\", kind: Function }, true)",
-                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 210..217, name: \"foo2\", kind: Function }, true)",
+                    "(TestMod, NavigationTarget { file_id: FileId(0), full_range: 210..214, name: \"foo_tests\", kind: Module, description: \"mod foo_tests\" }, true)",
+                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 210..214, name: \"foo0\", kind: Function }, true)",
+                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 210..214, name: \"foo1\", kind: Function }, true)",
+                    "(Test, NavigationTarget { file_id: FileId(0), full_range: 210..214, name: \"foo2\", kind: Function }, true)",
                 ]
             "#]],
         );

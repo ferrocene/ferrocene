@@ -1,13 +1,15 @@
 use std::convert::Infallible;
 use std::marker::PhantomData;
 
+use rustc_type_ir::data_structures::ensure_sufficient_stack;
 use rustc_type_ir::search_graph::{self, PathKind};
 use rustc_type_ir::solve::{CanonicalInput, Certainty, NoSolution, QueryResult};
 use rustc_type_ir::{Interner, TypingMode};
 
-use super::inspect::ProofTreeBuilder;
-use super::{FIXPOINT_STEP_LIMIT, has_no_inference_or_external_constraints};
 use crate::delegate::SolverDelegate;
+use crate::solve::{
+    EvalCtxt, FIXPOINT_STEP_LIMIT, has_no_inference_or_external_constraints, inspect,
+};
 
 /// This type is never constructed. We only use it to implement `search_graph::Delegate`
 /// for all types which impl `SolverDelegate` and doing it directly fails in coherence.
@@ -33,7 +35,7 @@ where
 
     const FIXPOINT_STEP_LIMIT: usize = FIXPOINT_STEP_LIMIT;
 
-    type ProofTreeBuilder = ProofTreeBuilder<D>;
+    type ProofTreeBuilder = inspect::ProofTreeBuilder<D>;
     fn inspect_is_noop(inspect: &mut Self::ProofTreeBuilder) -> bool {
         inspect.is_noop()
     }
@@ -47,7 +49,9 @@ where
     ) -> QueryResult<I> {
         match kind {
             PathKind::Coinductive => response_no_constraints(cx, input, Certainty::Yes),
-            PathKind::Unknown => response_no_constraints(cx, input, Certainty::overflow(false)),
+            PathKind::Unknown | PathKind::ForcedAmbiguity => {
+                response_no_constraints(cx, input, Certainty::overflow(false))
+            }
             // Even though we know these cycles to be unproductive, we still return
             // overflow during coherence. This is both as we are not 100% confident in
             // the implementation yet and any incorrect errors would be unsound there.
@@ -78,12 +82,7 @@ where
         Self::initial_provisional_result(cx, kind, input) == result
     }
 
-    fn on_stack_overflow(
-        cx: I,
-        inspect: &mut ProofTreeBuilder<D>,
-        input: CanonicalInput<I>,
-    ) -> QueryResult<I> {
-        inspect.canonical_goal_evaluation_overflow();
+    fn on_stack_overflow(cx: I, input: CanonicalInput<I>) -> QueryResult<I> {
         response_no_constraints(cx, input, Certainty::overflow(true))
     }
 
@@ -105,6 +104,21 @@ where
     ) -> QueryResult<I> {
         let certainty = from_result.unwrap().value.certainty;
         response_no_constraints(cx, for_input, certainty)
+    }
+
+    fn compute_goal(
+        search_graph: &mut SearchGraph<D>,
+        cx: I,
+        input: CanonicalInput<I>,
+        inspect: &mut Self::ProofTreeBuilder,
+    ) -> QueryResult<I> {
+        ensure_sufficient_stack(|| {
+            EvalCtxt::enter_canonical(cx, search_graph, input, inspect, |ecx, goal| {
+                let result = ecx.compute_goal(goal);
+                ecx.inspect.query_result(result);
+                result
+            })
+        })
     }
 }
 

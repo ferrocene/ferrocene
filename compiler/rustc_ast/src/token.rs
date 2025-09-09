@@ -7,6 +7,7 @@ pub use NtPatKind::*;
 pub use TokenKind::*;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_span::edition::Edition;
+use rustc_span::symbol::IdentPrintMode;
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, kw, sym};
 #[allow(clippy::useless_attribute)] // FIXME: following use of `hidden_glob_reexports` incorrectly triggers `useless_attribute` lint.
 #[allow(hidden_glob_reexports)]
@@ -21,8 +22,7 @@ pub enum CommentKind {
     Block,
 }
 
-// This type must not implement `Hash` due to the unusual `PartialEq` impl below.
-#[derive(Copy, Clone, Debug, Encodable, Decodable, HashStable_Generic)]
+#[derive(Copy, Clone, PartialEq, Debug, Encodable, Decodable, HashStable_Generic)]
 pub enum InvisibleOrigin {
     // From the expansion of a metavariable in a declarative macro.
     MetaVar(MetaVarKind),
@@ -41,20 +41,6 @@ impl InvisibleOrigin {
             InvisibleOrigin::MetaVar(_) => false,
             InvisibleOrigin::ProcMacro => true,
         }
-    }
-}
-
-impl PartialEq for InvisibleOrigin {
-    #[inline]
-    fn eq(&self, _other: &InvisibleOrigin) -> bool {
-        // When we had AST-based nonterminals we couldn't compare them, and the
-        // old `Nonterminal` type had an `eq` that always returned false,
-        // resulting in this restriction:
-        // https://doc.rust-lang.org/nightly/reference/macros-by-example.html#forwarding-a-matched-fragment
-        // This `eq` emulates that behaviour. We could consider lifting this
-        // restriction now but there are still cases involving invisible
-        // delimiters that make it harder than it first appears.
-        false
     }
 }
 
@@ -141,7 +127,8 @@ impl Delimiter {
         }
     }
 
-    // This exists because `InvisibleOrigin`s should be compared. It is only used for assertions.
+    // This exists because `InvisibleOrigin`s should not be compared. It is only used for
+    // assertions.
     pub fn eq_ignoring_invisible_origin(&self, other: &Delimiter) -> bool {
         match (self, other) {
             (Delimiter::Parenthesis, Delimiter::Parenthesis) => true,
@@ -344,15 +331,24 @@ pub enum IdentIsRaw {
     Yes,
 }
 
-impl From<bool> for IdentIsRaw {
-    fn from(b: bool) -> Self {
-        if b { Self::Yes } else { Self::No }
+impl IdentIsRaw {
+    pub fn to_print_mode_ident(self) -> IdentPrintMode {
+        match self {
+            IdentIsRaw::No => IdentPrintMode::Normal,
+            IdentIsRaw::Yes => IdentPrintMode::RawIdent,
+        }
+    }
+    pub fn to_print_mode_lifetime(self) -> IdentPrintMode {
+        match self {
+            IdentIsRaw::No => IdentPrintMode::Normal,
+            IdentIsRaw::Yes => IdentPrintMode::RawLifetime,
+        }
     }
 }
 
-impl From<IdentIsRaw> for bool {
-    fn from(is_raw: IdentIsRaw) -> bool {
-        matches!(is_raw, IdentIsRaw::Yes)
+impl From<bool> for IdentIsRaw {
+    fn from(b: bool) -> Self {
+        if b { Self::Yes } else { Self::No }
     }
 }
 
@@ -893,7 +889,7 @@ impl Token {
             || self.is_qpath_start()
             || matches!(self.is_metavar_seq(), Some(MetaVarKind::Path))
             || self.is_path_segment_keyword()
-            || self.is_ident() && !self.is_reserved_ident()
+            || self.is_non_reserved_ident()
     }
 
     /// Returns `true` if the token is a given keyword, `kw`.
@@ -935,6 +931,10 @@ impl Token {
     /// Returns `true` if the token is either a special identifier or a keyword.
     pub fn is_reserved_ident(&self) -> bool {
         self.is_non_raw_ident_where(Ident::is_reserved)
+    }
+
+    pub fn is_non_reserved_ident(&self) -> bool {
+        self.ident().is_some_and(|(id, raw)| raw == IdentIsRaw::Yes || !Ident::is_reserved(id))
     }
 
     /// Returns `true` if the token is the identifier `true` or `false`.
@@ -1085,6 +1085,7 @@ pub enum NtExprKind {
     Expr2021 { inferred: bool },
 }
 
+/// A macro nonterminal, known in documentation as a fragment specifier.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Encodable, Decodable, Hash, HashStable_Generic)]
 pub enum NonterminalKind {
     Item,

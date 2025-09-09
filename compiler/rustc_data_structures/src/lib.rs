@@ -19,12 +19,11 @@
 #![feature(ascii_char_variants)]
 #![feature(assert_matches)]
 #![feature(auto_traits)]
-#![feature(cfg_match)]
+#![feature(cfg_select)]
 #![feature(core_intrinsics)]
 #![feature(dropck_eyepatch)]
 #![feature(extend_one)]
 #![feature(file_buffered)]
-#![feature(macro_metavar_expr)]
 #![feature(map_try_insert)]
 #![feature(min_specialization)]
 #![feature(negative_impls)]
@@ -32,6 +31,7 @@
 #![feature(ptr_alignment_type)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
+#![feature(sized_hierarchy)]
 #![feature(test)]
 #![feature(thread_id_value)]
 #![feature(type_alias_impl_trait)]
@@ -77,6 +77,7 @@ pub mod thinvec;
 pub mod thousands;
 pub mod transitive_relation;
 pub mod unhash;
+pub mod union_find;
 pub mod unord;
 pub mod vec_cache;
 pub mod work_queue;

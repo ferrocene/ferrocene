@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use rustc_hir::ByRef;
 use rustc_middle::mir::*;
 use rustc_middle::thir::*;
 use rustc_middle::ty::{self, Ty, TypeVisitableExt};
@@ -123,9 +124,19 @@ impl<'tcx> MatchPairTree<'tcx> {
         let test_case = match pattern.kind {
             PatKind::Missing | PatKind::Wild | PatKind::Error(_) => None,
 
-            PatKind::Or { ref pats } => Some(TestCase::Or {
-                pats: pats.iter().map(|pat| FlatPat::new(place_builder.clone(), pat, cx)).collect(),
-            }),
+            PatKind::Or { ref pats } => {
+                let pats: Box<[FlatPat<'tcx>]> =
+                    pats.iter().map(|pat| FlatPat::new(place_builder.clone(), pat, cx)).collect();
+                if !pats[0].extra_data.bindings.is_empty() {
+                    // Hold a place for any bindings established in (possibly-nested) or-patterns.
+                    // By only holding a place when bindings are present, we skip over any
+                    // or-patterns that will be simplified by `merge_trivial_subcandidates`. In
+                    // other words, we can assume this expands into subcandidates.
+                    // FIXME(@dianne): this needs updating/removing if we always merge or-patterns
+                    extra_data.bindings.push(super::SubpatternBindings::FromOrPattern);
+                }
+                Some(TestCase::Or { pats })
+            }
 
             PatKind::Range(ref range) => {
                 if range.is_full_range(cx.tcx) == Some(true) {
@@ -193,12 +204,12 @@ impl<'tcx> MatchPairTree<'tcx> {
 
                 // Then push this binding, after any bindings in the subpattern.
                 if let Some(source) = place {
-                    extra_data.bindings.push(super::Binding {
+                    extra_data.bindings.push(super::SubpatternBindings::One(super::Binding {
                         span: pattern.span,
                         source,
                         var_id: var,
                         binding_mode: mode,
-                    });
+                    }));
                 }
 
                 None
@@ -260,7 +271,13 @@ impl<'tcx> MatchPairTree<'tcx> {
                 None
             }
 
-            PatKind::Deref { ref subpattern } => {
+            PatKind::Deref { ref subpattern }
+            | PatKind::DerefPattern { ref subpattern, borrow: ByRef::No } => {
+                if cfg!(debug_assertions) && matches!(pattern.kind, PatKind::DerefPattern { .. }) {
+                    // Only deref patterns on boxes can be lowered using a built-in deref.
+                    debug_assert!(pattern.ty.is_box());
+                }
+
                 MatchPairTree::for_pattern(
                     place_builder.deref(),
                     subpattern,
@@ -271,7 +288,7 @@ impl<'tcx> MatchPairTree<'tcx> {
                 None
             }
 
-            PatKind::DerefPattern { ref subpattern, mutability } => {
+            PatKind::DerefPattern { ref subpattern, borrow: ByRef::Yes(mutability) } => {
                 // Create a new temporary for each deref pattern.
                 // FIXME(deref_patterns): dedup temporaries to avoid multiple `deref()` calls?
                 let temp = cx.temp(

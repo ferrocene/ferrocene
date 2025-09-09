@@ -55,7 +55,7 @@ pub(super) fn check_impl_item<'tcx>(
     // Don't lint if method is a trait's implementation, we can't do anything about those
     if let hir::ImplItemKind::Fn(ref sig, _) = item.kind
         && let Some((hir_ty, err_ty)) = result_err_ty(cx, sig.decl, item.owner_id.def_id, item.span)
-        && trait_ref_of_method(cx, item.owner_id.def_id).is_none()
+        && trait_ref_of_method(cx, item.owner_id).is_none()
     {
         if cx.effective_visibilities.is_exported(item.owner_id.def_id) {
             let fn_header_span = item.span.with_hi(sig.decl.output.span().hi());
@@ -97,13 +97,9 @@ fn check_result_unit_err(cx: &LateContext<'_>, err_ty: Ty<'_>, fn_header_span: S
 
 fn check_result_large_err<'tcx>(cx: &LateContext<'tcx>, err_ty: Ty<'tcx>, hir_ty_span: Span, large_err_threshold: u64) {
     if let ty::Adt(adt, subst) = err_ty.kind()
-        && let Some(local_def_id) = err_ty
-            .ty_adt_def()
-            .expect("already checked this is adt")
-            .did()
-            .as_local()
+        && let Some(local_def_id) = adt.did().as_local()
         && let hir::Node::Item(item) = cx.tcx.hir_node_by_def_id(local_def_id)
-        && let hir::ItemKind::Enum(_, ref def, _) = item.kind
+        && let hir::ItemKind::Enum(_, _, ref def) = item.kind
     {
         let variants_size = AdtVariantInfo::new(cx, *adt, subst);
         if let Some((first_variant, variants)) = variants_size.split_first()

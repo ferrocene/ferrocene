@@ -1,5 +1,6 @@
 use rustc_ast as ast;
 use rustc_ast::token::{self, MetaVarKind};
+use rustc_ast::tokenstream::ParserRange;
 use rustc_ast::{Attribute, attr};
 use rustc_errors::codes::*;
 use rustc_errors::{Diag, PResult};
@@ -8,9 +9,9 @@ use thin_vec::ThinVec;
 use tracing::debug;
 
 use super::{
-    AttrWrapper, Capturing, FnParseMode, ForceCollect, Parser, ParserRange, PathStyle, Trailing,
-    UsePreAttrPos,
+    AttrWrapper, Capturing, FnParseMode, ForceCollect, Parser, PathStyle, Trailing, UsePreAttrPos,
 };
+use crate::parser::FnContext;
 use crate::{errors, exp, fluent_generated as fluent};
 
 // Public for rustfmt usage
@@ -200,7 +201,7 @@ impl<'a> Parser<'a> {
             AttrWrapper::empty(),
             true,
             false,
-            FnParseMode { req_name: |_| true, req_body: true },
+            FnParseMode { req_name: |_| true, context: FnContext::Free, req_body: true },
             ForceCollect::No,
         ) {
             Ok(Some(item)) => {
@@ -398,7 +399,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Matches `COMMASEP(meta_item_inner)`.
-    pub(crate) fn parse_meta_seq_top(&mut self) -> PResult<'a, ThinVec<ast::MetaItemInner>> {
+    pub fn parse_meta_seq_top(&mut self) -> PResult<'a, ThinVec<ast::MetaItemInner>> {
         // Presumably, the majority of the time there will only be one attr.
         let mut nmis = ThinVec::with_capacity(1);
         while self.token != token::Eof {

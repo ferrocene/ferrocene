@@ -11,7 +11,7 @@
 //@ compile-flags:-Cstrip=none
 //@ needs-subprocess
 //@ ignore-fuchsia Backtrace not symbolized, trace different line alignment
-//@ ignore-ferrocenecoretest - backtraces not supported on the target
+//@ ignore-ferrocene.facade - backtraces not supported on the target
 
 // FIXME(#117097): backtrace (possibly unwinding mechanism) seems to be different on at least
 // `i686-mingw` (32-bit windows-gnu)? cc #128911.
@@ -43,9 +43,14 @@ macro_rules! dump_and_die {
         // there, even on i686-pc-windows-msvc. We do the best we can in
         // rust-lang/rust to test it as well, but sometimes we just gotta keep
         // landing PRs.
+        //
+        // aarch64-msvc/arm64ec-msvc is broken as its backtraces are truncated.
+        // See https://github.com/rust-lang/rust/issues/140489
         if cfg!(any(target_os = "android",
                     all(target_os = "linux", target_arch = "arm"),
                     all(target_env = "msvc", target_arch = "x86"),
+                    all(target_env = "msvc", target_arch = "aarch64"),
+                    all(target_env = "msvc", target_arch = "arm64ec"),
                     target_os = "freebsd",
                     target_os = "dragonfly",
                     target_os = "openbsd")) {

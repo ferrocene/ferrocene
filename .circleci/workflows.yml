@@ -120,7 +120,6 @@ jobs:
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
@@ -179,6 +178,22 @@ jobs:
           qnx: true
           restore-from-job: x86_64-linux-build
 
+  # A basic check to ensure the certified libcore subset builds
+  # Will be replaced by a more sophisticated mechanism
+  x86_64-linux-certified:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      # Certified targets only
+      FERROCENE_TARGETS: aarch64-unknown-ferrocene.certified,x86_64-unknown-ferrocene.certified,thumbv7em-ferrocene.certified-eabi,thumbv7em-ferrocene.certified-eabihf
+      SCRIPT: |
+        ./x.py build --stage 2 library/core
+        ./x.py doc   --stage 2 library/core
+    steps:
+      - ferrocene-job-test-container:
+          restore-from-job: x86_64-linux-build
+
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
     resource_class: medium # 2-core
@@ -192,8 +207,6 @@ jobs:
           # We need the whole LLVM clone to be able to include the full source
           # code into the tarball we ship to customers.
           llvm-subset: false
-
-
 
   x86_64-linux-generic-test-container:
     executor: docker-x86_64-ubuntu-20
@@ -257,14 +270,19 @@ jobs:
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: ./x.py test --no-doc --coverage=library library/core
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py download
+        sed -i -e "s/profile = 'ferrocene-dist'/profile = 'compiler'/g" bootstrap.toml
+        sed -i -e "s/^\\[build\\]/[build]\\nprofiler = true\\nmetrics=true/g" bootstrap.toml
+        ./x.py run ferrocene/tools/coverage-of-subset
+        ./x.py test --no-doc --coverage=library library/core -v
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
-      - run:
-          name: Restore files from the x86_64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      # - run:
+      #     name: Restore files from the x86_64-linux-build job
+      #     command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
       - ferrocene-ci
 
   x86_64-linux-llvm:
@@ -314,12 +332,15 @@ jobs:
         type: string
       resource-class:
         type: string
+      extra-args:
+        type: string
+        default: ""
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -332,7 +353,6 @@ jobs:
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
-
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -417,7 +437,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
@@ -478,7 +498,7 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
-    - ferrocene-job-dist:
+      - ferrocene-job-dist:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
@@ -593,7 +613,7 @@ jobs:
 
   # Test VMs
 
-  ferrocenecoretest-generic-test:
+  facade-generic-test:
     executor: linux-vm
     parameters:
       qemu-arch:
@@ -649,12 +669,15 @@ jobs:
         type: string
       resource-class:
         type: string
+      extra-args:
+        type: string
+        default: ""
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -905,20 +928,20 @@ workflows:
             - x86_64-linux-build
       - x86_64-linux-library-coverage:
           requires:
-            - x86_64-linux-build
+            - x86_64-linux-test
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: aarch64-none-compiletest
-          target: aarch64-unknown-ferrocenecoretest
+          target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: qnx:compiletest-no-only-hosts
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: aarch64-none-test-library
-          target: aarch64-unknown-ferrocenecoretest
+          target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library
@@ -926,9 +949,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      # - wasm-dist-oxidos:
-      #     requires:
-      #       - x86_64-linux-build
+      - wasm-dist-oxidos:
+          requires:
+            - x86_64-linux-build
 
       - x86_64-linux-self-test:
           requires:
@@ -941,6 +964,7 @@ workflows:
           name: x86_64-qnx-test-library
           job: test:library
           test-variant: "2021"
+          extra-args: --no-doc # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -964,9 +988,9 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-library
-          target: thumbv7em-ferrocenecoretest-eabihf
+          target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
@@ -974,9 +998,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabi-test-library
-          target: thumbv7em-ferrocenecoretest-eabi
+          target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
@@ -984,9 +1008,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-compiletest
-          target: thumbv7em-ferrocenecoretest-eabihf
+          target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: qnx:compiletest-no-only-hosts
@@ -994,9 +1018,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabi-test-compiletest
-          target: thumbv7em-ferrocenecoretest-eabi
+          target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: qnx:compiletest-no-only-hosts
@@ -1008,6 +1032,7 @@ workflows:
           name: aarch64-qnx-test-library
           job: test:library
           test-variant: "2021"
+          extra-args: --no-doc # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1106,7 +1131,7 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
-            # - wasm-dist-oxidos
+            - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
             - aarch64-darwin-test
@@ -1197,7 +1222,7 @@ commands:
       - setup-uv
       - aws-oidc-auth
       - when:
-          condition:  <<parameters.restore-from-job>>
+          condition: <<parameters.restore-from-job>>
           steps:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
@@ -1224,7 +1249,7 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - setup-uv
       - aws-oidc-auth
       - run:
@@ -1370,7 +1395,6 @@ commands:
       - run:
           name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
-
 
   ferrocene-setup-windows:
     description: Prepare the Windows environment

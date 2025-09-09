@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C linker-flavor
-//~? requires one of
+//~? ERROR requires one of
 
 fn main() {}
 

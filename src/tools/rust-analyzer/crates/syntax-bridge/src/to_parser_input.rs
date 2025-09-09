@@ -12,7 +12,7 @@ pub fn to_parser_input<Ctx: Copy + fmt::Debug + PartialEq + Eq + Hash>(
     buffer: tt::TokenTreesView<'_, SpanData<Ctx>>,
     span_to_edition: &mut dyn FnMut(Ctx) -> Edition,
 ) -> parser::Input {
-    let mut res = parser::Input::default();
+    let mut res = parser::Input::with_capacity(buffer.len());
 
     let mut current = buffer.cursor();
     let mut syntax_context_to_edition_cache = FxHashMap::default();
@@ -21,17 +21,17 @@ pub fn to_parser_input<Ctx: Copy + fmt::Debug + PartialEq + Eq + Hash>(
         let tt = current.token_tree();
 
         // Check if it is lifetime
-        if let Some(tt::TokenTree::Leaf(tt::Leaf::Punct(punct))) = tt {
-            if punct.char == '\'' {
-                current.bump();
-                match current.token_tree() {
-                    Some(tt::TokenTree::Leaf(tt::Leaf::Ident(_ident))) => {
-                        res.push(LIFETIME_IDENT);
-                        current.bump();
-                        continue;
-                    }
-                    _ => panic!("Next token must be ident"),
+        if let Some(tt::TokenTree::Leaf(tt::Leaf::Punct(punct))) = tt
+            && punct.char == '\''
+        {
+            current.bump();
+            match current.token_tree() {
+                Some(tt::TokenTree::Leaf(tt::Leaf::Ident(_ident))) => {
+                    res.push(LIFETIME_IDENT);
+                    current.bump();
+                    continue;
                 }
+                _ => panic!("Next token must be ident"),
             }
         }
 

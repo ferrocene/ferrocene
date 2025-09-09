@@ -125,7 +125,7 @@ impl<T, E> Poll<Result<T, E>> {
         }
     }
 
-    /// Maps a `Poll::Ready<Result<T, E>>` to `Poll::Ready<Result<T, F>>` by
+    /// Maps a `Poll::Ready<Result<T, E>>` to `Poll::Ready<Result<T, U>>` by
     /// applying a function to a contained `Poll::Ready(Err)` value, leaving all other
     /// variants untouched.
     ///
@@ -215,7 +215,8 @@ impl<T, E> Poll<Option<Result<T, E>>> {
 }
 
 #[stable(feature = "futures_api", since = "1.36.0")]
-impl<T> From<T> for Poll<T> {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl<T> const From<T> for Poll<T> {
     /// Moves the value into a [`Poll::Ready`] to make a `Poll<T>`.
     ///
     /// # Example
@@ -229,7 +230,7 @@ impl<T> From<T> for Poll<T> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 impl<T, E> ops::Try for Poll<Result<T, E>> {
     type Output = Poll<T>;
     type Residual = Result<convert::Infallible, E>;
@@ -249,7 +250,7 @@ impl<T, E> ops::Try for Poll<Result<T, E>> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Poll<Result<T, F>> {
     #[inline]
     fn from_residual(x: Result<convert::Infallible, E>) -> Self {
@@ -259,7 +260,7 @@ impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Pol
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 impl<T, E> ops::Try for Poll<Option<Result<T, E>>> {
     type Output = Poll<Option<T>>;
     type Residual = Result<convert::Infallible, E>;
@@ -280,7 +281,7 @@ impl<T, E> ops::Try for Poll<Option<Result<T, E>>> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>>
     for Poll<Option<Result<T, F>>>
 {

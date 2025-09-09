@@ -21,7 +21,7 @@ echo "${HOME}"
 pwd
 
 # Avoid "no space left on device" failure if running in CI
-if [ "${CI:-0}" != "0" ] && [ "$target" = "aarch64-linux-android" ] ; then
+if [ "${CI:-0}" != "0" ] && [ "$target" = "aarch64-linux-android" ]; then
     docker system prune -af
     docker system df
 fi
@@ -44,6 +44,7 @@ run() {
         --env LIBC_CI \
         --env LIBC_CI_ZBUILD_STD \
         --env RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS \
+        --env RUST_LIBC_UNSTABLE_GNU_TIME_BITS \
         --env CARGO_HOME=/cargo \
         --env CARGO_TARGET_DIR=/checkout/target \
         --volume "$CARGO_HOME":/cargo \

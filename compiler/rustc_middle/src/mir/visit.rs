@@ -353,16 +353,20 @@ macro_rules! make_mir_visitor {
                             coroutine_closure_def_id: _def_id,
                             receiver_by_ref: _,
                         }
-                        | ty::InstanceKind::AsyncDropGlueCtorShim(_def_id, None)
                         | ty::InstanceKind::DropGlue(_def_id, None) => {}
 
                         ty::InstanceKind::FnPtrShim(_def_id, ty)
                         | ty::InstanceKind::DropGlue(_def_id, Some(ty))
                         | ty::InstanceKind::CloneShim(_def_id, ty)
                         | ty::InstanceKind::FnPtrAddrShim(_def_id, ty)
-                        | ty::InstanceKind::AsyncDropGlueCtorShim(_def_id, Some(ty)) => {
+                        | ty::InstanceKind::AsyncDropGlue(_def_id, ty)
+                        | ty::InstanceKind::AsyncDropGlueCtorShim(_def_id, ty) => {
                             // FIXME(eddyb) use a better `TyContext` here.
                             self.visit_ty($(& $mutability)? *ty, TyContext::Location(location));
+                        }
+                        ty::InstanceKind::FutureDropPollShim(_def_id, proxy_ty, impl_ty) => {
+                            self.visit_ty($(& $mutability)? *proxy_ty, TyContext::Location(location));
+                            self.visit_ty($(& $mutability)? *impl_ty, TyContext::Location(location));
                         }
                     }
                     self.visit_args(callee_args, location);
@@ -521,12 +525,26 @@ macro_rules! make_mir_visitor {
                         self.visit_operand(discr, location);
                     }
 
-                    TerminatorKind::Drop { place, target: _, unwind: _, replace: _ } => {
+                    TerminatorKind::Drop {
+                        place,
+                        target: _,
+                        unwind: _,
+                        replace: _,
+                        drop: _,
+                        async_fut,
+                    } => {
                         self.visit_place(
                             place,
                             PlaceContext::MutatingUse(MutatingUseContext::Drop),
                             location
                         );
+                        if let Some(async_fut) = async_fut {
+                            self.visit_local(
+                                $(&$mutability)? *async_fut,
+                                PlaceContext::MutatingUse(MutatingUseContext::Borrow),
+                                location
+                            );
+                        }
                     }
 
                     TerminatorKind::Call {
@@ -631,10 +649,10 @@ macro_rules! make_mir_visitor {
                         self.visit_operand(l, location);
                         self.visit_operand(r, location);
                     }
-                    OverflowNeg(op) | DivisionByZero(op) | RemainderByZero(op) => {
+                    OverflowNeg(op) | DivisionByZero(op) | RemainderByZero(op) | InvalidEnumConstruction(op) => {
                         self.visit_operand(op, location);
                     }
-                    ResumedAfterReturn(_) | ResumedAfterPanic(_) | NullPointerDereference => {
+                    ResumedAfterReturn(_) | ResumedAfterPanic(_) | NullPointerDereference | ResumedAfterDrop(_) => {
                         // Nothing to visit
                     }
                     MisalignedPointerDereference { required, found } => {
@@ -1194,18 +1212,19 @@ macro_rules! visit_place_fns {
             self.super_projection_elem(place_ref, elem, context, location);
         }
 
-        fn super_place(&mut self, place: &Place<'tcx>, context: PlaceContext, location: Location) {
-            let mut context = context;
-
-            if !place.projection.is_empty() {
-                if context.is_use() {
-                    // ^ Only change the context if it is a real use, not a "use" in debuginfo.
-                    context = if context.is_mutating_use() {
-                        PlaceContext::MutatingUse(MutatingUseContext::Projection)
-                    } else {
-                        PlaceContext::NonMutatingUse(NonMutatingUseContext::Projection)
-                    };
-                }
+        fn super_place(
+            &mut self,
+            place: &Place<'tcx>,
+            mut context: PlaceContext,
+            location: Location,
+        ) {
+            if !place.projection.is_empty() && context.is_use() {
+                // ^ Only change the context if it is a real use, not a "use" in debuginfo.
+                context = if context.is_mutating_use() {
+                    PlaceContext::MutatingUse(MutatingUseContext::Projection)
+                } else {
+                    PlaceContext::NonMutatingUse(NonMutatingUseContext::Projection)
+                };
             }
 
             self.visit_local(place.local, context, location);
@@ -1228,7 +1247,7 @@ macro_rules! visit_place_fns {
             &mut self,
             _place_ref: PlaceRef<'tcx>,
             elem: PlaceElem<'tcx>,
-            _context: PlaceContext,
+            context: PlaceContext,
             location: Location,
         ) {
             match elem {
@@ -1241,7 +1260,12 @@ macro_rules! visit_place_fns {
                 ProjectionElem::Index(local) => {
                     self.visit_local(
                         local,
-                        PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy),
+                        if context.is_use() {
+                            // ^ Only change the context if it is a real use, not a "use" in debuginfo.
+                            PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy)
+                        } else {
+                            context
+                        },
                         location,
                     );
                 }

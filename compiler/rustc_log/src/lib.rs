@@ -37,11 +37,13 @@ use std::env::{self, VarError};
 use std::fmt::{self, Display};
 use std::io::{self, IsTerminal};
 
+use tracing::dispatcher::SetGlobalDefaultError;
 use tracing_core::{Event, Subscriber};
 use tracing_subscriber::filter::{Directive, EnvFilter, LevelFilter};
 use tracing_subscriber::fmt::FmtContext;
 use tracing_subscriber::fmt::format::{self, FormatEvent, FormatFields};
 use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::{Layer, Registry};
 
 /// The values of all the environment variables that matter for configuring a logger.
 /// Errors are explicitly preserved so that we can share error handling.
@@ -71,6 +73,36 @@ impl LoggerConfig {
 
 /// Initialize the logger with the given values for the filter, coloring, and other options env variables.
 pub fn init_logger(cfg: LoggerConfig) -> Result<(), Error> {
+    init_logger_with_additional_layer(cfg, || Registry::default())
+}
+
+/// Trait alias for the complex return type of `build_subscriber` in
+/// [init_logger_with_additional_layer]. A [Registry] with any composition of [tracing::Subscriber]s
+/// (e.g. `Registry::default().with(custom_layer)`) should be compatible with this type.
+/// Having an alias is also useful so rustc_driver_impl does not need to explicitly depend on
+/// `tracing_subscriber`.
+pub trait BuildSubscriberRet:
+    tracing::Subscriber + for<'span> tracing_subscriber::registry::LookupSpan<'span> + Send + Sync
+{
+}
+
+impl<
+    T: tracing::Subscriber + for<'span> tracing_subscriber::registry::LookupSpan<'span> + Send + Sync,
+> BuildSubscriberRet for T
+{
+}
+
+/// Initialize the logger with the given values for the filter, coloring, and other options env variables.
+/// Additionally add a custom layer to collect logging and tracing events via `build_subscriber`,
+/// for example: `|| Registry::default().with(custom_layer)`.
+pub fn init_logger_with_additional_layer<F, T>(
+    cfg: LoggerConfig,
+    build_subscriber: F,
+) -> Result<(), Error>
+where
+    F: FnOnce() -> T,
+    T: BuildSubscriberRet,
+{
     let filter = match cfg.filter {
         Ok(env) => EnvFilter::new(env),
         _ => EnvFilter::default().add_directive(Directive::from(LevelFilter::WARN)),
@@ -123,7 +155,7 @@ pub fn init_logger(cfg: LoggerConfig) -> Result<(), Error> {
         Err(_) => {} // no wraptree
     }
 
-    let subscriber = tracing_subscriber::Registry::default().with(filter).with(layer);
+    let subscriber = build_subscriber().with(layer.with_filter(filter));
     match cfg.backtrace {
         Ok(backtrace_target) => {
             let fmt_layer = tracing_subscriber::fmt::layer()
@@ -131,10 +163,10 @@ pub fn init_logger(cfg: LoggerConfig) -> Result<(), Error> {
                 .without_time()
                 .event_format(BacktraceFormatter { backtrace_target });
             let subscriber = subscriber.with(fmt_layer);
-            tracing::subscriber::set_global_default(subscriber).unwrap();
+            tracing::subscriber::set_global_default(subscriber)?;
         }
         Err(_) => {
-            tracing::subscriber::set_global_default(subscriber).unwrap();
+            tracing::subscriber::set_global_default(subscriber)?;
         }
     };
 
@@ -180,6 +212,7 @@ pub enum Error {
     InvalidColorValue(String),
     NonUnicodeColorValue,
     InvalidWraptree(String),
+    AlreadyInit(SetGlobalDefaultError),
 }
 
 impl std::error::Error for Error {}
@@ -199,6 +232,13 @@ impl Display for Error {
                 formatter,
                 "invalid log WRAPTREE value '{value}': expected a non-negative integer",
             ),
+            Error::AlreadyInit(tracing_error) => Display::fmt(tracing_error, formatter),
         }
+    }
+}
+
+impl From<SetGlobalDefaultError> for Error {
+    fn from(tracing_error: SetGlobalDefaultError) -> Self {
+        Error::AlreadyInit(tracing_error)
     }
 }

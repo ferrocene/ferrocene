@@ -1,6 +1,5 @@
 //! Interface to VxWorks C library
 
-use core::mem::size_of;
 use core::ptr::null_mut;
 
 use crate::prelude::*;
@@ -220,7 +219,7 @@ s! {
     pub struct stat {
         pub st_dev: crate::dev_t,
         pub st_ino: crate::ino_t,
-        pub st_mode: crate::mode_t,
+        pub st_mode: mode_t,
         pub st_nlink: crate::nlink_t,
         pub st_uid: crate::uid_t,
         pub st_gid: crate::gid_t,
@@ -454,53 +453,6 @@ s_no_extra_traits! {
 
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
-        impl fmt::Debug for dirent {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("dirent")
-                    .field("d_ino", &self.d_ino)
-                    .field("d_name", &&self.d_name[..])
-                    .field("d_type", &self.d_type)
-                    .finish()
-            }
-        }
-
-        impl fmt::Debug for sockaddr_un {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sockaddr_un")
-                    .field("sun_len", &self.sun_len)
-                    .field("sun_family", &self.sun_family)
-                    .field("sun_path", &&self.sun_path[..])
-                    .finish()
-            }
-        }
-
-        impl fmt::Debug for RTP_DESC {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("RTP_DESC")
-                    .field("status", &self.status)
-                    .field("options", &self.options)
-                    .field("entrAddr", &self.entrAddr)
-                    .field("initTaskId", &self.initTaskId)
-                    .field("parentId", &self.parentId)
-                    .field("pathName", &&self.pathName[..])
-                    .field("taskCnt", &self.taskCnt)
-                    .field("textStart", &self.textStart)
-                    .field("textEnd", &self.textEnd)
-                    .finish()
-            }
-        }
-        impl fmt::Debug for sockaddr_storage {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sockaddr_storage")
-                    .field("ss_len", &self.ss_len)
-                    .field("ss_family", &self.ss_family)
-                    .field("__ss_pad1", &&self.__ss_pad1[..])
-                    .field("__ss_align", &self.__ss_align)
-                    .field("__ss_pad2", &&self.__ss_pad2[..])
-                    .finish()
-            }
-        }
-
         impl PartialEq for sa_u_t {
             fn eq(&self, other: &sa_u_t) -> bool {
                 unsafe {
@@ -745,6 +697,7 @@ pub const S_taskLib_ILLEGAL_PRIORITY: c_int = taskErrorBase + 0x0068;
 
 // FIXME(vxworks): could also be useful for TASK_DESC type
 pub const VX_TASK_NAME_LENGTH: c_int = 31;
+pub const VX_TASK_RENAME_LENGTH: c_int = 16;
 
 // semLibCommon.h
 pub const S_semLib_INVALID_STATE: c_int = semErrorBase + 0x0065;
@@ -805,6 +758,9 @@ pub const S_IROTH: c_int = 0o0004;
 pub const S_IWOTH: c_int = 0o0002;
 pub const S_IXOTH: c_int = 0o0001;
 pub const S_IRWXO: c_int = 0o0007;
+
+pub const UTIME_OMIT: c_long = 0x3ffffffe;
+pub const UTIME_NOW: c_long = 0x3fffffff;
 
 // socket.h
 pub const SOL_SOCKET: c_int = 0xffff;
@@ -1117,18 +1073,18 @@ impl Clone for fpos_t {
 
 f! {
     pub {const} fn CMSG_ALIGN(len: usize) -> usize {
-        len + mem::size_of::<usize>() - 1 & !(mem::size_of::<usize>() - 1)
+        len + size_of::<usize>() - 1 & !(size_of::<usize>() - 1)
     }
 
     pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
         let next = cmsg as usize
             + CMSG_ALIGN((*cmsg).cmsg_len as usize)
-            + CMSG_ALIGN(mem::size_of::<cmsghdr>());
+            + CMSG_ALIGN(size_of::<cmsghdr>());
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next <= max {
             (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
         } else {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         }
     }
 
@@ -1136,20 +1092,20 @@ f! {
         if (*mhdr).msg_controllen as usize > 0 {
             (*mhdr).msg_control as *mut cmsghdr
         } else {
-            0 as *mut cmsghdr
+            core::ptr::null_mut::<cmsghdr>()
         }
     }
 
     pub fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
-        (cmsg as *mut c_uchar).offset(CMSG_ALIGN(mem::size_of::<cmsghdr>()) as isize)
+        (cmsg as *mut c_uchar).offset(CMSG_ALIGN(size_of::<cmsghdr>()) as isize)
     }
 
     pub {const} fn CMSG_SPACE(length: c_uint) -> c_uint {
-        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(mem::size_of::<cmsghdr>())) as c_uint
+        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(size_of::<cmsghdr>())) as c_uint
     }
 
     pub {const} fn CMSG_LEN(length: c_uint) -> c_uint {
-        CMSG_ALIGN(mem::size_of::<cmsghdr>()) as c_uint + length
+        CMSG_ALIGN(size_of::<cmsghdr>()) as c_uint + length
     }
 }
 
@@ -1299,7 +1255,7 @@ extern "C" {
     pub fn msync(addr: *mut c_void, len: size_t, flags: c_int) -> c_int;
 
     pub fn truncate(path: *const c_char, length: off_t) -> c_int;
-    pub fn shm_open(name: *const c_char, oflag: c_int, mode: crate::mode_t) -> c_int;
+    pub fn shm_open(name: *const c_char, oflag: c_int, mode: mode_t) -> c_int;
     pub fn shm_unlink(name: *const c_char) -> c_int;
 
     pub fn gettimeofday(tp: *mut crate::timeval, tz: *mut c_void) -> c_int;
@@ -1810,13 +1766,13 @@ extern "C" {
     pub fn rmdir(path: *const c_char) -> c_int;
 
     // stat.h
-    pub fn mkdir(dirName: *const c_char, mode: crate::mode_t) -> c_int;
+    pub fn mkdir(dirName: *const c_char, mode: mode_t) -> c_int;
 
     // stat.h
-    pub fn chmod(path: *const c_char, mode: crate::mode_t) -> c_int;
+    pub fn chmod(path: *const c_char, mode: mode_t) -> c_int;
 
     // stat.h
-    pub fn fchmod(attr1: c_int, attr2: crate::mode_t) -> c_int;
+    pub fn fchmod(attr1: c_int, attr2: mode_t) -> c_int;
 
     // unistd.h
     pub fn fsync(fd: c_int) -> c_int;

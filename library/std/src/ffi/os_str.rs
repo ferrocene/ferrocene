@@ -137,7 +137,8 @@ impl OsString {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
     #[inline]
-    pub fn new() -> OsString {
+    #[rustc_const_stable(feature = "const_pathbuf_osstring_new", since = "CURRENT_RUSTC_VERSION")]
+    pub const fn new() -> OsString {
         OsString { inner: Buf::from_string(String::new()) }
     }
 
@@ -567,7 +568,7 @@ impl OsString {
     /// However, keep in mind that trimming the capacity may result in a reallocation and copy.
     ///
     /// [`into_boxed_os_str`]: Self::into_boxed_os_str
-    #[unstable(feature = "os_string_pathbuf_leak", issue = "125965")]
+    #[stable(feature = "os_string_pathbuf_leak", since = "1.89.0")]
     #[inline]
     pub fn leak<'a>(self) -> &'a mut OsStr {
         OsStr::from_inner_mut(self.inner.leak())
@@ -582,15 +583,25 @@ impl OsString {
     #[unstable(feature = "os_string_truncate", issue = "133262")]
     pub fn truncate(&mut self, len: usize) {
         self.as_os_str().inner.check_public_boundary(len);
-        self.inner.truncate(len);
+        // SAFETY: The length was just checked to be at a valid boundary.
+        unsafe { self.inner.truncate_unchecked(len) };
     }
 
-    /// Provides plumbing to core `Vec::extend_from_slice`.
-    /// More well behaving alternative to allowing outer types
-    /// full mutable access to the core `Vec`.
+    /// Provides plumbing to `Vec::extend_from_slice` without giving full
+    /// mutable access to the `Vec`.
+    ///
+    /// # Safety
+    ///
+    /// The slice must be valid for the platform encoding (as described in
+    /// [`OsStr::from_encoded_bytes_unchecked`]).
+    ///
+    /// This bypasses the encoding-dependent surrogate joining, so either
+    /// `self` must not end with a leading surrogate half, or `other` must not
+    /// start with a trailing surrogate half.
     #[inline]
-    pub(crate) fn extend_from_slice(&mut self, other: &[u8]) {
-        self.inner.extend_from_slice(other);
+    pub(crate) unsafe fn extend_from_slice_unchecked(&mut self, other: &[u8]) {
+        // SAFETY: Guaranteed by caller.
+        unsafe { self.inner.extend_from_slice_unchecked(other) };
     }
 }
 
@@ -817,7 +828,8 @@ impl OsStr {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn new<S: AsRef<OsStr> + ?Sized>(s: &S) -> &OsStr {
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    pub const fn new<S: [const] AsRef<OsStr> + ?Sized>(s: &S) -> &OsStr {
         s.as_ref()
     }
 
@@ -865,14 +877,16 @@ impl OsStr {
     }
 
     #[inline]
-    fn from_inner(inner: &Slice) -> &OsStr {
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    const fn from_inner(inner: &Slice) -> &OsStr {
         // SAFETY: OsStr is just a wrapper of Slice,
         // therefore converting &Slice to &OsStr is safe.
         unsafe { &*(inner as *const Slice as *const OsStr) }
     }
 
     #[inline]
-    fn from_inner_mut(inner: &mut Slice) -> &mut OsStr {
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    const fn from_inner_mut(inner: &mut Slice) -> &mut OsStr {
         // SAFETY: OsStr is just a wrapper of Slice,
         // therefore converting &mut Slice to &mut OsStr is safe.
         // Any method that mutates OsStr must be careful not to
@@ -1030,7 +1044,7 @@ impl OsStr {
     /// Converts a <code>[Box]<[OsStr]></code> into an [`OsString`] without copying or allocating.
     #[stable(feature = "into_boxed_os_str", since = "1.20.0")]
     #[must_use = "`self` will be dropped if the result is not used"]
-    pub fn into_os_string(self: Box<OsStr>) -> OsString {
+    pub fn into_os_string(self: Box<Self>) -> OsString {
         let boxed = unsafe { Box::from_raw(Box::into_raw(self) as *mut Slice) };
         OsString { inner: Buf::from_box(boxed) }
     }
@@ -1670,7 +1684,8 @@ impl ToOwned for OsStr {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl AsRef<OsStr> for OsStr {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const AsRef<OsStr> for OsStr {
     #[inline]
     fn as_ref(&self) -> &OsStr {
         self

@@ -4,6 +4,8 @@ use crate::{off64_t, off_t};
 pub type wchar_t = u32;
 
 s! {
+    // FIXME(1.0): This should not implement `PartialEq`
+    #[allow(unpredictable_function_pointer_comparisons)]
     pub struct sigaction {
         pub sa_sigaction: crate::sighandler_t,
         pub sa_mask: crate::sigset_t,
@@ -166,7 +168,6 @@ s! {
 }
 
 s_no_extra_traits! {
-    #[allow(missing_debug_implementations)]
     #[repr(align(8))]
     pub struct max_align_t {
         priv_: [i64; 2],

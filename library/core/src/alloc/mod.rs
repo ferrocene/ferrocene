@@ -2,10 +2,12 @@
 
 #![stable(feature = "alloc_module", since = "1.28.0")]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod global;
 mod layout;
 
 #[stable(feature = "global_alloc", since = "1.28.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::global::GlobalAlloc;
 #[stable(feature = "alloc_layout", since = "1.28.0")]
 pub use self::layout::Layout;
@@ -16,11 +18,16 @@ pub use self::layout::Layout;
     suggestion = "LayoutError"
 )]
 #[allow(deprecated, deprecated_in_future)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::layout::LayoutErr;
 #[stable(feature = "alloc_layout_error", since = "1.50.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::layout::LayoutError;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{self, NonNull};
 
 /// The `AllocError` error indicates an allocation failure
@@ -29,6 +36,7 @@ use crate::ptr::{self, NonNull};
 /// allocator.
 #[unstable(feature = "allocator_api", issue = "32838")]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct AllocError;
 
 #[unstable(
@@ -36,10 +44,12 @@ pub struct AllocError;
     reason = "the precise API and guarantees it provides may be tweaked.",
     issue = "32838"
 )]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Error for AllocError {}
 
 // (we need this for downstream impl of trait Error)
 #[unstable(feature = "allocator_api", issue = "32838")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for AllocError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("memory allocation failed")
@@ -90,7 +100,7 @@ impl fmt::Display for AllocError {
 /// # Safety
 ///
 /// Memory blocks that are [*currently allocated*] by an allocator,
-/// must point to valid memory, and retain their validity while until either:
+/// must point to valid memory, and retain their validity until either:
 ///  - the memory block is deallocated, or
 ///  - the allocator is dropped.
 ///
@@ -102,6 +112,7 @@ impl fmt::Display for AllocError {
 ///
 /// [*currently allocated*]: #currently-allocated-memory
 #[unstable(feature = "allocator_api", issue = "32838")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait Allocator {
     /// Attempts to allocate a block of memory.
     ///
@@ -112,7 +123,9 @@ pub unsafe trait Allocator {
     ///
     /// The returned block of memory remains valid as long as it is [*currently allocated*] and the shorter of:
     ///   - the borrow-checker lifetime of the allocator type itself.
-    ///   - as long as at the allocator and all its clones has not been dropped.
+    ///   - as long as the allocator and all its clones have not been dropped.
+    ///
+    /// [*currently allocated*]: #currently-allocated-memory
     ///
     /// # Errors
     ///
@@ -366,6 +379,7 @@ pub unsafe trait Allocator {
 }
 
 #[unstable(feature = "allocator_api", issue = "32838")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<A> Allocator for &A
 where
     A: Allocator + ?Sized,

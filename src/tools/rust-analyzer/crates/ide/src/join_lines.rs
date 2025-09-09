@@ -2,10 +2,10 @@ use ide_assists::utils::extract_trivial_expression;
 use ide_db::syntax_helpers::node_ext::expr_as_name_ref;
 use itertools::Itertools;
 use syntax::{
-    ast::{self, AstNode, AstToken, IsString},
     NodeOrToken, SourceFile, SyntaxElement,
     SyntaxKind::{self, USE_TREE, WHITESPACE},
-    SyntaxToken, TextRange, TextSize, T,
+    SyntaxToken, T, TextRange, TextSize,
+    ast::{self, AstNode, AstToken, IsString},
 };
 
 use ide_db::text_edit::{TextEdit, TextEditBuilder};
@@ -144,15 +144,15 @@ fn remove_newline(
         }
     }
 
-    if config.join_else_if {
-        if let (Some(prev), Some(_next)) = (as_if_expr(&prev), as_if_expr(&next)) {
-            match prev.else_token() {
-                Some(_) => cov_mark::hit!(join_two_ifs_with_existing_else),
-                None => {
-                    cov_mark::hit!(join_two_ifs);
-                    edit.replace(token.text_range(), " else ".to_owned());
-                    return;
-                }
+    if config.join_else_if
+        && let (Some(prev), Some(_next)) = (as_if_expr(&prev), as_if_expr(&next))
+    {
+        match prev.else_token() {
+            Some(_) => cov_mark::hit!(join_two_ifs_with_existing_else),
+            None => {
+                cov_mark::hit!(join_two_ifs);
+                edit.replace(token.text_range(), " else ".to_owned());
+                return;
             }
         }
     }
@@ -213,10 +213,10 @@ fn join_single_expr_block(edit: &mut TextEditBuilder, token: &SyntaxToken) -> Op
     let mut buf = expr.syntax().text().to_string();
 
     // Match block needs to have a comma after the block
-    if let Some(match_arm) = block_expr.syntax().parent().and_then(ast::MatchArm::cast) {
-        if match_arm.comma_token().is_none() {
-            buf.push(',');
-        }
+    if let Some(match_arm) = block_expr.syntax().parent().and_then(ast::MatchArm::cast)
+        && match_arm.comma_token().is_none()
+    {
+        buf.push(',');
     }
 
     edit.replace(block_range, buf);

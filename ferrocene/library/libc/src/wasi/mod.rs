@@ -36,7 +36,6 @@ pub type locale_t = *mut __locale_struct;
 
 s_no_extra_traits! {
     #[repr(align(16))]
-    #[allow(missing_debug_implementations)]
     pub struct max_align_t {
         priv_: [f64; 4],
     }
@@ -653,7 +652,7 @@ extern "C" {
         newpath: *const c_char,
         flags: c_int,
     ) -> c_int;
-    pub fn mkdirat(dirfd: c_int, pathname: *const c_char, mode: crate::mode_t) -> c_int;
+    pub fn mkdirat(dirfd: c_int, pathname: *const c_char, mode: mode_t) -> c_int;
     pub fn readlinkat(
         dirfd: c_int,
         pathname: *const c_char,

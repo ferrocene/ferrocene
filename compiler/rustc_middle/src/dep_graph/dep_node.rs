@@ -13,8 +13,11 @@ use crate::ty::TyCtxt;
 
 macro_rules! define_dep_nodes {
     (
-     $($(#[$attr:meta])*
-        [$($modifiers:tt)*] fn $variant:ident($($K:tt)*) -> $V:ty,)*) => {
+        $(
+            $(#[$attr:meta])*
+            [$($modifiers:tt)*] fn $variant:ident($($K:tt)*) -> $V:ty,
+        )*
+    ) => {
 
         #[macro_export]
         macro_rules! make_dep_kind_array {
@@ -83,7 +86,9 @@ macro_rules! define_dep_nodes {
     };
 }
 
-rustc_query_append!(define_dep_nodes![
+// Create various data structures for each query, and also for a few things
+// that aren't queries.
+rustc_with_all_queries!(define_dep_nodes![
     /// We use this for most things when incr. comp. is turned off.
     [] fn Null() -> (),
     /// We use this to create a forever-red node.
@@ -93,6 +98,7 @@ rustc_query_append!(define_dep_nodes![
     [] fn TraitSelect() -> (),
     [] fn CompileCodegenUnit() -> (),
     [] fn CompileMonoItem() -> (),
+    [] fn Metadata() -> (),
 ]);
 
 // WARNING: `construct` is generic and does not know that `CompileCodegenUnit` takes `Symbol`s as keys.
@@ -108,6 +114,12 @@ pub(crate) fn make_compile_mono_item<'tcx>(
     mono_item: &MonoItem<'tcx>,
 ) -> DepNode {
     DepNode::construct(tcx, dep_kinds::CompileMonoItem, mono_item)
+}
+
+// WARNING: `construct` is generic and does not know that `Metadata` takes `()`s as keys.
+// Be very careful changing this type signature!
+pub(crate) fn make_metadata(tcx: TyCtxt<'_>) -> DepNode {
+    DepNode::construct(tcx, dep_kinds::Metadata, &())
 }
 
 pub trait DepNodeExt: Sized {

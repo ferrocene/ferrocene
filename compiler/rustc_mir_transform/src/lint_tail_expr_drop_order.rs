@@ -12,8 +12,8 @@ use rustc_index::{IndexSlice, IndexVec};
 use rustc_macros::{LintDiagnostic, Subdiagnostic};
 use rustc_middle::bug;
 use rustc_middle::mir::{
-    self, BasicBlock, Body, ClearCrossCrate, Local, Location, Place, StatementKind, TerminatorKind,
-    dump_mir,
+    self, BasicBlock, Body, ClearCrossCrate, Local, Location, MirDumper, Place, StatementKind,
+    TerminatorKind,
 };
 use rustc_middle::ty::significant_drop_order::{
     extract_component_with_significant_dtor, ty_dtor_span,
@@ -134,6 +134,8 @@ impl<'a, 'mir, 'tcx> DropsReachable<'a, 'mir, 'tcx> {
                     target: _,
                     unwind: _,
                     replace: _,
+                    drop: _,
+                    async_fut: _,
                 } = &terminator.kind
                 && place_has_common_prefix(dropped_place, self.place)
             {
@@ -225,7 +227,10 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
         return;
     }
 
-    dump_mir(tcx, false, "lint_tail_expr_drop_order", &0 as _, body, |_, _| Ok(()));
+    if let Some(dumper) = MirDumper::new(tcx, "lint_tail_expr_drop_order", body) {
+        dumper.dump_mir(body);
+    }
+
     let locals_with_user_names = collect_user_names(body);
     let is_closure_like = tcx.is_closure_like(def_id.to_def_id());
 
@@ -233,8 +238,9 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
     // When we encounter a DROP of some place P we only care
     // about the drop if `P` may be initialized.
     let move_data = MoveData::gather_moves(body, tcx, |_| true);
-    let maybe_init = MaybeInitializedPlaces::new(tcx, body, &move_data);
-    let mut maybe_init = maybe_init.iterate_to_fixpoint(tcx, body, None).into_results_cursor(body);
+    let mut maybe_init = MaybeInitializedPlaces::new(tcx, body, &move_data)
+        .iterate_to_fixpoint(tcx, body, None)
+        .into_results_cursor(body);
     let mut block_drop_value_info =
         IndexVec::from_elem_n(MovePathIndexAtBlock::Unknown, body.basic_blocks.len());
     for (&block, candidates) in &bid_per_block {
@@ -513,8 +519,12 @@ struct LocalLabel<'a> {
 /// A custom `Subdiagnostic` implementation so that the notes are delivered in a specific order
 impl Subdiagnostic for LocalLabel<'_> {
     fn add_to_diag<G: rustc_errors::EmissionGuarantee>(self, diag: &mut rustc_errors::Diag<'_, G>) {
+        // Because parent uses this field , we need to remove it delay before adding it.
+        diag.remove_arg("name");
         diag.arg("name", self.name);
+        diag.remove_arg("is_generated_name");
         diag.arg("is_generated_name", self.is_generated_name);
+        diag.remove_arg("is_dropped_first_edition_2024");
         diag.arg("is_dropped_first_edition_2024", self.is_dropped_first_edition_2024);
         let msg = diag.eagerly_translate(crate::fluent_generated::mir_transform_tail_expr_local);
         diag.span_label(self.span, msg);

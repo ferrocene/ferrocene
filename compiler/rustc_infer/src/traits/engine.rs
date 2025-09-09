@@ -19,7 +19,8 @@ pub enum ScrubbedTraitError<'tcx> {
     TrueError,
     /// An ambiguity. This goal may hold if further inference is done.
     Ambiguity,
-    /// An old-solver-style cycle error, which will fatal.
+    /// An old-solver-style cycle error, which will fatal. This is not
+    /// returned by the new solver.
     Cycle(PredicateObligations<'tcx>),
 }
 
@@ -94,7 +95,7 @@ pub trait TraitEngine<'tcx, E: 'tcx>: 'tcx {
     /// Among all pending obligations, collect those are stalled on a inference variable which has
     /// changed since the last call to `select_where_possible`. Those obligations are marked as
     /// successful and returned.
-    fn drain_unstalled_obligations(
+    fn drain_stalled_obligations_for_coroutines(
         &mut self,
         infcx: &InferCtxt<'tcx>,
     ) -> PredicateObligations<'tcx>;

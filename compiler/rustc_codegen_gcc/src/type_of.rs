@@ -102,10 +102,10 @@ fn uncached_gcc_type<'gcc, 'tcx>(
             let mut name = with_no_trimmed_paths!(layout.ty.to_string());
             if let (&ty::Adt(def, _), &Variants::Single { index }) =
                 (layout.ty.kind(), &layout.variants)
+                && def.is_enum()
+                && !def.variants().is_empty()
             {
-                if def.is_enum() && !def.variants().is_empty() {
-                    write!(&mut name, "::{}", def.variant(index).name).unwrap();
-                }
+                write!(&mut name, "::{}", def.variant(index).name).unwrap();
             }
             if let (&ty::Coroutine(_, _), &Variants::Single { index }) =
                 (layout.ty.kind(), &layout.variants)
@@ -217,7 +217,7 @@ impl<'tcx> LayoutGccExt<'tcx> for TyAndLayout<'tcx> {
             let ty = match *self.ty.kind() {
                 // NOTE: we cannot remove this match like in the LLVM codegen because the call
                 // to fn_ptr_backend_type handle the on-stack attribute.
-                // TODO(antoyo): find a less hackish way to hande the on-stack attribute.
+                // TODO(antoyo): find a less hackish way to handle the on-stack attribute.
                 ty::FnPtr(sig_tys, hdr) => cx
                     .fn_ptr_backend_type(cx.fn_abi_of_fn_ptr(sig_tys.with(hdr), ty::List::empty())),
                 _ => self.scalar_gcc_type_at(cx, scalar, Size::ZERO),
@@ -264,10 +264,10 @@ impl<'tcx> LayoutGccExt<'tcx> for TyAndLayout<'tcx> {
     }
 
     fn immediate_gcc_type<'gcc>(&self, cx: &CodegenCx<'gcc, 'tcx>) -> Type<'gcc> {
-        if let BackendRepr::Scalar(ref scalar) = self.backend_repr {
-            if scalar.is_bool() {
-                return cx.type_i1();
-            }
+        if let BackendRepr::Scalar(ref scalar) = self.backend_repr
+            && scalar.is_bool()
+        {
+            return cx.type_i1();
         }
         self.gcc_type(cx)
     }

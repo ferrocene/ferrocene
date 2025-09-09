@@ -1,23 +1,24 @@
-use hir::{db::ExpandDatabase, FileRange, HirDisplay, InFile};
+use hir::{FileRange, HirDisplay, InFile, db::ExpandDatabase};
 use ide_db::text_edit::TextEdit;
 use ide_db::{
-    assists::{Assist, AssistId, AssistKind},
+    assists::{Assist, AssistId},
     label::Label,
     source_change::SourceChange,
 };
 use syntax::{
-    ast::{self, make, HasArgList},
-    format_smolstr, AstNode, SmolStr, TextRange, ToSmolStr,
+    AstNode, SmolStr, TextRange, ToSmolStr,
+    ast::{self, HasArgList, make},
+    format_smolstr,
 };
 
-use crate::{adjusted_display_range, Diagnostic, DiagnosticCode, DiagnosticsContext};
+use crate::{Diagnostic, DiagnosticCode, DiagnosticsContext, adjusted_display_range};
 
 // Diagnostic: unresolved-method
 //
 // This diagnostic is triggered if a method does not exist on a given type.
 pub(crate) fn unresolved_method(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::UnresolvedMethodCall,
+    d: &hir::UnresolvedMethodCall<'_>,
 ) -> Diagnostic {
     let suffix = if d.field_with_same_name.is_some() {
         ", but a field with a similar name exists"
@@ -46,10 +47,9 @@ pub(crate) fn unresolved_method(
         }),
     )
     .with_fixes(fixes(ctx, d))
-    .experimental()
 }
 
-fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedMethodCall) -> Option<Vec<Assist>> {
+fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedMethodCall<'_>) -> Option<Vec<Assist>> {
     let field_fix = if let Some(ty) = &d.field_with_same_name {
         field_fix(ctx, d, ty)
     } else {
@@ -67,17 +67,13 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedMethodCall) -> Option<
         fixes.push(assoc_func_fix);
     }
 
-    if fixes.is_empty() {
-        None
-    } else {
-        Some(fixes)
-    }
+    if fixes.is_empty() { None } else { Some(fixes) }
 }
 
 fn field_fix(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::UnresolvedMethodCall,
-    ty: &hir::Type,
+    d: &hir::UnresolvedMethodCall<'_>,
+    ty: &hir::Type<'_>,
 ) -> Option<Assist> {
     if !ty.impls_fnonce(ctx.sema.db) {
         return None;
@@ -99,19 +95,22 @@ fn field_fix(
         _ => return None,
     };
     Some(Assist {
-        id: AssistId("expected-method-found-field-fix", AssistKind::QuickFix),
+        id: AssistId::quick_fix("expected-method-found-field-fix"),
         label: Label::new("Use parentheses to call the value of the field".to_owned()),
         group: None,
         target: range,
         source_change: Some(SourceChange::from_iter([
-            (file_id.into(), TextEdit::insert(range.start(), "(".to_owned())),
-            (file_id.into(), TextEdit::insert(range.end(), ")".to_owned())),
+            (file_id.file_id(ctx.sema.db), TextEdit::insert(range.start(), "(".to_owned())),
+            (file_id.file_id(ctx.sema.db), TextEdit::insert(range.end(), ")".to_owned())),
         ])),
         command: None,
     })
 }
 
-fn assoc_func_fix(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedMethodCall) -> Option<Assist> {
+fn assoc_func_fix(
+    ctx: &DiagnosticsContext<'_>,
+    d: &hir::UnresolvedMethodCall<'_>,
+) -> Option<Assist> {
     if let Some(f) = d.assoc_func_with_same_name {
         let db = ctx.sema.db;
 
@@ -121,8 +120,7 @@ fn assoc_func_fix(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedMethodCall) -
 
         let call = ast::MethodCallExpr::cast(expr.syntax().clone())?;
         let range = InFile::new(expr_ptr.file_id, call.syntax().text_range())
-            .original_node_file_range_rooted(db)
-            .range;
+            .original_node_file_range_rooted_opt(db)?;
 
         let receiver = call.receiver()?;
         let receiver_type = &ctx.sema.type_of_expr(&receiver)?.original;
@@ -175,18 +173,16 @@ fn assoc_func_fix(ctx: &DiagnosticsContext<'_>, d: &hir::UnresolvedMethodCall) -
 
         let assoc_func_call_expr_string = make::expr_call(assoc_func_path, args).to_string();
 
-        let file_id = ctx.sema.original_range_opt(call.receiver()?.syntax())?.file_id;
-
         Some(Assist {
-            id: AssistId("method_call_to_assoc_func_call_fix", AssistKind::QuickFix),
+            id: AssistId::quick_fix("method_call_to_assoc_func_call_fix"),
             label: Label::new(format!(
                 "Use associated func call instead: `{assoc_func_call_expr_string}`"
             )),
             group: None,
-            target: range,
+            target: range.range,
             source_change: Some(SourceChange::from_text_edit(
-                file_id,
-                TextEdit::replace(range, assoc_func_call_expr_string),
+                range.file_id.file_id(ctx.sema.db),
+                TextEdit::replace(range.range, assoc_func_call_expr_string),
             )),
             command: None,
         })
@@ -272,7 +268,7 @@ impl<T, U> A<T, U> {
 }
 fn main() {
     let a = A {a: 0, b: ""};
-    A::<i32, &str>::foo();
+    A::<i32, &'static str>::foo();
 }
 "#,
         );
@@ -301,7 +297,7 @@ macro_rules! m {
 }
 fn main() {
     m!(());
- // ^^^^^^ error: no method `foo` on type `()`
+ // ^^ error: no method `foo` on type `()`
 }
 "#,
         );

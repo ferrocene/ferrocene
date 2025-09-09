@@ -6,10 +6,15 @@ import type * as ra from "./lsp_ext";
 import { Cargo } from "./toolchain";
 import type { Ctx } from "./ctx";
 import { createTaskFromRunnable, prepareEnv } from "./run";
-import { execute, isCargoRunnableArgs, unwrapUndefinable } from "./util";
+import {
+    execute,
+    isCargoRunnableArgs,
+    unwrapUndefinable,
+    log,
+    normalizeDriveLetter,
+    Env,
+} from "./util";
 import type { Config } from "./config";
-
-const debugOutput = vscode.window.createOutputChannel("Debug");
 
 // Here we want to keep track on everything that's currently running
 const activeDebugSessionIds: string[] = [];
@@ -56,15 +61,14 @@ export async function startDebugSession(ctx: Ctx, runnable: ra.Runnable): Promis
     if (-1 !== index) {
         debugConfig = configurations[index];
         message = " (from launch.json)";
-        debugOutput.clear();
     } else {
         debugConfig = await getDebugConfiguration(ctx.config, runnable);
     }
 
     if (!debugConfig) return false;
 
-    debugOutput.appendLine(`Launching debug configuration${message}:`);
-    debugOutput.appendLine(JSON.stringify(debugConfig, null, 2));
+    log.debug(`Launching debug configuration${message}:`);
+    log.debug(JSON.stringify(debugConfig, null, 2));
     return vscode.debug.startDebugging(undefined, debugConfig);
 }
 
@@ -118,10 +122,6 @@ async function getDebugConfiguration(
         return;
     }
 
-    debugOutput.clear();
-    if (config.debug.openDebugPane) {
-        debugOutput.show(true);
-    }
     // folder exists or RA is not active.
 
     const workspaceFolders = vscode.workspace.workspaceFolders!;
@@ -134,20 +134,14 @@ async function getDebugConfiguration(
               firstWorkspace;
 
     const workspace = unwrapUndefinable(maybeWorkspace);
-    let wsFolder = path.normalize(workspace.uri.fsPath);
-    if (os.platform() === "win32") {
-        // in windows, the drive letter can vary in casing for VSCode, so we gotta normalize that first
-        wsFolder = wsFolder.replace(/^[a-z]:\\/, (c) => c.toUpperCase());
-    }
+    const wsFolder = normalizeDriveLetter(path.normalize(workspace.uri.fsPath));
 
     const workspaceQualifier = isMultiFolderWorkspace ? `:${workspace.name}` : "";
     function simplifyPath(p: string): string {
         // in windows, the drive letter can vary in casing for VSCode, so we gotta normalize that first
-        if (os.platform() === "win32") {
-            p = p.replace(/^[a-z]:\\/, (c) => c.toUpperCase());
-        }
+        p = normalizeDriveLetter(path.normalize(p));
         // see https://github.com/rust-lang/rust-analyzer/pull/5513#issuecomment-663458818 for why this is needed
-        return path.normalize(p).replace(wsFolder, `\${workspaceFolder${workspaceQualifier}}`);
+        return p.replace(wsFolder, `\${workspaceFolder${workspaceQualifier}}`);
     }
 
     const executable = await getDebugExecutable(
@@ -219,10 +213,7 @@ type SourceFileMap = {
     destination: string;
 };
 
-async function discoverSourceFileMap(
-    env: Record<string, string>,
-    cwd: string,
-): Promise<SourceFileMap | undefined> {
+async function discoverSourceFileMap(env: Env, cwd: string): Promise<SourceFileMap | undefined> {
     const sysroot = env["RUSTC_TOOLCHAIN"];
     if (sysroot) {
         // let's try to use the default toolchain
@@ -232,7 +223,7 @@ async function discoverSourceFileMap(
         const commitHash = rx.exec(data)?.[1];
         if (commitHash) {
             const rustlib = path.normalize(sysroot + "/lib/rustlib/src/rust");
-            return { source: rustlib, destination: rustlib };
+            return { source: "/rustc/" + commitHash, destination: rustlib };
         }
     }
 
@@ -245,7 +236,7 @@ type PropertyFetcher<Config, Input, Key extends keyof Config> = (
 
 type DebugConfigProvider<Type extends string, DebugConfig extends BaseDebugConfig<Type>> = {
     executableProperty: keyof DebugConfig;
-    environmentProperty: PropertyFetcher<DebugConfig, Record<string, string>, keyof DebugConfig>;
+    environmentProperty: PropertyFetcher<DebugConfig, Env, keyof DebugConfig>;
     runnableArgsProperty: PropertyFetcher<DebugConfig, ra.CargoRunnableArgs, keyof DebugConfig>;
     sourceFileMapProperty?: keyof DebugConfig;
     type: Type;
@@ -289,7 +280,7 @@ const knownEngines: {
             "environment",
             Object.entries(env).map((entry) => ({
                 name: entry[0],
-                value: entry[1],
+                value: entry[1] ?? "",
             })),
         ],
         runnableArgsProperty: (runnableArgs: ra.CargoRunnableArgs) => [
@@ -317,11 +308,8 @@ const knownEngines: {
     },
 };
 
-async function getDebugExecutable(
-    runnableArgs: ra.CargoRunnableArgs,
-    env: Record<string, string>,
-): Promise<string> {
-    const cargo = new Cargo(runnableArgs.workspaceRoot || ".", debugOutput, env);
+async function getDebugExecutable(runnableArgs: ra.CargoRunnableArgs, env: Env): Promise<string> {
+    const cargo = new Cargo(runnableArgs.workspaceRoot || ".", env);
     const executable = await cargo.executableFromArgs(runnableArgs);
 
     // if we are here, there were no compilation errors.
@@ -341,7 +329,7 @@ function getDebugConfig(
     runnable: ra.Runnable,
     runnableArgs: ra.CargoRunnableArgs,
     executable: string,
-    env: Record<string, string>,
+    env: Env,
     sourceFileMap?: Record<string, string>,
 ): vscode.DebugConfiguration {
     const {
@@ -393,14 +381,14 @@ type CodeLldbDebugConfig = {
     args: string[];
     sourceMap: Record<string, string> | undefined;
     sourceLanguages: ["rust"];
-    env: Record<string, string>;
+    env: Env;
 } & BaseDebugConfig<"lldb">;
 
 type NativeDebugConfig = {
     target: string;
     // See https://github.com/WebFreak001/code-debug/issues/359
     arguments: string;
-    env: Record<string, string>;
+    env: Env;
     valuesFormatting: "prettyPrinters";
 } & BaseDebugConfig<"gdb">;
 

@@ -18,11 +18,11 @@ use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_infer::traits::Obligation;
 use rustc_middle::bug;
 use rustc_middle::query::LocalCrate;
+use rustc_middle::traits::query::NoSolution;
 use rustc_middle::ty::print::PrintTraitRefExt as _;
 use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt, TypeVisitableExt, TypingMode};
 use rustc_session::lint::builtin::COHERENCE_LEAK_CHECK;
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, sym};
-use rustc_type_ir::solve::NoSolution;
 use specialization_graph::GraphExt;
 use tracing::{debug, instrument};
 
@@ -233,7 +233,7 @@ pub(super) fn specialization_enabled_in(tcx: TyCtxt<'_>, _: LocalCrate) -> bool 
 ///
 /// For the purposes of const traits, we also check that the specializing
 /// impl is not more restrictive than the parent impl. That is, if the
-/// `parent_impl_def_id` is a const impl (conditionally based off of some `~const`
+/// `parent_impl_def_id` is a const impl (conditionally based off of some `[const]`
 /// bounds), then `specializing_impl_def_id` must also be const for the same
 /// set of types.
 #[instrument(skip(tcx), level = "debug")]

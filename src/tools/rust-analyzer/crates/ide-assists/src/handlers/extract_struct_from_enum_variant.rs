@@ -3,25 +3,27 @@ use std::iter;
 use either::Either;
 use hir::{HasCrate, Module, ModuleDef, Name, Variant};
 use ide_db::{
+    FxHashSet, RootDatabase,
     defs::Definition,
     helpers::mod_path_to_ast,
-    imports::insert_use::{insert_use, ImportScope, InsertUseConfig},
+    imports::insert_use::{ImportScope, InsertUseConfig, insert_use},
     path_transform::PathTransform,
     search::FileReference,
-    FxHashSet, RootDatabase,
 };
 use itertools::Itertools;
 use syntax::{
-    ast::{
-        self, edit::IndentLevel, edit_in_place::Indent, make, AstNode, HasAttrs, HasGenericParams,
-        HasName, HasVisibility,
-    },
-    match_ast, ted, Edition, SyntaxElement,
+    Edition, SyntaxElement,
     SyntaxKind::*,
     SyntaxNode, T,
+    ast::{
+        self, AstNode, HasAttrs, HasGenericParams, HasName, HasVisibility,
+        edit::{AstNodeEdit, IndentLevel},
+        make,
+    },
+    match_ast, ted,
 };
 
-use crate::{assist_context::SourceChangeBuilder, AssistContext, AssistId, AssistKind, Assists};
+use crate::{AssistContext, AssistId, Assists, assist_context::SourceChangeBuilder};
 
 // Assist: extract_struct_from_enum_variant
 //
@@ -54,7 +56,7 @@ pub(crate) fn extract_struct_from_enum_variant(
     let enum_hir = ctx.sema.to_def(&enum_ast)?;
     let target = variant.syntax().text_range();
     acc.add(
-        AssistId("extract_struct_from_enum_variant", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("extract_struct_from_enum_variant"),
         "Extract struct from enum variant",
         target,
         |builder| {
@@ -73,7 +75,7 @@ pub(crate) fn extract_struct_from_enum_variant(
                     def_file_references = Some(references);
                     continue;
                 }
-                builder.edit_file(file_id.file_id());
+                builder.edit_file(file_id.file_id(ctx.db()));
                 let processed = process_references(
                     ctx,
                     builder,
@@ -86,7 +88,7 @@ pub(crate) fn extract_struct_from_enum_variant(
                     apply_references(ctx.config.insert_use, path, node, import, edition)
                 });
             }
-            builder.edit_file(ctx.file_id());
+            builder.edit_file(ctx.vfs_file_id());
 
             let variant = builder.make_mut(variant.clone());
             if let Some(references) = def_file_references {
@@ -109,20 +111,30 @@ pub(crate) fn extract_struct_from_enum_variant(
             let generics = generic_params.as_ref().map(|generics| generics.clone_for_update());
 
             // resolve GenericArg in field_list to actual type
-            let field_list = field_list.clone_for_update();
-            if let Some((target_scope, source_scope)) =
+            let field_list = if let Some((target_scope, source_scope)) =
                 ctx.sema.scope(enum_ast.syntax()).zip(ctx.sema.scope(field_list.syntax()))
             {
-                PathTransform::generic_transformation(&target_scope, &source_scope)
-                    .apply(field_list.syntax());
-            }
+                let field_list = field_list.reset_indent();
+                let field_list =
+                    PathTransform::generic_transformation(&target_scope, &source_scope)
+                        .apply(field_list.syntax());
+                match_ast! {
+                    match field_list {
+                        ast::RecordFieldList(field_list) => Either::Left(field_list),
+                        ast::TupleFieldList(field_list) => Either::Right(field_list),
+                        _ => unreachable!(),
+                    }
+                }
+            } else {
+                field_list.clone_for_update()
+            };
 
             let def =
                 create_struct_def(variant_name.clone(), &variant, &field_list, generics, &enum_ast);
 
             let enum_ast = variant.parent_enum();
             let indent = enum_ast.indent_level();
-            def.reindent_to(indent);
+            let def = def.indent(indent);
 
             ted::insert_all(
                 ted::Position::before(enum_ast.syntax()),
@@ -203,12 +215,12 @@ fn tag_generics_in_variant(ty: &ast::Type, generics: &mut [(ast::GenericParam, b
                 ast::GenericParam::LifetimeParam(lt)
                     if matches!(token.kind(), T![lifetime_ident]) =>
                 {
-                    if let Some(lt) = lt.lifetime() {
-                        if lt.text().as_str() == token.text() {
-                            *tag = true;
-                            tagged_one = true;
-                            break;
-                        }
+                    if let Some(lt) = lt.lifetime()
+                        && lt.text().as_str() == token.text()
+                    {
+                        *tag = true;
+                        tagged_one = true;
+                        break;
                     }
                 }
                 param if matches!(token.kind(), T![ident]) => {
@@ -278,7 +290,7 @@ fn create_struct_def(
             field_list.clone().into()
         }
     };
-    field_list.reindent_to(IndentLevel::single());
+    let field_list = field_list.indent(IndentLevel::single());
 
     let strukt = make::struct_(enum_vis, name, generics, field_list).clone_for_update();
 

@@ -28,7 +28,9 @@ use rustc_target::spec::DebuginfoKind;
 use smallvec::SmallVec;
 use tracing::debug;
 
-use self::metadata::{UNKNOWN_COLUMN_NUMBER, UNKNOWN_LINE_NUMBER, file_metadata, type_di_node};
+use self::metadata::{
+    UNKNOWN_COLUMN_NUMBER, UNKNOWN_LINE_NUMBER, file_metadata, spanned_type_di_node, type_di_node,
+};
 use self::namespace::mangled_name_of_instance;
 use self::utils::{DIB, create_DIArray, is_node_local_to_unit};
 use crate::builder::Builder;
@@ -147,6 +149,12 @@ pub(crate) fn finalize(cx: &CodegenCx<'_, '_>) {
     }
 }
 
+impl<'ll> Builder<'_, 'll, '_> {
+    pub(crate) fn get_dbg_loc(&self) -> Option<&'ll DILocation> {
+        unsafe { llvm::LLVMGetCurrentDebugLocation2(self.llbuilder) }
+    }
+}
+
 impl<'ll> DebugInfoBuilderMethods for Builder<'_, 'll, '_> {
     // FIXME(eddyb) find a common convention for all of the debuginfo-related
     // names (choose between `dbg`, `debug`, `debuginfo`, `debug_info` etc.).
@@ -207,10 +215,6 @@ impl<'ll> DebugInfoBuilderMethods for Builder<'_, 'll, '_> {
         unsafe {
             llvm::LLVMSetCurrentDebugLocation2(self.llbuilder, ptr::null());
         }
-    }
-
-    fn get_dbg_loc(&self) -> Option<&'ll DILocation> {
-        unsafe { llvm::LLVMGetCurrentDebugLocation2(self.llbuilder) }
     }
 
     fn insert_reference_to_gdb_debug_scripts_section_global(&mut self) {
@@ -531,31 +535,26 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
             // First, let's see if this is a method within an inherent impl. Because
             // if yes, we want to make the result subroutine DIE a child of the
             // subroutine's self-type.
-            if let Some(impl_def_id) = cx.tcx.impl_of_method(instance.def_id()) {
-                // If the method does *not* belong to a trait, proceed
-                if cx.tcx.trait_id_of_impl(impl_def_id).is_none() {
-                    let impl_self_ty = cx.tcx.instantiate_and_normalize_erasing_regions(
-                        instance.args,
-                        cx.typing_env(),
-                        cx.tcx.type_of(impl_def_id),
-                    );
+            // For trait method impls we still use the "parallel namespace"
+            // strategy
+            if let Some(imp_def_id) = cx.tcx.inherent_impl_of_assoc(instance.def_id()) {
+                let impl_self_ty = cx.tcx.instantiate_and_normalize_erasing_regions(
+                    instance.args,
+                    cx.typing_env(),
+                    cx.tcx.type_of(imp_def_id),
+                );
 
-                    // Only "class" methods are generally understood by LLVM,
-                    // so avoid methods on other types (e.g., `<*mut T>::null`).
-                    if let ty::Adt(def, ..) = impl_self_ty.kind()
-                        && !def.is_box()
-                    {
-                        // Again, only create type information if full debuginfo is enabled
-                        if cx.sess().opts.debuginfo == DebugInfo::Full && !impl_self_ty.has_param()
-                        {
-                            return (type_di_node(cx, impl_self_ty), true);
-                        } else {
-                            return (namespace::item_namespace(cx, def.did()), false);
-                        }
+                // Only "class" methods are generally understood by LLVM,
+                // so avoid methods on other types (e.g., `<*mut T>::null`).
+                if let ty::Adt(def, ..) = impl_self_ty.kind()
+                    && !def.is_box()
+                {
+                    // Again, only create type information if full debuginfo is enabled
+                    if cx.sess().opts.debuginfo == DebugInfo::Full && !impl_self_ty.has_param() {
+                        return (type_di_node(cx, impl_self_ty), true);
+                    } else {
+                        return (namespace::item_namespace(cx, def.did()), false);
                     }
-                } else {
-                    // For trait method impls we still use the "parallel namespace"
-                    // strategy
                 }
             }
 
@@ -629,7 +628,7 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
         let loc = self.lookup_debug_loc(span.lo());
         let file_metadata = file_metadata(self, &loc.file);
 
-        let type_metadata = type_di_node(self, variable_type);
+        let type_metadata = spanned_type_di_node(self, variable_type, span);
 
         let (argument_index, dwarf_tag) = match variable_kind {
             ArgumentVariable(index) => (index as c_uint, DW_TAG_arg_variable),

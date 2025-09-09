@@ -8,7 +8,7 @@ use rustc_middle::ty::{
     self, GenericArgsRef, GenericParamDef, GenericParamDefKind, IsSuggestable, Ty,
 };
 use rustc_session::lint::builtin::LATE_BOUND_LIFETIME_ARGUMENTS;
-use rustc_span::{kw, sym};
+use rustc_span::kw;
 use smallvec::SmallVec;
 use tracing::{debug, instrument};
 
@@ -73,7 +73,7 @@ fn generic_arg_mismatch_err(
                     let param_name = tcx.hir_ty_param_name(param_local_id);
                     let param_type = tcx.type_of(param.def_id).instantiate_identity();
                     if param_type.is_suggestable(tcx, false) {
-                        err.span_suggestion(
+                        err.span_suggestion_verbose(
                             tcx.def_span(src_def_id),
                             "consider changing this type parameter to a const parameter",
                             format!("const {param_name}: {param_type}"),
@@ -258,19 +258,6 @@ pub fn lower_generic_args<'tcx: 'a, 'a>(
                             GenericParamDefKind::Const { .. },
                             _,
                         ) => {
-                            if let GenericParamDefKind::Const { .. } = param.kind
-                                && let GenericArg::Infer(inf) = arg
-                                && !tcx.features().generic_arg_infer()
-                            {
-                                rustc_session::parse::feature_err(
-                                    tcx.sess,
-                                    sym::generic_arg_infer,
-                                    inf.span,
-                                    "const arguments cannot yet be inferred with `_`",
-                                )
-                                .emit();
-                            }
-
                             // We lower to an infer even when the feature gate is not enabled
                             // as it is useful for diagnostics to be able to see a `ConstKind::Infer`
                             args.push(ctx.provided_kind(&args, param, arg));
@@ -432,14 +419,7 @@ pub(crate) fn check_generic_arg_count(
         .filter(|param| matches!(param.kind, ty::GenericParamDefKind::Type { synthetic: true, .. }))
         .count();
     let named_type_param_count = param_counts.types - has_self as usize - synth_type_param_count;
-    let synth_const_param_count = gen_params
-        .own_params
-        .iter()
-        .filter(|param| {
-            matches!(param.kind, ty::GenericParamDefKind::Const { synthetic: true, .. })
-        })
-        .count();
-    let named_const_param_count = param_counts.consts - synth_const_param_count;
+    let named_const_param_count = param_counts.consts;
     let infer_lifetimes =
         (gen_pos != GenericArgPosition::Type || seg.infer_args) && !gen_args.has_lifetime_params();
 
@@ -583,7 +563,7 @@ pub(crate) fn check_generic_arg_count(
                     gen_args,
                     def_id,
                 ))
-                .emit_unless(all_params_are_binded)
+                .emit_unless_delay(all_params_are_binded)
         });
 
         Err(reported)

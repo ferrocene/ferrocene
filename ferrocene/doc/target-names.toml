@@ -5,11 +5,12 @@
 # Ferrocene, to provide consistency across documents on how we refer to them.
 #
 # In the documents, as long as the ferrocene_qualification extension is added,
-# you can refer to them with :target:`triple`.
+# you can refer to them with :target:`tuple`.
 
 
 aarch64-apple-darwin        = "Apple Silicon macOS"
 aarch64-unknown-linux-gnu   = "Armv8-A Linux (glibc)"
+aarch64-unknown-linux-musl  = "Armv8-A Linux (musl)"
 aarch64-unknown-none        = "Armv8-A bare-metal"
 aarch64-unknown-nto-qnx710  = "Armv8-A QNX® Neutrino® 7.1.0"
 armebv7r-none-eabihf        = "Armv7-R bare-metal (hard-float, big-endian)"
@@ -23,7 +24,10 @@ thumbv7em-none-eabihf       = "Armv7E-M bare-metal (hard-float)"
 "thumbv8m.main-none-eabi"   = "Armv8-M Mainline (soft-float)"
 "thumbv8m.main-none-eabihf" = "Armv8-M Mainline (hard-float)"
 wasm32-unknown-unknown      = "WASM bare-metal"
-x86_64-apple-darwin         = "x86-64 macOS"
 x86_64-pc-nto-qnx710        = "x86-64 QNX® Neutrino® 7.1.0"
 x86_64-pc-windows-msvc      = "x86-64 Windows"
 x86_64-unknown-linux-gnu    = "x86-64 Linux (glibc)"
+x86_64-unknown-linux-musl    = "x86-64 Linux (musl)"
+
+# Removed targets
+x86_64-apple-darwin = "x86-64 macOS"

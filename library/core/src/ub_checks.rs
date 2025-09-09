@@ -49,6 +49,7 @@ use crate::intrinsics::{self, const_eval_select};
 /// debuginfo to have a measurable compile-time impact on debug builds.
 #[macro_export]
 #[unstable(feature = "ub_checks", issue = "none")]
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! assert_unsafe_precondition {
     ($kind:ident, $message:expr, ($($name:ident:$ty:ty = $arg:expr),*$(,)?) => $e:expr $(,)?) => {
         {
@@ -63,11 +64,19 @@ macro_rules! assert_unsafe_precondition {
             #[rustc_no_mir_inline]
             #[inline]
             #[rustc_nounwind]
+            #[track_caller]
             const fn precondition_check($($name:$ty),*) {
                 if !$e {
-                    ::core::panicking::panic_nounwind(concat!("unsafe precondition(s) violated: ", $message,
+                    // Ferrocene annotation: This code cannot be covered because it causes an
+                    // non-unwinding panic, which means it cannot be caught by any means in a test.
+                    let msg = concat!("unsafe precondition(s) violated: ", $message,
                         "\n\nThis indicates a bug in the program. \
-                        This Undefined Behavior check is optional, and cannot be relied on for safety."));
+                        This Undefined Behavior check is optional, and cannot be relied on for safety.");
+                    // blocked on fmt::Arguments
+                    #[cfg(not(feature = "ferrocene_certified"))]
+                    ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::new_const(&[msg]), false);
+                    #[cfg(feature = "ferrocene_certified")]
+                    ::core::panicking::panic_nounwind(msg);
                 }
             }
 
@@ -113,23 +122,40 @@ pub(crate) const fn check_language_ub() -> bool {
 /// check is anyway not executed in `const`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[cfg(any(
+    not(feature = "ferrocene_certified"),
+    all(feature = "ferrocene_certified", debug_assertions)
+))]
 pub(crate) const fn maybe_is_aligned_and_not_null(
     ptr: *const (),
     align: usize,
     is_zst: bool,
 ) -> bool {
     // This is just for safety checks so we can const_eval_select.
+    maybe_is_aligned(ptr, align) && (is_zst || !ptr.is_null())
+}
+
+/// Checks whether `ptr` is properly aligned with respect to the given alignment.
+///
+/// In `const` this is approximate and can fail spuriously. It is primarily intended
+/// for `assert_unsafe_precondition!` with `check_language_ub`, in which case the
+/// check is anyway not executed in `const`.
+#[inline]
+#[rustc_allow_const_fn_unstable(const_eval_select)]
+pub(crate) const fn maybe_is_aligned(ptr: *const (), align: usize) -> bool {
+    // This is just for safety checks so we can const_eval_select.
     const_eval_select!(
-        @capture { ptr: *const (), align: usize, is_zst: bool } -> bool:
+        @capture { ptr: *const (), align: usize } -> bool:
         if const {
-            is_zst || !ptr.is_null()
+            true
         } else {
-            ptr.is_aligned_to(align) && (is_zst || !ptr.is_null())
+            ptr.is_aligned_to(align)
         }
     )
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
     let max_len = if size == 0 { usize::MAX } else { isize::MAX as usize / size };
     len <= max_len
@@ -142,6 +168,7 @@ pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
 /// only be used with `assert_unsafe_precondition!`, similar to `is_aligned_and_not_null`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) const fn maybe_is_nonoverlapping(
     src: *const (),
     dst: *const (),

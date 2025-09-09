@@ -6,6 +6,9 @@
 #![cfg_attr(doc, feature(rustdoc_internals))]
 // Note: please avoid adding other feature gates where possible
 #![feature(rustc_private)]
+// Only used to define intrinsics in `compiler_builtins.rs`.
+#![feature(f16)]
+#![feature(f128)]
 // Note: please avoid adding other feature gates where possible
 #![warn(rust_2018_idioms)]
 #![warn(unreachable_pub)]
@@ -41,9 +44,8 @@ use std::sync::Arc;
 
 use cranelift_codegen::isa::TargetIsa;
 use cranelift_codegen::settings::{self, Configurable};
-use rustc_codegen_ssa::CodegenResults;
 use rustc_codegen_ssa::traits::CodegenBackend;
-use rustc_metadata::EncodedMetadata;
+use rustc_codegen_ssa::{CodegenResults, TargetConfig};
 use rustc_middle::dep_graph::{WorkProduct, WorkProductId};
 use rustc_session::Session;
 use rustc_session::config::OutputFilenames;
@@ -57,6 +59,7 @@ mod allocator;
 mod analyze;
 mod base;
 mod cast;
+mod codegen_f16_f128;
 mod codegen_i128;
 mod common;
 mod compiler_builtins;
@@ -76,7 +79,6 @@ mod optimize;
 mod pointer;
 mod pretty_clif;
 mod toolchain;
-mod trap;
 mod unsize;
 mod unwind_module;
 mod value_and_place;
@@ -178,11 +180,11 @@ impl CodegenBackend for CraneliftCodegenBackend {
         }
     }
 
-    fn target_features_cfg(&self, sess: &Session) -> (Vec<Symbol>, Vec<Symbol>) {
+    fn target_config(&self, sess: &Session) -> TargetConfig {
         // FIXME return the actually used target features. this is necessary for #[cfg(target_feature)]
         let target_features = if sess.target.arch == "x86_64" && sess.target.os != "none" {
             // x86_64 mandates SSE2 support and rustc requires the x87 feature to be enabled
-            vec![sym::fsxr, sym::sse, sym::sse2, Symbol::intern("x87")]
+            vec![sym::fxsr, sym::sse, sym::sse2, Symbol::intern("x87")]
         } else if sess.target.arch == "aarch64" {
             match &*sess.target.os {
                 "none" => vec![],
@@ -197,19 +199,45 @@ impl CodegenBackend for CraneliftCodegenBackend {
         };
         // FIXME do `unstable_target_features` properly
         let unstable_target_features = target_features.clone();
-        (target_features, unstable_target_features)
+
+        // FIXME(f16_f128): LLVM 20 (currently used by `rustc`) passes `f128` in XMM registers on
+        // Windows, whereas LLVM 21+ and Cranelift pass it indirectly. This means that `f128` won't
+        // work when linking against a LLVM-built sysroot.
+        let has_reliable_f128 = !sess.target.is_like_windows;
+        let has_reliable_f16 = match &*sess.target.arch {
+            // FIXME(f16_f128): LLVM 20 does not support `f16` on s390x, meaning the required
+            // builtins are not available in `compiler-builtins`.
+            "s390x" => false,
+            // FIXME(f16_f128): `rustc_codegen_llvm` currently disables support on Windows GNU
+            // targets due to GCC using a different ABI than LLVM. Therefore `f16` won't be
+            // available when using a LLVM-built sysroot.
+            "x86_64"
+                if sess.target.os == "windows"
+                    && sess.target.env == "gnu"
+                    && sess.target.abi != "llvm" =>
+            {
+                false
+            }
+            _ => true,
+        };
+
+        TargetConfig {
+            target_features,
+            unstable_target_features,
+            // `rustc_codegen_cranelift` polyfills functionality not yet
+            // available in Cranelift.
+            has_reliable_f16,
+            has_reliable_f16_math: has_reliable_f16,
+            has_reliable_f128,
+            has_reliable_f128_math: has_reliable_f128,
+        }
     }
 
     fn print_version(&self) {
         println!("Cranelift version: {}", cranelift_codegen::VERSION);
     }
 
-    fn codegen_crate(
-        &self,
-        tcx: TyCtxt<'_>,
-        metadata: EncodedMetadata,
-        need_metadata_module: bool,
-    ) -> Box<dyn Any> {
+    fn codegen_crate(&self, tcx: TyCtxt<'_>) -> Box<dyn Any> {
         info!("codegen crate {}", tcx.crate_name(LOCAL_CRATE));
         let config = self.config.clone().unwrap_or_else(|| {
             BackendConfig::from_opts(&tcx.sess.opts.cg.llvm_args)
@@ -222,7 +250,7 @@ impl CodegenBackend for CraneliftCodegenBackend {
             #[cfg(not(feature = "jit"))]
             tcx.dcx().fatal("jit support was disabled when compiling rustc_codegen_cranelift");
         } else {
-            driver::aot::run_aot(tcx, metadata, need_metadata_module)
+            driver::aot::run_aot(tcx)
         }
     }
 
@@ -280,6 +308,12 @@ fn build_isa(sess: &Session, jit: bool) -> Arc<dyn TargetIsa + 'static> {
     flags_builder.set("tls_model", tls_model).unwrap();
 
     flags_builder.set("enable_llvm_abi_extensions", "true").unwrap();
+
+    if let Some(align) = sess.opts.unstable_opts.min_function_alignment {
+        flags_builder
+            .set("log2_min_function_alignment", &align.bytes().ilog2().to_string())
+            .unwrap();
+    }
 
     use rustc_session::config::OptLevel;
     match sess.opts.optimize {

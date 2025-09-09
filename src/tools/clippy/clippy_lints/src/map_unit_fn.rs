@@ -101,10 +101,10 @@ fn is_unit_type(ty: Ty<'_>) -> bool {
 fn is_unit_function(cx: &LateContext<'_>, expr: &hir::Expr<'_>) -> bool {
     let ty = cx.typeck_results().expr_ty(expr);
 
-    if let ty::FnDef(id, _) = *ty.kind() {
-        if let Some(fn_type) = cx.tcx.fn_sig(id).instantiate_identity().no_bound_vars() {
-            return is_unit_type(fn_type.output());
-        }
+    if let ty::FnDef(id, _) = *ty.kind()
+        && let Some(fn_type) = cx.tcx.fn_sig(id).instantiate_identity().no_bound_vars()
+    {
+        return is_unit_type(fn_type.output());
     }
     false
 }
@@ -255,7 +255,7 @@ impl LateLintPass<'_> for MapUnit {
     fn check_stmt(&mut self, cx: &LateContext<'_>, stmt: &hir::Stmt<'_>) {
         if let hir::StmtKind::Semi(expr) = stmt.kind
             && !stmt.span.from_expansion()
-            && let Some(arglists) = method_chain_args(expr, &["map"])
+            && let Some(arglists) = method_chain_args(expr, &[sym::map])
         {
             lint_map_unit_fn(cx, stmt, expr, arglists[0]);
         }

@@ -5,14 +5,16 @@ use anyhow::Context;
 use rustc_hash::FxHashMap;
 use toolchain::Tool;
 
-use crate::{toolchain_info::QueryConfig, utf8_stdout, ManifestPath, Sysroot};
+use crate::{
+    Sysroot, cargo_config_file::CargoConfigFile, toolchain_info::QueryConfig, utf8_stdout,
+};
 
 /// For cargo, runs `cargo -Zunstable-options config get build.target` to get the configured project target(s).
 /// For rustc, runs `rustc --print -vV` to get the host target.
 pub fn get(
     config: QueryConfig<'_>,
     target: Option<&str>,
-    extra_env: &FxHashMap<String, String>,
+    extra_env: &FxHashMap<String, Option<String>>,
 ) -> anyhow::Result<Vec<String>> {
     let _p = tracing::info_span!("target_tuple::get").entered();
     if let Some(target) = target {
@@ -20,8 +22,8 @@ pub fn get(
     }
 
     let (sysroot, current_dir) = match config {
-        QueryConfig::Cargo(sysroot, cargo_toml) => {
-            match cargo_config_build_target(cargo_toml, extra_env, sysroot) {
+        QueryConfig::Cargo(sysroot, cargo_toml, config_file) => {
+            match config_file.as_ref().and_then(cargo_config_build_target) {
                 Some(it) => return Ok(it),
                 None => (sysroot, cargo_toml.parent().as_ref()),
             }
@@ -32,12 +34,11 @@ pub fn get(
 }
 
 fn rustc_discover_host_tuple(
-    extra_env: &FxHashMap<String, String>,
+    extra_env: &FxHashMap<String, Option<String>>,
     sysroot: &Sysroot,
     current_dir: &Path,
 ) -> anyhow::Result<String> {
-    let mut cmd = sysroot.tool(Tool::Rustc, current_dir);
-    cmd.envs(extra_env);
+    let mut cmd = sysroot.tool(Tool::Rustc, current_dir, extra_env);
     cmd.arg("-vV");
     let stdout = utf8_stdout(&mut cmd)
         .with_context(|| format!("unable to discover host platform via `{cmd:?}`"))?;
@@ -51,31 +52,30 @@ fn rustc_discover_host_tuple(
     }
 }
 
-fn cargo_config_build_target(
-    cargo_toml: &ManifestPath,
-    extra_env: &FxHashMap<String, String>,
-    sysroot: &Sysroot,
-) -> Option<Vec<String>> {
-    let mut cmd = sysroot.tool(Tool::Cargo, cargo_toml.parent());
-    cmd.envs(extra_env);
-    cmd.current_dir(cargo_toml.parent()).env("RUSTC_BOOTSTRAP", "1");
-    cmd.args(["-Z", "unstable-options", "config", "get", "build.target"]);
-    // if successful we receive `build.target = "target-tuple"`
-    // or `build.target = ["<target 1>", ..]`
-    // this might be `error: config value `build.target` is not set` in which case we
-    // don't wanna log the error
-    utf8_stdout(&mut cmd).and_then(parse_output_cargo_config_build_target).ok()
+fn cargo_config_build_target(config: &CargoConfigFile) -> Option<Vec<String>> {
+    match parse_json_cargo_config_build_target(config) {
+        Ok(v) => v,
+        Err(e) => {
+            tracing::debug!("Failed to discover cargo config build target {e:?}");
+            None
+        }
+    }
 }
 
 // Parses `"build.target = [target-tuple, target-tuple, ...]"` or `"build.target = "target-tuple"`
-fn parse_output_cargo_config_build_target(stdout: String) -> anyhow::Result<Vec<String>> {
-    let trimmed = stdout.trim_start_matches("build.target = ").trim_matches('"');
-
-    if !trimmed.starts_with('[') {
-        return Ok([trimmed.to_owned()].to_vec());
+fn parse_json_cargo_config_build_target(
+    config: &CargoConfigFile,
+) -> anyhow::Result<Option<Vec<String>>> {
+    let target = config.get("build").and_then(|v| v.as_object()).and_then(|m| m.get("target"));
+    match target {
+        Some(serde_json::Value::String(s)) => Ok(Some(vec![s.to_owned()])),
+        Some(v) => serde_json::from_value(v.clone())
+            .map(Option::Some)
+            .context("Failed to parse `build.target` as an array of target"),
+        // t`error: config value `build.target` is not set`, in which case we
+        // don't wanna log the error
+        None => Ok(None),
     }
-
-    serde_json::from_str(trimmed).context("Failed to parse `build.target` as an array of target")
 }
 
 #[cfg(test)]
@@ -92,7 +92,7 @@ mod tests {
         let sysroot = Sysroot::empty();
         let manifest_path =
             ManifestPath::try_from(AbsPathBuf::assert(Utf8PathBuf::from(manifest_path))).unwrap();
-        let cfg = QueryConfig::Cargo(&sysroot, &manifest_path);
+        let cfg = QueryConfig::Cargo(&sysroot, &manifest_path, &None);
         assert!(get(cfg, None, &FxHashMap::default()).is_ok());
     }
 

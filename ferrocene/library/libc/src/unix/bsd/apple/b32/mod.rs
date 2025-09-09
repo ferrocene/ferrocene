@@ -60,7 +60,6 @@ s_no_extra_traits! {
         __opaque: [c_char; crate::__PTHREAD_ONCE_SIZE__],
     }
 
-    #[allow(missing_debug_implementations)]
     #[repr(align(16))]
     pub struct max_align_t {
         priv_: [f64; 2],
@@ -80,14 +79,6 @@ cfg_if! {
             }
         }
         impl Eq for pthread_attr_t {}
-        impl fmt::Debug for pthread_attr_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("pthread_attr_t")
-                    .field("__sig", &self.__sig)
-                    // FIXME(debug): .field("__opaque", &self.__opaque)
-                    .finish()
-            }
-        }
         impl hash::Hash for pthread_attr_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.__sig.hash(state);
@@ -105,13 +96,6 @@ cfg_if! {
             }
         }
         impl Eq for pthread_once_t {}
-        impl fmt::Debug for pthread_once_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("pthread_once_t")
-                    .field("__sig", &self.__sig)
-                    .finish()
-            }
-        }
         impl hash::Hash for pthread_once_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.__sig.hash(state);

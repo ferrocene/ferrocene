@@ -65,22 +65,33 @@ subset = "default"
 name = "flip-link"
 subset = "default"
 
+[[groups.hosts.packages]]
+name = "miri"
+subset = "default"
+
 [groups.cross-compilation]
 targets = [
-  "x86_64-apple-darwin",
   "aarch64-unknown-linux-gnu",
+  "aarch64-unknown-linux-musl",
   "aarch64-unknown-none",
+  "aarch64-unknown-ferrocene.facade",
   "armebv7r-none-eabihf",
   "armv7r-none-eabihf",
   "armv8r-none-eabihf",
   "riscv64gc-unknown-linux-gnu",
   "thumbv6m-none-eabi",
   "thumbv7em-none-eabi",
+  "thumbv7em-ferrocene.facade-eabi",
   "thumbv7em-none-eabihf",
+  "thumbv7em-ferrocene.facade-eabihf",
   "thumbv8m.base-none-eabi",
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
   "wasm32-unknown-unknown",
+  "x86_64-unknown-linux-musl",
+  "aarch64-unknown-ferrocene.certified",
+  "thumbv7em-ferrocene.certified-eabi",
+  "thumbv7em-ferrocene.certified-eabihf",
 ]
 
 [[groups.cross-compilation.packages]]
@@ -97,12 +108,12 @@ targets = [
 name = "rust-std"
 subset = "qnx"
 
-#[groups.oxidos]
-#targets = ["wasm32-unknown-unknown"]
-#
-#[[groups.oxidos.packages]]
-#name = "oxidos"
-#subset = "oxidos"
+[groups.oxidos]
+targets = ["wasm32-unknown-unknown"]
+
+[[groups.oxidos.packages]]
+name = "oxidos"
+subset = "oxidos"
 
 [groups.any-platform]
 targets = ["*"]

@@ -111,9 +111,12 @@ Contributing to Upstream
 ------------------------
 
 A developer may contribute to upstream by either requesting a feature to be
-developed, reporting a bug, submitting a Pull Request for review and merging into
-the master branch, or writing documentation.
+developed, reporting a bug, submitting a Pull Request for review and getting
+it merged, or writing documentation.
 
-The procedures and guidelines for contributing to upstream are outside the scope
-of this document, and can be found at
-https://rustc-dev-guide.rust-lang.org/contributing.html.
+Each change gets reviewed by an appointed Rust expert and the review protocol
+is publicly available. The reviews are very thorough and make sure changes are
+of high quality.
+
+For more details on the procedures and guidelines for contributing to upstream
+read https://rustc-dev-guide.rust-lang.org/contributing.html.

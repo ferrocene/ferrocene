@@ -1,6 +1,36 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+[["tests/codegen-llvm"]]
+tests = [
+    "tests/codegen-llvm/enum/enum-match.rs",
+    "tests/codegen-llvm/enum/enum-transparent-extract.rs",
+]
+targets = ["aarch64-unknown-ferrocene.facade"]
+reason = "TODO: to be investigated"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/symbol-names/verbose.rs",
+    "tests/ui/type/issue-94187-verbose-type-name.rs",
+]
+targets = ["aarch64-apple-darwin",]
+reason = "TODO: to be investigated"
+
+[["tests/crashes"]]
+tests = [
+    "tests/crashes/120175.rs",
+]
+targets = ["aarch64-apple-darwin",]
+reason = "This test is fixed on upstream as of 7db184056909045802a66299947dc81c8e43e605"
+
+[["tests/rustdoc-js"]]
+tests = [
+    "tests/rustdoc-js/generics.rs",
+]
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin"]
+reason = "TODO: to be investigated"
+
 [["tests/run-make"]]
 tests = [
     "tests/run-coverage",
@@ -18,12 +48,40 @@ tests = [
 targets = ["aarch64-unknown-linux-gnu"]
 reason = "QEMU user space emulation doesn't support most sanitizers"
 
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/c-link-to-rust-va-list-fn",
+]
+targets = ["thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+reason = "<assert.h> is not available for inclusion on this platform"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/c-link-to-rust-va-list-fn",
+]
+targets = ["aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710"]
+reason = "Fails with linker errors on `-lpthread`, `-ldl`, and `-lrt`"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/c-link-to-rust-va-list-fn",
+]
+targets = ["aarch64-unknown-ferrocene.facade"]
+reason = "libcheckrust includes symbols which cannot be used without `-fPIC` on this platform"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/command/command-argv0.rs",
+]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+reason = "QEMU user space emulation behaves differently with argv0"
+
 [["tests/ui"]]
 tests = [
     "tests/ui/process/no-stdio.rs",
     "tests/ui/process/nofile-limit.rs",
 ]
-targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation behaves differently when spawning processes fails"
 
 [["tests/ui"]]
@@ -46,7 +104,7 @@ tests = [
     "tests/ui/test-attrs/test-panic-abort-nocapture.rs",
     "tests/ui/test-attrs/test-panic-abort.rs",
 ]
-targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
 [["tests/debuginfo"]]
@@ -61,5 +119,25 @@ reason = "The test does not pass on CI, to be revisited later. https://github.co
 
 [["tests/debuginfo"]]
 tests = ["tests/debuginfo"]
-targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "Running these tests require changes to bootstrap"
+
+[["tests/ui-fulldeps"]]
+tests = [
+    "tests/ui-fulldeps/session-diagnostic/diagnostic-derive-doc-comment-field.rs",
+    "tests/ui-fulldeps/session-diagnostic/diagnostic-derive.rs",
+]
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin",]
+reason = "These tests were broken in https://github.com/rust-lang/rust/pull/141751 and should be resolved with https://github.com/rust-lang/rust/pull/142377"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-add-and-remove-same-flag.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-minus-minus-plus.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-plus-plus-minus.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_space-eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-same-flag-many-times.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_eq.rs",
+]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+reason = "Currently output of these tests experiences multiple stdout writers colliding to create unreproducible results"

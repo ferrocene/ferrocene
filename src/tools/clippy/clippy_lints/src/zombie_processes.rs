@@ -4,7 +4,8 @@ use clippy_utils::{fn_def_id, get_enclosing_block, path_to_local_id};
 use rustc_ast::Mutability;
 use rustc_ast::visit::visit_opt;
 use rustc_errors::Applicability;
-use rustc_hir::intravisit::{Visitor, walk_block, walk_expr, walk_local};
+use rustc_hir::def_id::LocalDefId;
+use rustc_hir::intravisit::{Visitor, walk_block, walk_expr};
 use rustc_hir::{Expr, ExprKind, HirId, LetStmt, Node, PatKind, Stmt, StmtKind};
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::hir::nested_filter;
@@ -68,7 +69,9 @@ impl<'tcx> LateLintPass<'tcx> for ZombieProcesses {
                     let mut vis = WaitFinder {
                         cx,
                         local_id,
-                        state: VisitorState::WalkUpToLocal,
+                        create_id: expr.hir_id,
+                        body_id: cx.tcx.hir_enclosing_body_owner(expr.hir_id),
+                        state: VisitorState::WalkUpToCreate,
                         early_return: None,
                         missing_wait_branch: None,
                     };
@@ -129,17 +132,19 @@ struct MaybeWait(Span);
 struct WaitFinder<'a, 'tcx> {
     cx: &'a LateContext<'tcx>,
     local_id: HirId,
+    create_id: HirId,
+    body_id: LocalDefId,
     state: VisitorState,
     early_return: Option<Span>,
-    // When joining two if branches where one of them doesn't call `wait()`, stores its span for more targetted help
+    // When joining two if branches where one of them doesn't call `wait()`, stores its span for more targeted help
     // messages
     missing_wait_branch: Option<MissingWaitBranch>,
 }
 
 #[derive(PartialEq)]
 enum VisitorState {
-    WalkUpToLocal,
-    LocalFound,
+    WalkUpToCreate,
+    CreateFound,
 }
 
 #[derive(Copy, Clone)]
@@ -152,19 +157,13 @@ impl<'tcx> Visitor<'tcx> for WaitFinder<'_, 'tcx> {
     type NestedFilter = nested_filter::OnlyBodies;
     type Result = ControlFlow<MaybeWait>;
 
-    fn visit_local(&mut self, l: &'tcx LetStmt<'tcx>) -> Self::Result {
-        if self.state == VisitorState::WalkUpToLocal
-            && let PatKind::Binding(_, pat_id, ..) = l.pat.kind
-            && self.local_id == pat_id
-        {
-            self.state = VisitorState::LocalFound;
+    fn visit_expr(&mut self, ex: &'tcx Expr<'tcx>) -> Self::Result {
+        if ex.hir_id == self.create_id {
+            self.state = VisitorState::CreateFound;
+            return Continue(());
         }
 
-        walk_local(self, l)
-    }
-
-    fn visit_expr(&mut self, ex: &'tcx Expr<'tcx>) -> Self::Result {
-        if self.state != VisitorState::LocalFound {
+        if self.state != VisitorState::CreateFound {
             return walk_expr(self, ex);
         }
 
@@ -186,7 +185,7 @@ impl<'tcx> Visitor<'tcx> for WaitFinder<'_, 'tcx> {
             }
         } else {
             match ex.kind {
-                ExprKind::Ret(e) => {
+                ExprKind::Ret(e) if self.cx.tcx.hir_enclosing_body_owner(ex.hir_id) == self.body_id => {
                     visit_opt!(self, visit_expr, e);
                     if self.early_return.is_none() {
                         self.early_return = Some(ex.span);

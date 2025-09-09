@@ -12,5 +12,10 @@ fn main() {
     json_bom_plus_crlf_multifile_aux::test();
 }
 
+//~? ERROR mismatched types
+//~? ERROR mismatched types
+//~? ERROR mismatched types
+//~? ERROR mismatched types
+
 // ferrocene-annotations: um_rustc_json
 // ferrocene-annotations: um_rustc_error_format

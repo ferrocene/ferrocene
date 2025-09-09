@@ -28,9 +28,9 @@ pub type RawOsError = usize;
 use crate::io as std_io;
 use crate::os::uefi;
 use crate::ptr::NonNull;
-use crate::sync::atomic::{AtomicPtr, Ordering};
+use crate::sync::atomic::{Atomic, AtomicPtr, Ordering};
 
-static EXIT_BOOT_SERVICE_EVENT: AtomicPtr<crate::ffi::c_void> =
+static EXIT_BOOT_SERVICE_EVENT: Atomic<*mut crate::ffi::c_void> =
     AtomicPtr::new(crate::ptr::null_mut());
 
 /// # SAFETY
@@ -159,14 +159,6 @@ pub fn abort_internal() -> ! {
 
     // In case SystemTable and ImageHandle cannot be reached, use `core::intrinsics::abort`
     core::intrinsics::abort();
-}
-
-// This function is needed by the panic runtime. The symbol is named in
-// pre-link args for the target specification, so keep that in sync.
-#[cfg(not(test))]
-#[unsafe(no_mangle)]
-pub extern "C" fn __rust_abort() {
-    abort_internal();
 }
 
 /// Disable access to BootServices if `EVT_SIGNAL_EXIT_BOOT_SERVICES` is signaled

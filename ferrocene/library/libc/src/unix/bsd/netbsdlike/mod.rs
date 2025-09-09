@@ -78,7 +78,7 @@ s! {
         pub cgid: crate::gid_t,
         pub uid: crate::uid_t,
         pub gid: crate::gid_t,
-        pub mode: crate::mode_t,
+        pub mode: mode_t,
         #[cfg(target_os = "openbsd")]
         pub seq: c_ushort,
         #[cfg(target_os = "netbsd")]
@@ -440,6 +440,34 @@ pub const MNT_NODEV: c_int = 0x00000010;
 pub const MNT_LOCAL: c_int = 0x00001000;
 pub const MNT_QUOTA: c_int = 0x00002000;
 
+// sys/ioccom.h in NetBSD and OpenBSD
+pub const IOCPARM_MASK: u32 = 0x1fff;
+
+pub const IOC_VOID: c_ulong = 0x20000000;
+pub const IOC_OUT: c_ulong = 0x40000000;
+pub const IOC_IN: c_ulong = 0x80000000;
+pub const IOC_INOUT: c_ulong = IOC_IN | IOC_OUT;
+pub const IOC_DIRMASK: c_ulong = 0xe0000000;
+
+pub const fn _IO(g: c_ulong, n: c_ulong) -> c_ulong {
+    _IOC(IOC_VOID, g, n, 0)
+}
+
+/// Build an ioctl number for an read-only ioctl.
+pub const fn _IOR<T>(g: c_ulong, n: c_ulong) -> c_ulong {
+    _IOC(IOC_OUT, g, n, mem::size_of::<T>() as c_ulong)
+}
+
+/// Build an ioctl number for an write-only ioctl.
+pub const fn _IOW<T>(g: c_ulong, n: c_ulong) -> c_ulong {
+    _IOC(IOC_IN, g, n, mem::size_of::<T>() as c_ulong)
+}
+
+/// Build an ioctl number for a read-write ioctl.
+pub const fn _IOWR<T>(g: c_ulong, n: c_ulong) -> c_ulong {
+    _IOC(IOC_INOUT, g, n, mem::size_of::<T>() as c_ulong)
+}
+
 pub const AF_UNSPEC: c_int = 0;
 pub const AF_LOCAL: c_int = 1;
 pub const AF_UNIX: c_int = AF_LOCAL;
@@ -689,7 +717,7 @@ extern "C" {
     #[cfg_attr(target_os = "netbsd", link_name = "__clock_settime50")]
     pub fn clock_settime(clk_id: crate::clockid_t, tp: *const crate::timespec) -> c_int;
     pub fn __errno() -> *mut c_int;
-    pub fn shm_open(name: *const c_char, oflag: c_int, mode: crate::mode_t) -> c_int;
+    pub fn shm_open(name: *const c_char, oflag: c_int, mode: mode_t) -> c_int;
     pub fn memrchr(cx: *const c_void, c: c_int, n: size_t) -> *mut c_void;
     pub fn mkostemp(template: *mut c_char, flags: c_int) -> c_int;
     pub fn mkostemps(template: *mut c_char, suffixlen: c_int, flags: c_int) -> c_int;
@@ -707,9 +735,8 @@ extern "C" {
     pub fn getpriority(which: c_int, who: crate::id_t) -> c_int;
     pub fn setpriority(which: c_int, who: crate::id_t, prio: c_int) -> c_int;
 
-    pub fn mknodat(dirfd: c_int, pathname: *const c_char, mode: crate::mode_t, dev: dev_t)
-        -> c_int;
-    pub fn mkfifoat(dirfd: c_int, pathname: *const c_char, mode: crate::mode_t) -> c_int;
+    pub fn mknodat(dirfd: c_int, pathname: *const c_char, mode: mode_t, dev: dev_t) -> c_int;
+    pub fn mkfifoat(dirfd: c_int, pathname: *const c_char, mode: mode_t) -> c_int;
     pub fn sem_timedwait(sem: *mut sem_t, abstime: *const crate::timespec) -> c_int;
     pub fn sem_getvalue(sem: *mut sem_t, sval: *mut c_int) -> c_int;
     pub fn pthread_condattr_setclock(
@@ -830,7 +857,7 @@ extern "C" {
         fd: c_int,
         path: *const c_char,
         oflag: c_int,
-        mode: crate::mode_t,
+        mode: mode_t,
     ) -> c_int;
     pub fn posix_spawn_file_actions_addclose(
         actions: *mut posix_spawn_file_actions_t,

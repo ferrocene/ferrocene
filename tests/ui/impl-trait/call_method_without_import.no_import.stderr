@@ -3,6 +3,7 @@ error[E0599]: no method named `fmt` found for opaque type `impl Debug` in the cu
    |
 LL |         x.fmt(f);
    |           ^^^ method not found in `impl Debug`
+   |
   --> $SRC_DIR/core/src/fmt/mod.rs:LL:COL
    |
    = note: the method is available for `impl Debug` here
@@ -22,15 +23,10 @@ LL |         x.fmt(f);
    = help: items from traits can only be used if the trait is in scope
 help: the following traits which provide `fmt` are implemented but not in scope; perhaps you want to import one of them
    |
-LL + use std::fmt::Binary;
-   |
 LL + use std::fmt::Debug;
    |
-LL + use std::fmt::Display;
+LL + use std::fmt::Pointer;
    |
-LL + use std::fmt::LowerExp;
-   |
-     and 5 other candidates
 
 error: aborting due to 2 previous errors
 

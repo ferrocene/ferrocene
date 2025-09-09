@@ -57,7 +57,7 @@
 
 use crate::cell::Cell;
 use crate::sync::atomic::Ordering::{AcqRel, Acquire, Release};
-use crate::sync::atomic::{AtomicBool, AtomicPtr};
+use crate::sync::atomic::{Atomic, AtomicBool, AtomicPtr};
 use crate::sync::poison::once::ExclusiveState;
 use crate::thread::{self, Thread};
 use crate::{fmt, ptr, sync as public};
@@ -65,7 +65,7 @@ use crate::{fmt, ptr, sync as public};
 type StateAndQueue = *mut ();
 
 pub struct Once {
-    state_and_queue: AtomicPtr<()>,
+    state_and_queue: Atomic<*mut ()>,
 }
 
 pub struct OnceState {
@@ -74,11 +74,12 @@ pub struct OnceState {
 }
 
 // Four states that a Once can be in, encoded into the lower bits of
-// `state_and_queue` in the Once structure.
-const INCOMPLETE: usize = 0x0;
-const POISONED: usize = 0x1;
-const RUNNING: usize = 0x2;
-const COMPLETE: usize = 0x3;
+// `state_and_queue` in the Once structure. By choosing COMPLETE as the all-zero
+// state the `is_completed` check can be a bit faster on some platforms.
+const INCOMPLETE: usize = 0x3;
+const POISONED: usize = 0x2;
+const RUNNING: usize = 0x1;
+const COMPLETE: usize = 0x0;
 
 // Mask to learn about the state. All other bits are the queue of waiters if
 // this is in the RUNNING state.
@@ -94,7 +95,7 @@ const QUEUE_MASK: usize = !STATE_MASK;
 #[repr(align(4))] // Ensure the two lower bits are free to use as state bits.
 struct Waiter {
     thread: Thread,
-    signaled: AtomicBool,
+    signaled: Atomic<bool>,
     next: Cell<*const Waiter>,
 }
 
@@ -102,7 +103,7 @@ struct Waiter {
 // Every node is a struct on the stack of a waiting thread.
 // Will wake up the waiters when it gets dropped, i.e. also on panic.
 struct WaiterQueue<'a> {
-    state_and_queue: &'a AtomicPtr<()>,
+    state_and_queue: &'a Atomic<*mut ()>,
     set_state_on_drop_to: StateAndQueue,
 }
 
@@ -232,7 +233,7 @@ impl Once {
 }
 
 fn wait(
-    state_and_queue: &AtomicPtr<()>,
+    state_and_queue: &Atomic<*mut ()>,
     mut current: StateAndQueue,
     return_on_poisoned: bool,
 ) -> StateAndQueue {

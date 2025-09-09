@@ -18,8 +18,10 @@ Rust program.
 
 :dp:`fls_3fg60jblx0xb`
 :t:`Inline assembly` is written as an :t:`assembly code block` that is
-wrapped inside a :t:`macro invocation` of :t:`macro` :std:`core::arch::asm` or
-:t:`macro` :std:`core::arch::global_asm`.
+wrapped inside a :t:`macro invocation` of
+:t:`macro` :std:`core::arch::asm`,
+:t:`macro` :std:`core::arch::global_asm`, or
+:t:`macro` :std:`core::arch::naked_asm`.
 
 :dp:`fls_helnk2iz8qhp`
 :t:`Inline assembly` is available on the following architectures:
@@ -604,7 +606,7 @@ Register Arguments
 .. syntax::
 
    RegisterArgument ::=
-       (Identifier $$=$$)? DirectionModifier $$($$ RegisterName $$)$$ RegisterExpression
+       (Identifier $$=$$)? ( DirectionModifier $$($$ RegisterName $$)$$ )? RegisterExpression
 
    DirectionModifier ::=
        $$in$$
@@ -617,6 +619,7 @@ Register Arguments
        InputOutputRegisterExpression
      | SimpleRegisterExpression
      | ConstRegisterExpression
+     | SymPathExpression
 
    InputOutputRegisterExpression ::=
        InputRegisterExpression $$=>$$ OutputRegisterExpression
@@ -634,6 +637,9 @@ Register Arguments
 
    ConstRegisterExpression ::=
        $$const$$ Expression
+
+   SymPathExpression ::=
+       $$sym$$ PathExpression
 
 .. rubric:: Legality Rules
 
@@ -702,6 +708,10 @@ A :t:`register expression` is either an :t:`input-output register expression`, a
 
 :dp:`fls_jU8zg4k8dFsY`
 The :t:`type` of a :t:`const register expression` shall be an :t:`integer type`.
+
+:dp:`fls_y2wCBvXDtQK2`
+A :dt:`sym path expression` is a way for the :t:`assembly code block` to refer either to
+a :t:`function` :t:`name` or a :t:`static` :t:`name`.
 
 :dp:`fls_66owmltvhnu4`
 The :t:`type` of an :t:`input register expression`,
@@ -1484,7 +1494,7 @@ An :t:`assembly option` is used to specify a characteristic of or a restriction
 on the related :t:`assembly code block`.
 
 :dp:`fls_g09kmp2a04g9`
-:t:`Assembly option` ``att_syntax`` is applicable only to x86 architectures
+:t:`Assembly option` :dc:`att_syntax` is applicable only to x86 architectures
 and causes the assembler to use the ``.att_syntax`` prefix mode which prefixes
 :t:`[register]s` with ``%``.
 
@@ -1561,7 +1571,7 @@ of the following flags :t:`[register]s` shall be restored on exit from an
 side effects, and its outputs depend only on direct inputs.
 
 :dp:`fls_nszx1gllufi2`
-:t:`Assembly option` ``raw`` causes :t:`[assembly instruction]s` to be parsed
+:t:`Assembly option` :dc:`raw` causes :t:`[assembly instruction]s` to be parsed
 raw, without any special handling of :t:`[register parameter]s`.
 
 :dp:`fls_d169ppna563c`
@@ -1607,24 +1617,29 @@ It is undefined behavior if control reaches the end of an
 
 .. _fls_qezwyridmjob:
 
-Macros asm and global_asm
--------------------------
+Macros: asm, global_asm, and naked_asm
+--------------------------------------
 
 .. rubric:: Syntax
 
 .. syntax::
 
    AsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AbiClobber)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ RegisterArgument)* ($$,$$ AbiClobber)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
 
    GlobalAsmArguments ::=
        $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+
+   LabelBlock ::=
+       $$block$$ $${$$ StatementList $$}$$
 
 .. rubric:: Legality Rules
 
 :dp:`fls_ecteot716j8j`
 :t:`[Assembly code block]s` are embedded within Rust source code using
-:t:`[macro]s` :std:`core::arch::asm` and :std:`core::arch::global_asm`.
+:t:`[macro]s` :std:`core::arch::asm`,
+:std:`core::arch::global_asm`, and
+:std:`core::arch::naked_asm`.
 
 :dp:`fls_1ikzov7cxic1`
 When invoking :t:`macro` :std:`core::arch::asm`, the :s:`DelimitedTokenTree` of
@@ -1638,7 +1653,8 @@ encapsulate the :t:`assembly code block` in a separate :t:`function` and
 generate a :t:`call expression` to it.
 
 :dp:`fls_tgzga1lanfuo`
-When invoking :t:`macro` :std:`core::arch::global_asm`, the
+When invoking :t:`macro` :std:`core::arch::global_asm` and
+:t:`macro` :std:`core::arch::naked_asm`, the
 :s:`DelimitedTokenTree` of the related :t:`macro invocation` shall follow the
 syntax of :s:`GlobalAsmArguments`.
 
@@ -1646,6 +1662,15 @@ syntax of :s:`GlobalAsmArguments`.
 Invoking :t:`macro` :std:`core::arch::global_asm` causes the related
 :t:`assembly code block` to be emitted outside the :t:`function` where the
 :t:`macro invocation` took place.
+
+:dp:`fls_PEoOGTBjuEQc`
+The only :t:`[register argument]s` that can be used with :t:`[macro]s`
+:std:`core::arch::global_asm` and :std:`core::arch::naked_asm` are
+:t:`const <const register expression>` and :t:`sym <sym path expression>`.
+
+:dp:`fls_vcB5xwgD6Ign`
+The only :t:`[assembly option]s` that can be used with :t:`[macro]s`
+:std:`core::arch::global_asm` and :std:`core::arch::naked_asm` are :c:`att_syntax` and :c:`raw`.
 
 .. rubric:: Dynamic Semantics
 
@@ -1703,3 +1728,19 @@ The :t:`execution` of an :t:`assembly code block` produced by
 
        unsafe { do_nothing() }
    }
+
+.. _fls_MW7mtH5oOeQ1:
+
+Label block
+-----------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_ZKMMqhBRe5lJ`
+A :dt:`label block` is a :t:`block expression` whose memory address is substituted into an :t:`assembly code block`.
+
+:dp:`fls_vJT3iAG1ZLh3`
+The type of the :t:`label block` must be :t:`unit type` or :t:`never type`.
+
+:dp:`fls_ER0GVQE9N7oH`
+A :t:`label block` does not propagate its :t:`[unsafe context]` to its contained :t:`[statement]s`.

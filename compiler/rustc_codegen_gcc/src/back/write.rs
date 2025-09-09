@@ -4,22 +4,22 @@ use gccjit::{Context, OutputKind};
 use rustc_codegen_ssa::back::link::ensure_removed;
 use rustc_codegen_ssa::back::write::{BitcodeSection, CodegenContext, EmitObj, ModuleConfig};
 use rustc_codegen_ssa::{CompiledModule, ModuleCodegen};
-use rustc_errors::DiagCtxtHandle;
 use rustc_fs_util::link_or_copy;
 use rustc_session::config::OutputType;
-use rustc_span::fatal_error::FatalError;
 use rustc_target::spec::SplitDebuginfo;
 
 use crate::base::add_pic_option;
 use crate::errors::CopyBitcode;
 use crate::{GccCodegenBackend, GccContext};
 
-pub(crate) unsafe fn codegen(
+pub(crate) fn codegen(
     cgcx: &CodegenContext<GccCodegenBackend>,
-    dcx: DiagCtxtHandle<'_>,
     module: ModuleCodegen<GccContext>,
     config: &ModuleConfig,
-) -> Result<CompiledModule, FatalError> {
+) -> CompiledModule {
+    let dcx = cgcx.create_dcx();
+    let dcx = dcx.handle();
+
     let _timer = cgcx.prof.generic_activity_with_arg("GCC_module_codegen", &*module.name);
     {
         let context = &module.module_llvm.context;
@@ -186,6 +186,7 @@ pub(crate) unsafe fn codegen(
 
                     if fat_lto {
                         let lto_path = format!("{}.lto", path);
+                        // cSpell:disable
                         // FIXME(antoyo): The LTO frontend generates the following warning:
                         // ../build_sysroot/sysroot_src/library/core/src/num/dec2flt/lemire.rs:150:15: warning: type of ‘_ZN4core3num7dec2flt5table17POWER_OF_FIVE_12817ha449a68fb31379e4E’ does not match original declaration [-Wlto-type-mismatch]
                         // 150 |     let (lo5, hi5) = POWER_OF_FIVE_128[index];
@@ -193,6 +194,7 @@ pub(crate) unsafe fn codegen(
                         // lto1: note: ‘_ZN4core3num7dec2flt5table17POWER_OF_FIVE_12817ha449a68fb31379e4E’ was previously declared here
                         //
                         // This option is to mute it to make the UI tests pass with LTO enabled.
+                        // cSpell:enable
                         context.add_driver_option("-Wno-lto-type-mismatch");
                         // NOTE: this doesn't actually generate an executable. With the above
                         // flags, it combines the .o files together in another .o.
@@ -243,7 +245,7 @@ pub(crate) unsafe fn codegen(
         }
     }
 
-    Ok(module.into_compiled_module(
+    module.into_compiled_module(
         config.emit_obj != EmitObj::None,
         cgcx.target_can_use_split_dwarf && cgcx.split_debuginfo == SplitDebuginfo::Unpacked,
         config.emit_bc,
@@ -251,15 +253,7 @@ pub(crate) unsafe fn codegen(
         config.emit_ir,
         &cgcx.output_filenames,
         cgcx.invocation_temp.as_deref(),
-    ))
-}
-
-pub(crate) fn link(
-    _cgcx: &CodegenContext<GccCodegenBackend>,
-    _dcx: DiagCtxtHandle<'_>,
-    mut _modules: Vec<ModuleCodegen<GccContext>>,
-) -> Result<ModuleCodegen<GccContext>, FatalError> {
-    unimplemented!();
+    )
 }
 
 pub(crate) fn save_temp_bitcode(

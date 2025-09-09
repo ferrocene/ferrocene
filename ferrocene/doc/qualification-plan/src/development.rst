@@ -83,6 +83,11 @@ ticket), even if the developers and reviewers decided it was minor.
 
 Tickets must be created in the project management tool under the respective
 project board, they must be appropriately scoped, and they must detail acceptance criteria.
+
+The ticket shall detail which parts of Ferrocene are expected to be impacted.
+That could be for example rustc, the core library, the qualification documentation etc.
+Also it shall detail which tests have to be added.
+
 Large tickets must be broken down into smaller, independent tickets. A ticket
 must be approved by at least one other member of the Ferrocene team without any
 concerns.
@@ -106,8 +111,18 @@ The branch can be called anything except the following:
 - ``staging``
 
 To avoid conflicts, it is strongly recommended that the main developer for a
-branch adds a prefix to the branch name unique to them (like ``pa-`` or
-``skade-``).
+branch adds a prefix to the branch name unique to them (like ``hoverbear/`` or
+``skade/``).
+
+During development, the vast majority of code shall be written directly by
+humans. Technology like auto-complete (eg. Intellisense) or structured
+refactoring (eg. with Rust Analyzer) are permitted. However, bulk
+low-effort changes of questionable copyright or provenance, such as those
+created with generative AI such as LLMs, will be rejected. The Rust compiler
+team pursues a similar policy of rejecting 
+`low-effort changes <https://github.com/rust-lang/compiler-team/issues/893>`_,
+the Rust project is currently
+`evaluating their stance on AI <https://rust-lang.zulipchat.com/#narrow/channel/392734-council/topic/AI.20policy/with/493978958>`_.
 
 Each time a new commit is pushed to the Ferrocene GitHub repository, the
 Ferrocene CI infrastructure runs a subset of the test suite as part of the
@@ -116,8 +131,8 @@ commits being tested, rather they serve as an aid for the Ferrocene developer
 to catch the most common mistakes before and during code review. For further
 details, see :ref:`ci-phase-spot`.
 
-Once active development is done, a PR is opened and this initiates
-:ref:`dev-phase-review`.
+Once active development is done, a PR is opened with a description of the
+change. This initiates :ref:`dev-phase-review`.
 
 .. _dev-phase-review:
 

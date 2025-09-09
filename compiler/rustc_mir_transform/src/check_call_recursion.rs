@@ -3,6 +3,7 @@ use std::ops::ControlFlow;
 use rustc_data_structures::graph::iterate::{
     NodeStatus, TriColorDepthFirstSearch, TriColorVisitor,
 };
+use rustc_hir::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_middle::mir::{self, BasicBlock, BasicBlocks, Body, Terminator, TerminatorKind};
 use rustc_middle::ty::{self, GenericArg, GenericArgs, Instance, Ty, TyCtxt};
@@ -20,7 +21,7 @@ impl<'tcx> MirLint<'tcx> for CheckCallRecursion {
 
         if let DefKind::Fn | DefKind::AssocFn = tcx.def_kind(def_id) {
             // If this is trait/impl method, extract the trait's args.
-            let trait_args = match tcx.trait_of_item(def_id.to_def_id()) {
+            let trait_args = match tcx.trait_of_assoc(def_id.to_def_id()) {
                 Some(trait_def_id) => {
                     let trait_args_count = tcx.generics_of(trait_def_id).count();
                     &GenericArgs::identity_for_item(tcx, def_id)[..trait_args_count]
@@ -42,10 +43,9 @@ impl<'tcx> MirLint<'tcx> for CheckDropRecursion {
 
         // First check if `body` is an `fn drop()` of `Drop`
         if let DefKind::AssocFn = tcx.def_kind(def_id)
-        && let Some(trait_ref) =
-            tcx.impl_of_method(def_id.to_def_id()).and_then(|def_id| tcx.impl_trait_ref(def_id))
-        && let Some(drop_trait) = tcx.lang_items().drop_trait()
-        && drop_trait == trait_ref.instantiate_identity().def_id
+        && let Some(impl_id) = tcx.trait_impl_of_assoc(def_id.to_def_id())
+        && let trait_ref = tcx.impl_trait_ref(impl_id).unwrap()
+        && tcx.is_lang_item(trait_ref.instantiate_identity().def_id, LangItem::Drop)
         // avoid erroneous `Drop` impls from causing ICEs below
         && let sig = tcx.fn_sig(def_id).instantiate_identity()
         && sig.inputs().skip_binder().len() == 1

@@ -11,10 +11,10 @@ mod snippet;
 mod tests;
 
 use ide_db::{
+    FilePosition, FxHashSet, RootDatabase,
     imports::insert_use::{self, ImportScope},
     syntax_helpers::tree_diff::diff,
     text_edit::TextEdit,
-    FilePosition, FxHashSet, RootDatabase,
 };
 use syntax::ast::make;
 
@@ -208,9 +208,9 @@ pub fn completions(
     // when the user types a bare `_` (that is it does not belong to an identifier)
     // the user might just wanted to type a `_` for type inference or pattern discarding
     // so try to suppress completions in those cases
-    if trigger_character == Some('_') && ctx.original_token.kind() == syntax::SyntaxKind::UNDERSCORE
-    {
-        if let CompletionAnalysis::NameRef(NameRefContext {
+    if trigger_character == Some('_')
+        && ctx.original_token.kind() == syntax::SyntaxKind::UNDERSCORE
+        && let CompletionAnalysis::NameRef(NameRefContext {
             kind:
                 NameRefKind::Path(
                     path_ctx @ PathCompletionCtx {
@@ -220,11 +220,9 @@ pub fn completions(
                 ),
             ..
         }) = analysis
-        {
-            if path_ctx.is_trivial_path() {
-                return None;
-            }
-        }
+        && path_ctx.is_trivial_path()
+    {
+        return None;
     }
 
     {
@@ -275,7 +273,9 @@ pub fn resolve_completion_edits(
     let _p = tracing::info_span!("resolve_completion_edits").entered();
     let sema = hir::Semantics::new(db);
 
-    let original_file = sema.parse(sema.attach_first_edition(file_id)?);
+    let editioned_file_id = sema.attach_first_edition(file_id)?;
+
+    let original_file = sema.parse(editioned_file_id);
     let original_token =
         syntax::AstNode::syntax(&original_file).token_at_offset(offset).left_biased()?;
     let position_for_import = &original_token.parent()?;

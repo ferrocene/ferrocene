@@ -2,8 +2,8 @@
 use hir::DisplayTarget;
 use ide_db::famous_defs::FamousDefs;
 use syntax::{
-    ast::{self, AstNode},
     Direction, NodeOrToken, SyntaxKind, T,
+    ast::{self, AstNode},
 };
 
 use crate::{InlayHint, InlayHintPosition, InlayHintsConfig, InlayKind};
@@ -51,12 +51,11 @@ pub(super) fn hints(
             if ty.is_unknown() {
                 return None;
             }
-            if matches!(expr, ast::Expr::PathExpr(_)) {
-                if let Some(hir::Adt::Struct(st)) = ty.as_adt() {
-                    if st.fields(sema.db).is_empty() {
-                        return None;
-                    }
-                }
+            if matches!(expr, ast::Expr::PathExpr(_))
+                && let Some(hir::Adt::Struct(st)) = ty.as_adt()
+                && st.fields(sema.db).is_empty()
+            {
+                return None;
             }
             let label = label_of_ty(famous_defs, config, &ty, display_target)?;
             acc.push(InlayHint {
@@ -76,16 +75,15 @@ pub(super) fn hints(
 
 #[cfg(test)]
 mod tests {
-    use expect_test::{expect, Expect};
+    use expect_test::{Expect, expect};
     use ide_db::text_edit::{TextRange, TextSize};
 
     use crate::{
-        fixture,
+        InlayHintsConfig, fixture,
         inlay_hints::{
-            tests::{check_expect, check_with_config, DISABLED_CONFIG, TEST_CONFIG},
             LazyProperty,
+            tests::{DISABLED_CONFIG, TEST_CONFIG, check_expect, check_with_config},
         },
-        InlayHintsConfig,
     };
 
     #[track_caller]

@@ -5,21 +5,21 @@ use std::{
 
 use either::Either;
 use hir::{
-    sym, ClosureStyle, DisplayTarget, HasVisibility, HirDisplay, HirDisplayError, HirWrite,
-    ModuleDef, ModuleDefId, Semantics,
+    ClosureStyle, DisplayTarget, EditionedFileId, HasVisibility, HirDisplay, HirDisplayError,
+    HirWrite, InRealFile, ModuleDef, ModuleDefId, Semantics, sym,
 };
-use ide_db::{famous_defs::FamousDefs, FileRange, RootDatabase};
-use ide_db::{text_edit::TextEdit, FxHashSet};
+use ide_db::{FileRange, RootDatabase, famous_defs::FamousDefs, text_edit::TextEditBuilder};
+use ide_db::{FxHashSet, text_edit::TextEdit};
 use itertools::Itertools;
-use smallvec::{smallvec, SmallVec};
-use span::EditionedFileId;
+use smallvec::{SmallVec, smallvec};
 use stdx::never;
 use syntax::{
+    SmolStr, SyntaxNode, TextRange, TextSize, WalkEvent,
     ast::{self, AstNode, HasGenericParams},
-    format_smolstr, match_ast, SmolStr, SyntaxNode, TextRange, TextSize, WalkEvent,
+    format_smolstr, match_ast,
 };
 
-use crate::{navigation_target::TryToNav, FileId};
+use crate::{FileId, navigation_target::TryToNav};
 
 mod adjustment;
 mod bind_pat;
@@ -34,6 +34,7 @@ mod extern_block;
 mod generic_param;
 mod implicit_drop;
 mod implicit_static;
+mod implied_dyn_trait;
 mod lifetime;
 mod param_name;
 mod range_exclusive;
@@ -85,7 +86,7 @@ pub(crate) fn inlay_hints(
     let sema = Semantics::new(db);
     let file_id = sema
         .attach_first_edition(file_id)
-        .unwrap_or_else(|| EditionedFileId::current_edition(file_id));
+        .unwrap_or_else(|| EditionedFileId::current_edition(db, file_id));
     let file = sema.parse(file_id);
     let file = file.syntax();
 
@@ -95,16 +96,16 @@ pub(crate) fn inlay_hints(
         return acc;
     };
     let famous_defs = FamousDefs(&sema, scope.krate());
+    let display_target = famous_defs.1.to_display_target(sema.db);
 
     let ctx = &mut InlayHintCtx::default();
     let mut hints = |event| {
         if let Some(node) = handle_event(ctx, event) {
-            hints(&mut acc, ctx, &famous_defs, config, file_id, node);
+            hints(&mut acc, ctx, &famous_defs, config, file_id, display_target, node);
         }
     };
     let mut preorder = file.preorder();
     while let Some(event) = preorder.next() {
-        // FIXME: This can miss some hints that require the parent of the range to calculate
         if matches!((&event, range_limit), (WalkEvent::Enter(node), Some(range)) if range.intersect(node.text_range()).is_none())
         {
             preorder.skip_subtree();
@@ -136,7 +137,7 @@ pub(crate) fn inlay_hints_resolve(
     let sema = Semantics::new(db);
     let file_id = sema
         .attach_first_edition(file_id)
-        .unwrap_or_else(|| EditionedFileId::current_edition(file_id));
+        .unwrap_or_else(|| EditionedFileId::current_edition(db, file_id));
     let file = sema.parse(file_id);
     let file = file.syntax();
 
@@ -144,10 +145,12 @@ pub(crate) fn inlay_hints_resolve(
     let famous_defs = FamousDefs(&sema, scope.krate());
     let mut acc = Vec::new();
 
+    let display_target = famous_defs.1.to_display_target(sema.db);
+
     let ctx = &mut InlayHintCtx::default();
     let mut hints = |event| {
         if let Some(node) = handle_event(ctx, event) {
-            hints(&mut acc, ctx, &famous_defs, config, file_id, node);
+            hints(&mut acc, ctx, &famous_defs, config, file_id, display_target, node);
         }
     };
 
@@ -202,13 +205,19 @@ fn handle_event(ctx: &mut InlayHintCtx, node: WalkEvent<SyntaxNode>) -> Option<S
 fn hints(
     hints: &mut Vec<InlayHint>,
     ctx: &mut InlayHintCtx,
-    famous_defs @ FamousDefs(sema, _): &FamousDefs<'_, '_>,
+    famous_defs @ FamousDefs(sema, _krate): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig,
     file_id: EditionedFileId,
+    display_target: DisplayTarget,
     node: SyntaxNode,
 ) {
-    let display_target = sema.first_crate_or_default(file_id.file_id()).to_display_target(sema.db);
-    closing_brace::hints(hints, sema, config, file_id, display_target, node.clone());
+    closing_brace::hints(
+        hints,
+        sema,
+        config,
+        display_target,
+        InRealFile { file_id, value: node.clone() },
+    );
     if let Some(any_has_generic_args) = ast::AnyHasGenericArgs::cast(node.clone()) {
         generic_param::hints(hints, famous_defs, config, any_has_generic_args);
     }
@@ -219,26 +228,26 @@ fn hints(
                 chaining::hints(hints, famous_defs, config, display_target, &expr);
                 adjustment::hints(hints, famous_defs, config, display_target, &expr);
                 match expr {
-                    ast::Expr::CallExpr(it) => param_name::hints(hints, famous_defs, config, file_id, ast::Expr::from(it)),
+                    ast::Expr::CallExpr(it) => param_name::hints(hints, famous_defs, config, ast::Expr::from(it)),
                     ast::Expr::MethodCallExpr(it) => {
-                        param_name::hints(hints, famous_defs, config, file_id, ast::Expr::from(it))
+                        param_name::hints(hints, famous_defs, config, ast::Expr::from(it))
                     }
                     ast::Expr::ClosureExpr(it) => {
-                        closure_captures::hints(hints, famous_defs, config, file_id, it.clone());
+                        closure_captures::hints(hints, famous_defs, config, it.clone());
                         closure_ret::hints(hints, famous_defs, config, display_target, it)
                     },
-                    ast::Expr::RangeExpr(it) => range_exclusive::hints(hints, famous_defs, config, file_id,  it),
+                    ast::Expr::RangeExpr(it) => range_exclusive::hints(hints, famous_defs, config, it),
                     _ => Some(()),
                 }
             },
             ast::Pat(it) => {
-                binding_mode::hints(hints, famous_defs, config, file_id,  &it);
+                binding_mode::hints(hints, famous_defs, config, &it);
                 match it {
                     ast::Pat::IdentPat(it) => {
                         bind_pat::hints(hints, famous_defs, config, display_target, &it);
                     }
                     ast::Pat::RangePat(it) => {
-                        range_exclusive::hints(hints, famous_defs, config, file_id, it);
+                        range_exclusive::hints(hints, famous_defs, config, it);
                     }
                     _ => {}
                 }
@@ -246,30 +255,38 @@ fn hints(
             },
             ast::Item(it) => match it {
                 ast::Item::Fn(it) => {
-                    implicit_drop::hints(hints, famous_defs, config, file_id, &it);
+                    implicit_drop::hints(hints, famous_defs, config, display_target, &it);
                     if let Some(extern_block) = &ctx.extern_block_parent {
-                        extern_block::fn_hints(hints, famous_defs, config, file_id, &it, extern_block);
+                        extern_block::fn_hints(hints, famous_defs, config, &it, extern_block);
                     }
-                    lifetime::fn_hints(hints, ctx, famous_defs, config, file_id, it)
+                    lifetime::fn_hints(hints, ctx, famous_defs, config,  it)
                 },
                 ast::Item::Static(it) => {
                     if let Some(extern_block) = &ctx.extern_block_parent {
-                        extern_block::static_hints(hints, famous_defs, config, file_id, &it, extern_block);
+                        extern_block::static_hints(hints, famous_defs, config, &it, extern_block);
                     }
-                    implicit_static::hints(hints, famous_defs, config, file_id, Either::Left(it))
+                    implicit_static::hints(hints, famous_defs, config,  Either::Left(it))
                 },
-                ast::Item::Const(it) => implicit_static::hints(hints, famous_defs, config, file_id, Either::Right(it)),
-                ast::Item::Enum(it) => discriminant::enum_hints(hints, famous_defs, config, file_id, it),
-                ast::Item::ExternBlock(it) => extern_block::extern_block_hints(hints, famous_defs, config, file_id, it),
+                ast::Item::Const(it) => implicit_static::hints(hints, famous_defs, config, Either::Right(it)),
+                ast::Item::Enum(it) => discriminant::enum_hints(hints, famous_defs, config, it),
+                ast::Item::ExternBlock(it) => extern_block::extern_block_hints(hints, famous_defs, config, it),
                 _ => None,
             },
             // FIXME: trait object type elisions
             ast::Type(ty) => match ty {
-                ast::Type::FnPtrType(ptr) => lifetime::fn_ptr_hints(hints, ctx, famous_defs, config, file_id, ptr),
-                ast::Type::PathType(path) => lifetime::fn_path_hints(hints, ctx, famous_defs, config, file_id, path),
+                ast::Type::FnPtrType(ptr) => lifetime::fn_ptr_hints(hints, ctx, famous_defs, config,  ptr),
+                ast::Type::PathType(path) => {
+                    lifetime::fn_path_hints(hints, ctx, famous_defs, config, &path);
+                    implied_dyn_trait::hints(hints, famous_defs, config, Either::Left(path));
+                    Some(())
+                },
+                ast::Type::DynTraitType(dyn_) => {
+                    implied_dyn_trait::hints(hints, famous_defs, config, Either::Right(dyn_));
+                    Some(())
+                },
                 _ => Some(()),
             },
-            ast::GenericParamList(it) => bounds::hints(hints, famous_defs, config, file_id, it),
+            ast::GenericParamList(it) => bounds::hints(hints, famous_defs, config,  it),
             _ => Some(()),
         }
     };
@@ -434,6 +451,7 @@ pub enum InlayKind {
     Parameter,
     GenericParameter,
     Type,
+    Dyn,
     Drop,
     RangeExclusive,
     ExternUnsafety,
@@ -558,13 +576,13 @@ impl InlayHintLabel {
     }
 
     pub fn append_part(&mut self, part: InlayHintLabelPart) {
-        if part.linked_location.is_none() && part.tooltip.is_none() {
-            if let Some(InlayHintLabelPart { text, linked_location: None, tooltip: None }) =
+        if part.linked_location.is_none()
+            && part.tooltip.is_none()
+            && let Some(InlayHintLabelPart { text, linked_location: None, tooltip: None }) =
                 self.parts.last_mut()
-            {
-                text.push_str(&part.text);
-                return;
-            }
+        {
+            text.push_str(&part.text);
+            return;
         }
         self.parts.push(part);
     }
@@ -704,14 +722,14 @@ impl InlayHintLabelBuilder<'_> {
 fn label_of_ty(
     famous_defs @ FamousDefs(sema, _): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig,
-    ty: &hir::Type,
+    ty: &hir::Type<'_>,
     display_target: DisplayTarget,
 ) -> Option<InlayHintLabel> {
     fn rec(
         sema: &Semantics<'_, RootDatabase>,
         famous_defs: &FamousDefs<'_, '_>,
         mut max_length: Option<usize>,
-        ty: &hir::Type,
+        ty: &hir::Type<'_>,
         label_builder: &mut InlayHintLabelBuilder<'_>,
         config: &InlayHintsConfig,
         display_target: DisplayTarget,
@@ -770,11 +788,11 @@ fn label_of_ty(
 }
 
 /// Checks if the type is an Iterator from std::iter and returns the iterator trait and the item type of the concrete iterator.
-fn hint_iterator(
-    sema: &Semantics<'_, RootDatabase>,
-    famous_defs: &FamousDefs<'_, '_>,
-    ty: &hir::Type,
-) -> Option<(hir::Trait, hir::TypeAlias, hir::Type)> {
+fn hint_iterator<'db>(
+    sema: &Semantics<'db, RootDatabase>,
+    famous_defs: &FamousDefs<'_, 'db>,
+    ty: &hir::Type<'db>,
+) -> Option<(hir::Trait, hir::TypeAlias, hir::Type<'db>)> {
     let db = sema.db;
     let strukt = ty.strip_references().as_adt()?;
     let krate = strukt.module(db).krate();
@@ -793,7 +811,7 @@ fn hint_iterator(
 
     if ty.impls_trait(db, iter_trait, &[]) {
         let assoc_type_item = iter_trait.items(db).into_iter().find_map(|item| match item {
-            hir::AssocItem::TypeAlias(alias) if alias.name(db) == sym::Item.clone() => Some(alias),
+            hir::AssocItem::TypeAlias(alias) if alias.name(db) == sym::Item => Some(alias),
             _ => None,
         })?;
         if let Some(ty) = ty.normalize_trait_assoc_type(db, &[], assoc_type_item) {
@@ -808,8 +826,9 @@ fn ty_to_text_edit(
     sema: &Semantics<'_, RootDatabase>,
     config: &InlayHintsConfig,
     node_for_hint: &SyntaxNode,
-    ty: &hir::Type,
-    offset_to_insert: TextSize,
+    ty: &hir::Type<'_>,
+    offset_to_insert_ty: TextSize,
+    additional_edits: &dyn Fn(&mut TextEditBuilder),
     prefix: impl Into<String>,
 ) -> Option<LazyProperty<TextEdit>> {
     // FIXME: Limit the length and bail out on excess somehow?
@@ -818,8 +837,11 @@ fn ty_to_text_edit(
         .and_then(|scope| ty.display_source_code(scope.db, scope.module().into(), false).ok())?;
     Some(config.lazy_text_edit(|| {
         let mut builder = TextEdit::builder();
-        builder.insert(offset_to_insert, prefix.into());
-        builder.insert(offset_to_insert, rendered);
+        builder.insert(offset_to_insert_ty, prefix.into());
+        builder.insert(offset_to_insert_ty, rendered);
+
+        additional_edits(&mut builder);
+
         builder.finish()
     }))
 }
@@ -836,9 +858,9 @@ mod tests {
     use itertools::Itertools;
     use test_utils::extract_annotations;
 
-    use crate::inlay_hints::{AdjustmentHints, AdjustmentHintsMode};
     use crate::DiscriminantHints;
-    use crate::{fixture, inlay_hints::InlayHintsConfig, LifetimeElisionHints};
+    use crate::inlay_hints::{AdjustmentHints, AdjustmentHintsMode};
+    use crate::{LifetimeElisionHints, fixture, inlay_hints::InlayHintsConfig};
 
     use super::{ClosureReturnTypeHints, GenericParameterHints, InlayFieldsToResolve};
 
@@ -994,6 +1016,83 @@ fn foo() {
     let
 }
 "#,
+        );
+    }
+
+    #[test]
+    fn closure_dependency_cycle_no_panic() {
+        check(
+            r#"
+fn foo() {
+    let closure;
+     // ^^^^^^^ impl Fn()
+    closure = || {
+        closure();
+    };
+}
+
+fn bar() {
+    let closure1;
+     // ^^^^^^^^ impl Fn()
+    let closure2;
+     // ^^^^^^^^ impl Fn()
+    closure1 = || {
+        closure2();
+    };
+    closure2 = || {
+        closure1();
+    };
+}
+        "#,
+        );
+    }
+
+    #[test]
+    fn regression_19610() {
+        check(
+            r#"
+trait Trait {
+    type Assoc;
+}
+struct Foo<A>(A);
+impl<A: Trait<Assoc = impl Trait>> Foo<A> {
+    fn foo<'a, 'b>(_: &'a [i32], _: &'b [i32]) {}
+}
+
+fn bar() {
+    Foo::foo(&[1], &[2]);
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn regression_20239() {
+        check_with_config(
+            InlayHintsConfig { parameter_hints: true, type_hints: true, ..DISABLED_CONFIG },
+            r#"
+//- minicore: fn
+trait Iterator {
+    type Item;
+    fn map<B, F: FnMut(Self::Item) -> B>(self, f: F);
+}
+trait ToString {
+    fn to_string(&self);
+}
+
+fn check_tostr_eq<L, R>(left: L, right: R)
+where
+    L: Iterator,
+    L::Item: ToString,
+    R: Iterator,
+    R::Item: ToString,
+{
+    left.map(|s| s.to_string());
+           // ^ impl ToString
+    right.map(|s| s.to_string());
+            // ^ impl ToString
+}
+        "#,
         );
     }
 }

@@ -113,7 +113,8 @@ fn error_with_no_sources_formats_multi_line_correctly() {
 
 #[test]
 // NOTE(ignore/aarch64/nto) this and the `error_with_backtrace_outputs_correctly_with_two_sources`
-// ignored tests are executed as a UI test (`/tests/ui/error-with-backtrace-outputs-correctly.rs`)
+// ignored tests are executed as a UI test
+// (`tests/ui/ferrocene/error-with-backtrace-outputs-correctly.rs`)
 // to avoid an OOM issue when the `std::error` API is used from a thread, which is what the test
 // runner does with all unit tests
 #[cfg_attr(all(target_arch = "aarch64", target_os = "nto"), ignore)]

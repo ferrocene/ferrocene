@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::path::PathBuf;
 
 use crate::TargetSelection;
@@ -9,7 +12,7 @@ static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce"
 // for `bors try`
 // static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try";
 
-const DATE_COMMIT: &str = "20250131/bd027d5";
+const DATE_COMMIT: &str = "20250807/6df2831";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {

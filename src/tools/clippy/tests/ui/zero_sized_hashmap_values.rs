@@ -71,6 +71,35 @@ fn test2(map: HashMap<String, usize>, key: &str) -> HashMap<String, usize> {
     todo!();
 }
 
+fn issue14822() {
+    trait Trait {
+        type T;
+    }
+    struct S<T: Trait>(T::T);
+
+    // The `delay_bug` happens when evaluating the pointer metadata of `S<T>` which depends on
+    // whether `T::T` is `Sized`. Since the type alias doesn't have a trait bound of `T: Trait`
+    // evaluating `T::T: Sized` ultimately fails with `NoSolution`.
+    type A<T> = HashMap<u32, *const S<T>>;
+    type B<T> = HashMap<u32, S<T>>;
+
+    enum E {}
+    impl Trait for E {
+        type T = ();
+    }
+    type C = HashMap<u32, *const S<E>>;
+    type D = HashMap<u32, S<E>>;
+    //~^ zero_sized_map_values
+}
+
+fn issue15429() {
+    struct E<'a>(&'a [E<'a>]);
+
+    // The assertion error happens when the type being evaluated has escaping bound vars
+    // as it cannot be wrapped in a dummy binder during size computation.
+    type F = dyn for<'a> FnOnce(HashMap<u32, E<'a>>) -> u32;
+}
+
 fn main() {
     let _: HashMap<String, ()> = HashMap::new();
     //~^ zero_sized_map_values

@@ -1,15 +1,15 @@
 use std::ops::ControlFlow;
 
-use rustc_infer::infer::RegionObligation;
+use rustc_infer::infer::TypeOutlivesConstraint;
 use rustc_infer::infer::canonical::CanonicalQueryInput;
 use rustc_infer::traits::query::OutlivesBound;
 use rustc_infer::traits::query::type_op::ImpliedOutlivesBounds;
 use rustc_middle::infer::canonical::CanonicalQueryResponse;
 use rustc_middle::traits::ObligationCause;
+use rustc_middle::ty::outlives::{Component, push_outlives_components};
 use rustc_middle::ty::{self, ParamEnvAnd, Ty, TyCtxt, TypeVisitable, TypeVisitor};
 use rustc_span::def_id::CRATE_DEF_ID;
 use rustc_span::{DUMMY_SP, Span, sym};
-use rustc_type_ir::outlives::{Component, push_outlives_components};
 use smallvec::{SmallVec, smallvec};
 
 use crate::traits::query::NoSolution;
@@ -110,11 +110,12 @@ pub fn compute_implied_outlives_bounds_inner<'tcx>(
                 | ty::PredicateKind::ConstEquate(..)
                 | ty::PredicateKind::Ambiguous
                 | ty::PredicateKind::NormalizesTo(..)
+                | ty::PredicateKind::Clause(ty::ClauseKind::UnstableFeature(_))
                 | ty::PredicateKind::AliasRelate(..) => {}
 
                 // We need to search through *all* WellFormed predicates
-                ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(arg)) => {
-                    wf_args.push(arg);
+                ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(term)) => {
+                    wf_args.push(term);
                 }
 
                 // We need to register region relationships
@@ -141,7 +142,7 @@ pub fn compute_implied_outlives_bounds_inner<'tcx>(
         && !ocx.infcx.tcx.sess.opts.unstable_opts.no_implied_bounds_compat
         && ty.visit_with(&mut ContainsBevyParamSet { tcx: ocx.infcx.tcx }).is_break()
     {
-        for RegionObligation { sup_type, sub_region, .. } in
+        for TypeOutlivesConstraint { sup_type, sub_region, .. } in
             ocx.infcx.take_registered_region_obligations()
         {
             let mut components = smallvec![];

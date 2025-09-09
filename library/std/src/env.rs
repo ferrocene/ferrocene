@@ -12,9 +12,11 @@
 
 use crate::error::Error;
 use crate::ffi::{OsStr, OsString};
+use crate::num::NonZero;
+use crate::ops::Try;
 use crate::path::{Path, PathBuf};
-use crate::sys::os as os_imp;
-use crate::{fmt, io, sys};
+use crate::sys::{env as env_imp, os as os_imp};
+use crate::{array, fmt, io, sys};
 
 /// Returns the current working directory as a [`PathBuf`].
 ///
@@ -96,7 +98,7 @@ pub struct Vars {
 /// [`env::vars_os()`]: vars_os
 #[stable(feature = "env", since = "1.0.0")]
 pub struct VarsOs {
-    inner: os_imp::Env,
+    inner: env_imp::Env,
 }
 
 /// Returns an iterator of (variable, value) pairs of strings, for all the
@@ -150,7 +152,7 @@ pub fn vars() -> Vars {
 #[must_use]
 #[stable(feature = "env", since = "1.0.0")]
 pub fn vars_os() -> VarsOs {
-    VarsOs { inner: os_imp::env() }
+    VarsOs { inner: env_imp::env() }
 }
 
 #[stable(feature = "env", since = "1.0.0")]
@@ -259,7 +261,7 @@ pub fn var_os<K: AsRef<OsStr>>(key: K) -> Option<OsString> {
 }
 
 fn _var_os(key: &OsStr) -> Option<OsString> {
-    os_imp::getenv(key)
+    env_imp::getenv(key)
 }
 
 /// The error type for operations interacting with environment variables.
@@ -294,15 +296,7 @@ impl fmt::Display for VarError {
 }
 
 #[stable(feature = "env", since = "1.0.0")]
-impl Error for VarError {
-    #[allow(deprecated)]
-    fn description(&self) -> &str {
-        match *self {
-            VarError::NotPresent => "environment variable not found",
-            VarError::NotUnicode(..) => "environment variable was not valid unicode",
-        }
-    }
-}
+impl Error for VarError {}
 
 /// Sets the environment variable `key` to the value `value` for the currently running
 /// process.
@@ -363,7 +357,7 @@ impl Error for VarError {
 #[stable(feature = "env", since = "1.0.0")]
 pub unsafe fn set_var<K: AsRef<OsStr>, V: AsRef<OsStr>>(key: K, value: V) {
     let (key, value) = (key.as_ref(), value.as_ref());
-    unsafe { os_imp::setenv(key, value) }.unwrap_or_else(|e| {
+    unsafe { env_imp::setenv(key, value) }.unwrap_or_else(|e| {
         panic!("failed to set environment variable `{key:?}` to `{value:?}`: {e}")
     })
 }
@@ -434,7 +428,7 @@ pub unsafe fn set_var<K: AsRef<OsStr>, V: AsRef<OsStr>>(key: K, value: V) {
 #[stable(feature = "env", since = "1.0.0")]
 pub unsafe fn remove_var<K: AsRef<OsStr>>(key: K) {
     let key = key.as_ref();
-    unsafe { os_imp::unsetenv(key) }
+    unsafe { env_imp::unsetenv(key) }
         .unwrap_or_else(|e| panic!("failed to remove environment variable `{key:?}`: {e}"))
 }
 
@@ -615,7 +609,7 @@ impl Error for JoinPathsError {
 /// # Unix
 ///
 /// - Returns the value of the 'HOME' environment variable if it is set
-///   (including to an empty string).
+///   (and not an empty string).
 /// - Otherwise, it tries to determine the home directory by invoking the `getpwuid_r` function
 ///   using the UID of the current user. An empty home directory field returned from the
 ///   `getpwuid_r` function is considered to be a valid value.
@@ -872,19 +866,36 @@ impl !Sync for Args {}
 #[stable(feature = "env", since = "1.0.0")]
 impl Iterator for Args {
     type Item = String;
+
     fn next(&mut self) -> Option<String> {
         self.inner.next().map(|s| s.into_string().unwrap())
     }
+
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
+
+    // Methods which skip args cannot simply delegate to the inner iterator,
+    // because `env::args` states that we will "panic during iteration if any
+    // argument to the process is not valid Unicode".
+    //
+    // This offers two possible interpretations:
+    // - a skipped argument is never encountered "during iteration"
+    // - even a skipped argument is encountered "during iteration"
+    //
+    // As a panic can be observed, we err towards validating even skipped
+    // arguments for now, though this is not explicitly promised by the API.
 }
 
 #[stable(feature = "env", since = "1.0.0")]
 impl ExactSizeIterator for Args {
+    #[inline]
     fn len(&self) -> usize {
         self.inner.len()
     }
+
+    #[inline]
     fn is_empty(&self) -> bool {
         self.inner.is_empty()
     }
@@ -914,19 +925,65 @@ impl !Sync for ArgsOs {}
 #[stable(feature = "env", since = "1.0.0")]
 impl Iterator for ArgsOs {
     type Item = OsString;
+
+    #[inline]
     fn next(&mut self) -> Option<OsString> {
         self.inner.next()
     }
+
+    #[inline]
+    fn next_chunk<const N: usize>(
+        &mut self,
+    ) -> Result<[OsString; N], array::IntoIter<OsString, N>> {
+        self.inner.next_chunk()
+    }
+
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
+    }
+
+    #[inline]
+    fn count(self) -> usize {
+        self.inner.len()
+    }
+
+    #[inline]
+    fn last(self) -> Option<OsString> {
+        self.inner.last()
+    }
+
+    #[inline]
+    fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
+        self.inner.advance_by(n)
+    }
+
+    #[inline]
+    fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
+    where
+        F: FnMut(B, Self::Item) -> R,
+        R: Try<Output = B>,
+    {
+        self.inner.try_fold(init, f)
+    }
+
+    #[inline]
+    fn fold<B, F>(self, init: B, f: F) -> B
+    where
+        F: FnMut(B, Self::Item) -> B,
+    {
+        self.inner.fold(init, f)
     }
 }
 
 #[stable(feature = "env", since = "1.0.0")]
 impl ExactSizeIterator for ArgsOs {
+    #[inline]
     fn len(&self) -> usize {
         self.inner.len()
     }
+
+    #[inline]
     fn is_empty(&self) -> bool {
         self.inner.is_empty()
     }
@@ -934,8 +991,14 @@ impl ExactSizeIterator for ArgsOs {
 
 #[stable(feature = "env_iterators", since = "1.12.0")]
 impl DoubleEndedIterator for ArgsOs {
+    #[inline]
     fn next_back(&mut self) -> Option<OsString> {
         self.inner.next_back()
+    }
+
+    #[inline]
+    fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
+        self.inner.advance_back_by(n)
     }
 }
 
@@ -975,6 +1038,7 @@ pub mod consts {
     /// * `"sparc"`
     /// * `"sparc64"`
     /// * `"hexagon"`
+    /// * `"loongarch32"`
     /// * `"loongarch64"`
     ///
     /// </details>

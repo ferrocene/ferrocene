@@ -12,6 +12,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
+use crate::FileType;
 use crate::core::builder::{Builder, Cargo, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::utils::build_stamp::{BuildStamp, generate_smart_stamp_hash};
@@ -28,10 +29,25 @@ pub struct GccOutput {
     pub libgccjit: PathBuf,
 }
 
+impl GccOutput {
+    /// Install the required libgccjit library file(s) to the specified `path`.
+    pub fn install_to(&self, builder: &Builder<'_>, directory: &Path) {
+        // At build time, cg_gcc has to link to libgccjit.so (the unversioned symbol).
+        // However, at runtime, it will by default look for libgccjit.so.0.
+        // So when we install the built libgccjit.so file to the target `directory`, we add it there
+        // with the `.0` suffix.
+        let mut target_filename = self.libgccjit.file_name().unwrap().to_str().unwrap().to_string();
+        target_filename.push_str(".0");
+
+        let dst = directory.join(target_filename);
+        builder.copy_link(&self.libgccjit, &dst, FileType::NativeLibrary);
+    }
+}
+
 impl Step for Gcc {
     type Output = GccOutput;
 
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("src/gcc").alias("gcc")
@@ -61,20 +77,10 @@ impl Step for Gcc {
         }
 
         build_gcc(&metadata, builder, target);
-        create_lib_alias(builder, &libgccjit_path);
 
         t!(metadata.stamp.write());
 
         GccOutput { libgccjit: libgccjit_path }
-    }
-}
-
-/// Creates a libgccjit.so.0 alias next to libgccjit.so if it does not
-/// already exist
-fn create_lib_alias(builder: &Builder<'_>, libgccjit: &PathBuf) {
-    let lib_alias = libgccjit.parent().unwrap().join("libgccjit.so.0");
-    if !lib_alias.exists() {
-        t!(builder.symlink_file(libgccjit, lib_alias));
     }
 }
 
@@ -96,6 +102,8 @@ pub enum GccBuildStatus {
 /// Returns a path to the libgccjit.so file.
 #[cfg(not(test))]
 fn try_download_gcc(builder: &Builder<'_>, target: TargetSelection) -> Option<PathBuf> {
+    use build_helper::git::PathFreshness;
+
     // Try to download GCC from CI if configured and available
     if !matches!(builder.config.gcc_ci_mode, crate::core::config::GccCiMode::DownloadFromCi) {
         return None;
@@ -104,18 +112,39 @@ fn try_download_gcc(builder: &Builder<'_>, target: TargetSelection) -> Option<Pa
         eprintln!("GCC CI download is only available for the `x86_64-unknown-linux-gnu` target");
         return None;
     }
-    let sha =
-        detect_gcc_sha(&builder.config, builder.config.rust_info.is_managed_git_subrepository());
-    let root = ci_gcc_root(&builder.config);
-    let gcc_stamp = BuildStamp::new(&root).with_prefix("gcc").add_stamp(&sha);
-    if !gcc_stamp.is_up_to_date() && !builder.config.dry_run() {
-        builder.config.download_ci_gcc(&sha, &root);
-        t!(gcc_stamp.write());
-    }
+    let source = detect_gcc_freshness(
+        &builder.config,
+        builder.config.rust_info.is_managed_git_subrepository(),
+    );
+    builder.verbose(|| {
+        eprintln!("GCC freshness: {source:?}");
+    });
+    match source {
+        PathFreshness::LastModifiedUpstream { upstream } => {
+            // Download from upstream CI
+            let root = ci_gcc_root(&builder.config, target);
+            let gcc_stamp = BuildStamp::new(&root).with_prefix("gcc").add_stamp(&upstream);
+            if !gcc_stamp.is_up_to_date() && !builder.config.dry_run() {
+                builder.config.download_ci_gcc(&upstream, &root);
+                t!(gcc_stamp.write());
+            }
 
-    let libgccjit = root.join("lib").join("libgccjit.so");
-    create_lib_alias(builder, &libgccjit);
-    Some(libgccjit)
+            let libgccjit = root.join("lib").join("libgccjit.so");
+            Some(libgccjit)
+        }
+        PathFreshness::HasLocalModifications { .. } => {
+            // We have local modifications, rebuild GCC.
+            eprintln!("Found local GCC modifications, GCC will *not* be downloaded");
+            None
+        }
+        PathFreshness::MissingUpstream => {
+            eprintln!("error: could not find commit hash for downloading GCC");
+            eprintln!("HELP: maybe your repository history is too shallow?");
+            eprintln!("HELP: consider disabling `download-ci-gcc`");
+            eprintln!("HELP: or fetch enough history to include one upstream commit");
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -196,21 +225,18 @@ fn build_gcc(metadata: &Meta, builder: &Builder<'_>, target: TargetSelection) {
     t!(fs::create_dir_all(install_dir));
 
     // GCC creates files (e.g. symlinks to the downloaded dependencies)
-    // in the source directory, which does not work with our CI setup, where we mount
+    // in the source directory, which does not work with our CI/Docker setup, where we mount
     // source directories as read-only on Linux.
-    // Therefore, as a part of the build in CI, we first copy the whole source directory
-    // to the build directory, and perform the build from there.
-    let src_dir = if builder.config.is_running_on_ci {
-        let src_dir = builder.gcc_out(target).join("src");
-        if src_dir.exists() {
-            builder.remove_dir(&src_dir);
-        }
-        builder.create_dir(&src_dir);
-        builder.cp_link_r(root, &src_dir);
-        src_dir
-    } else {
-        root.clone()
-    };
+    // And in general, we shouldn't be modifying the source directories if possible, even for local
+    // builds.
+    // Therefore, we first copy the whole source directory to the build directory, and perform the
+    // build from there.
+    let src_dir = builder.gcc_out(target).join("src");
+    if src_dir.exists() {
+        builder.remove_dir(&src_dir);
+    }
+    builder.create_dir(&src_dir);
+    builder.cp_link_r(root, &src_dir);
 
     command(src_dir.join("contrib/download_prerequisites")).current_dir(&src_dir).run(builder);
     let mut configure_cmd = command(src_dir.join("configure"));
@@ -260,35 +286,20 @@ pub fn add_cg_gcc_cargo_flags(cargo: &mut Cargo, gcc: &GccOutput) {
 
 /// The absolute path to the downloaded GCC artifacts.
 #[cfg(not(test))]
-fn ci_gcc_root(config: &crate::Config) -> PathBuf {
-    config.out.join(config.build).join("ci-gcc")
+fn ci_gcc_root(config: &crate::Config, target: TargetSelection) -> PathBuf {
+    config.out.join(target).join("ci-gcc")
 }
 
-/// This retrieves the GCC sha we *want* to use, according to git history.
+/// Detect whether GCC sources have been modified locally or not.
 #[cfg(not(test))]
-fn detect_gcc_sha(config: &crate::Config, is_git: bool) -> String {
-    use build_helper::git::get_closest_merge_commit;
+fn detect_gcc_freshness(config: &crate::Config, is_git: bool) -> build_helper::git::PathFreshness {
+    use build_helper::git::PathFreshness;
 
-    let gcc_sha = if is_git {
-        get_closest_merge_commit(
-            Some(&config.src),
-            &config.git_config(),
-            &["src/gcc", "src/bootstrap/download-ci-gcc-stamp"],
-        )
-        .unwrap()
+    if is_git {
+        config.check_path_modifications(&["src/gcc", "src/bootstrap/download-ci-gcc-stamp"])
     } else if let Some(info) = crate::utils::channel::read_commit_info_file(&config.src) {
-        info.sha.trim().to_owned()
+        PathFreshness::LastModifiedUpstream { upstream: info.sha.trim().to_owned() }
     } else {
-        "".to_owned()
-    };
-
-    if gcc_sha.is_empty() {
-        eprintln!("error: could not find commit hash for downloading GCC");
-        eprintln!("HELP: maybe your repository history is too shallow?");
-        eprintln!("HELP: consider disabling `download-ci-gcc`");
-        eprintln!("HELP: or fetch enough history to include one upstream commit");
-        panic!();
+        PathFreshness::MissingUpstream
     }
-
-    gcc_sha
 }

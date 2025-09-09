@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C debuginfo
-//~? codegen option
+//~? ERROR codegen option
 
 fn main() {}
 

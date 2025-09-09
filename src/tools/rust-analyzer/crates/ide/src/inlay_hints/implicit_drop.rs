@@ -6,16 +6,16 @@
 //! }
 //! ```
 use hir::{
+    ChalkTyInterner, DefWithBody,
     db::{DefDatabase as _, HirDatabase as _},
     mir::{MirSpan, TerminatorKind},
-    ChalkTyInterner, DefWithBody,
 };
-use ide_db::{famous_defs::FamousDefs, FileRange};
+use ide_db::{FileRange, famous_defs::FamousDefs};
 
-use span::EditionedFileId;
 use syntax::{
+    ToSmolStr,
     ast::{self, AstNode},
-    match_ast, ToSmolStr,
+    match_ast,
 };
 
 use crate::{InlayHint, InlayHintLabel, InlayHintPosition, InlayHintsConfig, InlayKind};
@@ -24,7 +24,7 @@ pub(super) fn hints(
     acc: &mut Vec<InlayHint>,
     FamousDefs(sema, _): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig,
-    file_id: EditionedFileId,
+    display_target: hir::DisplayTarget,
     node: &ast::Fn,
 ) -> Option<()> {
     if !config.implicit_drop_hints {
@@ -92,8 +92,8 @@ pub(super) fn hints(
                 },
                 MirSpan::Unknown => continue,
             };
-            let binding = &hir.bindings[binding_idx];
-            let name = binding.name.display_no_db(file_id.edition()).to_smolstr();
+            let binding = &hir[binding_idx];
+            let name = binding.name.display_no_db(display_target.edition).to_smolstr();
             if name.starts_with("<ra@") {
                 continue; // Ignore desugared variables
             }
@@ -107,7 +107,7 @@ pub(super) fn hints(
                         .and_then(|d| source_map.pat_syntax(*d).ok())
                         .and_then(|d| {
                             Some(FileRange {
-                                file_id: d.file_id.file_id()?.into(),
+                                file_id: d.file_id.file_id()?.file_id(sema.db),
                                 range: d.value.text_range(),
                             })
                         })
@@ -143,8 +143,8 @@ fn nearest_token_after_node(
 #[cfg(test)]
 mod tests {
     use crate::{
-        inlay_hints::tests::{check_with_config, DISABLED_CONFIG},
         InlayHintsConfig,
+        inlay_hints::tests::{DISABLED_CONFIG, check_with_config},
     };
 
     const ONLY_DROP_CONFIG: InlayHintsConfig =

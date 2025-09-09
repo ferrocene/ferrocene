@@ -6,6 +6,7 @@ use std::os::raw::{c_char, c_int};
 
 use cranelift_jit::{JITBuilder, JITModule};
 use rustc_codegen_ssa::CrateInfo;
+use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir::mono::MonoItem;
 use rustc_session::Session;
 use rustc_span::sym;
@@ -84,7 +85,7 @@ pub(crate) fn run_jit(tcx: TyCtxt<'_>, jit_args: Vec<String>) -> ! {
 
     tcx.dcx().abort_if_errors();
 
-    jit_module.finalize_definitions();
+    let mut jit_module = jit_module.finalize_definitions();
 
     println!(
         "Rustc codegen cranelift will JIT run the executable, because -Cllvm-args=mode=jit was passed"
@@ -104,7 +105,7 @@ pub(crate) fn run_jit(tcx: TyCtxt<'_>, jit_args: Vec<String>) -> ! {
         call_conv: jit_module.target_config().default_call_conv,
     };
     let start_func_id = jit_module.declare_function("main", Linkage::Import, &start_sig).unwrap();
-    let finalized_start: *const u8 = jit_module.module.get_finalized_function(start_func_id);
+    let finalized_start: *const u8 = jit_module.get_finalized_function(start_func_id);
 
     let f: extern "C" fn(c_int, *const *const c_char) -> c_int =
         unsafe { ::std::mem::transmute(finalized_start) };
@@ -119,13 +120,18 @@ pub(crate) fn run_jit(tcx: TyCtxt<'_>, jit_args: Vec<String>) -> ! {
     std::process::exit(ret);
 }
 
-pub(crate) fn codegen_and_compile_fn<'tcx>(
+fn codegen_and_compile_fn<'tcx>(
     tcx: TyCtxt<'tcx>,
     cx: &mut crate::CodegenCx,
     cached_context: &mut Context,
     module: &mut dyn Module,
     instance: Instance<'tcx>,
 ) {
+    if tcx.codegen_instance_attrs(instance.def).flags.contains(CodegenFnAttrFlags::NAKED) {
+        tcx.dcx()
+            .span_fatal(tcx.def_span(instance.def_id()), "Naked asm is not supported in JIT mode");
+    }
+
     cranelift_codegen::timing::set_thread_profiler(Box::new(super::MeasuremeProfiler(
         tcx.prof.clone(),
     )));
@@ -135,16 +141,15 @@ pub(crate) fn codegen_and_compile_fn<'tcx>(
             crate::PrintOnPanic(|| format!("{:?} {}", instance, tcx.symbol_name(instance).name));
 
         let cached_func = std::mem::replace(&mut cached_context.func, Function::new());
-        if let Some(codegened_func) = crate::base::codegen_fn(
+        let codegened_func = crate::base::codegen_fn(
             tcx,
             cx,
             &mut TypeDebugContext::default(),
             cached_func,
             module,
             instance,
-        ) {
-            crate::base::compile_fn(cx, &tcx.prof, cached_context, module, codegened_func);
-        }
+        );
+        crate::base::compile_fn(cx, &tcx.prof, cached_context, module, codegened_func);
     });
 }
 

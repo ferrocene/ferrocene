@@ -36,7 +36,7 @@ pub(super) struct CosignBinary;
 impl Step for CosignBinary {
     type Output = PathBuf;
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.never()
@@ -49,14 +49,14 @@ impl Step for CosignBinary {
 
         let mut artifact = None;
         for candidate in COSIGN_ARTIFACTS {
-            if candidate.target == &*builder.config.build.triple {
+            if candidate.target == &*builder.config.host_target.triple {
                 artifact = Some(candidate);
                 break;
             }
         }
         let Some(artifact) = artifact else {
             eprintln!();
-            eprintln!("error: unsupported platform for cosign: {}", builder.config.build);
+            eprintln!("error: unsupported platform for cosign: {}", builder.config.host_target);
             eprintln!("note:  add support for it in src/bootstrap/ferrocene/sign/cosign.rs");
             eprintln!();
             panic!("could not download cosign");
@@ -64,7 +64,7 @@ impl Step for CosignBinary {
 
         let dest = builder
             .out
-            .join(builder.config.build.triple)
+            .join(builder.config.host_target.triple)
             .join("ferrocene")
             .join(format!("cosign-{COSIGN_VERSION}"));
         if let Some(parent) = dest.parent() {
@@ -79,7 +79,9 @@ impl Step for CosignBinary {
         if !dest.exists() {
             builder.config.download_file(&url, &dest, "test");
         }
-        if !builder.config.verify(&dest, artifact.sha256) && !builder.config.dry_run() {
+        if !crate::core::download::verify(&builder.config.exec_ctx, &dest, artifact.sha256)
+            && !builder.config.dry_run()
+        {
             panic!("invalid cosign downloaded");
         }
 

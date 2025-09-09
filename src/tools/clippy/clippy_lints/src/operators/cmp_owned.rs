@@ -41,7 +41,7 @@ fn check_op(cx: &LateContext<'_>, expr: &Expr<'_>, other: &Expr<'_>, left: bool)
         ExprKind::MethodCall(_, arg, [], _)
             if typeck
                 .type_dependent_def_id(expr.hir_id)
-                .and_then(|id| cx.tcx.trait_of_item(id))
+                .and_then(|id| cx.tcx.trait_of_assoc(id))
                 .is_some_and(|id| matches!(cx.tcx.get_diagnostic_name(id), Some(sym::ToString | sym::ToOwned))) =>
         {
             (arg, arg.span)
@@ -98,7 +98,7 @@ fn check_op(cx: &LateContext<'_>, expr: &Expr<'_>, other: &Expr<'_>, left: bool)
             let arg_snip = snippet(cx, arg_span, "..");
             let expr_snip;
             let eq_impl;
-            if with_deref.is_implemented() {
+            if with_deref.is_implemented() && !arg_ty.peel_refs().is_str() {
                 expr_snip = format!("*{arg_snip}");
                 eq_impl = with_deref;
             } else {

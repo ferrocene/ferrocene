@@ -12,7 +12,7 @@ impl TestCx<'_> {
         // For `run-make` V2, we need to perform 2 steps to build and run a `run-make` V2 recipe
         // (`rmake.rs`) to run the actual tests. The support library is already built as a tool rust
         // library and is available under
-        // `build/$HOST/stage0-bootstrap-tools/$TARGET/release/librun_make_support.rlib`.
+        // `build/$HOST/bootstrap-tools/$TARGET/release/librun_make_support.rlib`.
         //
         // 1. We need to build the recipe `rmake.rs` as a binary and link in the `run_make_support`
         //    library.
@@ -63,7 +63,7 @@ impl TestCx<'_> {
         //
         // ```
         // build/<target_triple>/
-        // ├── stage0-bootstrap-tools/
+        // ├── bootstrap-tools/
         // │   ├── <host_triple>/release/librun_make_support.rlib   // <- support rlib itself
         // │   ├── <host_triple>/release/deps/                      // <- deps
         // │   └── release/deps/                                    // <- deps of deps
@@ -72,7 +72,7 @@ impl TestCx<'_> {
         // FIXME(jieyouxu): there almost certainly is a better way to do this (specifically how the
         // support lib and its deps are organized), but this seems to work for now.
 
-        let tools_bin = host_build_root.join("stage0-bootstrap-tools");
+        let tools_bin = host_build_root.join("bootstrap-tools");
         let support_host_path = tools_bin.join(&self.config.host).join("release");
         let support_lib_path = support_host_path.join("librun_make_support.rlib");
 
@@ -221,6 +221,23 @@ impl TestCx<'_> {
             cmd.env("REMOTE_TEST_CLIENT", remote_test_client);
         }
 
+        if let Some(runner) = &self.config.runner {
+            cmd.env("RUNNER", runner);
+        }
+
+        // Guard against externally-set env vars.
+        cmd.env_remove("__RUSTC_DEBUG_ASSERTIONS_ENABLED");
+        if self.config.with_rustc_debug_assertions {
+            // Used for `run_make_support::env::rustc_debug_assertions_enabled`.
+            cmd.env("__RUSTC_DEBUG_ASSERTIONS_ENABLED", "1");
+        }
+
+        cmd.env_remove("__STD_DEBUG_ASSERTIONS_ENABLED");
+        if self.config.with_std_debug_assertions {
+            // Used for `run_make_support::env::std_debug_assertions_enabled`.
+            cmd.env("__STD_DEBUG_ASSERTIONS_ENABLED", "1");
+        }
+
         // We don't want RUSTFLAGS set from the outside to interfere with
         // compiler flags set in the test cases:
         cmd.env_remove("RUSTFLAGS");
@@ -291,7 +308,7 @@ impl TestCx<'_> {
         let stdout = String::from_utf8_lossy(&stdout).into_owned();
         let stderr = String::from_utf8_lossy(&stderr).into_owned();
         // This conditions on `status.success()` so we don't print output twice on error.
-        // NOTE: this code is called from a libtest thread, so it's hidden by default unless --nocapture is passed.
+        // NOTE: this code is called from an executor thread, so it's hidden by default unless --no-capture is passed.
         self.dump_output(status.success(), &cmd.get_program().to_string_lossy(), &stdout, &stderr);
         if !status.success() {
             let res = ProcRes { status, stdout, stderr, truncated, cmdline: format!("{:?}", cmd) };

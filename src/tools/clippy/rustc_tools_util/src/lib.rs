@@ -121,7 +121,7 @@ fn get_output(cmd: &str, args: &[&str]) -> Option<String> {
 pub fn rerun_if_git_changes() -> Option<()> {
     // Make sure we get rerun when the git commit changes.
     // We want to watch two files: HEAD, which tracks which branch we are on,
-    // and the file for that branch that tracks which commit is is on.
+    // and the file for that branch that tracks which commit is checked out.
 
     // First, find the `HEAD` file. This should work even with worktrees.
     let git_head_file = PathBuf::from(get_output("git", &["rev-parse", "--git-path", "HEAD"])?);
@@ -157,7 +157,8 @@ pub fn get_commit_date() -> Option<String> {
 
 #[must_use]
 pub fn get_compiler_version() -> Option<String> {
-    get_output("rustc", &["-V"])
+    let compiler = std::option_env!("RUSTC").unwrap_or("rustc");
+    get_output(compiler, &["-V"])
 }
 
 #[must_use]
@@ -172,6 +173,8 @@ pub fn get_channel(compiler_version: Option<String>) -> String {
             return String::from("beta");
         } else if rustc_output.contains("nightly") {
             return String::from("nightly");
+        } else if rustc_output.contains("dev") {
+            return String::from("dev");
         }
     }
 

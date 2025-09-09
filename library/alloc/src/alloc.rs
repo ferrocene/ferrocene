@@ -17,6 +17,7 @@ unsafe extern "Rust" {
     #[rustc_allocator]
     #[rustc_nounwind]
     #[rustc_std_internal_symbol]
+    #[rustc_allocator_zeroed_variant = "__rust_alloc_zeroed"]
     fn __rust_alloc(size: usize, align: usize) -> *mut u8;
     #[rustc_deallocator]
     #[rustc_nounwind]
@@ -31,8 +32,9 @@ unsafe extern "Rust" {
     #[rustc_std_internal_symbol]
     fn __rust_alloc_zeroed(size: usize, align: usize) -> *mut u8;
 
+    #[rustc_nounwind]
     #[rustc_std_internal_symbol]
-    static __rust_no_alloc_shim_is_unstable: u8;
+    fn __rust_no_alloc_shim_is_unstable_v2();
 }
 
 /// The global memory allocator.
@@ -88,7 +90,7 @@ pub unsafe fn alloc(layout: Layout) -> *mut u8 {
     unsafe {
         // Make sure we don't accidentally allow omitting the allocator shim in
         // stable code until it is actually stabilized.
-        core::ptr::read_volatile(&__rust_no_alloc_shim_is_unstable);
+        __rust_no_alloc_shim_is_unstable_v2();
 
         __rust_alloc(layout.size(), layout.align())
     }
@@ -171,7 +173,7 @@ pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
     unsafe {
         // Make sure we don't accidentally allow omitting the allocator shim in
         // stable code until it is actually stabilized.
-        core::ptr::read_volatile(&__rust_no_alloc_shim_is_unstable);
+        __rust_no_alloc_shim_is_unstable_v2();
 
         __rust_alloc_zeroed(layout.size(), layout.align())
     }
@@ -428,10 +430,10 @@ pub mod __alloc_error_handler {
             // This symbol is emitted by rustc next to __rust_alloc_error_handler.
             // Its value depends on the -Zoom={panic,abort} compiler option.
             #[rustc_std_internal_symbol]
-            static __rust_alloc_error_handler_should_panic: u8;
+            fn __rust_alloc_error_handler_should_panic_v2() -> u8;
         }
 
-        if unsafe { __rust_alloc_error_handler_should_panic != 0 } {
+        if unsafe { __rust_alloc_error_handler_should_panic_v2() != 0 } {
             panic!("memory allocation of {size} bytes failed")
         } else {
             core::panicking::panic_nounwind_fmt(

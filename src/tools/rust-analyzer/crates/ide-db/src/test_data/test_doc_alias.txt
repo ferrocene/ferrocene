@@ -2,7 +2,9 @@
     (
         Module {
             id: ModuleId {
-                krate: Idx::<CrateData>(0),
+                krate: Crate(
+                    Id(3000),
+                ),
                 block: None,
                 local_id: Idx::<ModuleData>(0),
             },
@@ -14,17 +16,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                1,
+                                3401,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -40,6 +41,8 @@
                 container_name: None,
                 is_alias: false,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
             FileSymbol {
                 name: "Struct",
@@ -47,17 +50,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                0,
+                                3400,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -73,6 +75,8 @@
                 container_name: None,
                 is_alias: false,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
             FileSymbol {
                 name: "mul1",
@@ -80,17 +84,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                0,
+                                3400,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -106,6 +109,8 @@
                 container_name: None,
                 is_alias: true,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
             FileSymbol {
                 name: "mul2",
@@ -113,17 +118,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                0,
+                                3400,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -139,6 +143,8 @@
                 container_name: None,
                 is_alias: true,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
             FileSymbol {
                 name: "s1",
@@ -146,17 +152,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                0,
+                                3400,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -172,6 +177,8 @@
                 container_name: None,
                 is_alias: true,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
             FileSymbol {
                 name: "s1",
@@ -179,17 +186,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                1,
+                                3401,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -205,6 +211,8 @@
                 container_name: None,
                 is_alias: true,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
             FileSymbol {
                 name: "s2",
@@ -212,17 +220,16 @@
                     Struct(
                         Struct {
                             id: StructId(
-                                0,
+                                3400,
                             ),
                         },
                     ),
                 ),
                 loc: DeclarationLocation {
-                    hir_file_id: EditionedFileId(
-                        FileId(
-                            0,
+                    hir_file_id: FileId(
+                        EditionedFileId(
+                            Id(2000),
                         ),
-                        Edition2021,
                     ),
                     ptr: SyntaxNodePtr {
                         kind: STRUCT,
@@ -238,6 +245,8 @@
                 container_name: None,
                 is_alias: true,
                 is_assoc: false,
+                is_import: false,
+                do_not_complete: Yes,
             },
         ],
     ),

@@ -94,18 +94,18 @@ fn check_struct<'tcx>(
     ty_args: GenericArgsRef<'_>,
     typeck_results: &'tcx TypeckResults<'tcx>,
 ) {
-    if let TyKind::Path(QPath::Resolved(_, p)) = self_ty.kind {
-        if let Some(PathSegment { args, .. }) = p.segments.last() {
-            let args = args.map(|a| a.args).unwrap_or(&[]);
+    if let TyKind::Path(QPath::Resolved(_, p)) = self_ty.kind
+        && let Some(PathSegment { args, .. }) = p.segments.last()
+    {
+        let args = args.map(|a| a.args).unwrap_or(&[]);
 
-            // ty_args contains the generic parameters of the type declaration, while args contains the
-            // arguments used at instantiation time. If both len are not equal, it means that some
-            // parameters were not provided (which means that the default values were used); in this
-            // case we will not risk suggesting too broad a rewrite. We won't either if any argument
-            // is a type or a const.
-            if ty_args.len() != args.len() || args.iter().any(|arg| !matches!(arg, GenericArg::Lifetime(_))) {
-                return;
-            }
+        // ty_args contains the generic parameters of the type declaration, while args contains the
+        // arguments used at instantiation time. If both len are not equal, it means that some
+        // parameters were not provided (which means that the default values were used); in this
+        // case we will not risk suggesting too broad a rewrite. We won't either if any argument
+        // is a type or a const.
+        if ty_args.len() != args.len() || args.iter().any(|arg| !matches!(arg, GenericArg::Lifetime(_))) {
+            return;
         }
     }
 
@@ -183,16 +183,16 @@ fn check_enum<'tcx>(cx: &LateContext<'tcx>, item: &'tcx Item<'_>, func_expr: &Ex
 impl<'tcx> LateLintPass<'tcx> for DerivableImpls {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx Item<'_>) {
         if let ItemKind::Impl(Impl {
-            of_trait: Some(trait_ref),
+            of_trait: Some(of_trait),
             items: [child],
             self_ty,
             ..
         }) = item.kind
-            && !cx.tcx.has_attr(item.owner_id, sym::automatically_derived)
+            && !cx.tcx.is_automatically_derived(item.owner_id.to_def_id())
             && !item.span.from_expansion()
-            && let Some(def_id) = trait_ref.trait_def_id()
+            && let Some(def_id) = of_trait.trait_ref.trait_def_id()
             && cx.tcx.is_diagnostic_item(sym::Default, def_id)
-            && let impl_item_hir = child.id.hir_id()
+            && let impl_item_hir = child.hir_id()
             && let Node::ImplItem(impl_item) = cx.tcx.hir_node(impl_item_hir)
             && let ImplItemKind::Fn(_, b) = &impl_item.kind
             && let Body { value: func_expr, .. } = cx.tcx.hir_body(*b)

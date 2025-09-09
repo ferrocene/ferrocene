@@ -2,16 +2,15 @@ import * as Is from "vscode-languageclient/lib/common/utils/is";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
-import { expectNotUndefined, log, unwrapUndefinable } from "./util";
+import { expectNotUndefined, log, normalizeDriveLetter, unwrapUndefinable } from "./util";
 import type { Env } from "./util";
 import type { Disposable } from "vscode";
 
 export type RunnableEnvCfgItem = {
     mask?: string;
-    env: Record<string, string>;
+    env: { [key: string]: { toString(): string } | null };
     platform?: string | string[];
 };
-export type RunnableEnvCfg = Record<string, string> | RunnableEnvCfgItem[];
 
 type ShowStatusBar = "always" | "never" | { documentSelector: vscode.DocumentSelector };
 
@@ -20,15 +19,9 @@ export class Config {
     configureLang: vscode.Disposable | undefined;
 
     readonly rootSection = "rust-analyzer";
-    private readonly requiresServerReloadOpts = [
-        "cargo",
-        "procMacro",
-        "serverPath",
-        "server",
-        "files",
-        "cfg",
-        "showSyntaxTree",
-    ].map((opt) => `${this.rootSection}.${opt}`);
+    private readonly requiresServerReloadOpts = ["server", "files", "showSyntaxTree"].map(
+        (opt) => `${this.rootSection}.${opt}`,
+    );
 
     private readonly requiresWindowReloadOpts = ["testExplorer"].map(
         (opt) => `${this.rootSection}.${opt}`,
@@ -208,17 +201,18 @@ export class Config {
     }
 
     get serverPath() {
-        return this.get<null | string>("server.path") ?? this.get<null | string>("serverPath");
+        return this.get<null | string>("server.path");
     }
 
     get serverExtraEnv(): Env {
         const extraEnv =
-            this.get<{ [key: string]: string | number } | null>("server.extraEnv") ?? {};
+            this.get<{ [key: string]: { toString(): string } | null } | null>("server.extraEnv") ??
+            {};
         return substituteVariablesInEnv(
             Object.fromEntries(
                 Object.entries(extraEnv).map(([k, v]) => [
                     k,
-                    typeof v !== "string" ? v.toString() : v,
+                    typeof v === "string" ? v : v?.toString(),
                 ]),
             ),
         );
@@ -266,18 +260,13 @@ export class Config {
         return this.get<boolean | undefined>("testExplorer");
     }
 
-    runnablesExtraEnv(label: string): Record<string, string> | undefined {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const item = this.get<any>("runnables.extraEnv") ?? this.get<any>("runnableEnv");
-        if (!item) return undefined;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fixRecord = (r: Record<string, any>) => {
-            for (const key in r) {
-                if (typeof r[key] !== "string") {
-                    r[key] = String(r[key]);
-                }
-            }
-        };
+    runnablesExtraEnv(label: string): Env {
+        const serverEnv = this.serverExtraEnv;
+        let extraEnv =
+            this.get<
+                RunnableEnvCfgItem[] | { [key: string]: { toString(): string } | null } | null
+            >("runnables.extraEnv") ?? {};
+        if (!extraEnv) return serverEnv;
 
         const platform = process.platform;
         const checkPlatform = (it: RunnableEnvCfgItem) => {
@@ -288,19 +277,25 @@ export class Config {
             return true;
         };
 
-        if (item instanceof Array) {
+        if (extraEnv instanceof Array) {
             const env = {};
-            for (const it of item) {
+            for (const it of extraEnv) {
                 const masked = !it.mask || new RegExp(it.mask).test(label);
                 if (masked && checkPlatform(it)) {
                     Object.assign(env, it.env);
                 }
             }
-            fixRecord(env);
-            return env;
+            extraEnv = env;
         }
-        fixRecord(item);
-        return item;
+        const runnableExtraEnv = substituteVariablesInEnv(
+            Object.fromEntries(
+                Object.entries(extraEnv).map(([k, v]) => [
+                    k,
+                    typeof v === "string" ? v : v?.toString(),
+                ]),
+            ),
+        );
+        return { ...runnableExtraEnv, ...serverEnv };
     }
 
     get restartServerOnConfigChange() {
@@ -323,7 +318,6 @@ export class Config {
         return {
             engine: this.get<string>("debug.engine"),
             engineSettings: this.get<object>("debug.engineSettings") ?? {},
-            openDebugPane: this.get<boolean>("debug.openDebugPane"),
             buildBeforeRestart: this.get<boolean>("debug.buildBeforeRestart"),
             sourceFileMap: sourceFileMap,
         };
@@ -399,6 +393,7 @@ export function prepareVSCodeConfig<T>(resp: T): T {
 
 // FIXME: Merge this with `substituteVSCodeVariables` above
 export function substituteVariablesInEnv(env: Env): Env {
+    const depRe = new RegExp(/\${(?<depName>.+?)}/g);
     const missingDeps = new Set<string>();
     // vscode uses `env:ENV_NAME` for env vars resolution, and it's easier
     // to follow the same convention for our dependency tracking
@@ -406,15 +401,16 @@ export function substituteVariablesInEnv(env: Env): Env {
     const envWithDeps = Object.fromEntries(
         Object.entries(env).map(([key, value]) => {
             const deps = new Set<string>();
-            const depRe = new RegExp(/\${(?<depName>.+?)}/g);
-            let match = undefined;
-            while ((match = depRe.exec(value))) {
-                const depName = unwrapUndefinable(match.groups?.["depName"]);
-                deps.add(depName);
-                // `depName` at this point can have a form of `expression` or
-                // `prefix:expression`
-                if (!definedEnvKeys.has(depName)) {
-                    missingDeps.add(depName);
+            if (value) {
+                let match = undefined;
+                while ((match = depRe.exec(value))) {
+                    const depName = unwrapUndefinable(match.groups?.["depName"]);
+                    deps.add(depName);
+                    // `depName` at this point can have a form of `expression` or
+                    // `prefix:expression`
+                    if (!definedEnvKeys.has(depName)) {
+                        missingDeps.add(depName);
+                    }
                 }
             }
             return [`env:${key}`, { deps: [...deps], value }];
@@ -455,11 +451,10 @@ export function substituteVariablesInEnv(env: Env): Env {
     do {
         leftToResolveSize = toResolve.size;
         for (const key of toResolve) {
-            const item = unwrapUndefinable(envWithDeps[key]);
-            if (item.deps.every((dep) => resolved.has(dep))) {
-                item.value = item.value.replace(/\${(?<depName>.+?)}/g, (_wholeMatch, depName) => {
-                    const item = unwrapUndefinable(envWithDeps[depName]);
-                    return item.value;
+            const item = envWithDeps[key];
+            if (item && item.deps.every((dep) => resolved.has(dep))) {
+                item.value = item.value?.replace(/\${(?<depName>.+?)}/g, (_wholeMatch, depName) => {
+                    return envWithDeps[depName]?.value ?? "";
                 });
                 resolved.add(key);
                 toResolve.delete(key);
@@ -499,7 +494,7 @@ function computeVscodeVar(varName: string): string | null {
                   // user has opened on Editor startup. Could lead to
                   // unpredictable workspace selection in practice.
                   // It's better to pick the first one
-                  folder.uri.fsPath;
+                  normalizeDriveLetter(folder.uri.fsPath);
         return fsPath;
     };
     // https://code.visualstudio.com/docs/editor/variables-reference

@@ -1,5 +1,4 @@
-use std::path::PathBuf;
-
+use rustc_ast::Path;
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_errors::codes::*;
 use rustc_errors::{
@@ -9,7 +8,7 @@ use rustc_errors::{
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::intravisit::{Visitor, VisitorExt, walk_ty};
-use rustc_hir::{self as hir, AmbigArg, FnRetTy, GenericParamKind, IsAnonInPath, Node};
+use rustc_hir::{self as hir, AmbigArg, FnRetTy, GenericParamKind, Node};
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_middle::ty::print::{PrintTraitRefExt as _, TraitRefPrintOnlyTraitPath};
 use rustc_middle::ty::{self, Binder, ClosureKind, FnSig, GenericArg, Region, Ty, TyCtxt};
@@ -31,23 +30,57 @@ pub struct UnableToConstructConstantValue<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag(trait_selection_empty_on_clause_in_rustc_on_unimplemented, code = E0232)]
-pub struct EmptyOnClauseInOnUnimplemented {
-    #[primary_span]
-    #[label]
-    pub span: Span,
+pub enum InvalidOnClause {
+    #[diag(trait_selection_rustc_on_unimplemented_empty_on_clause, code = E0232)]
+    Empty {
+        #[primary_span]
+        #[label]
+        span: Span,
+    },
+    #[diag(trait_selection_rustc_on_unimplemented_expected_one_predicate_in_not, code = E0232)]
+    ExpectedOnePredInNot {
+        #[primary_span]
+        #[label]
+        span: Span,
+    },
+    #[diag(trait_selection_rustc_on_unimplemented_unsupported_literal_in_on, code = E0232)]
+    UnsupportedLiteral {
+        #[primary_span]
+        #[label]
+        span: Span,
+    },
+    #[diag(trait_selection_rustc_on_unimplemented_expected_identifier, code = E0232)]
+    ExpectedIdentifier {
+        #[primary_span]
+        #[label]
+        span: Span,
+        path: Path,
+    },
+    #[diag(trait_selection_rustc_on_unimplemented_invalid_predicate, code = E0232)]
+    InvalidPredicate {
+        #[primary_span]
+        #[label]
+        span: Span,
+        invalid_pred: Symbol,
+    },
+    #[diag(trait_selection_rustc_on_unimplemented_invalid_flag, code = E0232)]
+    InvalidFlag {
+        #[primary_span]
+        #[label]
+        span: Span,
+        invalid_flag: Symbol,
+    },
+    #[diag(trait_selection_rustc_on_unimplemented_invalid_name, code = E0232)]
+    InvalidName {
+        #[primary_span]
+        #[label]
+        span: Span,
+        invalid_name: Symbol,
+    },
 }
 
 #[derive(Diagnostic)]
-#[diag(trait_selection_invalid_on_clause_in_rustc_on_unimplemented, code = E0232)]
-pub struct InvalidOnClauseInOnUnimplemented {
-    #[primary_span]
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(trait_selection_no_value_in_rustc_on_unimplemented, code = E0232)]
+#[diag(trait_selection_rustc_on_unimplemented_missing_value, code = E0232)]
 #[note]
 pub struct NoValueInOnUnimplemented {
     #[primary_span]
@@ -166,11 +199,12 @@ pub struct ClosureFnMutLabel {
 }
 
 #[derive(Diagnostic)]
-#[diag(trait_selection_async_closure_not_fn)]
-pub(crate) struct AsyncClosureNotFn {
+#[diag(trait_selection_coro_closure_not_fn)]
+pub(crate) struct CoroClosureNotFn {
     #[primary_span]
     pub span: Span,
     pub kind: &'static str,
+    pub coro_kind: String,
 }
 
 #[derive(Diagnostic)]
@@ -188,11 +222,6 @@ pub struct AnnotationRequired<'a> {
     pub infer_subdiags: Vec<SourceKindSubdiag<'a>>,
     #[subdiagnostic]
     pub multi_suggestions: Vec<SourceKindMultiSuggestion<'a>>,
-    #[note(trait_selection_full_type_written)]
-    pub was_written: bool,
-    pub path: PathBuf,
-    #[note(trait_selection_type_annotations_needed_error_time)]
-    pub time_version: bool,
 }
 
 // Copy of `AnnotationRequired` for E0283
@@ -211,9 +240,6 @@ pub struct AmbiguousImpl<'a> {
     pub infer_subdiags: Vec<SourceKindSubdiag<'a>>,
     #[subdiagnostic]
     pub multi_suggestions: Vec<SourceKindMultiSuggestion<'a>>,
-    #[note(trait_selection_full_type_written)]
-    pub was_written: bool,
-    pub path: PathBuf,
 }
 
 // Copy of `AnnotationRequired` for E0284
@@ -232,9 +258,6 @@ pub struct AmbiguousReturn<'a> {
     pub infer_subdiags: Vec<SourceKindSubdiag<'a>>,
     #[subdiagnostic]
     pub multi_suggestions: Vec<SourceKindMultiSuggestion<'a>>,
-    #[note(trait_selection_full_type_written)]
-    pub was_written: bool,
-    pub path: PathBuf,
 }
 
 // Used when a better one isn't available
@@ -500,7 +523,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                     match self.tcx.parent_hir_node(self.tcx.local_def_id_to_hir_id(anon_reg.scope))
                     {
                         hir::Node::Item(hir::Item {
-                            kind: hir::ItemKind::Trait(_, _, _, generics, ..),
+                            kind: hir::ItemKind::Trait(_, _, _, _, generics, ..),
                             ..
                         })
                         | hir::Node::Item(hir::Item {
@@ -551,19 +574,6 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
 
             impl<'v> Visitor<'v> for ImplicitLifetimeFinder {
                 fn visit_ty(&mut self, ty: &'v hir::Ty<'v, AmbigArg>) {
-                    let make_suggestion = |lifetime: &hir::Lifetime| {
-                        if lifetime.is_anon_in_path == IsAnonInPath::Yes
-                            && lifetime.ident.span.is_empty()
-                        {
-                            format!("{}, ", self.suggestion_param_name)
-                        } else if lifetime.ident.name == kw::UnderscoreLifetime
-                            && lifetime.ident.span.is_empty()
-                        {
-                            format!("{} ", self.suggestion_param_name)
-                        } else {
-                            self.suggestion_param_name.clone()
-                        }
-                    };
                     match ty.kind {
                         hir::TyKind::Path(hir::QPath::Resolved(_, path)) => {
                             for segment in path.segments {
@@ -572,7 +582,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                                         matches!(
                                             arg,
                                             hir::GenericArg::Lifetime(lifetime)
-                                                if lifetime.is_anon_in_path == IsAnonInPath::Yes
+                                                if lifetime.is_implicit()
                                         )
                                     }) {
                                         self.suggestions.push((
@@ -591,10 +601,10 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                                             if let hir::GenericArg::Lifetime(lifetime) = arg
                                                 && lifetime.is_anonymous()
                                             {
-                                                self.suggestions.push((
-                                                    lifetime.ident.span,
-                                                    make_suggestion(lifetime),
-                                                ));
+                                                self.suggestions.push(
+                                                    lifetime
+                                                        .suggestion(&self.suggestion_param_name),
+                                                );
                                             }
                                         }
                                     }
@@ -602,7 +612,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                             }
                         }
                         hir::TyKind::Ref(lifetime, ..) if lifetime.is_anonymous() => {
-                            self.suggestions.push((lifetime.ident.span, make_suggestion(lifetime)));
+                            self.suggestions.push(lifetime.suggestion(&self.suggestion_param_name));
                         }
                         _ => {}
                     }
@@ -622,7 +632,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                 // Do not suggest constraining the `&self` param, but rather the return type.
                 // If that is wrong (because it is not sufficient), a follow up error will tell the
                 // user to fix it. This way we lower the chances of *over* constraining, but still
-                // get the cake of "correctly" contrained in two steps.
+                // get the cake of "correctly" constrained in two steps.
                 visitor.visit_ty_unambig(self.ty_sup);
             }
             visitor.visit_ty_unambig(self.ty_sub);
@@ -738,7 +748,8 @@ pub enum ExplicitLifetimeRequired<'a> {
         #[suggestion(
             trait_selection_explicit_lifetime_required_sugg_with_ident,
             code = "{new_ty}",
-            applicability = "unspecified"
+            applicability = "unspecified",
+            style = "verbose"
         )]
         new_ty_span: Span,
         #[skip_arg]
@@ -753,7 +764,8 @@ pub enum ExplicitLifetimeRequired<'a> {
         #[suggestion(
             trait_selection_explicit_lifetime_required_sugg_with_param_type,
             code = "{new_ty}",
-            applicability = "unspecified"
+            applicability = "unspecified",
+            style = "verbose"
         )]
         new_ty_span: Span,
         #[skip_arg]
@@ -1441,7 +1453,8 @@ pub enum SuggestAccessingField<'a> {
     #[suggestion(
         trait_selection_suggest_accessing_field,
         code = "{snippet}.{name}",
-        applicability = "maybe-incorrect"
+        applicability = "maybe-incorrect",
+        style = "verbose"
     )]
     Safe {
         #[primary_span]
@@ -1453,7 +1466,8 @@ pub enum SuggestAccessingField<'a> {
     #[suggestion(
         trait_selection_suggest_accessing_field,
         code = "unsafe {{ {snippet}.{name} }}",
-        applicability = "maybe-incorrect"
+        applicability = "maybe-incorrect",
+        style = "verbose"
     )]
     Unsafe {
         #[primary_span]

@@ -2,7 +2,6 @@
 
 use std::iter;
 
-use rustc_ast::ptr::P;
 use rustc_ast::token::{Delimiter, Token, TokenKind};
 use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, LazyAttrTokenStream, Spacing, TokenTree,
@@ -12,13 +11,17 @@ use rustc_ast::{
     NodeId, NormalAttr,
 };
 use rustc_attr_parsing as attr;
+use rustc_attr_parsing::validate_attr::deny_builtin_meta_unsafety;
+use rustc_attr_parsing::{
+    AttributeParser, CFG_TEMPLATE, EvalConfigResult, ShouldEmit, eval_config_entry, parse_cfg_attr,
+    validate_attr,
+};
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_feature::{
     ACCEPTED_LANG_FEATURES, AttributeSafety, EnabledLangFeature, EnabledLibFeature, Features,
     REMOVED_LANG_FEATURES, UNSTABLE_LANG_FEATURES,
 };
 use rustc_lint_defs::BuiltinLintDiag;
-use rustc_parse::validate_attr;
 use rustc_session::Session;
 use rustc_session::parse::feature_err;
 use rustc_span::{STDLIB_STABLE_CRATES, Span, Symbol, sym};
@@ -81,9 +84,19 @@ pub fn features(sess: &Session, krate_attrs: &[Attribute], crate_name: Symbol) -
 
             // If the enabled feature has been removed, issue an error.
             if let Some(f) = REMOVED_LANG_FEATURES.iter().find(|f| name == f.feature.name) {
+                let pull_note = if let Some(pull) = f.pull {
+                    format!(
+                        "; see <https://github.com/rust-lang/rust/pull/{}> for more information",
+                        pull
+                    )
+                } else {
+                    "".to_owned()
+                };
                 sess.dcx().emit_err(FeatureRemoved {
                     span: mi.span(),
                     reason: f.reason.map(|reason| FeatureRemovedReason { reason }),
+                    removed_rustc_version: f.feature.since,
+                    pull_note,
                 });
                 continue;
             }
@@ -152,7 +165,12 @@ pub fn pre_configure_attrs(sess: &Session, attrs: &[Attribute]) -> ast::AttrVec 
     attrs
         .iter()
         .flat_map(|attr| strip_unconfigured.process_cfg_attr(attr))
-        .take_while(|attr| !is_cfg(attr) || strip_unconfigured.cfg_true(attr).0)
+        .take_while(|attr| {
+            !is_cfg(attr)
+                || strip_unconfigured
+                    .cfg_true(attr, strip_unconfigured.lint_node_id, ShouldEmit::Nothing)
+                    .as_bool()
+        })
         .collect()
 }
 
@@ -162,7 +180,7 @@ pub(crate) fn attr_into_trace(mut attr: Attribute, trace_name: Symbol) -> Attrib
             let NormalAttr { item, tokens } = &mut **normal;
             item.path.segments[0].ident.name = trace_name;
             // This makes the trace attributes unobservable to token-based proc macros.
-            *tokens = Some(LazyAttrTokenStream::new(AttrTokenStream::default()));
+            *tokens = Some(LazyAttrTokenStream::new_direct(AttrTokenStream::default()));
         }
         AttrKind::DocComment(..) => unreachable!(),
     }
@@ -192,7 +210,7 @@ impl<'a> StripUnconfigured<'a> {
         if self.config_tokens {
             if let Some(Some(tokens)) = node.tokens_mut() {
                 let attr_stream = tokens.to_attr_token_stream();
-                *tokens = LazyAttrTokenStream::new(self.configure_tokens(&attr_stream));
+                *tokens = LazyAttrTokenStream::new_direct(self.configure_tokens(&attr_stream));
             }
         }
     }
@@ -223,7 +241,7 @@ impl<'a> StripUnconfigured<'a> {
                     target.attrs.flat_map_in_place(|attr| self.process_cfg_attr(&attr));
 
                     if self.in_cfg(&target.attrs) {
-                        target.tokens = LazyAttrTokenStream::new(
+                        target.tokens = LazyAttrTokenStream::new_direct(
                             self.configure_tokens(&target.tokens.to_attr_token_stream()),
                         );
                         Some(AttrTokenTree::AttrsTarget(target))
@@ -274,7 +292,12 @@ impl<'a> StripUnconfigured<'a> {
     /// is in the original source file. Gives a compiler error if the syntax of
     /// the attribute is incorrect.
     pub(crate) fn expand_cfg_attr(&self, cfg_attr: &Attribute, recursive: bool) -> Vec<Attribute> {
-        validate_attr::check_attribute_safety(&self.sess.psess, AttributeSafety::Normal, &cfg_attr);
+        validate_attr::check_attribute_safety(
+            &self.sess.psess,
+            Some(AttributeSafety::Normal),
+            &cfg_attr,
+            ast::CRATE_NODE_ID,
+        );
 
         // A trace attribute left in AST in place of the original `cfg_attr` attribute.
         // It can later be used by lints or other diagnostics.
@@ -361,7 +384,7 @@ impl<'a> StripUnconfigured<'a> {
                 .to_attr_token_stream(),
         ));
 
-        let tokens = Some(LazyAttrTokenStream::new(AttrTokenStream::new(trees)));
+        let tokens = Some(LazyAttrTokenStream::new_direct(AttrTokenStream::new(trees)));
         let attr = ast::attr::mk_attr_from_item(
             &self.sess.psess.attr_id_generator,
             item,
@@ -380,26 +403,40 @@ impl<'a> StripUnconfigured<'a> {
 
     /// Determines if a node with the given attributes should be included in this configuration.
     fn in_cfg(&self, attrs: &[Attribute]) -> bool {
-        attrs.iter().all(|attr| !is_cfg(attr) || self.cfg_true(attr).0)
+        attrs.iter().all(|attr| {
+            !is_cfg(attr)
+                || self.cfg_true(attr, self.lint_node_id, ShouldEmit::ErrorsAndLints).as_bool()
+        })
     }
 
-    pub(crate) fn cfg_true(&self, attr: &Attribute) -> (bool, Option<MetaItem>) {
-        let meta_item = match validate_attr::parse_meta(&self.sess.psess, attr) {
-            Ok(meta_item) => meta_item,
-            Err(err) => {
-                err.emit();
-                return (true, None);
-            }
+    pub(crate) fn cfg_true(
+        &self,
+        attr: &Attribute,
+        node: NodeId,
+        emit_errors: ShouldEmit,
+    ) -> EvalConfigResult {
+        // Unsafety check needs to be done explicitly here because this attribute will be removed before the normal check
+        deny_builtin_meta_unsafety(
+            self.sess.dcx(),
+            attr.get_normal_item().unsafety,
+            &rustc_ast::Path::from_ident(attr.ident().unwrap()),
+        );
+
+        let Some(cfg) = AttributeParser::parse_single(
+            self.sess,
+            attr,
+            attr.span,
+            node,
+            self.features,
+            emit_errors,
+            parse_cfg_attr,
+            &CFG_TEMPLATE,
+        ) else {
+            // Cfg attribute was not parsable, give up
+            return EvalConfigResult::True;
         };
 
-        validate_attr::deny_builtin_meta_unsafety(&self.sess.psess, &meta_item);
-
-        (
-            parse_cfg(&meta_item, self.sess).is_none_or(|meta_item| {
-                attr::cfg_matches(meta_item, &self.sess, self.lint_node_id, self.features)
-            }),
-            Some(meta_item),
-        )
+        eval_config_entry(self.sess, &cfg, self.lint_node_id, self.features, emit_errors)
     }
 
     /// If attributes are not allowed on expressions, emit an error for `attr`
@@ -428,7 +465,7 @@ impl<'a> StripUnconfigured<'a> {
     }
 
     #[instrument(level = "trace", skip(self))]
-    pub fn configure_expr(&self, expr: &mut P<ast::Expr>, method_receiver: bool) {
+    pub fn configure_expr(&self, expr: &mut ast::Expr, method_receiver: bool) {
         if !method_receiver {
             for attr in expr.attrs.iter() {
                 self.maybe_emit_expr_attr_err(attr);
@@ -451,6 +488,7 @@ impl<'a> StripUnconfigured<'a> {
     }
 }
 
+/// FIXME: Still used by Rustdoc, should be removed after
 pub fn parse_cfg<'a>(meta_item: &'a MetaItem, sess: &Session) -> Option<&'a MetaItemInner> {
     let span = meta_item.span;
     match meta_item.meta_item_list() {

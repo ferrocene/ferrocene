@@ -1,0 +1,42 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+:upcoming-release:
+
+Ferrocene 25.08.0
+=================
+
+New features
+------------
+
+A subset of the ``core`` library has been certified to IEC-61508 SIL 2. For more information,
+see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
+
+Removed experimental features
+-----------------------------
+
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview. In some circumstances, these features are removed.
+
+* Experimental support has been removed for the following platforms:
+
+  * :target-with-tuple:`x86_64-apple-darwin`
+
+Fixed known problems
+--------------------
+
+A list of fixed known problems in this release can be found on the
+`Ferrocene 25.08 Known Problems <https://problems.ferrocene.dev/versions/25.08.html>`_
+page.
+
+Rust changes
+------------
+
+This release includes the following changes introduced by the upstream Rust
+project. Note that this changelog is maintained by upstream. The target support
+changes described here describe Rust's support levels, and have no correlation
+to the targets and platforms supported by Ferrocene.
+
+.. rust-changelog::
+   :from: 1.87.0
+   :to: 1.88.0

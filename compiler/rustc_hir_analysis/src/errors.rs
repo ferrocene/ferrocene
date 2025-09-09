@@ -127,6 +127,7 @@ pub(crate) enum AssocItemNotFoundSugg<'a> {
     SimilarInOtherTrait {
         #[primary_span]
         span: Span,
+        trait_name: &'a str,
         assoc_kind: &'static str,
         suggested_name: Symbol,
     },
@@ -159,15 +160,6 @@ pub(crate) enum AssocItemNotFoundSugg<'a> {
         assoc_kind: &'static str,
         suggested_name: Symbol,
     },
-}
-
-#[derive(Diagnostic)]
-#[diag(hir_analysis_unrecognized_atomic_operation, code = E0092)]
-pub(crate) struct UnrecognizedAtomicOperation<'a> {
-    #[primary_span]
-    #[label]
-    pub span: Span,
-    pub op: &'a str,
 }
 
 #[derive(Diagnostic)]
@@ -213,6 +205,7 @@ pub(crate) struct DropImplOnWrongItem {
     #[primary_span]
     #[label]
     pub span: Span,
+    pub trait_: Symbol,
 }
 
 #[derive(Diagnostic)]
@@ -284,13 +277,6 @@ pub(crate) struct CopyImplOnTypeWithDtor {
     #[primary_span]
     #[label]
     pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(hir_analysis_multiple_relaxed_default_bounds, code = E0203)]
-pub(crate) struct MultipleRelaxedDefaultBounds {
-    #[primary_span]
-    pub spans: Vec<Span>,
 }
 
 #[derive(Diagnostic)]
@@ -424,17 +410,6 @@ pub(crate) struct UnconstrainedOpaqueType {
     pub what: &'static str,
 }
 
-#[derive(Diagnostic)]
-#[diag(hir_analysis_tait_forward_compat2)]
-#[note]
-pub(crate) struct TaitForwardCompat2 {
-    #[primary_span]
-    pub span: Span,
-    #[note(hir_analysis_opaque)]
-    pub opaque_type_span: Span,
-    pub opaque_type: String,
-}
-
 pub(crate) struct MissingTypeParams {
     pub span: Span,
     pub def_span: Span,
@@ -526,6 +501,7 @@ pub(crate) struct ConstImplForNonConstTrait {
     pub trait_name: String,
     #[suggestion(
         applicability = "machine-applicable",
+        // FIXME(const_trait_impl) fix this suggestion
         code = "#[const_trait] ",
         style = "verbose"
     )]
@@ -549,6 +525,7 @@ pub(crate) struct ConstBoundForNonConstTrait {
     pub suggestion_pre: &'static str,
     #[suggestion(
         applicability = "machine-applicable",
+        // FIXME(const_trait_impl) fix this suggestion
         code = "#[const_trait] ",
         style = "verbose"
     )]
@@ -642,7 +619,7 @@ pub(crate) struct VariadicFunctionCompatibleConvention<'a> {
     #[primary_span]
     #[label]
     pub span: Span,
-    pub conventions: &'a str,
+    pub convention: &'a str,
 }
 
 #[derive(Diagnostic)]
@@ -1327,7 +1304,7 @@ pub(crate) struct ImplForTyRequires {
 }
 
 #[derive(Diagnostic)]
-#[diag(hir_analysis_traits_with_defualt_impl, code = E0321)]
+#[diag(hir_analysis_traits_with_default_impl, code = E0321)]
 #[note]
 pub(crate) struct TraitsWithDefaultImpl<'a> {
     #[primary_span]
@@ -1675,14 +1652,6 @@ pub(crate) struct CmseEntryGeneric {
     pub span: Span,
 }
 
-#[derive(Diagnostic)]
-#[diag(hir_analysis_register_type_unstable)]
-pub(crate) struct RegisterTypeUnstable<'a> {
-    #[primary_span]
-    pub span: Span,
-    pub ty: Ty<'a>,
-}
-
 #[derive(LintDiagnostic)]
 #[diag(hir_analysis_supertrait_item_shadowing)]
 pub(crate) struct SupertraitItemShadowing {
@@ -1713,5 +1682,27 @@ pub(crate) enum SupertraitItemShadowee {
 pub(crate) struct SelfInTypeAlias {
     #[primary_span]
     #[label]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(hir_analysis_abi_custom_clothed_function)]
+pub(crate) struct AbiCustomClothedFunction {
+    #[primary_span]
+    pub span: Span,
+    #[suggestion(
+        hir_analysis_suggestion,
+        applicability = "maybe-incorrect",
+        code = "#[unsafe(naked)]\n",
+        style = "short"
+    )]
+    pub naked_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(hir_analysis_async_drop_without_sync_drop)]
+#[help]
+pub(crate) struct AsyncDropWithoutSyncDrop {
+    #[primary_span]
     pub span: Span,
 }

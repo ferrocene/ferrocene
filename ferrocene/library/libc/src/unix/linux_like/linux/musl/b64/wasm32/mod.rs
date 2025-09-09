@@ -53,6 +53,14 @@ s! {
     }
 
     pub struct ipc_perm {
+        #[cfg(musl_v1_2_3)]
+        pub __key: crate::key_t,
+        #[cfg(not(musl_v1_2_3))]
+        #[deprecated(
+            since = "0.2.173",
+            note = "This field is incorrectly named and will be changed
+                to __key in a future release."
+        )]
         pub __ipc_perm_key: crate::key_t,
         pub uid: crate::uid_t,
         pub gid: crate::gid_t,
@@ -433,7 +441,6 @@ pub const SYS_set_mempolicy_home_node: c_long = 450;
 pub const SYS_fadvise: c_long = SYS_fadvise64;
 
 pub const MADV_SOFT_OFFLINE: c_int = 101;
-pub const MAP_32BIT: c_int = 0x0040;
 pub const O_APPEND: c_int = 1024;
 pub const O_DIRECT: c_int = 0x4000;
 pub const O_DIRECTORY: c_int = 0x10000;

@@ -13,3 +13,6 @@ fn test_correct3<'a>(x: &dyn Foo<'a>, _: Tait) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

@@ -271,7 +271,7 @@ impl<I: Iterator> Peekable<I> {
     /// assert_eq!(iter.next_if(|&x| x == 0), Some(0));
     /// // The next item returned is now 1, so `next_if` will return `None`.
     /// assert_eq!(iter.next_if(|&x| x == 0), None);
-    /// // `next_if` saves the value of the next item if it was not equal to `expected`.
+    /// // `next_if` retains the next item if the predicate evaluates to `false` for it.
     /// assert_eq!(iter.next(), Some(1));
     /// ```
     ///
@@ -304,9 +304,9 @@ impl<I: Iterator> Peekable<I> {
     /// let mut iter = (0..5).peekable();
     /// // The first item of the iterator is 0; consume it.
     /// assert_eq!(iter.next_if_eq(&0), Some(0));
-    /// // The next item returned is now 1, so `next_if` will return `None`.
+    /// // The next item returned is now 1, so `next_if_eq` will return `None`.
     /// assert_eq!(iter.next_if_eq(&0), None);
-    /// // `next_if_eq` saves the value of the next item if it was not equal to `expected`.
+    /// // `next_if_eq` retains the next item if it was not equal to `expected`.
     /// assert_eq!(iter.next(), Some(1));
     /// ```
     #[stable(feature = "peekable_next_if", since = "1.51.0")]
@@ -316,6 +316,108 @@ impl<I: Iterator> Peekable<I> {
         I::Item: PartialEq<T>,
     {
         self.next_if(|next| next == expected)
+    }
+
+    /// Consumes the next value of this iterator and applies a function `f` on it,
+    /// returning the result if the closure returns `Ok`.
+    ///
+    /// Otherwise if the closure returns `Err` the value is put back for the next iteration.
+    ///
+    /// The content of the `Err` variant is typically the original value of the closure,
+    /// but this is not required. If a different value is returned,
+    /// the next `peek()` or `next()` call will result in this new value.
+    /// This is similar to modifying the output of `peek_mut()`.
+    ///
+    /// If the closure panics, the next value will always be consumed and dropped
+    /// even if the panic is caught, because the closure never returned an `Err` value to put back.
+    ///
+    /// # Examples
+    ///
+    /// Parse the leading decimal number from an iterator of characters.
+    /// ```
+    /// #![feature(peekable_next_if_map)]
+    /// let mut iter = "125 GOTO 10".chars().peekable();
+    /// let mut line_num = 0_u32;
+    /// while let Some(digit) = iter.next_if_map(|c| c.to_digit(10).ok_or(c)) {
+    ///     line_num = line_num * 10 + digit;
+    /// }
+    /// assert_eq!(line_num, 125);
+    /// assert_eq!(iter.collect::<String>(), " GOTO 10");
+    /// ```
+    ///
+    /// Matching custom types.
+    /// ```
+    /// #![feature(peekable_next_if_map)]
+    ///
+    /// #[derive(Debug, PartialEq, Eq)]
+    /// enum Node {
+    ///     Comment(String),
+    ///     Red(String),
+    ///     Green(String),
+    ///     Blue(String),
+    /// }
+    ///
+    /// /// Combines all consecutive `Comment` nodes into a single one.
+    /// fn combine_comments(nodes: Vec<Node>) -> Vec<Node> {
+    ///     let mut result = Vec::with_capacity(nodes.len());
+    ///     let mut iter = nodes.into_iter().peekable();
+    ///     let mut comment_text = None::<String>;
+    ///     loop {
+    ///         // Typically the closure in .next_if_map() matches on the input,
+    ///         //  extracts the desired pattern into an `Ok`,
+    ///         //  and puts the rest into an `Err`.
+    ///         while let Some(text) = iter.next_if_map(|node| match node {
+    ///             Node::Comment(text) => Ok(text),
+    ///             other => Err(other),
+    ///         }) {
+    ///             comment_text.get_or_insert_default().push_str(&text);
+    ///         }
+    ///
+    ///         if let Some(text) = comment_text.take() {
+    ///             result.push(Node::Comment(text));
+    ///         }
+    ///         if let Some(node) = iter.next() {
+    ///             result.push(node);
+    ///         } else {
+    ///             break;
+    ///         }
+    ///     }
+    ///     result
+    /// }
+    ///# assert_eq!( // hiding the test to avoid cluttering the documentation.
+    ///#     combine_comments(vec![
+    ///#         Node::Comment("The".to_owned()),
+    ///#         Node::Comment("Quick".to_owned()),
+    ///#         Node::Comment("Brown".to_owned()),
+    ///#         Node::Red("Fox".to_owned()),
+    ///#         Node::Green("Jumped".to_owned()),
+    ///#         Node::Comment("Over".to_owned()),
+    ///#         Node::Blue("The".to_owned()),
+    ///#         Node::Comment("Lazy".to_owned()),
+    ///#         Node::Comment("Dog".to_owned()),
+    ///#     ]),
+    ///#     vec![
+    ///#         Node::Comment("TheQuickBrown".to_owned()),
+    ///#         Node::Red("Fox".to_owned()),
+    ///#         Node::Green("Jumped".to_owned()),
+    ///#         Node::Comment("Over".to_owned()),
+    ///#         Node::Blue("The".to_owned()),
+    ///#         Node::Comment("LazyDog".to_owned()),
+    ///#     ],
+    ///# )
+    /// ```
+    #[unstable(feature = "peekable_next_if_map", issue = "143702")]
+    pub fn next_if_map<R>(&mut self, f: impl FnOnce(I::Item) -> Result<R, I::Item>) -> Option<R> {
+        let unpeek = if let Some(item) = self.next() {
+            match f(item) {
+                Ok(result) => return Some(result),
+                Err(item) => Some(item),
+            }
+        } else {
+            None
+        };
+        self.peeked = Some(unpeek);
+        None
     }
 }
 

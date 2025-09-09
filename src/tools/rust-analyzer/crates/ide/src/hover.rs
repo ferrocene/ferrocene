@@ -7,26 +7,30 @@ use std::{iter, ops::Not};
 
 use either::Either;
 use hir::{
-    db::DefDatabase, DisplayTarget, GenericDef, GenericSubstitution, HasCrate, HasSource, LangItem,
-    Semantics,
+    DisplayTarget, GenericDef, GenericSubstitution, HasCrate, HasSource, LangItem, Semantics,
+    db::DefDatabase,
 };
 use ide_db::{
+    FileRange, FxIndexSet, Ranker, RootDatabase,
     defs::{Definition, IdentClass, NameRefClass, OperatorClass},
     famous_defs::FamousDefs,
     helpers::pick_best_token,
-    FileRange, FxIndexSet, Ranker, RootDatabase,
 };
-use itertools::{multizip, Itertools};
+use itertools::{Itertools, multizip};
 use span::Edition;
-use syntax::{ast, AstNode, SyntaxKind::*, SyntaxNode, T};
+use syntax::{
+    AstNode,
+    SyntaxKind::{self, *},
+    SyntaxNode, T, ast,
+};
 
 use crate::{
+    FileId, FilePosition, NavigationTarget, RangeInfo, Runnable, TryToNav,
     doc_links::token_as_doc_comment,
     markdown_remove::remove_markdown,
     markup::Markup,
     navigation_target::UpmappingResult,
     runnables::{runnable_fn, runnable_mod},
-    FileId, FilePosition, NavigationTarget, RangeInfo, Runnable, TryToNav,
 };
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HoverConfig {
@@ -54,6 +58,7 @@ pub struct MemoryLayoutHoverConfig {
     pub size: Option<MemoryLayoutHoverRenderKind>,
     pub offset: Option<MemoryLayoutHoverRenderKind>,
     pub alignment: Option<MemoryLayoutHoverRenderKind>,
+    pub padding: Option<MemoryLayoutHoverRenderKind>,
     pub niches: bool,
 }
 
@@ -129,8 +134,8 @@ pub(crate) fn hover(
     let sema = &hir::Semantics::new(db);
     let file = sema.parse_guess_edition(file_id).syntax().clone();
     let edition =
-        sema.attach_first_edition(file_id).map(|it| it.edition()).unwrap_or(Edition::CURRENT);
-    let display_target = sema.first_crate_or_default(file_id).to_display_target(db);
+        sema.attach_first_edition(file_id).map(|it| it.edition(db)).unwrap_or(Edition::CURRENT);
+    let display_target = sema.first_crate(file_id)?.to_display_target(db);
     let mut res = if range.is_empty() {
         hover_offset(
             sema,
@@ -195,7 +200,7 @@ fn hover_offset(
         });
     }
 
-    if let Some((range, resolution)) =
+    if let Some((range, _, _, resolution)) =
         sema.check_for_format_args_template(original_token.clone(), offset)
     {
         let res = hover_for_definition(
@@ -239,17 +244,15 @@ fn hover_offset(
                     let node = token.parent()?;
 
                     // special case macro calls, we wanna render the invoked arm index
-                    if let Some(name) = ast::NameRef::cast(node.clone()) {
-                        if let Some(path_seg) =
+                    if let Some(name) = ast::NameRef::cast(node.clone())
+                        && let Some(path_seg) =
                             name.syntax().parent().and_then(ast::PathSegment::cast)
-                        {
-                            if let Some(macro_call) = path_seg
+                            && let Some(macro_call) = path_seg
                                 .parent_path()
                                 .syntax()
                                 .parent()
                                 .and_then(ast::MacroCall::cast)
-                            {
-                                if let Some(macro_) = sema.resolve_macro_call(&macro_call) {
+                                && let Some(macro_) = sema.resolve_macro_call(&macro_call) {
                                     break 'a vec![(
                                         (Definition::Macro(macro_), None),
                                         sema.resolve_macro_call_arm(&macro_call),
@@ -257,9 +260,6 @@ fn hover_offset(
                                         node,
                                     )];
                                 }
-                            }
-                        }
-                    }
 
                     match IdentClass::classify_node(sema, &node)? {
                         // It's better for us to fall back to the keyword hover here,
@@ -274,11 +274,13 @@ fn hover_offset(
                         }
 
                         class => {
-                            let is_def = matches!(class, IdentClass::NameClass(_));
+                            let render_extras = matches!(class, IdentClass::NameClass(_))
+                                // Render extra information for `Self` keyword as well
+                                || ast::NameRef::cast(node.clone()).is_some_and(|name_ref| name_ref.token_kind() == SyntaxKind::SELF_TYPE_KW);
                             multizip((
                                 class.definitions(),
                                 iter::repeat(None),
-                                iter::repeat(is_def),
+                                iter::repeat(render_extras),
                                 iter::repeat(node),
                             ))
                             .collect::<Vec<_>>()
@@ -419,10 +421,10 @@ pub(crate) fn hover_for_definition(
     sema: &Semantics<'_, RootDatabase>,
     file_id: FileId,
     def: Definition,
-    subst: Option<GenericSubstitution>,
+    subst: Option<GenericSubstitution<'_>>,
     scope_node: &SyntaxNode,
     macro_arm: Option<u32>,
-    hovered_definition: bool,
+    render_extras: bool,
     config: &HoverConfig,
     edition: Edition,
     display_target: DisplayTarget,
@@ -450,20 +452,20 @@ pub(crate) fn hover_for_definition(
     let notable_traits = def_ty.map(|ty| notable_traits(db, &ty)).unwrap_or_default();
     let subst_types = subst.map(|subst| subst.types(db));
 
-    let markup = render::definition(
+    let (markup, range_map) = render::definition(
         sema.db,
         def,
         famous_defs.as_ref(),
         &notable_traits,
         macro_arm,
-        hovered_definition,
+        render_extras,
         subst_types.as_ref(),
         config,
         edition,
         display_target,
     );
     HoverResult {
-        markup: render::process_markup(sema.db, def, &markup, config),
+        markup: render::process_markup(sema.db, def, &markup, range_map, config),
         actions: [
             show_fn_references_action(sema.db, def),
             show_implementations_action(sema.db, def),
@@ -476,10 +478,10 @@ pub(crate) fn hover_for_definition(
     }
 }
 
-fn notable_traits(
-    db: &RootDatabase,
-    ty: &hir::Type,
-) -> Vec<(hir::Trait, Vec<(Option<hir::Type>, hir::Name)>)> {
+fn notable_traits<'db>(
+    db: &'db RootDatabase,
+    ty: &hir::Type<'db>,
+) -> Vec<(hir::Trait, Vec<(Option<hir::Type<'db>>, hir::Name)>)> {
     db.notable_traits_in_deps(ty.krate(db).into())
         .iter()
         .flat_map(|it| &**it)
@@ -499,6 +501,7 @@ fn notable_traits(
                 )
             })
         })
+        .sorted_by_cached_key(|(trait_, _)| trait_.name(db))
         .collect::<Vec<_>>()
 }
 
@@ -512,7 +515,7 @@ fn show_implementations_action(db: &RootDatabase, def: Definition) -> Option<Hov
 
     let adt = match def {
         Definition::Trait(it) => {
-            return it.try_to_nav(db).map(UpmappingResult::call_site).map(to_action)
+            return it.try_to_nav(db).map(UpmappingResult::call_site).map(to_action);
         }
         Definition::Adt(it) => Some(it),
         Definition::SelfType(it) => it.self_ty(db).as_adt(),
@@ -544,7 +547,7 @@ fn runnable_action(
         Definition::Module(it) => runnable_mod(sema, it).map(HoverAction::Runnable),
         Definition::Function(func) => {
             let src = func.source(sema.db)?;
-            if src.file_id != file_id {
+            if src.file_id.file_id().is_none_or(|f| f.file_id(sema.db) != file_id) {
                 cov_mark::hit!(hover_macro_generated_struct_fn_doc_comment);
                 cov_mark::hit!(hover_macro_generated_struct_fn_doc_attr);
                 return None;
@@ -559,8 +562,8 @@ fn runnable_action(
 fn goto_type_action_for_def(
     db: &RootDatabase,
     def: Definition,
-    notable_traits: &[(hir::Trait, Vec<(Option<hir::Type>, hir::Name)>)],
-    subst_types: Option<Vec<(hir::Symbol, hir::Type)>>,
+    notable_traits: &[(hir::Trait, Vec<(Option<hir::Type<'_>>, hir::Name)>)],
+    subst_types: Option<Vec<(hir::Symbol, hir::Type<'_>)>>,
     edition: Edition,
 ) -> Option<HoverAction> {
     let mut targets: Vec<hir::ModuleDef> = Vec::new();
@@ -614,7 +617,7 @@ fn goto_type_action_for_def(
 
 fn walk_and_push_ty(
     db: &RootDatabase,
-    ty: &hir::Type,
+    ty: &hir::Type<'_>,
     push_new_def: &mut dyn FnMut(hir::ModuleDef),
 ) {
     ty.walk(db, |t| {
@@ -627,9 +630,7 @@ fn walk_and_push_ty(
         } else if let Some(trait_) = t.as_associated_type_parent_trait(db) {
             push_new_def(trait_.into());
         } else if let Some(tp) = t.as_type_param(db) {
-            let sized_trait = db
-                .lang_item(t.krate(db).into(), LangItem::Sized)
-                .and_then(|lang_item| lang_item.as_trait());
+            let sized_trait = LangItem::Sized.resolve_trait(db, t.krate(db).into());
             tp.trait_bounds(db)
                 .into_iter()
                 .filter(|&it| Some(it.into()) != sized_trait)

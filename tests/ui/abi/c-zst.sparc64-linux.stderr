@@ -5,9 +5,8 @@ error: fn_abi_of(pass_zst) = FnAbi {
                        ty: (),
                        layout: Layout {
                            size: Size(0 bytes),
-                           align: AbiAndPrefAlign {
+                           align: AbiAlign {
                                abi: $SOME_ALIGN,
-                               pref: $SOME_ALIGN,
                            },
                            backend_repr: Memory {
                                sized: true,
@@ -28,7 +27,7 @@ error: fn_abi_of(pass_zst) = FnAbi {
                    },
                    mode: Indirect {
                        attrs: ArgAttributes {
-                           regular: NoAlias | NoCapture | NonNull | NoUndef,
+                           regular: NoAlias | CapturesAddress | NonNull | NoUndef,
                            arg_ext: None,
                            pointee_size: Size(0 bytes),
                            pointee_align: Some(
@@ -45,9 +44,8 @@ error: fn_abi_of(pass_zst) = FnAbi {
                    ty: (),
                    layout: Layout {
                        size: Size(0 bytes),
-                       align: AbiAndPrefAlign {
+                       align: AbiAlign {
                            abi: $SOME_ALIGN,
-                           pref: $SOME_ALIGN,
                        },
                        backend_repr: Memory {
                            sized: true,

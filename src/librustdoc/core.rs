@@ -31,6 +31,7 @@ use crate::clean::inline::build_trait;
 use crate::clean::{self, ItemId};
 use crate::config::{Options as RustdocOptions, OutputFormat, RenderOptions};
 use crate::formats::cache::Cache;
+use crate::html::macro_expansion::{ExpandedCode, source_macro_expansion};
 use crate::passes;
 use crate::passes::Condition::*;
 use crate::passes::collect_intra_doc_links::LinkCollector;
@@ -149,15 +150,12 @@ pub(crate) fn new_dcx(
     diagnostic_width: Option<usize>,
     unstable_opts: &UnstableOptions,
 ) -> rustc_errors::DiagCtxt {
-    let fallback_bundle = rustc_errors::fallback_fluent_bundle(
-        rustc_driver::DEFAULT_LOCALE_RESOURCES.to_vec(),
-        false,
-    );
+    let translator = rustc_driver::default_translator();
     let emitter: Box<DynEmitter> = match error_format {
         ErrorOutputType::HumanReadable { kind, color_config } => {
             let short = kind.short();
             Box::new(
-                HumanEmitter::new(stderr_destination(color_config), fallback_bundle)
+                HumanEmitter::new(stderr_destination(color_config), translator)
                     .sm(source_map.map(|sm| sm as _))
                     .short_message(short)
                     .diagnostic_width(diagnostic_width)
@@ -178,7 +176,7 @@ pub(crate) fn new_dcx(
                 JsonEmitter::new(
                     Box::new(io::BufWriter::new(io::stderr())),
                     Some(source_map),
-                    fallback_bundle,
+                    translator,
                     pretty,
                     json_rendered,
                     color_config,
@@ -217,6 +215,7 @@ pub(crate) fn create_config(
         scrape_examples_options,
         expanded_args,
         remap_path_prefix,
+        target_modifiers,
         ..
     }: RustdocOptions,
     render_options: &RenderOptions,
@@ -280,6 +279,7 @@ pub(crate) fn create_config(
         } else {
             OutputTypes::new(&[])
         },
+        target_modifiers,
         ..Options::default()
     };
 
@@ -335,19 +335,25 @@ pub(crate) fn run_global_ctxt(
     show_coverage: bool,
     render_options: RenderOptions,
     output_format: OutputFormat,
-) -> (clean::Crate, RenderOptions, Cache) {
+) -> (clean::Crate, RenderOptions, Cache, FxHashMap<rustc_span::BytePos, Vec<ExpandedCode>>) {
     // Certain queries assume that some checks were run elsewhere
     // (see https://github.com/rust-lang/rust/pull/73566#issuecomment-656954425),
     // so type-check everything other than function bodies in this crate before running lints.
+
+    let expanded_macros = {
+        // We need for these variables to be removed to ensure that the `Crate` won't be "stolen"
+        // anymore.
+        let (_resolver, krate) = &*tcx.resolver_for_lowering().borrow();
+
+        source_macro_expansion(&krate, &render_options, output_format, tcx.sess.source_map())
+    };
 
     // NOTE: this does not call `tcx.analysis()` so that we won't
     // typeck function bodies or run the default rustc lints.
     // (see `override_queries` in the `config`)
 
     // NOTE: These are copy/pasted from typeck/lib.rs and should be kept in sync with those changes.
-    let _ = tcx.sess.time("wf_checking", || {
-        tcx.try_par_hir_for_each_module(|module| tcx.ensure_ok().check_mod_type_wf(module))
-    });
+    let _ = tcx.sess.time("wf_checking", || tcx.ensure_ok().check_type_wf(()));
 
     tcx.dcx().abort_if_errors();
 
@@ -358,7 +364,7 @@ pub(crate) fn run_global_ctxt(
     rustc_passes::stability::check_unused_or_stable_features(tcx);
 
     let auto_traits =
-        tcx.all_traits().filter(|&trait_def_id| tcx.trait_is_auto(trait_def_id)).collect();
+        tcx.visible_traits().filter(|&trait_def_id| tcx.trait_is_auto(trait_def_id)).collect();
 
     let mut ctxt = DocContext {
         tcx,
@@ -388,8 +394,6 @@ pub(crate) fn run_global_ctxt(
         let sized_trait = build_trait(&mut ctxt, sized_trait_did);
         ctxt.external_traits.insert(sized_trait_did, sized_trait);
     }
-
-    debug!("crate: {:?}", tcx.hir_crate(()));
 
     let mut krate = tcx.sess.time("clean_crate", || clean::krate(&mut ctxt));
 
@@ -453,7 +457,7 @@ pub(crate) fn run_global_ctxt(
 
     tcx.dcx().abort_if_errors();
 
-    (krate, ctxt.render_options, ctxt.cache)
+    (krate, ctxt.render_options, ctxt.cache, expanded_macros)
 }
 
 /// Due to <https://github.com/rust-lang/rust/pull/73566>,

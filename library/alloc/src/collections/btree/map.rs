@@ -40,30 +40,15 @@ pub(super) const MIN_LEN: usize = node::MIN_LEN_AFTER_SPLIT;
 
 /// An ordered map based on a [B-Tree].
 ///
-/// B-Trees represent a fundamental compromise between cache-efficiency and actually minimizing
-/// the amount of work performed in a search. In theory, a binary search tree (BST) is the optimal
-/// choice for a sorted map, as a perfectly balanced BST performs the theoretical minimum amount of
-/// comparisons necessary to find an element (log<sub>2</sub>n). However, in practice the way this
-/// is done is *very* inefficient for modern computer architectures. In particular, every element
-/// is stored in its own individually heap-allocated node. This means that every single insertion
-/// triggers a heap-allocation, and every single comparison should be a cache-miss. Since these
-/// are both notably expensive things to do in practice, we are forced to, at the very least,
-/// reconsider the BST strategy.
+/// Given a key type with a [total order], an ordered map stores its entries in key order.
+/// That means that keys must be of a type that implements the [`Ord`] trait,
+/// such that two keys can always be compared to determine their [`Ordering`].
+/// Examples of keys with a total order are strings with lexicographical order,
+/// and numbers with their natural order.
 ///
-/// A B-Tree instead makes each node contain B-1 to 2B-1 elements in a contiguous array. By doing
-/// this, we reduce the number of allocations by a factor of B, and improve cache efficiency in
-/// searches. However, this does mean that searches will have to do *more* comparisons on average.
-/// The precise number of comparisons depends on the node search strategy used. For optimal cache
-/// efficiency, one could search the nodes linearly. For optimal comparisons, one could search
-/// the node using binary search. As a compromise, one could also perform a linear search
-/// that initially only checks every i<sup>th</sup> element for some choice of i.
-///
-/// Currently, our implementation simply performs naive linear search. This provides excellent
-/// performance on *small* nodes of elements which are cheap to compare. However in the future we
-/// would like to further explore choosing the optimal search strategy based on the choice of B,
-/// and possibly other factors. Using linear search, searching for a random element is expected
-/// to take B * log(n) comparisons, which is generally worse than a BST. In practice,
-/// however, performance is excellent.
+/// Iterators obtained from functions such as [`BTreeMap::iter`], [`BTreeMap::into_iter`], [`BTreeMap::values`], or
+/// [`BTreeMap::keys`] produce their items in key order, and take worst-case logarithmic and
+/// amortized constant time per item returned.
 ///
 /// It is a logic error for a key to be modified in such a way that the key's ordering relative to
 /// any other key, as determined by the [`Ord`] trait, changes while it is in the map. This is
@@ -71,14 +56,6 @@ pub(super) const MIN_LEN: usize = node::MIN_LEN_AFTER_SPLIT;
 /// The behavior resulting from such a logic error is not specified, but will be encapsulated to the
 /// `BTreeMap` that observed the logic error and not result in undefined behavior. This could
 /// include panics, incorrect results, aborts, memory leaks, and non-termination.
-///
-/// Iterators obtained from functions such as [`BTreeMap::iter`], [`BTreeMap::into_iter`], [`BTreeMap::values`], or
-/// [`BTreeMap::keys`] produce their items in order by key, and take worst-case logarithmic and
-/// amortized constant time per item returned.
-///
-/// [B-Tree]: https://en.wikipedia.org/wiki/B-tree
-/// [`Cell`]: core::cell::Cell
-/// [`RefCell`]: core::cell::RefCell
 ///
 /// # Examples
 ///
@@ -135,6 +112,8 @@ pub(super) const MIN_LEN: usize = node::MIN_LEN_AFTER_SPLIT;
 /// ]);
 /// ```
 ///
+/// ## `Entry` API
+///
 /// `BTreeMap` implements an [`Entry API`], which allows for complex
 /// methods of getting, setting, updating and removing keys and their values:
 ///
@@ -167,6 +146,43 @@ pub(super) const MIN_LEN: usize = node::MIN_LEN_AFTER_SPLIT;
 /// // modify an entry before an insert with in-place mutation
 /// player_stats.entry("mana").and_modify(|mana| *mana += 200).or_insert(100);
 /// ```
+///
+/// # Background
+///
+/// A B-tree is (like) a [binary search tree], but adapted to the natural granularity that modern
+/// machines like to consume data at. This means that each node contains an entire array of elements,
+/// instead of just a single element.
+///
+/// B-Trees represent a fundamental compromise between cache-efficiency and actually minimizing
+/// the amount of work performed in a search. In theory, a binary search tree (BST) is the optimal
+/// choice for a sorted map, as a perfectly balanced BST performs the theoretical minimum number of
+/// comparisons necessary to find an element (log<sub>2</sub>n). However, in practice the way this
+/// is done is *very* inefficient for modern computer architectures. In particular, every element
+/// is stored in its own individually heap-allocated node. This means that every single insertion
+/// triggers a heap-allocation, and every comparison is a potential cache-miss due to the indirection.
+/// Since both heap-allocations and cache-misses are notably expensive in practice, we are forced to,
+/// at the very least, reconsider the BST strategy.
+///
+/// A B-Tree instead makes each node contain B-1 to 2B-1 elements in a contiguous array. By doing
+/// this, we reduce the number of allocations by a factor of B, and improve cache efficiency in
+/// searches. However, this does mean that searches will have to do *more* comparisons on average.
+/// The precise number of comparisons depends on the node search strategy used. For optimal cache
+/// efficiency, one could search the nodes linearly. For optimal comparisons, one could search
+/// the node using binary search. As a compromise, one could also perform a linear search
+/// that initially only checks every i<sup>th</sup> element for some choice of i.
+///
+/// Currently, our implementation simply performs naive linear search. This provides excellent
+/// performance on *small* nodes of elements which are cheap to compare. However in the future we
+/// would like to further explore choosing the optimal search strategy based on the choice of B,
+/// and possibly other factors. Using linear search, searching for a random element is expected
+/// to take B * log(n) comparisons, which is generally worse than a BST. In practice,
+/// however, performance is excellent.
+///
+/// [B-Tree]: https://en.wikipedia.org/wiki/B-tree
+/// [binary search tree]: https://en.wikipedia.org/wiki/Binary_search_tree
+/// [total order]: https://en.wikipedia.org/wiki/Total_order
+/// [`Cell`]: core::cell::Cell
+/// [`RefCell`]: core::cell::RefCell
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(test), rustc_diagnostic_item = "BTreeMap")]
 #[rustc_insignificant_dtor]
@@ -382,6 +398,7 @@ impl<'a, K: 'a, V: 'a> Default for Iter<'a, K, V> {
 /// documentation for more.
 ///
 /// [`iter_mut`]: BTreeMap::iter_mut
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct IterMut<'a, K: 'a, V: 'a> {
     range: LazyLeafRange<marker::ValMut<'a>, K, V>,
@@ -391,7 +408,6 @@ pub struct IterMut<'a, K: 'a, V: 'a> {
     _marker: PhantomData<&'a mut (K, V)>,
 }
 
-#[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "collection_debug", since = "1.17.0")]
 impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for IterMut<'_, K, V> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1151,7 +1167,7 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
         K: Ord,
         F: FnMut(&K, &mut V) -> bool,
     {
-        self.extract_if(|k, v| !f(k, v)).for_each(drop);
+        self.extract_if(.., |k, v| !f(k, v)).for_each(drop);
     }
 
     /// Moves all elements from `other` into `self`, leaving `other` empty.
@@ -1397,11 +1413,13 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
         }
     }
 
-    /// Creates an iterator that visits all elements (key-value pairs) in
-    /// ascending key order and uses a closure to determine if an element should
-    /// be removed. If the closure returns `true`, the element is removed from
-    /// the map and yielded. If the closure returns `false`, or panics, the
-    /// element remains in the map and will not be yielded.
+    /// Creates an iterator that visits elements (key-value pairs) in the specified range in
+    /// ascending key order and uses a closure to determine if an element
+    /// should be removed.
+    ///
+    /// If the closure returns `true`, the element is removed from the map and
+    /// yielded. If the closure returns `false`, or panics, the element remains
+    /// in the map and will not be yielded.
     ///
     /// The iterator also lets you mutate the value of each element in the
     /// closure, regardless of whether you choose to keep or remove it.
@@ -1414,40 +1432,49 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
     ///
     /// # Examples
     ///
-    /// Splitting a map into even and odd keys, reusing the original map:
-    ///
     /// ```
     /// #![feature(btree_extract_if)]
     /// use std::collections::BTreeMap;
     ///
+    /// // Splitting a map into even and odd keys, reusing the original map:
     /// let mut map: BTreeMap<i32, i32> = (0..8).map(|x| (x, x)).collect();
-    /// let evens: BTreeMap<_, _> = map.extract_if(|k, _v| k % 2 == 0).collect();
+    /// let evens: BTreeMap<_, _> = map.extract_if(.., |k, _v| k % 2 == 0).collect();
     /// let odds = map;
     /// assert_eq!(evens.keys().copied().collect::<Vec<_>>(), [0, 2, 4, 6]);
     /// assert_eq!(odds.keys().copied().collect::<Vec<_>>(), [1, 3, 5, 7]);
+    ///
+    /// // Splitting a map into low and high halves, reusing the original map:
+    /// let mut map: BTreeMap<i32, i32> = (0..8).map(|x| (x, x)).collect();
+    /// let low: BTreeMap<_, _> = map.extract_if(0..4, |_k, _v| true).collect();
+    /// let high = map;
+    /// assert_eq!(low.keys().copied().collect::<Vec<_>>(), [0, 1, 2, 3]);
+    /// assert_eq!(high.keys().copied().collect::<Vec<_>>(), [4, 5, 6, 7]);
     /// ```
     #[unstable(feature = "btree_extract_if", issue = "70530")]
-    pub fn extract_if<F>(&mut self, pred: F) -> ExtractIf<'_, K, V, F, A>
+    pub fn extract_if<F, R>(&mut self, range: R, pred: F) -> ExtractIf<'_, K, V, R, F, A>
     where
         K: Ord,
+        R: RangeBounds<K>,
         F: FnMut(&K, &mut V) -> bool,
     {
-        let (inner, alloc) = self.extract_if_inner();
+        let (inner, alloc) = self.extract_if_inner(range);
         ExtractIf { pred, inner, alloc }
     }
 
-    pub(super) fn extract_if_inner(&mut self) -> (ExtractIfInner<'_, K, V>, A)
+    pub(super) fn extract_if_inner<R>(&mut self, range: R) -> (ExtractIfInner<'_, K, V, R>, A)
     where
         K: Ord,
+        R: RangeBounds<K>,
     {
         if let Some(root) = self.root.as_mut() {
             let (root, dormant_root) = DormantMutRef::new(root);
-            let front = root.borrow_mut().first_leaf_edge();
+            let first = root.borrow_mut().lower_bound(SearchBound::from_range(range.start_bound()));
             (
                 ExtractIfInner {
                     length: &mut self.length,
                     dormant_root: Some(dormant_root),
-                    cur_leaf_edge: Some(front),
+                    cur_leaf_edge: Some(first),
+                    range,
                 },
                 (*self.alloc).clone(),
             )
@@ -1457,6 +1484,7 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
                     length: &mut self.length,
                     dormant_root: None,
                     cur_leaf_edge: None,
+                    range,
                 },
                 (*self.alloc).clone(),
             )
@@ -1915,19 +1943,19 @@ pub struct ExtractIf<
     'a,
     K,
     V,
+    R,
     F,
     #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator + Clone = Global,
-> where
-    F: 'a + FnMut(&K, &mut V) -> bool,
-{
+> {
     pred: F,
-    inner: ExtractIfInner<'a, K, V>,
+    inner: ExtractIfInner<'a, K, V, R>,
     /// The BTreeMap will outlive this IntoIter so we don't care about drop order for `alloc`.
     alloc: A,
 }
+
 /// Most of the implementation of ExtractIf are generic over the type
 /// of the predicate, thus also serving for BTreeSet::ExtractIf.
-pub(super) struct ExtractIfInner<'a, K, V> {
+pub(super) struct ExtractIfInner<'a, K, V, R> {
     /// Reference to the length field in the borrowed map, updated live.
     length: &'a mut usize,
     /// Buried reference to the root field in the borrowed map.
@@ -1937,23 +1965,28 @@ pub(super) struct ExtractIfInner<'a, K, V> {
     /// Empty if the map has no root, if iteration went beyond the last leaf edge,
     /// or if a panic occurred in the predicate.
     cur_leaf_edge: Option<Handle<NodeRef<marker::Mut<'a>, K, V, marker::Leaf>, marker::Edge>>,
+    /// Range over which iteration was requested.  We don't need the left side, but we
+    /// can't extract the right side without requiring K: Clone.
+    range: R,
 }
 
 #[unstable(feature = "btree_extract_if", issue = "70530")]
-impl<K, V, F> fmt::Debug for ExtractIf<'_, K, V, F>
+impl<K, V, R, F, A> fmt::Debug for ExtractIf<'_, K, V, R, F, A>
 where
     K: fmt::Debug,
     V: fmt::Debug,
-    F: FnMut(&K, &mut V) -> bool,
+    A: Allocator + Clone,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("ExtractIf").field(&self.inner.peek()).finish()
+        f.debug_struct("ExtractIf").field("peek", &self.inner.peek()).finish_non_exhaustive()
     }
 }
 
 #[unstable(feature = "btree_extract_if", issue = "70530")]
-impl<K, V, F, A: Allocator + Clone> Iterator for ExtractIf<'_, K, V, F, A>
+impl<K, V, R, F, A: Allocator + Clone> Iterator for ExtractIf<'_, K, V, R, F, A>
 where
+    K: PartialOrd,
+    R: RangeBounds<K>,
     F: FnMut(&K, &mut V) -> bool,
 {
     type Item = (K, V);
@@ -1967,7 +2000,7 @@ where
     }
 }
 
-impl<'a, K, V> ExtractIfInner<'a, K, V> {
+impl<'a, K, V, R> ExtractIfInner<'a, K, V, R> {
     /// Allow Debug implementations to predict the next element.
     pub(super) fn peek(&self) -> Option<(&K, &V)> {
         let edge = self.cur_leaf_edge.as_ref()?;
@@ -1977,10 +2010,22 @@ impl<'a, K, V> ExtractIfInner<'a, K, V> {
     /// Implementation of a typical `ExtractIf::next` method, given the predicate.
     pub(super) fn next<F, A: Allocator + Clone>(&mut self, pred: &mut F, alloc: A) -> Option<(K, V)>
     where
+        K: PartialOrd,
+        R: RangeBounds<K>,
         F: FnMut(&K, &mut V) -> bool,
     {
         while let Ok(mut kv) = self.cur_leaf_edge.take()?.next_kv() {
             let (k, v) = kv.kv_mut();
+
+            // On creation, we navigated directly to the left bound, so we need only check the
+            // right bound here to decide whether to stop.
+            match self.range.end_bound() {
+                Bound::Included(ref end) if (*k).le(end) => (),
+                Bound::Excluded(ref end) if (*k).lt(end) => (),
+                Bound::Unbounded => (),
+                _ => return None,
+            }
+
             if pred(k, v) {
                 *self.length -= 1;
                 let (kv, pos) = kv.remove_kv_tracking(
@@ -2012,7 +2057,13 @@ impl<'a, K, V> ExtractIfInner<'a, K, V> {
 }
 
 #[unstable(feature = "btree_extract_if", issue = "70530")]
-impl<K, V, F> FusedIterator for ExtractIf<'_, K, V, F> where F: FnMut(&K, &mut V) -> bool {}
+impl<K, V, R, F> FusedIterator for ExtractIf<'_, K, V, R, F>
+where
+    K: PartialOrd,
+    R: RangeBounds<K>,
+    F: FnMut(&K, &mut V) -> bool,
+{
+}
 
 #[stable(feature = "btree_range", since = "1.17.0")]
 impl<'a, K, V> Iterator for Range<'a, K, V> {

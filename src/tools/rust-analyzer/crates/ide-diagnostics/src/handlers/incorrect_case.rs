@@ -1,13 +1,13 @@
-use hir::{db::ExpandDatabase, CaseType, InFile};
-use ide_db::{assists::Assist, defs::NameClass};
+use hir::{CaseType, InFile, db::ExpandDatabase};
+use ide_db::{assists::Assist, defs::NameClass, rename::RenameDefinition};
 use syntax::AstNode;
 
 use crate::{
-    // references::rename::rename_with_semantics,
-    unresolved_fix,
     Diagnostic,
     DiagnosticCode,
     DiagnosticsContext,
+    // references::rename::rename_with_semantics,
+    unresolved_fix,
 };
 
 // Diagnostic: incorrect-ident-case
@@ -29,6 +29,7 @@ pub(crate) fn incorrect_case(ctx: &DiagnosticsContext<'_>, d: &hir::IncorrectCas
         ),
         InFile::new(d.file, d.ident.into()),
     )
+    .stable()
     .with_fixes(fixes(ctx, d))
 }
 
@@ -43,7 +44,7 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::IncorrectCase) -> Option<Vec<Ass
     let label = format!("Rename to {}", d.suggested_text);
     let mut res = unresolved_fix("change_case", &label, frange.range);
     if ctx.resolve.should_resolve(&res.id) {
-        let source_change = def.rename(&ctx.sema, &d.suggested_text);
+        let source_change = def.rename(&ctx.sema, &d.suggested_text, RenameDefinition::Yes);
         res.source_change = Some(source_change.ok().unwrap_or_default());
     }
 
@@ -786,6 +787,8 @@ static FOO: () = {
     }
 
     #[test]
+    // FIXME
+    #[should_panic]
     fn enum_variant_body_inner_item() {
         check_diagnostics(
             r#"

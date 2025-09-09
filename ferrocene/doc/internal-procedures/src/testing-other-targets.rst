@@ -23,8 +23,7 @@ Host Setup
 Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
-:target-with-triple:`aarch64-apple-darwin`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:target-with-tuple:`aarch64-apple-darwin`
 
 Install Lima, if you don't have it:
 
@@ -115,7 +114,7 @@ The vm name is displayed in VS Code when trying to connect via ssh.
     With `ForwardAgent` enabled, removing the ssh settings for `ControlMaster`, `ControlPath` and `ControlPersist` in lima's generated configuration might be necessary,
     in case you use the configuration directly.
 
-Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-triple:`x86_64-unknown-linux-gnu` on this page.
+Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
 .. Warning::
     
@@ -124,7 +123,7 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
 
     Please ensure you always work from the guest-local repository.
 
-:target-with-triple:`x86_64-pc-windows-msvc`
+:target-with-tuple:`x86_64-pc-windows-msvc`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Setup WSL2, if you don't have it:
@@ -133,7 +132,7 @@ Setup WSL2, if you don't have it:
 
     wsl --install --distribution Ubuntu-24.04
 
-Ensure ```nestedVirtualization`` is set in the guest ``/etc/wsl.conf``, here is an example
+Ensure ``nestedVirtualization`` is set in the guest ``/etc/wsl.conf``, here is an example
 configuration:
 
 .. code-block::
@@ -157,7 +156,7 @@ Shell into the guest:
     
 You can also point `Visual Studio Code WSL extension <https://code.visualstudio.com/docs/remote/wsl-tutorial>`_ at it.
 
-Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-triple:`x86_64-unknown-linux-gnu` on this page.
+Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
 .. Warning::
     
@@ -166,7 +165,7 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
 
     Please ensure you always work from the guest-local repository.
 
-:target-with-triple:`x86_64-unknown-linux-gnu`
+:target-with-tuple:`x86_64-unknown-linux-gnu`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
@@ -190,16 +189,16 @@ Currently bare metal targets have a similar procedure for testing.
    Currently, these targets use our *secret sauce*.
    This will eventually be an open source component, but for now, it's our little bit of arcane magic.
 
-:target-with-triple:`aarch64-unknown-none`
+:target-with-tuple:`aarch64-unknown-none`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. Warning::
     
     In a :target:`aarch64-unknown-linux-gnu` environment -- such as a guest on
-    :target:`aarch64-apple-darwin` or :target:`x86_64-pc-windows-msvc` -- you **must** skip to the final step, running the tests using::
+    :target:`aarch64-apple-darwin` -- you **must** skip to the final step, running the tests using::
     
         export QEMU_CPU=cortex-a53
-        ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
+        ./x test --stage 1 --target aarch64-unknown-ferrocene.facade library/core
 
     Incorrectly configuring your :target:`aarch64-unknown-linux-gnu` environment using the other steps 
     will damage to the environment and result in "Too many levels of symbolic links" errors.
@@ -233,7 +232,7 @@ targets," ensure the following is in your ``config.toml``:
 
 .. code-block:: bash
 
-    [target.aarch64-unknown-ferrocenecoretest]
+    [target."aarch64-unknown-ferrocene.facade"]
     cc = "aarch64-linux-gnu-gcc"
     profiler = false
 
@@ -242,10 +241,10 @@ After, you can run the tests:
 .. code-block:: bash
 
     export QEMU_CPU=cortex-a53
-    ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
+    ./x test --stage 1 --target aarch64-unknown-ferrocene.facade library/core
 
-:target-with-triple:`thumbv7em-none-eabihf` & :target-with-triple:`thumbv7em-none-eabi`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:target-with-tuple:`thumbv7em-none-eabihf` & :target-with-tuple:`thumbv7em-none-eabi`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install the necessary packages:
 
@@ -275,9 +274,9 @@ Now set the target:
 
 .. code-block:: bash
 
-    export TARGET="thumbv7em-ferrocenecoretest-eabihf"
+    export TARGET="thumbv7em-ferrocene.facade-eabihf"
     # or 
-    export TARGET="thumbv7em-ferrocenecoretest-eabi"
+    export TARGET="thumbv7em-ferrocene.facade-eabi"
 
 In order to test this target, the build process will acquire a copy of our *secret sauce* from AWS. Ensure you're authenticated, following the section in
 :doc:`internal-procedures:setup-local-env` if your environment is not yet set up.
@@ -286,11 +285,11 @@ Ensure the following is in your ``config.toml``:
 
 .. code-block:: toml
 
-    [target.thumbv7em-ferrocenecoretest-eabi]
+    [target."thumbv7em-ferrocene.facade-eabi"]
     cc = 'arm-none-eabi-gcc'
     profiler = false
 
-    [target.thumbv7em-ferrocenecoretest-eabihf]
+    [target."thumbv7em-ferrocene.facade-eabihf"]
     cc = 'arm-none-eabi-gcc'
     profiler = false
 

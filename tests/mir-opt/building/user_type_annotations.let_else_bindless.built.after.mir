@@ -1,8 +1,8 @@
 // MIR for `let_else_bindless` after built
 
 | User Type Annotations
-| 0: user_ty: Canonical { value: Ty((u32, u64, &'static char)), max_universe: U0, variables: [] }, span: $DIR/user_type_annotations.rs:40:20: 40:45, inferred_ty: (u32, u64, &char)
-| 1: user_ty: Canonical { value: Ty((u32, u64, &'static char)), max_universe: U0, variables: [] }, span: $DIR/user_type_annotations.rs:40:20: 40:45, inferred_ty: (u32, u64, &char)
+| 0: user_ty: Canonical { value: Ty((u32, u64, &'static char)), max_universe: U0, variables: [] }, span: $DIR/user_type_annotations.rs:41:20: 41:45, inferred_ty: (u32, u64, &char)
+| 1: user_ty: Canonical { value: Ty((u32, u64, &'static char)), max_universe: U0, variables: [] }, span: $DIR/user_type_annotations.rs:41:20: 41:45, inferred_ty: (u32, u64, &char)
 |
 fn let_else_bindless() -> () {
     let mut _0: ();
@@ -59,4 +59,10 @@ fn let_else_bindless() -> () {
     bb6 (cleanup): {
         resume;
     }
+}
+
+ALLOC0 (size: 40, align: 1) {
+    0x00 │ 69 6e 74 65 72 6e 61 6c 20 65 72 72 6f 72 3a 20 │ internal error: 
+    0x10 │ 65 6e 74 65 72 65 64 20 75 6e 72 65 61 63 68 61 │ entered unreacha
+    0x20 │ 62 6c 65 20 63 6f 64 65                         │ ble code
 }

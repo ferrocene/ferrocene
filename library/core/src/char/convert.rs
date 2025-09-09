@@ -21,6 +21,8 @@ pub(super) const fn from_u32(i: u32) -> Option<char> {
 /// Converts a `u32` to a `char`, ignoring validity. See [`char::from_u32_unchecked`].
 #[inline]
 #[must_use]
+#[allow(unnecessary_transmutes)]
+#[track_caller]
 pub(super) const unsafe fn from_u32_unchecked(i: u32) -> char {
     // SAFETY: the caller must guarantee that `i` is a valid char value.
     unsafe {
@@ -34,7 +36,8 @@ pub(super) const unsafe fn from_u32_unchecked(i: u32) -> char {
 }
 
 #[stable(feature = "char_convert", since = "1.13.0")]
-impl From<char> for u32 {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const From<char> for u32 {
     /// Converts a [`char`] into a [`u32`].
     ///
     /// # Examples
@@ -51,7 +54,8 @@ impl From<char> for u32 {
 }
 
 #[stable(feature = "more_char_conversions", since = "1.51.0")]
-impl From<char> for u64 {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const From<char> for u64 {
     /// Converts a [`char`] into a [`u64`].
     ///
     /// # Examples
@@ -70,7 +74,8 @@ impl From<char> for u64 {
 }
 
 #[stable(feature = "more_char_conversions", since = "1.51.0")]
-impl From<char> for u128 {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const From<char> for u128 {
     /// Converts a [`char`] into a [`u128`].
     ///
     /// # Examples
@@ -93,7 +98,8 @@ impl From<char> for u128 {
 ///
 /// See [`impl From<u8> for char`](char#impl-From<u8>-for-char) for details on the encoding.
 #[stable(feature = "u8_from_char", since = "1.59.0")]
-impl TryFrom<char> for u8 {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const TryFrom<char> for u8 {
     type Error = TryFromCharError;
 
     /// Tries to convert a [`char`] into a [`u8`].
@@ -108,7 +114,11 @@ impl TryFrom<char> for u8 {
     /// ```
     #[inline]
     fn try_from(c: char) -> Result<u8, Self::Error> {
-        u8::try_from(u32::from(c)).map_err(|_| TryFromCharError(()))
+        // FIXME(const-hack): this should use map_err instead
+        match u8::try_from(u32::from(c)) {
+            Ok(b) => Ok(b),
+            Err(_) => Err(TryFromCharError(())),
+        }
     }
 }
 
@@ -117,7 +127,8 @@ impl TryFrom<char> for u8 {
 ///
 /// This corresponds to the UCS-2 encoding, as specified in ISO/IEC 10646:2003.
 #[stable(feature = "u16_from_char", since = "1.74.0")]
-impl TryFrom<char> for u16 {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const TryFrom<char> for u16 {
     type Error = TryFromCharError;
 
     /// Tries to convert a [`char`] into a [`u16`].
@@ -132,7 +143,11 @@ impl TryFrom<char> for u16 {
     /// ```
     #[inline]
     fn try_from(c: char) -> Result<u16, Self::Error> {
-        u16::try_from(u32::from(c)).map_err(|_| TryFromCharError(()))
+        // FIXME(const-hack): this should use map_err instead
+        match u16::try_from(u32::from(c)) {
+            Ok(x) => Ok(x),
+            Err(_) => Err(TryFromCharError(())),
+        }
     }
 }
 
@@ -155,7 +170,8 @@ impl TryFrom<char> for u16 {
 /// for a superset of Windows-1252 that fills the remaining blanks with corresponding
 /// C0 and C1 control codes.
 #[stable(feature = "char_convert", since = "1.13.0")]
-impl From<u8> for char {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const From<u8> for char {
     /// Converts a [`u8`] into a [`char`].
     ///
     /// # Examples
@@ -187,21 +203,16 @@ enum CharErrorKind {
 }
 
 #[stable(feature = "char_from_str", since = "1.20.0")]
-impl Error for ParseCharError {
-    #[allow(deprecated)]
-    fn description(&self) -> &str {
-        match self.kind {
-            CharErrorKind::EmptyString => "cannot parse char from empty string",
-            CharErrorKind::TooManyChars => "too many characters in string",
-        }
-    }
-}
+impl Error for ParseCharError {}
 
 #[stable(feature = "char_from_str", since = "1.20.0")]
 impl fmt::Display for ParseCharError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[allow(deprecated)]
-        self.description().fmt(f)
+        match self.kind {
+            CharErrorKind::EmptyString => "cannot parse char from empty string",
+            CharErrorKind::TooManyChars => "too many characters in string",
+        }
+        .fmt(f)
     }
 }
 
@@ -221,6 +232,7 @@ impl FromStr for char {
 }
 
 #[inline]
+#[allow(unnecessary_transmutes)]
 const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
     // This is an optimized version of the check
     // (i > MAX as u32) || (i >= 0xD800 && i <= 0xDFFF),
@@ -244,7 +256,8 @@ const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
-impl TryFrom<u32> for char {
+#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+impl const TryFrom<u32> for char {
     type Error = CharTryFromError;
 
     #[inline]

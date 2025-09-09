@@ -176,3 +176,35 @@ fn return_wait() -> ExitStatus {
     let mut x = Command::new("").spawn().unwrap();
     return x.wait().unwrap();
 }
+
+mod issue14677 {
+    use std::io;
+    use std::process::Command;
+
+    fn do_something<F: Fn() -> Result<(), ()>>(f: F) {
+        todo!()
+    }
+
+    fn foo() {
+        let mut child = Command::new("true").spawn().unwrap();
+        let some_condition = true;
+        do_something(|| {
+            if some_condition {
+                return Err(());
+            }
+            Ok(())
+        });
+        child.kill().unwrap();
+        child.wait().unwrap();
+    }
+}
+
+fn issue14911() -> std::io::Result<String> {
+    let (mut recv, send) = std::io::pipe()?;
+    let mut command = Command::new("ls")
+        .stdout(send.try_clone()?)
+        .spawn()
+        .expect("Could not spawn new process...");
+    command.wait()?;
+    Ok("".into())
+}

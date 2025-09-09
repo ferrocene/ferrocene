@@ -51,9 +51,12 @@ QNX_TARGETS = [
 
 GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
+    "aarch64-unknown-ferrocene.facade",
     "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
+    "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-none-eabihf",
+    "thumbv7em-ferrocene.facade-eabihf",
     "armv8r-none-eabihf",
     "thumbv8m.base-none-eabi",
     "thumbv8m.main-none-eabi",
@@ -61,6 +64,10 @@ GENERIC_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
+    "x86_64-unknown-ferrocene.certified",
+    "aarch64-unknown-ferrocene.certified",
+    "thumbv7em-ferrocene.certified-eabi",
+    "thumbv7em-ferrocene.certified-eabihf",
 ]
 
 # Targets only built (and self-tested!) on Linux.
@@ -68,6 +75,8 @@ AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
 X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
 X86_64_LINUX_BUILD_STD_TARGETS = [
     "riscv64gc-unknown-linux-gnu",
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
 ]
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
@@ -77,7 +86,7 @@ AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD
 
 # Targets only built (and tested!) on Mac
 AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
-AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
+AARCH64_MAC_BUILD_STD_TARGETS = []
 AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS
 
 # Tagets only built (and tested!) on Windows

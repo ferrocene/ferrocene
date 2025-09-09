@@ -5,8 +5,9 @@
 
 use std::{collections::hash_map::Entry, fmt, iter, mem};
 
+use crate::imports::insert_use::{ImportScope, ImportScopeKind};
 use crate::text_edit::{TextEdit, TextEditBuilder};
-use crate::{assists::Command, syntax_helpers::tree_diff::diff, SnippetCap};
+use crate::{SnippetCap, assists::Command, syntax_helpers::tree_diff::diff};
 use base_db::AnchoredPathBuf;
 use itertools::Itertools;
 use nohash_hasher::IntMap;
@@ -14,8 +15,8 @@ use rustc_hash::FxHashMap;
 use span::FileId;
 use stdx::never;
 use syntax::{
-    syntax_editor::{SyntaxAnnotation, SyntaxEditor},
     AstNode, SyntaxElement, SyntaxNode, SyntaxNodePtr, SyntaxToken, TextRange, TextSize,
+    syntax_editor::{SyntaxAnnotation, SyntaxEditor},
 };
 
 /// An annotation ID associated with an indel, to describe changes.
@@ -367,6 +368,17 @@ impl SourceChangeBuilder {
     pub fn make_mut<N: AstNode>(&mut self, node: N) -> N {
         self.mutated_tree.get_or_insert_with(|| TreeMutator::new(node.syntax())).make_mut(&node)
     }
+
+    pub fn make_import_scope_mut(&mut self, scope: ImportScope) -> ImportScope {
+        ImportScope {
+            kind: match scope.kind.clone() {
+                ImportScopeKind::File(it) => ImportScopeKind::File(self.make_mut(it)),
+                ImportScopeKind::Module(it) => ImportScopeKind::Module(self.make_mut(it)),
+                ImportScopeKind::Block(it) => ImportScopeKind::Block(self.make_mut(it)),
+            },
+            required_cfgs: scope.required_cfgs.iter().map(|it| self.make_mut(it.clone())).collect(),
+        }
+    }
     /// Returns a copy of the `node`, suitable for mutation.
     ///
     /// Syntax trees in rust-analyzer are typically immutable, and mutating
@@ -469,7 +481,7 @@ impl SourceChangeBuilder {
     }
 
     fn add_snippet_annotation(&mut self, kind: AnnotationSnippet) -> SyntaxAnnotation {
-        let annotation = SyntaxAnnotation::new();
+        let annotation = SyntaxAnnotation::default();
         self.snippet_annotations.push((kind, annotation));
         self.source_change.is_snippet = true;
         annotation
@@ -479,13 +491,14 @@ impl SourceChangeBuilder {
         self.commit();
 
         // Only one file can have snippet edits
-        stdx::never!(self
-            .source_change
-            .source_file_edits
-            .iter()
-            .filter(|(_, (_, snippet_edit))| snippet_edit.is_some())
-            .at_most_one()
-            .is_err());
+        stdx::never!(
+            self.source_change
+                .source_file_edits
+                .iter()
+                .filter(|(_, (_, snippet_edit))| snippet_edit.is_some())
+                .at_most_one()
+                .is_err()
+        );
 
         mem::take(&mut self.source_change)
     }

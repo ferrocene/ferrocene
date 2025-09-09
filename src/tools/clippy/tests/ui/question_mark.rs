@@ -3,6 +3,8 @@
 #![allow(dead_code)]
 #![allow(clippy::unnecessary_wraps)]
 
+use std::sync::MutexGuard;
+
 fn some_func(a: Option<u32>) -> Option<u32> {
     if a.is_none() {
         //~^ question_mark
@@ -369,6 +371,11 @@ fn pattern() -> Result<(), PatternedError> {
     res
 }
 
+fn expect_expr(a: Option<usize>) -> Option<usize> {
+    #[expect(clippy::needless_question_mark)]
+    Some(a?)
+}
+
 fn main() {}
 
 // `?` is not the same as `return None;` if inside of a try block
@@ -523,4 +530,34 @@ fn msrv_1_13(arg: Option<i32>) -> Option<i32> {
     };
     println!("{}", val);
     Some(val)
+}
+
+fn issue_14615(a: MutexGuard<Option<u32>>) -> Option<String> {
+    let Some(a) = *a else {
+        return None;
+    };
+    //~^^^ question_mark
+    Some(format!("{a}"))
+}
+
+fn const_in_pattern(x: Option<(i32, i32)>) -> Option<()> {
+    const N: i32 = 0;
+
+    let Some((x, N)) = x else {
+        return None;
+    };
+
+    None
+}
+
+fn issue_13642(x: Option<i32>) -> Option<()> {
+    let Some(x) = x else {
+        #[cfg(false)]
+        panic!();
+
+        #[cfg(true)]
+        return None;
+    };
+
+    None
 }

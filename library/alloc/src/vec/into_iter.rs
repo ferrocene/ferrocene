@@ -168,7 +168,7 @@ impl<T, A: Allocator> IntoIter<T, A> {
 
         // SAFETY: This allocation originally came from a `Vec`, so it passes
         // all those checks. We have `this.buf` ≤ `this.ptr` ≤ `this.end`,
-        // so the `sub_ptr`s below cannot wrap, and will produce a well-formed
+        // so the `offset_from_unsigned`s below cannot wrap, and will produce a well-formed
         // range. `end` ≤ `buf + cap`, so the range will be in-bounds.
         // Taking `alloc` is ok because nothing else is going to look at it,
         // since our `Drop` impl isn't going to run so there's no more code.
@@ -256,6 +256,11 @@ impl<T, A: Allocator> Iterator for IntoIter<T, A> {
     #[inline]
     fn count(self) -> usize {
         self.len()
+    }
+
+    #[inline]
+    fn last(mut self) -> Option<T> {
+        self.next_back()
     }
 
     #[inline]

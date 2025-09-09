@@ -4,6 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use rustc_literal_escaper::unescape_str;
 use walkdir::WalkDir;
 
 mod groups;
@@ -58,6 +59,8 @@ pub struct LintExtractor<'a> {
     pub rustc_target: &'a str,
     /// The target linker overriding `rustc`'s default
     pub rustc_linker: Option<&'a str>,
+    /// Stage of the compiler that builds the docs (the stage of `rustc_path`).
+    pub build_rustc_stage: u32,
     /// Verbose output.
     pub verbose: bool,
     /// Validate the style and the code example.
@@ -214,6 +217,9 @@ impl<'a> LintExtractor<'a> {
                         let line = line.trim();
                         if let Some(text) = line.strip_prefix("/// ") {
                             doc_lines.push(text.to_string());
+                        } else if let Some(text) = line.strip_prefix("#[doc = \"") {
+                            let buf = parse_doc_string(text);
+                            doc_lines.push(buf);
                         } else if line == "///" {
                             doc_lines.push("".to_string());
                         } else if line.starts_with("// ") {
@@ -223,6 +229,20 @@ impl<'a> LintExtractor<'a> {
                             // Ignore allow of lints (useful for
                             // invalid_rust_codeblocks).
                             continue;
+                        } else if let Some(text) =
+                            line.strip_prefix("#[cfg_attr(not(bootstrap), doc = \"")
+                        {
+                            if self.build_rustc_stage >= 1 {
+                                let buf = parse_doc_string(text);
+                                doc_lines.push(buf);
+                            }
+                        } else if let Some(text) =
+                            line.strip_prefix("#[cfg_attr(bootstrap, doc = \"")
+                        {
+                            if self.build_rustc_stage == 0 {
+                                let buf = parse_doc_string(text);
+                                doc_lines.push(buf);
+                            }
                         } else {
                             let name = lint_name(line).map_err(|e| {
                                 format!(
@@ -312,6 +332,7 @@ impl<'a> LintExtractor<'a> {
         if matches!(
             lint.name.as_str(),
             "unused_features" // broken lint
+            | "soft_unstable" // cannot have a stable example
         ) {
             return Ok(());
         }
@@ -444,21 +465,15 @@ impl<'a> LintExtractor<'a> {
         fs::write(&tempfile, source)
             .map_err(|e| format!("failed to write {}: {}", tempfile.display(), e))?;
         let mut cmd = Command::new(self.rustc_path);
-        if options.contains(&"edition2024") {
-            cmd.arg("--edition=2024");
-            cmd.arg("-Zunstable-options");
-        } else if options.contains(&"edition2021") {
-            cmd.arg("--edition=2021");
-        } else if options.contains(&"edition2018") {
-            cmd.arg("--edition=2018");
-        } else if options.contains(&"edition2015") {
-            cmd.arg("--edition=2015");
-        } else if options.contains(&"edition") {
-            panic!("lint-docs: unknown edition");
-        } else {
+        let edition = options
+            .iter()
+            .filter_map(|opt| opt.strip_prefix("edition"))
+            .next()
             // defaults to latest edition
-            cmd.arg("--edition=2021");
-        }
+            .unwrap_or("2024");
+        cmd.arg(format!("--edition={edition}"));
+        // Just in case this is an unstable edition.
+        cmd.arg("-Zunstable-options");
         cmd.arg("--error-format=json");
         cmd.arg("--target").arg(self.rustc_target);
         if let Some(target_linker) = self.rustc_linker {
@@ -572,6 +587,23 @@ impl<'a> LintExtractor<'a> {
             .map_err(|e| format!("could not write to {}: {}", out_path.display(), e))?;
         Ok(())
     }
+}
+
+/// Parses a doc string that follows `#[doc = "`.
+fn parse_doc_string(text: &str) -> String {
+    let escaped = text.strip_suffix("]").unwrap_or(text);
+    let escaped = escaped.strip_suffix(")").unwrap_or(escaped).strip_suffix("\"");
+    let Some(escaped) = escaped else {
+        panic!("Cannot extract docstring content from {text}");
+    };
+    let mut buf = String::new();
+    unescape_str(escaped, |_, res| match res {
+        Ok(c) => buf.push(c),
+        Err(err) => {
+            assert!(!err.is_fatal(), "failed to unescape string literal")
+        }
+    });
+    buf
 }
 
 /// Adds `Lint`s that have been renamed.

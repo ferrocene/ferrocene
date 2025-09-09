@@ -4,10 +4,12 @@ use super::NEEDLESS_COLLECT;
 use clippy_utils::diagnostics::{span_lint_and_sugg, span_lint_hir_and_then};
 use clippy_utils::source::{snippet, snippet_with_applicability};
 use clippy_utils::sugg::Sugg;
-use clippy_utils::ty::{get_type_diagnostic_name, make_normalized_projection, make_projection};
+use clippy_utils::ty::{
+    get_type_diagnostic_name, has_non_owning_mutable_access, make_normalized_projection, make_projection,
+};
 use clippy_utils::{
     CaptureKind, can_move_expr_to_closure, fn_def_id, get_enclosing_block, higher, is_trait_method, path_to_local,
-    path_to_local_id,
+    path_to_local_id, sym,
 };
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::{Applicability, MultiSpan};
@@ -18,11 +20,12 @@ use rustc_hir::{
 use rustc_lint::LateContext;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::ty::{self, AssocTag, ClauseKind, EarlyBinder, GenericArg, GenericArgKind, Ty};
+use rustc_span::Span;
 use rustc_span::symbol::Ident;
-use rustc_span::{Span, sym};
 
 const NEEDLESS_COLLECT_MSG: &str = "avoid using `collect()` when not needed";
 
+#[expect(clippy::too_many_lines)]
 pub(super) fn check<'tcx>(
     cx: &LateContext<'tcx>,
     name_span: Span,
@@ -30,17 +33,21 @@ pub(super) fn check<'tcx>(
     iter_expr: &'tcx Expr<'tcx>,
     call_span: Span,
 ) {
+    let iter_ty = cx.typeck_results().expr_ty(iter_expr);
+    if has_non_owning_mutable_access(cx, iter_ty) {
+        return; // don't lint if the iterator has side effects
+    }
+
     match cx.tcx.parent_hir_node(collect_expr.hir_id) {
         Node::Expr(parent) => {
             check_collect_into_intoiterator(cx, parent, collect_expr, call_span, iter_expr);
 
             if let ExprKind::MethodCall(name, _, args @ ([] | [_]), _) = parent.kind {
                 let mut app = Applicability::MachineApplicable;
-                let name = name.ident.as_str();
                 let collect_ty = cx.typeck_results().expr_ty(collect_expr);
 
-                let sugg: String = match name {
-                    "len" => {
+                let sugg: String = match name.ident.name {
+                    sym::len => {
                         if let Some(adt) = collect_ty.ty_adt_def()
                             && matches!(
                                 cx.tcx.get_diagnostic_name(adt.did()),
@@ -52,13 +59,13 @@ pub(super) fn check<'tcx>(
                             return;
                         }
                     },
-                    "is_empty"
+                    sym::is_empty
                         if is_is_empty_sig(cx, parent.hir_id)
                             && iterates_same_ty(cx, cx.typeck_results().expr_ty(iter_expr), collect_ty) =>
                     {
                         "next().is_none()".into()
                     },
-                    "contains" => {
+                    sym::contains => {
                         if is_contains_sig(cx, parent.hir_id, iter_expr)
                             && let Some(arg) = args.first()
                         {
@@ -331,7 +338,7 @@ impl<'tcx> Visitor<'tcx> for IterFunctionVisitor<'_, 'tcx> {
         // Check function calls on our collection
         if let ExprKind::MethodCall(method_name, recv, args, _) = &expr.kind {
             if args.is_empty()
-                && method_name.ident.name.as_str() == "collect"
+                && method_name.ident.name == sym::collect
                 && is_trait_method(self.cx, expr, sym::Iterator)
             {
                 self.current_mutably_captured_ids = get_captured_ids(self.cx, self.cx.typeck_results().expr_ty(recv));
@@ -349,20 +356,20 @@ impl<'tcx> Visitor<'tcx> for IterFunctionVisitor<'_, 'tcx> {
                     if let Some(hir_id) = self.current_statement_hir_id {
                         self.hir_id_uses_map.insert(hir_id, self.uses.len());
                     }
-                    match method_name.ident.name.as_str() {
-                        "into_iter" => self.uses.push(Some(IterFunction {
+                    match method_name.ident.name {
+                        sym::into_iter => self.uses.push(Some(IterFunction {
                             func: IterFunctionKind::IntoIter(expr.hir_id),
                             span: expr.span,
                         })),
-                        "len" => self.uses.push(Some(IterFunction {
+                        sym::len => self.uses.push(Some(IterFunction {
                             func: IterFunctionKind::Len,
                             span: expr.span,
                         })),
-                        "is_empty" => self.uses.push(Some(IterFunction {
+                        sym::is_empty => self.uses.push(Some(IterFunction {
                             func: IterFunctionKind::IsEmpty,
                             span: expr.span,
                         })),
-                        "contains" => self.uses.push(Some(IterFunction {
+                        sym::contains => self.uses.push(Some(IterFunction {
                             func: IterFunctionKind::Contains(args[0].span),
                             span: expr.span,
                         })),
@@ -377,20 +384,20 @@ impl<'tcx> Visitor<'tcx> for IterFunctionVisitor<'_, 'tcx> {
                 return;
             }
 
-            if let Some(hir_id) = path_to_local(recv) {
-                if let Some(index) = self.hir_id_uses_map.remove(&hir_id) {
-                    if self
-                        .illegal_mutable_capture_ids
-                        .intersection(&self.current_mutably_captured_ids)
-                        .next()
-                        .is_none()
-                    {
-                        if let Some(hir_id) = self.current_statement_hir_id {
-                            self.hir_id_uses_map.insert(hir_id, index);
-                        }
-                    } else {
-                        self.uses[index] = None;
+            if let Some(hir_id) = path_to_local(recv)
+                && let Some(index) = self.hir_id_uses_map.remove(&hir_id)
+            {
+                if self
+                    .illegal_mutable_capture_ids
+                    .intersection(&self.current_mutably_captured_ids)
+                    .next()
+                    .is_none()
+                {
+                    if let Some(hir_id) = self.current_statement_hir_id {
+                        self.hir_id_uses_map.insert(hir_id, index);
                     }
+                } else {
+                    self.uses[index] = None;
                 }
             }
         }
@@ -500,7 +507,7 @@ fn get_captured_ids(cx: &LateContext<'_>, ty: Ty<'_>) -> HirIdSet {
         match ty.kind() {
             ty::Adt(_, generics) => {
                 for generic in *generics {
-                    if let GenericArgKind::Type(ty) = generic.unpack() {
+                    if let GenericArgKind::Type(ty) = generic.kind() {
                         get_captured_ids_recursive(cx, ty, set);
                     }
                 }

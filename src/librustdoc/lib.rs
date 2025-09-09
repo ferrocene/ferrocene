@@ -1,27 +1,23 @@
+// tidy-alphabetical-start
+#![cfg_attr(bootstrap, feature(round_char_boundary))]
 #![doc(
     html_root_url = "https://doc.rust-lang.org/nightly/",
     html_playground_url = "https://play.rust-lang.org/"
 )]
-#![feature(rustc_private)]
+#![feature(ascii_char)]
+#![feature(ascii_char_variants)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(debug_closure_helpers)]
 #![feature(file_buffered)]
 #![feature(format_args_nl)]
 #![feature(if_let_guard)]
-#![feature(impl_trait_in_assoc_type)]
+#![feature(iter_advance_by)]
 #![feature(iter_intersperse)]
-#![feature(let_chains)]
-#![feature(never_type)]
-#![feature(round_char_boundary)]
+#![feature(rustc_private)]
 #![feature(test)]
-#![feature(type_alias_impl_trait)]
-#![feature(type_ascription)]
-#![recursion_limit = "256"]
 #![warn(rustc::internal)]
-#![allow(clippy::collapsible_if, clippy::collapsible_else_if)]
-#![allow(rustc::diagnostic_outside_of_impl)]
-#![allow(rustc::untranslatable_diagnostic)]
+// tidy-alphabetical-end
 
 extern crate thin_vec;
 
@@ -73,9 +69,11 @@ extern crate tikv_jemalloc_sys as jemalloc_sys;
 
 use std::env::{self, VarError};
 use std::io::{self, IsTerminal};
+use std::path::Path;
 use std::process;
 
 use rustc_errors::DiagCtxtHandle;
+use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_interface::interface;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::config::{ErrorOutputType, RustcOptGroup, make_crate_type_option};
@@ -83,6 +81,8 @@ use rustc_session::{EarlyDiagCtxt, getopts};
 use tracing::info;
 
 use crate::clean::utils::DOC_RUST_LANG_ORG_VERSION;
+use crate::error::Error;
+use crate::formats::cache::Cache;
 
 /// A macro to create a FxHashMap.
 ///
@@ -170,12 +170,28 @@ pub fn main() {
     // NOTE: this compiles both versions of tracing unconditionally, because
     // - The compile time hit is not that bad, especially compared to rustdoc's incremental times, and
     // - Otherwise, there's no warning that logging is being ignored when `download-rustc` is enabled
-    // NOTE: The reason this doesn't show double logging when `download-rustc = false` and
-    // `debug_logging = true` is because all rustc logging goes to its version of tracing (the one
-    // in the sysroot), and all of rustdoc's logging goes to its version (the one in Cargo.toml).
 
-    init_logging(&early_dcx);
-    rustc_driver::init_logger(&early_dcx, rustc_log::LoggerConfig::from_env("RUSTDOC_LOG"));
+    crate::init_logging(&early_dcx);
+    match rustc_log::init_logger(rustc_log::LoggerConfig::from_env("RUSTDOC_LOG")) {
+        Ok(()) => {}
+        // With `download-rustc = true` there are definitely 2 distinct tracing crates in the
+        // dependency graph: one in the downloaded sysroot and one built just now as a dependency of
+        // rustdoc. So the sysroot's tracing is definitely not yet initialized here.
+        //
+        // But otherwise, depending on link style, there may or may not be 2 tracing crates in play.
+        // The one we just initialized in `crate::init_logging` above is rustdoc's direct dependency
+        // on tracing. When rustdoc is built by x.py using Cargo, rustc_driver's and rustc_log's
+        // tracing dependency is distinct from this one and also needs to be initialized (using the
+        // same RUSTDOC_LOG environment variable for both). Other build systems may use just a
+        // single tracing crate throughout the rustc and rustdoc build.
+        //
+        // The reason initializing 2 tracings does not show double logging when `download-rustc =
+        // false` and `debug_logging = true` is because all rustc logging goes only to its version
+        // of tracing (the one in the sysroot) and all of rustdoc's logging only goes to its version
+        // (the one in Cargo.toml).
+        Err(rustc_log::Error::AlreadyInit(_)) => {}
+        Err(error) => early_dcx.early_fatal(error.to_string()),
+    }
 
     let exit_code = rustc_driver::catch_with_exit_code(|| {
         let at_args = rustc_driver::args::raw_args(&early_dcx);
@@ -507,28 +523,20 @@ fn opts() -> Vec<RustcOptGroup> {
             "",
         ),
         opt(
-            Unstable,
-            FlagMulti,
-            "",
-            "enable-per-target-ignores",
-            "parse ignore-foo for ignoring doctests on a per-target basis",
-            "",
-        ),
-        opt(
-            Unstable,
+            Stable,
             Opt,
             "",
-            "runtool",
+            "test-runtool",
             "",
             "The tool to run tests with when building for a different target than host",
         ),
         opt(
-            Unstable,
+            Stable,
             Multi,
             "",
-            "runtool-arg",
+            "test-runtool-arg",
             "",
-            "One (of possibly many) arguments to pass to the runtool",
+            "One argument (of possibly many) to pass to the runtool",
         ),
         opt(
             Unstable,
@@ -646,9 +654,9 @@ fn opts() -> Vec<RustcOptGroup> {
             Unstable,
             Multi,
             "",
-            "doctest-compilation-args",
-            "",
-            "add arguments to be used when compiling doctests",
+            "doctest-build-arg",
+            "One argument (of possibly many) to be used when compiling doctests",
+            "ARG",
         ),
         opt(
             Unstable,
@@ -656,6 +664,14 @@ fn opts() -> Vec<RustcOptGroup> {
             "",
             "disable-minification",
             "disable the minification of CSS/JS files (perma-unstable, do not use with cached files)",
+            "",
+        ),
+        opt(
+            Unstable,
+            Flag,
+            "",
+            "generate-macro-expansion",
+            "Add possibility to expand macros in the HTML source code pages",
             "",
         ),
         // deprecated / removed options
@@ -721,20 +737,32 @@ pub(crate) fn wrap_return(dcx: DiagCtxtHandle<'_>, res: Result<(), String>) {
     }
 }
 
-fn run_renderer<'tcx, T: formats::FormatRenderer<'tcx>>(
+fn run_renderer<
+    'tcx,
+    T: formats::FormatRenderer<'tcx>,
+    F: FnOnce(
+        clean::Crate,
+        config::RenderOptions,
+        Cache,
+        TyCtxt<'tcx>,
+    ) -> Result<(T, clean::Crate), Error>,
+>(
     krate: clean::Crate,
     renderopts: config::RenderOptions,
     cache: formats::cache::Cache,
     tcx: TyCtxt<'tcx>,
+    init: F,
 ) {
-    match formats::run_format::<T>(krate, renderopts, cache, tcx) {
+    match formats::run_format::<T, F>(krate, renderopts, cache, tcx, init) {
         Ok(_) => tcx.dcx().abort_if_errors(),
         Err(e) => {
             let mut msg =
                 tcx.dcx().struct_fatal(format!("couldn't generate documentation: {}", e.error));
             let file = e.file.display().to_string();
             if !file.is_empty() {
-                msg.note(format!("failed to create or modify \"{file}\""));
+                msg.note(format!("failed to create or modify {e}"));
+            } else {
+                msg.note(format!("failed to create or modify file: {e}"));
             }
             msg.emit();
         }
@@ -793,7 +821,7 @@ fn main_args(early_dcx: &mut EarlyDiagCtxt, at_args: &[String]) {
 
     // Note that we discard any distinction between different non-zero exit
     // codes from `from_matches` here.
-    let (input, options, render_options) =
+    let (input, options, render_options, loaded_paths) =
         match config::Options::from_matches(early_dcx, &matches, args) {
             Some(opts) => opts,
             None => return,
@@ -857,12 +885,19 @@ fn main_args(early_dcx: &mut EarlyDiagCtxt, at_args: &[String]) {
     let scrape_examples_options = options.scrape_examples_options.clone();
     let bin_crate = options.bin_crate;
 
+    let output_format = options.output_format;
     let config = core::create_config(input, options, &render_options);
 
     let registered_lints = config.register_lints.is_some();
 
     interface::run_compiler(config, |compiler| {
         let sess = &compiler.sess;
+
+        // Register the loaded external files in the source map so they show up in depinfo.
+        // We can't load them via the source map because it gets created after we process the options.
+        for external_path in &loaded_paths {
+            let _ = sess.source_map().load_file(external_path);
+        }
 
         if sess.opts.describe_lints {
             rustc_driver::describe_lints(sess, registered_lints);
@@ -875,9 +910,10 @@ fn main_args(early_dcx: &mut EarlyDiagCtxt, at_args: &[String]) {
                 sess.dcx().fatal("Compilation failed, aborting rustdoc");
             }
 
-            let (krate, render_opts, mut cache) = sess.time("run_global_ctxt", || {
-                core::run_global_ctxt(tcx, show_coverage, render_options, output_format)
-            });
+            let (krate, render_opts, mut cache, expanded_macros) = sess
+                .time("run_global_ctxt", || {
+                    core::run_global_ctxt(tcx, show_coverage, render_options, output_format)
+                });
             info!("finished with rustc");
 
             if let Some(options) = scrape_examples_options {
@@ -896,6 +932,10 @@ fn main_args(early_dcx: &mut EarlyDiagCtxt, at_args: &[String]) {
                 rustc_interface::passes::write_dep_info(tcx);
             }
 
+            if let Some(metrics_dir) = &sess.opts.unstable_opts.metrics_dir {
+                dump_feature_usage_metrics(tcx, metrics_dir);
+            }
+
             if run_check {
                 // Since we're in "check" mode, no need to generate anything beyond this point.
                 return;
@@ -904,14 +944,41 @@ fn main_args(early_dcx: &mut EarlyDiagCtxt, at_args: &[String]) {
             info!("going to format");
             match output_format {
                 config::OutputFormat::Html => sess.time("render_html", || {
-                    run_renderer::<html::render::Context<'_>>(krate, render_opts, cache, tcx)
+                    run_renderer(
+                        krate,
+                        render_opts,
+                        cache,
+                        tcx,
+                        |krate, render_opts, cache, tcx| {
+                            html::render::Context::init(
+                                krate,
+                                render_opts,
+                                cache,
+                                tcx,
+                                expanded_macros,
+                            )
+                        },
+                    )
                 }),
                 config::OutputFormat::Json => sess.time("render_json", || {
-                    run_renderer::<json::JsonRenderer<'_>>(krate, render_opts, cache, tcx)
+                    run_renderer(krate, render_opts, cache, tcx, json::JsonRenderer::init)
                 }),
                 // Already handled above with doctest runners.
                 config::OutputFormat::Doctest => unreachable!(),
             }
         })
     })
+}
+
+fn dump_feature_usage_metrics(tcxt: TyCtxt<'_>, metrics_dir: &Path) {
+    let hash = tcxt.crate_hash(LOCAL_CRATE);
+    let crate_name = tcxt.crate_name(LOCAL_CRATE);
+    let metrics_file_name = format!("unstable_feature_usage_metrics-{crate_name}-{hash}.json");
+    let metrics_path = metrics_dir.join(metrics_file_name);
+    if let Err(error) = tcxt.features().dump_feature_usage_metrics(metrics_path) {
+        // FIXME(yaahc): once metrics can be enabled by default we will want "failure to emit
+        // default metrics" to only produce a warning when metrics are enabled by default and emit
+        // an error only when the user manually enables metrics
+        tcxt.dcx().err(format!("cannot emit feature usage metrics: {error}"));
+    }
 }

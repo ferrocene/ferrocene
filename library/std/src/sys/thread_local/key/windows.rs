@@ -27,7 +27,7 @@
 use crate::cell::UnsafeCell;
 use crate::ptr;
 use crate::sync::atomic::Ordering::{AcqRel, Acquire, Relaxed, Release};
-use crate::sync::atomic::{AtomicPtr, AtomicU32};
+use crate::sync::atomic::{Atomic, AtomicPtr, AtomicU32};
 use crate::sys::c;
 use crate::sys::thread_local::guard;
 
@@ -38,9 +38,9 @@ pub struct LazyKey {
     /// The key value shifted up by one. Since TLS_OUT_OF_INDEXES == u32::MAX
     /// is not a valid key value, this allows us to use zero as sentinel value
     /// without risking overflow.
-    key: AtomicU32,
+    key: Atomic<Key>,
     dtor: Option<Dtor>,
-    next: AtomicPtr<LazyKey>,
+    next: Atomic<*mut LazyKey>,
     /// Currently, destructors cannot be unregistered, so we cannot use racy
     /// initialization for keys. Instead, we need synchronize initialization.
     /// Use the Windows-provided `Once` since it does not require TLS.
@@ -81,15 +81,10 @@ impl LazyKey {
             } else {
                 let key = unsafe { c::TlsAlloc() };
                 if key == c::TLS_OUT_OF_INDEXES {
-                    // Wakeup the waiting threads before panicking to avoid deadlock.
-                    unsafe {
-                        c::InitOnceComplete(
-                            self.once.get(),
-                            c::INIT_ONCE_INIT_FAILED,
-                            ptr::null_mut(),
-                        );
-                    }
-                    panic!("out of TLS indexes");
+                    // Since we abort the process, there is no need to wake up
+                    // the waiting threads. If this were a panic, the wakeup
+                    // would need to occur first in order to avoid deadlock.
+                    rtabort!("out of TLS indexes");
                 }
 
                 unsafe {
@@ -112,7 +107,9 @@ impl LazyKey {
             // If there is no destructor to clean up, we can use racy initialization.
 
             let key = unsafe { c::TlsAlloc() };
-            assert_ne!(key, c::TLS_OUT_OF_INDEXES, "out of TLS indexes");
+            if key == c::TLS_OUT_OF_INDEXES {
+                rtabort!("out of TLS indexes");
+            }
 
             match self.key.compare_exchange(0, key + 1, AcqRel, Acquire) {
                 Ok(_) => key,
@@ -142,7 +139,7 @@ pub unsafe fn get(key: Key) -> *mut u8 {
     unsafe { c::TlsGetValue(key).cast() }
 }
 
-static DTORS: AtomicPtr<LazyKey> = AtomicPtr::new(ptr::null_mut());
+static DTORS: Atomic<*mut LazyKey> = AtomicPtr::new(ptr::null_mut());
 
 /// Should only be called once per key, otherwise loops or breaks may occur in
 /// the linked list.

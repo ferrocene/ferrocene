@@ -1,9 +1,9 @@
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
 use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
-use rustc_type_ir_macros::{TypeFoldable_Generic, TypeVisitable_Generic};
 
 use crate::fold::TypeFoldable;
+use crate::inherent::*;
 use crate::relate::RelateResult;
 use crate::relate::combine::PredicateEmittingRelation;
 use crate::{self as ty, Interner};
@@ -12,14 +12,13 @@ use crate::{self as ty, Interner};
 /// slightly different typing rules depending on the current context. See the
 /// doc comment for each variant for how and why they are used.
 ///
-/// In most cases you can get the correct typing mode automically via:
+/// In most cases you can get the correct typing mode automatically via:
 /// - `mir::Body::typing_mode`
 /// - `rustc_lint::LateContext::typing_mode`
 ///
 /// If neither of these functions are available, feel free to reach out to
 /// t-types for help.
-#[derive_where(Clone, Copy, Hash, PartialEq, Eq, Debug; I: Interner)]
-#[derive(TypeVisitable_Generic, TypeFoldable_Generic)]
+#[derive_where(Clone, Copy, Hash, PartialEq, Debug; I: Interner)]
 #[cfg_attr(
     feature = "nightly",
     derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
@@ -65,7 +64,7 @@ pub enum TypingMode<I: Interner> {
     ///     let x: <() as Assoc>::Output = true;
     /// }
     /// ```
-    Analysis { defining_opaque_types: I::DefiningOpaqueTypes },
+    Analysis { defining_opaque_types_and_generators: I::LocalDefIds },
     /// The behavior during MIR borrowck is identical to `TypingMode::Analysis`
     /// except that the initial value for opaque types is the type computed during
     /// HIR typeck with unique unconstrained region inference variables.
@@ -73,13 +72,13 @@ pub enum TypingMode<I: Interner> {
     /// This is currently only used with by the new solver as it results in new
     /// non-universal defining uses of opaque types, which is a breaking change.
     /// See tests/ui/impl-trait/non-defining-use/as-projection-term.rs.
-    Borrowck { defining_opaque_types: I::DefiningOpaqueTypes },
+    Borrowck { defining_opaque_types: I::LocalDefIds },
     /// Any analysis after borrowck for a given body should be able to use all the
     /// hidden types defined by borrowck, without being able to define any new ones.
     ///
     /// This is currently only used by the new solver, but should be implemented in
     /// the old solver as well.
-    PostBorrowckAnalysis { defined_opaque_types: I::DefiningOpaqueTypes },
+    PostBorrowckAnalysis { defined_opaque_types: I::LocalDefIds },
     /// After analysis, mostly during codegen and MIR optimizations, we're able to
     /// reveal all opaque types. As the concrete type should *never* be observable
     /// directly by the user, this should not be used by checks which may expose
@@ -91,25 +90,47 @@ pub enum TypingMode<I: Interner> {
     PostAnalysis,
 }
 
+impl<I: Interner> Eq for TypingMode<I> {}
+
 impl<I: Interner> TypingMode<I> {
     /// Analysis outside of a body does not define any opaque types.
     pub fn non_body_analysis() -> TypingMode<I> {
-        TypingMode::Analysis { defining_opaque_types: Default::default() }
+        TypingMode::Analysis { defining_opaque_types_and_generators: Default::default() }
+    }
+
+    pub fn typeck_for_body(cx: I, body_def_id: I::LocalDefId) -> TypingMode<I> {
+        TypingMode::Analysis {
+            defining_opaque_types_and_generators: cx
+                .opaque_types_and_coroutines_defined_by(body_def_id),
+        }
     }
 
     /// While typechecking a body, we need to be able to define the opaque
     /// types defined by that body.
+    ///
+    /// FIXME: This will be removed because it's generally not correct to define
+    /// opaques outside of HIR typeck.
     pub fn analysis_in_body(cx: I, body_def_id: I::LocalDefId) -> TypingMode<I> {
-        TypingMode::Analysis { defining_opaque_types: cx.opaque_types_defined_by(body_def_id) }
+        TypingMode::Analysis {
+            defining_opaque_types_and_generators: cx.opaque_types_defined_by(body_def_id),
+        }
     }
 
     pub fn borrowck(cx: I, body_def_id: I::LocalDefId) -> TypingMode<I> {
-        TypingMode::Borrowck { defining_opaque_types: cx.opaque_types_defined_by(body_def_id) }
+        let defining_opaque_types = cx.opaque_types_defined_by(body_def_id);
+        if defining_opaque_types.is_empty() {
+            TypingMode::non_body_analysis()
+        } else {
+            TypingMode::Borrowck { defining_opaque_types }
+        }
     }
 
     pub fn post_borrowck_analysis(cx: I, body_def_id: I::LocalDefId) -> TypingMode<I> {
-        TypingMode::PostBorrowckAnalysis {
-            defined_opaque_types: cx.opaque_types_defined_by(body_def_id),
+        let defined_opaque_types = cx.opaque_types_defined_by(body_def_id);
+        if defined_opaque_types.is_empty() {
+            TypingMode::non_body_analysis()
+        } else {
+            TypingMode::PostBorrowckAnalysis { defined_opaque_types }
         }
     }
 }
@@ -153,6 +174,8 @@ pub trait InferCtxtLike: Sized {
         &self,
         vid: ty::RegionVid,
     ) -> <Self::Interner as Interner>::Region;
+
+    fn is_changed_arg(&self, arg: <Self::Interner as Interner>::GenericArg) -> bool;
 
     fn next_region_infer(&self) -> <Self::Interner as Interner>::Region;
     fn next_ty_infer(&self) -> <Self::Interner as Interner>::Ty;
@@ -233,4 +256,69 @@ pub trait InferCtxtLike: Sized {
         r: <Self::Interner as Interner>::Region,
         span: <Self::Interner as Interner>::Span,
     );
+
+    type OpaqueTypeStorageEntries: OpaqueTypeStorageEntries;
+    fn opaque_types_storage_num_entries(&self) -> Self::OpaqueTypeStorageEntries;
+    fn clone_opaque_types_lookup_table(
+        &self,
+    ) -> Vec<(ty::OpaqueTypeKey<Self::Interner>, <Self::Interner as Interner>::Ty)>;
+    fn clone_duplicate_opaque_types(
+        &self,
+    ) -> Vec<(ty::OpaqueTypeKey<Self::Interner>, <Self::Interner as Interner>::Ty)>;
+    fn clone_opaque_types_added_since(
+        &self,
+        prev_entries: Self::OpaqueTypeStorageEntries,
+    ) -> Vec<(ty::OpaqueTypeKey<Self::Interner>, <Self::Interner as Interner>::Ty)>;
+
+    fn register_hidden_type_in_storage(
+        &self,
+        opaque_type_key: ty::OpaqueTypeKey<Self::Interner>,
+        hidden_ty: <Self::Interner as Interner>::Ty,
+        span: <Self::Interner as Interner>::Span,
+    ) -> Option<<Self::Interner as Interner>::Ty>;
+    fn add_duplicate_opaque_type(
+        &self,
+        opaque_type_key: ty::OpaqueTypeKey<Self::Interner>,
+        hidden_ty: <Self::Interner as Interner>::Ty,
+        span: <Self::Interner as Interner>::Span,
+    );
+
+    fn reset_opaque_types(&self);
+}
+
+pub fn may_use_unstable_feature<'a, I: Interner, Infcx>(
+    infcx: &'a Infcx,
+    param_env: I::ParamEnv,
+    symbol: I::Symbol,
+) -> bool
+where
+    Infcx: InferCtxtLike<Interner = I>,
+{
+    // Iterate through all goals in param_env to find the one that has the same symbol.
+    for pred in param_env.caller_bounds().iter() {
+        if let ty::ClauseKind::UnstableFeature(sym) = pred.kind().skip_binder() {
+            if sym == symbol {
+                return true;
+            }
+        }
+    }
+
+    // During codegen we must assume that all feature bounds hold as we may be
+    // monomorphizing a body from an upstream crate which had an unstable feature
+    // enabled that we do not.
+    //
+    // Coherence should already report overlap errors involving unstable impls
+    // as the affected code would otherwise break when stabilizing this feature.
+    // It is also easily possible to accidentally cause unsoundness this way as
+    // we have to always enable unstable impls during codegen.
+    //
+    // Return ambiguity can also prevent people from writing code which depends on inference guidance
+    // that might no longer work after the impl is stabilised,
+    // tests/ui/unstable-feature-bound/unstable_impl_method_selection.rs is one of the example.
+    //
+    // Note: `feature_bound_holds_in_crate` does not consider a feature to be enabled
+    // if we are in std/core even if there is a corresponding `feature` attribute on the crate.
+
+    (infcx.typing_mode() == TypingMode::PostAnalysis)
+        || infcx.cx().features().feature_bound_holds_in_crate(symbol)
 }

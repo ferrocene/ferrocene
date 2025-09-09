@@ -9,7 +9,7 @@ use crate::cell::UnsafeCell;
 use crate::marker::PhantomData;
 use crate::mem::MaybeUninit;
 use crate::ptr;
-use crate::sync::atomic::{self, AtomicPtr, AtomicUsize, Ordering};
+use crate::sync::atomic::{self, Atomic, AtomicPtr, AtomicUsize, Ordering};
 use crate::time::Instant;
 
 // Bits indicating the state of a slot:
@@ -37,7 +37,7 @@ struct Slot<T> {
     msg: UnsafeCell<MaybeUninit<T>>,
 
     /// The state of the slot.
-    state: AtomicUsize,
+    state: Atomic<usize>,
 }
 
 impl<T> Slot<T> {
@@ -55,7 +55,7 @@ impl<T> Slot<T> {
 /// Each block in the list can hold up to `BLOCK_CAP` messages.
 struct Block<T> {
     /// The next block in the linked list.
-    next: AtomicPtr<Block<T>>,
+    next: Atomic<*mut Block<T>>,
 
     /// Slots for messages.
     slots: [Slot<T>; BLOCK_CAP],
@@ -65,11 +65,11 @@ impl<T> Block<T> {
     /// Creates an empty block.
     fn new() -> Box<Block<T>> {
         // SAFETY: This is safe because:
-        //  [1] `Block::next` (AtomicPtr) may be safely zero initialized.
+        //  [1] `Block::next` (Atomic<*mut _>) may be safely zero initialized.
         //  [2] `Block::slots` (Array) may be safely zero initialized because of [3, 4].
         //  [3] `Slot::msg` (UnsafeCell) may be safely zero initialized because it
         //       holds a MaybeUninit.
-        //  [4] `Slot::state` (AtomicUsize) may be safely zero initialized.
+        //  [4] `Slot::state` (Atomic<usize>) may be safely zero initialized.
         unsafe { Box::new_zeroed().assume_init() }
     }
 
@@ -110,10 +110,10 @@ impl<T> Block<T> {
 #[derive(Debug)]
 struct Position<T> {
     /// The index in the channel.
-    index: AtomicUsize,
+    index: Atomic<usize>,
 
     /// The block in the linked list.
-    block: AtomicPtr<Block<T>>,
+    block: Atomic<*mut Block<T>>,
 }
 
 /// The token type for the list flavor.
@@ -575,7 +575,7 @@ impl<T> Channel<T> {
         // After this point `head.block` is not modified again and it will be deallocated if it's
         // non-null. The `Drop` code of the channel, which runs after this function, also attempts
         // to deallocate `head.block` if it's non-null. Therefore this function must maintain the
-        // invariant that if a deallocation of head.block is attemped then it must also be set to
+        // invariant that if a deallocation of head.block is attempted then it must also be set to
         // NULL. Failing to do so will lead to the Drop code attempting a double free. For this
         // reason both reads above do an atomic swap instead of a simple atomic load.
 

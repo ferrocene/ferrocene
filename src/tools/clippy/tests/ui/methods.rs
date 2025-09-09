@@ -1,6 +1,5 @@
 //@aux-build:option_helpers.rs
 
-#![warn(clippy::all, clippy::pedantic)]
 #![allow(
     clippy::disallowed_names,
     clippy::default_trait_access,
@@ -19,8 +18,7 @@
     clippy::wrong_self_convention,
     clippy::unused_async,
     clippy::unused_self,
-    clippy::useless_vec,
-    unused
+    clippy::useless_vec
 )]
 
 #[macro_use]
@@ -51,7 +49,7 @@ struct Lt2<'a> {
 
 impl<'a> Lt2<'a> {
     // The lifetime is different, but that’s irrelevant; see issue #734.
-    pub fn new(s: &str) -> Lt2 {
+    pub fn new(s: &str) -> Lt2<'_> {
         unimplemented!()
     }
 }

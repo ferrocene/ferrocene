@@ -66,9 +66,9 @@ kinds of builds (sets of jobs).
 ### Pull Request builds
 
 After each push to a pull request, a set of `pr` jobs are executed. Currently,
-these execute the `x86_64-gnu-llvm-X`, `x86_64-gnu-tools`, `mingw-check` and
-`mingw-check-tidy` jobs, all running on Linux. These execute a relatively short
-(~30 minutes) and lightweight test suite that should catch common issues. More
+these execute the `x86_64-gnu-llvm-X`, `x86_64-gnu-tools`, `pr-check-1`, `pr-check-2`
+and `tidy` jobs, all running on Linux. These execute a relatively short
+(~40 minutes) and lightweight test suite that should catch common issues. More
 specifically, they run a set of lints, they try to perform a cross-compile check
 build to Windows mingw (without producing any artifacts) and they test the
 compiler using a *system* version of LLVM. Unfortunately, it would take too many
@@ -84,24 +84,23 @@ resources to run the full test suite for each commit on every PR.
 > Thus, it is a good idea to run `./x doc xxx` locally for any doc comment
 > changes to help catch these early.
 
-PR jobs are defined in the `pr` section of [`jobs.yml`]. They run under the
-`rust-lang/rust` repository, and their results can be observed directly on the
-PR, in the "CI checks" section at the bottom of the PR page.
+PR jobs are defined in the `pr` section of [`jobs.yml`]. Their results can be observed
+directly on the PR, in the "CI checks" section at the bottom of the PR page.
 
 ### Auto builds
 
 Before a commit can be merged into the `master` branch, it needs to pass our
 complete test suite. We call this an `auto` build. This build runs tens of CI
 jobs that exercise various tests across operating systems and targets. The full
-test suite is quite slow; it can take two hours or more until all the `auto` CI
+test suite is quite slow; it can take several hours until all the `auto` CI
 jobs finish.
 
 Most platforms only run the build steps, some run a restricted set of tests,
 only a subset run the full suite of tests (see Rust's [platform tiers]).
 
 Auto jobs are defined in the `auto` section of [`jobs.yml`]. They are executed
-on the `auto` branch under the `rust-lang-ci/rust` repository[^rust-lang-ci] and
-their results can be seen [here](https://github.com/rust-lang-ci/rust/actions),
+on the `auto` branch under the `rust-lang/rust` repository and
+their results can be seen [here](https://github.com/rust-lang/rust/actions),
 although usually you will be notified of the result by a comment made by bors on
 the corresponding PR.
 
@@ -109,9 +108,6 @@ At any given time, at most a single `auto` build is being executed. Find out
 more [here](#merging-prs-serially-with-bors).
 
 [platform tiers]: https://forge.rust-lang.org/release/platform-support.html#rust-platform-support
-
-[^rust-lang-ci]: The `auto` and `try` jobs run under the `rust-lang-ci` fork for
-    historical reasons. This may change in the future.
 
 ### Try builds
 
@@ -135,17 +131,35 @@ There are several use-cases for try builds:
 - Run a specific CI job (e.g. Windows tests) on a PR, to quickly test if it
   passes the test suite executed by that job.
 
-You can select which CI jobs will
-be executed in the try build by adding lines containing `try-job:
-<job pattern>` to the PR description. All such specified jobs will be executed
-in the try build once the `@bors try` command is used on the PR. If no try
-jobs are specified in this way, the jobs defined in the `try` section of
-[`jobs.yml`] will be executed by default.
+By default, if you send a comment with `@bors try`, the jobs defined in the `try` section of
+[`jobs.yml`] will be executed. We call this mode a "fast try build". Such a try build
+will not execute any tests, and it will allow compilation warnings. It is useful when you want to
+get an optimized toolchain as fast as possible, for a crater run or performance benchmarks,
+even if it might not be working fully correctly. If you want to do a full build for the default try job,
+specify its job name in a job pattern (explained below).
 
-Each pattern can either be an exact name of a job or a glob pattern that matches multiple jobs,
+If you want to run custom CI job(s) in a try build and make sure that they pass all tests and do
+not produce any compilation warnings, you can select CI jobs to be executed by specifying a *job pattern*,
+which can be used in one of two ways:
+- You can add a set of `try-job: <job pattern>` directives to the PR description (described below) and then
+  simply run `@bors try`. CI will read these directives and run the jobs that you have specified. This is
+  useful if you want to rerun the same set of try jobs multiple times, after incrementally modifying a PR.
+- You can specify the job pattern using the `jobs` parameter of the try command: `@bors try jobs=<job pattern>`.
+  This is useful for one-off try builds with specific jobs. Note that the `jobs` parameter has a higher priority
+  than the PR description directives.
+  - There can also be multiple patterns specified, e.g. `@bors try jobs=job1,job2,job3`.
+
+Each job pattern can either be an exact name of a job or a glob pattern that matches multiple jobs,
 for example `*msvc*` or `*-alt`. You can start at most 20 jobs in a single try build. When using
 glob patterns, you might want to wrap them in backticks (`` ` ``) to avoid GitHub rendering
 the pattern as Markdown.
+
+The job pattern needs to match one or more jobs defined in the `auto` or `optional` sections
+of [`jobs.yml`]:
+
+- `auto` jobs are executed before a commit is merged into the `master` branch.
+- `optional` jobs are executed only when explicitly requested via a try build.
+  They are typically used for tier 2 and tier 3 targets.
 
 > **Using `try-job` PR description directives**
 >
@@ -174,24 +188,19 @@ the pattern as Markdown.
 > However, it can be less flexible because you cannot adjust the set of tests
 > that are exercised this way.
 
-Try jobs are defined in the `try` section of [`jobs.yml`]. They are executed on
-the `try` branch under the `rust-lang-ci/rust` repository[^rust-lang-ci] and
-their results can be seen [here](https://github.com/rust-lang-ci/rust/actions),
+Try builds are executed on the `try` branch under the `rust-lang/rust` repository and
+their results can be seen [here](https://github.com/rust-lang/rust/actions),
 although usually you will be notified of the result by a comment made by bors on
 the corresponding PR.
 
-Note that if you start the default try job using `@bors try`, it will skip building several `dist` components and running post-optimization tests, to make the build duration shorter. If you want to execute the full build as it would happen before a merge, add an explicit `try-job` pattern with the name of the default try job (currently `dist-x86_64-linux`).
+Multiple try builds can execute concurrently across different PRs, but there can be at most
+a single try build running on a single PR at any given time.
 
-Multiple try builds can execute concurrently across different PRs.
-
-<div class="warning">
-bors identify try jobs by commit hash. This means that if you have two PRs
-containing the same (latest) commits, running `@bors try` will result in the
-*same* try job and it really confuses `bors`. Please refrain from doing so.
-</div>
+Note that try builds are handled using the new [bors][new-bors] implementation.
 
 [rustc-perf]: https://github.com/rust-lang/rustc-perf
 [crater]: https://github.com/rust-lang/crater
+[new-bors]: https://github.com/rust-lang/bors
 
 ### Modifying CI jobs
 
@@ -351,7 +360,7 @@ invalidated if one of the following changes:
 - Files copied into the Docker image in the Dockerfile
 - The architecture of the GitHub runner (x86 or ARM)
 
-[ghcr.io]: https://github.com/rust-lang-ci/rust/pkgs/container/rust-ci
+[ghcr.io]: https://github.com/rust-lang/rust/pkgs/container/rust-ci
 [Docker registry caching]: https://docs.docker.com/build/cache/backends/registry/
 
 ### LLVM caching with sccache
@@ -442,7 +451,7 @@ particular job, it is probably easiest to just look at the build log. To do
 this:
 
 1. Go to
-   <https://github.com/rust-lang-ci/rust/actions?query=branch%3Aauto+is%3Asuccess>
+   <https://github.com/rust-lang/rust/actions?query=branch%3Aauto+is%3Asuccess>
    to find the most recently successful build, and click on it.
 2. Choose the job you are interested in on the left-hand side.
 3. Click on the gear icon and choose "View raw logs"
@@ -454,7 +463,6 @@ this:
 [`jobs.yml`]: https://github.com/rust-lang/rust/blob/master/src/ci/github-actions/jobs.yml
 [`.github/workflows/ci.yml`]: https://github.com/rust-lang/rust/blob/master/.github/workflows/ci.yml
 [`src/ci/citool`]: https://github.com/rust-lang/rust/blob/master/src/ci/citool
-[rust-lang-ci]: https://github.com/rust-lang-ci/rust/actions
 [bors]: https://github.com/bors
 [homu]: https://github.com/rust-lang/homu
 [merge queue]: https://bors.rust-lang.org/queue/rust

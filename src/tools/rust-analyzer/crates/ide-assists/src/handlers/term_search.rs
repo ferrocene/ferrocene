@@ -1,12 +1,12 @@
 //! Term search assist
 use hir::term_search::{TermSearchConfig, TermSearchCtx};
 use ide_db::{
-    assists::{AssistId, AssistKind, GroupLabel},
+    assists::{AssistId, GroupLabel},
     famous_defs::FamousDefs,
 };
 
 use itertools::Itertools;
-use syntax::{ast, AstNode};
+use syntax::{AstNode, ast};
 
 use crate::assist_context::{AssistContext, Assists};
 
@@ -46,7 +46,7 @@ pub(crate) fn term_search(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<
         return None;
     }
 
-    let mut formatter = |_: &hir::Type| String::from("todo!()");
+    let mut formatter = |_: &hir::Type<'_>| String::from("todo!()");
 
     let edition = scope.krate().edition(ctx.db());
     let paths = paths
@@ -68,7 +68,7 @@ pub(crate) fn term_search(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<
     for code in paths {
         acc.add_group(
             &GroupLabel(String::from("Term search")),
-            AssistId("term_search", AssistKind::Generate),
+            AssistId::generate("term_search"),
             format!("Replace {macro_name}!() with {code}"),
             goal_range,
             |builder| {
@@ -111,7 +111,7 @@ fn f() { let a: u128 = 1; let b: u128 = todo$0!("asd") }"#,
         check_assist(
             term_search,
             r#"//- minicore: todo, unimplemented
-fn f() { let a: u128 = 1; let b: u128 = todo$0!("asd") }"#,
+fn f() { let a: u128 = 1; let b: u128 = unimplemented$0!("asd") }"#,
             r#"fn f() { let a: u128 = 1; let b: u128 = a }"#,
         )
     }
@@ -121,7 +121,7 @@ fn f() { let a: u128 = 1; let b: u128 = todo$0!("asd") }"#,
         check_assist(
             term_search,
             r#"//- minicore: todo, unimplemented
-fn f() { let a: u128 = 1; let b: u128 = todo$0!("asd") }"#,
+fn f() { let a: u128 = 1; let b: u128 = unimplemented$0!() }"#,
             r#"fn f() { let a: u128 = 1; let b: u128 = a }"#,
         )
     }
@@ -144,7 +144,7 @@ fn f() { let a = A { x: 1, y: true }; let b: i32 = a.x; }"#,
             term_search,
             r#"//- minicore: todo, unimplemented, option
 fn f() { let a: i32 = 1; let b: Option<i32> = todo$0!(); }"#,
-            r#"fn f() { let a: i32 = 1; let b: Option<i32> = Some(a); }"#,
+            r#"fn f() { let a: i32 = 1; let b: Option<i32> = None; }"#,
         )
     }
 
@@ -156,7 +156,7 @@ fn f() { let a: i32 = 1; let b: Option<i32> = todo$0!(); }"#,
 enum Option<T> { None, Some(T) }
 fn f() { let a: i32 = 1; let b: Option<i32> = todo$0!(); }"#,
             r#"enum Option<T> { None, Some(T) }
-fn f() { let a: i32 = 1; let b: Option<i32> = Option::Some(a); }"#,
+fn f() { let a: i32 = 1; let b: Option<i32> = Option::None; }"#,
         )
     }
 
@@ -168,7 +168,7 @@ fn f() { let a: i32 = 1; let b: Option<i32> = Option::Some(a); }"#,
 enum Option<T> { None, Some(T) }
 fn f() { let a: Option<i32> = Option::None; let b: Option<Option<i32>> = todo$0!(); }"#,
             r#"enum Option<T> { None, Some(T) }
-fn f() { let a: Option<i32> = Option::None; let b: Option<Option<i32>> = Option::Some(a); }"#,
+fn f() { let a: Option<i32> = Option::None; let b: Option<Option<i32>> = Option::None; }"#,
         )
     }
 
@@ -221,7 +221,7 @@ fn f() { let a: i32 = 1; let b: i32 = 2; let a: u32 = 0; let c: i32 = todo$0!();
             term_search,
             r#"//- minicore: todo, unimplemented
 fn f() { let a: bool = todo$0!(); }"#,
-            r#"fn f() { let a: bool = false; }"#,
+            r#"fn f() { let a: bool = true; }"#,
         )
     }
 

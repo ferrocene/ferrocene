@@ -34,7 +34,7 @@ const DEFAULT_DOC_VALID_IDENTS: &[&str] = &[
     "GitHub", "GitLab",
     "IPv4", "IPv6",
     "ClojureScript", "CoffeeScript", "JavaScript", "PostScript", "PureScript", "TypeScript",
-    "WebAssembly",
+    "PowerPC", "WebAssembly",
     "NaN", "NaNs",
     "OAuth", "GraphQL",
     "OCaml",
@@ -44,7 +44,7 @@ const DEFAULT_DOC_VALID_IDENTS: &[&str] = &[
     "WebP", "OpenExr", "YCbCr", "sRGB",
     "TensorFlow",
     "TrueType",
-    "iOS", "macOS", "FreeBSD", "NetBSD", "OpenBSD",
+    "iOS", "macOS", "FreeBSD", "NetBSD", "OpenBSD", "NixOS",
     "TeX", "LaTeX", "BibTeX", "BibLaTeX",
     "MinGW",
     "CamelCase",
@@ -120,12 +120,7 @@ impl ConfError {
         Self {
             message: message.into(),
             suggestion,
-            span: Span::new(
-                file.start_pos + BytePos::from_usize(span.start),
-                file.start_pos + BytePos::from_usize(span.end),
-                SyntaxContext::root(),
-                None,
-            ),
+            span: span_from_toml_range(file, span),
         }
     }
 }
@@ -176,11 +171,61 @@ macro_rules! default_text {
     };
 }
 
+macro_rules! deserialize {
+    ($map:expr, $ty:ty, $errors:expr, $file:expr) => {{
+        let raw_value = $map.next_value::<toml::Spanned<toml::Value>>()?;
+        let value_span = raw_value.span();
+        let value = match <$ty>::deserialize(raw_value.into_inner()) {
+            Err(e) => {
+                $errors.push(ConfError::spanned(
+                    $file,
+                    e.to_string().replace('\n', " ").trim(),
+                    None,
+                    value_span,
+                ));
+                continue;
+            },
+            Ok(value) => value,
+        };
+        (value, value_span)
+    }};
+
+    ($map:expr, $ty:ty, $errors:expr, $file:expr, $replacements_allowed:expr) => {{
+        let array = $map.next_value::<Vec<toml::Spanned<toml::Value>>>()?;
+        let mut disallowed_paths_span = Range {
+            start: usize::MAX,
+            end: usize::MIN,
+        };
+        let mut disallowed_paths = Vec::new();
+        for raw_value in array {
+            let value_span = raw_value.span();
+            let mut disallowed_path = match DisallowedPath::<$replacements_allowed>::deserialize(raw_value.into_inner())
+            {
+                Err(e) => {
+                    $errors.push(ConfError::spanned(
+                        $file,
+                        e.to_string().replace('\n', " ").trim(),
+                        None,
+                        value_span,
+                    ));
+                    continue;
+                },
+                Ok(disallowed_path) => disallowed_path,
+            };
+            disallowed_paths_span = union(&disallowed_paths_span, &value_span);
+            disallowed_path.set_span(span_from_toml_range($file, value_span));
+            disallowed_paths.push(disallowed_path);
+        }
+        (disallowed_paths, disallowed_paths_span)
+    }};
+}
+
 macro_rules! define_Conf {
     ($(
         $(#[doc = $doc:literal])+
         $(#[conf_deprecated($dep:literal, $new_conf:ident)])?
         $(#[default_text = $default_text:expr])?
+        $(#[disallowed_paths_allow_replacements = $replacements_allowed:expr])?
         $(#[lints($($for_lints:ident),* $(,)?)])?
         $name:ident: $ty:ty = $default:expr,
     )*) => {
@@ -218,42 +263,46 @@ macro_rules! define_Conf {
                 let mut value_spans = HashMap::new();
                 let mut errors = Vec::new();
                 let mut warnings = Vec::new();
+
+                // Declare a local variable for each field available to a configuration file.
                 $(let mut $name = None;)*
+
                 // could get `Field` here directly, but get `String` first for diagnostics
                 while let Some(name) = map.next_key::<toml::Spanned<String>>()? {
-                    match Field::deserialize(name.get_ref().as_str().into_deserializer()) {
+                    let field = match Field::deserialize(name.get_ref().as_str().into_deserializer()) {
                         Err(e) => {
                             let e: FieldError = e;
                             errors.push(ConfError::spanned(self.0, e.error, e.suggestion, name.span()));
+                            continue;
                         }
-                        $(Ok(Field::$name) => {
+                        Ok(field) => field
+                    };
+
+                    match field {
+                        $(Field::$name => {
+                            // Is this a deprecated field, i.e., is `$dep` set? If so, push a warning.
                             $(warnings.push(ConfError::spanned(self.0, format!("deprecated field `{}`. {}", name.get_ref(), $dep), None, name.span()));)?
-                            let raw_value = map.next_value::<toml::Spanned<toml::Value>>()?;
-                            let value_span = raw_value.span();
-                            match <$ty>::deserialize(raw_value.into_inner()) {
-                                Err(e) => errors.push(ConfError::spanned(self.0, e.to_string().replace('\n', " ").trim(), None, value_span)),
-                                Ok(value) => match $name {
-                                    Some(_) => {
-                                        errors.push(ConfError::spanned(self.0, format!("duplicate field `{}`", name.get_ref()), None, name.span()));
-                                    }
-                                    None => {
-                                        $name = Some(value);
-                                        value_spans.insert(name.get_ref().as_str().to_string(), value_span);
-                                        // $new_conf is the same as one of the defined `$name`s, so
-                                        // this variable is defined in line 2 of this function.
-                                        $(match $new_conf {
-                                            Some(_) => errors.push(ConfError::spanned(self.0, concat!(
-                                                "duplicate field `", stringify!($new_conf),
-                                                "` (provided as `", stringify!($name), "`)"
-                                            ), None, name.span())),
-                                            None => $new_conf = $name.clone(),
-                                        })?
-                                    },
-                                }
+                            let (value, value_span) =
+                                deserialize!(map, $ty, errors, self.0 $(, $replacements_allowed)?);
+                            // Was this field set previously?
+                            if $name.is_some() {
+                                errors.push(ConfError::spanned(self.0, format!("duplicate field `{}`", name.get_ref()), None, name.span()));
+                                continue;
                             }
+                            $name = Some(value);
+                            value_spans.insert(name.get_ref().as_str().to_string(), value_span);
+                            // If this is a deprecated field, was the new field (`$new_conf`) set previously?
+                            // Note that `$new_conf` is one of the defined `$name`s.
+                            $(match $new_conf {
+                                Some(_) => errors.push(ConfError::spanned(self.0, concat!(
+                                    "duplicate field `", stringify!($new_conf),
+                                    "` (provided as `", stringify!($name), "`)"
+                                ), None, name.span())),
+                                None => $new_conf = $name.clone(),
+                            })?
                         })*
                         // ignore contents of the third_party key
-                        Ok(Field::third_party) => drop(map.next_value::<IgnoredAny>())
+                        Field::third_party => drop(map.next_value::<IgnoredAny>())
                     }
                 }
                 let conf = Conf { $($name: $name.unwrap_or_else(defaults::$name),)* };
@@ -273,6 +322,22 @@ macro_rules! define_Conf {
             )*]
         }
     };
+}
+
+fn union(x: &Range<usize>, y: &Range<usize>) -> Range<usize> {
+    Range {
+        start: cmp::min(x.start, y.start),
+        end: cmp::max(x.end, y.end),
+    }
+}
+
+fn span_from_toml_range(file: &SourceFile, span: Range<usize>) -> Span {
+    Span::new(
+        file.start_pos + BytePos::from_usize(span.start),
+        file.start_pos + BytePos::from_usize(span.end),
+        SyntaxContext::root(),
+        None,
+    )
 }
 
 define_Conf! {
@@ -295,6 +360,9 @@ define_Conf! {
     /// Whether `dbg!` should be allowed in test functions or `#[cfg(test)]`
     #[lints(dbg_macro)]
     allow_dbg_in_tests: bool = false,
+    /// Whether an item should be allowed to have the same name as its containing module
+    #[lints(module_name_repetitions)]
+    allow_exact_repetitions: bool = true,
     /// Whether `expect` should be allowed in code always evaluated at compile time
     #[lints(expect_used)]
     allow_expect_in_consts: bool = true,
@@ -461,6 +529,7 @@ define_Conf! {
     )]
     avoid_breaking_exported_api: bool = true,
     /// The list of types which may not be held across an await point.
+    #[disallowed_paths_allow_replacements = false]
     #[lints(await_holding_invalid_type)]
     await_holding_invalid_types: Vec<DisallowedPathWithoutReplacement> = Vec::new(),
     /// DEPRECATED LINT: BLACKLISTED_NAME.
@@ -474,6 +543,26 @@ define_Conf! {
     /// Whether to check MSRV compatibility in `#[test]` and `#[cfg(test)]` code.
     #[lints(incompatible_msrv)]
     check_incompatible_msrv_in_tests: bool = false,
+    /// Whether to suggest reordering constructor fields when initializers are present.
+    ///
+    /// Warnings produced by this configuration aren't necessarily fixed by just reordering the fields. Even if the
+    /// suggested code would compile, it can change semantics if the initializer expressions have side effects. The
+    /// following example [from rust-clippy#11846] shows how the suggestion can run into borrow check errors:
+    ///
+    /// ```rust
+    /// struct MyStruct {
+    ///     vector: Vec<u32>,
+    ///     length: usize
+    /// }
+    /// fn main() {
+    ///     let vector = vec![1,2,3];
+    ///     MyStruct { length: vector.len(), vector};
+    /// }
+    /// ```
+    ///
+    /// [from rust-clippy#11846]: https://github.com/rust-lang/rust-clippy/issues/11846#issuecomment-1820747924
+    #[lints(inconsistent_struct_constructor)]
+    check_inconsistent_struct_field_initializers: bool = false,
     /// Whether to also run the listed lints on private items.
     #[lints(missing_errors_doc, missing_panics_doc, missing_safety_doc, unnecessary_safety_doc)]
     check_private_items: bool = false,
@@ -486,9 +575,25 @@ define_Conf! {
     #[conf_deprecated("Please use `cognitive-complexity-threshold` instead", cognitive_complexity_threshold)]
     cyclomatic_complexity_threshold: u64 = 25,
     /// The list of disallowed macros, written as fully qualified paths.
+    ///
+    /// **Fields:**
+    /// - `path` (required): the fully qualified path to the macro that should be disallowed
+    /// - `reason` (optional): explanation why this macro is disallowed
+    /// - `replacement` (optional): suggested alternative macro
+    /// - `allow-invalid` (optional, `false` by default): when set to `true`, it will ignore this entry
+    ///   if the path doesn't exist, instead of emitting an error
+    #[disallowed_paths_allow_replacements = true]
     #[lints(disallowed_macros)]
     disallowed_macros: Vec<DisallowedPath> = Vec::new(),
     /// The list of disallowed methods, written as fully qualified paths.
+    ///
+    /// **Fields:**
+    /// - `path` (required): the fully qualified path to the method that should be disallowed
+    /// - `reason` (optional): explanation why this method is disallowed
+    /// - `replacement` (optional): suggested alternative method
+    /// - `allow-invalid` (optional, `false` by default): when set to `true`, it will ignore this entry
+    ///   if the path doesn't exist, instead of emitting an error
+    #[disallowed_paths_allow_replacements = true]
     #[lints(disallowed_methods)]
     disallowed_methods: Vec<DisallowedPath> = Vec::new(),
     /// The list of disallowed names to lint about. NB: `bar` is not here since it has legitimate uses. The value
@@ -497,6 +602,14 @@ define_Conf! {
     #[lints(disallowed_names)]
     disallowed_names: Vec<String> = DEFAULT_DISALLOWED_NAMES.iter().map(ToString::to_string).collect(),
     /// The list of disallowed types, written as fully qualified paths.
+    ///
+    /// **Fields:**
+    /// - `path` (required): the fully qualified path to the type that should be disallowed
+    /// - `reason` (optional): explanation why this type is disallowed
+    /// - `replacement` (optional): suggested alternative type
+    /// - `allow-invalid` (optional, `false` by default): when set to `true`, it will ignore this entry
+    ///   if the path doesn't exist, instead of emitting an error
+    #[disallowed_paths_allow_replacements = true]
     #[lints(disallowed_types)]
     disallowed_types: Vec<DisallowedPath> = Vec::new(),
     /// The list of words this lint should not consider as identifiers needing ticks. The value
@@ -549,25 +662,15 @@ define_Conf! {
     /// The maximum size of the `Err`-variant in a `Result` returned from a function
     #[lints(result_large_err)]
     large_error_threshold: u64 = 128,
+    /// Whether collapsible `if` and `else if` chains are linted if they contain comments inside the parts
+    /// that would be collapsed.
+    #[lints(collapsible_else_if, collapsible_if)]
+    lint_commented_code: bool = false,
     /// Whether to suggest reordering constructor fields when initializers are present.
+    /// DEPRECATED CONFIGURATION: lint-inconsistent-struct-field-initializers
     ///
-    /// Warnings produced by this configuration aren't necessarily fixed by just reordering the fields. Even if the
-    /// suggested code would compile, it can change semantics if the initializer expressions have side effects. The
-    /// following example [from rust-clippy#11846] shows how the suggestion can run into borrow check errors:
-    ///
-    /// ```rust
-    /// struct MyStruct {
-    ///     vector: Vec<u32>,
-    ///     length: usize
-    /// }
-    /// fn main() {
-    ///     let vector = vec![1,2,3];
-    ///     MyStruct { length: vector.len(), vector};
-    /// }
-    /// ```
-    ///
-    /// [from rust-clippy#11846]: https://github.com/rust-lang/rust-clippy/issues/11846#issuecomment-1820747924
-    #[lints(inconsistent_struct_constructor)]
+    /// Use the `check-inconsistent-struct-field-initializers` configuration instead.
+    #[conf_deprecated("Please use `check-inconsistent-struct-field-initializers` instead", check_inconsistent_struct_field_initializers)]
     lint_inconsistent_struct_field_initializers: bool = false,
     /// The lower bound for linting decimal literals
     #[lints(decimal_literal_representation)]
@@ -596,6 +699,9 @@ define_Conf! {
     /// Minimum chars an ident can have, anything below or equal to this will be linted.
     #[lints(min_ident_chars)]
     min_ident_chars_threshold: u64 = 1,
+    /// Whether to allow fields starting with an underscore to skip documentation requirements
+    #[lints(missing_docs_in_private_items)]
+    missing_docs_allow_unused: bool = false,
     /// Whether to **only** check for missing documentation in items visible within the current
     /// crate. For example, `pub(crate)` items.
     #[lints(missing_docs_in_private_items)]
@@ -635,6 +741,7 @@ define_Conf! {
         iter_kv_map,
         legacy_numeric_constants,
         lines_filter_map_ok,
+        manual_abs_diff,
         manual_bits,
         manual_c_str_literals,
         manual_clamp,
@@ -642,6 +749,7 @@ define_Conf! {
         manual_flatten,
         manual_hash_one,
         manual_is_ascii_check,
+        manual_is_power_of_two,
         manual_let_else,
         manual_midpoint,
         manual_non_exhaustive,
@@ -652,6 +760,7 @@ define_Conf! {
         manual_repeat_n,
         manual_retain,
         manual_slice_fill,
+        manual_slice_size_calculation,
         manual_split_once,
         manual_str_repeat,
         manual_strip,
@@ -675,6 +784,7 @@ define_Conf! {
         same_item_push,
         seek_from_current,
         seek_rewind,
+        to_digit_is_some,
         transmute_ptr_to_ref,
         tuple_array_conversions,
         type_repetition_in_bounds,
@@ -684,6 +794,7 @@ define_Conf! {
         unnested_or_patterns,
         unused_trait_names,
         use_self,
+        zero_ptr,
     )]
     msrv: Msrv = Msrv::default(),
     /// The minimum size (in bytes) to consider a type for passing by reference instead of by value.
@@ -739,7 +850,7 @@ define_Conf! {
     trait_assoc_item_kinds_order: SourceItemOrderingTraitAssocItemKinds = DEFAULT_TRAIT_ASSOC_ITEM_KINDS_ORDER.into(),
     /// The maximum size (in bytes) to consider a `Copy` type for passing by value instead of by
     /// reference.
-    #[default_text = "target_pointer_width * 2"]
+    #[default_text = "target_pointer_width"]
     #[lints(trivially_copy_pass_by_ref)]
     trivial_copy_size_limit: Option<u64> = None,
     /// The maximum complexity a type can have
@@ -760,7 +871,8 @@ define_Conf! {
     /// The maximum allowed size of a bit mask before suggesting to use 'trailing_zeros'
     #[lints(verbose_bit_mask)]
     verbose_bit_mask_threshold: u64 = 1,
-    /// Whether to allow certain wildcard imports (prelude, super in tests).
+    /// Whether to emit warnings on all wildcard imports, including those from `prelude`, from `super` in tests,
+    /// or for `pub use` reexports.
     #[lints(wildcard_imports)]
     warn_on_all_wildcard_imports: bool = false,
     /// Whether to also emit warnings for unsafe blocks with metavariable expansions in **private** macros.
@@ -981,7 +1093,23 @@ impl serde::de::Error for FieldError {
         // set and allows it.
         use fmt::Write;
 
-        let mut expected = expected.to_vec();
+        let metadata = get_configuration_metadata();
+        let deprecated = metadata
+            .iter()
+            .filter_map(|conf| {
+                if conf.deprecation_reason.is_some() {
+                    Some(conf.name.as_str())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        let mut expected = expected
+            .iter()
+            .copied()
+            .filter(|name| !deprecated.contains(name))
+            .collect::<Vec<_>>();
         expected.sort_unstable();
 
         let (rows, column_widths) = calculate_dimensions(&expected);
@@ -1064,7 +1192,13 @@ mod tests {
     fn configs_are_tested() {
         let mut names: HashSet<String> = crate::get_configuration_metadata()
             .into_iter()
-            .map(|meta| meta.name.replace('_', "-"))
+            .filter_map(|meta| {
+                if meta.deprecation_reason.is_none() {
+                    Some(meta.name.replace('_', "-"))
+                } else {
+                    None
+                }
+            })
             .collect();
 
         let toml_files = WalkDir::new("../tests")

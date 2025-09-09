@@ -30,13 +30,29 @@ jobs:
       - name: Check style
         run: ./ci/style.sh
 
+  clippy:
+    name: Clippy on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update stable --no-self-update
+      - uses: Swatinem/rust-cache@v2
+      # Here we use the latest stable Rust toolchain already installed by GitHub
+      # Ideally we should run it for every target, but we cannot rely on unstable toolchains
+      # due to Clippy not being consistent between them.
+      - run: cargo clippy --workspace --exclude libc-test --exclude ctest-test --all-targets -- -D warnings
+
   # This runs `cargo build --target ...` for all T1 and T2 targets`
   verify_build:
     name: Verify build
     strategy:
       matrix:
         toolchain: [stable, nightly, 1.63.0]
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         include:
           - toolchain: beta
             os: ubuntu-24.04
@@ -46,14 +62,12 @@ jobs:
       TOOLCHAIN: ${{ matrix.toolchain }}
     steps:
       - uses: actions/checkout@v4
-      # Remove `-Dwarnings` at the MSRV since lints may be different or buffier
-      - name: Update RUSTFLAGS
-        run: |
-          set -eux
-          [ "${{ matrix.toolchain }}" = "1.63.0" ] && echo 'RUSTFLAGS=' >> "$GITHUB_ENV" || true
-          
       - name: Setup Rust toolchain
         run: ./ci/install-rust.sh
+
+      - name: Install semver-checks
+        uses: taiki-e/install-action@cargo-semver-checks
+        if: matrix.toolchain == 'stable'
 
       # FIXME(ci): These `du` statements are temporary for debugging cache
       - name: Target size before restoring cache
@@ -65,7 +79,11 @@ jobs:
         run: du -sh target | sort -k 2 || true
 
       - name: Execute build.sh
-        run: ./ci/verify-build.sh
+        run: |
+          set -eux
+          # Remove `-Dwarnings` at the MSRV since lints may be different
+          [ "${{ matrix.toolchain }}" = "1.63.0" ] && export RUSTFLAGS=""
+          ./ci/verify-build.sh
       - name: Target size after job completion
         run: du -sh target | sort -k 2
 
@@ -83,11 +101,17 @@ jobs:
             artifact-tag: offset-bits64
             env:
               RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS: 64
+          - target: i686-unknown-linux-gnu
+            docker: true
+            os: ubuntu-24.04
+            artifact-tag: time-bits64
+            env:
+              RUST_LIBC_UNSTABLE_GNU_TIME_BITS: 64
           - target: x86_64-unknown-linux-gnu
             docker: true
             os: ubuntu-24.04
           - target: aarch64-apple-darwin
-            os: macos-14
+            os: macos-15
           - target: x86_64-pc-windows-gnu
             os: windows-2022
             env:
@@ -156,12 +180,14 @@ jobs:
           - aarch64-unknown-linux-musl
           - arm-linux-androideabi
           - arm-unknown-linux-musleabihf
-          - i686-linux-android
+          # FIXME(#4297): Disabled due to spurious failueSome android jobs are disabled because of high rates of
+          # - i686-linux-android
           - i686-unknown-linux-musl
           - loongarch64-unknown-linux-gnu
           - loongarch64-unknown-linux-musl
           - powerpc64-unknown-linux-gnu
           - powerpc64le-unknown-linux-gnu
+          - powerpc64le-unknown-linux-musl
           - riscv64gc-unknown-linux-gnu
           - s390x-unknown-linux-gnu
           - wasm32-unknown-emscripten
@@ -180,6 +206,25 @@ jobs:
             env:
               RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS: 64
             artifact-tag: offset-bits64
+          - target: arm-unknown-linux-gnueabihf
+            env:
+              RUST_LIBC_UNSTABLE_GNU_TIME_BITS: 64
+            artifact-tag: time-bits64
+          - target: aarch64-unknown-linux-musl
+            env:
+              RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
+          - target: arm-unknown-linux-musleabihf
+            env:
+              RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
+          - target: i686-unknown-linux-musl
+            env:
+              RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
+          - target: loongarch64-unknown-linux-musl
+            env:
+              RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
+          - target: powerpc64le-unknown-linux-musl
+            env:
+              RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
           # FIXME(ppc): SIGILL running tests, see
           # https://github.com/rust-lang/libc/pull/4254#issuecomment-2636288713
           # - target: powerpc-unknown-linux-gnu
@@ -187,6 +232,10 @@ jobs:
           #   env:
           #     RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS: 64
           #   artifact-tag: offset-bits64
+          # - target: powerpc-unknown-linux-gnu
+          #   env:
+          #     RUST_LIBC_UNSTABLE_GNU_TIME_BITS: 64
+          #   artifact-tag: time-bits64
     timeout-minutes: 25
     env:
       TARGET: ${{ matrix.target }}
@@ -232,7 +281,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: test on Solaris
-        uses: vmactions/solaris-vm@v1
+        uses: vmactions/solaris-vm@v1.1.4
         with:
           release: "11.4-gcc"
           usesh: true
@@ -258,7 +307,8 @@ jobs:
       - test_tier2
       - test_tier2_vm
       - verify_build
-    # Github branch protection is exceedingly silly and treats "jobs skipped because a dependency
+      - clippy
+    # GitHub branch protection is exceedingly silly and treats "jobs skipped because a dependency
     # failed" as success. So we have to do some contortions to ensure the job fails if any of its
     # dependencies fails.
     if: always() # make sure this is never "skipped"

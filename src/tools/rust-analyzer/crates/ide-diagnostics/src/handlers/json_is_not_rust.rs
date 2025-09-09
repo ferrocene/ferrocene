@@ -4,19 +4,19 @@
 use hir::{ImportPathConfig, PathResolution, Semantics};
 use ide_db::text_edit::TextEdit;
 use ide_db::{
-    helpers::mod_path_to_ast,
-    imports::insert_use::{insert_use, ImportScope},
-    source_change::SourceChangeBuilder,
     EditionedFileId, FileRange, FxHashMap, RootDatabase,
+    helpers::mod_path_to_ast,
+    imports::insert_use::{ImportScope, insert_use},
+    source_change::SourceChangeBuilder,
 };
 use itertools::Itertools;
 use stdx::{format_to, never};
 use syntax::{
-    ast::{self, make},
     Edition, SyntaxKind, SyntaxNode,
+    ast::{self, make},
 };
 
-use crate::{fix, Diagnostic, DiagnosticCode, DiagnosticsConfig, Severity};
+use crate::{Diagnostic, DiagnosticCode, DiagnosticsConfig, Severity, fix};
 
 #[derive(Default)]
 struct State {
@@ -128,19 +128,17 @@ pub(crate) fn json_in_items(
                 state.has_serialize = serialize_resolved.is_some();
                 state.build_struct("Root", &it);
                 edit.insert(range.start(), state.result);
+                let vfs_file_id = file_id.file_id(sema.db);
                 acc.push(
                     Diagnostic::new(
                         DiagnosticCode::Ra("json-is-not-rust", Severity::WeakWarning),
                         "JSON syntax is not valid as a Rust item",
-                        FileRange { file_id: file_id.into(), range },
+                        FileRange { file_id: vfs_file_id, range },
                     )
+                    .stable()
                     .with_fixes(Some(vec![{
-                        let mut scb = SourceChangeBuilder::new(file_id);
-                        let scope = match import_scope {
-                            ImportScope::File(it) => ImportScope::File(scb.make_mut(it)),
-                            ImportScope::Module(it) => ImportScope::Module(scb.make_mut(it)),
-                            ImportScope::Block(it) => ImportScope::Block(scb.make_mut(it)),
-                        };
+                        let mut scb = SourceChangeBuilder::new(vfs_file_id);
+                        let scope = scb.make_import_scope_mut(import_scope);
                         let current_module = semantics_scope.module();
 
                         let cfg = ImportPathConfig {
@@ -150,40 +148,30 @@ pub(crate) fn json_in_items(
                             allow_unstable: true,
                         };
 
-                        if !scope_has("Serialize") {
-                            if let Some(PathResolution::Def(it)) = serialize_resolved {
-                                if let Some(it) = current_module.find_use_path(
-                                    sema.db,
-                                    it,
-                                    config.insert_use.prefix_kind,
-                                    cfg,
-                                ) {
-                                    insert_use(
-                                        &scope,
-                                        mod_path_to_ast(&it, edition),
-                                        &config.insert_use,
-                                    );
-                                }
-                            }
+                        if !scope_has("Serialize")
+                            && let Some(PathResolution::Def(it)) = serialize_resolved
+                            && let Some(it) = current_module.find_use_path(
+                                sema.db,
+                                it,
+                                config.insert_use.prefix_kind,
+                                cfg,
+                            )
+                        {
+                            insert_use(&scope, mod_path_to_ast(&it, edition), &config.insert_use);
                         }
-                        if !scope_has("Deserialize") {
-                            if let Some(PathResolution::Def(it)) = deserialize_resolved {
-                                if let Some(it) = current_module.find_use_path(
-                                    sema.db,
-                                    it,
-                                    config.insert_use.prefix_kind,
-                                    cfg,
-                                ) {
-                                    insert_use(
-                                        &scope,
-                                        mod_path_to_ast(&it, edition),
-                                        &config.insert_use,
-                                    );
-                                }
-                            }
+                        if !scope_has("Deserialize")
+                            && let Some(PathResolution::Def(it)) = deserialize_resolved
+                            && let Some(it) = current_module.find_use_path(
+                                sema.db,
+                                it,
+                                config.insert_use.prefix_kind,
+                                cfg,
+                            )
+                        {
+                            insert_use(&scope, mod_path_to_ast(&it, edition), &config.insert_use);
                         }
                         let mut sc = scb.finish();
-                        sc.insert_source_edit(file_id, edit.finish());
+                        sc.insert_source_edit(vfs_file_id, edit.finish());
                         fix("convert_json_to_struct", "Convert JSON to struct", sc, range)
                     }])),
                 );
@@ -196,8 +184,8 @@ pub(crate) fn json_in_items(
 #[cfg(test)]
 mod tests {
     use crate::{
-        tests::{check_diagnostics_with_config, check_fix, check_no_fix},
         DiagnosticsConfig,
+        tests::{check_diagnostics_with_config, check_fix, check_no_fix},
     };
 
     #[test]

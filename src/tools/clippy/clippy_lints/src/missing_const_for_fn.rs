@@ -7,7 +7,7 @@ use rustc_abi::ExternAbi;
 use rustc_errors::Applicability;
 use rustc_hir::def_id::CRATE_DEF_ID;
 use rustc_hir::intravisit::FnKind;
-use rustc_hir::{self as hir, Body, Constness, FnDecl, GenericParamKind};
+use rustc_hir::{self as hir, Body, Constness, FnDecl, GenericParamKind, OwnerId};
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::ty;
 use rustc_session::impl_lint_pass;
@@ -125,7 +125,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingConstForFn {
                 }
             },
             FnKind::Method(_, sig, ..) => {
-                if already_const(sig.header) || trait_ref_of_method(cx, def_id).is_some() {
+                if already_const(sig.header) || trait_ref_of_method(cx, OwnerId { def_id }).is_some() {
                     return;
                 }
             },
@@ -139,12 +139,11 @@ impl<'tcx> LateLintPass<'tcx> for MissingConstForFn {
         // Const fns are not allowed as methods in a trait.
         {
             let parent = cx.tcx.hir_get_parent_item(hir_id).def_id;
-            if parent != CRATE_DEF_ID {
-                if let hir::Node::Item(item) = cx.tcx.hir_node_by_def_id(parent) {
-                    if let hir::ItemKind::Trait(..) = &item.kind {
-                        return;
-                    }
-                }
+            if parent != CRATE_DEF_ID
+                && let hir::Node::Item(item) = cx.tcx.hir_node_by_def_id(parent)
+                && let hir::ItemKind::Trait(..) = &item.kind
+            {
+                return;
             }
         }
 
@@ -198,7 +197,7 @@ fn fn_inputs_has_impl_trait_ty(cx: &LateContext<'_>, def_id: LocalDefId) -> bool
     inputs.iter().any(|input| {
         matches!(
             input.kind(),
-            ty::Alias(ty::AliasTyKind::Weak, alias_ty) if cx.tcx.type_of(alias_ty.def_id).skip_binder().is_impl_trait()
+            ty::Alias(ty::AliasTyKind::Free, alias_ty) if cx.tcx.type_of(alias_ty.def_id).skip_binder().is_impl_trait()
         )
     })
 }

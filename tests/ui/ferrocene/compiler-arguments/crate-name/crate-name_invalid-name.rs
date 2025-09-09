@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --crate-name=foo-bar
-//~? invalid character '-' in crate name
+//~? ERROR invalid character '-' in crate name
 
 fn main() {}
 

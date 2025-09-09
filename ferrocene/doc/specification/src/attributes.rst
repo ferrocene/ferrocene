@@ -138,6 +138,7 @@ Built-in Attributes
      | LinkOrdinalContent
      | MacroExportContent
      | MacroUseContent
+     | NakedContent
      | NoBinutilsContent
      | NoImplicitPreludeContent
      | NoLinkContent
@@ -183,6 +184,9 @@ The following :t:`[built-in attribute]s` are :dt:`[code generation attribute]s`:
 
 * :dp:`fls_gxxbf6eag3et`
   :t:`Attribute` :c:`track_caller`.
+
+* :dp:`fls_eOJS3mxa9xgu`
+  :t:`Attribute` :c:`naked`.
 
 :dp:`fls_87o6n9et9jio`
 The following :t:`[built-in attribute]s` are
@@ -503,7 +507,9 @@ Attribute ``target_feature``
 .. rubric:: Legality Rules
 
 :dp:`fls_3qj3jvmtxvx6`
-:t:`Attribute` :c:`target_feature` shall apply to :t:`[unsafe function]s`.
+Safe :t:`[function]s` that are annotated with :c:`[target_feature]s`
+can only be called without an :t:`unsafe block` by a caller that is within a function
+that enables all the :c:`[target_feature]s` that the callee enables.
 
 :dp:`fls_agpkz1v3c281`
 :t:`Attribute` :dc:`target_feature` enables target architecture features for its
@@ -680,6 +686,48 @@ the :t:`attribute`.
    #[track_caller]
    fn who_called_me () {}
 
+
+.. _fls_Sd6rUmpEb355:
+
+Attribute ``naked``
+^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   NakedContent ::=
+       $$naked$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_8eg0iN2diBZt`
+:t:`Attribute` :c:`naked` shall apply to :t:`[function]s`.
+
+:dp:`fls_WnqgR5OyecIs`
+:t:`Attribute` :dc:`naked` ensures that a :t:`function` prologue and epilogue are not generated.
+
+:dp:`fls_NCHa4Dc1M6oM`
+:t:`Attribute` :c:`naked` :t:`function body` must consist of exactly one
+:t:`macro` :std:`core::arch::naked_asm` call.
+
+:dp:`fls_H7ccwNk2HGAi`
+:t:`Attribute` :c:`naked` cannot be used together with :t:`[testing function]s`.
+
+:dp:`fls_ocOk47SGiRVb`
+:t:`Attribute` :c:`naked` cannot be used together with :t:`attribute` :c:`inline`.
+
+:dp:`fls_VUL2qySBvRqy`
+:t:`Attribute` :c:`naked` cannot be used together with :t:`attribute` :c:`track_caller`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_0tYMAQY1V55p`
+It is a :t:`safety invariant` for the :t:`function body` to respect the :t:`ABI` of the function.
+
+:dp:`fls_wGbJrz4OpKKb`
+It is a :t:`safety invariant` for the :t:`function body` to :t:`diverge <diverging expression>`.
+
 .. _fls_cdx9zb1yxcc8:
 
 Conditional Compilation Attributes
@@ -702,6 +750,8 @@ Attribute ``cfg``
      | ConfigurationPredicateAll
      | ConfigurationPredicateAny
      | ConfigurationPredicateNot
+     | $$true$$
+     | $$false$$
 
    ConfigurationOption ::=
        ConfigurationOptionName ConfigurationOptionValue?
@@ -757,6 +807,12 @@ negates the Boolean :t:`value` of its nested :t:`configuration predicate`.
 :dp:`fls_tvsadfy9uibu`
 A :t:`not configuration predicate` evaluates statically to ``true`` when its
 nested configuration predicate evaluates to ``false``.
+
+:dp:`fls_JWx8vQwl19Fu`
+:t:`Configuration predicate` :dc:`true` always evaluates statically to ``true``.
+
+:dp:`fls_SziFAQsio0ab`
+:t:`Configuration predicate` :dc:`false` always evaluates statically to ``false``.
 
 :dp:`fls_jbl9xyynjo0g`
 The :t:`evaluation` of a configuration option is tool-defined.
@@ -1376,23 +1432,29 @@ Attribute ``unsafe``
 
 .. rubric:: Legality Rules
 
+:dp:`fls_z5DTDKM9mU3o`
+:t:`Attribute` :dc:`unsafe` is used to indicate that an  :t:`attribute` is :t:`unsafe <unsafe operation>`.
+
 :dp:`fls_5pjo3nGOxbVw`
 :t:`Attribute` :c:`unsafe` shall apply to what the contained :t:`attribute` applies to.
 
 :dp:`fls_gpxlWbQUNsj8`
-:t:`Attribute` :c:`unsafe` behaves like the contained :t:`attribute`.
+:t:`Attribute` :c:`unsafe` does not affect the behavior of the contained :t:`attribute`.
 
 :dp:`fls_PhrfxSBvXTPV`
-The contained :t:`attribute` shall be one of:
+The contained :t:`attribute` shall be one of the following:
 
 * :dp:`fls_pCSew95bKJJ5`
-  :t:`attribute` :c:`no_mangle`,
+  :t:`Attribute` :c:`no_mangle`
 
-  :dp:`fls_NRLgmOXxuljQ`
-  :t:`attribute` :c:`export_name`, or
+* :dp:`fls_NRLgmOXxuljQ`
+  :t:`Attribute` :c:`export_name`
 
-  :dp:`fls_ykpxNByUDyHG`
-  :t:`attribute` :c:`link_section`,
+* :dp:`fls_ykpxNByUDyHG`
+  :t:`Attribute` :c:`link_section`
+
+* :dp:`fls_2oP2nbDPtUg7`
+  :t:`Attribute` :c:`naked`
 
 .. rubric:: Examples
 

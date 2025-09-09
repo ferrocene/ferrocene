@@ -1,11 +1,12 @@
 use hir::{AsAssocItem, HasVisibility, ModuleDef, Visibility};
-use ide_db::assists::{AssistId, AssistKind};
+use ide_db::assists::AssistId;
 use itertools::Itertools;
 use stdx::{format_to, to_lower_snake_case};
 use syntax::{
+    AstNode, AstToken, Edition,
     algo::skip_whitespace_token,
-    ast::{self, edit::IndentLevel, HasDocComments, HasGenericArgs, HasName},
-    match_ast, AstNode, AstToken, Edition,
+    ast::{self, HasDocComments, HasGenericArgs, HasName, edit::IndentLevel},
+    match_ast,
 };
 
 use crate::assist_context::{AssistContext, Assists};
@@ -55,7 +56,7 @@ pub(crate) fn generate_documentation_template(
     let indent_level = IndentLevel::from_node(parent_syntax);
 
     acc.add(
-        AssistId("generate_documentation_template", AssistKind::Generate),
+        AssistId::generate("generate_documentation_template"),
         "Generate a documentation template",
         text_range,
         |builder| {
@@ -114,7 +115,7 @@ pub(crate) fn generate_doc_example(acc: &mut Assists, ctx: &AssistContext<'_>) -
     let indent_level = IndentLevel::from_node(&node);
 
     acc.add(
-        AssistId("generate_doc_example", AssistKind::Generate),
+        AssistId::generate("generate_doc_example"),
         "Generate a documentation example",
         node.text_range(),
         |builder| {
@@ -147,11 +148,11 @@ fn make_example_for_fn(ast_func: &ast::Fn, ctx: &AssistContext<'_>) -> Option<St
     let self_name = self_name(ast_func);
 
     format_to!(example, "use {use_path};\n\n");
-    if let Some(self_name) = &self_name {
-        if let Some(mut_) = is_ref_mut_self(ast_func) {
-            let mut_ = if mut_ { "mut " } else { "" };
-            format_to!(example, "let {mut_}{self_name} = ;\n");
-        }
+    if let Some(self_name) = &self_name
+        && let Some(mut_) = is_ref_mut_self(ast_func)
+    {
+        let mut_ = if mut_ { "mut " } else { "" };
+        format_to!(example, "let {mut_}{self_name} = ;\n");
     }
     for param_name in &ref_mut_params {
         format_to!(example, "let mut {param_name} = ;\n");
@@ -169,10 +170,10 @@ fn make_example_for_fn(ast_func: &ast::Fn, ctx: &AssistContext<'_>) -> Option<St
         format_to!(example, "{function_call};\n");
     }
     // Check the mutated values
-    if let Some(self_name) = &self_name {
-        if is_ref_mut_self(ast_func) == Some(true) {
-            format_to!(example, "assert_eq!({self_name}, );");
-        }
+    if let Some(self_name) = &self_name
+        && is_ref_mut_self(ast_func) == Some(true)
+    {
+        format_to!(example, "assert_eq!({self_name}, );");
     }
     for param_name in &ref_mut_params {
         format_to!(example, "assert_eq!({param_name}, );");
@@ -312,12 +313,28 @@ fn crate_name(ast_func: &ast::Fn, ctx: &AssistContext<'_>) -> Option<String> {
 /// `None` if function without a body; some bool to guess if function can panic
 fn can_panic(ast_func: &ast::Fn) -> Option<bool> {
     let body = ast_func.body()?.to_string();
-    let can_panic = body.contains("panic!(")
-        // FIXME it would be better to not match `debug_assert*!` macro invocations
-        || body.contains("assert!(")
-        || body.contains(".unwrap()")
-        || body.contains(".expect(");
-    Some(can_panic)
+    let mut iter = body.chars();
+    let assert_postfix = |s| {
+        ["!(", "_eq!(", "_ne!(", "_matches!("].iter().any(|postfix| str::starts_with(s, postfix))
+    };
+
+    while !iter.as_str().is_empty() {
+        let s = iter.as_str();
+        iter.next();
+        if s.strip_prefix("debug_assert").is_some_and(assert_postfix) {
+            iter.nth(10);
+            continue;
+        }
+        if s.strip_prefix("assert").is_some_and(assert_postfix)
+            || s.starts_with("panic!(")
+            || s.starts_with(".unwrap()")
+            || s.starts_with(".expect(")
+        {
+            return Some(true);
+        }
+    }
+
+    Some(false)
 }
 
 /// Helper function to get the name that should be given to `self` arguments
@@ -677,6 +694,24 @@ pub fn panics_if(a: bool) {
     }
 
     #[test]
+    fn guesses_debug_assert_macro_cannot_panic() {
+        check_assist(
+            generate_documentation_template,
+            r#"
+pub fn $0debug_panics_if_not(a: bool) {
+    debug_assert!(a == true);
+}
+"#,
+            r#"
+/// .
+pub fn debug_panics_if_not(a: bool) {
+    debug_assert!(a == true);
+}
+"#,
+        );
+    }
+
+    #[test]
     fn guesses_assert_macro_can_panic() {
         check_assist(
             generate_documentation_template,
@@ -693,6 +728,28 @@ pub fn $0panics_if_not(a: bool) {
 /// Panics if .
 pub fn panics_if_not(a: bool) {
     assert!(a == true);
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn guesses_assert_eq_macro_can_panic() {
+        check_assist(
+            generate_documentation_template,
+            r#"
+pub fn $0panics_if_not(a: bool) {
+    assert_eq!(a, true);
+}
+"#,
+            r#"
+/// .
+///
+/// # Panics
+///
+/// Panics if .
+pub fn panics_if_not(a: bool) {
+    assert_eq!(a, true);
 }
 "#,
         );

@@ -374,9 +374,12 @@ fn check_predicates<'tcx>(
 
     // Include the well-formed predicates of the type parameters of the impl.
     for arg in tcx.impl_trait_ref(impl1_def_id).unwrap().instantiate_identity().args {
+        let Some(term) = arg.as_term() else {
+            continue;
+        };
         let infcx = &tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let obligations =
-            wf::obligations(infcx, tcx.param_env(impl1_def_id), impl1_def_id, 0, arg, span)
+            wf::obligations(infcx, tcx.param_env(impl1_def_id), impl1_def_id, 0, term, span)
                 .unwrap();
 
         assert!(!obligations.has_infer());
@@ -387,43 +390,11 @@ fn check_predicates<'tcx>(
 
     let mut res = Ok(());
     for (clause, span) in impl1_predicates {
-        if !impl2_predicates.iter().any(|pred2| trait_predicates_eq(clause.as_predicate(), *pred2))
-        {
+        if !impl2_predicates.iter().any(|&pred2| clause.as_predicate() == pred2) {
             res = res.and(check_specialization_on(tcx, clause, span))
         }
     }
     res
-}
-
-/// Checks if some predicate on the specializing impl (`predicate1`) is the same
-/// as some predicate on the base impl (`predicate2`).
-///
-/// This basically just checks syntactic equivalence, but is a little more
-/// forgiving since we want to equate `T: Tr` with `T: ~const Tr` so this can work:
-///
-/// ```ignore (illustrative)
-/// #[rustc_specialization_trait]
-/// trait Specialize { }
-///
-/// impl<T: Bound> Tr for T { }
-/// impl<T: ~const Bound + Specialize> const Tr for T { }
-/// ```
-///
-/// However, we *don't* want to allow the reverse, i.e., when the bound on the
-/// specializing impl is not as const as the bound on the base impl:
-///
-/// ```ignore (illustrative)
-/// impl<T: ~const Bound> const Tr for T { }
-/// impl<T: Bound + Specialize> const Tr for T { } // should be T: ~const Bound
-/// ```
-///
-/// So we make that check in this function and try to raise a helpful error message.
-fn trait_predicates_eq<'tcx>(
-    predicate1: ty::Predicate<'tcx>,
-    predicate2: ty::Predicate<'tcx>,
-) -> bool {
-    // FIXME(const_trait_impl)
-    predicate1 == predicate2
 }
 
 #[instrument(level = "debug", skip(tcx))]
@@ -496,6 +467,7 @@ fn trait_specialization_kind<'tcx>(
         | ty::ClauseKind::ConstArgHasType(..)
         | ty::ClauseKind::WellFormed(_)
         | ty::ClauseKind::ConstEvaluatable(..)
+        | ty::ClauseKind::UnstableFeature(_)
         | ty::ClauseKind::HostEffect(..) => None,
     }
 }

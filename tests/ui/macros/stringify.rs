@@ -1,5 +1,5 @@
 //@ run-pass
-//@ edition:2021
+//@ edition:2024
 //@ compile-flags: --test
 
 #![allow(incomplete_features)]
@@ -10,7 +10,6 @@
 #![feature(decl_macro)]
 #![feature(explicit_tail_calls)]
 #![feature(if_let_guard)]
-#![feature(let_chains)]
 #![feature(more_qualified_paths)]
 #![feature(never_patterns)]
 #![feature(trait_alias)]
@@ -288,6 +287,9 @@ fn test_expr() {
     // ExprKind::OffsetOf: untestable because this test works pre-expansion.
 
     // ExprKind::MacCall
+    c1!(expr, [ mac!() ], "mac!()");
+    c1!(expr, [ mac![] ], "mac![]");
+    c1!(expr, [ mac! {} ], "mac! {}");
     c1!(expr, [ mac!(...) ], "mac!(...)");
     c1!(expr, [ mac![...] ], "mac![...]");
     c1!(expr, [ mac! { ... } ], "mac! { ... }");
@@ -353,7 +355,8 @@ fn test_item() {
     c1!(item, [ pub extern crate self as std; ], "pub extern crate self as std;");
 
     // ItemKind::Use
-    c1!(item, [ pub use crate::{a, b::c}; ], "pub use crate::{ a, b::c };"); // FIXME
+    c1!(item, [ pub use crate::{a, b::c}; ], "pub use crate::{a, b::c};");
+    c1!(item, [ pub use crate::{ e, ff }; ], "pub use crate::{ e, ff };");
     c1!(item, [ pub use A::*; ], "pub use A::*;");
 
     // ItemKind::Static
@@ -479,12 +482,14 @@ fn test_item() {
     c1!(item, [ impl<T> Struct<T> {} ], "impl<T> Struct<T> {}");
     c1!(item, [ pub impl Trait for Struct {} ], "pub impl Trait for Struct {}");
     c1!(item, [ impl<T> const Trait for T {} ], "impl<T> const Trait for T {}");
-    c1!(item, [ impl ~const Struct {} ], "impl ~const Struct {}");
 
     // ItemKind::MacCall
+    c1!(item, [ mac!(); ], "mac!();");
+    c1!(item, [ mac![]; ], "mac![];");
+    c1!(item, [ mac! {} ], "mac! {}");
     c1!(item, [ mac!(...); ], "mac!(...);");
     c1!(item, [ mac![...]; ], "mac![...];");
-    c1!(item, [ mac! { ... } ], "mac! { ... }");
+    c1!(item, [ mac! {...} ], "mac! {...}");
 
     // ItemKind::MacroDef
     c1!(item,
@@ -598,8 +603,11 @@ fn test_pat() {
     c1!(pat, [ (pat) ], "(pat)");
 
     // PatKind::MacCall
+    c1!(pat, [ mac!() ], "mac!()");
+    c1!(pat, [ mac![] ], "mac![]");
+    c1!(pat, [ mac! {} ], "mac! {}");
     c1!(pat, [ mac!(...) ], "mac!(...)");
-    c1!(pat, [ mac![...] ], "mac![...]");
+    c1!(pat, [ mac! [ ... ] ], "mac! [...]");
     c1!(pat, [ mac! { ... } ], "mac! { ... }");
 
     // Attributes are not allowed on patterns.
@@ -644,6 +652,9 @@ fn test_stmt() {
     c1!(stmt, [ ; ], ";");
 
     // StmtKind::MacCall
+    c1!(stmt, [ mac! ( ) ], "mac! ()");
+    c1!(stmt, [ mac![] ], "mac![]");
+    c1!(stmt, [ mac!{} ], "mac!{}");
     c1!(stmt, [ mac!(...) ], "mac!(...)");
     c1!(stmt, [ mac![...] ], "mac![...]");
     c1!(stmt, [ mac! { ... } ], "mac! { ... }");
@@ -717,7 +728,7 @@ fn test_ty() {
     c1!(ty, [ dyn Send + 'a ], "dyn Send + 'a");
     c1!(ty, [ dyn 'a + Send ], "dyn 'a + Send");
     c1!(ty, [ dyn ?Sized ], "dyn ?Sized");
-    c1!(ty, [ dyn ~const Clone ], "dyn ~const Clone");
+    c1!(ty, [ dyn [const] Clone ], "dyn [const] Clone");
     c1!(ty, [ dyn for<'a> Send ], "dyn for<'a> Send");
 
     // TyKind::ImplTrait
@@ -725,7 +736,7 @@ fn test_ty() {
     c1!(ty, [ impl Send + 'a ], "impl Send + 'a");
     c1!(ty, [ impl 'a + Send ], "impl 'a + Send");
     c1!(ty, [ impl ?Sized ], "impl ?Sized");
-    c1!(ty, [ impl ~const Clone ], "impl ~const Clone");
+    c1!(ty, [ impl [const] Clone ], "impl [const] Clone");
     c1!(ty, [ impl for<'a> Send ], "impl for<'a> Send");
 
     // TyKind::Paren
@@ -739,6 +750,9 @@ fn test_ty() {
     // TyKind::ImplicitSelf: there is no syntax for this.
 
     // TyKind::MacCall
+    c1!(ty, [ mac!() ], "mac!()");
+    c1!(ty, [ mac![] ], "mac![]");
+    c1!(ty, [ mac! { } ], "mac! {}");
     c1!(ty, [ mac!(...) ], "mac!(...)");
     c1!(ty, [ mac![...] ], "mac![...]");
     c1!(ty, [ mac! { ... } ], "mac! { ... }");

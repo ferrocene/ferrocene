@@ -90,6 +90,10 @@ Definition of Terms
        Uses type information to determine whether a single pattern or a tree of
        patterns can fully capture a value.
 
+   Facade Target
+       A target that can be used in place of a different target during testing
+       and development.
+
    SSH Key
        An access credential in the SSH protocol. Its function is similar to that of
        user names and passwords, but the keys are primarily used for automated

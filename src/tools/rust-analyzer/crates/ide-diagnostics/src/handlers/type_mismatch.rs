@@ -1,27 +1,26 @@
 use either::Either;
-use hir::{db::ExpandDatabase, CallableKind, ClosureStyle, HirDisplay, HirFileIdExt, InFile};
+use hir::{CallableKind, ClosureStyle, HirDisplay, InFile, db::ExpandDatabase};
 use ide_db::{
     famous_defs::FamousDefs,
     source_change::{SourceChange, SourceChangeBuilder},
     text_edit::TextEdit,
 };
 use syntax::{
+    AstNode, AstPtr, TextSize,
     ast::{
-        self,
+        self, BlockExpr, Expr, ExprStmt, HasArgList,
         edit::{AstNodeEdit, IndentLevel},
         syntax_factory::SyntaxFactory,
-        BlockExpr, Expr, ExprStmt, HasArgList,
     },
-    AstNode, AstPtr, TextSize,
 };
 
-use crate::{adjusted_display_range, fix, Assist, Diagnostic, DiagnosticCode, DiagnosticsContext};
+use crate::{Assist, Diagnostic, DiagnosticCode, DiagnosticsContext, adjusted_display_range, fix};
 
 // Diagnostic: type-mismatch
 //
 // This diagnostic is triggered when the type of an expression or pattern does not match
 // the expected type.
-pub(crate) fn type_mismatch(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch) -> Diagnostic {
+pub(crate) fn type_mismatch(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch<'_>) -> Diagnostic {
     let display_range = adjusted_display_range(ctx, d.expr_or_pat, &|node| {
         let Either::Left(expr) = node else { return None };
         let salient_token_range = match expr {
@@ -40,7 +39,7 @@ pub(crate) fn type_mismatch(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch)
         cov_mark::hit!(type_mismatch_range_adjustment);
         Some(salient_token_range)
     });
-    let mut diag = Diagnostic::new(
+    Diagnostic::new(
         DiagnosticCode::RustcHardError("E0308"),
         format!(
             "expected {}, found {}",
@@ -53,14 +52,10 @@ pub(crate) fn type_mismatch(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch)
         ),
         display_range,
     )
-    .with_fixes(fixes(ctx, d));
-    if diag.fixes.is_none() {
-        diag.experimental = true;
-    }
-    diag
+    .with_fixes(fixes(ctx, d))
 }
 
-fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch) -> Option<Vec<Assist>> {
+fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch<'_>) -> Option<Vec<Assist>> {
     let mut fixes = Vec::new();
 
     if let Some(expr_ptr) = d.expr_or_pat.value.cast::<ast::Expr>() {
@@ -72,16 +67,12 @@ fn fixes(ctx: &DiagnosticsContext<'_>, d: &hir::TypeMismatch) -> Option<Vec<Assi
         str_ref_to_owned(ctx, d, expr_ptr, &mut fixes);
     }
 
-    if fixes.is_empty() {
-        None
-    } else {
-        Some(fixes)
-    }
+    if fixes.is_empty() { None } else { Some(fixes) }
 }
 
 fn add_reference(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::TypeMismatch,
+    d: &hir::TypeMismatch<'_>,
     expr_ptr: &InFile<AstPtr<ast::Expr>>,
     acc: &mut Vec<Assist>,
 ) -> Option<()> {
@@ -103,7 +94,7 @@ fn add_reference(
 
 fn add_missing_ok_or_some(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::TypeMismatch,
+    d: &hir::TypeMismatch<'_>,
     expr_ptr: &InFile<AstPtr<ast::Expr>>,
     acc: &mut Vec<Assist>,
 ) -> Option<()> {
@@ -155,7 +146,7 @@ fn add_missing_ok_or_some(
                 }
 
                 let source_change = SourceChange::from_text_edit(
-                    expr_ptr.file_id.original_file(ctx.sema.db),
+                    expr_ptr.file_id.original_file(ctx.sema.db).file_id(ctx.sema.db),
                     builder.finish(),
                 );
                 let name = format!("Insert {variant_name}(()) as the tail of this block");
@@ -169,7 +160,7 @@ fn add_missing_ok_or_some(
                 builder
                     .insert(ret_expr.syntax().text_range().end(), format!(" {variant_name}(())"));
                 let source_change = SourceChange::from_text_edit(
-                    expr_ptr.file_id.original_file(ctx.sema.db),
+                    expr_ptr.file_id.original_file(ctx.sema.db).file_id(ctx.sema.db),
                     builder.finish(),
                 );
                 let name = format!("Insert {variant_name}(()) as the return value");
@@ -182,8 +173,10 @@ fn add_missing_ok_or_some(
     let mut builder = TextEdit::builder();
     builder.insert(expr.syntax().text_range().start(), format!("{variant_name}("));
     builder.insert(expr.syntax().text_range().end(), ")".to_owned());
-    let source_change =
-        SourceChange::from_text_edit(expr_ptr.file_id.original_file(ctx.sema.db), builder.finish());
+    let source_change = SourceChange::from_text_edit(
+        expr_ptr.file_id.original_file(ctx.sema.db).file_id(ctx.sema.db),
+        builder.finish(),
+    );
     let name = format!("Wrap in {variant_name}");
     acc.push(fix("wrap_in_constructor", &name, source_change, expr_range));
     Some(())
@@ -191,14 +184,14 @@ fn add_missing_ok_or_some(
 
 fn remove_unnecessary_wrapper(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::TypeMismatch,
+    d: &hir::TypeMismatch<'_>,
     expr_ptr: &InFile<AstPtr<ast::Expr>>,
     acc: &mut Vec<Assist>,
 ) -> Option<()> {
     let db = ctx.sema.db;
     let root = db.parse_or_expand(expr_ptr.file_id);
     let expr = expr_ptr.value.to_node(&root);
-    let expr = ctx.sema.original_ast_node(expr.clone())?;
+    let expr = ctx.sema.original_ast_node(expr)?;
 
     let Expr::CallExpr(call_expr) = expr else {
         return None;
@@ -225,7 +218,7 @@ fn remove_unnecessary_wrapper(
     let inner_arg = call_expr.arg_list()?.args().next()?;
 
     let file_id = expr_ptr.file_id.original_file(db);
-    let mut builder = SourceChangeBuilder::new(file_id);
+    let mut builder = SourceChangeBuilder::new(file_id.file_id(ctx.sema.db));
     let mut editor;
     match inner_arg {
         // We're returning `()`
@@ -236,7 +229,7 @@ fn remove_unnecessary_wrapper(
                 .and_then(Either::<ast::ReturnExpr, ast::StmtList>::cast)?;
 
             editor = builder.make_editor(parent.syntax());
-            let make = SyntaxFactory::new();
+            let make = SyntaxFactory::with_mappings();
 
             match parent {
                 Either::Left(ret_expr) => {
@@ -261,7 +254,7 @@ fn remove_unnecessary_wrapper(
         }
     }
 
-    builder.add_file_edits(file_id, editor);
+    builder.add_file_edits(file_id.file_id(ctx.sema.db), editor);
     let name = format!("Remove unnecessary {}() wrapper", variant.name(db).as_str());
     acc.push(fix(
         "remove_unnecessary_wrapper",
@@ -274,7 +267,7 @@ fn remove_unnecessary_wrapper(
 
 fn remove_semicolon(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::TypeMismatch,
+    d: &hir::TypeMismatch<'_>,
     expr_ptr: &InFile<AstPtr<ast::Expr>>,
     acc: &mut Vec<Assist>,
 ) -> Option<()> {
@@ -293,8 +286,10 @@ fn remove_semicolon(
     let semicolon_range = expr_before_semi.semicolon_token()?.text_range();
 
     let edit = TextEdit::delete(semicolon_range);
-    let source_change =
-        SourceChange::from_text_edit(expr_ptr.file_id.original_file(ctx.sema.db), edit);
+    let source_change = SourceChange::from_text_edit(
+        expr_ptr.file_id.original_file(ctx.sema.db).file_id(ctx.sema.db),
+        edit,
+    );
 
     acc.push(fix("remove_semicolon", "Remove this semicolon", source_change, semicolon_range));
     Some(())
@@ -302,15 +297,14 @@ fn remove_semicolon(
 
 fn str_ref_to_owned(
     ctx: &DiagnosticsContext<'_>,
-    d: &hir::TypeMismatch,
+    d: &hir::TypeMismatch<'_>,
     expr_ptr: &InFile<AstPtr<ast::Expr>>,
     acc: &mut Vec<Assist>,
 ) -> Option<()> {
     let expected = d.expected.display(ctx.sema.db, ctx.display_target);
-    let actual = d.actual.display(ctx.sema.db, ctx.display_target);
-
     // FIXME do this properly
-    if expected.to_string() != "String" || actual.to_string() != "&str" {
+    let is_applicable = d.actual.strip_reference().is_str() && expected.to_string() == "String";
+    if !is_applicable {
         return None;
     }
 
@@ -321,8 +315,10 @@ fn str_ref_to_owned(
     let to_owned = ".to_owned()".to_owned();
 
     let edit = TextEdit::insert(expr.syntax().text_range().end(), to_owned);
-    let source_change =
-        SourceChange::from_text_edit(expr_ptr.file_id.original_file(ctx.sema.db), edit);
+    let source_change = SourceChange::from_text_edit(
+        expr_ptr.file_id.original_file(ctx.sema.db).file_id(ctx.sema.db),
+        edit,
+    );
     acc.push(fix("str_ref_to_owned", "Add .to_owned() here", source_change, expr_range));
 
     Some(())
@@ -1047,19 +1043,6 @@ fn test() -> String {
     }
 
     #[test]
-    fn closure_mismatch_show_different_type() {
-        check_diagnostics(
-            r#"
-fn f() {
-    let mut x = (|| 1, 2);
-    x = (|| 3, 4);
-       //^^^^ error: expected {closure#0}, found {closure#1}
-}
-            "#,
-        );
-    }
-
-    #[test]
     fn type_mismatch_range_adjustment() {
         cov_mark::check!(type_mismatch_range_adjustment);
         check_diagnostics(
@@ -1254,6 +1237,20 @@ fn foo(v: &Enum) {
     let <() as Trait>::Assoc::Variant = v;
 }
     "#,
+        );
+    }
+
+    #[test]
+    fn regression_19844() {
+        check_diagnostics(
+            r#"
+fn main() {
+    struct S {}
+    enum E { V() }
+    let E::V() = &S {};
+     // ^^^^^^ error: expected S, found E
+}
+"#,
         );
     }
 }

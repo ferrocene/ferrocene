@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Backtrace {
     // Frames here are listed from top-to-bottom of the stack
-    frames: Vec<BacktraceFrame>,
+    frames: Box<[BacktraceFrame]>,
 }
 
 #[derive(Clone, Copy)]
@@ -143,7 +143,7 @@ fn _assert_send_sync() {
 #[derive(Clone)]
 pub struct BacktraceFrame {
     frame: Frame,
-    symbols: Option<Vec<BacktraceSymbol>>,
+    symbols: Option<Box<[BacktraceSymbol]>>,
 }
 
 #[derive(Clone)]
@@ -186,11 +186,11 @@ impl Frame {
     }
 
     /// Resolve all addresses in the frame to their symbolic names.
-    fn resolve_symbols(&self) -> Vec<BacktraceSymbol> {
+    fn resolve_symbols(&self) -> Box<[BacktraceSymbol]> {
         let mut symbols = Vec::new();
         let sym = |symbol: &Symbol| {
             symbols.push(BacktraceSymbol {
-                name: symbol.name().map(|m| m.as_bytes().to_vec()),
+                name: symbol.name().map(|m| m.as_bytes().into()),
                 addr: symbol.addr().map(TracePtr),
                 filename: symbol.filename().map(|m| m.to_owned()),
                 lineno: symbol.lineno(),
@@ -204,7 +204,7 @@ impl Frame {
                 resolve(ip.into_void(), sym);
             }
         }
-        symbols
+        symbols.into_boxed_slice()
     }
 }
 
@@ -220,7 +220,7 @@ impl Frame {
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct BacktraceSymbol {
-    name: Option<Vec<u8>>,
+    name: Option<Box<[u8]>>,
     addr: Option<TracePtr>,
     filename: Option<PathBuf>,
     lineno: Option<u32>,
@@ -306,7 +306,9 @@ impl Backtrace {
         });
         frames.shrink_to_fit();
 
-        Backtrace { frames }
+        Backtrace {
+            frames: frames.into_boxed_slice(),
+        }
     }
 
     /// Returns the frames from when this backtrace was captured.
@@ -320,7 +322,7 @@ impl Backtrace {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn frames(&self) -> &[BacktraceFrame] {
-        self.frames.as_slice()
+        self.frames.as_ref()
     }
 
     /// If this backtrace was created from `new_unresolved` then this function
@@ -340,7 +342,9 @@ impl Backtrace {
 
 impl From<Vec<BacktraceFrame>> for Backtrace {
     fn from(frames: Vec<BacktraceFrame>) -> Self {
-        Backtrace { frames }
+        Backtrace {
+            frames: frames.into_boxed_slice(),
+        }
     }
 }
 
@@ -358,7 +362,7 @@ impl From<crate::Frame> for BacktraceFrame {
 // more information on https://github.com/rust-lang/backtrace-rs/pull/526
 impl Into<Vec<BacktraceFrame>> for Backtrace {
     fn into(self) -> Vec<BacktraceFrame> {
-        self.frames
+        self.frames.into_vec()
     }
 }
 
@@ -553,7 +557,7 @@ mod serde_impls {
         ip: usize,
         symbol_address: usize,
         module_base_address: Option<usize>,
-        symbols: Option<Vec<BacktraceSymbol>>,
+        symbols: Option<Box<[BacktraceSymbol]>>,
     }
 
     impl Serialize for BacktraceFrame {

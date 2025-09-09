@@ -4,13 +4,13 @@ use anyhow::Context;
 use rustc_hash::FxHashMap;
 use toolchain::Tool;
 
-use crate::{toolchain_info::QueryConfig, utf8_stdout, Sysroot};
+use crate::{Sysroot, toolchain_info::QueryConfig, utf8_stdout};
 
 /// Uses `rustc --print target-spec-json`.
 pub fn get(
     config: QueryConfig<'_>,
     target: Option<&str>,
-    extra_env: &FxHashMap<String, String>,
+    extra_env: &FxHashMap<String, Option<String>>,
 ) -> anyhow::Result<String> {
     const RUSTC_ARGS: [&str; 2] = ["--print", "target-spec-json"];
     let process = |output: String| {
@@ -20,9 +20,8 @@ pub fn get(
             })
     };
     let (sysroot, current_dir) = match config {
-        QueryConfig::Cargo(sysroot, cargo_toml) => {
-            let mut cmd = sysroot.tool(Tool::Cargo, cargo_toml.parent());
-            cmd.envs(extra_env);
+        QueryConfig::Cargo(sysroot, cargo_toml, _) => {
+            let mut cmd = sysroot.tool(Tool::Cargo, cargo_toml.parent(), extra_env);
             cmd.env("RUSTC_BOOTSTRAP", "1");
             cmd.args(["rustc", "-Z", "unstable-options"]).args(RUSTC_ARGS).args([
                 "--",
@@ -43,11 +42,8 @@ pub fn get(
         QueryConfig::Rustc(sysroot, current_dir) => (sysroot, current_dir),
     };
 
-    let mut cmd = Sysroot::tool(sysroot, Tool::Rustc, current_dir);
-    cmd.envs(extra_env)
-        .env("RUSTC_BOOTSTRAP", "1")
-        .args(["-Z", "unstable-options"])
-        .args(RUSTC_ARGS);
+    let mut cmd = Sysroot::tool(sysroot, Tool::Rustc, current_dir, extra_env);
+    cmd.env("RUSTC_BOOTSTRAP", "1").args(["-Z", "unstable-options"]).args(RUSTC_ARGS);
     if let Some(target) = target {
         cmd.args(["--target", target]);
     }
@@ -70,7 +66,7 @@ mod tests {
         let sysroot = Sysroot::empty();
         let manifest_path =
             ManifestPath::try_from(AbsPathBuf::assert(Utf8PathBuf::from(manifest_path))).unwrap();
-        let cfg = QueryConfig::Cargo(&sysroot, &manifest_path);
+        let cfg = QueryConfig::Cargo(&sysroot, &manifest_path, &None);
         assert!(get(cfg, None, &FxHashMap::default()).is_ok());
     }
 

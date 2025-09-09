@@ -12,7 +12,7 @@ use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt};
 use rustc_session::errors::ExprParenthesesNeeded;
 use rustc_span::source_map::Spanned;
-use rustc_span::{Ident, Span, Symbol, sym};
+use rustc_span::{Span, Symbol, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::{FulfillmentError, Obligation, ObligationCtxt};
 use tracing::debug;
@@ -322,7 +322,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             lhs_expr.span,
                             format!("cannot use `{}` on type `{}`", s, lhs_ty_str),
                         );
-                        self.note_unmet_impls_on_type(&mut err, errors, false);
+                        self.note_unmet_impls_on_type(&mut err, &errors, false);
                         (err, None)
                     }
                     Op::BinOp(bin_op) => {
@@ -382,7 +382,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             err.span_label(rhs_expr.span, rhs_ty_str);
                         }
                         let suggest_derive = self.can_eq(self.param_env, lhs_ty, rhs_ty);
-                        self.note_unmet_impls_on_type(&mut err, errors, suggest_derive);
+                        self.note_unmet_impls_on_type(&mut err, &errors, suggest_derive);
                         (err, output_def_id)
                     }
                 };
@@ -582,22 +582,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         // concatenation (e.g., "Hello " + "World!"). This means
                         // we don't want the note in the else clause to be emitted
                     } else if lhs_ty.has_non_region_param() {
-                        // Look for a TraitPredicate in the Fulfillment errors,
-                        // and use it to generate a suggestion.
-                        //
-                        // Note that lookup_op_method must be called again but
-                        // with a specific rhs_ty instead of a placeholder so
-                        // the resulting predicate generates a more specific
-                        // suggestion for the user.
-                        let errors = self
-                            .lookup_op_method(
-                                (lhs_expr, lhs_ty),
-                                Some((rhs_expr, rhs_ty)),
-                                lang_item_for_binop(self.tcx, op),
-                                op.span(),
-                                expected,
-                            )
-                            .unwrap_err();
                         if !errors.is_empty() {
                             for error in errors {
                                 if let Some(trait_pred) =
@@ -706,7 +690,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         .sess
                         .source_map()
                         .span_to_snippet(lhs_expr.span)
-                        .unwrap_or("_".to_string()),
+                        .unwrap_or_else(|_| "_".to_string()),
                 };
 
                 if op.span().can_be_used_for_suggestions() {
@@ -946,7 +930,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             ty::Str | ty::Never | ty::Char | ty::Tuple(_) | ty::Array(_, _) => {}
                             ty::Ref(_, lty, _) if *lty.kind() == ty::Str => {}
                             _ => {
-                                self.note_unmet_impls_on_type(&mut err, errors, true);
+                                self.note_unmet_impls_on_type(&mut err, &errors, true);
                             }
                         }
                     }
@@ -975,22 +959,23 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             lhs_ty, opname, trait_did
         );
 
-        let opname = Ident::with_dummy_span(opname);
         let (opt_rhs_expr, opt_rhs_ty) = opt_rhs.unzip();
         let cause = self.cause(
             span,
-            ObligationCauseCode::BinOp {
-                lhs_hir_id: lhs_expr.hir_id,
-                rhs_hir_id: opt_rhs_expr.map(|expr| expr.hir_id),
-                rhs_span: opt_rhs_expr.map(|expr| expr.span),
-                rhs_is_lit: opt_rhs_expr
-                    .is_some_and(|expr| matches!(expr.kind, hir::ExprKind::Lit(_))),
-                output_ty: expected.only_has_type(self),
+            match opt_rhs_expr {
+                Some(rhs) => ObligationCauseCode::BinOp {
+                    lhs_hir_id: lhs_expr.hir_id,
+                    rhs_hir_id: rhs.hir_id,
+                    rhs_span: rhs.span,
+                    rhs_is_lit: matches!(rhs.kind, hir::ExprKind::Lit(_)),
+                    output_ty: expected.only_has_type(self),
+                },
+                None => ObligationCauseCode::UnOp { hir_id: lhs_expr.hir_id },
             },
         );
 
         let method =
-            self.lookup_method_in_trait(cause.clone(), opname, trait_did, lhs_ty, opt_rhs_ty);
+            self.lookup_method_for_operator(cause.clone(), opname, trait_did, lhs_ty, opt_rhs_ty);
         match method {
             Some(ok) => {
                 let method = self.register_infer_ok_obligations(ok);

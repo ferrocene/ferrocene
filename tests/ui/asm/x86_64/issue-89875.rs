@@ -15,3 +15,6 @@ fn foo() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

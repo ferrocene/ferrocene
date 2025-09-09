@@ -3,7 +3,7 @@
 #![feature(file_buffered)]
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
-#![feature(let_chains)]
+#![feature(once_cell_get_mut)]
 // tidy-alphabetical-end
 
 use rustc_hir::lang_items::LangItem;
@@ -29,7 +29,7 @@ fn custom_coerce_unsize_info<'tcx>(
 ) -> Result<CustomCoerceUnsized, ErrorGuaranteed> {
     let trait_ref = ty::TraitRef::new(
         tcx.tcx,
-        tcx.require_lang_item(LangItem::CoerceUnsized, Some(tcx.span)),
+        tcx.require_lang_item(LangItem::CoerceUnsized, tcx.span),
         [source_ty, target_ty],
     );
 

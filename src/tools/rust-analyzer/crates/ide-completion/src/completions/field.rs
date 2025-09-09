@@ -1,14 +1,14 @@
 //! Completion of field list position.
 
 use crate::{
-    context::{PathCompletionCtx, Qualified},
     CompletionContext, Completions,
+    context::{PathCompletionCtx, Qualified},
 };
 
 pub(crate) fn complete_field_list_tuple_variant(
     acc: &mut Completions,
     ctx: &CompletionContext<'_>,
-    path_ctx: &PathCompletionCtx,
+    path_ctx: &PathCompletionCtx<'_>,
 ) {
     if ctx.qualifier_ctx.vis_node.is_some() {
     } else if let PathCompletionCtx {

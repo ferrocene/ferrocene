@@ -2,7 +2,7 @@
 // submodule into the standard library. We try to set this crate up similarly
 // to the standard library itself to minimize the likelihood of issues when
 // updating the `backtrace` crate.
-
+#![feature(optimize_attribute)]
 #![no_std]
 
 extern crate alloc;

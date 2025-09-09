@@ -1,5 +1,3 @@
-use std::{cmp, iter};
-
 use clippy_config::Conf;
 use clippy_utils::diagnostics::span_lint_and_sugg;
 use clippy_utils::source::snippet;
@@ -7,12 +5,12 @@ use clippy_utils::ty::{for_each_top_level_late_bound_region, is_copy};
 use clippy_utils::{is_self, is_self_ty};
 use core::ops::ControlFlow;
 use rustc_abi::ExternAbi;
-use rustc_ast::attr;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::Applicability;
 use rustc_hir as hir;
+use rustc_hir::attrs::{AttributeKind, InlineAttr};
 use rustc_hir::intravisit::FnKind;
-use rustc_hir::{BindingMode, Body, FnDecl, Impl, ItemKind, MutTy, Mutability, Node, PatKind};
+use rustc_hir::{BindingMode, Body, FnDecl, Impl, ItemKind, MutTy, Mutability, Node, PatKind, find_attr};
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::ty::adjustment::{Adjust, PointerCoercion};
 use rustc_middle::ty::layout::LayoutOf;
@@ -20,6 +18,7 @@ use rustc_middle::ty::{self, RegionKind, TyCtxt};
 use rustc_session::impl_lint_pass;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{Span, sym};
+use std::iter;
 
 declare_clippy_lint! {
     /// ### What it does
@@ -33,10 +32,8 @@ declare_clippy_lint! {
     /// registers.
     ///
     /// ### Known problems
-    /// This lint is target register size dependent, it is
-    /// limited to 32-bit to try and reduce portability problems between 32 and
-    /// 64-bit, but if you are compiling for 8 or 16-bit targets then the limit
-    /// will be different.
+    /// This lint is target dependent, some cases will lint on 64-bit targets but
+    /// not 32-bit or lower targets.
     ///
     /// The configuration option `trivial_copy_size_limit` can be set to override
     /// this limit for a project.
@@ -112,16 +109,9 @@ pub struct PassByRefOrValue {
 
 impl PassByRefOrValue {
     pub fn new(tcx: TyCtxt<'_>, conf: &'static Conf) -> Self {
-        let ref_min_size = conf.trivial_copy_size_limit.unwrap_or_else(|| {
-            let bit_width = u64::from(tcx.sess.target.pointer_width);
-            // Cap the calculated bit width at 32-bits to reduce
-            // portability problems between 32 and 64-bit targets
-            let bit_width = cmp::min(bit_width, 32);
-            #[expect(clippy::integer_division)]
-            let byte_width = bit_width / 8;
-            // Use a limit of 2 times the register byte width
-            byte_width * 2
-        });
+        let ref_min_size = conf
+            .trivial_copy_size_limit
+            .unwrap_or_else(|| u64::from(tcx.sess.target.pointer_width / 8));
 
         Self {
             ref_min_size,
@@ -130,7 +120,7 @@ impl PassByRefOrValue {
         }
     }
 
-    fn check_poly_fn(&mut self, cx: &LateContext<'_>, def_id: LocalDefId, decl: &FnDecl<'_>, span: Option<Span>) {
+    fn check_poly_fn(&self, cx: &LateContext<'_>, def_id: LocalDefId, decl: &FnDecl<'_>, span: Option<Span>) {
         if self.avoid_breaking_exported_api && cx.effective_visibilities.is_exported(def_id) {
             return;
         }
@@ -178,19 +168,18 @@ impl PassByRefOrValue {
                         && size <= self.ref_min_size
                         && let hir::TyKind::Ref(_, MutTy { ty: decl_ty, .. }) = input.kind
                     {
-                        if let Some(typeck) = cx.maybe_typeck_results() {
+                        if let Some(typeck) = cx.maybe_typeck_results()
                             // Don't lint if a raw pointer is created.
                             // TODO: Limit the check only to raw pointers to the argument (or part of the argument)
                             //       which escape the current function.
-                            if typeck.node_types().items().any(|(_, &ty)| ty.is_raw_ptr())
+                            && (typeck.node_types().items().any(|(_, &ty)| ty.is_raw_ptr())
                                 || typeck
                                     .adjustments()
                                     .items()
                                     .flat_map(|(_, a)| a)
-                                    .any(|a| matches!(a.kind, Adjust::Pointer(PointerCoercion::UnsafeFnPointer)))
-                            {
-                                continue;
-                            }
+                                    .any(|a| matches!(a.kind, Adjust::Pointer(PointerCoercion::UnsafeFnPointer))))
+                        {
+                            continue;
                         }
                         let value_type = if fn_body.and_then(|body| body.params.get(index)).is_some_and(is_self) {
                             "self".into()
@@ -281,13 +270,14 @@ impl<'tcx> LateLintPass<'tcx> for PassByRefOrValue {
                     return;
                 }
                 let attrs = cx.tcx.hir_attrs(hir_id);
+                if find_attr!(attrs, AttributeKind::Inline(InlineAttr::Always, _)) {
+                    return;
+                }
+
                 for a in attrs {
-                    if let Some(meta_items) = a.meta_item_list() {
-                        if a.has_name(sym::proc_macro_derive)
-                            || (a.has_name(sym::inline) && attr::list_contains_name(&meta_items, sym::always))
-                        {
-                            return;
-                        }
+                    // FIXME(jdonszelmann): make part of the find_attr above
+                    if a.has_name(sym::proc_macro_derive) {
+                        return;
                     }
                 }
             },
@@ -296,13 +286,13 @@ impl<'tcx> LateLintPass<'tcx> for PassByRefOrValue {
         }
 
         // Exclude non-inherent impls
-        if let Node::Item(item) = cx.tcx.parent_hir_node(hir_id) {
-            if matches!(
+        if let Node::Item(item) = cx.tcx.parent_hir_node(hir_id)
+            && matches!(
                 item.kind,
                 ItemKind::Impl(Impl { of_trait: Some(_), .. }) | ItemKind::Trait(..)
-            ) {
-                return;
-            }
+            )
+        {
+            return;
         }
 
         self.check_poly_fn(cx, def_id, decl, Some(span));

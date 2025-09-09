@@ -242,7 +242,7 @@ enum class LLVMRustAttributeKind {
   MinSize = 4,
   Naked = 5,
   NoAlias = 6,
-  NoCapture = 7,
+  CapturesAddress = 7,
   NoInline = 8,
   NonNull = 9,
   NoRedZone = 10,
@@ -277,6 +277,8 @@ enum class LLVMRustAttributeKind {
   FnRetThunkExtern = 41,
   Writable = 42,
   DeadOnUnwind = 43,
+  DeadOnReturn = 44,
+  CapturesReadOnly = 45,
 };
 
 static Attribute::AttrKind fromRust(LLVMRustAttributeKind Kind) {
@@ -295,12 +297,6 @@ static Attribute::AttrKind fromRust(LLVMRustAttributeKind Kind) {
     return Attribute::Naked;
   case LLVMRustAttributeKind::NoAlias:
     return Attribute::NoAlias;
-  case LLVMRustAttributeKind::NoCapture:
-#if LLVM_VERSION_GE(21, 0)
-    report_fatal_error("NoCapture doesn't exist in LLVM 21");
-#else
-    return Attribute::NoCapture;
-#endif
   case LLVMRustAttributeKind::NoCfCheck:
     return Attribute::NoCfCheck;
   case LLVMRustAttributeKind::NoInline:
@@ -369,6 +365,15 @@ static Attribute::AttrKind fromRust(LLVMRustAttributeKind Kind) {
     return Attribute::Writable;
   case LLVMRustAttributeKind::DeadOnUnwind:
     return Attribute::DeadOnUnwind;
+  case LLVMRustAttributeKind::DeadOnReturn:
+#if LLVM_VERSION_GE(21, 0)
+    return Attribute::DeadOnReturn;
+#else
+    report_fatal_error("DeadOnReturn attribute requires LLVM 21 or later");
+#endif
+  case LLVMRustAttributeKind::CapturesAddress:
+  case LLVMRustAttributeKind::CapturesReadOnly:
+    report_fatal_error("Should be handled separately");
   }
   report_fatal_error("bad LLVMRustAttributeKind");
 }
@@ -419,9 +424,14 @@ extern "C" void LLVMRustEraseInstFromParent(LLVMValueRef Instr) {
 extern "C" LLVMAttributeRef
 LLVMRustCreateAttrNoValue(LLVMContextRef C, LLVMRustAttributeKind RustAttr) {
 #if LLVM_VERSION_GE(21, 0)
-  // LLVM 21 replaced the NoCapture attribute with Captures(none).
-  if (RustAttr == LLVMRustAttributeKind::NoCapture) {
-    return wrap(Attribute::getWithCaptureInfo(*unwrap(C), CaptureInfo::none()));
+  if (RustAttr == LLVMRustAttributeKind::CapturesAddress) {
+    return wrap(Attribute::getWithCaptureInfo(
+        *unwrap(C), CaptureInfo(CaptureComponents::Address)));
+  }
+  if (RustAttr == LLVMRustAttributeKind::CapturesReadOnly) {
+    return wrap(Attribute::getWithCaptureInfo(
+        *unwrap(C), CaptureInfo(CaptureComponents::Address |
+                                CaptureComponents::ReadProvenance)));
   }
 #endif
   return wrap(Attribute::get(*unwrap(C), fromRust(RustAttr)));
@@ -473,6 +483,9 @@ extern "C" LLVMAttributeRef
 LLVMRustCreateRangeAttribute(LLVMContextRef C, unsigned NumBits,
                              const uint64_t LowerWords[],
                              const uint64_t UpperWords[]) {
+  // FIXME(Zalathar): There appears to be no stable guarantee that C++
+  // `AttrKind` values correspond directly to the `unsigned KindID` values
+  // accepted by LLVM-C API functions, though in practice they currently do.
   return LLVMCreateConstantRangeAttribute(C, Attribute::Range, NumBits,
                                           LowerWords, UpperWords);
 }
@@ -622,35 +635,8 @@ extern "C" LLVMValueRef LLVMRustBuildAtomicStore(LLVMBuilderRef B,
   return wrap(SI);
 }
 
-enum class LLVMRustAsmDialect {
-  Att,
-  Intel,
-};
-
-static InlineAsm::AsmDialect fromRust(LLVMRustAsmDialect Dialect) {
-  switch (Dialect) {
-  case LLVMRustAsmDialect::Att:
-    return InlineAsm::AD_ATT;
-  case LLVMRustAsmDialect::Intel:
-    return InlineAsm::AD_Intel;
-  default:
-    report_fatal_error("bad AsmDialect.");
-  }
-}
-
 extern "C" uint64_t LLVMRustGetArrayNumElements(LLVMTypeRef Ty) {
   return unwrap(Ty)->getArrayNumElements();
-}
-
-extern "C" LLVMValueRef
-LLVMRustInlineAsm(LLVMTypeRef Ty, char *AsmString, size_t AsmStringLen,
-                  char *Constraints, size_t ConstraintsLen,
-                  LLVMBool HasSideEffects, LLVMBool IsAlignStack,
-                  LLVMRustAsmDialect Dialect, LLVMBool CanThrow) {
-  return wrap(InlineAsm::get(
-      unwrap<FunctionType>(Ty), StringRef(AsmString, AsmStringLen),
-      StringRef(Constraints, ConstraintsLen), HasSideEffects, IsAlignStack,
-      fromRust(Dialect), CanThrow));
 }
 
 extern "C" bool LLVMRustInlineAsmVerify(LLVMTypeRef Ty, char *Constraints,
@@ -971,6 +957,27 @@ extern "C" LLVMMetadataRef LLVMRustDIGetInstMetadata(LLVMValueRef x) {
     return wrap(MD);
   }
   return nullptr;
+}
+
+extern "C" void
+LLVMRustRemoveEnumAttributeAtIndex(LLVMValueRef F, size_t index,
+                                   LLVMRustAttributeKind RustAttr) {
+  LLVMRemoveEnumAttributeAtIndex(F, index, fromRust(RustAttr));
+}
+
+extern "C" bool LLVMRustHasFnAttribute(LLVMValueRef F, const char *Name,
+                                       size_t NameLen) {
+  if (auto *Fn = dyn_cast<Function>(unwrap<Value>(F))) {
+    return Fn->hasFnAttribute(StringRef(Name, NameLen));
+  }
+  return false;
+}
+
+extern "C" void LLVMRustRemoveFnAttribute(LLVMValueRef Fn, const char *Name,
+                                          size_t NameLen) {
+  if (auto *F = dyn_cast<Function>(unwrap<Value>(Fn))) {
+    F->removeFnAttr(StringRef(Name, NameLen));
+  }
 }
 
 extern "C" void LLVMRustGlobalAddMetadata(LLVMValueRef Global, unsigned Kind,
@@ -1459,60 +1466,6 @@ LLVMRustGetDiagInfoKind(LLVMDiagnosticInfoRef DI) {
   return toRust((DiagnosticKind)unwrap(DI)->getKind());
 }
 
-// This is kept distinct from LLVMGetTypeKind, because when
-// a new type kind is added, the Rust-side enum must be
-// updated or UB will result.
-extern "C" LLVMTypeKind LLVMRustGetTypeKind(LLVMTypeRef Ty) {
-  switch (unwrap(Ty)->getTypeID()) {
-  case Type::VoidTyID:
-    return LLVMVoidTypeKind;
-  case Type::HalfTyID:
-    return LLVMHalfTypeKind;
-  case Type::FloatTyID:
-    return LLVMFloatTypeKind;
-  case Type::DoubleTyID:
-    return LLVMDoubleTypeKind;
-  case Type::X86_FP80TyID:
-    return LLVMX86_FP80TypeKind;
-  case Type::FP128TyID:
-    return LLVMFP128TypeKind;
-  case Type::PPC_FP128TyID:
-    return LLVMPPC_FP128TypeKind;
-  case Type::LabelTyID:
-    return LLVMLabelTypeKind;
-  case Type::MetadataTyID:
-    return LLVMMetadataTypeKind;
-  case Type::IntegerTyID:
-    return LLVMIntegerTypeKind;
-  case Type::FunctionTyID:
-    return LLVMFunctionTypeKind;
-  case Type::StructTyID:
-    return LLVMStructTypeKind;
-  case Type::ArrayTyID:
-    return LLVMArrayTypeKind;
-  case Type::PointerTyID:
-    return LLVMPointerTypeKind;
-  case Type::FixedVectorTyID:
-    return LLVMVectorTypeKind;
-  case Type::TokenTyID:
-    return LLVMTokenTypeKind;
-  case Type::ScalableVectorTyID:
-    return LLVMScalableVectorTypeKind;
-  case Type::BFloatTyID:
-    return LLVMBFloatTypeKind;
-  case Type::X86_AMXTyID:
-    return LLVMX86_AMXTypeKind;
-  default: {
-    std::string error;
-    auto stream = llvm::raw_string_ostream(error);
-    stream << "Rust does not support the TypeID: " << unwrap(Ty)->getTypeID()
-           << " for the type: " << *unwrap(Ty);
-    stream.flush();
-    report_fatal_error(error.c_str());
-  }
-  }
-}
-
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(SMDiagnostic, LLVMSMDiagnosticRef)
 
 extern "C" LLVMSMDiagnosticRef LLVMRustGetSMDiagnostic(LLVMDiagnosticInfoRef DI,
@@ -1597,10 +1550,47 @@ extern "C" LLVMValueRef LLVMRustBuildMemSet(LLVMBuilderRef B, LLVMValueRef Dst,
                                       MaybeAlign(DstAlign), IsVolatile));
 }
 
+extern "C" void LLVMRustPositionBuilderPastAllocas(LLVMBuilderRef B,
+                                                   LLVMValueRef Fn) {
+  Function *F = unwrap<Function>(Fn);
+  unwrap(B)->SetInsertPointPastAllocas(F);
+}
 extern "C" void LLVMRustPositionBuilderAtStart(LLVMBuilderRef B,
                                                LLVMBasicBlockRef BB) {
   auto Point = unwrap(BB)->getFirstInsertionPt();
   unwrap(B)->SetInsertPoint(unwrap(BB), Point);
+}
+
+extern "C" void LLVMRustPositionBefore(LLVMBuilderRef B, LLVMValueRef Instr) {
+  if (auto I = dyn_cast<Instruction>(unwrap<Value>(Instr))) {
+    unwrap(B)->SetInsertPoint(I);
+  }
+}
+
+extern "C" void LLVMRustPositionAfter(LLVMBuilderRef B, LLVMValueRef Instr) {
+  if (auto I = dyn_cast<Instruction>(unwrap<Value>(Instr))) {
+    auto J = I->getNextNode();
+    unwrap(B)->SetInsertPoint(J);
+  }
+}
+
+extern "C" LLVMValueRef
+LLVMRustGetFunctionCall(LLVMValueRef Fn, const char *Name, size_t NameLen) {
+  auto targetName = StringRef(Name, NameLen);
+  Function *F = unwrap<Function>(Fn);
+  for (auto &BB : *F) {
+    for (auto &I : BB) {
+      if (auto *callInst = llvm::dyn_cast<llvm::CallBase>(&I)) {
+        const llvm::Function *calledFunc = callInst->getCalledFunction();
+        if (calledFunc && calledFunc->getName() == targetName) {
+          // Found a call to the target function
+          return wrap(callInst);
+        }
+      }
+    }
+  }
+
+  return nullptr;
 }
 
 extern "C" bool LLVMRustConstIntGetZExtValue(LLVMValueRef CV, uint64_t *value) {

@@ -1,9 +1,9 @@
 //! Implements the various phases of `cargo miri run/test`.
 
 use std::env;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::path::{self, Path, PathBuf};
 use std::process::Command;
 
 use rustc_version::VersionMeta;
@@ -65,16 +65,6 @@ fn forward_patched_extern_arg(args: &mut impl Iterator<Item = String>, cmd: &mut
 }
 
 pub fn phase_cargo_miri(mut args: impl Iterator<Item = String>) {
-    // Check for version and help flags even when invoked as `cargo-miri`.
-    if has_arg_flag("--help") || has_arg_flag("-h") {
-        show_help();
-        return;
-    }
-    if has_arg_flag("--version") || has_arg_flag("-V") {
-        show_version();
-        return;
-    }
-
     // Require a subcommand before any flags.
     // We cannot know which of those flags take arguments and which do not,
     // so we cannot detect subcommands later.
@@ -85,12 +75,37 @@ pub fn phase_cargo_miri(mut args: impl Iterator<Item = String>) {
         "setup" => MiriCommand::Setup,
         "test" | "t" | "run" | "r" | "nextest" => MiriCommand::Forward(subcommand),
         "clean" => MiriCommand::Clean,
-        _ =>
+        _ => {
+            // Check for version and help flags.
+            if has_arg_flag("--help") || has_arg_flag("-h") {
+                show_help();
+                return;
+            }
+            if has_arg_flag("--version") || has_arg_flag("-V") {
+                show_version();
+                return;
+            }
             show_error!(
                 "`cargo miri` supports the following subcommands: `run`, `test`, `nextest`, `clean`, and `setup`."
-            ),
+            )
+        }
     };
-    let verbose = num_arg_flag("-v");
+    if has_arg_flag("--help") || has_arg_flag("-h") {
+        match subcommand {
+            MiriCommand::Forward(verb) => {
+                println!("`cargo miri {verb}` supports the same flags as `cargo {verb}`:\n");
+                let mut cmd = cargo();
+                cmd.arg(verb);
+                cmd.arg("--help");
+                exec(cmd);
+            }
+            _ => {
+                show_help();
+                return;
+            }
+        }
+    }
+    let verbose = num_arg_flag("-v") + num_arg_flag("--verbose");
     let quiet = has_arg_flag("-q") || has_arg_flag("--quiet");
 
     // Determine the involved architectures.
@@ -222,12 +237,12 @@ pub fn phase_cargo_miri(mut args: impl Iterator<Item = String>) {
     // that to be the Miri driver, but acting as rustc, in host mode.
     //
     // In `main`, we need the value of `RUSTC` to distinguish RUSTC_WRAPPER invocations from rustdoc
-    // or TARGET_RUNNER invocations, so we canonicalize it here to make it exceedingly unlikely that
+    // or TARGET_RUNNER invocations, so we make it absolute to make it exceedingly unlikely that
     // there would be a collision with other invocations of cargo-miri (as rustdoc or as runner). We
     // explicitly do this even if RUSTC_STAGE is set, since for these builds we do *not* want the
     // bootstrap `rustc` thing in our way! Instead, we have MIRI_HOST_SYSROOT to use for host
     // builds.
-    cmd.env("RUSTC", fs::canonicalize(find_miri()).unwrap());
+    cmd.env("RUSTC", path::absolute(find_miri()).unwrap());
     // In case we get invoked as RUSTC without the wrapper, let's be a host rustc. This makes no
     // sense for cross-interpretation situations, but without the wrapper, this will use the host
     // sysroot, so asking it to behave like a target build makes even less sense.
@@ -666,11 +681,6 @@ pub fn phase_rustdoc(mut args: impl Iterator<Item = String>) {
         if arg == "--extern" {
             // Patch --extern arguments to use *.rmeta files, since phase_cargo_rustc only creates stub *.rlib files.
             forward_patched_extern_arg(&mut args, &mut cmd);
-        } else if arg == "--runtool" {
-            // An existing --runtool flag indicates cargo is running in cross-target mode, which we don't support.
-            // Note that this is only passed when cargo is run with the unstable -Zdoctest-xcompile flag;
-            // otherwise, we won't be called as rustdoc at all.
-            show_error!("cross-interpreting doctests is not currently supported by Miri.");
         } else {
             cmd.arg(arg);
         }
@@ -693,8 +703,8 @@ pub fn phase_rustdoc(mut args: impl Iterator<Item = String>) {
     // to let phase_cargo_rustc know to expect that. We'll use this environment variable as a flag:
     cmd.env("MIRI_CALLED_FROM_RUSTDOC", "1");
 
-    // The `--test-builder` and `--runtool` arguments are unstable rustdoc features,
-    // which are disabled by default. We first need to enable them explicitly:
+    // The `--test-builder` is an unstable rustdoc features,
+    // which is disabled by default. We first need to enable them explicitly:
     cmd.arg("-Zunstable-options");
 
     // rustdoc needs to know the right sysroot.
@@ -702,10 +712,10 @@ pub fn phase_rustdoc(mut args: impl Iterator<Item = String>) {
     // make sure the 'miri' flag is set for rustdoc
     cmd.arg("--cfg").arg("miri");
 
-    // Make rustdoc call us back.
+    // Make rustdoc call us back for the build.
+    // (cargo already sets `--test-runtool` to us since we are the cargo test runner.)
     let cargo_miri_path = env::current_exe().expect("current executable path invalid");
     cmd.arg("--test-builder").arg(&cargo_miri_path); // invoked by forwarding most arguments
-    cmd.arg("--runtool").arg(&cargo_miri_path); // invoked with just a single path argument
 
     debug_cmd("[cargo-miri rustdoc]", verbose, &cmd);
     exec(cmd)

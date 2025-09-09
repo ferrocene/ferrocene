@@ -14,6 +14,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/IRPrinter/IRPrintingPasses.h"
 #include "llvm/LTO/LTO.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -395,7 +396,7 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
     bool EmitStackSizeSection, bool RelaxELFRelocations, bool UseInitArray,
     const char *SplitDwarfFile, const char *OutputObjFile,
     const char *DebugInfoCompression, bool UseEmulatedTls,
-    const char *ArgsCstrBuff, size_t ArgsCstrBuffLen) {
+    const char *ArgsCstrBuff, size_t ArgsCstrBuffLen, bool UseWasmEH) {
 
   auto OptLevel = fromRust(RustOptLevel);
   auto RM = fromRust(RustReloc);
@@ -461,6 +462,9 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
     Options.ThreadModel = ThreadModel::Single;
   }
 
+  if (UseWasmEH)
+    Options.ExceptionModel = ExceptionHandling::Wasm;
+
   Options.EmitStackSizeSection = EmitStackSizeSection;
 
   if (ArgsCstrBuff != nullptr) {
@@ -511,8 +515,13 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
 #endif
   }
 
+#if LLVM_VERSION_GE(21, 0)
+  TargetMachine *TM = TheTarget->createTargetMachine(Trip, CPU, Feature,
+                                                     Options, RM, CM, OptLevel);
+#else
   TargetMachine *TM = TheTarget->createTargetMachine(
       Trip.getTriple(), CPU, Feature, Options, RM, CM, OptLevel);
+#endif
   return wrap(TM);
 }
 
@@ -694,6 +703,10 @@ struct LLVMRustSanitizerOptions {
 #ifdef ENZYME
 extern "C" void registerEnzymeAndPassPipeline(llvm::PassBuilder &PB,
                                               /* augmentPassBuilder */ bool);
+
+extern "C" {
+extern llvm::cl::opt<std::string> EnzymeFunctionToAnalyze;
+}
 #endif
 
 extern "C" LLVMRustResult LLVMRustOptimize(
@@ -703,7 +716,8 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     bool LintIR, LLVMRustThinLTOBuffer **ThinLTOBufferRef, bool EmitThinLTO,
     bool EmitThinLTOSummary, bool MergeFunctions, bool UnrollLoops,
     bool SLPVectorize, bool LoopVectorize, bool DisableSimplifyLibCalls,
-    bool EmitLifetimeMarkers, bool RunEnzyme,
+    bool EmitLifetimeMarkers, bool RunEnzyme, bool PrintBeforeEnzyme,
+    bool PrintAfterEnzyme, bool PrintPasses,
     LLVMRustSanitizerOptions *SanitizerOptions, const char *PGOGenPath,
     const char *PGOUsePath, bool InstrumentCoverage,
     const char *InstrProfileOutput, const char *PGOSampleUsePath,
@@ -1048,14 +1062,47 @@ extern "C" LLVMRustResult LLVMRustOptimize(
   // now load "-enzyme" pass:
 #ifdef ENZYME
   if (RunEnzyme) {
-    registerEnzymeAndPassPipeline(PB, true);
+
+    if (PrintBeforeEnzyme) {
+      // Handle the Rust flag `-Zautodiff=PrintModBefore`.
+      std::string Banner = "Module before EnzymeNewPM";
+      MPM.addPass(PrintModulePass(outs(), Banner, true, false));
+    }
+
+    registerEnzymeAndPassPipeline(PB, false);
     if (auto Err = PB.parsePassPipeline(MPM, "enzyme")) {
       std::string ErrMsg = toString(std::move(Err));
       LLVMRustSetLastError(ErrMsg.c_str());
       return LLVMRustResult::Failure;
     }
+
+    // Check if PrintTAFn was used and add type analysis pass if needed
+    if (!EnzymeFunctionToAnalyze.empty()) {
+      if (auto Err = PB.parsePassPipeline(MPM, "print-type-analysis")) {
+        std::string ErrMsg = toString(std::move(Err));
+        LLVMRustSetLastError(ErrMsg.c_str());
+        return LLVMRustResult::Failure;
+      }
+    }
+
+    if (PrintAfterEnzyme) {
+      // Handle the Rust flag `-Zautodiff=PrintModAfter`.
+      std::string Banner = "Module after EnzymeNewPM";
+      MPM.addPass(PrintModulePass(outs(), Banner, true, false));
+    }
   }
 #endif
+  if (PrintPasses) {
+    // Print all passes from the PM:
+    std::string Pipeline;
+    raw_string_ostream SOS(Pipeline);
+    MPM.printPipeline(SOS, [&PIC](StringRef ClassName) {
+      auto PassName = PIC.getPassNameForClassName(ClassName);
+      return PassName.empty() ? ClassName : PassName;
+    });
+    outs() << Pipeline;
+    outs() << "\n";
+  }
 
   // Upgrade all calls to old intrinsics first.
   for (Module::iterator I = TheModule->begin(), E = TheModule->end(); I != E;)
@@ -1179,12 +1226,6 @@ extern "C" void LLVMRustPrintPasses() {
 extern "C" void LLVMRustRunRestrictionPass(LLVMModuleRef M, char **Symbols,
                                            size_t Len) {
   auto PreserveFunctions = [=](const GlobalValue &GV) {
-    // Preserve LLVM-injected, ASAN-related symbols.
-    // See also https://github.com/rust-lang/rust/issues/113404.
-    if (GV.getName() == "___asan_globals_registered") {
-      return true;
-    }
-
     // Preserve symbols exported from Rust modules.
     for (size_t I = 0; I < Len; I++) {
       if (GV.getName() == Symbols[I]) {
@@ -1244,7 +1285,7 @@ extern "C" void LLVMRustSetModuleCodeModel(LLVMModuleRef M,
 //
 // Otherwise I'll apologize in advance, it probably requires a relatively
 // significant investment on your part to "truly understand" what's going on
-// here. Not saying I do myself, but it took me awhile staring at LLVM's source
+// here. Not saying I do myself, but it took me a while staring at LLVM's source
 // and various online resources about ThinLTO to make heads or tails of all
 // this.
 
@@ -1339,7 +1380,12 @@ LLVMRustCreateThinLTOData(LLVMRustThinLTOModule *modules, size_t num_modules,
   // Convert the preserved symbols set from string to GUID, this is then needed
   // for internalization.
   for (size_t i = 0; i < num_symbols; i++) {
+#if LLVM_VERSION_GE(21, 0)
+    auto GUID =
+        GlobalValue::getGUIDAssumingExternalLinkage(preserved_symbols[i]);
+#else
     auto GUID = GlobalValue::getGUID(preserved_symbols[i]);
+#endif
     Ret->GUIDPreservedSymbols.insert(GUID);
   }
 
@@ -1598,40 +1644,6 @@ extern "C" LLVMModuleRef LLVMRustParseBitcodeForLTO(LLVMContextRef Context,
   return wrap(std::move(*SrcOrError).release());
 }
 
-// Find a section of an object file by name. Fail if the section is missing or
-// empty.
-extern "C" const char *LLVMRustGetSliceFromObjectDataByName(const char *data,
-                                                            size_t len,
-                                                            const char *name,
-                                                            size_t name_len,
-                                                            size_t *out_len) {
-  *out_len = 0;
-  auto Name = StringRef(name, name_len);
-  auto Data = StringRef(data, len);
-  auto Buffer = MemoryBufferRef(Data, ""); // The id is unused.
-  file_magic Type = identify_magic(Buffer.getBuffer());
-  Expected<std::unique_ptr<object::ObjectFile>> ObjFileOrError =
-      object::ObjectFile::createObjectFile(Buffer, Type);
-  if (!ObjFileOrError) {
-    LLVMRustSetLastError(toString(ObjFileOrError.takeError()).c_str());
-    return nullptr;
-  }
-  for (const object::SectionRef &Sec : (*ObjFileOrError)->sections()) {
-    Expected<StringRef> SecName = Sec.getName();
-    if (SecName && *SecName == Name) {
-      Expected<StringRef> SectionOrError = Sec.getContents();
-      if (!SectionOrError) {
-        LLVMRustSetLastError(toString(SectionOrError.takeError()).c_str());
-        return nullptr;
-      }
-      *out_len = SectionOrError->size();
-      return SectionOrError->data();
-    }
-  }
-  LLVMRustSetLastError("could not find requested section");
-  return nullptr;
-}
-
 // Computes the LTO cache key for the provided 'ModId' in the given 'Data',
 // storing the result in 'KeyOut'.
 // Currently, this cache key is a SHA-1 hash of anything that could affect
@@ -1659,11 +1671,11 @@ extern "C" void LLVMRustComputeLTOCacheKey(RustStringRef KeyOut,
   // Based on the 'InProcessThinBackend' constructor in LLVM
 #if LLVM_VERSION_GE(21, 0)
   for (auto &Name : Data->Index.cfiFunctionDefs().symbols())
-    CfiFunctionDefs.insert(
-        GlobalValue::getGUID(GlobalValue::dropLLVMManglingEscape(Name)));
+    CfiFunctionDefs.insert(GlobalValue::getGUIDAssumingExternalLinkage(
+        GlobalValue::dropLLVMManglingEscape(Name)));
   for (auto &Name : Data->Index.cfiFunctionDecls().symbols())
-    CfiFunctionDecls.insert(
-        GlobalValue::getGUID(GlobalValue::dropLLVMManglingEscape(Name)));
+    CfiFunctionDecls.insert(GlobalValue::getGUIDAssumingExternalLinkage(
+        GlobalValue::dropLLVMManglingEscape(Name)));
 #else
   for (auto &Name : Data->Index.cfiFunctionDefs())
     CfiFunctionDefs.insert(

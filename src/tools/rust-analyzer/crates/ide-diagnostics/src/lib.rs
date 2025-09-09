@@ -25,18 +25,23 @@
 
 mod handlers {
     pub(crate) mod await_outside_of_async;
+    pub(crate) mod bad_rtn;
     pub(crate) mod break_outside_of_loop;
+    pub(crate) mod elided_lifetimes_in_path;
     pub(crate) mod expected_function;
     pub(crate) mod generic_args_prohibited;
     pub(crate) mod inactive_code;
     pub(crate) mod incoherent_impl;
     pub(crate) mod incorrect_case;
+    pub(crate) mod incorrect_generics_len;
+    pub(crate) mod incorrect_generics_order;
     pub(crate) mod invalid_cast;
     pub(crate) mod invalid_derive_target;
     pub(crate) mod macro_error;
     pub(crate) mod malformed_derive;
     pub(crate) mod mismatched_arg_count;
     pub(crate) mod missing_fields;
+    pub(crate) mod missing_lifetime;
     pub(crate) mod missing_match_arms;
     pub(crate) mod missing_unsafe;
     pub(crate) mod moved_out_of_ref;
@@ -78,27 +83,26 @@ mod handlers {
 #[cfg(test)]
 mod tests;
 
-use std::{collections::hash_map, iter, sync::LazyLock};
+use std::{iter, sync::LazyLock};
 
 use either::Either;
 use hir::{
-    db::ExpandDatabase, diagnostics::AnyDiagnostic, Crate, DisplayTarget, HirFileId, InFile,
-    Semantics,
+    Crate, DisplayTarget, InFile, Semantics, db::ExpandDatabase, diagnostics::AnyDiagnostic,
 };
 use ide_db::{
-    assists::{Assist, AssistId, AssistKind, AssistResolveStrategy},
-    base_db::{ReleaseChannel, SourceDatabase},
-    generated::lints::{Lint, LintGroup, CLIPPY_LINT_GROUPS, DEFAULT_LINTS, DEFAULT_LINT_GROUPS},
+    EditionedFileId, FileId, FileRange, FxHashMap, FxHashSet, RootDatabase, Severity, SnippetCap,
+    assists::{Assist, AssistId, AssistResolveStrategy, ExprFillDefaultMode},
+    base_db::{ReleaseChannel, RootQueryDb as _},
+    generated::lints::{CLIPPY_LINT_GROUPS, DEFAULT_LINT_GROUPS, DEFAULT_LINTS, Lint, LintGroup},
     imports::insert_use::InsertUseConfig,
     label::Label,
     source_change::SourceChange,
     syntax_helpers::node_ext::parse_tt_as_comma_sep_paths,
-    EditionedFileId, FileId, FileRange, FxHashMap, FxHashSet, RootDatabase, Severity, SnippetCap,
 };
 use itertools::Itertools;
 use syntax::{
+    AstPtr, Edition, NodeOrToken, SmolStr, SyntaxKind, SyntaxNode, SyntaxNodePtr, T, TextRange,
     ast::{self, AstNode, HasAttrs},
-    AstPtr, Edition, NodeOrToken, SmolStr, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange, T,
 };
 
 // FIXME: Make this an enum
@@ -127,7 +131,7 @@ impl DiagnosticCode {
                 format!("https://rust-lang.github.io/rust-clippy/master/#/{e}")
             }
             DiagnosticCode::Ra(e, _) => {
-                format!("https://rust-analyzer.github.io/manual.html#{e}")
+                format!("https://rust-analyzer.github.io/book/diagnostics.html#{e}")
             }
         }
     }
@@ -177,7 +181,7 @@ impl Diagnostic {
                 DiagnosticCode::Ra(_, s) => s,
             },
             unused: false,
-            experimental: false,
+            experimental: true,
             fixes: None,
             main_node: None,
         }
@@ -193,8 +197,8 @@ impl Diagnostic {
             .with_main_node(node)
     }
 
-    fn experimental(mut self) -> Diagnostic {
-        self.experimental = true;
+    fn stable(mut self) -> Diagnostic {
+        self.experimental = false;
         self
     }
 
@@ -211,17 +215,6 @@ impl Diagnostic {
     fn with_unused(mut self, unused: bool) -> Diagnostic {
         self.unused = unused;
         self
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum ExprFillDefaultMode {
-    Todo,
-    Default,
-}
-impl Default for ExprFillDefaultMode {
-    fn default() -> Self {
-        Self::Todo
     }
 }
 
@@ -301,8 +294,11 @@ impl DiagnosticsContext<'_> {
                 }
             }
         })()
+        .map(|frange| ide_db::FileRange {
+            file_id: frange.file_id.file_id(self.sema.db),
+            range: frange.range,
+        })
         .unwrap_or_else(|| sema.diagnostics_display_range(*node))
-        .into()
     }
 }
 
@@ -319,13 +315,14 @@ pub fn syntax_diagnostics(
     }
 
     let sema = Semantics::new(db);
-    let file_id = sema
+    let editioned_file_id = sema
         .attach_first_edition(file_id)
-        .unwrap_or_else(|| EditionedFileId::current_edition(file_id));
+        .unwrap_or_else(|| EditionedFileId::current_edition(db, file_id));
+
+    let (file_id, _) = editioned_file_id.unpack(db);
 
     // [#3434] Only take first 128 errors to prevent slowing down editor/ide, the number 128 is chosen arbitrarily.
-    db.parse_errors(file_id)
-        .as_deref()
+    db.parse_errors(editioned_file_id)
         .into_iter()
         .flatten()
         .take(128)
@@ -333,7 +330,7 @@ pub fn syntax_diagnostics(
             Diagnostic::new(
                 DiagnosticCode::SyntaxError,
                 format!("Syntax Error: {err}"),
-                FileRange { file_id: file_id.into(), range: err.range() },
+                FileRange { file_id, range: err.range() },
             )
         })
         .collect()
@@ -349,26 +346,28 @@ pub fn semantic_diagnostics(
 ) -> Vec<Diagnostic> {
     let _p = tracing::info_span!("semantic_diagnostics").entered();
     let sema = Semantics::new(db);
-    let file_id = sema
+    let editioned_file_id = sema
         .attach_first_edition(file_id)
-        .unwrap_or_else(|| EditionedFileId::current_edition(file_id));
+        .unwrap_or_else(|| EditionedFileId::current_edition(db, file_id));
+
+    let (file_id, edition) = editioned_file_id.unpack(db);
     let mut res = Vec::new();
 
-    let parse = sema.parse(file_id);
+    let parse = sema.parse(editioned_file_id);
 
     // FIXME: This iterates the entire file which is a rather expensive operation.
     // We should implement these differently in some form?
     // Salsa caching + incremental re-parse would be better here
     for node in parse.syntax().descendants() {
-        handlers::useless_braces::useless_braces(&mut res, file_id, &node);
-        handlers::field_shorthand::field_shorthand(&mut res, file_id, &node);
+        handlers::useless_braces::useless_braces(db, &mut res, editioned_file_id, &node);
+        handlers::field_shorthand::field_shorthand(db, &mut res, editioned_file_id, &node);
         handlers::json_is_not_rust::json_in_items(
             &sema,
             &mut res,
-            file_id,
+            editioned_file_id,
             &node,
             config,
-            file_id.edition(),
+            edition,
         );
     }
 
@@ -378,29 +377,32 @@ pub fn semantic_diagnostics(
         module.and_then(|m| db.toolchain_channel(m.krate().into())),
         Some(ReleaseChannel::Nightly) | None
     );
-    let krate = module.map(|module| module.krate()).unwrap_or_else(|| {
-        (*db.crate_graph().crates_in_topological_order().last().unwrap()).into()
-    });
-    let display_target = krate.to_display_target(db);
-    let ctx = DiagnosticsContext {
-        config,
-        sema,
-        resolve,
-        edition: file_id.edition(),
-        is_nightly,
-        display_target,
+
+    let krate = match module {
+        Some(module) => module.krate(),
+        None => {
+            match db.all_crates().last() {
+                Some(last) => (*last).into(),
+                // short-circuit, return an empty vec of diagnostics
+                None => return vec![],
+            }
+        }
     };
+    let display_target = krate.to_display_target(db);
+    let ctx = DiagnosticsContext { config, sema, resolve, edition, is_nightly, display_target };
 
     let mut diags = Vec::new();
     match module {
         // A bunch of parse errors in a file indicate some bigger structural parse changes in the
         // file, so we skip semantic diagnostics so we can show these faster.
         Some(m) => {
-            if db.parse_errors(file_id).as_deref().is_none_or(|es| es.len() < 16) {
+            if db.parse_errors(editioned_file_id).is_none_or(|es| es.len() < 16) {
                 m.diagnostics(db, &mut diags, config.style_lints);
             }
         }
-        None => handlers::unlinked_file::unlinked_file(&ctx, &mut res, file_id.file_id()),
+        None => {
+            handlers::unlinked_file::unlinked_file(&ctx, &mut res, editioned_file_id.file_id(db))
+        }
     }
 
     for diag in diags {
@@ -421,14 +423,11 @@ pub fn semantic_diagnostics(
             AnyDiagnostic::MacroExpansionParseError(d) => {
                 // FIXME: Point to the correct error span here, not just the macro-call name
                 res.extend(d.errors.iter().take(16).map(|err| {
-                    {
                         Diagnostic::new(
                             DiagnosticCode::SyntaxError,
                             format!("Syntax Error in Expansion: {err}"),
                             ctx.resolve_precise_location(&d.node.clone(), d.precise_location),
                         )
-                    }
-                    .experimental()
                 }));
                 continue;
             },
@@ -482,12 +481,13 @@ pub fn semantic_diagnostics(
                 Some(it) => it,
                 None => continue,
             },
-            AnyDiagnostic::GenericArgsProhibited(d) => {
-                handlers::generic_args_prohibited::generic_args_prohibited(&ctx, &d)
-            }
-            AnyDiagnostic::ParenthesizedGenericArgsWithoutFnTrait(d) => {
-                handlers::parenthesized_generic_args_without_fn_trait::parenthesized_generic_args_without_fn_trait(&ctx, &d)
-            }
+            AnyDiagnostic::GenericArgsProhibited(d) => handlers::generic_args_prohibited::generic_args_prohibited(&ctx, &d),
+            AnyDiagnostic::ParenthesizedGenericArgsWithoutFnTrait(d) => handlers::parenthesized_generic_args_without_fn_trait::parenthesized_generic_args_without_fn_trait(&ctx, &d),
+            AnyDiagnostic::BadRtn(d) => handlers::bad_rtn::bad_rtn(&ctx, &d),
+            AnyDiagnostic::IncorrectGenericsLen(d) => handlers::incorrect_generics_len::incorrect_generics_len(&ctx, &d),
+            AnyDiagnostic::IncorrectGenericsOrder(d) => handlers::incorrect_generics_order::incorrect_generics_order(&ctx, &d),
+            AnyDiagnostic::MissingLifetime(d) => handlers::missing_lifetime::missing_lifetime(&ctx, &d),
+            AnyDiagnostic::ElidedLifetimesInPath(d) => handlers::elided_lifetimes_in_path::elided_lifetimes_in_path(&ctx, &d),
         };
         res.push(d)
     }
@@ -512,13 +512,7 @@ pub fn semantic_diagnostics(
 
     // The edition isn't accurate (each diagnostics may have its own edition due to macros),
     // but it's okay as it's only being used for error recovery.
-    handle_lints(
-        &ctx.sema,
-        &mut FxHashMap::default(),
-        &mut lints,
-        &mut Vec::new(),
-        file_id.edition(),
-    );
+    handle_lints(&ctx.sema, &mut lints, editioned_file_id.edition(db));
 
     res.retain(|d| d.severity != Severity::Allow);
 
@@ -559,9 +553,8 @@ fn handle_diag_from_macros(
     let span_map = sema.db.expansion_span_map(macro_file);
     let mut spans = span_map.spans_for_range(node.text_range());
     if spans.any(|span| {
-        sema.db.lookup_intern_syntax_context(span.ctx).outer_expn.is_some_and(|expansion| {
-            let macro_call =
-                sema.db.lookup_intern_macro_call(expansion.as_macro_file().macro_call_id);
+        span.ctx.outer_expn(sema.db).is_some_and(|expansion| {
+            let macro_call = sema.db.lookup_intern_macro_call(expansion.into());
             // We don't want to show diagnostics for non-local macros at all, but proc macros authors
             // seem to rely on being able to emit non-warning-free code, so we don't want to show warnings
             // for them even when the proc macro comes from the same workspace (in rustc that's not a
@@ -575,16 +568,14 @@ fn handle_diag_from_macros(
         diag.fixes = None;
 
         // All Clippy lints report in macros, see https://github.com/rust-lang/rust-clippy/blob/903293b199364/declare_clippy_lint/src/lib.rs#L172.
-        if let DiagnosticCode::RustcLint(lint) = diag.code {
-            if !LINTS_TO_REPORT_IN_EXTERNAL_MACROS.contains(lint) {
-                return false;
-            }
+        if let DiagnosticCode::RustcLint(lint) = diag.code
+            && !LINTS_TO_REPORT_IN_EXTERNAL_MACROS.contains(lint)
+        {
+            return false;
         };
     }
     true
 }
-
-// `__RA_EVERY_LINT` is a fake lint group to allow every lint in proc macros
 
 struct BuiltLint {
     lint: &'static Lint,
@@ -629,9 +620,7 @@ fn build_lints_map(
 
 fn handle_lints(
     sema: &Semantics<'_, RootDatabase>,
-    cache: &mut FxHashMap<HirFileId, FxHashMap<SmolStr, SeverityAttr>>,
     diagnostics: &mut [(InFile<SyntaxNode>, &mut Diagnostic)],
-    cache_stack: &mut Vec<HirFileId>,
     edition: Edition,
 ) {
     for (node, diag) in diagnostics {
@@ -645,7 +634,8 @@ fn handle_lints(
             diag.severity = default_severity;
         }
 
-        let mut diag_severity = fill_lint_attrs(sema, node, cache, cache_stack, diag, edition);
+        let mut diag_severity =
+            lint_severity_at(sema, node, &lint_groups(&diag.code, edition), edition);
 
         if let outline_diag_severity @ Some(_) =
             find_outline_mod_lint_severity(sema, node, diag, edition)
@@ -698,155 +688,22 @@ fn find_outline_mod_lint_severity(
     result
 }
 
-#[derive(Debug, Clone, Copy)]
-struct SeverityAttr {
-    severity: Severity,
-    /// This field counts how far we are from the main node. Bigger values mean more far.
-    ///
-    /// Note this isn't accurate: there can be gaps between values (created when merging severity maps).
-    /// The important thing is that if an attr is closer to the main node, it will have smaller value.
-    ///
-    /// This is necessary even though we take care to never overwrite a value from deeper nesting
-    /// because of lint groups. For example, in the following code:
-    /// ```
-    /// #[warn(non_snake_case)]
-    /// mod foo {
-    ///     #[allow(nonstandard_style)]
-    ///     mod bar {}
-    /// }
-    /// ```
-    /// We want to not warn on non snake case inside `bar`. If we are traversing this for the first
-    /// time, everything will be fine, because we will set `diag_severity` on the first matching group
-    /// and never overwrite it since then. But if `bar` is cached, the cache will contain both
-    /// `#[warn(non_snake_case)]` and `#[allow(nonstandard_style)]`, and without this field, we have
-    /// no way of differentiating between the two.
-    depth: u32,
-}
-
-fn fill_lint_attrs(
+fn lint_severity_at(
     sema: &Semantics<'_, RootDatabase>,
     node: &InFile<SyntaxNode>,
-    cache: &mut FxHashMap<HirFileId, FxHashMap<SmolStr, SeverityAttr>>,
-    cache_stack: &mut Vec<HirFileId>,
-    diag: &Diagnostic,
+    lint_groups: &LintGroups,
     edition: Edition,
 ) -> Option<Severity> {
-    let mut collected_lint_attrs = FxHashMap::<SmolStr, SeverityAttr>::default();
-    let mut diag_severity = None;
-
-    let mut ancestors = node.value.ancestors().peekable();
-    let mut depth = 0;
-    loop {
-        let ancestor = ancestors.next().expect("we always return from top-level nodes");
-        depth += 1;
-
-        if ancestors.peek().is_none() {
-            // We don't want to insert too many nodes into cache, but top level nodes (aka. outline modules
-            // or macro expansions) need to touch the database so they seem like a good fit to cache.
-
-            if let Some(cached) = cache.get_mut(&node.file_id) {
-                // This node (and everything above it) is already cached; the attribute is either here or nowhere.
-
-                // Workaround for the borrow checker.
-                let cached = std::mem::take(cached);
-
-                cached.iter().for_each(|(lint, severity)| {
-                    for item in &*cache_stack {
-                        let node_cache_entry = cache
-                            .get_mut(item)
-                            .expect("we always insert cached nodes into the cache map");
-                        let lint_cache_entry = node_cache_entry.entry(lint.clone());
-                        if let hash_map::Entry::Vacant(lint_cache_entry) = lint_cache_entry {
-                            // Do not overwrite existing lint attributes, as we go bottom to top and bottom attrs
-                            // overwrite top attrs.
-                            lint_cache_entry.insert(SeverityAttr {
-                                severity: severity.severity,
-                                depth: severity.depth + depth,
-                            });
-                        }
-                    }
-                });
-
-                let all_matching_groups = lint_groups(&diag.code, edition)
-                    .iter()
-                    .filter_map(|lint_group| cached.get(lint_group));
-                let cached_severity =
-                    all_matching_groups.min_by_key(|it| it.depth).map(|it| it.severity);
-
-                cache.insert(node.file_id, cached);
-
-                return diag_severity.or(cached_severity);
-            }
-
-            // Insert this node's descendants' attributes into any outline descendant, but not including this node.
-            // This must come before inserting this node's own attributes to preserve order.
-            collected_lint_attrs.drain().for_each(|(lint, severity)| {
-                if diag_severity.is_none() && lint_groups(&diag.code, edition).contains(&lint) {
-                    diag_severity = Some(severity.severity);
-                }
-
-                for item in &*cache_stack {
-                    let node_cache_entry = cache
-                        .get_mut(item)
-                        .expect("we always insert cached nodes into the cache map");
-                    let lint_cache_entry = node_cache_entry.entry(lint.clone());
-                    if let hash_map::Entry::Vacant(lint_cache_entry) = lint_cache_entry {
-                        // Do not overwrite existing lint attributes, as we go bottom to top and bottom attrs
-                        // overwrite top attrs.
-                        lint_cache_entry.insert(severity);
-                    }
-                }
-            });
-
-            cache_stack.push(node.file_id);
-            cache.insert(node.file_id, FxHashMap::default());
-
-            if let Some(ancestor) = ast::AnyHasAttrs::cast(ancestor) {
-                // Insert this node's attributes into any outline descendant, including this node.
-                lint_attrs(sema, ancestor, edition).for_each(|(lint, severity)| {
-                    if diag_severity.is_none() && lint_groups(&diag.code, edition).contains(&lint) {
-                        diag_severity = Some(severity);
-                    }
-
-                    for item in &*cache_stack {
-                        let node_cache_entry = cache
-                            .get_mut(item)
-                            .expect("we always insert cached nodes into the cache map");
-                        let lint_cache_entry = node_cache_entry.entry(lint.clone());
-                        if let hash_map::Entry::Vacant(lint_cache_entry) = lint_cache_entry {
-                            // Do not overwrite existing lint attributes, as we go bottom to top and bottom attrs
-                            // overwrite top attrs.
-                            lint_cache_entry.insert(SeverityAttr { severity, depth });
-                        }
-                    }
-                });
-            }
-
-            let parent_node = sema.find_parent_file(node.file_id);
-            if let Some(parent_node) = parent_node {
-                let parent_severity =
-                    fill_lint_attrs(sema, &parent_node, cache, cache_stack, diag, edition);
-                if diag_severity.is_none() {
-                    diag_severity = parent_severity;
-                }
-            }
-            cache_stack.pop();
-            return diag_severity;
-        } else if let Some(ancestor) = ast::AnyHasAttrs::cast(ancestor) {
-            lint_attrs(sema, ancestor, edition).for_each(|(lint, severity)| {
-                if diag_severity.is_none() && lint_groups(&diag.code, edition).contains(&lint) {
-                    diag_severity = Some(severity);
-                }
-
-                let lint_cache_entry = collected_lint_attrs.entry(lint);
-                if let hash_map::Entry::Vacant(lint_cache_entry) = lint_cache_entry {
-                    // Do not overwrite existing lint attributes, as we go bottom to top and bottom attrs
-                    // overwrite top attrs.
-                    lint_cache_entry.insert(SeverityAttr { severity, depth });
-                }
-            });
-        }
-    }
+    node.value
+        .ancestors()
+        .filter_map(ast::AnyHasAttrs::cast)
+        .find_map(|ancestor| {
+            lint_attrs(sema, ancestor, edition)
+                .find_map(|(lint, severity)| lint_groups.contains(&lint).then_some(severity))
+        })
+        .or_else(|| {
+            lint_severity_at(sema, &sema.find_parent_file(node.file_id)?, lint_groups, edition)
+        })
 }
 
 fn lint_attrs<'a>(
@@ -903,35 +760,35 @@ fn cfg_attr_lint_attrs(
     }
 
     while let Some(value) = iter.next() {
-        if let Some(token) = value.as_token() {
-            if token.kind() == SyntaxKind::IDENT {
-                let severity = match token.text() {
-                    "allow" | "expect" => Some(Severity::Allow),
-                    "warn" => Some(Severity::Warning),
-                    "forbid" | "deny" => Some(Severity::Error),
-                    "cfg_attr" => {
-                        if let Some(NodeOrToken::Node(value)) = iter.next() {
-                            cfg_attr_lint_attrs(sema, &value, lint_attrs);
-                        }
-                        None
+        if let Some(token) = value.as_token()
+            && token.kind() == SyntaxKind::IDENT
+        {
+            let severity = match token.text() {
+                "allow" | "expect" => Some(Severity::Allow),
+                "warn" => Some(Severity::Warning),
+                "forbid" | "deny" => Some(Severity::Error),
+                "cfg_attr" => {
+                    if let Some(NodeOrToken::Node(value)) = iter.next() {
+                        cfg_attr_lint_attrs(sema, &value, lint_attrs);
                     }
-                    _ => None,
-                };
-                if let Some(severity) = severity {
-                    let lints = iter.next();
-                    if let Some(NodeOrToken::Node(lints)) = lints {
-                        lint_attrs.push((severity, lints));
-                    }
+                    None
+                }
+                _ => None,
+            };
+            if let Some(severity) = severity {
+                let lints = iter.next();
+                if let Some(NodeOrToken::Node(lints)) = lints {
+                    lint_attrs.push((severity, lints));
                 }
             }
         }
     }
 
-    if prev_len != lint_attrs.len() {
-        if let Some(false) | None = sema.check_cfg_attr(value) {
-            // Discard the attributes when the condition is false.
-            lint_attrs.truncate(prev_len);
-        }
+    if prev_len != lint_attrs.len()
+        && let Some(false) | None = sema.check_cfg_attr(value)
+    {
+        // Discard the attributes when the condition is false.
+        lint_attrs.truncate(prev_len);
     }
 }
 
@@ -944,10 +801,6 @@ struct LintGroups {
 impl LintGroups {
     fn contains(&self, group: &str) -> bool {
         self.groups.contains(&group) || (self.inside_warnings && group == "warnings")
-    }
-
-    fn iter(&self) -> impl Iterator<Item = &'static str> {
-        self.groups.iter().copied().chain(self.inside_warnings.then_some("warnings"))
     }
 }
 
@@ -977,7 +830,7 @@ fn fix(id: &'static str, label: &str, source_change: SourceChange, target: TextR
 fn unresolved_fix(id: &'static str, label: &str, target: TextRange) -> Assist {
     assert!(!id.contains(' '));
     Assist {
-        id: AssistId(id, AssistKind::QuickFix),
+        id: AssistId::quick_fix(id),
         label: Label::new(label.to_owned()),
         group: None,
         target,
@@ -993,8 +846,8 @@ fn adjusted_display_range<N: AstNode>(
 ) -> FileRange {
     let source_file = ctx.sema.parse_or_expand(diag_ptr.file_id);
     let node = diag_ptr.value.to_node(&source_file);
-    diag_ptr
+    let hir::FileRange { file_id, range } = diag_ptr
         .with_value(adj(node).unwrap_or_else(|| diag_ptr.value.text_range()))
-        .original_node_file_range_rooted(ctx.sema.db)
-        .into()
+        .original_node_file_range_rooted(ctx.sema.db);
+    ide_db::FileRange { file_id: file_id.file_id(ctx.sema.db), range }
 }

@@ -1,45 +1,66 @@
 //! Handles dynamic library loading for proc macro
 
+mod proc_macros;
 mod version;
 
 use proc_macro::bridge;
 use std::{fmt, fs, io, time::SystemTime};
+use temp_dir::TempDir;
 
 use libloading::Library;
 use object::Object;
 use paths::{Utf8Path, Utf8PathBuf};
 
-use crate::{proc_macros::ProcMacros, server_impl::TopSubtree, ProcMacroKind, ProcMacroSrvSpan};
+use crate::{
+    PanicMessage, ProcMacroKind, ProcMacroSrvSpan, dylib::proc_macros::ProcMacros,
+    server_impl::TopSubtree,
+};
 
-/// Loads dynamic library in platform dependent manner.
-///
-/// For unix, you have to use RTLD_DEEPBIND flag to escape problems described
-/// [here](https://github.com/fedochet/rust-proc-macro-panic-inside-panic-expample)
-/// and [here](https://github.com/rust-lang/rust/issues/60593).
-///
-/// Usage of RTLD_DEEPBIND
-/// [here](https://github.com/fedochet/rust-proc-macro-panic-inside-panic-expample/issues/1)
-///
-/// It seems that on Windows that behaviour is default, so we do nothing in that case.
-#[cfg(windows)]
-fn load_library(file: &Utf8Path) -> Result<Library, libloading::Error> {
-    unsafe { Library::new(file) }
+pub(crate) struct Expander {
+    inner: ProcMacroLibrary,
+    modified_time: SystemTime,
 }
 
-#[cfg(unix)]
-fn load_library(file: &Utf8Path) -> Result<Library, libloading::Error> {
-    // not defined by POSIX, different values on mips vs other targets
-    #[cfg(target_env = "gnu")]
-    use libc::RTLD_DEEPBIND;
-    use libloading::os::unix::Library as UnixLibrary;
-    // defined by POSIX
-    use libloading::os::unix::RTLD_NOW;
+impl Expander {
+    pub(crate) fn new(
+        temp_dir: &TempDir,
+        lib: &Utf8Path,
+    ) -> Result<Expander, LoadProcMacroDylibError> {
+        // Some libraries for dynamic loading require canonicalized path even when it is
+        // already absolute
+        let lib = lib.canonicalize_utf8()?;
+        let modified_time = fs::metadata(&lib).and_then(|it| it.modified())?;
 
-    // MUSL and bionic don't have it..
-    #[cfg(not(target_env = "gnu"))]
-    const RTLD_DEEPBIND: std::os::raw::c_int = 0x0;
+        let path = ensure_file_with_lock_free_access(temp_dir, &lib)?;
+        let library = ProcMacroLibrary::open(path.as_ref())?;
 
-    unsafe { UnixLibrary::open(Some(file), RTLD_NOW | RTLD_DEEPBIND).map(|lib| lib.into()) }
+        Ok(Expander { inner: library, modified_time })
+    }
+
+    pub(crate) fn expand<S: ProcMacroSrvSpan>(
+        &self,
+        macro_name: &str,
+        macro_body: TopSubtree<S>,
+        attributes: Option<TopSubtree<S>>,
+        def_site: S,
+        call_site: S,
+        mixed_site: S,
+    ) -> Result<TopSubtree<S>, PanicMessage>
+    where
+        <S::Server as bridge::server::Types>::TokenStream: Default,
+    {
+        self.inner
+            .proc_macros
+            .expand(macro_name, macro_body, attributes, def_site, call_site, mixed_site)
+    }
+
+    pub(crate) fn list_macros(&self) -> impl Iterator<Item = (&str, ProcMacroKind)> {
+        self.inner.proc_macros.list_macros()
+    }
+
+    pub(crate) fn modified_time(&self) -> SystemTime {
+        self.modified_time
+    }
 }
 
 #[derive(Debug)]
@@ -84,74 +105,32 @@ struct ProcMacroLibrary {
 impl ProcMacroLibrary {
     fn open(path: &Utf8Path) -> Result<Self, LoadProcMacroDylibError> {
         let file = fs::File::open(path)?;
+        #[allow(clippy::undocumented_unsafe_blocks)] // FIXME
         let file = unsafe { memmap2::Mmap::map(&file) }?;
         let obj = object::File::parse(&*file)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         let version_info = version::read_dylib_info(&obj)?;
+        if version_info.version_string != crate::RUSTC_VERSION_STRING {
+            return Err(LoadProcMacroDylibError::AbiMismatch(version_info.version_string));
+        }
+
         let symbol_name =
             find_registrar_symbol(&obj).map_err(invalid_data_err)?.ok_or_else(|| {
                 invalid_data_err(format!("Cannot find registrar symbol in file {path}"))
             })?;
 
-        let lib = load_library(path).map_err(invalid_data_err)?;
-        let proc_macros = unsafe {
-            // SAFETY: We extend the lifetime here to avoid referential borrow problems
-            // We never reveal proc_macros to the outside and drop it before _lib
-            std::mem::transmute::<&ProcMacros, &'static ProcMacros>(ProcMacros::from_lib(
-                &lib,
-                symbol_name,
-                &version_info.version_string,
-            )?)
-        };
-        Ok(ProcMacroLibrary { _lib: lib, proc_macros })
-    }
-}
-
-// Drop order matters as we can't remove the dylib before the library is unloaded
-pub(crate) struct Expander {
-    inner: ProcMacroLibrary,
-    _remove_on_drop: RemoveFileOnDrop,
-    modified_time: SystemTime,
-}
-
-impl Expander {
-    pub(crate) fn new(lib: &Utf8Path) -> Result<Expander, LoadProcMacroDylibError> {
-        // Some libraries for dynamic loading require canonicalized path even when it is
-        // already absolute
-        let lib = lib.canonicalize_utf8()?;
-        let modified_time = fs::metadata(&lib).and_then(|it| it.modified())?;
-
-        let path = ensure_file_with_lock_free_access(&lib)?;
-        let library = ProcMacroLibrary::open(path.as_ref())?;
-
-        Ok(Expander { inner: library, _remove_on_drop: RemoveFileOnDrop(path), modified_time })
-    }
-
-    pub(crate) fn expand<S: ProcMacroSrvSpan>(
-        &self,
-        macro_name: &str,
-        macro_body: TopSubtree<S>,
-        attributes: Option<TopSubtree<S>>,
-        def_site: S,
-        call_site: S,
-        mixed_site: S,
-    ) -> Result<TopSubtree<S>, String>
-    where
-        <S::Server as bridge::server::Types>::TokenStream: Default,
-    {
-        let result = self
-            .inner
-            .proc_macros
-            .expand(macro_name, macro_body, attributes, def_site, call_site, mixed_site);
-        result.map_err(|e| e.into_string().unwrap_or_default())
-    }
-
-    pub(crate) fn list_macros(&self) -> Vec<(String, ProcMacroKind)> {
-        self.inner.proc_macros.list_macros()
-    }
-
-    pub(crate) fn modified_time(&self) -> SystemTime {
-        self.modified_time
+        // SAFETY: We have verified the validity of the dylib as a proc-macro library
+        let lib = unsafe { load_library(path) }.map_err(invalid_data_err)?;
+        // SAFETY: We have verified the validity of the dylib as a proc-macro library
+        // The 'static lifetime is a lie, it's actually the lifetime of the library but unavoidable
+        // due to self-referentiality
+        // But we make sure that we do not drop it before the symbol is dropped
+        let proc_macros =
+            unsafe { lib.get::<&'static &'static ProcMacros>(symbol_name.as_bytes()) };
+        match proc_macros {
+            Ok(proc_macros) => Ok(ProcMacroLibrary { proc_macros: *proc_macros, _lib: lib }),
+            Err(e) => Err(e.into()),
+        }
     }
 }
 
@@ -184,18 +163,12 @@ fn find_registrar_symbol(obj: &object::File<'_>) -> object::Result<Option<String
         }))
 }
 
-struct RemoveFileOnDrop(Utf8PathBuf);
-impl Drop for RemoveFileOnDrop {
-    fn drop(&mut self) {
-        #[cfg(windows)]
-        std::fs::remove_file(&self.0).unwrap();
-        _ = self.0;
-    }
-}
-
 /// Copy the dylib to temp directory to prevent locking in Windows
 #[cfg(windows)]
-fn ensure_file_with_lock_free_access(path: &Utf8Path) -> io::Result<Utf8PathBuf> {
+fn ensure_file_with_lock_free_access(
+    temp_dir: &TempDir,
+    path: &Utf8Path,
+) -> io::Result<Utf8PathBuf> {
     use std::collections::hash_map::RandomState;
     use std::hash::{BuildHasher, Hasher};
 
@@ -203,9 +176,7 @@ fn ensure_file_with_lock_free_access(path: &Utf8Path) -> io::Result<Utf8PathBuf>
         return Ok(path.to_path_buf());
     }
 
-    let mut to = Utf8PathBuf::from_path_buf(std::env::temp_dir()).unwrap();
-    to.push("rust-analyzer-proc-macros");
-    _ = fs::create_dir(&to);
+    let mut to = Utf8Path::from_path(temp_dir.path()).unwrap().to_owned();
 
     let file_name = path.file_stem().ok_or_else(|| {
         io::Error::new(io::ErrorKind::InvalidInput, format!("File path is invalid: {path}"))
@@ -222,6 +193,60 @@ fn ensure_file_with_lock_free_access(path: &Utf8Path) -> io::Result<Utf8PathBuf>
 }
 
 #[cfg(unix)]
-fn ensure_file_with_lock_free_access(path: &Utf8Path) -> io::Result<Utf8PathBuf> {
+fn ensure_file_with_lock_free_access(
+    _temp_dir: &TempDir,
+    path: &Utf8Path,
+) -> io::Result<Utf8PathBuf> {
     Ok(path.to_owned())
+}
+
+/// Loads dynamic library in platform dependent manner.
+///
+/// For unix, you have to use RTLD_DEEPBIND flag to escape problems described
+/// [here](https://github.com/fedochet/rust-proc-macro-panic-inside-panic-expample)
+/// and [here](https://github.com/rust-lang/rust/issues/60593).
+///
+/// Usage of RTLD_DEEPBIND
+/// [here](https://github.com/fedochet/rust-proc-macro-panic-inside-panic-expample/issues/1)
+///
+/// It seems that on Windows that behaviour is default, so we do nothing in that case.
+///
+/// # Safety
+///
+/// The caller is responsible for ensuring that the path is valid proc-macro library
+#[cfg(windows)]
+unsafe fn load_library(file: &Utf8Path) -> Result<Library, libloading::Error> {
+    // SAFETY: The caller is responsible for ensuring that the path is valid proc-macro library
+    unsafe { Library::new(file) }
+}
+
+/// Loads dynamic library in platform dependent manner.
+///
+/// For unix, you have to use RTLD_DEEPBIND flag to escape problems described
+/// [here](https://github.com/fedochet/rust-proc-macro-panic-inside-panic-expample)
+/// and [here](https://github.com/rust-lang/rust/issues/60593).
+///
+/// Usage of RTLD_DEEPBIND
+/// [here](https://github.com/fedochet/rust-proc-macro-panic-inside-panic-expample/issues/1)
+///
+/// It seems that on Windows that behaviour is default, so we do nothing in that case.
+///
+/// # Safety
+///
+/// The caller is responsible for ensuring that the path is valid proc-macro library
+#[cfg(unix)]
+unsafe fn load_library(file: &Utf8Path) -> Result<Library, libloading::Error> {
+    // not defined by POSIX, different values on mips vs other targets
+    #[cfg(target_env = "gnu")]
+    use libc::RTLD_DEEPBIND;
+    use libloading::os::unix::Library as UnixLibrary;
+    // defined by POSIX
+    use libloading::os::unix::RTLD_NOW;
+
+    // MUSL and bionic don't have it..
+    #[cfg(not(target_env = "gnu"))]
+    const RTLD_DEEPBIND: std::os::raw::c_int = 0x0;
+
+    // SAFETY: The caller is responsible for ensuring that the path is valid proc-macro library
+    unsafe { UnixLibrary::open(Some(file), RTLD_NOW | RTLD_DEEPBIND).map(|lib| lib.into()) }
 }

@@ -1,9 +1,9 @@
-use base_db::ra_salsa::InternKey;
-use expect_test::{expect, Expect};
+use expect_test::{Expect, expect};
 use hir_def::db::DefDatabase;
-use hir_expand::files::InFileWrapper;
+use hir_expand::{HirFileId, files::InFileWrapper};
 use itertools::Itertools;
-use span::{HirFileId, TextRange};
+use salsa::plumbing::FromId;
+use span::TextRange;
 use syntax::{AstNode, AstPtr};
 use test_fixture::WithFixture;
 
@@ -16,11 +16,11 @@ use super::visit_module;
 
 fn check_closure_captures(#[rust_analyzer::rust_fixture] ra_fixture: &str, expect: Expect) {
     let (db, file_id) = TestDB::with_single_file(ra_fixture);
-    let module = db.module_for_file(file_id);
+    let module = db.module_for_file(file_id.file_id(&db));
     let def_map = module.def_map(&db);
 
     let mut defs = Vec::new();
-    visit_module(&db, &def_map, module.local_id, &mut |it| defs.push(it));
+    visit_module(&db, def_map, module.local_id, &mut |it| defs.push(it));
 
     let mut captures_info = Vec::new();
     for def in defs {
@@ -34,8 +34,8 @@ fn check_closure_captures(#[rust_analyzer::rust_fixture] ra_fixture: &str, expec
         let infer = db.infer(def);
         let db = &db;
         captures_info.extend(infer.closure_info.iter().flat_map(|(closure_id, (captures, _))| {
-            let closure = db.lookup_intern_closure(InternedClosureId::from_intern_id(closure_id.0));
-            let (_, source_map) = db.body_with_source_map(closure.0);
+            let closure = db.lookup_intern_closure(InternedClosureId::from_id(closure_id.0));
+            let source_map = db.body_with_source_map(closure.0).1;
             let closure_text_range = source_map
                 .expr_syntax(closure.1)
                 .expect("failed to map closure to SyntaxNode")
@@ -384,7 +384,9 @@ fn main() {
     };
 }
 "#,
-        expect!["57..149;20..25;78..80,98..100,118..124,134..135 ByRef(Mut { kind: Default }) a &'? mut bool"],
+        expect![
+            "57..149;20..25;78..80,98..100,118..124,134..135 ByRef(Mut { kind: Default }) a &'? mut bool"
+        ],
     );
 }
 
@@ -440,5 +442,48 @@ fn main() {
 }
 "#,
         expect!["99..165;49..54;120..121,133..134 ByRef(Mut { kind: Default }) a &'? mut A"],
+    );
+}
+
+#[test]
+fn let_binding_is_a_ref_capture_in_ref_binding() {
+    check_closure_captures(
+        r#"
+//- minicore:copy
+struct S;
+fn main() {
+    let mut s = S;
+    let s_ref = &mut s;
+    let mut s2 = S;
+    let s_ref2 = &mut s2;
+    let closure = || {
+        if let ref cb = s_ref {
+        } else if let ref mut cb = s_ref2 {
+        }
+    };
+}
+"#,
+        expect![[r#"
+            129..225;49..54;149..155 ByRef(Shared) s_ref &'? &'? mut S
+            129..225;93..99;188..198 ByRef(Mut { kind: Default }) s_ref2 &'? mut &'? mut S"#]],
+    );
+}
+
+#[test]
+fn let_binding_is_a_value_capture_in_binding() {
+    check_closure_captures(
+        r#"
+//- minicore:copy, option
+struct Box(i32);
+fn main() {
+    let b = Some(Box(0));
+    let closure = || {
+        if let Some(b) = b {
+            let _move = b;
+        }
+    };
+}
+"#,
+        expect!["73..149;37..38;103..104 ByValue b Option<Box>"],
     );
 }

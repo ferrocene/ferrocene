@@ -1,5 +1,3 @@
-use std::slice;
-
 use crate::inherent::*;
 use crate::visit::Flags;
 use crate::{self as ty, Interner};
@@ -75,8 +73,8 @@ bitflags::bitflags! {
 
         /// Does this have `Projection`?
         const HAS_TY_PROJECTION           = 1 << 10;
-        /// Does this have `Weak`?
-        const HAS_TY_WEAK                 = 1 << 11;
+        /// Does this have `Free` aliases?
+        const HAS_TY_FREE_ALIAS                 = 1 << 11;
         /// Does this have `Opaque`?
         const HAS_TY_OPAQUE               = 1 << 12;
         /// Does this have `Inherent`?
@@ -88,7 +86,7 @@ bitflags::bitflags! {
         ///
         /// Rephrased, could this term be normalized further?
         const HAS_ALIAS                   = TypeFlags::HAS_TY_PROJECTION.bits()
-                                          | TypeFlags::HAS_TY_WEAK.bits()
+                                          | TypeFlags::HAS_TY_FREE_ALIAS.bits()
                                           | TypeFlags::HAS_TY_OPAQUE.bits()
                                           | TypeFlags::HAS_TY_INHERENT.bits()
                                           | TypeFlags::HAS_CT_PROJECTION.bits();
@@ -132,6 +130,9 @@ bitflags::bitflags! {
 
         /// Does this have any binders with bound vars (e.g. that need to be anonymized)?
         const HAS_BINDER_VARS             = 1 << 23;
+
+        /// Does this type have any coroutines in it?
+        const HAS_TY_CORO                 = 1 << 24;
     }
 }
 
@@ -243,9 +244,13 @@ impl<I: Interner> FlagComputation<I> {
             }
 
             ty::Closure(_, args)
-            | ty::Coroutine(_, args)
             | ty::CoroutineClosure(_, args)
             | ty::CoroutineWitness(_, args) => {
+                self.add_args(args.as_slice());
+            }
+
+            ty::Coroutine(_, args) => {
+                self.add_flags(TypeFlags::HAS_TY_CORO);
                 self.add_args(args.as_slice());
             }
 
@@ -275,7 +280,7 @@ impl<I: Interner> FlagComputation<I> {
             ty::Alias(kind, data) => {
                 self.add_flags(match kind {
                     ty::Projection => TypeFlags::HAS_TY_PROJECTION,
-                    ty::Weak => TypeFlags::HAS_TY_WEAK,
+                    ty::Free => TypeFlags::HAS_TY_FREE_ALIAS,
                     ty::Opaque => TypeFlags::HAS_TY_OPAQUE,
                     ty::Inherent => TypeFlags::HAS_TY_INHERENT,
                 });
@@ -306,7 +311,7 @@ impl<I: Interner> FlagComputation<I> {
 
             ty::Pat(ty, pat) => {
                 self.add_ty(ty);
-                self.add_flags(pat.flags());
+                self.add_ty_pat(pat);
             }
 
             ty::Slice(tt) => self.add_ty(tt),
@@ -338,6 +343,10 @@ impl<I: Interner> FlagComputation<I> {
                 })
             }
         }
+    }
+
+    fn add_ty_pat(&mut self, pat: <I as Interner>::Pat) {
+        self.add_flags(pat.flags());
     }
 
     fn add_predicate(&mut self, binder: ty::Binder<I, ty::PredicateKind<I>>) {
@@ -388,8 +397,8 @@ impl<I: Interner> FlagComputation<I> {
                 self.add_alias_term(projection_term);
                 self.add_term(term);
             }
-            ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(arg)) => {
-                self.add_args(slice::from_ref(&arg));
+            ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(term)) => {
+                self.add_term(term);
             }
             ty::PredicateKind::DynCompatible(_def_id) => {}
             ty::PredicateKind::Clause(ty::ClauseKind::ConstEvaluatable(uv)) => {
@@ -399,7 +408,6 @@ impl<I: Interner> FlagComputation<I> {
                 self.add_const(expected);
                 self.add_const(found);
             }
-            ty::PredicateKind::Ambiguous => {}
             ty::PredicateKind::NormalizesTo(ty::NormalizesTo { alias, term }) => {
                 self.add_alias_term(alias);
                 self.add_term(term);
@@ -408,6 +416,8 @@ impl<I: Interner> FlagComputation<I> {
                 self.add_term(t1);
                 self.add_term(t2);
             }
+            ty::PredicateKind::Clause(ty::ClauseKind::UnstableFeature(_sym)) => {}
+            ty::PredicateKind::Ambiguous => {}
         }
     }
 
@@ -477,8 +487,8 @@ impl<I: Interner> FlagComputation<I> {
     }
 
     fn add_args(&mut self, args: &[I::GenericArg]) {
-        for kind in args {
-            match kind.kind() {
+        for arg in args {
+            match arg.kind() {
                 ty::GenericArgKind::Type(ty) => self.add_ty(ty),
                 ty::GenericArgKind::Lifetime(lt) => self.add_region(lt),
                 ty::GenericArgKind::Const(ct) => self.add_const(ct),

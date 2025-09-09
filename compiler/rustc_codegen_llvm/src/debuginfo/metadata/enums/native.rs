@@ -174,10 +174,8 @@ pub(super) fn build_coroutine_di_node<'ll, 'tcx>(
             DIFlags::FlagZero,
         ),
         |cx, coroutine_type_di_node| {
-            let coroutine_layout = cx
-                .tcx
-                .coroutine_layout(coroutine_def_id, coroutine_args.as_coroutine().kind_ty())
-                .unwrap();
+            let coroutine_layout =
+                cx.tcx.coroutine_layout(coroutine_def_id, coroutine_args).unwrap();
 
             let Variants::Multiple { tag_encoding: TagEncoding::Direct, ref variants, .. } =
                 coroutine_type_and_layout.variants
@@ -375,7 +373,7 @@ fn build_discr_member_di_node<'ll, 'tcx>(
                 file,
                 UNKNOWN_LINE_NUMBER,
                 layout,
-                enum_or_coroutine_type_and_layout.fields.offset(tag_field),
+                enum_or_coroutine_type_and_layout.fields.offset(tag_field.as_usize()),
                 DIFlags::FlagArtificial,
                 ty,
             ))

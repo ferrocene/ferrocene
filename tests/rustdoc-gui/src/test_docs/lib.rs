@@ -79,6 +79,7 @@ impl Foo {
     pub fn warning2() {}
 }
 
+/// <a href="#implementations"><code id="trait-impl-link-in-summary">A collapsible trait impl with a link</code></a>
 impl AsRef<str> for Foo {
     fn as_ref(&self) -> &str {
         "hello"
@@ -159,6 +160,10 @@ pub enum AnEnum {
 #[doc(keyword = "for")]
 /// Some keyword.
 pub mod keyword {}
+
+#[doc(attribute = "forbid")]
+/// Some attribute.
+pub mod repr {}
 
 /// Just some type alias.
 pub type SomeType = u32;
@@ -739,4 +744,44 @@ pub mod SidebarSort {
     impl Sort for Cell<u16> {}
     impl Sort for Cell<u8> {}
     impl<'a> Sort for &'a str {}
+}
+
+pub mod impls_indent {
+    pub struct Context;
+
+    /// Working with objects.
+    ///
+    /// # Safety
+    ///
+    /// Functions that take indices of locals do not check bounds on these indices;
+    /// the caller must ensure that the indices are less than the number of locals
+    /// in the current stack frame.
+    impl Context {
+    }
+
+    /// Working with objects.
+    ///
+    /// # Safety
+    ///
+    /// Functions that take indices of locals do not check bounds on these indices;
+    /// the caller must ensure that the indices are less than the number of locals
+    /// in the current stack frame.
+    impl Context {
+        /// bla
+        pub fn bar() {}
+    }
+}
+
+pub mod tooltips {
+    pub struct X;
+
+    impl X {
+        pub fn bar() -> Vec<u8> {
+            Vec::new()
+        }
+    }
+
+    pub fn bar() -> Vec<u8> {
+        Vec::new()
+    }
 }

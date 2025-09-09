@@ -18,6 +18,125 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.88.0
+-------------------------------
+
+- `Stabilize let_chains feature in the 2024 edition <https://github.com/rust-lang/rust/pull/132833>`_
+
+  - No change: the FLS only supports the 2021 edition
+
+- `Stabilize naked_functions feature <https://github.com/rust-lang/rust/pull/134213>`_
+
+  - New sections: :ref:`fls_Sd6rUmpEb355`
+
+  - New paragraphs:
+
+    - :p:`fls_eOJS3mxa9xgu`
+
+    - :p:`fls_2oP2nbDPtUg7`
+
+    - :p:`fls_y2wCBvXDtQK2`
+
+    - :p:`fls_PEoOGTBjuEQc`
+
+    - :p:`fls_vcB5xwgD6Ign`
+
+  - Changed paragraphs:
+
+    - :p:`fls_3fg60jblx0xb`
+
+    - :p:`fls_ecteot716j8j`
+
+    - :p:`fls_tgzga1lanfuo`
+
+    - :p:`fls_g09kmp2a04g9`
+
+    - :p:`fls_nszx1gllufi2`
+
+  - New syntax: :s:`SymPathExpression`
+
+  - Changed syntax:
+
+    - :s:`RegisterArgument`
+
+    - :s:`RegisterExpression`
+
+    - :s:`BuiltinAttributeContent`
+
+- `Stabilize cfg_boolean_literals feature <https://github.com/rust-lang/rust/pull/138632>`_
+
+  - Changed syntax: :s:`ConfigurationPredicate`
+
+- `Fully de-stabilize the #[bench] attribute <https://github.com/rust-lang/rust/pull/134273)>`_
+
+  - No change: this was an unstable feature and was therefore not specified in the FLS
+
+- `Add warn-by-default dangerous_implicit_autorefs lint against implicit autoref of raw pointer dereference <https://github.com/rust-lang/rust/pull/123239>`_
+
+  - No change: lints are not part of the FLS
+
+- `Add invalid_null_arguments lint to prevent invalid usage of null pointers <https://github.com/rust-lang/rust/pull/119220>`_
+
+  - No change: lints are not part of the FLS
+
+- `Change trait impl candidate preference for builtin impls and trivial where-clauses. <https://github.com/rust-lang/rust/pull/138176>`_
+
+  - No change: trait impl candidate preference is not specified in the FLS
+
+- `Check types of generic const parameter defaults <https://github.com/rust-lang/rust/pull/139646>`_
+
+  - No change: this bug was not documented in the FLS
+
+Language changes in Rust 1.87.0
+-------------------------------
+
+- `Stabilize asm_goto feature <https://github.com/rust-lang/rust/pull/133870>`_
+
+  - New section: :ref:`fls_MW7mtH5oOeQ1`
+
+- `Allow parsing open beginning ranges (..EXPR) after unary operators: ! - * <https://github.com/rust-lang/rust/pull/134900>`_
+
+  - No change: this lifted restriction was not specified in the FLS
+
+- `Don't require method impls for methods with "Self: Sized" bounds in impls for unsized types <https://github.com/rust-lang/rust/pull/135480>`_
+
+  - No change: this lifted restriction was not specified in the FLS
+
+- `Stabilize feature(precise_capturing_in_traits) allowing use<...> bounds on return position impl Trait in traits (RPITIT) <https://github.com/rust-lang/rust/pull/138128>`_
+
+  - No change: this lifted restriction was not specified in the FLS
+
+Language changes in Rust 1.86.0
+-------------------------------
+
+- `Stabilize upcasting trait objects to supertraits. <https://github.com/rust-lang/rust/pull/134367>`_
+
+  - New paragraph: :p:`fls_QB4c6FNKxaPl`
+
+- `Allow safe functions to be marked with the #[target_feature] attribute. <https://github.com/rust-lang/rust/pull/134090>`_
+
+  - Changed paragraph: :p:`fls_3qj3jvmtxvx6`
+
+- `The missing_abi lint now warns-by-default. <https://github.com/rust-lang/rust/pull/132397>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Rust now lints about double negations, to catch cases that might have intended to be a prefix decrement operator (--x) as written in other languages. This was previously a clippy lint, clippy::double_neg, and is now available directly in Rust as double_negations. <https://github.com/rust-lang/rust/pull/126604>`_
+
+  - No change: Lints are not part of the FLS
+
+- `More pointers are now detected as definitely not-null based on their alignment in const eval. <https://github.com/rust-lang/rust/pull/133700>`_
+
+  - No change: The concrete semantics of constant evaluation is not described within the FLS
+
+- `Empty repr() attribute applied to invalid items are now correctly rejected. <https://github.com/rust-lang/rust/pull/133925>`_
+
+  - No change: this bug was not documented
+
+- `Inner attributes, #![test] and #![rustfmt::skip], are no longer accepted in more places than intended. <https://github.com/rust-lang/rust/pull/134276>`_
+
+  - No change: These attributes are not part of the FLS
+
 Language changes in Rust 1.85.0
 -------------------------------
 

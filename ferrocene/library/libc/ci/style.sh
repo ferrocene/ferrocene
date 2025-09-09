@@ -9,12 +9,9 @@ cargo test --manifest-path libc-test/Cargo.toml --test style -- --nocapture
 command -v rustfmt
 rustfmt -V
 
-# Run once to cover everything that isn't in `src/`
-cargo fmt
-
 # Save a list of all source files
 tmpfile="file-list~" # trailing tilde for gitignore
-find src -name '*.rs' > "$tmpfile"
+find src ci -name '*.rs' > "$tmpfile"
 
 # Before formatting, replace all macro identifiers with a function signature.
 # This allows `rustfmt` to format it.
@@ -59,19 +56,16 @@ done < "$tmpfile"
 
 rm "$tmpfile"
 
-if shellcheck --version ; then
-    find . -name '*.sh' -print0 | xargs -0 shellcheck
-else
-    echo "shellcheck not found"
-    exit 1
-fi
+# Run once from workspace root to get everything that wasn't handled as an
+# individual file.
+cargo fmt ${check:+"$check"}
 
 # Ensure that `sort` output is not locale-dependent
 export LC_ALL=C
 
 for file in libc-test/semver/*.txt; do
     case "$file" in
-      *TODO*) continue ;;
+        *TODO*) continue ;;
     esac
 
     if ! sort -C "$file"; then
@@ -87,3 +81,10 @@ for file in libc-test/semver/*.txt; do
         exit 1
     fi
 done
+
+if shellcheck --version; then
+    find . -name '*.sh' -print0 | xargs -0 shellcheck
+else
+    echo "shellcheck not found"
+    exit 1
+fi

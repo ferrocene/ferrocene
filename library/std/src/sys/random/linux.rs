@@ -15,7 +15,7 @@
 //! bytes, while the non-blocking pool, once initialized using the blocking
 //! pool, uses a CPRNG to return an unlimited number of random bytes. With a
 //! strong enough CPRNG however, the entropy estimation didn't contribute that
-//! much towards security while being an excellent vector for DoS attacs. Thus,
+//! much towards security while being an excellent vector for DoS attacks. Thus,
 //! the blocking pool was removed in kernel version 5.6.[^2] That patch did not
 //! magically increase the quality of the non-blocking pool, however, so we can
 //! safely consider it strong enough even in older kernel versions and use it
@@ -30,7 +30,7 @@
 //! data the system has available at the time.
 //!
 //! So in conclusion, we always want the output of the non-blocking pool, but
-//! may need to wait until it is initalized. The default behavior of `getrandom`
+//! may need to wait until it is initialized. The default behavior of `getrandom`
 //! is to wait until the non-blocking pool is initialized and then draw from there,
 //! so if `getrandom` is available, we use its default to generate the bytes. For
 //! `HashMap`, however, we need to specify the `GRND_INSECURE` flags, but that
@@ -64,8 +64,8 @@ use crate::fs::File;
 use crate::io::Read;
 use crate::os::fd::AsRawFd;
 use crate::sync::OnceLock;
-use crate::sync::atomic::AtomicBool;
 use crate::sync::atomic::Ordering::{Acquire, Relaxed, Release};
+use crate::sync::atomic::{Atomic, AtomicBool};
 use crate::sys::pal::os::errno;
 use crate::sys::pal::weak::syscall;
 
@@ -81,9 +81,9 @@ fn getrandom(mut bytes: &mut [u8], insecure: bool) {
         ) -> libc::ssize_t;
     );
 
-    static GETRANDOM_AVAILABLE: AtomicBool = AtomicBool::new(true);
-    static GRND_INSECURE_AVAILABLE: AtomicBool = AtomicBool::new(true);
-    static URANDOM_READY: AtomicBool = AtomicBool::new(false);
+    static GETRANDOM_AVAILABLE: Atomic<bool> = AtomicBool::new(true);
+    static GRND_INSECURE_AVAILABLE: Atomic<bool> = AtomicBool::new(true);
+    static URANDOM_READY: Atomic<bool> = AtomicBool::new(false);
     static DEVICE: OnceLock<File> = OnceLock::new();
 
     if GETRANDOM_AVAILABLE.load(Relaxed) {

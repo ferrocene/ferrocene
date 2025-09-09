@@ -1,8 +1,9 @@
 use clippy_config::Conf;
-use clippy_config::types::DisallowedPath;
+use clippy_config::types::{DisallowedPath, create_disallowed_map};
 use clippy_utils::diagnostics::span_lint_and_then;
+use clippy_utils::paths::PathNS;
 use rustc_data_structures::fx::FxHashMap;
-use rustc_hir::def::Res;
+use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefIdMap;
 use rustc_hir::{AmbigArg, Item, ItemKind, PolyTraitRef, PrimTy, Ty, TyKind, UseKind};
 use rustc_lint::{LateContext, LateLintPass};
@@ -34,6 +35,9 @@ declare_clippy_lint! {
     ///     { path = "std::net::Ipv4Addr", reason = "no IPv4 allowed" },
     ///     # Can also add a `replacement` that will be offered as a suggestion.
     ///     { path = "std::sync::Mutex", reason = "prefer faster & simpler non-poisonable mutex", replacement = "parking_lot::Mutex" },
+    ///     # This would normally error if the path is incorrect, but with `allow-invalid` = `true`,
+    ///     # it will be silently ignored
+    ///     { path = "std::invalid::Type", reason = "use alternative instead", allow-invalid = true }
     /// ]
     /// ```
     ///
@@ -60,22 +64,14 @@ pub struct DisallowedTypes {
 
 impl DisallowedTypes {
     pub fn new(tcx: TyCtxt<'_>, conf: &'static Conf) -> Self {
-        let mut def_ids = DefIdMap::default();
-        let mut prim_tys = FxHashMap::default();
-        for disallowed_path in &conf.disallowed_types {
-            let path: Vec<_> = disallowed_path.path().split("::").collect::<Vec<_>>();
-            for res in clippy_utils::def_path_res(tcx, &path) {
-                match res {
-                    Res::Def(_, id) => {
-                        def_ids.insert(id, (disallowed_path.path(), disallowed_path));
-                    },
-                    Res::PrimTy(ty) => {
-                        prim_tys.insert(ty, (disallowed_path.path(), disallowed_path));
-                    },
-                    _ => {},
-                }
-            }
-        }
+        let (def_ids, prim_tys) = create_disallowed_map(
+            tcx,
+            &conf.disallowed_types,
+            PathNS::Type,
+            def_kind_predicate,
+            "type",
+            true,
+        );
         Self { def_ids, prim_tys }
     }
 
@@ -95,14 +91,27 @@ impl DisallowedTypes {
     }
 }
 
+pub fn def_kind_predicate(def_kind: DefKind) -> bool {
+    matches!(
+        def_kind,
+        DefKind::Struct
+            | DefKind::Union
+            | DefKind::Enum
+            | DefKind::Trait
+            | DefKind::TyAlias
+            | DefKind::ForeignTy
+            | DefKind::AssocTy
+    )
+}
+
 impl_lint_pass!(DisallowedTypes => [DISALLOWED_TYPES]);
 
 impl<'tcx> LateLintPass<'tcx> for DisallowedTypes {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx Item<'tcx>) {
-        if let ItemKind::Use(path, UseKind::Single(_)) = &item.kind {
-            for res in &path.res {
-                self.check_res_emit(cx, res, item.span);
-            }
+        if let ItemKind::Use(path, UseKind::Single(_)) = &item.kind
+            && let Some(res) = path.res.type_ns
+        {
+            self.check_res_emit(cx, &res, item.span);
         }
     }
 

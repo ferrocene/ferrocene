@@ -1,13 +1,14 @@
 use ide_db::{famous_defs::FamousDefs, source_change::SourceChangeBuilder};
 use stdx::{format_to, to_lower_snake_case};
 use syntax::{
-    ast::{self, edit_in_place::Indent, make, AstNode, HasName, HasVisibility},
-    ted, TextRange,
+    TextRange,
+    ast::{self, AstNode, HasName, HasVisibility, edit_in_place::Indent, make},
+    ted,
 };
 
 use crate::{
+    AssistContext, AssistId, Assists, GroupLabel,
     utils::{convert_reference_type, find_struct_impl, generate_impl},
-    AssistContext, AssistId, AssistKind, Assists, GroupLabel,
 };
 
 // Assist: generate_setter
@@ -62,7 +63,7 @@ pub(crate) fn generate_setter(acc: &mut Assists, ctx: &AssistContext<'_>) -> Opt
 
     acc.add_group(
         &GroupLabel("Generate getter/setter".to_owned()),
-        AssistId("generate_setter", AssistKind::Generate),
+        AssistId::generate("generate_setter"),
         "Generate a setter method",
         target,
         |builder| build_source_change(builder, ctx, info_of_record_fields, setter_info),
@@ -203,7 +204,7 @@ pub(crate) fn generate_getter_impl(
 
     acc.add_group(
         &GroupLabel("Generate getter/setter".to_owned()),
-        AssistId(id, AssistKind::Generate),
+        AssistId::generate(id),
         label,
         target,
         |builder| build_source_change(builder, ctx, info_of_record_fields, getter_info),
@@ -293,7 +294,7 @@ fn generate_setter_from_info(info: &AssistInfo, record_field_info: &RecordFieldI
     let self_expr = make::ext::expr_self();
     let lhs = make::expr_field(self_expr, field_name);
     let rhs = make::expr_path(make::ext::ident_path(field_name));
-    let assign_stmt = make::expr_stmt(make::expr_assignment(lhs, rhs));
+    let assign_stmt = make::expr_stmt(make::expr_assignment(lhs, rhs).into());
     let body = make::block_expr([assign_stmt.into()], None);
 
     // Make the setter fn
@@ -432,12 +433,11 @@ fn build_source_change(
         new_fn.indent(1.into());
 
         // Insert a tabstop only for last method we generate
-        if i == record_fields_count - 1 {
-            if let Some(cap) = ctx.config.snippet_cap {
-                if let Some(name) = new_fn.name() {
-                    builder.add_tabstop_before(cap, name);
-                }
-            }
+        if i == record_fields_count - 1
+            && let Some(cap) = ctx.config.snippet_cap
+            && let Some(name) = new_fn.name()
+        {
+            builder.add_tabstop_before(cap, name);
         }
 
         assoc_item_list.add_item(new_fn.clone().into());

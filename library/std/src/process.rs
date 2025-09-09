@@ -168,8 +168,6 @@ use crate::num::NonZero;
 use crate::path::Path;
 use crate::sys::pipe::{AnonPipe, read2};
 use crate::sys::process as imp;
-#[stable(feature = "command_access", since = "1.57.0")]
-pub use crate::sys_common::process::CommandEnvs;
 use crate::sys_common::{AsInner, AsInnerMut, FromInner, IntoInner};
 use crate::{fmt, fs, str};
 
@@ -1073,7 +1071,7 @@ impl Command {
     /// ```
     #[stable(feature = "process", since = "1.0.0")]
     pub fn output(&mut self) -> io::Result<Output> {
-        let (status, stdout, stderr) = self.inner.output()?;
+        let (status, stdout, stderr) = imp::output(&mut self.inner)?;
         Ok(Output { status: ExitStatus(status), stdout, stderr })
     }
 
@@ -1174,7 +1172,7 @@ impl Command {
     /// ```
     #[stable(feature = "command_access", since = "1.57.0")]
     pub fn get_envs(&self) -> CommandEnvs<'_> {
-        self.inner.get_envs()
+        CommandEnvs { iter: self.inner.get_envs() }
     }
 
     /// Returns the working directory for the child process.
@@ -1264,6 +1262,48 @@ impl<'a> ExactSizeIterator for CommandArgs<'a> {
     }
 }
 
+/// An iterator over the command environment variables.
+///
+/// This struct is created by
+/// [`Command::get_envs`][crate::process::Command::get_envs]. See its
+/// documentation for more.
+#[must_use = "iterators are lazy and do nothing unless consumed"]
+#[stable(feature = "command_access", since = "1.57.0")]
+pub struct CommandEnvs<'a> {
+    iter: imp::CommandEnvs<'a>,
+}
+
+#[stable(feature = "command_access", since = "1.57.0")]
+impl<'a> Iterator for CommandEnvs<'a> {
+    type Item = (&'a OsStr, Option<&'a OsStr>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+}
+
+#[stable(feature = "command_access", since = "1.57.0")]
+impl<'a> ExactSizeIterator for CommandEnvs<'a> {
+    fn len(&self) -> usize {
+        self.iter.len()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.iter.is_empty()
+    }
+}
+
+#[stable(feature = "command_access", since = "1.57.0")]
+impl<'a> fmt::Debug for CommandEnvs<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.iter.fmt(f)
+    }
+}
+
 /// The output of a finished process.
 ///
 /// This is returned in a Result by either the [`output`] method of a
@@ -1306,9 +1346,10 @@ impl Output {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
-    /// # #[cfg(unix)] {
+    /// # #[cfg(all(unix, not(target_os = "android")))] {
     /// use std::process::Command;
     /// assert!(Command::new("false").output().unwrap().exit_ok().is_err());
     /// # }
@@ -1639,7 +1680,8 @@ impl From<io::Stdout> for Stdio {
     ///
     /// # Examples
     ///
-    /// ```rust
+    // Ferrocene annotation: QNX does not have a `whoami` binary
+    /// ```rust,ignore-qnx
     /// #![feature(exit_status_error)]
     /// use std::io;
     /// use std::process::Command;
@@ -1655,7 +1697,7 @@ impl From<io::Stdout> for Stdio {
     /// # Ok(())
     /// # }
     /// #
-    /// # if cfg!(unix) {
+    /// # if cfg!(all(unix, not(target_os = "android"))) {
     /// #     test().unwrap();
     /// # }
     /// ```
@@ -1670,7 +1712,8 @@ impl From<io::Stderr> for Stdio {
     ///
     /// # Examples
     ///
-    /// ```rust
+    // Ferrocene annotation: QNX does not have a `whoami` binary
+    /// ```rust,ignore-qnx
     /// #![feature(exit_status_error)]
     /// use std::io;
     /// use std::process::Command;
@@ -1684,7 +1727,7 @@ impl From<io::Stderr> for Stdio {
     /// # Ok(())
     /// # }
     /// #
-    /// # if cfg!(unix) {
+    /// # if cfg!(all(unix, not(target_os = "android"))) {
     /// #     test().unwrap();
     /// # }
     /// ```
@@ -1865,9 +1908,10 @@ impl crate::sealed::Sealed for ExitStatusError {}
 ///
 /// # Examples
 ///
-/// ```
+// Ferrocene annotation: QNX does not have the binaries
+/// ```ignore-qnx
 /// #![feature(exit_status_error)]
-/// # if cfg!(unix) {
+/// # if cfg!(all(unix, not(target_os = "android"))) {
 /// use std::process::{Command, ExitStatusError};
 ///
 /// fn run(cmd: &str) -> Result<(), ExitStatusError> {
@@ -1908,9 +1952,10 @@ impl ExitStatusError {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
-    /// # #[cfg(unix)] {
+    /// # #[cfg(all(unix, not(target_os = "android")))] {
     /// use std::process::Command;
     ///
     /// let bad = Command::new("false").status().unwrap().exit_ok().unwrap_err();
@@ -1932,10 +1977,11 @@ impl ExitStatusError {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     ///
-    /// # if cfg!(unix) {
+    /// # if cfg!(all(unix, not(target_os = "android"))) {
     /// use std::num::NonZero;
     /// use std::process::Command;
     ///
@@ -2455,6 +2501,7 @@ pub fn exit(code: i32) -> ! {
 #[stable(feature = "process_abort", since = "1.17.0")]
 #[cold]
 #[cfg_attr(not(test), rustc_diagnostic_item = "process_abort")]
+#[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 pub fn abort() -> ! {
     crate::sys::abort_internal();
 }
@@ -2492,7 +2539,7 @@ pub fn id() -> u32 {
 #[rustc_on_unimplemented(on(
     cause = "MainFunctionType",
     message = "`main` has invalid return type `{Self}`",
-    label = "`main` can only return types that implement `{Termination}`"
+    label = "`main` can only return types that implement `{This}`"
 ))]
 pub trait Termination {
     /// Is called to get the representation of the value as status code.

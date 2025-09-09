@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 pub(crate) mod flip_link;
 
 use std::path::PathBuf;
@@ -32,7 +35,7 @@ impl SelfTest {
 impl Step for SelfTest {
     type Output = PathBuf;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/self-test")
@@ -45,7 +48,7 @@ impl Step for SelfTest {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info("Building ferrocene/tools/self-test");
 
-        let compiler = builder.compiler(0, builder.config.build);
+        let compiler = builder.compiler(0, builder.config.host_target);
         let mut cmd = prepare_tool_cargo(
             builder,
             compiler,

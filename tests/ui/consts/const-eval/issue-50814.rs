@@ -1,4 +1,5 @@
 //@ build-fail
+//@ dont-require-annotations: NOTE
 
 trait Unsigned {
     const MAX: u8;
@@ -13,13 +14,13 @@ struct Sum<A, B>(A, B);
 
 impl<A: Unsigned, B: Unsigned> Unsigned for Sum<A, B> {
     const MAX: u8 = A::MAX + B::MAX;
-    //~^ ERROR evaluation of `<Sum<U8, U8> as Unsigned>::MAX` failed
-    //~| ERROR evaluation of `<Sum<U8, U8> as Unsigned>::MAX` failed
+    //~^ ERROR attempt to compute `u8::MAX + u8::MAX`, which would overflow
+    //~| ERROR attempt to compute `u8::MAX + u8::MAX`, which would overflow
 }
 
 fn foo<T>(_: T) -> &'static u8 {
     &Sum::<U8, U8>::MAX
-    //~^ constant
+    //~^ NOTE constant
 }
 
 fn main() {

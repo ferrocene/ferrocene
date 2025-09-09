@@ -33,8 +33,8 @@
 //@[staticlib_] compile-flags: --crate-type=staticlib
 
 // These crate types are not supported on this special Ferrocene target
-//@[dylib_] ignore-ferrocenecoretest
-//@[cdylib_] ignore-ferrocenecoretest
+//@[dylib_] ignore-ferrocene.facade
+//@[cdylib_] ignore-ferrocene.facade
 
 #![crate_name = "NonSnakeCase"]
 //[cdylib_,dylib_,lib_,proc_macro_,rlib_,staticlib_]~^ ERROR crate `NonSnakeCase` should have a snake case name

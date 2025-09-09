@@ -1,5 +1,5 @@
 <!---
-lsp/ext.rs hash: af70cce5d6905e39
+lsp/ext.rs hash: 78e87a78de8f288e
 
 If you need to change the above hash to make the test pass, please check if you
 need to adjust this doc as well and ping this issue:
@@ -693,24 +693,6 @@ interface CancelFlycheckParams {}
 ```
 
 Cancels all running flycheck processes.
-
-## Syntax Tree
-
-**Method:** `rust-analyzer/syntaxTree`
-
-**Request:**
-
-```typescript
-interface SyntaxTreeParams {
-    textDocument: TextDocumentIdentifier,
-    range?: Range,
-}
-```
-
-**Response:** `string`
-
-Returns textual representation of a parse tree for the file/selected region.
-Primarily for debugging, but very useful for all people working on rust-analyzer itself.
 
 ## View Syntax Tree
 

@@ -1,9 +1,9 @@
 use hir::db::ExpandDatabase;
 use ide_db::source_change::SourceChange;
 use ide_db::text_edit::TextEdit;
-use syntax::{ast, AstNode, SyntaxKind, SyntaxNode, SyntaxNodePtr, SyntaxToken, T};
+use syntax::{AstNode, SyntaxKind, SyntaxNode, SyntaxNodePtr, SyntaxToken, T, ast};
 
-use crate::{fix, Diagnostic, DiagnosticCode, DiagnosticsContext};
+use crate::{Diagnostic, DiagnosticCode, DiagnosticsContext, fix};
 
 // Diagnostic: need-mut
 //
@@ -12,14 +12,14 @@ pub(crate) fn need_mut(ctx: &DiagnosticsContext<'_>, d: &hir::NeedMut) -> Option
     let root = ctx.sema.db.parse_or_expand(d.span.file_id);
     let node = d.span.value.to_node(&root);
     let mut span = d.span;
-    if let Some(parent) = node.parent() {
-        if ast::BinExpr::can_cast(parent.kind()) {
-            // In case of an assignment, the diagnostic is provided on the variable name.
-            // We want to expand it to include the whole assignment, but only when this
-            // is an ordinary assignment, not a destructuring assignment. So, the direct
-            // parent is an assignment expression.
-            span = d.span.with_value(SyntaxNodePtr::new(&parent));
-        }
+    if let Some(parent) = node.parent()
+        && ast::BinExpr::can_cast(parent.kind())
+    {
+        // In case of an assignment, the diagnostic is provided on the variable name.
+        // We want to expand it to include the whole assignment, but only when this
+        // is an ordinary assignment, not a destructuring assignment. So, the direct
+        // parent is an assignment expression.
+        span = d.span.with_value(SyntaxNodePtr::new(&parent));
     };
 
     let fixes = (|| {
@@ -39,7 +39,7 @@ pub(crate) fn need_mut(ctx: &DiagnosticsContext<'_>, d: &hir::NeedMut) -> Option
         Some(vec![fix(
             "add_mut",
             "Change it to be mutable",
-            SourceChange::from_text_edit(file_id, edit),
+            SourceChange::from_text_edit(file_id.file_id(ctx.sema.db), edit),
             use_range,
         )])
     })();
@@ -55,6 +55,7 @@ pub(crate) fn need_mut(ctx: &DiagnosticsContext<'_>, d: &hir::NeedMut) -> Option
             ),
             span,
         )
+        .stable()
         .with_fixes(fixes),
     )
 }
@@ -72,17 +73,17 @@ pub(crate) fn unused_mut(ctx: &DiagnosticsContext<'_>, d: &hir::UnusedMut) -> Op
             let ast = source.syntax();
             let Some(mut_token) = token(ast, T![mut]) else { continue };
             edit_builder.delete(mut_token.text_range());
-            if let Some(token) = mut_token.next_token() {
-                if token.kind() == SyntaxKind::WHITESPACE {
-                    edit_builder.delete(token.text_range());
-                }
+            if let Some(token) = mut_token.next_token()
+                && token.kind() == SyntaxKind::WHITESPACE
+            {
+                edit_builder.delete(token.text_range());
             }
         }
         let edit = edit_builder.finish();
         Some(vec![fix(
             "remove_mut",
             "Remove unnecessary `mut`",
-            SourceChange::from_text_edit(file_id, edit),
+            SourceChange::from_text_edit(file_id.file_id(ctx.sema.db), edit),
             use_range,
         )])
     })();
@@ -94,7 +95,7 @@ pub(crate) fn unused_mut(ctx: &DiagnosticsContext<'_>, d: &hir::UnusedMut) -> Op
             "variable does not need to be mutable",
             ast,
         )
-        .experimental() // Not supporting `#[allow(unused_mut)]` in proc macros leads to false positive.
+        // Not supporting `#[allow(unused_mut)]` in proc macros leads to false positive, hence not stable.
         .with_fixes(fixes),
     )
 }
@@ -1258,7 +1259,7 @@ fn foo(mut foo: Foo) {
 
 pub struct A {}
 pub unsafe fn foo(a: *mut A) {
-    let mut b = || -> *mut A { &mut *a };
+    let mut b = || -> *mut A { unsafe { &mut *a } };
       //^^^^^ 💡 warn: variable does not need to be mutable
     let _ = b();
 }

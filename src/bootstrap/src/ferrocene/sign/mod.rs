@@ -27,7 +27,7 @@ struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
 impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
     type Output = ();
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.never()
@@ -63,7 +63,7 @@ macro_rules! documents {
             impl Step for $name {
                 type Output = ();
                 const DEFAULT: bool = true;
-                const ONLY_HOSTS: bool = true;
+                const IS_HOST: bool = true;
 
                 fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
                     run.path(crate::ferrocene::doc::$name::SOURCE)
@@ -116,6 +116,7 @@ documents![
     QualificationPlan,
     QualificationReport,
     SafetyManual,
+    CoreCertification,
     // QMS Documents
     InternalProcedures,
 ];

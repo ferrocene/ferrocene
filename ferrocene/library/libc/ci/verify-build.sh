@@ -11,11 +11,12 @@ set -eux
 
 rust="$TOOLCHAIN"
 filter="${FILTER:-}"
+host_target=$(rustc -vV | awk '/^host/ { print $2 }')
 
 case "$(uname -s)" in
-    Linux*)     os=linux ;;
-    Darwin*)    os=macos ;;
-    MINGW*)     os=windows ;;
+    Linux*) os=linux ;;
+    Darwin*) os=macos ;;
+    MINGW*) os=windows ;;
     *)
         echo "Unknown system $(uname -s)"
         exit 1
@@ -24,7 +25,8 @@ esac
 
 echo "Testing Rust $rust on $os"
 
-if [ "$TOOLCHAIN" = "nightly" ] ; then
+if [ "$TOOLCHAIN" = "nightly" ]; then
+    # For build-std
     rustup component add rust-src
 fi
 
@@ -46,7 +48,7 @@ test_target() {
 
     if [ "${no_dist}" != "0" ]; then
         # If we can't download a `core`, we need to build it
-        cmd="$cmd -Zbuild-std=core,alloc"
+        cmd="$cmd -Zbuild-std=core"
 
         # FIXME: With `build-std` feature, `compiler_builtins` emits a lof of lint warnings.
         RUSTFLAGS="${RUSTFLAGS:-} -Aimproper_ctypes_definitions"
@@ -59,26 +61,28 @@ test_target() {
         N=5
         n=0
         until [ $n -ge $N ]; do
-            if rustup target add "$target" --toolchain "$rust" ; then
+            if rustup target add "$target" --toolchain "$rust"; then
                 break
             fi
-            n=$((n+1))
+            n=$((n + 1))
             sleep 1
         done
     fi
 
     # Test with expected combinations of features
     $cmd
-    $cmd --features const-extern-fn
     $cmd --features extra_traits
 
     if [ "$os" = "linux" ]; then
         # Test with the equivalent of __USE_TIME_BITS64
         RUST_LIBC_UNSTABLE_LINUX_TIME_BITS64=1 $cmd
         case "$target" in
-            # Test with the equivalent of __FILE_OFFSET_BITS=64
-            arm*-gnu*|i*86*-gnu|powerpc-*-gnu*|mips*-gnu|sparc-*-gnu|thumb-*gnu*)
-                RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS=64 $cmd;;
+            arm*-gnu* | i*86*-gnu | powerpc-*-gnu* | mips*-gnu | sparc-*-gnu | thumb-*gnu*)
+                # Test with the equivalent of _FILE_OFFSET_BITS=64
+                RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS=64 $cmd
+                # Test with the equivalent of _TIME_BITS=64
+                RUST_LIBC_UNSTABLE_GNU_TIME_BITS=64 $cmd
+                ;;
         esac
     fi
 
@@ -104,6 +108,13 @@ test_target() {
             $cmd
             $cmd --no-default-features
         done
+    fi
+
+    # FIXME(semver): can't pass `--target` to `cargo-semver-checks`
+    if [ "$rust" = "stable" ] && [ "$target" = "$host_target" ]; then
+        # Run semver checks on the stable channel
+        cargo semver-checks --only-explicit-features \
+            --features std,extra_traits
     fi
 }
 
@@ -150,11 +161,14 @@ x86_64-unknown-linux-musl \
 x86_64-unknown-netbsd \
 "
 
+# FIXME(powerpc64le): powerpc64le-unknown-linux-musl is tier 2 since 1.85 and
+# can be moved to rust_linux_targets once MSRV is increased
 rust_nightly_linux_targets="\
 aarch64-unknown-fuchsia \
 armv5te-unknown-linux-gnueabi \
 armv5te-unknown-linux-musleabi \
 i686-pc-windows-gnu \
+powerpc64le-unknown-linux-musl \
 riscv64gc-unknown-linux-gnu \
 x86_64-fortanix-unknown-sgx \
 x86_64-pc-solaris \

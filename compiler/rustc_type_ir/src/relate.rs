@@ -33,7 +33,7 @@ pub enum StructurallyRelateAliases {
 /// a miscompilation or unsoundness.
 ///
 /// When in doubt, use `VarianceDiagInfo::default()`
-#[derive_where(Clone, Copy, PartialEq, Eq, Debug, Default; I: Interner)]
+#[derive_where(Clone, Copy, PartialEq, Debug, Default; I: Interner)]
 pub enum VarianceDiagInfo<I: Interner> {
     /// No additional information - this is the default.
     /// We will not add any additional information to error messages.
@@ -50,6 +50,8 @@ pub enum VarianceDiagInfo<I: Interner> {
         param_index: u32,
     },
 }
+
+impl<I: Interner> Eq for VarianceDiagInfo<I> {}
 
 impl<I: Interner> VarianceDiagInfo<I> {
     /// Mirrors `Variance::xform` - used to 'combine' the existing
@@ -273,8 +275,10 @@ impl<I: Interner> Relate<I> for ty::AliasTerm<I> {
                     false, // do not fetch `type_of(a_def_id)`, as it will cause a cycle
                 )?,
                 ty::AliasTermKind::ProjectionTy
-                | ty::AliasTermKind::WeakTy
+                | ty::AliasTermKind::FreeConst
+                | ty::AliasTermKind::FreeTy
                 | ty::AliasTermKind::InherentTy
+                | ty::AliasTermKind::InherentConst
                 | ty::AliasTermKind::UnevaluatedConst
                 | ty::AliasTermKind::ProjectionConst => {
                     relate_args_invariantly(relation, a.args, b.args)?
@@ -398,8 +402,12 @@ pub fn structurally_relate_tys<I: Interner, R: TypeRelation<I>>(
         (ty::Placeholder(p1), ty::Placeholder(p2)) if p1 == p2 => Ok(a),
 
         (ty::Adt(a_def, a_args), ty::Adt(b_def, b_args)) if a_def == b_def => {
-            let args = relation.relate_item_args(a_def.def_id(), a_args, b_args)?;
-            Ok(Ty::new_adt(cx, a_def, args))
+            Ok(if a_args.is_empty() {
+                a
+            } else {
+                let args = relation.relate_item_args(a_def.def_id(), a_args, b_args)?;
+                if args == a_args { a } else { Ty::new_adt(cx, a_def, args) }
+            })
         }
 
         (ty::Foreign(a_id), ty::Foreign(b_id)) if a_id == b_id => Ok(Ty::new_foreign(cx, a_id)),
@@ -513,8 +521,12 @@ pub fn structurally_relate_tys<I: Interner, R: TypeRelation<I>>(
         }
 
         (ty::FnDef(a_def_id, a_args), ty::FnDef(b_def_id, b_args)) if a_def_id == b_def_id => {
-            let args = relation.relate_item_args(a_def_id, a_args, b_args)?;
-            Ok(Ty::new_fn_def(cx, a_def_id, args))
+            Ok(if a_args.is_empty() {
+                a
+            } else {
+                let args = relation.relate_item_args(a_def_id, a_args, b_args)?;
+                if args == a_args { a } else { Ty::new_fn_def(cx, a_def_id, args) }
+            })
         }
 
         (ty::FnPtr(a_sig_tys, a_hdr), ty::FnPtr(b_sig_tys, b_hdr)) => {

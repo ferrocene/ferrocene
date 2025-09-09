@@ -16,7 +16,7 @@
 //! dependencies, and needs an active internet connection
 
 //@ only-thumb
-//@ ignore-ferrocenecoretest cortex-m crate does not support test double
+//@ ignore-ferrocene.facade cortex-m crate does not support test double
 
 use std::path::PathBuf;
 

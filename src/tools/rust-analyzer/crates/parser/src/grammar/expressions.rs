@@ -4,8 +4,8 @@ use crate::grammar::attributes::ATTRIBUTE_FIRST;
 
 use super::*;
 
+pub(super) use atom::{EXPR_RECOVERY_SET, LITERAL_FIRST, literal, parse_asm_expr};
 pub(crate) use atom::{block_expr, match_arm_list};
-pub(super) use atom::{literal, LITERAL_FIRST};
 
 #[derive(PartialEq, Eq)]
 pub(super) enum Semicolon {
@@ -58,7 +58,7 @@ pub(super) fn stmt(p: &mut Parser<'_>, semicolon: Semicolon) {
     // }
     attributes::outer_attrs(p);
 
-    if p.at(T![let]) {
+    if p.at(T![let]) || (p.at(T![super]) && p.nth_at(1, T![let])) {
         let_stmt(p, semicolon);
         m.complete(p, LET_STMT);
         return;
@@ -77,44 +77,45 @@ pub(super) fn stmt(p: &mut Parser<'_>, semicolon: Semicolon) {
         return;
     }
 
-    if let Some((cm, blocklike)) = expr_stmt(p, Some(m)) {
-        if !(p.at(T!['}']) || (semicolon != Semicolon::Required && p.at(EOF))) {
-            // test no_semi_after_block
-            // fn foo() {
-            //     if true {}
-            //     loop {}
-            //     match () {}
-            //     while true {}
-            //     for _ in () {}
-            //     {}
-            //     {}
-            //     macro_rules! test {
-            //          () => {}
-            //     }
-            //     test!{}
-            // }
-            let m = cm.precede(p);
-            match semicolon {
-                Semicolon::Required => {
-                    if blocklike.is_block() {
-                        p.eat(T![;]);
-                    } else {
-                        p.expect(T![;]);
-                    }
-                }
-                Semicolon::Optional => {
+    if let Some((cm, blocklike)) = expr_stmt(p, Some(m))
+        && !(p.at(T!['}']) || (semicolon != Semicolon::Required && p.at(EOF)))
+    {
+        // test no_semi_after_block
+        // fn foo() {
+        //     if true {}
+        //     loop {}
+        //     match () {}
+        //     while true {}
+        //     for _ in () {}
+        //     {}
+        //     {}
+        //     macro_rules! test {
+        //          () => {}
+        //     }
+        //     test!{}
+        // }
+        let m = cm.precede(p);
+        match semicolon {
+            Semicolon::Required => {
+                if blocklike.is_block() {
                     p.eat(T![;]);
+                } else {
+                    p.expect(T![;]);
                 }
-                Semicolon::Forbidden => (),
             }
-            m.complete(p, EXPR_STMT);
+            Semicolon::Optional => {
+                p.eat(T![;]);
+            }
+            Semicolon::Forbidden => (),
         }
+        m.complete(p, EXPR_STMT);
     }
 }
 
 // test let_stmt
-// fn f() { let x: i32 = 92; }
+// fn f() { let x: i32 = 92; super let y; super::foo; }
 pub(super) fn let_stmt(p: &mut Parser<'_>, with_semi: Semicolon) {
+    p.eat(T![super]);
     p.bump(T![let]);
     patterns::pattern(p);
     if p.at(T![:]) {
@@ -133,14 +134,11 @@ pub(super) fn let_stmt(p: &mut Parser<'_>, with_semi: Semicolon) {
     if p.at(T![else]) {
         // test_err let_else_right_curly_brace
         // fn func() { let Some(_) = {Some(1)} else { panic!("h") };}
-        if let Some(expr) = expr_after_eq {
-            if let Some(token) = expr.last_token(p) {
-                if token == T!['}'] {
-                    p.error(
-                        "right curly brace `}` before `else` in a `let...else` statement not allowed"
-                    )
-                }
-            }
+        if let Some(expr) = expr_after_eq
+            && let Some(token) = expr.last_token(p)
+            && token == T!['}']
+        {
+            p.error("right curly brace `}` before `else` in a `let...else` statement not allowed")
         }
 
         // test let_else

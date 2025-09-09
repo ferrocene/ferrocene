@@ -24,7 +24,7 @@ pub mod toolchain_info {
 
     use std::path::Path;
 
-    use crate::{ManifestPath, Sysroot};
+    use crate::{ManifestPath, Sysroot, cargo_config_file::CargoConfigFile};
 
     #[derive(Copy, Clone)]
     pub enum QueryConfig<'a> {
@@ -32,11 +32,12 @@ pub mod toolchain_info {
         Rustc(&'a Sysroot, &'a Path),
         /// Attempt to use cargo to query the desired information, honoring cargo configurations.
         /// If this fails, falls back to invoking `rustc` directly.
-        Cargo(&'a Sysroot, &'a ManifestPath),
+        Cargo(&'a Sysroot, &'a ManifestPath, &'a Option<CargoConfigFile>),
     }
 }
 
 mod build_dependencies;
+mod cargo_config_file;
 mod cargo_workspace;
 mod env;
 mod manifest_path;
@@ -48,17 +49,17 @@ mod tests;
 
 use std::{
     fmt,
-    fs::{self, read_dir, ReadDir},
+    fs::{self, ReadDir, read_dir},
     io,
     process::Command,
 };
 
-use anyhow::{bail, format_err, Context};
+use anyhow::{Context, bail, format_err};
 use paths::{AbsPath, AbsPathBuf, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 
 pub use crate::{
-    build_dependencies::WorkspaceBuildScripts,
+    build_dependencies::{ProcMacroDylibPath, WorkspaceBuildScripts},
     cargo_workspace::{
         CargoConfig, CargoFeatures, CargoMetadataConfig, CargoWorkspace, Package, PackageData,
         PackageDependency, RustLibSource, Target, TargetData, TargetKind,
@@ -102,7 +103,9 @@ impl ProjectManifest {
         if path.extension().unwrap_or_default() == "rs" {
             return Ok(ProjectManifest::CargoScript(path));
         }
-        bail!("project root must point to a Cargo.toml, rust-project.json or <script>.rs file: {path}");
+        bail!(
+            "project root must point to a Cargo.toml, rust-project.json or <script>.rs file: {path}"
+        );
     }
 
     pub fn discover_single(path: &AbsPath) -> anyhow::Result<ProjectManifest> {
@@ -136,21 +139,22 @@ impl ProjectManifest {
         }
 
         fn find_in_parent_dirs(path: &AbsPath, target_file_name: &str) -> Option<ManifestPath> {
-            if path.file_name().unwrap_or_default() == target_file_name {
-                if let Ok(manifest) = ManifestPath::try_from(path.to_path_buf()) {
-                    return Some(manifest);
-                }
+            if path.file_name().unwrap_or_default() == target_file_name
+                && let Ok(manifest) = ManifestPath::try_from(path.to_path_buf())
+            {
+                return Some(manifest);
             }
 
             let mut curr = Some(path);
 
             while let Some(path) = curr {
                 let candidate = path.join(target_file_name);
-                if fs::metadata(&candidate).is_ok() {
-                    if let Ok(manifest) = ManifestPath::try_from(candidate) {
-                        return Some(manifest);
-                    }
+                if fs::metadata(&candidate).is_ok()
+                    && let Ok(manifest) = ManifestPath::try_from(candidate)
+                {
+                    return Some(manifest);
                 }
+
                 curr = path.parent();
             }
 

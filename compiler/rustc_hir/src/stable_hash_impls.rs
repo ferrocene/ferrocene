@@ -5,36 +5,14 @@ use crate::HashIgnoredAttrId;
 use crate::hir::{
     AttributeMap, BodyId, Crate, ForeignItemId, ImplItemId, ItemId, OwnerNodes, TraitItemId,
 };
-use crate::hir_id::{HirId, ItemLocalId};
+use crate::hir_id::ItemLocalId;
+use crate::lints::DelayedLints;
 
 /// Requirements for a `StableHashingContext` to be used in this crate.
 /// This is a hack to allow using the `HashStable_Generic` derive macro
 /// instead of implementing everything in `rustc_middle`.
-pub trait HashStableContext:
-    rustc_attr_data_structures::HashStableContext
-    + rustc_ast::HashStableContext
-    + rustc_abi::HashStableContext
-{
+pub trait HashStableContext: rustc_ast::HashStableContext + rustc_abi::HashStableContext {
     fn hash_attr_id(&mut self, id: &HashIgnoredAttrId, hasher: &mut StableHasher);
-}
-
-impl<HirCtx: crate::HashStableContext> ToStableHashKey<HirCtx> for HirId {
-    type KeyType = (DefPathHash, ItemLocalId);
-
-    #[inline]
-    fn to_stable_hash_key(&self, hcx: &HirCtx) -> (DefPathHash, ItemLocalId) {
-        let def_path_hash = self.owner.def_id.to_stable_hash_key(hcx);
-        (def_path_hash, self.local_id)
-    }
-}
-
-impl<HirCtx: crate::HashStableContext> ToStableHashKey<HirCtx> for ItemLocalId {
-    type KeyType = ItemLocalId;
-
-    #[inline]
-    fn to_stable_hash_key(&self, _: &HirCtx) -> ItemLocalId {
-        *self
-    }
 }
 
 impl<HirCtx: crate::HashStableContext> ToStableHashKey<HirCtx> for BodyId {
@@ -99,6 +77,13 @@ impl<'tcx, HirCtx: crate::HashStableContext> HashStable<HirCtx> for OwnerNodes<'
         // `hash_stable` results.
         let OwnerNodes { opt_hash_including_bodies, nodes: _, bodies: _ } = *self;
         opt_hash_including_bodies.unwrap().hash_stable(hcx, hasher);
+    }
+}
+
+impl<HirCtx: crate::HashStableContext> HashStable<HirCtx> for DelayedLints {
+    fn hash_stable(&self, hcx: &mut HirCtx, hasher: &mut StableHasher) {
+        let DelayedLints { opt_hash, .. } = *self;
+        opt_hash.unwrap().hash_stable(hcx, hasher);
     }
 }
 

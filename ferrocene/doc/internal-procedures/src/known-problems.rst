@@ -41,7 +41,7 @@ frontmatter `tag`
 ^^^^^^^^^^^^^^^^^
 
 The `tag` frontmatter describes the category this issue belongs to. You can see the current
-categories here https://github.com/ferrocene/problems/blob/main/config.yml.
+categories here https://github.com/ferrocene/problems/blob/main/src/config.yml.
 
 frontmatter `introduced-commit`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

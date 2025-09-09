@@ -115,14 +115,6 @@ tests = ["tests/debuginfo"]
 targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "Running these tests require changes to bootstrap"
 
-[["tests/ui-fulldeps"]]
-tests = [
-    "tests/ui-fulldeps/session-diagnostic/diagnostic-derive-doc-comment-field.rs",
-    "tests/ui-fulldeps/session-diagnostic/diagnostic-derive.rs",
-]
-targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin",]
-reason = "These tests were broken in https://github.com/rust-lang/rust/pull/141751 and should be resolved with https://github.com/rust-lang/rust/pull/142377"
-
 [["tests/ui"]]
 tests = [
     "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-add-and-remove-same-flag.rs",

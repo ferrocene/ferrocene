@@ -221,9 +221,8 @@ pub const fn identity<T>(x: T) -> T {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AsRef"]
-#[const_trait]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-pub trait AsRef<T: PointeeSized>: PointeeSized {
+pub const trait AsRef<T: PointeeSized>: PointeeSized {
     /// Converts this type into a shared reference of the (usually inferred) input type.
     #[stable(feature = "rust1", since = "1.0.0")]
     fn as_ref(&self) -> &T;
@@ -374,9 +373,8 @@ pub trait AsRef<T: PointeeSized>: PointeeSized {
 /// `&mut Vec<u8>`, for example, is the better choice (callers need to pass the correct type then).
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AsMut"]
-#[const_trait]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-pub trait AsMut<T: PointeeSized>: PointeeSized {
+pub const trait AsMut<T: PointeeSized>: PointeeSized {
     /// Converts this type into a mutable reference of the (usually inferred) input type.
     #[stable(feature = "rust1", since = "1.0.0")]
     fn as_mut(&mut self) -> &mut T;
@@ -455,8 +453,7 @@ pub trait AsMut<T: PointeeSized>: PointeeSized {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(search_unbox)]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[const_trait]
-pub trait Into<T>: Sized {
+pub const trait Into<T>: Sized {
     /// Converts this type into the (usually inferred) input type.
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -592,8 +589,7 @@ pub trait Into<T>: Sized {
 ))]
 #[doc(search_unbox)]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[const_trait]
-pub trait From<T>: Sized {
+pub const trait From<T>: Sized {
     /// Converts to this type from the input type.
     #[rustc_diagnostic_item = "from_fn"]
     #[must_use]
@@ -621,8 +617,7 @@ pub trait From<T>: Sized {
 #[rustc_diagnostic_item = "TryInto"]
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[const_trait]
-pub trait TryInto<T>: Sized {
+pub const trait TryInto<T>: Sized {
     /// The type returned in the event of a conversion error.
     #[stable(feature = "try_from", since = "1.34.0")]
     type Error;
@@ -701,8 +696,7 @@ pub trait TryInto<T>: Sized {
 #[rustc_diagnostic_item = "TryFrom"]
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[const_trait]
-pub trait TryFrom<T>: Sized {
+pub const trait TryFrom<T>: Sized {
     /// The type returned in the event of a conversion error.
     #[stable(feature = "try_from", since = "1.34.0")]
     type Error;

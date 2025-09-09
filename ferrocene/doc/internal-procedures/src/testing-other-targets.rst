@@ -24,6 +24,7 @@ Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux ho
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
 :target-with-tuple:`aarch64-apple-darwin`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install Lima, if you don't have it:
 
@@ -124,7 +125,7 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
     Please ensure you always work from the guest-local repository.
 
 :target-with-tuple:`x86_64-pc-windows-msvc`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Setup WSL2, if you don't have it:
 
@@ -166,7 +167,7 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
     Please ensure you always work from the guest-local repository.
 
 :target-with-tuple:`x86_64-unknown-linux-gnu`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
 installed, as well as a few extras:
@@ -190,7 +191,7 @@ Currently bare metal targets have a similar procedure for testing.
    This will eventually be an open source component, but for now, it's our little bit of arcane magic.
 
 :target-with-tuple:`aarch64-unknown-none`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. Warning::
     

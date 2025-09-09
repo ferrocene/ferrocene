@@ -36,7 +36,7 @@ You can create a guest with the following command:
 
 .. code-block:: yaml
 
-    cat <<EOF | limactl create --name=test -
+    cat <<EOF | limactl create --name=ferrocene -
     minimumLimaVersion: "1.0.0"
     images:
       - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"

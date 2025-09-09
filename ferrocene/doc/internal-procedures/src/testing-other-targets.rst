@@ -24,7 +24,7 @@ Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux ho
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
 :target-with-tuple:`aarch64-apple-darwin`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install Lima, if you don't have it:
 

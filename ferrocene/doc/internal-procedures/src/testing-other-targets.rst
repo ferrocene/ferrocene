@@ -32,7 +32,7 @@ Install Lima, if you don't have it:
 
     brew install lima
 
-You can create a guest with the following:
+You can create a guest with the following command:
 
 .. code-block:: yaml
 
@@ -166,16 +166,6 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
 
     Please ensure you always work from the guest-local repository.
 
-Target Procedures
------------------
-
-Currently bare metal targets have a similar procedure for testing.
-
-.. note::
-
-   Currently, these targets use our *secret sauce*.
-   This will eventually be an open source component, but for now, it's our little bit of arcane magic.
-
 :target-with-triple:`x86_64-unknown-linux-gnu`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -185,6 +175,20 @@ installed, as well as a few extras:
 .. code-block:: bash
 
    sudo apt install qemu-user-static binfmt-support
+
+.. Note::
+
+    These packages must also be installed in the VMs used on MacOS and Windows.
+
+Target Procedures
+-----------------
+
+Currently bare metal targets have a similar procedure for testing.
+
+.. note::
+
+   Currently, these targets use our *secret sauce*.
+   This will eventually be an open source component, but for now, it's our little bit of arcane magic.
 
 :target-with-triple:`aarch64-unknown-none`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -157,3 +157,38 @@ impl Step for GenerateTarball {
         run.builder.ensure(Self { target: run.target });
     }
 }
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct FlipLink {
+    host: TargetSelection,
+}
+
+impl Step for FlipLink {
+    type Output = ();
+    const DEFAULT: bool = true;
+    const IS_HOST: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("ferrocene/tools/flip-link")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(FlipLink { host: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.info("Testing ferrocene/tools/flip-link");
+        tool::prepare_tool_cargo(
+            builder,
+            builder.compiler(0, self.host),
+            Mode::ToolBootstrap,
+            self.host,
+            Kind::Test,
+            "ferrocene/tools/flip-link",
+            SourceType::InTree,
+            &[],
+        )
+        .into_cmd()
+        .run(builder);
+    }
+}

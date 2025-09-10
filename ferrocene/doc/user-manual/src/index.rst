@@ -60,6 +60,14 @@ Ferrocene User Manual
    rustfmt/usage
    rustfmt/config
 
+.. toctree::
+   :numbered:
+   :maxdepth: 2
+   :caption: flip-link
+
+   flip-link/install
+   flip-link/usage
+
 .. appendices::
    :numbered:
    :maxdepth: 2

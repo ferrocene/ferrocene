@@ -871,6 +871,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::CheckDocumentSignatures,
                 crate::ferrocene::test::GenerateTarball,
                 crate::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols,
+                crate::ferrocene::test::FlipLink,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
                 test::BootstrapPy,

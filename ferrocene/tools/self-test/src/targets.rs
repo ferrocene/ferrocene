@@ -148,16 +148,13 @@ fn check_default_link_args(sysroot: &Path, target: &TargetSpec) -> Result<(), Er
     // All our `HostCc` targets require `-fuse-ld=lld` to be passed
     let fuse_ld_arg = "-fuse-ld=lld";
     if !output.stdout.contains(fuse_ld_arg) {
-        return Err(Error::TargetDefaultLinkArgMissing {
+        Err(Error::TargetDefaultLinkArgMissing {
             target: target.tuple.into(),
             link_arg: fuse_ld_arg.into(),
-        });
+        })
     } else {
-        println!("Contains {fuse_ld_arg}!");
-        println!("{}", output.stdout);
+        Ok(())
     }
-
-    Ok(())
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -250,6 +247,34 @@ mod tests {
             check_target(utils.reporter(), utils.sysroot(), &target).unwrap()
         );
         utils.assert_report_success("target installed correctly: x86_64-unknown-linux-gnu");
+    }
+
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))] // Only on x86_64 Linux since the test is specific to that.
+    #[test]
+    #[should_panic]
+    fn test_check_target_std_fails_if_lld_not_used() {
+        let tuple = "x86_64-unknown-linux-gnu";
+        let target = TargetSpec { tuple, std: true, linker: Linker::HostCc };
+
+        let utils = TestUtils::new();
+        utils
+            .target(tuple)
+            .lib("core", "0123456789abcdef")
+            .lib("alloc", "0123456789abcdef")
+            .lib("std", "0123456789abcdef")
+            .lib("test", "0123456789abcdef")
+            .lib("proc_macro", "0123456789abcdef")
+            .lib("other", "0123456789abcdef") // Unknown libraries are ignored
+            .create();
+
+        let _bin = utils
+            .bin("rustc")
+            .expected_args(&["--target", tuple, "--print", "link-args"])
+            .expected_args_strict(false)
+            .stdout("-fuse-ld=not-lld-this-should-fail")
+            .create();
+
+        check_target(utils.reporter(), utils.sysroot(), &target).unwrap(); // Panic!
     }
 
     #[test]

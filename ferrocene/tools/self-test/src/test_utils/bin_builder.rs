@@ -21,7 +21,8 @@ pub(crate) struct BinBuilder<'a> {
     stderr: Option<String>,
     exit: Option<i32>,
     expected_args: Option<&'a [&'a str]>,
-    /// If true test for all args, if false only check for presence
+    /// If true test that all expected args and no additional ones are present.
+    /// If false only check expected args are present, but there can be additional ones.
     expected_args_strict: bool,
     dest: BinaryDestination,
     program: &'static str,

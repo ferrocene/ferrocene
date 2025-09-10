@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use serde_json::Value;
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
+use crate::utils::exec::BootstrapCommand;
 use crate::{Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -177,18 +181,73 @@ impl Step for FlipLink {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let compiler = builder.compiler(0, self.host);
+        // The flip link tests require a thumbv7em-none-eabi target to exist
+        builder.ensure(Std::new(compiler, TargetSelection::from_user("thumbv7em-none-eabi")));
+
         builder.info("Testing ferrocene/tools/flip-link");
-        tool::prepare_tool_cargo(
+
+        let out = tool::prepare_tool_cargo(
             builder,
-            builder.compiler(0, self.host),
-            Mode::ToolBootstrap,
+            compiler,
+            Mode::ToolTarget,
             self.host,
             Kind::Test,
             "ferrocene/tools/flip-link",
-            SourceType::InTree,
+            SourceType::Submodule,
             &[],
         )
         .into_cmd()
-        .run(builder);
+        .args(["--no-run", "--message-format", "json"])
+        .run_capture_stdout(builder);
+
+        let mut test_artifacts = vec![];
+        for line in out.stdout().lines() {
+            let parsed: serde_json::Value = serde_json::from_str(&line).unwrap();
+
+            // We only care about flip-link
+            let Some(package_id) = parsed.pointer("/package_id").and_then(Value::as_str) else {
+                continue;
+            };
+            if !package_id.contains("flip-link") {
+                continue;
+            }
+
+            // Ensure we only get test binaries, not the actual `flip-link`.
+            let Some(test) = parsed.pointer("/profile/test").and_then(Value::as_bool) else {
+                continue;
+            };
+            if !test {
+                continue;
+            }
+
+            let Some(kind) = parsed
+                .pointer("/target/kind")
+                .and_then(Value::as_array)
+                .and_then(|v| v.first())
+                .and_then(Value::as_str)
+            else {
+                continue;
+            };
+            if !(kind == "test" || kind == "bin") {
+                continue;
+            }
+
+            let Some(executable) = parsed.pointer("/executable").and_then(Value::as_str) else {
+                panic!(
+                    "\
+                    No executable found in cargo line that should include executable\n\
+                    {line}\
+                "
+                );
+            };
+
+            test_artifacts.push(executable.to_string());
+        }
+
+        for artifact in test_artifacts {
+            builder.info(&format!("Testing flip-link test binary ({artifact})"));
+            BootstrapCommand::new(artifact).current_dir("ferrocene/tools/flip-link").run(builder);
+        }
     }
 }

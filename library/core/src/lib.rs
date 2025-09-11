@@ -262,6 +262,7 @@ pub use crate::macros::cfg_select;
 #[macro_use]
 mod internal_macros;
 
+<<<<<<< HEAD
 #[path = "num/shells/int_macros.rs"]
 #[macro_use]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -316,6 +317,18 @@ pub mod u8;
 #[path = "num/shells/usize.rs"]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod usize;
+=======
+#[path = "num/shells/legacy_int_modules.rs"]
+mod legacy_int_modules;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[allow(clippy::useless_attribute)] // FIXME false positive (https://github.com/rust-lang/rust-clippy/issues/15636)
+#[allow(deprecated_in_future)]
+pub use legacy_int_modules::{i8, i16, i32, i64, isize, u8, u16, u32, u64, usize};
+#[stable(feature = "i128", since = "1.26.0")]
+#[allow(clippy::useless_attribute)] // FIXME false positive (https://github.com/rust-lang/rust-clippy/issues/15636)
+#[allow(deprecated_in_future)]
+pub use legacy_int_modules::{i128, u128};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[path = "num/f128.rs"]
 #[cfg(not(feature = "ferrocene_certified"))]

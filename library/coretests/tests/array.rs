@@ -718,7 +718,11 @@ fn array_map_drops_unmapped_elements_on_panic() {
     }
 }
 
+<<<<<<< HEAD
 // This takes covers `<[T; N]>::eq` when it returns none.
+=======
+// This covers the `PartialEq::<[T]>::eq` impl for `[T; N]` when it returns false.
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[test]
 fn array_eq() {
     let not_true = [0u8] == [].as_slice();

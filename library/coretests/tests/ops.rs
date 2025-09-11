@@ -89,7 +89,12 @@ fn test_range_to_contains() {
     assert!(!(1u32..=5).contains(&6));
 }
 
+<<<<<<< HEAD
 // This test covers `RangeBounds::contains` when the start is excluded.
+=======
+// This test covers `RangeBounds::contains` when the start is excluded,
+// which cannot be directly expressed by Rust's built-in range syntax.
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[test]
 fn test_range_bounds_contains() {
     let r = (Bound::Excluded(1u32), Bound::Included(5u32));

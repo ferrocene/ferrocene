@@ -534,14 +534,14 @@ fn test_prebuilt_llvm_config_path_resolution() {
         false,
     )
     .llvm_result()
-    .llvm_config
+    .host_llvm_config
     .clone();
     let actual = drop_win_disk_prefix_if_present(actual);
     assert_eq!(expected, actual);
 
     let actual = prebuilt_llvm_config(&builder, builder.config.host_target, false)
         .llvm_result()
-        .llvm_config
+        .host_llvm_config
         .clone();
     let actual = drop_win_disk_prefix_if_present(actual);
     assert_eq!(expected, actual);
@@ -559,7 +559,7 @@ fn test_prebuilt_llvm_config_path_resolution() {
 
     let actual = prebuilt_llvm_config(&builder, builder.config.host_target, false)
         .llvm_result()
-        .llvm_config
+        .host_llvm_config
         .clone();
     let expected = builder
         .out
@@ -582,7 +582,7 @@ fn test_prebuilt_llvm_config_path_resolution() {
 
         let actual = prebuilt_llvm_config(&builder, builder.config.host_target, false)
             .llvm_result()
-            .llvm_config
+            .host_llvm_config
             .clone();
         let expected = builder
             .out

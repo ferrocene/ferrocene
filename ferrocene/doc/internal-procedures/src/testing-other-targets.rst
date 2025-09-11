@@ -251,7 +251,7 @@ Install the necessary packages:
 
 .. code-block:: bash
 
-    sudo apt install gcc-arm-none-eabi qemu-system-arm
+    sudo apt install gcc-arm-none-eabi
 
 If you don't already have a ``/usr/share/binfmts/qemu-arm`` file, create one:
 

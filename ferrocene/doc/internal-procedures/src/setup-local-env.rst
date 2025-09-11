@@ -27,7 +27,7 @@ On Ubuntu 24.10, install the software requirements by running:
 
 .. code-block:: bash
 
-   sudo apt install ninja-build bzip2 cmake gcc g++ awscli
+   sudo apt install ninja-build bzip2 cmake gcc g++ awscli zlib1g-dev
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
 .. note::

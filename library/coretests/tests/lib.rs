@@ -118,7 +118,6 @@
 // tidy-alphabetical-start
 #![feature(char_internals)]
 #![feature(debug_closure_helpers)]
-#![feature(one_sided_range)]
 // tidy-alphabetical-end
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.

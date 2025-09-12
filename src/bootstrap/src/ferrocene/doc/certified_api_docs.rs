@@ -40,7 +40,6 @@ impl Step for CertifiedApiDocs {
 
         // Remove unwanted files/dirs
         builder.remove(&certified_target_doc_out.join("index.html"));
-        builder.remove_dir(&certified_target_doc_out.join("alloc"));
 
         // Copy the files from the certified target to the host target
         let host_target_doc_out = builder.doc_out(self.target).join("certification/api-docs");

@@ -1864,7 +1864,9 @@ impl Config {
                         }
                     }
 
-                    if let Some(config_path) = &self.config {
+                    // Ferrocene addition: our CI builders don't currently upload builder-config.
+                    // For now, just assume it matches the local settings.
+                    if false && let Some(config_path) = &self.config {
                         let ci_config_toml = match self.get_builder_toml("ci-rustc") {
                             Ok(ci_config_toml) => ci_config_toml,
                             Err(e) if e.to_string().contains("unknown field") => {

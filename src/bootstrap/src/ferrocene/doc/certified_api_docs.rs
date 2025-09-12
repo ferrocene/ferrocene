@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use crate::core::build_steps::doc;
 use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::target_to_certified_target;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub(crate) struct CertifiedApiDocs {
@@ -24,7 +23,9 @@ impl Step for CertifiedApiDocs {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let certified_crates = vec!["core".into()];
-        let certified_target = target_to_certified_target(&self.target)
+        let certified_target = self
+            .target
+            .certified_equivalent()
             .expect(&format!("no certified equivalent exists for target \"{}\"", &self.target));
 
         // Build the docs for the certified target

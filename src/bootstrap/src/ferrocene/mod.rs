@@ -202,15 +202,3 @@ fn download_and_extract_ci_outcomes(builder: &Builder<'_>, kind: &str) -> PathBu
 
     extracted_dir.join("share").join("ferrocene").join(&name)
 }
-
-/// Map the target to the certified target that is based on it, if there is one
-pub(crate) fn target_to_certified_target(target: &TargetSelection) -> Option<TargetSelection> {
-    let target_tuple = match target.triple.as_ref() {
-        "x86_64-unknown-linux-gnu" => "x86_64-unknown-ferrocene.certified",
-        "aarch64-unknown-none" => "aarch64-unknown-ferrocene.certified",
-        "thumbv7em-none-eabi" => "thumbv7em-ferrocene.certified-eabi",
-        "thumbv7em-none-eabihf" => "thumbv7em-ferrocene.certified-eabihf",
-        _ => return None,
-    };
-    Some(TargetSelection::from_user(target_tuple))
-}

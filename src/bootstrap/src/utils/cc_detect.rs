@@ -26,7 +26,6 @@ use std::iter;
 use std::path::{Path, PathBuf};
 
 use crate::core::config::TargetSelection;
-use crate::ferrocene::target_to_certified_target;
 use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
@@ -76,7 +75,7 @@ pub fn fill_compilers(build: &mut Build) {
 
         _ => {
             // Ferrocene addition: Load the matching certified target
-            let certified_target = target_to_certified_target(&build.host_target);
+            let certified_target = build.host_target.certified_equivalent();
 
             // For all targets we're going to need a C compiler for building some shims
             // and such as well as for being a linker for Rust code.

@@ -110,6 +110,20 @@ impl TargetSelection {
         }
     }
 
+    // Ferrocene addition
+    /// Map the target to the certified target that is based on it, if there is one
+    pub fn certified_equivalent(&self) -> Option<TargetSelection> {
+        let target_tuple = match self.triple.as_ref() {
+            "x86_64-unknown-linux-gnu" => "x86_64-unknown-ferrocene.certified",
+            "aarch64-unknown-none" => "aarch64-unknown-ferrocene.certified",
+            "thumbv7em-none-eabi" => "thumbv7em-ferrocene.certified-eabi",
+            "thumbv7em-none-eabihf" => "thumbv7em-ferrocene.certified-eabihf",
+            target if target.contains("ferrocene.certified") => target,
+            _ => return None,
+        };
+        Some(TargetSelection::from_user(target_tuple))
+    }
+
     /// Path to the file defining the custom target, if any.
     pub fn filepath(&self) -> Option<&Path> {
         self.file.as_ref().map(Path::new)

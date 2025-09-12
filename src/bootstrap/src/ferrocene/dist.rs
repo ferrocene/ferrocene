@@ -17,7 +17,7 @@ use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use crate::ferrocene::{target_to_certified_target, uv_command};
+use crate::ferrocene::uv_command;
 use crate::utils::exec::command;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use crate::{FileType, t};
@@ -50,7 +50,7 @@ impl Step for Docs {
         //
         // NOTE: must be called before .add_directory, since it places the
         // certified API docs in the doc_out
-        if target_to_certified_target(&self.target).is_some() {
+        if self.target.certified_equivalent().is_some() {
             builder.ensure(CertifiedApiDocs { target: self.target });
         } else {
             builder.info(&format!("skipping Build certified-core-docs ({})", self.target));

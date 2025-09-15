@@ -32,10 +32,11 @@ Install Lima, if you don't have it:
 
     brew install lima
 
-You can create a guest with the following command:
+You can create a guest with the following commands:
 
 .. code-block:: yaml
 
+    mkdir -p ~/lima/shared
     cat <<EOF | limactl create --name=ferrocene -
     minimumLimaVersion: "1.0.0"
     images:
@@ -64,6 +65,11 @@ You can create a guest with the following command:
     memory: "8GiB"
     mountTypesUnsupported: ["9p"]
     EOF
+
+.. Note::
+
+    These commands will create a VM named `ferrocene` and a folder at `~/lima/shared` on the host that is added as a writeable shared mount point to the VM.
+    The entire home directory of the host is also mounted as readonly in the VM at `~/host`.
 
 Start the guest:
 

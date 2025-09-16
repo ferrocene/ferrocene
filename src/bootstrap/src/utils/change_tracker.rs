@@ -491,4 +491,9 @@ pub const CONFIG_CHANGE_HISTORY: &[ChangeInfo] = &[
         severity: ChangeSeverity::Warning,
         summary: "Added `build.compiletest-allow-stage0` flag instead of `COMPILETEST_FORCE_STAGE0` env var, and reject running `compiletest` self tests against stage 0 rustc unless explicitly allowed.",
     },
+    ChangeInfo {
+        change_id: 146604,
+        severity: ChangeSeverity::Info,
+        summary: "Setting `rust.lld = true` when building rustc for the `aarch64-unknown-linux-gnu` target will now also cause that rustc to use the LLD linker by default.",
+    },
 ];

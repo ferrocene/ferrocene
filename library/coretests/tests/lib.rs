@@ -115,13 +115,6 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
-// Ferrocene additions:
-//
-// Features we add so we can have better coverage:
-// tidy-alphabetical-start
-#![feature(char_internals)]
-#![feature(debug_closure_helpers)]
-// tidy-alphabetical-end
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {

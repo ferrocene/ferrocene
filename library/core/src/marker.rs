@@ -1184,13 +1184,6 @@ marker_impls! {
         {T: ConstParamTy_ + ?Sized} &T,
 }
 
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[unstable(feature = "adt_const_params", issue = "95174")]
-    UnsizedConstParamTy for
-        usize
-}
-
 /// A common trait implemented by all function pointers.
 //
 // Note that while the trait is internal and unstable it is nevertheless

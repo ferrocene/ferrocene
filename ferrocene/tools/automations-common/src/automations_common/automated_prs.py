@@ -61,51 +61,64 @@ class AutomatedPR(abc.ABC):
 
         result = self.run()
         if result == AutomationResult.SUCCESS:
-            self.cmd(["git", "branch", "-D", branch_name], check=False)
-            self.cmd(["git", "checkout", "-b", branch_name])
-            self.cmd(["git", "push", self.origin, branch_name, "-f"])
+            self.on_success(branch_name, current_branch, existing_conflict_issue)
+        elif result == AutomationResult.FAILURE:
+            self.on_failure(existing_conflict_issue)
+        else:
+            assert(result == AutomationResult.NO_CHANGES)
 
-            # Create the PR
-            response = self.http.post(
-                self.__repo_api("pulls"),
+        # Reset the commit at the state it was before the automation ran.
+        # Otherwise, if multiple automations are executed in the same job,
+        # the following PRs will also include the changes of the previous PRs.
+        self.cmd(["git", "reset", "--hard", current_hash])
+
+    def on_success(self, branch_name, current_branch, existing_conflict_issue):
+        self.cmd(["git", "branch", "-D", branch_name], check=False)
+        self.cmd(["git", "checkout", "-b", branch_name])
+        self.cmd(["git", "push", self.origin, branch_name, "-f"])
+
+        # Create the PR
+        response = self.http.post(
+            self.__repo_api("pulls"),
+            json={
+                "title": self.pr_title(),
+                "head": branch_name,
+                "base": self.base_branch(),
+                "body": self.pr_body(branch_name),
+                "maintainers_can_modify": True,
+            },
+        )
+        response.raise_for_status()
+        create_json = response.json()
+
+        # Apply the label to the PR
+        response = self.http.post(
+            self.__repo_api(f"issues/{create_json['number']}/labels"),
+            json={
+                "labels": list(self.pr_labels()),
+            },
+        ).raise_for_status()
+
+        # Close the "there is a conflict" if it's still open
+        if existing_conflict_issue is not None:
+            self.http.post(
+                existing_conflict_issue["comments_url"],
                 json={
-                    "title": self.pr_title(),
-                    "head": branch_name,
-                    "base": self.base_branch(),
-                    "body": self.pr_body(branch_name),
-                    "maintainers_can_modify": True,
+                    "body": self.error_issue_fixed_comment(create_json["html_url"]),
                 },
-            )
-            response.raise_for_status()
-            create_json = response.json()
-
-            # Apply the label to the PR
-            response = self.http.post(
-                self.__repo_api(f"issues/{create_json['number']}/labels"),
+            ).raise_for_status()
+            self.http.patch(
+                existing_conflict_issue["url"],
                 json={
-                    "labels": list(self.pr_labels()),
+                    "state": "closed",
                 },
             ).raise_for_status()
 
-            # Close the "there is a conflict" if it's still open
-            if existing_conflict_issue is not None:
-                self.http.post(
-                    existing_conflict_issue["comments_url"],
-                    json={
-                        "body": self.error_issue_fixed_comment(create_json["html_url"]),
-                    },
-                ).raise_for_status()
-                self.http.patch(
-                    existing_conflict_issue["url"],
-                    json={
-                        "state": "closed",
-                    },
-                ).raise_for_status()
+        self.cmd(["git", "checkout", current_branch])
+        self.cmd(["git", "branch", "-D", branch_name])
 
-            self.cmd(["git", "checkout", current_branch])
-            self.cmd(["git", "branch", "-D", branch_name])
-
-        elif result == AutomationResult.FAILURE and existing_conflict_issue is None:
+    def on_failure(self, existing_conflict_issue):
+        if existing_conflict_issue is None:
             # Create an issue alerting the team that the pull failed
             response = self.http.post(
                 self.__repo_api("issues"),
@@ -125,7 +138,7 @@ class AutomatedPR(abc.ABC):
                 },
             ).raise_for_status()
 
-        elif result == AutomationResult.FAILURE:
+        else:
             # If an issue already exists just post a status update
             self.http.post(
                 existing_conflict_issue["comments_url"],
@@ -133,11 +146,6 @@ class AutomatedPR(abc.ABC):
                     "body": self.error_issue_repeated_comment(),
                 },
             ).raise_for_status()
-
-        # Reset the commit at the state it was before the automation ran.
-        # Otherwise, if multiple automations are executed in the same job,
-        # the following PRs will also include the changes of the previous PRs.
-        self.cmd(["git", "reset", "--hard", current_hash])
 
     #####################
     #                   #

@@ -116,6 +116,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     };
 
     let ignored_path_regexes: &[&str] = match state.coverage_for {
+        #[rustfmt::skip]
         FerroceneCoverageFor::Library => &[
             // Ignore Cargo dependencies:
             "\\.cargo/registry", // Without remap-path-prefix

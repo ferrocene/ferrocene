@@ -35,7 +35,12 @@ def cmd(*args, dry_run=False, **kwargs):
     Run a command and error out if it fails to execute.
     """
     kwargs.setdefault("check", True)
-    return subprocess.run(*args, **kwargs)
+    c = pretty_print_cmd(*args, **kwargs)
+    if dry_run:
+        print(f"dry_run: not running command: {c}")
+    else:
+        print(f"run cmd: {c}")
+        return subprocess.run(*args, **kwargs)
 
 def cmd_capture(*args, **kwargs):
     """
@@ -43,7 +48,9 @@ def cmd_capture(*args, **kwargs):
     """
     kwargs.setdefault("stdout", subprocess.PIPE)
     kwargs.setdefault("text", True)
-    return subprocess.run(*args, **kwargs).stdout.strip()
+    if stdout := cmd(*args, **kwargs).stdout:
+        print("stdout:", stdout)
+        return stdout.strip()
 
 
 #####################
@@ -71,10 +78,11 @@ class AutomatedPR(abc.ABC):
     #                   #
     #####################
 
-    def create(self):
+    def create(self, dry_run=False):
         """
         Handle the creation of the PR, and open an issue if an error occurs.
         """
+        self.dry_run = dry_run
         self.origin = ORIGIN
 
         self.http = requests.Session()
@@ -115,53 +123,62 @@ class AutomatedPR(abc.ABC):
         # Reset the commit at the state it was before the automation ran.
         # Otherwise, if multiple automations are executed in the same job,
         # the following PRs will also include the changes of the previous PRs.
-        self.cmd(["git", "reset", "--hard", current_hash])
+        self.cmd(["git", "reset", "--hard", current_hash], dry_run=self.dry_run)
 
     def on_success(self, branch_name, current_branch, existing_conflict_issue):
-        self.cmd(["git", "checkout", "-B", branch_name])
-        self.cmd(["git", "push", self.origin, branch_name, "-f"])
+        self.cmd(["git", "checkout", "-B", branch_name], dry_run=self.dry_run)
+        self.cmd(["git", "push", self.origin, branch_name, "-f"], dry_run=self.dry_run)
 
         # Create the PR
-        response = self.http.post(
-            self.__repo_api("pulls"),
-            json={
-                "title": self.pr_title(),
-                "head": branch_name,
-                "base": self.base_branch(),
-                "body": self.pr_body(branch_name),
-                "maintainers_can_modify": True,
-            },
-        )
-        response.raise_for_status()
-        create_json = response.json()
+        if self.dry_run:
+            print(f"dry_run: not opening PR for {branch_name}->{self.base_branch()}")
+        else:
+            response = self.http.post(
+                self.__repo_api("pulls"),
+                json={
+                    "title": self.pr_title(),
+                    "head": branch_name,
+                    "base": self.base_branch(),
+                    "body": self.pr_body(branch_name),
+                    "maintainers_can_modify": True,
+                },
+            )
+            response.raise_for_status()
+            create_json = response.json()
 
-        # Apply the label to the PR
-        response = self.http.post(
-            self.__repo_api(f"issues/{create_json['number']}/labels"),
-            json={
-                "labels": list(self.pr_labels()),
-            },
-        ).raise_for_status()
+            # Apply the label to the PR
+            response = self.http.post(
+                self.__repo_api(f"issues/{create_json['number']}/labels"),
+                json={
+                    "labels": list(self.pr_labels()),
+                },
+            ).raise_for_status()
 
         # Close the "there is a conflict" if it's still open
         if existing_conflict_issue is not None:
-            self.http.post(
-                existing_conflict_issue["comments_url"],
-                json={
-                    "body": self.error_issue_fixed_comment(create_json["html_url"]),
-                },
-            ).raise_for_status()
-            self.http.patch(
-                existing_conflict_issue["url"],
-                json={
-                    "state": "closed",
-                },
-            ).raise_for_status()
+            if self.dry_run:
+                print(f"dry_run: not closing existing issue {existing_conflict_issue['url']}")
+            else:
+                self.http.post(
+                    existing_conflict_issue["comments_url"],
+                    json={
+                        "body": self.error_issue_fixed_comment(create_json["html_url"]),
+                    },
+                ).raise_for_status()
+                self.http.patch(
+                    existing_conflict_issue["url"],
+                    json={
+                        "state": "closed",
+                    },
+                ).raise_for_status()
 
-        self.cmd(["git", "checkout", current_branch])
-        self.cmd(["git", "branch", "-D", branch_name])
+        self.cmd(["git", "checkout", current_branch], dry_run=self.dry_run)
+        self.cmd(["git", "branch", "-D", branch_name], dry_run=self.dry_run)
 
     def on_failure(self, existing_conflict_issue):
+        if self.dry_run:
+            print("dry_run: not opening remote issue")
+            return
         if existing_conflict_issue is None:
             # Create an issue alerting the team that the pull failed
             response = self.http.post(

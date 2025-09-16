@@ -57,7 +57,7 @@ def cmd_capture(*args, **kwargs):
     """
     kwargs.setdefault("stdout", subprocess.PIPE)
     kwargs.setdefault("text", True)
-    if stdout := cmd(*args, **kwargs).stdout:
+    if (stdout := cmd(*args, **kwargs).stdout) is not None:
         log("stdout:", stdout)
         return stdout.strip()
 

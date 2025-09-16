@@ -58,14 +58,6 @@ fn layout_array_edge_cases() {
 #[test]
 fn layout_errors() {
     let layout = Layout::new::<[u8; 2]>();
-<<<<<<< HEAD
-    assert!(layout.align_to(isize::MAX as usize + 1).is_err());
-    assert!(layout.align_to(3).is_err());
-    assert!(layout.repeat(usize::MAX).is_err());
-    assert!(layout.repeat_packed(usize::MAX).is_err());
-
-    let next = Layout::from_size_align(isize::MAX as usize, 1).unwrap();
-=======
     // Should error if the alignment is not a power of two.
     assert!(layout.align_to(3).is_err());
 
@@ -84,7 +76,6 @@ fn layout_errors() {
     assert!(layout.repeat_packed(align_max + 1).is_err());
 
     let next = Layout::from_size_align(size_max, 1).unwrap();
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     assert!(layout.extend(next).is_err());
 }
 

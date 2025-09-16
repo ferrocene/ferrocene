@@ -385,16 +385,11 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 ///
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
-<<<<<<< HEAD
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
 #[cfg_attr(
     not(feature = "ferrocene_certified"),
-    derive(Clone, Copy, Eq, PartialOrd, Ord, Debug, Hash)
+    derive_const(Clone, Eq, PartialOrd, Ord, PartialEq)
 )]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(PartialEq))]
-=======
-#[derive(Copy, Debug, Hash)]
-#[derive_const(Clone, Eq, PartialOrd, Ord, PartialEq)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.
 // It has no special behavior, but does require that the three variants
@@ -648,16 +643,12 @@ impl Ordering {
     #[inline]
     #[must_use]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn then_with<F: FnOnce() -> Ordering>(self, f: F) -> Ordering {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn then_with<F>(self, f: F) -> Ordering
     where
         F: [const] FnOnce() -> Ordering + [const] Destruct,
     {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         match self {
             Equal => f(),
             _ => self,
@@ -689,13 +680,9 @@ impl Ordering {
 pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] pub T);
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PartialOrd> PartialOrd for Reverse<T> {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: [const] PartialOrd> const PartialOrd for Reverse<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn partial_cmp(&self, other: &Reverse<T>) -> Option<Ordering> {
         other.0.partial_cmp(&self.0)
@@ -720,13 +707,9 @@ impl<T: [const] PartialOrd> const PartialOrd for Reverse<T> {
 }
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: Ord> Ord for Reverse<T> {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: [const] Ord> const Ord for Reverse<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn cmp(&self, other: &Reverse<T>) -> Ordering {
         other.0.cmp(&self.0)
@@ -1620,17 +1603,13 @@ pub const fn min<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn min_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
     v1: T,
     v2: T,
     compare: F,
 ) -> T {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if compare(&v1, &v2).is_le() { v1 } else { v2 }
 }
 
@@ -1655,18 +1634,14 @@ pub const fn min_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn min_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> T
 where
     T: [const] Destruct,
     F: [const] FnMut(&T) -> K + [const] Destruct,
     K: [const] Ord + [const] Destruct,
 {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if f(&v2) < f(&v1) { v2 } else { v1 }
 }
 
@@ -1737,17 +1712,13 @@ pub const fn max<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn max_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
     v1: T,
     v2: T,
     compare: F,
 ) -> T {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if compare(&v1, &v2).is_gt() { v1 } else { v2 }
 }
 
@@ -1772,18 +1743,14 @@ pub const fn max_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn max_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> T
 where
     T: [const] Destruct,
     F: [const] FnMut(&T) -> K + [const] Destruct,
     K: [const] Ord + [const] Destruct,
 {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if f(&v2) < f(&v1) { v1 } else { v2 }
 }
 
@@ -1827,13 +1794,9 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn minmax<T>(v1: T, v2: T) -> [T; 2]
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minmax<T>(v1: T, v2: T) -> [T; 2]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 where
     T: [const] Ord,
 {
@@ -1867,13 +1830,9 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn minmax_by<T, F>(v1: T, v2: T, compare: F) -> [T; 2]
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minmax_by<T, F>(v1: T, v2: T, compare: F) -> [T; 2]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 where
     F: [const] FnOnce(&T, &T) -> Ordering,
 {
@@ -1901,13 +1860,9 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn minmax_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> [T; 2]
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minmax_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> [T; 2]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 where
     F: [const] FnMut(&T) -> K + [const] Destruct,
     K: [const] Ord + [const] Destruct,
@@ -1937,13 +1892,9 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl PartialEq for () {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialEq for () {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn eq(&self, _other: &()) -> bool {
             true
@@ -2038,13 +1989,9 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl PartialOrd for () {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialOrd for () {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
             Some(Equal)
@@ -2093,13 +2040,9 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl Ord for () {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Ord for () {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn cmp(&self, _other: &()) -> Ordering {
             Equal
@@ -2150,13 +2093,9 @@ mod impls {
     ord_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[unstable(feature = "never_type", issue = "35121")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl PartialEq for ! {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialEq for ! {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn eq(&self, _: &!) -> bool {
             *self
@@ -2164,21 +2103,14 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl Eq for ! {}
-
-    #[unstable(feature = "never_type", issue = "35121")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl PartialOrd for ! {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Eq for ! {}
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialOrd for ! {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
             *self
@@ -2186,13 +2118,9 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl Ord for ! {
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Ord for ! {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn cmp(&self, _: &!) -> Ordering {
             *self
@@ -2218,13 +2146,9 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: PointeeSized, B: PointeeSized> PartialOrd<&B> for &A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialOrd<&B> for &A
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         A: [const] PartialOrd<B>,
     {
@@ -2266,13 +2190,9 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: PointeeSized> Ord for &A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized> const Ord for &A
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         A: [const] Ord,
     {
@@ -2282,13 +2202,9 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: PointeeSized> Eq for &A where A: Eq {}
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized> const Eq for &A where A: [const] Eq {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     // &mut pointers
 
@@ -2309,13 +2225,9 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: PointeeSized, B: PointeeSized> PartialOrd<&mut B> for &mut A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialOrd<&mut B> for &mut A
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         A: [const] PartialOrd<B>,
     {
@@ -2357,13 +2269,9 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: PointeeSized> Ord for &mut A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized> const Ord for &mut A
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         A: [const] Ord,
     {
@@ -2373,13 +2281,9 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: PointeeSized> Eq for &mut A where A: Eq {}
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized> const Eq for &mut A where A: [const] Eq {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]

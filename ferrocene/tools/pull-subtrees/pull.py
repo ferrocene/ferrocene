@@ -278,6 +278,9 @@ def update_subtree(repo_root, subtree):
                 cwd=repo_root,
             )
         except subprocess.CalledProcessError:
+            # NOTE: this can be wrong if `git subtree` failed for a reason other than merge conflicts.
+            # Unfortunately, it gives us no way to detect that other than parsing stderr :/
+            # This will hopefully be caught in `run()` when `git merge --continue` fails.
             print("pull-subtrees: there are unresolved merge conflicts")
             print("pull-subtrees: comitting with merge conflicts markers in the source")
 
@@ -407,7 +410,9 @@ class PullSubtreePR(AutomatedPR):
             else:
                 return AutomationResult.SUCCESS
         except subprocess.CalledProcessError:
-            self.cmd(["git", "merge", "--abort"], check=False)
+            # if we can't even abort the merge, something has really gone wrong.
+            # check that this succeeds even though we're already handling an error.
+            self.cmd(["git", "merge", "--abort"])
             return AutomationResult.FAILURE
 
     def base_branch(self):

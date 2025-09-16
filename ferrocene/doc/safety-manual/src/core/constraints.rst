@@ -49,18 +49,20 @@ Review operands
 
 Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
 
-The user shall manually verify that the implementations for operators they use in their source code are certified. They have to check all occurrences of operands listed in the ``core::ops`` module. For each occurrence they have to check that the implementation for the combination of types is certified.
+The user shall manually verify that the implementations for operators they use in their source code are certified.
+They have to check all occurrences of operands listed in the ``core::ops`` module.
+For each occurrence, they have to check that the implementation for the combination of types is certified.
 
-For example there are many implementation for addition (``trait Add``).
+For example, there are many implementations for addition (``trait Add``).
 
 One of those implementations could be certified, e.g. ``impl Add<i32> for i32``. This would mean that it is legal in certified contexts to add two ``i32`` s to each other.
 
 Another implementation could be uncertified, e.g. ``impl Add<i64> for i64``. This would mean that it is not legal in certified contexts to add two ``i64`` s to each other.
 
-Therefore the source code has to be reviewed for all syntax that denotes an operator and it has to be verified that the implementation of that operator for that combination of types is certified.
+Therefore, the source code has to be reviewed for all syntax that denotes an operator.
+The source code also has to be verified that the implementation of that operator, for that combination of types, is certified.
 
 .. code-block:: rust
-  :linenos:
 
   // this is in the core library:
 

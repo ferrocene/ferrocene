@@ -118,8 +118,7 @@ class AutomatedPR(abc.ABC):
         self.cmd(["git", "reset", "--hard", current_hash])
 
     def on_success(self, branch_name, current_branch, existing_conflict_issue):
-        self.cmd(["git", "branch", "-D", branch_name], check=False)
-        self.cmd(["git", "checkout", "-b", branch_name])
+        self.cmd(["git", "checkout", "-B", branch_name])
         self.cmd(["git", "push", self.origin, branch_name, "-f"])
 
         # Create the PR

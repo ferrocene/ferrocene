@@ -23,19 +23,8 @@ Host Setup
 Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
-:target-with-tuple:`x86_64-unknown-linux-gnu`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
-installed, as well as a few extras:
-
-.. code-block:: bash
-
-   sudo apt install qemu-user-static binfmt-support
-
-
 :target-with-tuple:`aarch64-apple-darwin`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install Lima, if you don't have it:
 
@@ -43,28 +32,44 @@ Install Lima, if you don't have it:
 
     brew install lima
 
-You can create a guest with the following:
+You can create a guest with the following commands:
 
 .. code-block:: yaml
 
-    cat <<- EOF | limactl create --name=ferrocene
-        minimumLimaVersion: "1.0.0"
-        images:
-        - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
-            arch: "aarch64"
-            digest: "sha256:fb39312ffd2b47b97eaef6ff197912eaa3e0a215eb3eecfbf2a24acd96ee1125"
-        - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
-            arch: "aarch64"
-        mounts:
-        - location: "~"
-        - location: "/tmp/lima"
+    mkdir -p ~/lima/shared
+    cat <<EOF | limactl create --name=ferrocene -
+    minimumLimaVersion: "1.0.0"
+    images:
+      - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
+        arch: "aarch64"
+        digest: "sha256:fb39312ffd2b47b97eaef6ff197912eaa3e0a215eb3eecfbf2a24acd96ee1125"
+      - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
+        arch: "aarch64"
+    mounts:
+      # Creates a readonly folder in the VM at "~/host" that maps to the host home directory.
+      # Note: "~" cannot be used, because it resolves to the host home path!
+      # See: https://github.com/lima-vm/lima/blob/9e3334fdb5bceef60d23cf429ed9b9f4e76c853f/templates/default.yaml#L36
+      - location: "~"
+        mountPoint: "{{.Home}}/host"
+      # Creates a writeable folder in the VM at "~/shared" that maps to "~/lima/shared" on the host side.
+      # Note: the ending "/" on "mountPoint" prevents the vm "shared" folder from being nested inside the host "shared" folder.
+      - location: "~/lima/shared"
+        mountPoint: "{{.Home}}/shared/"
         writable: true
-        ssh:
-        forwardAgent: true
-        cpus: 8
-        memory: "8GiB"
-        mountTypesUnsupported: ["9p"]
+    # Configures ssh forwarding and sets a fix ssh port to connect from the host side.
+    ssh:
+      loadDotSSHPubKeys: true
+      forwardAgent: true
+      localPort: 50123
+    cpus: 8
+    memory: "8GiB"
+    mountTypesUnsupported: ["9p"]
     EOF
+
+.. Note::
+
+    These commands will create a VM named `ferrocene` and a folder at `~/lima/shared` on the host that is added as a writeable shared mount point to the VM.
+    The entire home directory of the host is also mounted as readonly in the VM at `~/host`.
 
 Start the guest:
 
@@ -80,7 +85,41 @@ Shell into the guest:
     limactl shell ferrocene
 
 You can also point `Visual Studio Code's SSH extension <https://code.visualstudio.com/docs/remote/ssh>`_ at it
-using `these steps <https://github.com/lima-vm/lima/discussions/1890#discussioncomment-7221563>`_.
+by adding the following configuration to your default ssh host configuration file:
+
+.. code-block::
+
+    Host lima-vm
+      IdentityFile "~/.lima/_config/user"
+      IdentityFile "~/.ssh/id_ed25519"
+      StrictHostKeyChecking no
+      UserKnownHostsFile /dev/null
+      NoHostAuthenticationForLocalhost yes
+      GSSAPIAuthentication no
+      PreferredAuthentications publickey
+      Compression no
+      BatchMode yes
+      IdentitiesOnly yes
+      Ciphers "^aes128-gcm@openssh.com,aes256-gcm@openssh.com"
+      User user
+      ForwardAgent yes
+      Hostname 127.0.0.1
+      Port 50123
+
+You may change `User` to your user name and change `lima-vm` to a name that better describes your vm.
+The vm name is displayed in VS Code when trying to connect via ssh.
+
+.. Note::
+
+    Ensure that the port is the same as set when creating the lima vm.
+
+.. Note::
+
+    This configuration is required if 1Password is set to manage your ssh keys, because 1Password functions as the identity agent.
+    Otherwise, the generated ssh config by lima may be used directly as described in `Lima's usage guide <https://lima-vm.io/docs/usage/>`_.
+
+    With `ForwardAgent` enabled, removing the ssh settings for `ControlMaster`, `ControlPath` and `ControlPersist` in lima's generated configuration might be necessary,
+    in case you use the configuration directly.
 
 Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
@@ -92,7 +131,7 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
     Please ensure you always work from the guest-local repository.
 
 :target-with-tuple:`x86_64-pc-windows-msvc`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Setup WSL2, if you don't have it:
 
@@ -133,6 +172,20 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
 
     Please ensure you always work from the guest-local repository.
 
+:target-with-tuple:`x86_64-unknown-linux-gnu`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
+installed, as well as a few extras:
+
+.. code-block:: bash
+
+   sudo apt install qemu-user-static binfmt-support
+
+.. Note::
+
+    These packages must also be installed in the VMs used on MacOS and Windows.
+
 Target Procedures
 -----------------
 
@@ -144,7 +197,7 @@ Currently bare metal targets have a similar procedure for testing.
    This will eventually be an open source component, but for now, it's our little bit of arcane magic.
 
 :target-with-tuple:`aarch64-unknown-none`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. Warning::
     
@@ -204,7 +257,7 @@ Install the necessary packages:
 
 .. code-block:: bash
 
-    sudo apt install gcc-arm-none-eabi qemu-system-arm
+    sudo apt install gcc-arm-none-eabi
 
 If you don't already have a ``/usr/share/binfmts/qemu-arm`` file, create one:
 

@@ -21,7 +21,7 @@
 # - `GITHUB_TOKEN`: API token with access to the repo contents, issues and RPs
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
 
-from automations_common import AutomatedPR, AutomationResult, PRLinker
+from automations_common import AutomatedPR, AutomationResult, PRLinker, cmd as run, cmd_capture as run_capture
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -480,20 +480,9 @@ local branch to GitHub and open a PR for it.
         return f"The automation failed to pull the latest changes from {self.repo_link} again."
 
 
-def run(*args, **kwargs):
-    kwargs.setdefault("check", True)
-    return subprocess.run(*args, **kwargs)
-
-
-def run_capture(*args, **kwargs):
-    kwargs.setdefault("check", True)
-    kwargs.setdefault("stdout", subprocess.PIPE)
-    kwargs.setdefault("text", True)
-    return subprocess.run(*args, **kwargs).stdout.strip()
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dry-run", help="run git commands and fetch from GitHub API, but do not open PRs or make comments")
     exclusive = parser.add_mutually_exclusive_group()
     exclusive.add_argument("--automation-for-branch", help="run the automation for the provided branch")
     exclusive.add_argument("subtree_repo", help="the subtree to pull", default=None, nargs="?")
@@ -508,7 +497,7 @@ if __name__ == "__main__":
         for subtree in subtrees:
             if args.automation_for_branch not in subtree.into:
                 continue
-            PullSubtreePR(subtree, args.automation_for_branch).create()
+            PullSubtreePR(subtree, args.automation_for_branch).create(dry_run=args.dry_run)
     # We can use an `elif` here because automation_for_branch and subtree_repo are mutually exclusive
     elif args.subtree_repo is not None:
         subtree = None

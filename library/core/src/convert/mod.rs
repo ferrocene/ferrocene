@@ -975,34 +975,23 @@ impl const PartialEq for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl Eq for Infallible {}
-
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl PartialOrd for Infallible {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const Eq for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const PartialOrd for Infallible {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
         match *self {}
     }
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl Ord for Infallible {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const Ord for Infallible {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
         match *self {}
     }

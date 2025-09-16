@@ -215,7 +215,6 @@ fn cmp_default() {
     assert_eq!(Fool(false), Fool(true));
 }
 
-<<<<<<< HEAD
 #[test]
 fn clamp() {
     assert_eq!((-3).clamp(-2, 1), -2);
@@ -223,9 +222,6 @@ fn clamp() {
     assert_eq!(2.clamp(-2, 1), 1);
 }
 
-/* FIXME(#110395)
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod const_cmp {
     use super::*;
 

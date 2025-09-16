@@ -1154,27 +1154,6 @@ pub macro ConstParamTy($item:item) {
     /* compiler built-in */
 }
 
-<<<<<<< HEAD
-#[lang = "unsized_const_param_ty"]
-#[unstable(feature = "unsized_const_params", issue = "95174")]
-#[diagnostic::on_unimplemented(message = "`{Self}` can't be used as a const parameter type")]
-/// A marker for types which can be used as types of `const` generic parameters.
-///
-/// Equivalent to [`ConstParamTy_`] except that this is used by
-/// the `unsized_const_params` to allow for fake unstable impls.
-pub trait UnsizedConstParamTy: StructuralPartialEq + Eq {}
-
-/// Derive macro generating an impl of the trait `ConstParamTy`.
-#[rustc_builtin_macro]
-#[allow_internal_unstable(unsized_const_params)]
-#[unstable(feature = "unsized_const_params", issue = "95174")]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub macro UnsizedConstParamTy($item:item) {
-    /* compiler built-in */
-}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 // FIXME(adt_const_params): handle `ty::FnDef`/`ty::Closure`
 #[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {

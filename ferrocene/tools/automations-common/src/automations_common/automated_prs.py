@@ -18,6 +18,34 @@ import subprocess
 DEFAULT_BASE_BRANCH = "main"
 ORIGIN = "origin"
 
+#####################
+#                   #
+#     Utilities     #
+#                   #
+#####################
+
+def cmd(dry_run=False, *args, **kwargs):
+    """
+    Run a command and error out if it fails to execute.
+    """
+    kwargs.setdefault("check", True)
+    return subprocess.run(*args, **kwargs)
+
+def cmd_capture(*args, **kwargs):
+    """
+    Run a command, error out if it fails to execute and return its stdout.
+    """
+    kwargs.setdefault("check", True)
+    kwargs.setdefault("stdout", subprocess.PIPE)
+    kwargs.setdefault("text", True)
+    return subprocess.run(*args, **kwargs).stdout.strip()
+
+
+#####################
+#                   #
+#        API        #
+#                   #
+#####################
 
 class AutomationResult(enum.Enum):
     SUCCESS = 1
@@ -26,6 +54,18 @@ class AutomationResult(enum.Enum):
 
 
 class AutomatedPR(abc.ABC):
+    # backcompat to avoid runtime errors
+    def cmd(self, *args, **kwargs):
+        cmd(*args, **kwargs)
+    def cmd_capture(self, *args, **kwargs):
+        cmd_capture(*args, **kwargs)
+
+    #####################
+    #                   #
+    #    Entrypoints    #
+    #                   #
+    #####################
+
     def create(self):
         """
         Handle the creation of the PR, and open an issue if an error occurs.
@@ -146,28 +186,6 @@ class AutomatedPR(abc.ABC):
                     "body": self.error_issue_repeated_comment(),
                 },
             ).raise_for_status()
-
-    #####################
-    #                   #
-    #     Utilities     #
-    #                   #
-    #####################
-
-    def cmd(self, *args, **kwargs):
-        """
-        Run a command and error out if it fails to execute.
-        """
-        kwargs.setdefault("check", True)
-        return subprocess.run(*args, **kwargs)
-
-    def cmd_capture(self, *args, **kwargs):
-        """
-        Run a command, error out if it fails to execute and return its stdout.
-        """
-        kwargs.setdefault("check", True)
-        kwargs.setdefault("stdout", subprocess.PIPE)
-        kwargs.setdefault("text", True)
-        return subprocess.run(*args, **kwargs).stdout.strip()
 
     ############################
     #                          #

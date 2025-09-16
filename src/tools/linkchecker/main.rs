@@ -84,6 +84,10 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // This is fine though, because that section is hidden by the build system with `display: none`
     // when the link is missing. We thus ignore it to avoid a linkchecker complaint.
     ("index.html", &["qualification/technical-report.pdf", "certification/core/technical-report.pdf"]),
+    // The index.html here would be the upstream Rust index.html, which is removed when generating
+    // the certified API docs.
+    ("certification/api-docs/help.html", &["certification/api-docs/index.html"]),
+    ("certification/api-docs/settings.html", &["certification/api-docs/index.html"]),
 ];
 
 #[rustfmt::skip]
@@ -564,6 +568,11 @@ fn load_html_file(file: &Path, report: &mut Report) -> FileEntry {
 }
 
 fn is_intra_doc_exception(file: &Path, link: &str) -> bool {
+    // Ferrocene addition
+    if is_ferrocene_exception(file, link) {
+        return true;
+    }
+
     if let Some(entry) = INTRA_DOC_LINK_EXCEPTIONS.iter().find(|&(f, _)| file.ends_with(f)) {
         entry.1.is_empty() || entry.1.contains(&link)
     } else {
@@ -572,9 +581,11 @@ fn is_intra_doc_exception(file: &Path, link: &str) -> bool {
 }
 
 fn is_exception(file: &Path, link: &str) -> bool {
+    // Ferrocene addition
     if is_ferrocene_exception(file, link) {
         return true;
     }
+
     if let Some(entry) = LINKCHECK_EXCEPTIONS.iter().find(|&(f, _)| file.ends_with(f)) {
         entry.1.contains(&link)
     } else {
@@ -715,11 +726,17 @@ fn is_not_found_error(path: &Path, error: &std::io::Error) -> bool {
             && path.as_os_str().to_str().map_or(false, |s| s.contains("::")))
 }
 
+/// Check if `link` in `file` should be exempted from being linkchecked
 fn is_ferrocene_exception(file: &Path, link: &str) -> bool {
+    let is_certified_docs = file.to_string_lossy().contains("certification/api-docs/");
+
     if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
         true
     } else if file.ends_with("certification/core/subset.html") && link.starts_with("#id") {
         // The links in the csv-table are not expected to work
+        true
+    } else if is_certified_docs {
+        // The certified API docs have many broken links, because of subsetting
         true
     } else {
         false

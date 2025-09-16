@@ -1202,6 +1202,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::CompilerTechnicalReport,
                 crate::ferrocene::doc::CoreTechnicalReport,
                 crate::ferrocene::doc::code_coverage::AllCoverageReports,
+                crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs,
                 // QMS Document
                 crate::ferrocene::doc::InternalProcedures,
             ),

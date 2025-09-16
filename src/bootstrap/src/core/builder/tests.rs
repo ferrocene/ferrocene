@@ -1156,6 +1156,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###
         );
     }
@@ -1293,6 +1294,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###);
     }
 
@@ -1367,6 +1369,7 @@ mod snapshot {
         [doc] style-guide (book) <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###
         );
     }
@@ -1432,6 +1435,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###
         );
     }
@@ -1516,6 +1520,7 @@ mod snapshot {
         [doc] style-guide (book) <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###
         );
     }
@@ -1740,6 +1745,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###);
     }
 
@@ -2928,6 +2934,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###);
     }
 

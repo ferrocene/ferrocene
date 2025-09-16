@@ -865,6 +865,9 @@ workflows:
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
+      - x86_64-linux-certified:
+          requires:
+            - x86_64-linux-build
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -1126,6 +1129,7 @@ workflows:
 
       - finish-build:
           requires:
+            - x86_64-linux-certified
             - x86_64-linux-docs
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix

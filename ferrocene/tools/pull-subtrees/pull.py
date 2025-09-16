@@ -413,7 +413,14 @@ class PullSubtreePR(AutomatedPR):
         except subprocess.CalledProcessError:
             # if we can't even abort the merge, something has really gone wrong.
             # check that this succeeds even though we're already handling an error.
-            self.cmd(["git", "merge", "--abort"])
+            try:
+                self.cmd(["git", "merge", "--abort"])
+            except subprocess.CalledProcessError:
+                # run `git status` one last time to try and figure out what went wrong.
+                # don't check if that fails; raise the original error from `merge --abort`.
+                self.cmd(["git", "status", "--ignore-submodules=none"], check=False)
+                self.cmd(["git", "submodule", "foreach", "git", "status"], check=False)
+                raise
             return AutomationResult.FAILURE
 
     def base_branch(self):

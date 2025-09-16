@@ -9,6 +9,7 @@
 import abc
 import enum
 import os
+import sys
 import random
 import requests
 import string
@@ -24,6 +25,14 @@ ORIGIN = "origin"
 #                   #
 #####################
 
+# These log to stderr to avoid interleaving output between stdout and stderr.
+def log(*args, **kwargs):
+    print("info:", *args, file=sys.stderr, **kwargs)
+def warn(*args, **kwargs):
+    print("warning:", *args, file=sys.stderr, **kwargs)
+def err(*args, **kwargs):
+    print("error:", *args, file=sys.stderr, **kwargs)
+
 def pretty_print_cmd(*args, **kwargs):
     if isinstance(args[0], list):
         args = args[0]
@@ -37,9 +46,9 @@ def cmd(*args, dry_run=False, **kwargs):
     kwargs.setdefault("check", True)
     c = pretty_print_cmd(*args, **kwargs)
     if dry_run:
-        print(f"dry_run: not running command: {c}")
+        log(f"dry_run: not running command: {c}")
     else:
-        print(f"run cmd: {c}")
+        log(f"run cmd: {c}")
         return subprocess.run(*args, **kwargs)
 
 def cmd_capture(*args, **kwargs):
@@ -48,8 +57,13 @@ def cmd_capture(*args, **kwargs):
     """
     kwargs.setdefault("stdout", subprocess.PIPE)
     kwargs.setdefault("text", True)
-    if stdout := cmd(*args, **kwargs).stdout:
-        print("stdout:", stdout)
+    if (stdout := cmd(*args, **kwargs).stdout) is not None:
+        lines = stdout.splitlines()
+        if len(lines):
+            log("stdout:", lines[0])
+        if len(lines) > 1:
+            log("stdout: ...")
+        print(file=sys.stderr)
         return stdout.strip()
 
 
@@ -92,8 +106,8 @@ class AutomatedPR(abc.ABC):
 
         existing_pull = self.__find_open("pulls", self.pr_title(), self.pr_labels())
         if existing_pull is not None:
-            print("An automated PR is already open, a new one won't be created.")
-            print(f"==> {existing_pull['html_url']}")
+            log("An automated PR is already open, a new one won't be created.")
+            log(f"==> {existing_pull['html_url']}")
             return
 
         existing_conflict_issue = self.__find_open(
@@ -131,7 +145,7 @@ class AutomatedPR(abc.ABC):
 
         # Create the PR
         if self.dry_run:
-            print(f"dry_run: not opening PR for {branch_name}->{self.base_branch()}")
+            log(f"dry_run: not opening PR for {branch_name}->{self.base_branch()}")
         else:
             response = self.http.post(
                 self.__repo_api("pulls"),
@@ -157,7 +171,7 @@ class AutomatedPR(abc.ABC):
         # Close the "there is a conflict" if it's still open
         if existing_conflict_issue is not None:
             if self.dry_run:
-                print(f"dry_run: not closing existing issue {existing_conflict_issue['url']}")
+                log(f"dry_run: not closing existing issue {existing_conflict_issue['url']}")
             else:
                 self.http.post(
                     existing_conflict_issue["comments_url"],
@@ -177,7 +191,7 @@ class AutomatedPR(abc.ABC):
 
     def on_failure(self, existing_conflict_issue):
         if self.dry_run:
-            print("dry_run: not opening remote issue")
+            log("dry_run: not opening remote issue")
             return
         if existing_conflict_issue is None:
             # Create an issue alerting the team that the pull failed

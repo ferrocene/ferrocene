@@ -24,24 +24,32 @@ ORIGIN = "origin"
 #                   #
 #####################
 
-def cmd(dry_run=False, *args, **kwargs):
+def pretty_print_cmd(*args, **kwargs):
+    if isinstance(args[0], list):
+        args = args[0]
+    # TODO: make this prettier
+    return '"' + '" "'.join([str(a) for a in args]) + '"'
+
+def cmd(*args, dry_run=False, **kwargs):
     """
     Run a command and error out if it fails to execute.
     """
     kwargs.setdefault("check", True)
+    c = pretty_print_cmd(*args, **kwargs)
     if dry_run:
-        print(f"dry_run: not running command: {args=} {kwargs=}")
+        print(f"dry_run: not running command: {c}")
     else:
-        print(f"run cmd: {args=} {kwargs=}")
+        print(f"run cmd: {c}")
         return subprocess.run(*args, **kwargs)
 
 def cmd_capture(*args, **kwargs):
     """
     Run a command, error out if it fails to execute and return its stdout.
     """
-    kwargs.setdefault("check", True)
     kwargs.setdefault("stdout", subprocess.PIPE)
-    if stdout := cmd(*args, **kwargs):
+    kwargs.setdefault("text", True)
+    if stdout := cmd(*args, **kwargs).stdout:
+        print("stdout:", stdout)
         return stdout.strip()
 
 
@@ -60,9 +68,9 @@ class AutomationResult(enum.Enum):
 class AutomatedPR(abc.ABC):
     # backcompat to avoid runtime errors
     def cmd(self, *args, **kwargs):
-        cmd(*args, **kwargs)
+        return cmd(*args, **kwargs)
     def cmd_capture(self, *args, **kwargs):
-        cmd_capture(*args, **kwargs)
+        return cmd_capture(*args, **kwargs)
 
     #####################
     #                   #

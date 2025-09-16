@@ -482,7 +482,7 @@ local branch to GitHub and open a PR for it.
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", help="run git commands and fetch from GitHub API, but do not open PRs or make comments")
+    parser.add_argument("--dry-run", action='store_true', help="run git commands and fetch from GitHub API, but do not open PRs or make comments")
     exclusive = parser.add_mutually_exclusive_group()
     exclusive.add_argument("--automation-for-branch", help="run the automation for the provided branch")
     exclusive.add_argument("subtree_repo", help="the subtree to pull", default=None, nargs="?")

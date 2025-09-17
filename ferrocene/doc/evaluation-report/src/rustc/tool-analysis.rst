@@ -284,7 +284,7 @@ Core library
    * - .. id:: CORE_ERR_01
      - :id:`RUSTC_UC1_RLIB`, :id:`RUSTC_UC2_STATICLIB`, :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`
      - Source code contains calls to uncertified functions
-     - Uncertfied code generated
+     - Uncertified code generated
      - :id:`CORE_AVD_SUBSET_001`
      - YES
    * - .. id:: CORE_ERR_02

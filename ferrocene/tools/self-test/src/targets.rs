@@ -4,10 +4,12 @@
 use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use std::path::Path;
+use std::process::Command;
 
 use crate::error::Error;
 use crate::linkers::Linker;
 use crate::report::Reporter;
+use crate::utils::run_command;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
     // Targets with architecture specific tuning
@@ -127,9 +129,50 @@ fn check_target(
         false => ["core", "alloc"].as_slice(),
     };
     check_libraries(target, &target_dir, expected_libs)?;
+    check_default_link_args(sysroot, target)?;
 
     reporter.success(&format!("target installed correctly: {}", target.tuple));
     Ok(CheckTargetOutcome::Found)
+}
+
+/// Check if the default link args for the target are what is expected
+fn check_default_link_args(sysroot: &Path, target: &TargetSpec) -> Result<(), Error> {
+    match target.linker {
+        Linker::HostCc => (),
+        Linker::BundledLld | Linker::CrossCc(_) => return Ok(()), // No default link args expected
+    }
+
+    let rustc = sysroot.join("bin").join("rustc");
+    let temp_dir = tempfile::tempdir()
+        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
+    let temp_main = temp_dir.path().join("main.rs");
+    std::fs::write(&temp_main, "fn main() {}").map_err(|error| {
+        Error::WritingSampleProgramFailed {
+            name: "link_arg_example".into(),
+            dest: temp_main.clone(),
+            error,
+        }
+    })?;
+
+    let mut command = Command::new(rustc);
+    command.arg("--target");
+    command.arg(target.tuple);
+    command.arg("--print");
+    command.arg("link-args");
+    command.arg(temp_main);
+    let output = run_command(&mut command)
+        .map_err(|error| Error::sample_program_compilation_failed("link-args", error))?;
+
+    // All our `HostCc` targets require `-fuse-ld=lld` to be passed
+    let fuse_ld_arg = "-fuse-ld=lld";
+    if !output.stdout.contains(fuse_ld_arg) {
+        Err(Error::TargetDefaultLinkArgMissing {
+            target: target.tuple.into(),
+            link_arg: fuse_ld_arg.into(),
+        })
+    } else {
+        Ok(())
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -210,11 +253,46 @@ mod tests {
             .lib("other", "0123456789abcdef") // Unknown libraries are ignored
             .create();
 
+        let _bin = utils
+            .bin("rustc")
+            .expected_args(&["--target", tuple, "--print", "link-args"])
+            .expected_args_strict(false)
+            .stdout("-fuse-ld=lld")
+            .create();
+
         assert_eq!(
             CheckTargetOutcome::Found,
             check_target(utils.reporter(), utils.sysroot(), &target).unwrap()
         );
         utils.assert_report_success("target installed correctly: x86_64-unknown-linux-gnu");
+    }
+
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))] // Only on x86_64 Linux since the test is specific to that.
+    #[test]
+    #[should_panic]
+    fn test_check_target_std_fails_if_lld_not_used() {
+        let tuple = "x86_64-unknown-linux-gnu";
+        let target = TargetSpec { tuple, std: true, linker: Linker::HostCc };
+
+        let utils = TestUtils::new();
+        utils
+            .target(tuple)
+            .lib("core", "0123456789abcdef")
+            .lib("alloc", "0123456789abcdef")
+            .lib("std", "0123456789abcdef")
+            .lib("test", "0123456789abcdef")
+            .lib("proc_macro", "0123456789abcdef")
+            .lib("other", "0123456789abcdef") // Unknown libraries are ignored
+            .create();
+
+        let _bin = utils
+            .bin("rustc")
+            .expected_args(&["--target", tuple, "--print", "link-args"])
+            .expected_args_strict(false)
+            .stdout("-fuse-ld=not-lld-this-should-fail")
+            .create();
+
+        check_target(utils.reporter(), utils.sysroot(), &target).unwrap(); // Panic!
     }
 
     #[test]
@@ -361,5 +439,21 @@ mod tests {
         assert_fail("lib-0123456789abcdef.rlib"); // No library name
         assert_fail("libcore-0123456789abcdef.so"); // Different extension
         assert_fail("libcore-0123456789abcdef"); // No extension
+    }
+
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))] // Only on x86_64 Linux since the test is specific to that.
+    #[test]
+    fn test_check_target_default_link_args() -> Result<(), Error> {
+        let tuple = "x86_64-unknown-linux-gnu";
+        let target = TargetSpec { tuple, std: true, linker: Linker::HostCc };
+
+        let utils = TestUtils::new();
+        let _bin = utils
+            .bin("rustc")
+            .expected_args(&["--target", tuple, "--print", "link-args"])
+            .expected_args_strict(false)
+            .stdout("-fuse-ld=lld")
+            .create();
+        check_default_link_args(utils.sysroot(), &target)
     }
 }

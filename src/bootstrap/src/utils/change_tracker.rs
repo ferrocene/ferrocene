@@ -541,4 +541,9 @@ pub const CONFIG_CHANGE_HISTORY: &[ChangeInfo] = &[
         severity: ChangeSeverity::Info,
         summary: "Added a new option `rust.break-on-ice` to control if internal compiler errors cause a debug break on Windows.",
     },
+    ChangeInfo {
+        change_id: 146604,
+        severity: ChangeSeverity::Info,
+        summary: "Setting `rust.lld = true` when building rustc for the `aarch64-unknown-linux-gnu` target will now also cause that rustc to use the LLD linker by default.",
+    },
 ];

@@ -24,6 +24,12 @@ Leadership roles
    * - Technical Lead
      - Ana Hobden
 
+   * - Compiler Lead
+     - Jynn Nelson
+
+   * - Certification Lead
+     - Johann Hemmann
+
    * - Release Lead
      - Ana Hobden
 

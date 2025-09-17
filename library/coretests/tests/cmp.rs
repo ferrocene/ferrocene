@@ -222,19 +222,18 @@ fn clamp() {
     assert_eq!(2.clamp(-2, 1), 1);
 }
 
-/* FIXME(#110395)
 mod const_cmp {
     use super::*;
 
     struct S(i32);
 
-    impl PartialEq for S {
+    impl const PartialEq for S {
         fn eq(&self, other: &Self) -> bool {
             self.0 == other.0
         }
     }
 
-    impl PartialOrd for S {
+    impl const PartialOrd for S {
         fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
             let ret = match (self.0, other.0) {
                 (a, b) if a > b => Ordering::Greater,
@@ -254,4 +253,3 @@ mod const_cmp {
     const _: () = assert!(S(0) < S(1));
     const _: () = assert!(S(1) > S(0));
 }
-*/

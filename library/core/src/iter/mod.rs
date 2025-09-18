@@ -416,8 +416,8 @@ pub use self::adapters::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::TrustedRandomAccessNoCoerce;
-#[stable(feature = "iter_chain", since = "CURRENT_RUSTC_VERSION")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[stable(feature = "iter_chain", since = "1.91.0")]
 pub use self::adapters::chain;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::adapters::try_process;

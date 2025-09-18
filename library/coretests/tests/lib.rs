@@ -13,8 +13,10 @@
 #![feature(bool_to_result)]
 #![feature(bstr)]
 #![feature(cfg_target_has_reliable_f16_f128)]
+#![feature(char_internals)]
 #![feature(char_max_len)]
 #![feature(clone_to_uninit)]
+#![feature(const_cmp)]
 #![feature(const_convert)]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
@@ -116,7 +118,6 @@
 //
 // Features we add so we can have better coverage:
 // tidy-alphabetical-start
-#![feature(char_internals)]
 #![feature(debug_closure_helpers)]
 // tidy-alphabetical-end
 

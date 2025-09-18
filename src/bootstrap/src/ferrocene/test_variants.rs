@@ -48,14 +48,14 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
 
     // INTERNAL_PROCEDURES_START_TEST_VARIANTS
     ("2021", &[
-        VariantCondition::Edition("2015"),
+        VariantCondition::Edition("2021"),
     ]),
     ("2021-cortex-a53", &[
-        VariantCondition::Edition("2015"),
+        VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-a53"),
     ]),
     ("2021-cortex-m4", &[
-        VariantCondition::Edition("2015"),
+        VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-m4"),
     ]),
     // INTERNAL_PROCEDURES_END_TEST_VARIANTS

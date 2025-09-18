@@ -64,6 +64,10 @@ GENERIC_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
+    "x86_64-unknown-ferrocene.certified",
+    "aarch64-unknown-ferrocene.certified",
+    "thumbv7em-ferrocene.certified-eabi",
+    "thumbv7em-ferrocene.certified-eabihf",
 ]
 
 # Targets only built (and self-tested!) on Linux.
@@ -71,6 +75,8 @@ AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
 X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
 X86_64_LINUX_BUILD_STD_TARGETS = [
     "riscv64gc-unknown-linux-gnu",
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
 ]
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)

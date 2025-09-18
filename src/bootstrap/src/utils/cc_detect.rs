@@ -26,6 +26,7 @@ use std::iter;
 use std::path::{Path, PathBuf};
 
 use crate::core::config::TargetSelection;
+use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
 
@@ -109,8 +110,8 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     // build script context (rust-lang/cc-rs#1225). Map `.facade` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
     // the C compiler.
-    let facade_compiler = if target.triple.contains("ferrocene.facade") {
-        let sub = target.triple.replace("ferrocene.facade", "none");
+    let facade_compiler = if contains_ferrocene_vendors(target.triple) {
+        let sub = replace_ferrocene_vendors(target.triple);
         cfg.target(&sub);
         let compiler = cfg.get_compiler();
 
@@ -125,7 +126,7 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
         ar
     } else {
         if facade_compiler.is_some() {
-            let sub = target.triple.replace("ferrocene.facade", "none");
+            let sub = replace_ferrocene_vendors(target.triple);
             cfg.target(&sub);
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
@@ -325,6 +326,14 @@ impl Language {
             Language::CPlusPlus => "clang++",
         }
     }
+}
+
+fn contains_ferrocene_vendors(triple: Interned<String>) -> bool {
+    triple.contains("ferrocene.facade") || triple.contains("ferrocene.certified")
+}
+
+fn replace_ferrocene_vendors(triple: Interned<String>) -> String {
+    triple.replace("ferrocene.facade", "none").replace("ferrocene.certified", "none")
 }
 
 #[cfg(test)]

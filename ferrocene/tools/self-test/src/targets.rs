@@ -10,6 +10,7 @@ use crate::linkers::Linker;
 use crate::report::Reporter;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
+    // Targets with architecture specific tuning
     #[cfg(target_arch = "x86_64")]
     TargetSpec {
         tuple: "aarch64-unknown-linux-gnu",
@@ -18,6 +19,31 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     },
     #[cfg(target_arch = "aarch64")]
     TargetSpec { tuple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
+    #[cfg(target_arch = "x86_64")]
+    TargetSpec {
+        tuple: "aarch64-unknown-linux-musl",
+        std: true,
+        linker: Linker::CrossCc(&["aarch64-linux-musl-"]),
+    },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec { tuple: "aarch64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec {
+        tuple: "x86_64-unknown-linux-gnu",
+        std: true,
+        linker: Linker::CrossCc(&["x86_64-linux-gnu-"]),
+    },
+    #[cfg(target_arch = "x86_64")]
+    TargetSpec { tuple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec {
+        tuple: "x86_64-unknown-linux-musl",
+        std: true,
+        linker: Linker::CrossCc(&["x86_64-linux-musl-"]),
+    },
+    #[cfg(target_arch = "x86_64")]
+    TargetSpec { tuple: "x86_64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
+    // Targets without architecture specific tuning
     TargetSpec { tuple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-ferrocene.facade", std: true, linker: Linker::BundledLld },
@@ -46,14 +72,6 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
-    #[cfg(target_arch = "aarch64")]
-    TargetSpec {
-        tuple: "x86_64-unknown-linux-gnu",
-        std: true,
-        linker: Linker::CrossCc(&["x86_64-linux-gnu-"]),
-    },
-    #[cfg(target_arch = "x86_64")]
-    TargetSpec { tuple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
 ];
 
 #[derive(Debug)]

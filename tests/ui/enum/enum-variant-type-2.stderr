@@ -5,7 +5,7 @@ LL | fn foo(x: Foo::Bar) {}
    |           ^^^^^^^^
    |           |
    |           not a type
-   |           help: try using the variant's enum: `Foo`
+   |           help: try using the variant's enum: `crate::Foo`
 
 error: aborting due to 1 previous error
 

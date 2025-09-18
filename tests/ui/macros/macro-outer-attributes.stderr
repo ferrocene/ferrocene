@@ -13,7 +13,7 @@ LL |       pub fn bar() { });
    |              ^^^
 help: consider importing this function
    |
-LL + use b::bar;
+LL + use crate::b::bar;
    |
 help: if you import `bar`, refer to it directly
    |

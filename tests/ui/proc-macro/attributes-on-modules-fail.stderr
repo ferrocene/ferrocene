@@ -54,7 +54,7 @@ LL |     type A = Y;
    |
 help: consider importing this struct
    |
-LL +     use Y;
+LL +     use crate::Y;
    |
 
 error[E0412]: cannot find type `X` in this scope
@@ -65,7 +65,7 @@ LL | type A = X;
    |
 help: consider importing this struct
    |
-LL + use m::X;
+LL + use crate::m::X;
    |
 
 error: aborting due to 7 previous errors

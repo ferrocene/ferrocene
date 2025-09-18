@@ -1,7 +1,7 @@
 //@ run-rustfix
 #![allow(dead_code)]
 
-use m::A;
+use crate::m::A;
 
 use std::collections::HashMap;
 

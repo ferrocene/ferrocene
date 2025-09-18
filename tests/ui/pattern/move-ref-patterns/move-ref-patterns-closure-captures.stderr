@@ -45,7 +45,7 @@ LL |     let c2 = || {
    |              ^^ this closure implements `FnMut`, not `Fn`
 ...
 LL |         drop::<&mut U>(_x2);
-   |                        --- closure is `FnMut` because it mutates the variable `_x2` here
+   |                        --- closure is `FnMut` because it mutates the variable `*_x2` here
 ...
 LL |     accept_fn(&c2);
    |     --------- --- the requirement to implement `Fn` derives from here

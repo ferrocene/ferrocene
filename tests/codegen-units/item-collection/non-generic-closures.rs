@@ -1,4 +1,5 @@
 //@ compile-flags:-Clink-dead-code -Zinline-mir=no -O
+//@ edition: 2015
 
 #![deny(dead_code)]
 #![crate_type = "lib"]
@@ -22,8 +23,8 @@ fn assigned_to_variable_but_not_executed() {
 //~ MONO_ITEM fn assigned_to_variable_executed_indirectly @@ non_generic_closures-cgu.0[External]
 fn assigned_to_variable_executed_indirectly() {
     //~ MONO_ITEM fn assigned_to_variable_executed_indirectly::{closure#0} @@ non_generic_closures-cgu.0[External]
-    //~ MONO_ITEM fn <{closure@TEST_PATH:27:13: 27:21} as std::ops::FnOnce<(i32,)>>::call_once - shim @@ non_generic_closures-cgu.0[External]
-    //~ MONO_ITEM fn <{closure@TEST_PATH:27:13: 27:21} as std::ops::FnOnce<(i32,)>>::call_once - shim(vtable) @@ non_generic_closures-cgu.0[External]
+    //~ MONO_ITEM fn <{closure@TEST_PATH:28:13: 28:21} as std::ops::FnOnce<(i32,)>>::call_once - shim @@ non_generic_closures-cgu.0[External]
+    //~ MONO_ITEM fn <{closure@TEST_PATH:28:13: 28:21} as std::ops::FnOnce<(i32,)>>::call_once - shim(vtable) @@ non_generic_closures-cgu.0[External]
     let f = |a: i32| {
         let _ = a + 2;
     };
@@ -44,7 +45,7 @@ fn assigned_to_variable_executed_directly() {
 fn with_drop(v: PresentDrop) {
     //~ MONO_ITEM fn with_drop::{closure#0} @@ non_generic_closures-cgu.0[External]
     //~ MONO_ITEM fn std::ptr::drop_in_place::<PresentDrop> - shim(Some(PresentDrop)) @@ non_generic_closures-cgu.0[Internal]
-    //~ MONO_ITEM fn std::ptr::drop_in_place::<{closure@TEST_PATH:49:14: 49:24}> - shim(Some({closure@TEST_PATH:49:14: 49:24})) @@ non_generic_closures-cgu.0[Internal]
+    //~ MONO_ITEM fn std::ptr::drop_in_place::<{closure@TEST_PATH:50:14: 50:24}> - shim(Some({closure@TEST_PATH:50:14: 50:24})) @@ non_generic_closures-cgu.0[Internal]
 
     let _f = |a: usize| {
         let _ = a + 2;

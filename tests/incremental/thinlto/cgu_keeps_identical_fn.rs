@@ -6,6 +6,7 @@
 //@ revisions: cfail1 cfail2 cfail3
 //@ compile-flags: -Z query-dep-graph -O
 //@ build-pass
+//@ edition: 2015
 
 #![feature(rustc_attrs)]
 #![crate_type = "rlib"]

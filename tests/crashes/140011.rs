@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ known-bug: #140011
 //@compile-flags: -Wrust-2021-incompatible-closure-captures
 enum b {

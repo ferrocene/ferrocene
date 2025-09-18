@@ -7,7 +7,7 @@
 #[attr = MacroUse {arguments: UseAll}]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 fn b<C>(e: C) { }
 

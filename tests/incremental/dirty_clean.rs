@@ -1,4 +1,5 @@
 //@ revisions: rpass1 cfail2
+//@ edition: 2015
 //@ compile-flags: -Z query-dep-graph
 
 #![allow(warnings)]

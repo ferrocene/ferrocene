@@ -4,6 +4,7 @@
 
 //@ revisions:rpass1 rpass2
 //@ compile-flags: -Z query-dep-graph
+//@ edition: 2015
 
 #![feature(rustc_attrs)]
 

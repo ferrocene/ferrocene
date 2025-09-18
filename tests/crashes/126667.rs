@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ known-bug: rust-lang/rust#126667
 #![warn(rust_2021_compatibility)]
 

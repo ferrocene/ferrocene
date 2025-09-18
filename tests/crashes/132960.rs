@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ known-bug: #132960
 
 #![feature(adt_const_params, const_ptr_read, generic_const_exprs, unsized_const_params)]

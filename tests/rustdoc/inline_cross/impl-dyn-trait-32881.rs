@@ -1,4 +1,5 @@
 // https://github.com/rust-lang/rust/issues/32881
+//@ edition: 2015
 #![crate_name="foobar"]
 
 //@ aux-build:rustdoc-trait-object-impl.rs

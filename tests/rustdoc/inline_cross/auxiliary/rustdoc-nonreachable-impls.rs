@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub struct Foo;
 
 pub trait Woof {}

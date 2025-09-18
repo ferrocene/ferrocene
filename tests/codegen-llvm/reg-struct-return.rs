@@ -3,6 +3,7 @@
 // (like abi_return_struct_as_int target spec).
 // x86 only.
 
+//@ edition: 2015
 //@ revisions: ENABLED DISABLED
 //@ add-core-stubs
 //@ compile-flags: --target i686-unknown-linux-gnu -Cno-prepopulate-passes -Copt-level=3

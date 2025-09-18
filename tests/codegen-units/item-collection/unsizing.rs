@@ -1,4 +1,5 @@
 //@ compile-flags:-Zmir-opt-level=0 -O
+//@ edition: 2015
 
 #![deny(dead_code)]
 #![feature(coerce_unsized)]

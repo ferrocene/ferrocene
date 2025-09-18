@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_name = "aCrate"]
 
 mod a_module {

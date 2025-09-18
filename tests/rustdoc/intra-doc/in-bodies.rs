@@ -1,4 +1,5 @@
 // we need to make sure that intra-doc links on trait impls get resolved in the right scope
+//@ edition: 2015
 
 #![deny(rustdoc::broken_intra_doc_links)]
 

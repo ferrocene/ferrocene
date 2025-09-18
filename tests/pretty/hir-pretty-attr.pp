@@ -1,7 +1,7 @@
 #[attr = MacroUse {arguments: UseAll}]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 //@ pretty-compare-only
 //@ pretty-mode:hir
 //@ pp-exact:hir-pretty-attr.pp

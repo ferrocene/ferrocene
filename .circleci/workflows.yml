@@ -554,7 +554,11 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 18
+      #
+      # # On Windows, we tune this down because the CircleCI's agent occasionally
+      # tries to contact the runner and will time out, killing the build. We set
+      # the LLVM parallelism to 7 to ensure 1 core is always free to respond.
+      LLVM_BUILD_PARALLELISM: 7
     steps:
       - run:
           name: Make sure git autocrlf is false

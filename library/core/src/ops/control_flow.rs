@@ -83,7 +83,12 @@ use crate::{convert, ops};
 #[must_use]
 // ControlFlow should not implement PartialOrd or Ord, per RFC 3058:
 // https://rust-lang.github.io/rfcs/3058-try-trait-v2.html#traits-for-controlflow
+<<<<<<< HEAD
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, Copy, PartialEq, Eq, Hash))]
+=======
+#[derive(Copy, Debug, Hash)]
+#[derive_const(Clone, PartialEq, Eq)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub enum ControlFlow<B, C = ()> {
     /// Move on to the next phase of the operation as normal.
     #[stable(feature = "control_flow_enum_type", since = "1.55.0")]

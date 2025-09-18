@@ -118,7 +118,6 @@
 //
 // Features we add so we can have better coverage:
 // tidy-alphabetical-start
-#![feature(char_internals)]
 #![feature(debug_closure_helpers)]
 // tidy-alphabetical-end
 

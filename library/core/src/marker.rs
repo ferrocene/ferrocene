@@ -6,24 +6,17 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod variance;
 
 #[unstable(feature = "phantom_variance_markers", issue = "135806")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::variance::{
     PhantomContravariant, PhantomContravariantLifetime, PhantomCovariant, PhantomCovariantLifetime,
     PhantomInvariant, PhantomInvariantLifetime, Variance, variance,
 };
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cell::UnsafeCell;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::Debug;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::UnsafePinned;
 
 /// Implements a given marker trait for multiple types at the same time.
@@ -225,7 +218,6 @@ pub trait StructuralPartialEq {
     // Empty.
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[unstable(feature = "structural_match", issue = "31434")]
     StructuralPartialEq for
@@ -238,13 +230,6 @@ marker_impls! {
         {T, const N: usize} [T; N],
         {T} [T],
         {T: ?Sized} &T,
-}
-
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[unstable(feature = "structural_match", issue = "31434")]
-    StructuralPartialEq for
-        usize
 }
 
 /// Types whose values can be duplicated simply by copying bits.
@@ -450,7 +435,6 @@ pub macro Copy($item:item) {
 // Implementations that cannot be described in Rust
 // are implemented in `traits::SelectionContext::copy_clone_conditions()`
 // in `rustc_trait_selection`.
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[stable(feature = "rust1", since = "1.0.0")]
     Copy for
@@ -463,20 +447,7 @@ marker_impls! {
 
 }
 
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[stable(feature = "rust1", since = "1.0.0")]
-    Copy for
-        usize, u8, u16, u32, u64, u128,
-        isize, i8, i16, i32, i64, i128,
-        f32, f64,
-        bool,
-        {T: ?Sized} *const T,
-        {T: ?Sized} *mut T,
-}
-
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Copy for ! {}
 
 /// Shared references can be copied, but mutable references *cannot*!
@@ -502,7 +473,6 @@ impl<T: ?Sized> Copy for &T {}
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait BikeshedGuaranteedNoDrop {}
 
 /// Types for which it is safe to share references between threads.
@@ -666,10 +636,8 @@ pub unsafe auto trait Sync {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Sync for *const T {}
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Sync for *mut T {}
 
 /// Zero-sized type used to mark things that "act like" they own a `T`.
@@ -810,14 +778,12 @@ impl<T: ?Sized> !Sync for *mut T {}
 pub struct PhantomData<T: ?Sized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Hash for PhantomData<T> {
     #[inline]
     fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> cmp::PartialEq for PhantomData<T> {
     fn eq(&self, _other: &PhantomData<T>) -> bool {
         true
@@ -825,11 +791,9 @@ impl<T: ?Sized> cmp::PartialEq for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> cmp::Eq for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> cmp::PartialOrd for PhantomData<T> {
     fn partial_cmp(&self, _other: &PhantomData<T>) -> Option<cmp::Ordering> {
         Option::Some(cmp::Ordering::Equal)
@@ -837,7 +801,6 @@ impl<T: ?Sized> cmp::PartialOrd for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> cmp::Ord for PhantomData<T> {
     fn cmp(&self, _other: &PhantomData<T>) -> cmp::Ordering {
         cmp::Ordering::Equal
@@ -845,11 +808,9 @@ impl<T: ?Sized> cmp::Ord for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Copy for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Clone for PhantomData<T> {
     fn clone(&self) -> Self {
         Self
@@ -857,7 +818,6 @@ impl<T: ?Sized> Clone for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Default for PhantomData<T> {
     fn default() -> Self {
         Self
@@ -865,7 +825,6 @@ impl<T: ?Sized> Default for PhantomData<T> {
 }
 
 #[unstable(feature = "structural_match", issue = "31434")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
 
 /// Compiler-internal trait used to indicate the type of enum discriminants.
@@ -887,13 +846,7 @@ pub trait DiscriminantKind {
     /// The type of the discriminant, which must satisfy the trait
     /// bounds required by `mem::Discriminant`.
     #[lang = "discriminant_type"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     type Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
-    /// The type of the discriminant, which must satisfy the trait
-    /// bounds required by `mem::Discriminant`.
-    #[lang = "discriminant_type"]
-    #[cfg(feature = "ferrocene_certified")]
-    type Discriminant: Clone + Copy + Eq + PartialEq + Send + Sync;
 }
 
 /// Used to determine whether a type contains
@@ -915,7 +868,6 @@ pub trait DiscriminantKind {
 pub unsafe auto trait Freeze {}
 
 #[unstable(feature = "freeze", issue = "121675")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Freeze for UnsafeCell<T> {}
 marker_impls! {
     #[unstable(feature = "freeze", issue = "121675")]
@@ -935,20 +887,13 @@ marker_impls! {
 /// tracked by [#125735](https://github.com/rust-lang/rust/issues/125735).
 #[cfg_attr(not(bootstrap), lang = "unsafe_unpin")]
 #[cfg_attr(bootstrap, allow(dead_code))]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) unsafe auto trait UnsafeUnpin {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> UnsafeUnpin for PhantomData<T> {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> UnsafeUnpin for *const T {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> UnsafeUnpin for *mut T {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> UnsafeUnpin for &T {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
 
 /// Types that do not require any pinning guarantees.
@@ -1021,7 +966,6 @@ unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
     message = "`{Self}` cannot be unpinned"
 )]
 #[lang = "unpin"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub auto trait Unpin {}
 
 /// A marker type which does not implement `Unpin`.
@@ -1034,21 +978,17 @@ pub auto trait Unpin {}
 // will likely eventually be deprecated, and all new code should be using `UnsafePinned` instead.
 #[stable(feature = "pin", since = "1.33.0")]
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct PhantomPinned;
 
 #[stable(feature = "pin", since = "1.33.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl !Unpin for PhantomPinned {}
 
 // This is a small hack to allow existing code which uses PhantomPinned to opt-out of noalias to
 // continue working. Ideally PhantomPinned could just wrap an `UnsafePinned<()>` to get the same
 // effect, but we can't add a new field to an already stable unit struct -- that would be a breaking
 // change.
-#[cfg(not(feature = "ferrocene_certified"))]
 impl !UnsafeUnpin for PhantomPinned {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[stable(feature = "pin", since = "1.33.0")]
     Unpin for
@@ -1056,7 +996,6 @@ marker_impls! {
         {T: ?Sized} &mut T,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[stable(feature = "pin_raw", since = "1.38.0")]
     Unpin for
@@ -1116,12 +1055,6 @@ marker_impls! {
         {T} &mut T,
         {T} *const T,
         {T} *mut T,
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-marker_impls! {
-    #[unstable(feature = "pointer_like_trait", issue = "none")]
-    PointerLike for
         {T: PointerLike} crate::pin::Pin<T>,
 }
 
@@ -1161,13 +1094,11 @@ pub trait UnsizedConstParamTy: StructuralPartialEq + Eq {}
 #[rustc_builtin_macro]
 #[allow_internal_unstable(unsized_const_params)]
 #[unstable(feature = "unsized_const_params", issue = "95174")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro UnsizedConstParamTy($item:item) {
     /* compiler built-in */
 }
 
 // FIXME(adt_const_params): handle `ty::FnDef`/`ty::Closure`
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[unstable(feature = "adt_const_params", issue = "95174")]
     ConstParamTy_ for
@@ -1179,14 +1110,6 @@ marker_impls! {
         {T: ConstParamTy_, const N: usize} [T; N],
 }
 
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[unstable(feature = "adt_const_params", issue = "95174")]
-    ConstParamTy_ for
-        usize
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[unstable(feature = "unsized_const_params", issue = "95174")]
     UnsizedConstParamTy for
@@ -1202,13 +1125,6 @@ marker_impls! {
         {T: UnsizedConstParamTy + ?Sized} &T,
 }
 
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[unstable(feature = "adt_const_params", issue = "95174")]
-    UnsizedConstParamTy for
-        usize
-}
-
 /// A common trait implemented by all function pointers.
 //
 // Note that while the trait is internal and unstable it is nevertheless
@@ -1221,7 +1137,6 @@ marker_impls! {
 #[lang = "fn_ptr_trait"]
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]
@@ -1421,7 +1336,6 @@ pub trait FnPtr: Copy + Clone {
 #[allow_internal_unstable(dispatch_from_dyn, coerce_unsized, unsize, coerce_pointee_validated)]
 #[rustc_diagnostic_item = "CoercePointee"]
 #[unstable(feature = "derive_coerce_pointee", issue = "123430")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro CoercePointee($item:item) {
     /* compiler built-in */
 }
@@ -1435,7 +1349,6 @@ pub macro CoercePointee($item:item) {
 #[lang = "coerce_pointee_validated"]
 #[unstable(feature = "coerce_pointee_validated", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait CoercePointeeValidated {
     /* compiler built-in */
 }

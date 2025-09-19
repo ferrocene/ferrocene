@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Infallible"],"fn":["identity"],"trait":["AsMut","AsRef","From","Into","TryFrom","TryInto"]};

@@ -67,7 +67,7 @@ jobs:
       - name: Execute the build
         run: ferrocene/ci/run.sh
         env:
-          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-19
+          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-20
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           SCRIPT: |
             set -e

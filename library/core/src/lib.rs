@@ -341,6 +341,8 @@ pub mod iter;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod net;
 pub mod option;
+#[cfg(not(feature = "ferrocene_certified"))]
+pub mod os;
 pub mod panic;
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]

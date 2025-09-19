@@ -4,6 +4,8 @@
 Core library subset
 ===================
 
+.. include:: ./partials/pre-release.rst
+
 This is a list of all functions within the certified subset.
 
 .. csv-table::

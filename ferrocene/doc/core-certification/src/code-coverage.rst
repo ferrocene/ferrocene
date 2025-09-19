@@ -4,4 +4,6 @@
 Code coverage report
 ====================
 
-`Code coverage report <./_static/coverage/index.html>`_  of the certified core library.
+.. include:: ./partials/pre-release.rst
+
+The code coverage report of the certified core library will be placed here for full release.

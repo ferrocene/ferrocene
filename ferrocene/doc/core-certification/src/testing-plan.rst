@@ -4,6 +4,8 @@
 Testing Plan
 ============
 
+.. include:: ./partials/pre-release.rst
+
 Re-verification scope
 ---------------------
 

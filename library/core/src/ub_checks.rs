@@ -71,8 +71,7 @@ macro_rules! assert_unsafe_precondition {
                     let msg = concat!("unsafe precondition(s) violated: ", $message,
                         "\n\nThis indicates a bug in the program. \
                         This Undefined Behavior check is optional, and cannot be relied on for safety.");
-                    // blocked on fmt::Arguments
-                    #[cfg(not(feature = "ferrocene_certified"))]
+                    #[cfg(not(feature = "ferrocene_certified"))] // blocked on fmt::Arguments
                     ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::new_const(&[msg]), false);
                     #[cfg(feature = "ferrocene_certified")]
                     ::core::panicking::panic_nounwind(msg);

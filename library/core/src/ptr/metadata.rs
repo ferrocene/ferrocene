@@ -1,17 +1,10 @@
 #![unstable(feature = "ptr_metadata", issue = "81513")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Freeze;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
-#[cfg(feature = "ferrocene_certified")]
-use crate::{intrinsics::aggregate_raw_ptr};
 
 /// Provides the pointer metadata type of any pointed-to type.
 ///
@@ -70,12 +63,7 @@ pub trait Pointee {
     // in sync with those here:
     // NOTE: The metadata of `dyn Trait + 'a` is `DynMetadata<dyn Trait + 'a>`
     // so a `'static` bound must not be added.
-    #[cfg(not(feature = "ferrocene_certified"))]
     type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
-    /// The type for metadata in pointers and references to `Self`.
-    #[lang = "metadata_type"]
-    #[cfg(feature = "ferrocene_certified")]
-    type Metadata: Copy + Send + Sync + Ord;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.
@@ -108,7 +96,6 @@ pub trait Thin = Pointee<Metadata = ()>;
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
     ptr_metadata(ptr)
 }
@@ -165,13 +152,11 @@ pub const fn from_raw_parts_mut<T: ?Sized>(
 /// duplicated in multiple codegen units), and pointers to vtables of *different* types/traits can
 /// compare equal (since identical vtables can be deduplicated within a codegen unit).
 #[lang = "dyn_metadata"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct DynMetadata<Dyn: ?Sized> {
     _vtable_ptr: NonNull<VTable>,
     _phantom: crate::marker::PhantomData<Dyn>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe extern "C" {
     /// Opaque type for accessing vtables.
     ///
@@ -180,7 +165,6 @@ unsafe extern "C" {
     type VTable;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> DynMetadata<Dyn> {
     /// When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout
     /// computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead
@@ -222,12 +206,9 @@ impl<Dyn: ?Sized> DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<Dyn: ?Sized> Send for DynMetadata<Dyn> {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<Dyn: ?Sized> Sync for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> fmt::Debug for DynMetadata<Dyn> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata").field(&self.vtable_ptr()).finish()
@@ -236,13 +217,10 @@ impl<Dyn: ?Sized> fmt::Debug for DynMetadata<Dyn> {
 
 // Manual impls needed to avoid `Dyn: $Trait` bounds.
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Unpin for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Copy for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Clone for DynMetadata<Dyn> {
     #[inline]
     fn clone(&self) -> Self {
@@ -250,10 +228,8 @@ impl<Dyn: ?Sized> Clone for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Eq for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -261,7 +237,6 @@ impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -270,7 +245,6 @@ impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<crate::cmp::Ordering> {
@@ -278,7 +252,6 @@ impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Hash for DynMetadata<Dyn> {
     #[inline]
     fn hash<H: Hasher>(&self, hasher: &mut H) {

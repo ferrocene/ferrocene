@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
@@ -30,12 +29,8 @@ use crate::fmt;
 /// Files are compared as strings, not `Path`, which could be unexpected.
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
-#[cfg_attr(
-    not(feature = "ferrocene_certified"),
-    derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)
-)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
 pub struct Location<'a> {
     file: &'a str,
     line: u32,
@@ -90,7 +85,6 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -132,7 +126,6 @@ impl<'a> Location<'a> {
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file(&self) -> &str {
         self.file
     }
@@ -201,7 +194,6 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["impls"],"trait":["Fn","FnMut","FnOnce"]};

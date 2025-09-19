@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"macro":["spec_tuple_impl"],"trait":["IntoIterator"]};

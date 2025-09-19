@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"macro":["default_impl"],"trait":["Default"]};

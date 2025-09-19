@@ -4,6 +4,8 @@
 Testing with the certified core library
 =======================================
 
+.. include:: ../../../core-certification/src/partials/pre-release.rst
+
 When using the certified core library, run tests exactly how you'd run tests with the normal Rust core library,
 by running ``cargo test``.
 

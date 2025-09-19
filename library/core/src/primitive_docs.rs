@@ -314,7 +314,6 @@ mod prim_bool {}
 /// [2024 edition]: <https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html>
 ///
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_never {}
 
 #[rustc_doc_primitive = "char"]
@@ -446,7 +445,6 @@ mod prim_never {}
 /// assert_eq!(32, size_of_val(&v[..]));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_char {}
 
 #[rustc_doc_primitive = "unit"]
@@ -488,13 +486,11 @@ mod prim_char {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_unit {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl () {}
 
 #[rustc_doc_primitive = "pointer"]
@@ -617,7 +613,6 @@ impl () {}
 /// [`write`]: ptr::write
 /// [valid]: ptr#safety
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_pointer {}
 
 #[rustc_doc_primitive = "array"]
@@ -944,7 +939,6 @@ mod prim_array {}
 /// [`.chunks`]: slice::chunks
 /// [`.windows`]: slice::windows
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_slice {}
 
 #[rustc_doc_primitive = "str"]
@@ -1018,7 +1012,6 @@ mod prim_slice {}
 /// called on a string slice may assume that it is valid UTF-8, which means that a non-UTF-8 string
 /// slice can lead to undefined behavior down the road.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_str {}
 
 #[rustc_doc_primitive = "tuple"]
@@ -1146,7 +1139,6 @@ mod prim_str {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_tuple {}
 
 // Required to make auto trait impls render.
@@ -1172,7 +1164,6 @@ impl<T> (T,) {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Half-precision_floating-point_format
 #[unstable(feature = "f16", issue = "116909")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_f16 {}
 
 #[rustc_doc_primitive = "f32"]
@@ -1408,7 +1399,6 @@ mod prim_f64 {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
 #[unstable(feature = "f128", issue = "116909")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_f128 {}
 
 #[rustc_doc_primitive = "i8"]
@@ -1920,7 +1910,6 @@ mod prim_ref {}
 /// In addition, all *safe* function pointers implement [`Fn`], [`FnMut`], and [`FnOnce`], because
 /// these traits are specially known to the compiler.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_fn {}
 
 // Required to make auto trait impls render.

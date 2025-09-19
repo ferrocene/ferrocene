@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"macro":["eq_impl","ord_impl","partial_eq_impl","partial_ord_impl","partial_ord_methods_primitive_impl"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["arith","bit","control_flow","deref","drop","function","range","try_trait","unsize"]};

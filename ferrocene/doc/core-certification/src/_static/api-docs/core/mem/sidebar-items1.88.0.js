@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["align_of","drop","size_of","transmute"],"trait":["SizedTypeProperties"]};

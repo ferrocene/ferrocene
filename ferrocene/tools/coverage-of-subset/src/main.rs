@@ -6,7 +6,7 @@ use std::path::Path;
 
 /// Uncertified code is marked with this attribute
 const MARKER: &str = "#[cfg(not(feature = \"ferrocene_certified\"))]";
-const APPLICABLE: [&str; 20] = [
+const APPLICABLE: [&str; 18] = [
     "fn",
     "unsafe fn",
     "const fn",
@@ -20,8 +20,6 @@ const APPLICABLE: [&str; 20] = [
     "pub(crate) const fn",
     "pub(crate) const unsafe fn",
     "impl",
-    "unsafe impl",
-    "impl const",
     "pub impl",
     "pub(crate) impl",
     "mod",

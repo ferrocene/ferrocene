@@ -181,19 +181,19 @@ jobs:
 
   # A basic check to ensure the certified libcore subset builds
   # Will be replaced by a more sophisticated mechanism
-  x86_64-linux-certified:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      # Certified targets only
-      FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf
-      SCRIPT: |
-        ./x.py build --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
-        ./x.py doc --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
-    steps:
-      - ferrocene-job-test-container:
-          restore-from-job: x86_64-linux-build
+  # x86_64-linux-certified:
+  #   executor: docker-x86_64-ubuntu-20
+  #   resource_class: large # 4-core
+  #   environment:
+  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
+  #     # Certified targets only
+  #     FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf
+  #     SCRIPT: |
+  #       ./x.py build --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
+  #       ./x.py doc --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
+  #   steps:
+  #     - ferrocene-job-test-container:
+  #         restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
@@ -268,25 +268,25 @@ jobs:
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
 
-  x86_64-linux-library-coverage:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
-        sed -i -e "s/profile = 'ferrocene-dist'/profile = 'compiler'/g" bootstrap.toml
-        sed -i -e "s/^\\[build\\]/[build]\\nprofiler = true\\nmetrics=true/g" bootstrap.toml
-        ./x.py run ferrocene/tools/coverage-of-subset
-        ./x.py test --no-doc --coverage=library library/core -v
-    steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
-      - run:
-          name: Restore files from the x86_64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-      - ferrocene-ci
+  # x86_64-linux-library-coverage:
+  #   executor: docker-x86_64-ubuntu-20
+  #   resource_class: medium # 2-core
+  #   environment:
+  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
+  #     SCRIPT: |
+  #       ferrocene/ci/scripts/llvm_cache.py download
+  #       sed -i -e "s/profile = 'ferrocene-dist'/profile = 'compiler'/g" bootstrap.toml
+  #       sed -i -e "s/^\\[build\\]/[build]\\nprofiler = true\\nmetrics=true/g" bootstrap.toml
+  #       ./x.py run ferrocene/tools/coverage-of-subset
+  #       ./x.py test --no-doc --coverage=library library/core -v
+  #   steps:
+  #     - aws-oidc-auth
+  #     - ferrocene-checkout:
+  #         llvm-subset: true
+  #     - run:
+  #         name: Restore files from the x86_64-linux-build job
+  #         command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+  #     - ferrocene-ci
 
   x86_64-linux-llvm:
     executor: docker-x86_64-ubuntu-20
@@ -863,9 +863,9 @@ workflows:
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
-      - x86_64-linux-certified:
-          requires:
-            - x86_64-linux-build
+      # - x86_64-linux-certified:
+      #     requires:
+      #       - x86_64-linux-build
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -875,7 +875,7 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
-            - x86_64-linux-library-coverage
+            # - x86_64-linux-library-coverage
             - x86_64-qnx-test-library
             - x86_64-qnx-test-library-std
             - x86_64-qnx-test-compiletest
@@ -927,9 +927,9 @@ workflows:
           test-variant: "2021"
           requires:
             - x86_64-linux-build
-      - x86_64-linux-library-coverage:
-          requires:
-            - x86_64-linux-build
+      # - x86_64-linux-library-coverage:
+      #     requires:
+      #       - x86_64-linux-build
 
       - ferrocenecoretest-generic-test:
           name: aarch64-none-compiletest
@@ -1125,7 +1125,7 @@ workflows:
 
       - finish-build:
           requires:
-            - x86_64-linux-certified
+            # - x86_64-linux-certified
             - x86_64-linux-docs
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix

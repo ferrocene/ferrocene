@@ -7,19 +7,16 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-<<<<<<< HEAD
 use ignore::Walk;
-=======
+
 use crate::diagnostics::{CheckId, DiagCtx, RunningCheck};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 const ISSUES_TXT_HEADER: &str = r#"============================================================
     ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
 ============================================================
 "#;
 
-<<<<<<< HEAD
-fn check_stray_ferrocene_files(tests_path: &Path, bad: &mut bool) {
+fn check_stray_ferrocene_files(tests_path: &Path, check: &mut RunningCheck) {
     let mut directories: HashMap<PathBuf, u32> = HashMap::new();
 
     for entry in Walk::new(tests_path.join("ui")).flatten() {
@@ -29,24 +26,19 @@ fn check_stray_ferrocene_files(tests_path: &Path, bad: &mut bool) {
 
     for (dir_path, count) in directories {
         if count == 1 && dir_path.join("ferrocene-annotations").exists() {
-            tidy_error!(
-                bad,
+            check.error(format!(
                 "following path contains a dangling `ferrocene-annotations` file, which may be \
                      a remnant from an upstream directory move: {}",
                 dir_path.display()
-            )
+            ))
         }
     }
 }
 
-pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
-    let path = &root_path.join("tests");
-    check_stray_ferrocene_files(path, bad);
-=======
 pub fn check(root_path: &Path, bless: bool, diag_ctx: DiagCtx) {
     let path = &root_path.join("tests");
     let mut check = diag_ctx.start_check(CheckId::new("ui_tests").path(path));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    check_stray_ferrocene_files(path, &mut check);
 
     // the list of files in ui tests that are allowed to start with `issue-XXXX`
     // BTreeSet because we would like a stable ordering so --bless works

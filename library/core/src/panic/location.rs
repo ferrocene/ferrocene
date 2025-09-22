@@ -207,12 +207,9 @@ impl<'a> Location<'a> {
     /// `std::source_location::file_name`, both of which return a nul-terminated `const char*`.
     #[must_use]
     #[inline]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[stable(feature = "file_with_nul", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "file_with_nul", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file_as_c_str(&self) -> &'a CStr {
         let filename = self.filename.as_ptr();
 

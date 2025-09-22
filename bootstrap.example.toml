@@ -325,14 +325,12 @@
 # Defaults to the Python interpreter used to execute x.py.
 #build.python = "python"
 
-<<<<<<< HEAD
+# The path to (or name of) the resource compiler executable to use on Windows.
+#build.windows-rc = "rc.exe"
+
 # The uv executable used to install and manage Python dependencies. Defaults
 # to the "uv" command in the system path.
 #uv = "uv"
-=======
-# The path to (or name of) the resource compiler executable to use on Windows.
-#build.windows-rc = "rc.exe"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 # The path to the REUSE executable to use. Note that REUSE is not required in
 # most cases, as our tooling relies on a cached (and shrunk) copy of the

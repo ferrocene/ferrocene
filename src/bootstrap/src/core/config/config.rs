@@ -273,11 +273,7 @@ pub struct Config {
     pub gdb: Option<PathBuf>,
     pub lldb: Option<PathBuf>,
     pub python: Option<PathBuf>,
-<<<<<<< HEAD
-    pub uv: Option<PathBuf>,
-=======
     pub windows_rc: Option<PathBuf>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub reuse: Option<PathBuf>,
     pub cargo_native_static: bool,
     pub configure_args: Vec<String>,
@@ -332,6 +328,7 @@ pub struct Config {
     pub exec_ctx: ExecutionContext,
 
     // Ferrocene-specific configuration
+    pub uv: Option<PathBuf>,
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
     pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,

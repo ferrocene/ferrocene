@@ -61,21 +61,13 @@ pub fn check(src_path: &Path, ci_info: &crate::CiInfo, diag_ctx: DiagCtx) {
             }
             match (new_version, old_version) {
                 (Some(new_version), Some(old_version)) if new_version != old_version + 1 => {
-<<<<<<< HEAD
                     // Ferrocene annotation: Upstream pulls sometimes increment the format version
                     // by more than one, so this error is disarmed.
                     // *bad = true;
-                    // eprintln!(
-                    //     "error in `rustdoc_json` tidy check: invalid `FORMAT_VERSION` increase in \
-                    //      `{RUSTDOC_JSON_TYPES}/lib.rs`, should be `{}`, found `{new_version}`",
+                    // check.error(format!(
+                    //     "invalid `FORMAT_VERSION` increase in `{RUSTDOC_JSON_TYPES}/lib.rs`, should be `{}`, found `{new_version}`",
                     //     old_version + 1,
-                    // );
-=======
-                    check.error(format!(
-                        "invalid `FORMAT_VERSION` increase in `{RUSTDOC_JSON_TYPES}/lib.rs`, should be `{}`, found `{new_version}`",
-                        old_version + 1,
-                    ));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                    // ));
                 }
                 _ => {}
             }

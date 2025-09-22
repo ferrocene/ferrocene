@@ -5,11 +5,9 @@ use super::super::{
     Product, Rev, Scan, Skip, SkipWhile, StepBy, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce,
     Zip, try_process,
 };
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use super::TrustedLen;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::array;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::{self, Ordering};
@@ -4121,12 +4119,14 @@ pub trait Iterator {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecIterEq<B: Iterator>: Iterator {
     fn spec_iter_eq<F>(self, b: B, f: F) -> bool
     where
         F: FnMut(Self::Item, <B as Iterator>::Item) -> ControlFlow<()>;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator, B: Iterator> SpecIterEq<B> for A {
     #[inline]
     default fn spec_iter_eq<F>(self, b: B, f: F) -> bool
@@ -4137,6 +4137,7 @@ impl<A: Iterator, B: Iterator> SpecIterEq<B> for A {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator + TrustedLen, B: Iterator + TrustedLen> SpecIterEq<B> for A {
     #[inline]
     fn spec_iter_eq<F>(self, b: B, f: F) -> bool
@@ -4199,6 +4200,7 @@ where
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 fn iter_eq<A, B, F>(a: A, b: B, f: F) -> bool
 where
     A: Iterator,

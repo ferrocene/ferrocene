@@ -38,21 +38,22 @@ pub enum ToolArtifactKind {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-struct ToolBuild {
+// Ferrocene addition: pub(crate) for use in ferrocene::tool::SymbolReport
+pub(crate) struct ToolBuild {
     /// Compiler that will build this tool.
-    build_compiler: Compiler,
-    target: TargetSelection,
-    tool: &'static str,
-    path: &'static str,
-    mode: Mode,
-    source_type: SourceType,
-    extra_features: Vec<String>,
+    pub(crate) build_compiler: Compiler,
+    pub(crate) target: TargetSelection,
+    pub(crate) tool: &'static str,
+    pub(crate) path: &'static str,
+    pub(crate) mode: Mode,
+    pub(crate) source_type: SourceType,
+    pub(crate) extra_features: Vec<String>,
     /// Nightly-only features that are allowed (comma-separated list).
-    allow_features: &'static str,
+    pub(crate) allow_features: &'static str,
     /// Additional arguments to pass to the `cargo` invocation.
-    cargo_args: Vec<String>,
+    pub(crate) cargo_args: Vec<String>,
     /// Whether the tool builds a binary or a library.
-    artifact_kind: ToolArtifactKind,
+    pub(crate) artifact_kind: ToolArtifactKind,
 }
 
 /// Result of the tool build process. Each `Step` in this module is responsible

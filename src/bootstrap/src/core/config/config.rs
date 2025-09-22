@@ -273,7 +273,11 @@ pub struct Config {
     pub gdb: Option<PathBuf>,
     pub lldb: Option<PathBuf>,
     pub python: Option<PathBuf>,
+<<<<<<< HEAD
     pub uv: Option<PathBuf>,
+=======
+    pub windows_rc: Option<PathBuf>,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub reuse: Option<PathBuf>,
     pub cargo_native_static: bool,
     pub configure_args: Vec<String>,
@@ -514,6 +518,7 @@ impl Config {
             nodejs: build_nodejs,
             npm: build_npm,
             python: build_python,
+            windows_rc: build_windows_rc,
             reuse: build_reuse,
             locked_deps: build_locked_deps,
             vendor: build_vendor,
@@ -1529,6 +1534,7 @@ impl Config {
                 .unwrap_or(rust_debug == Some(true)),
             vendor,
             verbose_tests,
+            windows_rc: build_windows_rc.map(PathBuf::from),
             // tidy-alphabetical-end
             // Ferrocene additions
             uv: uv.map(PathBuf::from),
@@ -2332,15 +2338,7 @@ pub fn parse_download_ci_llvm<'a>(
     asserts: bool,
 ) -> bool {
     let dwn_ctx = dwn_ctx.as_ref();
-
-    // We don't ever want to use `true` on CI, as we should not
-    // download upstream artifacts if there are any local modifications.
-    let default = if dwn_ctx.is_running_on_ci {
-        StringOrBool::String("if-unchanged".to_string())
-    } else {
-        StringOrBool::Bool(true)
-    };
-    let download_ci_llvm = download_ci_llvm.unwrap_or(default);
+    let download_ci_llvm = download_ci_llvm.unwrap_or(StringOrBool::Bool(true));
 
     let if_unchanged = || {
         if rust_info.is_from_tarball() {
@@ -2372,8 +2370,9 @@ pub fn parse_download_ci_llvm<'a>(
                 );
             }
 
-            if b && dwn_ctx.is_running_on_ci {
-                // On CI, we must always rebuild LLVM if there were any modifications to it
+            #[cfg(not(test))]
+            if b && dwn_ctx.is_running_on_ci && CiEnv::is_rust_lang_managed_ci_job() {
+                // On rust-lang CI, we must always rebuild LLVM if there were any modifications to it
                 panic!(
                     "`llvm.download-ci-llvm` cannot be set to `true` on CI. Use `if-unchanged` instead."
                 );

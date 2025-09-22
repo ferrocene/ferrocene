@@ -37,7 +37,11 @@ define_config! {
         nodejs: Option<String> = "nodejs",
         npm: Option<String> = "npm",
         python: Option<String> = "python",
+<<<<<<< HEAD
         uv: Option<String> = "uv", // Ferrocene addition
+=======
+        windows_rc: Option<String> = "windows-rc",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         reuse: Option<String> = "reuse",
         locked_deps: Option<bool> = "locked-deps",
         vendor: Option<bool> = "vendor",

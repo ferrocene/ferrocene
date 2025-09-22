@@ -740,7 +740,7 @@ fn doc_std(
     let mut cargo =
         builder::Cargo::new(builder, compiler, Mode::Std, SourceType::InTree, target, Kind::Doc);
 
-    compile::std_cargo(builder, target, compiler.stage, &mut cargo);
+    compile::std_cargo(builder, target, compiler.stage, &mut cargo, &requested_crates);
     cargo
         .arg("--no-deps")
         .arg("--target-dir")
@@ -777,10 +777,6 @@ fn doc_std(
 
     if builder.config.library_docs_private_items {
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
-    }
-
-    for krate in requested_crates {
-        cargo.arg("-p").arg(krate);
     }
 
     let description =

@@ -5,7 +5,7 @@
 // (Also compare against ui-fulldeps/dropck-tarena-unsound-drop.rs,
 //  which is a reduction of this code to more directly show the reason
 //  for the error message we see here.)
-
+//@ edition: 2015
 #![feature(rustc_private)]
 
 extern crate rustc_arena;

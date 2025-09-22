@@ -11,6 +11,7 @@ use std::rc::Rc;
 use serde_json::json;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
@@ -51,7 +52,7 @@ impl Step for Docs {
         // NOTE: must be called before .add_directory, since it places the
         // certified API docs in the doc_out
         if self.target.certified_equivalent().is_some() {
-            builder.ensure(CertifiedApiDocs { target: self.target });
+            builder.ensure(CertifiedApiDocs { target: self.target, format: DocumentationFormat::Html});
         } else {
             builder.info(&format!("skipping Build certified-core-docs ({})", self.target));
         }

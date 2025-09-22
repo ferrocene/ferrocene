@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf, absolute};
 
 use self::certified_api_docs::CertifiedApiDocs;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
@@ -580,7 +581,7 @@ macro_rules! sphinx_books {
                 )*
 
                 // Generate the API docs for the certified crates
-                builder.ensure(CertifiedApiDocs {target: self.target});
+                builder.ensure(CertifiedApiDocs {target: self.target, format: DocumentationFormat::Html});
 
                 // Also regenerate the index file, so that the "Ferrocene documentation" link in
                 // the breadcrumbs doesn't break.

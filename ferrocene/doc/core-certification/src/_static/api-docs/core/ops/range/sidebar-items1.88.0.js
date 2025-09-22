@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Bound","OneSidedRangeBound"],"struct":["Range","RangeFrom","RangeFull","RangeInclusive","RangeTo","RangeToInclusive"],"trait":["IntoBounds","OneSidedRange","RangeBounds"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"derive":["Eq","PartialEq"],"enum":["Ordering"],"fn":["default_chaining_impl","max","min"],"mod":["impls"],"trait":["Eq","Ord","PartialEq","PartialOrd"]};

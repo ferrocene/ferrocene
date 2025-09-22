@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"trait":["Deref","DerefMut","DerefPure","LegacyReceiver","Receiver"]};

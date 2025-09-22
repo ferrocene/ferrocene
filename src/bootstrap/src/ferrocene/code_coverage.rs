@@ -8,10 +8,12 @@ use std::path::PathBuf;
 use build_helper::exit;
 
 use crate::builder::Builder;
+use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
+use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::{BootstrapCommand, Compiler, GitRepo, Mode, RemapScheme, t};
@@ -128,6 +130,9 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             "library/std",
         ],
     };
+
+    builder.info("Generating rustdoc-json for the certified libcore subset");
+    builder.ensure(CertifiedApiDocs { target: builder.config.host_target, format: DocumentationFormat::Json });
 
     builder.info("Generating lcov dump of the code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));

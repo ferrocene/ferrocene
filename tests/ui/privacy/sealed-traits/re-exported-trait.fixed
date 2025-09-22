@@ -9,6 +9,6 @@ pub mod a {
 }
 
 struct S;
-impl a::Trait for S {} //~ ERROR module `b` is private
+impl crate::a::Trait for S {} //~ ERROR module `b` is private
 
 fn main() {}

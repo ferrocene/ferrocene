@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -Znormalize-docs
 //@ dont-require-annotations: NOTE
 

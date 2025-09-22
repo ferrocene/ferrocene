@@ -7,10 +7,10 @@ LL |     B(Ty::A),
 help: try using the variant's enum
    |
 LL -     B(Ty::A),
-LL +     B(E),
+LL +     B(crate::E),
    |
 LL -     B(Ty::A),
-LL +     B(Ty),
+LL +     B(crate::Ty),
    |
 
 error[E0573]: expected type, found variant `E::A`
@@ -22,10 +22,10 @@ LL | impl E::A {}
 help: try using the variant's enum
    |
 LL - impl E::A {}
-LL + impl E {}
+LL + impl crate::E {}
    |
 LL - impl E::A {}
-LL + impl Ty {}
+LL + impl crate::Ty {}
    |
 
 error: aborting due to 2 previous errors

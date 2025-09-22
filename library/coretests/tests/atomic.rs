@@ -13,7 +13,7 @@ fn bool_() {
 
 #[test]
 #[should_panic = "there is no such thing as an acquire store"]
-fn store_ilegal_rt_store_acquire_ordering() {
+fn store_illegal_rt_store_acquire_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::Acquire;
     a.store(true, ord);
@@ -21,7 +21,7 @@ fn store_ilegal_rt_store_acquire_ordering() {
 
 #[test]
 #[should_panic = "there is no such thing as an acquire-release store"]
-fn store_ilegal_rt_store_acq_rel_ordering() {
+fn store_illegal_rt_store_acq_rel_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::AcqRel;
     a.store(true, ord);
@@ -29,7 +29,7 @@ fn store_ilegal_rt_store_acq_rel_ordering() {
 
 #[test]
 #[should_panic = "there is no such thing as a release load"]
-fn store_ilegal_rt_load_release_ordering() {
+fn store_illegal_rt_load_release_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::Release;
     a.load(ord);
@@ -37,7 +37,7 @@ fn store_ilegal_rt_load_release_ordering() {
 
 #[test]
 #[should_panic = "there is no such thing as an acquire-release load"]
-fn store_ilegal_rt_load_acq_rel_ordering() {
+fn store_illegal_rt_load_acq_rel_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::AcqRel;
     a.load(ord);

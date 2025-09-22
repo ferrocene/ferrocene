@@ -38,6 +38,7 @@ define_config! {
         npm: Option<String> = "npm",
         python: Option<String> = "python",
         uv: Option<String> = "uv", // Ferrocene addition
+        windows_rc: Option<String> = "windows-rc",
         reuse: Option<String> = "reuse",
         locked_deps: Option<bool> = "locked-deps",
         vendor: Option<bool> = "vendor",

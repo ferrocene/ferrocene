@@ -11,6 +11,10 @@
 //@ compile-flags:-Cstrip=none
 //@ needs-subprocess
 //@ ignore-fuchsia Backtrace not symbolized, trace different line alignment
+//@ ignore-ios needs the `.dSYM` files to be moved to the device
+//@ ignore-tvos needs the `.dSYM` files to be moved to the device
+//@ ignore-watchos needs the `.dSYM` files to be moved to the device
+//@ ignore-visionos needs the `.dSYM` files to be moved to the device
 //@ ignore-ferrocene.facade - backtraces not supported on the target
 
 // FIXME(#117097): backtrace (possibly unwinding mechanism) seems to be different on at least

@@ -340,6 +340,17 @@ than building it.
             .entry(*target)
             .or_insert_with(|| Target::from_triple(&target.triple));
 
+        // Ferrocene addition: set `no_std` for certified targets.
+        // FIXME: bootstrap shouldn't silently assume std if it doesn't find a target, instead it
+        // should panic ...
+        if let Some(certified_target) = target.certified_equivalent() {
+            build
+                .config
+                .target_config
+                .entry(certified_target)
+                .or_insert_with(|| Target::from_triple(&certified_target.triple));
+        }
+
         if (target.contains("-none-") || target.contains("nvptx"))
             && build.no_std(*target) == Some(false)
         {

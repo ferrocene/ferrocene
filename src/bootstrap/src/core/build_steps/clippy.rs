@@ -154,11 +154,7 @@ impl Step for Std {
             Kind::Clippy,
         );
 
-        std_cargo(builder, target, compiler.stage, &mut cargo);
-
-        for krate in &*self.crates {
-            cargo.arg("-p").arg(krate);
-        }
+        std_cargo(builder, target, compiler.stage, &mut cargo, &self.crates);
 
         let _guard =
             builder.msg_clippy(format_args!("library{}", crate_description(&self.crates)), target);

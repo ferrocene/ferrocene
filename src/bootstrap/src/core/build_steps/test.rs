@@ -2837,7 +2837,7 @@ impl Step for Crate {
                         .arg("--manifest-path")
                         .arg(builder.src.join("library/sysroot/Cargo.toml"));
                 } else {
-                    compile::std_cargo(builder, target, compiler.stage, &mut cargo);
+                    compile::std_cargo(builder, target, compiler.stage, &mut cargo, &[]);
                 }
             }
             Mode::Rustc => {

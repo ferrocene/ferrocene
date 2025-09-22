@@ -74,9 +74,6 @@ pub fn fill_compilers(build: &mut Build) {
         }
 
         _ => {
-            // Ferrocene addition: Load the matching certified target
-            let certified_target = build.host_target.certified_equivalent();
-
             // For all targets we're going to need a C compiler for building some shims
             // and such as well as for being a linker for Rust code.
             build
@@ -85,8 +82,8 @@ pub fn fill_compilers(build: &mut Build) {
                 .chain(&build.hosts)
                 .cloned()
                 .chain(iter::once(build.host_target))
-                // Ferrocene addition: see above
-                .chain(certified_target)
+                // Ferrocene addition: Load the matching certified target
+                .flat_map(|t| std::iter::once(t).chain(t.certified_equivalent()))
                 .collect()
         }
     };

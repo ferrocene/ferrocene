@@ -58,6 +58,7 @@ macro_rules! define_scoped_cx {
 
 thread_local! {
     static FORCE_IMPL_FILENAME_LINE: Cell<bool> = const { Cell::new(false) };
+    static SHOULD_PREFIX_WITH_CRATE_NAME: Cell<bool> = const { Cell::new(false) };
     static SHOULD_PREFIX_WITH_CRATE: Cell<bool> = const { Cell::new(false) };
     static NO_TRIMMED_PATH: Cell<bool> = const { Cell::new(false) };
     static FORCE_TRIMMED_PATH: Cell<bool> = const { Cell::new(false) };
@@ -125,6 +126,11 @@ define_helper!(
     /// cycle errors, this can result in extra or suboptimal error output,
     /// so this variable disables that check.
     fn with_forced_impl_filename_line(ForcedImplGuard, FORCE_IMPL_FILENAME_LINE);
+    // Ferrocene annotation: This allows printing fully-qualified source names for `symbol-report`.
+    /// Adds the crate name prefix to paths where appropriate.
+    /// Unlike `with_crate_prefix`, this unconditionally uses `tcx.crate_name` instead of sometimes
+    /// using `crate::` for local items.
+    fn with_resolve_crate_name(CrateNamePrefixGuard, SHOULD_PREFIX_WITH_CRATE_NAME);
     /// Adds the `crate::` prefix to paths where appropriate.
     fn with_crate_prefix(CratePrefixGuard, SHOULD_PREFIX_WITH_CRATE);
     /// Prevent path trimming if it is turned on. Path trimming affects `Display` impl
@@ -2334,7 +2340,7 @@ impl<'tcx> Printer<'tcx> for FmtPrinter<'_, 'tcx> {
 
     fn path_crate(&mut self, cnum: CrateNum) -> Result<(), PrintError> {
         self.empty_path = true;
-        if cnum == LOCAL_CRATE {
+        if cnum == LOCAL_CRATE && !with_resolve_crate_name() {
             if self.tcx.sess.at_least_rust_2018() {
                 // We add the `crate::` keyword on Rust 2018, only when desired.
                 if with_crate_prefix() {

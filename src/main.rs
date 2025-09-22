@@ -49,11 +49,35 @@ pub struct ShowCommand {
 }
 
 #[derive(Debug)]
+enum CoverageStatus {
+    Tested,
+    Untested,
+    Ignored,
+}
+
+#[derive(Debug)]
+struct LineCoverage {
+    lines: Vec<(usize, CoverageStatus)>,
+}
+
+impl LineCoverage {
+    fn len(&self) -> usize {
+        self.lines.len()
+    }
+    fn considered(&self) -> usize {
+        self.lines.iter().filter(|(_, s)| !matches!(s, CoverageStatus::Ignored)).count()
+    }
+    fn tested(&self) -> usize {
+        self.lines.iter().filter(|(_, s)| matches!(s, CoverageStatus::Tested)).count()
+    }
+}
+
+#[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
     // symbol_name: String,
     filename: PathBuf,
-    covered: Vec<(usize, bool)>,
+    lines: LineCoverage,
 }
 
 fn get_coverage(report: &CoverageReport, func: &Function, span: Span, ferrocene: &std::path::Path, source_name: String) -> Result<FunctionCoverage> {
@@ -74,7 +98,10 @@ fn get_coverage(report: &CoverageReport, func: &Function, span: Span, ferrocene:
         filename: filename.clone(),
         // we didn't get any hits from the tool, so we don't know which lines shouldn't be
         // considered. report them all as considered and missing coverage.
-        covered: source_lines.clone().map(|i| (i, false)).collect(),
+        lines: LineCoverage {
+            lines: source_lines.clone()
+                .map(|i| (i, CoverageStatus::Untested)).collect(),
+        },
     };
     let Some(func_coverage) = report.files.get(&filename) else {
         println!("warning: couldn't find source file {} in coverage report", filename.display());
@@ -84,11 +111,14 @@ fn get_coverage(report: &CoverageReport, func: &Function, span: Span, ferrocene:
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
-        if let Some(tested) = func_coverage.hits_for_line(line) {
-            covered.push((line, tested != 0));
-        }
+        let status = match func_coverage.hits_for_line(line) {
+            None => CoverageStatus::Ignored,
+            Some(0) => CoverageStatus::Untested,
+            Some(_) => CoverageStatus::Tested,
+        };
+        covered.push((line, status));
     }
-    Ok(FunctionCoverage { covered, ..no_coverage })
+    Ok(FunctionCoverage { lines: LineCoverage { lines: covered }, ..no_coverage })
 }
 
 impl ShowCommand {
@@ -121,7 +151,24 @@ impl ShowCommand {
             }
         }
 
-        println!("{coverage:?}");
+        let mut unconsidered = 0;
+        let mut fully_covered = 0;
+        for func in &coverage {
+            print!("{}: ", func.source_name);
+            if func.lines.considered() == 0 {
+                println!("BUG: no lines considered");
+                unconsidered += 1;
+            } else {
+                println!("{}/{} covered ({} lines unconsidered)",
+                    func.lines.tested(),
+                    func.lines.considered(),
+                    func.lines.len(),
+                );
+                fully_covered += (func.lines.tested() == func.lines.considered()) as usize;
+            }
+        }
+        let total = coverage.len();
+        println!("{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions", total - unconsidered - fully_covered);
 
         // for (path, result) in report.files.iter() {
         //     // Read file to string

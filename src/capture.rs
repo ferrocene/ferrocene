@@ -498,7 +498,7 @@ impl fmt::Debug for Backtrace {
         let mut print_path =
             move |fmt: &mut fmt::Formatter<'_>, path: crate::BytesOrWideString<'_>| {
                 let path = path.into_path_buf();
-                if style == PrintFmt::Full {
+                if style != PrintFmt::Full {
                     if let Ok(cwd) = &cwd {
                         if let Ok(suffix) = path.strip_prefix(cwd) {
                             return fmt::Display::fmt(&suffix.display(), fmt);

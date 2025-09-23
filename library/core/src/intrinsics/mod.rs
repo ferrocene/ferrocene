@@ -1065,7 +1065,7 @@ pub unsafe fn unaligned_volatile_store<T>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sqrtf16(x: f16) -> f16;
+pub fn sqrtf16(x: f16) -> f16;
 /// Returns the square root of an `f32`
 ///
 /// The stabilized version of this intrinsic is
@@ -1073,7 +1073,7 @@ pub unsafe fn sqrtf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sqrtf32(x: f32) -> f32;
+pub fn sqrtf32(x: f32) -> f32;
 /// Returns the square root of an `f64`
 ///
 /// The stabilized version of this intrinsic is
@@ -1081,7 +1081,7 @@ pub unsafe fn sqrtf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sqrtf64(x: f64) -> f64;
+pub fn sqrtf64(x: f64) -> f64;
 /// Returns the square root of an `f128`
 ///
 /// The stabilized version of this intrinsic is
@@ -1089,7 +1089,7 @@ pub unsafe fn sqrtf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sqrtf128(x: f128) -> f128;
+pub fn sqrtf128(x: f128) -> f128;
 
 /// Raises an `f16` to an integer power.
 ///
@@ -1098,7 +1098,7 @@ pub unsafe fn sqrtf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powif16(a: f16, x: i32) -> f16;
+pub fn powif16(a: f16, x: i32) -> f16;
 /// Raises an `f32` to an integer power.
 ///
 /// The stabilized version of this intrinsic is
@@ -1106,7 +1106,7 @@ pub unsafe fn powif16(a: f16, x: i32) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powif32(a: f32, x: i32) -> f32;
+pub fn powif32(a: f32, x: i32) -> f32;
 /// Raises an `f64` to an integer power.
 ///
 /// The stabilized version of this intrinsic is
@@ -1114,7 +1114,7 @@ pub unsafe fn powif32(a: f32, x: i32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powif64(a: f64, x: i32) -> f64;
+pub fn powif64(a: f64, x: i32) -> f64;
 /// Raises an `f128` to an integer power.
 ///
 /// The stabilized version of this intrinsic is
@@ -1122,7 +1122,7 @@ pub unsafe fn powif64(a: f64, x: i32) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powif128(a: f128, x: i32) -> f128;
+pub fn powif128(a: f128, x: i32) -> f128;
 
 /// Returns the sine of an `f16`.
 ///
@@ -1131,7 +1131,7 @@ pub unsafe fn powif128(a: f128, x: i32) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sinf16(x: f16) -> f16;
+pub fn sinf16(x: f16) -> f16;
 /// Returns the sine of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1139,7 +1139,7 @@ pub unsafe fn sinf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sinf32(x: f32) -> f32;
+pub fn sinf32(x: f32) -> f32;
 /// Returns the sine of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1147,7 +1147,7 @@ pub unsafe fn sinf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sinf64(x: f64) -> f64;
+pub fn sinf64(x: f64) -> f64;
 /// Returns the sine of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1155,7 +1155,7 @@ pub unsafe fn sinf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn sinf128(x: f128) -> f128;
+pub fn sinf128(x: f128) -> f128;
 
 /// Returns the cosine of an `f16`.
 ///
@@ -1164,7 +1164,7 @@ pub unsafe fn sinf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn cosf16(x: f16) -> f16;
+pub fn cosf16(x: f16) -> f16;
 /// Returns the cosine of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1172,7 +1172,7 @@ pub unsafe fn cosf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn cosf32(x: f32) -> f32;
+pub fn cosf32(x: f32) -> f32;
 /// Returns the cosine of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1180,7 +1180,7 @@ pub unsafe fn cosf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn cosf64(x: f64) -> f64;
+pub fn cosf64(x: f64) -> f64;
 /// Returns the cosine of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1188,7 +1188,7 @@ pub unsafe fn cosf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn cosf128(x: f128) -> f128;
+pub fn cosf128(x: f128) -> f128;
 
 /// Raises an `f16` to an `f16` power.
 ///
@@ -1197,7 +1197,7 @@ pub unsafe fn cosf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powf16(a: f16, x: f16) -> f16;
+pub fn powf16(a: f16, x: f16) -> f16;
 /// Raises an `f32` to an `f32` power.
 ///
 /// The stabilized version of this intrinsic is
@@ -1205,7 +1205,7 @@ pub unsafe fn powf16(a: f16, x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powf32(a: f32, x: f32) -> f32;
+pub fn powf32(a: f32, x: f32) -> f32;
 /// Raises an `f64` to an `f64` power.
 ///
 /// The stabilized version of this intrinsic is
@@ -1213,7 +1213,7 @@ pub unsafe fn powf32(a: f32, x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powf64(a: f64, x: f64) -> f64;
+pub fn powf64(a: f64, x: f64) -> f64;
 /// Raises an `f128` to an `f128` power.
 ///
 /// The stabilized version of this intrinsic is
@@ -1221,7 +1221,7 @@ pub unsafe fn powf64(a: f64, x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn powf128(a: f128, x: f128) -> f128;
+pub fn powf128(a: f128, x: f128) -> f128;
 
 /// Returns the exponential of an `f16`.
 ///
@@ -1230,7 +1230,7 @@ pub unsafe fn powf128(a: f128, x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn expf16(x: f16) -> f16;
+pub fn expf16(x: f16) -> f16;
 /// Returns the exponential of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1238,7 +1238,7 @@ pub unsafe fn expf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn expf32(x: f32) -> f32;
+pub fn expf32(x: f32) -> f32;
 /// Returns the exponential of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1246,7 +1246,7 @@ pub unsafe fn expf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn expf64(x: f64) -> f64;
+pub fn expf64(x: f64) -> f64;
 /// Returns the exponential of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1254,7 +1254,7 @@ pub unsafe fn expf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn expf128(x: f128) -> f128;
+pub fn expf128(x: f128) -> f128;
 
 /// Returns 2 raised to the power of an `f16`.
 ///
@@ -1263,7 +1263,7 @@ pub unsafe fn expf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn exp2f16(x: f16) -> f16;
+pub fn exp2f16(x: f16) -> f16;
 /// Returns 2 raised to the power of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1271,7 +1271,7 @@ pub unsafe fn exp2f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn exp2f32(x: f32) -> f32;
+pub fn exp2f32(x: f32) -> f32;
 /// Returns 2 raised to the power of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1279,7 +1279,7 @@ pub unsafe fn exp2f32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn exp2f64(x: f64) -> f64;
+pub fn exp2f64(x: f64) -> f64;
 /// Returns 2 raised to the power of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1287,7 +1287,7 @@ pub unsafe fn exp2f64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn exp2f128(x: f128) -> f128;
+pub fn exp2f128(x: f128) -> f128;
 
 /// Returns the natural logarithm of an `f16`.
 ///
@@ -1296,7 +1296,7 @@ pub unsafe fn exp2f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn logf16(x: f16) -> f16;
+pub fn logf16(x: f16) -> f16;
 /// Returns the natural logarithm of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1304,7 +1304,7 @@ pub unsafe fn logf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn logf32(x: f32) -> f32;
+pub fn logf32(x: f32) -> f32;
 /// Returns the natural logarithm of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1312,7 +1312,7 @@ pub unsafe fn logf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn logf64(x: f64) -> f64;
+pub fn logf64(x: f64) -> f64;
 /// Returns the natural logarithm of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1320,7 +1320,7 @@ pub unsafe fn logf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn logf128(x: f128) -> f128;
+pub fn logf128(x: f128) -> f128;
 
 /// Returns the base 10 logarithm of an `f16`.
 ///
@@ -1329,7 +1329,7 @@ pub unsafe fn logf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log10f16(x: f16) -> f16;
+pub fn log10f16(x: f16) -> f16;
 /// Returns the base 10 logarithm of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1337,7 +1337,7 @@ pub unsafe fn log10f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log10f32(x: f32) -> f32;
+pub fn log10f32(x: f32) -> f32;
 /// Returns the base 10 logarithm of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1345,7 +1345,7 @@ pub unsafe fn log10f32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log10f64(x: f64) -> f64;
+pub fn log10f64(x: f64) -> f64;
 /// Returns the base 10 logarithm of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1353,7 +1353,7 @@ pub unsafe fn log10f64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log10f128(x: f128) -> f128;
+pub fn log10f128(x: f128) -> f128;
 
 /// Returns the base 2 logarithm of an `f16`.
 ///
@@ -1362,7 +1362,7 @@ pub unsafe fn log10f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log2f16(x: f16) -> f16;
+pub fn log2f16(x: f16) -> f16;
 /// Returns the base 2 logarithm of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1370,7 +1370,7 @@ pub unsafe fn log2f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log2f32(x: f32) -> f32;
+pub fn log2f32(x: f32) -> f32;
 /// Returns the base 2 logarithm of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1378,7 +1378,7 @@ pub unsafe fn log2f32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log2f64(x: f64) -> f64;
+pub fn log2f64(x: f64) -> f64;
 /// Returns the base 2 logarithm of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1386,7 +1386,7 @@ pub unsafe fn log2f64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn log2f128(x: f128) -> f128;
+pub fn log2f128(x: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values.
 ///
@@ -1395,7 +1395,7 @@ pub unsafe fn log2f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmaf16(a: f16, b: f16, c: f16) -> f16;
+pub fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values.
 ///
 /// The stabilized version of this intrinsic is
@@ -1403,7 +1403,7 @@ pub unsafe fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmaf32(a: f32, b: f32, c: f32) -> f32;
+pub fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values.
 ///
 /// The stabilized version of this intrinsic is
@@ -1411,7 +1411,7 @@ pub unsafe fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmaf64(a: f64, b: f64, c: f64) -> f64;
+pub fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values.
 ///
 /// The stabilized version of this intrinsic is
@@ -1419,7 +1419,7 @@ pub unsafe fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmaf128(a: f128, b: f128, c: f128) -> f128;
+pub fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -1434,7 +1434,7 @@ pub unsafe fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
+pub fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
 /// intermediate result.
@@ -1448,7 +1448,7 @@ pub unsafe fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
+pub fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
 /// intermediate result.
@@ -1462,7 +1462,7 @@ pub unsafe fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
+pub fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
 /// intermediate result.
@@ -1476,7 +1476,7 @@ pub unsafe fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
+pub fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns the largest integer less than or equal to an `f16`.
 ///
@@ -1486,7 +1486,7 @@ pub unsafe fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn floorf16(x: f16) -> f16;
+pub const fn floorf16(x: f16) -> f16;
 /// Returns the largest integer less than or equal to an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1495,7 +1495,7 @@ pub const unsafe fn floorf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn floorf32(x: f32) -> f32;
+pub const fn floorf32(x: f32) -> f32;
 /// Returns the largest integer less than or equal to an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1504,7 +1504,7 @@ pub const unsafe fn floorf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn floorf64(x: f64) -> f64;
+pub const fn floorf64(x: f64) -> f64;
 /// Returns the largest integer less than or equal to an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1513,7 +1513,7 @@ pub const unsafe fn floorf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn floorf128(x: f128) -> f128;
+pub const fn floorf128(x: f128) -> f128;
 
 /// Returns the smallest integer greater than or equal to an `f16`.
 ///
@@ -1523,7 +1523,7 @@ pub const unsafe fn floorf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn ceilf16(x: f16) -> f16;
+pub const fn ceilf16(x: f16) -> f16;
 /// Returns the smallest integer greater than or equal to an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1532,7 +1532,7 @@ pub const unsafe fn ceilf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn ceilf32(x: f32) -> f32;
+pub const fn ceilf32(x: f32) -> f32;
 /// Returns the smallest integer greater than or equal to an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1541,7 +1541,7 @@ pub const unsafe fn ceilf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn ceilf64(x: f64) -> f64;
+pub const fn ceilf64(x: f64) -> f64;
 /// Returns the smallest integer greater than or equal to an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1550,7 +1550,7 @@ pub const unsafe fn ceilf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn ceilf128(x: f128) -> f128;
+pub const fn ceilf128(x: f128) -> f128;
 
 /// Returns the integer part of an `f16`.
 ///
@@ -1560,7 +1560,7 @@ pub const unsafe fn ceilf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn truncf16(x: f16) -> f16;
+pub const fn truncf16(x: f16) -> f16;
 /// Returns the integer part of an `f32`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1569,7 +1569,7 @@ pub const unsafe fn truncf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn truncf32(x: f32) -> f32;
+pub const fn truncf32(x: f32) -> f32;
 /// Returns the integer part of an `f64`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1578,7 +1578,7 @@ pub const unsafe fn truncf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn truncf64(x: f64) -> f64;
+pub const fn truncf64(x: f64) -> f64;
 /// Returns the integer part of an `f128`.
 ///
 /// The stabilized version of this intrinsic is
@@ -1587,7 +1587,7 @@ pub const unsafe fn truncf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn truncf128(x: f128) -> f128;
+pub const fn truncf128(x: f128) -> f128;
 
 /// Returns the nearest integer to an `f16`. Rounds half-way cases to the number with an even
 /// least significant digit.
@@ -1641,7 +1641,7 @@ pub const fn round_ties_even_f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn roundf16(x: f16) -> f16;
+pub const fn roundf16(x: f16) -> f16;
 /// Returns the nearest integer to an `f32`. Rounds half-way cases away from zero.
 ///
 /// The stabilized version of this intrinsic is
@@ -1650,7 +1650,7 @@ pub const unsafe fn roundf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn roundf32(x: f32) -> f32;
+pub const fn roundf32(x: f32) -> f32;
 /// Returns the nearest integer to an `f64`. Rounds half-way cases away from zero.
 ///
 /// The stabilized version of this intrinsic is
@@ -1659,7 +1659,7 @@ pub const unsafe fn roundf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn roundf64(x: f64) -> f64;
+pub const fn roundf64(x: f64) -> f64;
 /// Returns the nearest integer to an `f128`. Rounds half-way cases away from zero.
 ///
 /// The stabilized version of this intrinsic is
@@ -1668,10 +1668,10 @@ pub const unsafe fn roundf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn roundf128(x: f128) -> f128;
+pub const fn roundf128(x: f128) -> f128;
 
 /// Float addition that allows optimizations based on algebraic rules.
-/// May assume inputs are finite.
+/// Requires that inputs and output of the operation are finite, causing UB otherwise.
 ///
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
@@ -1680,7 +1680,7 @@ pub const unsafe fn roundf128(x: f128) -> f128;
 pub unsafe fn fadd_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float subtraction that allows optimizations based on algebraic rules.
-/// May assume inputs are finite.
+/// Requires that inputs and output of the operation are finite, causing UB otherwise.
 ///
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
@@ -1689,7 +1689,7 @@ pub unsafe fn fadd_fast<T: Copy>(a: T, b: T) -> T;
 pub unsafe fn fsub_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float multiplication that allows optimizations based on algebraic rules.
-/// May assume inputs are finite.
+/// Requires that inputs and output of the operation are finite, causing UB otherwise.
 ///
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
@@ -1698,7 +1698,7 @@ pub unsafe fn fsub_fast<T: Copy>(a: T, b: T) -> T;
 pub unsafe fn fmul_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float division that allows optimizations based on algebraic rules.
-/// May assume inputs are finite.
+/// Requires that inputs and output of the operation are finite, causing UB otherwise.
 ///
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
@@ -1707,7 +1707,7 @@ pub unsafe fn fmul_fast<T: Copy>(a: T, b: T) -> T;
 pub unsafe fn fdiv_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float remainder that allows optimizations based on algebraic rules.
-/// May assume inputs are finite.
+/// Requires that inputs and output of the operation are finite, causing UB otherwise.
 ///
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]

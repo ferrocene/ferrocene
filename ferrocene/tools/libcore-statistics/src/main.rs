@@ -2,16 +2,17 @@ mod loc;
 mod render;
 mod stability;
 mod stats;
+mod tsv;
 mod visitor;
 
 use crate::loc::LOC;
-use crate::stats::StatsCollector;
+use crate::stats::{FunctionKind, StatsCollector};
+use crate::tsv::TSV;
 use crate::visitor::Visitor;
+
 use anyhow::Error;
 use rustdoc_types::Crate;
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn main() -> Result<(), Error> {
     let args = std::env::args().collect::<Vec<_>>();
@@ -33,6 +34,122 @@ fn main() -> Result<(), Error> {
         std::fs::create_dir_all(&out_dir)?;
     }
 
+    // _functions_tsv(&collector, &out_dir)?;
+    // _types_tsv(&collector, &out_dir)?;
+    // _traits_tsv(&collector, &out_dir)?;
+    // _items_tsv(&collector, &out_dir)?;
+    // _macros_tsv(&collector, out_dir)?;
+    certified_subset_tsv(&mut collector, &out_dir)?;
+
+    Ok(())
+}
+
+fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
+    let mut functions = TSV::new(
+        &out_dir.join("libcore-subset.tsv"),
+        [
+            "File",
+            "Name",
+            "Impl",
+            "Kind",
+            "Visibility",
+            "Safety",
+            "doc(hidden)",
+            "is_nightly",
+            "Safety constraint",
+            "Panics section",
+            "Examples section",
+            "Docs",
+        ],
+    )?;
+
+    // sort by file and within a file by name
+    collector.functions.sort_by_key(|f| f.name.clone());
+    collector.functions.sort_by_key(|f| f.file.clone());
+
+    for function in &collector.functions {
+        let file = &function.file;
+        let name = function
+            .name
+            .strip_prefix(&format!("{}::", &function.module))
+            .unwrap();
+        let is_nightly = is_nightly(file, name);
+
+        let safety_constraint = safety_constraint(function);
+
+        let docs = &function.docs;
+        let contains_panics = docs.contains("# Panics");
+        let contains_examples = ["# Example", "# Examples", "# Basic examples"]
+            .iter()
+            .any(|a| docs.contains(a));
+
+        // warn about rule violations
+        let is_trait_method_implementation = matches!(function.kind, FunctionKind::TraitMethod);
+        let is_private = !function.public;
+        if !(is_private || function.is_doc_hidden || is_trait_method_implementation || is_nightly) {
+            if !contains_examples {
+                eprintln!("{file}: {name} has no examples")
+            }
+            if safety_constraint == "missing" {
+                eprintln!("{file}: {name} is missing a safety comment")
+            }
+        }
+
+        functions.add([
+            file,
+            name,
+            function.impl_.as_deref().unwrap_or(""),
+            &function.kind.to_string(),
+            function.public_str(),
+            &function.safety,
+            &function.is_doc_hidden.to_string(),
+            &is_nightly.to_string(),
+            safety_constraint,
+            &contains_panics.to_string(),
+            &contains_examples.to_string(),
+            docs,
+        ])?;
+    }
+
+    Ok(())
+}
+
+// FIXME: detect nightly from attributes, don't hardcode
+fn is_nightly(file: &String, name: &str) -> bool {
+    let nightly_items = [
+        ("library/core/src/intrinsics/mod.rs", [].as_slice()),
+        ("library/core/src/ops/function.rs", &[]),
+        (
+            "library/core/src/ops/range.rs",
+            &["Bound::as_mut", "OneSidedRange::bound"],
+        ),
+        ("library/core/src/panicking.rs", &[]),
+        ("library/core/src/ptr/alignment.rs", &[]),
+        ("library/core/src/ptr/metadata.rs", &[]),
+    ];
+    for (nightly_file, items) in nightly_items {
+        if nightly_file == file {
+            if items.is_empty() {
+                return true; // ignore all items in the modules
+            } else if items.contains(&name) {
+                return true; // ignore specific items only
+            }
+        }
+    }
+    false
+}
+
+fn safety_constraint(function: &stats::Function) -> &'static str {
+    let contains_safety = function.docs.contains("# Safety");
+    let is_unsafe = function.safety == "unsafe";
+    match (is_unsafe, contains_safety) {
+        (true, true) => "documented",
+        (true, false) => "missing",
+        (false, _) => "not applicable",
+    }
+}
+
+fn _functions_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut functions = TSV::new(
         &out_dir.join("functions.tsv"),
         [
@@ -47,6 +164,8 @@ fn main() -> Result<(), Error> {
             "Lines of documentation",
             "File",
             "Impl",
+            "Safety",
+            "Docs",
         ],
     )?;
     for function in &collector.functions {
@@ -65,9 +184,15 @@ fn main() -> Result<(), Error> {
             &function.lines_of_docs.to_string(),
             &function.file,
             function.impl_.as_deref().unwrap_or(""),
+            &function.safety,
+            &function.docs,
         ])?;
     }
 
+    Ok(())
+}
+
+fn _types_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut types = TSV::new(
         &out_dir.join("types.tsv"),
         [
@@ -87,7 +212,8 @@ fn main() -> Result<(), Error> {
     for type_ in &collector.types {
         let counters = &collector
             .type_counters
-            .remove(&type_.id)
+            .get(&type_.id)
+            .cloned()
             .unwrap_or_default();
 
         types.add([
@@ -105,6 +231,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn _traits_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut traits = TSV::new(
         &out_dir.join("traits.tsv"),
         [
@@ -121,7 +251,8 @@ fn main() -> Result<(), Error> {
     for trait_ in collector.traits.values() {
         let counters = &collector
             .trait_counters
-            .remove(&trait_.id)
+            .get(&trait_.id)
+            .cloned()
             .unwrap_or_default();
 
         traits.add([
@@ -136,6 +267,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn _items_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut items = TSV::new(
         &out_dir.join("items.tsv"),
         [
@@ -162,6 +297,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn _macros_tsv(collector: &StatsCollector, out_dir: PathBuf) -> Result<(), Error> {
     let mut macros = TSV::new(
         &out_dir.join("macros.tsv"),
         [
@@ -185,32 +324,4 @@ fn main() -> Result<(), Error> {
     }
 
     Ok(())
-}
-
-/// Tab-separated values
-#[allow(clippy::upper_case_acronyms)]
-struct TSV<const N: usize> {
-    writer: BufWriter<File>,
-}
-
-impl<const N: usize> TSV<N> {
-    fn new(path: &Path, header: [&str; N]) -> Result<Self, Error> {
-        let mut tsv = Self {
-            writer: BufWriter::new(File::create(path)?),
-        };
-        tsv.add(header)?;
-
-        Ok(tsv)
-    }
-
-    fn add(&mut self, line: [&str; N]) -> Result<(), Error> {
-        for (i, heading) in line.iter().enumerate() {
-            if i != 0 {
-                self.writer.write_all(b"\t")?;
-            }
-            self.writer.write_all(heading.as_bytes())?;
-        }
-        self.writer.write_all(b"\n")?;
-        Ok(())
-    }
 }

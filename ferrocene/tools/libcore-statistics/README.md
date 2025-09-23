@@ -36,3 +36,10 @@ build/$target/json-doc/core.json
 
 [rust-lang/rust]: https://github.com/rust-lang/rust
 [#107264]: https://github.com/rust-lang/rust/pull/107264
+
+### rustdoc JSON for certified libcore subset
+
+```console
+$ git switch libcore-cert
+$ ./x doc --json library/core --set rust.std-features="['certified_subset']"
+```

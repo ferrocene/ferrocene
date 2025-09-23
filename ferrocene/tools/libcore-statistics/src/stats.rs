@@ -2,7 +2,7 @@ use crate::loc::LOC;
 use crate::render::{render_impl, render_type};
 use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
-use rustdoc_types::Id;
+use rustdoc_types::{Attribute, Id};
 use std::collections::{HashMap, HashSet};
 
 pub(crate) struct StatsCollector {
@@ -57,6 +57,11 @@ impl StatsCollector {
                 _ => item.visibility == rustdoc_types::Visibility::Public,
             },
             stability: self.stability_stack.last().cloned(),
+            is_doc_hidden: item
+                .attrs
+                .iter()
+                .find(|attr| **attr == Attribute::Other("#[doc(hidden)]".to_string()))
+                .is_some(),
         }
     }
 
@@ -239,6 +244,17 @@ impl Visitor for StatsCollector {
                 .map(|d| d.trim().chars().filter(|c| *c == '\n').count())
                 .unwrap_or(0),
             file: span.filename.to_str().unwrap().to_string(),
+            safety: function
+                .header
+                .is_unsafe
+                .then_some("unsafe")
+                .unwrap_or("safe")
+                .to_string(),
+            docs: item
+                .docs
+                .as_ref()
+                .map(|d| d.replace('\n', " "))
+                .unwrap_or_default(),
         });
     }
 
@@ -365,6 +381,7 @@ enum Inside {
     },
 }
 
+#[derive(Clone, Debug)]
 pub(crate) enum FunctionKind {
     Function,
     Method,
@@ -374,18 +391,15 @@ pub(crate) enum FunctionKind {
 
 impl std::fmt::Display for FunctionKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            FunctionKind::Function => f.write_str("function"),
-            FunctionKind::Method => f.write_str("method"),
-            FunctionKind::TraitMethod => f.write_str("trait method"),
-            FunctionKind::TraitMethodDefinition { has_default } => {
-                if *has_default {
-                    f.write_str("definition of default trait method")
-                } else {
-                    f.write_str("definition of required trait method")
-                }
+        f.write_str(match self {
+            FunctionKind::Function => "function",
+            FunctionKind::Method => "method",
+            FunctionKind::TraitMethod => "trait method implementation",
+            FunctionKind::TraitMethodDefinition { has_default: false } => "trait method definition",
+            FunctionKind::TraitMethodDefinition { has_default: true } => {
+                "trait method definition with default"
             }
-        }
+        })
     }
 }
 
@@ -437,12 +451,14 @@ impl std::fmt::Display for MacroKind {
     }
 }
 
+#[derive(Clone, Debug)]
 pub(crate) struct Common {
     pub(crate) id: Id,
     pub(crate) name: String,
     pub(crate) module: String,
     pub(crate) public: bool,
     pub(crate) stability: Option<Stability>,
+    pub(crate) is_doc_hidden: bool,
 }
 
 impl Common {
@@ -469,6 +485,7 @@ impl Common {
     }
 }
 
+#[derive(Clone, Debug)]
 pub(crate) struct Function {
     pub(crate) common: Common,
     pub(crate) kind: FunctionKind,
@@ -477,6 +494,8 @@ pub(crate) struct Function {
     pub(crate) file: String,
     pub(crate) lines_of_code: usize,
     pub(crate) lines_of_docs: usize,
+    pub(crate) safety: String,
+    pub(crate) docs: String,
 }
 
 pub(crate) struct Type {
@@ -501,7 +520,7 @@ pub(crate) struct Macro {
     pub(crate) kind: MacroKind,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct TypeCounters {
     pub(crate) blanket_impls: usize,
     pub(crate) auto_impls: usize,
@@ -510,7 +529,7 @@ pub(crate) struct TypeCounters {
     pub(crate) trait_methods: usize,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct TraitCounters {
     pub(crate) required_methods: usize,
     pub(crate) default_methods: usize,

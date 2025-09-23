@@ -1,16 +1,20 @@
+use rustdoc_types::Attribute;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{Expr, ExprLit, Lit, MetaNameValue};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct Stability {
     pub(crate) stable: bool,
     pub(crate) feature: String,
 }
 
-pub(crate) fn parse_stability(attrs: &[String]) -> Option<Stability> {
+pub(crate) fn parse_stability(attrs: &[Attribute]) -> Option<Stability> {
     for attr in attrs {
+        let Attribute::Other(attr) = attr else {
+            continue;
+        };
         let parsed_outer = syn::Attribute::parse_outer.parse_str(attr);
         let parsed_inner = syn::Attribute::parse_inner.parse_str(attr);
         let iter = parsed_outer

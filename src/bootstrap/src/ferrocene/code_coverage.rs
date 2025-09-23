@@ -24,10 +24,11 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
         exit!(1);
     }
 
+    cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
     cargo.rustflag("--cfg=ferrocene_coverage");
     cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
-    
+
     // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
     // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
     // fetch profiler_builtins from somewhere else.
@@ -43,7 +44,8 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins without the `dependency=` prefix.
     let compiler = builder.compiler(1, builder.host_target);
-    let target_dir = builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
+    let target_dir =
+        builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
     cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 }
 

@@ -2,16 +2,17 @@ mod loc;
 mod render;
 mod stability;
 mod stats;
+mod tsv;
 mod visitor;
 
 use crate::loc::LOC;
 use crate::stats::{FunctionKind, StatsCollector};
+use crate::tsv::TSV;
 use crate::visitor::Visitor;
+
 use anyhow::Error;
 use rustdoc_types::Crate;
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn main() -> Result<(), Error> {
     let args = std::env::args().collect::<Vec<_>>();
@@ -323,32 +324,4 @@ fn _macros_tsv(collector: &StatsCollector, out_dir: PathBuf) -> Result<(), Error
     }
 
     Ok(())
-}
-
-/// Tab-separated values
-#[allow(clippy::upper_case_acronyms)]
-struct TSV<const N: usize> {
-    writer: BufWriter<File>,
-}
-
-impl<const N: usize> TSV<N> {
-    fn new(path: &Path, header: [&str; N]) -> Result<Self, Error> {
-        let mut tsv = Self {
-            writer: BufWriter::new(File::create(path)?),
-        };
-        tsv.add(header)?;
-
-        Ok(tsv)
-    }
-
-    fn add(&mut self, line: [&str; N]) -> Result<(), Error> {
-        for (i, heading) in line.iter().enumerate() {
-            if i != 0 {
-                self.writer.write_all(b"\t")?;
-            }
-            self.writer.write_all(heading.as_bytes())?;
-        }
-        self.writer.write_all(b"\n")?;
-        Ok(())
-    }
 }

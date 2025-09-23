@@ -6,7 +6,8 @@ use super::{Builder, Kind};
 use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::SplitDebuginfo;
-use crate::core::config::flags::Color;
+use crate::core::config::flags::{Color, FerroceneCoverageFor};
+use crate::ferrocene::code_coverage::{Paths, instrument_coverage};
 use crate::utils::build_stamp;
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, linker_args, linker_flags};
 use crate::{
@@ -1342,7 +1343,7 @@ impl Builder<'_> {
             // cargo bench/install do not accept `--release` and miri doesn't want it
             !matches!(cmd_kind, Kind::Bench | Kind::Install | Kind::Miri | Kind::MiriSetup | Kind::MiriTest);
 
-        Cargo {
+        let mut cargo = Cargo {
             command: cargo,
             args: vec![],
             compiler,
@@ -1352,7 +1353,15 @@ impl Builder<'_> {
             hostflags,
             allow_features,
             release_build,
+        };
+
+        if mode == Mode::Std && cmd_kind == Kind::Test
+            && self.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library) {
+            let paths = Paths::find(self, target, FerroceneCoverageFor::Library);
+            cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
         }
+
+        cargo
     }
 }
 

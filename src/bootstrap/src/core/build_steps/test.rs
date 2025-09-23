@@ -2771,30 +2771,6 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-        // Doctests are incompatible with gathering the code coverage of libcore.
-        //
-        // In general, testing libcore has the problem that everything depends on libcore, and
-        // building a different libcore with testing flags enabled will generate errors due to
-        // duplicated lang items. This is why upstream defines the libcore tests in the coretests
-        // crate instead of the core crate.
-        //
-        // Running doctests with coverage instrumentation enabled causes similar problems, as Pietro
-        // was getting duplicate language items errors when trying to make it work. If in the future
-        // you want to try and make this work again:
-        //
-        // - Ensure that the flags we add to libcore for coverage instrumentation are added every
-        //   time libcore is built, by changing the `std_cargo` function.
-        //
-        // - If you need to persist the test binaries to pass to llvm-cov, check out this:
-        //   https://doc.rust-lang.org/stable/rustc/instrument-coverage.html#including-doc-tests
-        //   I don't think the `cargo test --no-run` step is necessary, we can just list the
-        //   binaries with bootstrap code. Please note the rustdoc flags from that page though.
-        if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
-            && builder.doc_tests != DocTests::No
-        {
-            panic!("Cannot generate coverage for doc tests");
-        }
-
         // Prepare sysroot
         // See [field@compile::Std::force_recompile].
         builder.ensure(Std::new(compiler, compiler.host).force_recompile(true));
@@ -2876,7 +2852,6 @@ impl Step for Crate {
             }
 
             measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
-            cargo.rustflag("--cfg=ferrocene_coverage");
         }
 
         let mut crates = self.crates.clone();

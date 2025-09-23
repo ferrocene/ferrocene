@@ -10,7 +10,7 @@ use crate::core::config::flags::Color;
 use crate::utils::build_stamp;
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, linker_args, linker_flags};
 use crate::{
-    BootstrapCommand, CLang, Compiler, Config, DocTests, DryRun, EXTRA_CHECK_CFGS, GitRepo, Mode,
+    BootstrapCommand, CLang, Compiler, Config, DryRun, EXTRA_CHECK_CFGS, GitRepo, Mode,
     RemapScheme, TargetSelection, command, prepare_behaviour_dump_dir, t,
 };
 
@@ -639,7 +639,7 @@ impl Builder<'_> {
             }
             None => {
                 // Second condition is specific to Ferrocene
-                if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() {
+                if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() { // hmm
                     // The standard library defaults to the legacy scheme
                     false
                 } else {

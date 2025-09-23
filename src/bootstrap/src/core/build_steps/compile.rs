@@ -641,13 +641,13 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, cargo: &mut Car
 
     let mut features = String::new();
 
-    if builder.no_std(target) == Some(true) {
+    if dbg!(builder.no_std(target)) == Some(true) {
         features += " compiler-builtins-mem";
         if !target.starts_with("bpf") {
             features.push_str(compiler_builtins_c_feature);
         }
 
-        if target.contains("ferrocene.certified") {
+        if dbg!(target).contains("ferrocene.certified") {
             features += " ferrocene_certified";
         }
         // for no-std targets we only compile a few no_std crates

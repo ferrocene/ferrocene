@@ -6,12 +6,16 @@ pub(crate) mod coverage_of_subset;
 use std::path::PathBuf;
 
 use crate::Compiler;
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::core::build_steps::tool::Tool;
+use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
+use crate::core::build_steps::tool::{Tool, SourceType};
+use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
+use crate::ferrocene::tool::{SymbolReport, SYMBOL_PATH};
 use crate::utils::exec::BootstrapCommand;
+use crate::utils::build_stamp;
+use crate::{Kind, Mode};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
@@ -109,5 +113,78 @@ impl Step for TraceabilityMatrix {
 
         cmd.run(builder);
         html_output
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct CertifiedCoreSymbols {
+    build_compiler: Compiler,
+    target: TargetSelection,
+}
+
+impl Step for CertifiedCoreSymbols {
+    type Output = PathBuf;
+    const DEFAULT: bool = false;
+    const IS_HOST: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path(SYMBOL_PATH).alias("certified-core-symbols")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        let build_compiler = run.builder.compiler(run.builder.top_stage.max(1), run.build_triple());
+        run.builder.ensure(CertifiedCoreSymbols { build_compiler, target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let CertifiedCoreSymbols { build_compiler, target } = self;
+        let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
+
+        let certified_target = self
+            .target
+            .certified_equivalent()
+            .expect(&format!("no certified equivalent exists for target \"{target}\""));
+
+        // c.f. check::std
+        let mut cargo = Cargo::new(
+            builder,
+            build_compiler,
+            Mode::Std,
+            SourceType::InTree,
+            certified_target,
+            Kind::Check,
+        );
+        std_cargo(builder, certified_target, &mut cargo);
+        let crates = vec!["core"];  // currently, only core is certified
+        for krate in &*crates {
+            cargo.arg("-p").arg(krate);
+        }
+        cargo.env("RUSTC_REAL", symbol_report);
+        let report = builder.cargo_out(build_compiler, Mode::Std, certified_target).join("symbol-report.txt");
+        cargo.env("SYMBOL_REPORT_OUT", &report);
+
+        let _guard = builder.msg(
+            Kind::Run,
+            format_args!("symbol-report for certified library subset{}", crate_description(&crates)),
+            Mode::Std,
+            build_compiler,
+            certified_target,
+        );
+
+        let check_stamp =
+            build_stamp::libstd_stamp(builder, build_compiler, certified_target).with_prefix("symbol-report");
+        run_cargo(
+            builder,
+            cargo,
+            builder.config.free_args.clone(),
+            &check_stamp,
+            vec![],
+            true,
+            false,
+        );
+        drop(_guard);
+
+        println!("Generated report at {}", report.display());
+        report
     }
 }

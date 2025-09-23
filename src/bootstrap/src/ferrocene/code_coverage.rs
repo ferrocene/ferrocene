@@ -25,6 +25,26 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     }
 
     cargo.rustflag("-Cinstrument-coverage");
+    cargo.rustflag("--cfg=ferrocene_coverage");
+    cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
+    
+    // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
+    // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
+    // fetch profiler_builtins from somewhere else.
+    //
+    // Thankfully profiler_builtins is built as part of building the sysroot, so it will be
+    // placed in the `deps` directory inside of Cargo's target directory. In theory this
+    // would result in Cargo picking it up automatically, but in practice it doesn't.
+    //
+    // Turns out that Cargo passes `-L dependency=$target_dir/deps` to rustc instead of
+    // just `-L $target_dir/deps`. The `dependency=` prefix causes rustc to only load
+    // explicit dependencies from that directory, not implicitly injected crates.
+    //
+    // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
+    // the location of profiler_builtins without the `dependency=` prefix.
+    let compiler = builder.compiler(1, builder.host_target);
+    let target_dir = builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
+    cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 }
 
 pub(crate) fn measure_coverage(

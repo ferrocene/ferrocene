@@ -38,6 +38,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     // just a dummy comment so the list doesn't get onelined
     "aarch64_be-unknown-hermit",
     "aarch64_be-unknown-none-softfloat",
+<<<<<<< HEAD
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -46,6 +47,9 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-unknown-ferrocene.certified",
     "thumbv7em-ferrocene.certified-eabi",
     "thumbv7em-ferrocene.certified-eabihf",
+=======
+    "x86_64-unknown-motor",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM
@@ -251,6 +255,10 @@ than building it.
 
         // We don't use a C compiler on wasm32
         if target.contains("wasm32") {
+            continue;
+        }
+
+        if target.contains("motor") {
             continue;
         }
 

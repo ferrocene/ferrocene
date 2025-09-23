@@ -93,118 +93,126 @@
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
 //
+// Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
+// of conflicts we have when merging main.
+//
 // Library features:
-// tidy-alphabetical-start
-#![feature(array_ptr_get)]
-#![feature(asm_experimental_arch)]
-#![feature(bigint_helper_methods)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
-#![feature(cfg_match)]
-#![feature(const_carrying_mul_add)]
+// not-alphabetical-start
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(bigint_helper_methods))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr_internals))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_match))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
-#![feature(disjoint_bitor)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(disjoint_bitor))]
 #![feature(internal_impls_macro)]
-#![feature(ip)]
-#![feature(is_ascii_octdigit)]
-#![feature(lazy_get)]
-#![feature(link_cfg)]
-#![feature(non_null_from_ref)]
-#![feature(offset_of_enum)]
-#![feature(panic_internals)]
-#![feature(ptr_alignment_type)]
-#![feature(ptr_metadata)]
-#![feature(set_ptr_value)]
-#![feature(slice_as_array)]
-#![feature(slice_ptr_get)]
-#![feature(str_internals)]
-#![feature(str_split_inclusive_remainder)]
-#![feature(str_split_remainder)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(ip))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(is_ascii_octdigit))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(lazy_get))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(non_null_from_ref))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_as_array))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_ptr_get))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_internals))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_inclusive_remainder))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_remainder))]
 #![feature(ub_checks)]
-#![feature(unchecked_neg)]
-#![feature(unchecked_shifts)]
-#![feature(unsafe_pinned)]
-#![feature(utf16_extra)]
-#![feature(variant_count)]
-// tidy-alphabetical-end
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_neg))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_shifts))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsafe_pinned))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(utf16_extra))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(variant_count))]
+// not-alphabetical-end
 //
 // Language features:
-// tidy-alphabetical-start
-#![feature(abi_unadjusted)]
+// not-alphabetical-start
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(abi_unadjusted))]
 #![feature(adt_const_params)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
-#![feature(cfg_sanitize)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_sanitize))]
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
-#![feature(const_precise_live_drops)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
-#![feature(deprecated_suggestion)]
-#![feature(doc_cfg)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
 #![feature(doc_cfg_hide)]
-#![feature(doc_notable_trait)]
-#![feature(extern_types)]
-#![feature(f128)]
-#![feature(f16)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
-#![feature(generic_arg_infer)]
-#![feature(if_let_guard)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(generic_arg_infer))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
-#![feature(let_chains)]
-#![feature(link_llvm_intrinsics)]
-#![feature(macro_metavar_expr)]
-#![feature(marker_trait_attr)]
-#![feature(min_specialization)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(let_chains))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
 #![feature(multiple_supertrait_upcastable)]
-#![feature(must_not_suspend)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
 #![feature(negative_impls)]
 #![feature(never_type)]
 #![feature(no_core)]
 #![feature(optimize_attribute)]
 #![feature(prelude_import)]
-#![feature(repr_simd)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![feature(simd_ffi)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
 #![feature(staged_api)]
-#![feature(stmt_expr_attributes)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
-#![feature(transparent_unions)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(transparent_unions))]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
-#![feature(unsized_fn_params)]
-#![feature(with_negative_coherence)]
-// tidy-alphabetical-end
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(with_negative_coherence))]
+// not-alphabetical-end
 //
 // Target features:
-// tidy-alphabetical-start
-#![feature(aarch64_unstable_target_feature)]
-#![feature(arm_target_feature)]
-#![feature(avx512_target_feature)]
-#![feature(hexagon_target_feature)]
-#![feature(keylocker_x86)]
-#![feature(loongarch_target_feature)]
-#![feature(mips_target_feature)]
-#![feature(powerpc_target_feature)]
-#![feature(riscv_target_feature)]
-#![feature(rtm_target_feature)]
-#![feature(s390x_target_feature)]
-#![feature(sha512_sm_x86)]
-#![feature(sse4a_target_feature)]
-#![feature(tbm_target_feature)]
-#![feature(wasm_target_feature)]
-#![feature(x86_amx_intrinsics)]
-// tidy-alphabetical-end
+// not-alphabetical-start
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(avx512_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(hexagon_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(keylocker_x86))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(loongarch_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(mips_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(powerpc_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(riscv_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(rtm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(s390x_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(sha512_sm_x86))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(sse4a_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(tbm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(wasm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(x86_amx_intrinsics))]
+// not-alphabetical-end
+//
+// Ferrocene lints/features:
+#![allow(unused_attributes)]
+#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::private_intra_doc_links))]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
@@ -219,6 +227,7 @@ mod macros;
 
 #[unstable(feature = "assert_matches", issue = "82775")]
 /// Unstable module containing the unstable `assert_matches` macro.
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod assert_matches {
     #[unstable(feature = "assert_matches", issue = "82775")]
     pub use crate::macros::{assert_matches, debug_assert_matches};
@@ -233,9 +242,11 @@ pub mod autodiff {
 }
 
 #[unstable(feature = "contracts", issue = "128044")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod contracts;
 
 #[unstable(feature = "cfg_match", issue = "115585")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::macros::cfg_match;
 
 #[macro_use]
@@ -243,53 +254,70 @@ mod internal_macros;
 
 #[path = "num/shells/int_macros.rs"]
 #[macro_use]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod int_macros;
 
 #[rustc_diagnostic_item = "i128_legacy_mod"]
 #[path = "num/shells/i128.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod i128;
 #[rustc_diagnostic_item = "i16_legacy_mod"]
 #[path = "num/shells/i16.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod i16;
 #[rustc_diagnostic_item = "i32_legacy_mod"]
 #[path = "num/shells/i32.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod i32;
 #[rustc_diagnostic_item = "i64_legacy_mod"]
 #[path = "num/shells/i64.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod i64;
 #[rustc_diagnostic_item = "i8_legacy_mod"]
 #[path = "num/shells/i8.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod i8;
 #[rustc_diagnostic_item = "isize_legacy_mod"]
 #[path = "num/shells/isize.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod isize;
 
 #[rustc_diagnostic_item = "u128_legacy_mod"]
 #[path = "num/shells/u128.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod u128;
 #[rustc_diagnostic_item = "u16_legacy_mod"]
 #[path = "num/shells/u16.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod u16;
 #[rustc_diagnostic_item = "u32_legacy_mod"]
 #[path = "num/shells/u32.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod u32;
 #[rustc_diagnostic_item = "u64_legacy_mod"]
 #[path = "num/shells/u64.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod u64;
 #[rustc_diagnostic_item = "u8_legacy_mod"]
 #[path = "num/shells/u8.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod u8;
 #[rustc_diagnostic_item = "usize_legacy_mod"]
 #[path = "num/shells/usize.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod usize;
 
 #[path = "num/f128.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f128;
 #[path = "num/f16.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f16;
 #[path = "num/f32.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f32;
 #[path = "num/f64.rs"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f64;
 
 #[macro_use]
@@ -310,57 +338,80 @@ pub mod ub_checks;
 
 /* Core language traits */
 
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod borrow;
 pub mod clone;
 pub mod cmp;
 pub mod convert;
 pub mod default;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod error;
 pub mod marker;
 pub mod ops;
 
 /* Core types and methods on primitives */
 
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod any;
 pub mod array;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod ascii;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod asserting;
 #[unstable(feature = "async_iterator", issue = "79024")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod bstr;
 pub mod cell;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod char;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod io;
 pub mod iter;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod net;
 pub mod option;
 pub mod panic;
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod pat;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod range;
 pub mod result;
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod unsafe_binder;
 
 pub mod fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod slice;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod str;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod time;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod unicode;
 
 /* Async */
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod future;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod task;
 
 /* Heap memory allocator trait */
@@ -369,11 +420,15 @@ pub mod alloc;
 
 // note: does not need to be public
 mod bool;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod escape;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod tuple;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod primitive;
 
 // Pull in the `core_arch` crate directly into core. The contents of
@@ -394,9 +449,11 @@ pub mod primitive;
     unreachable_pub
 )]
 #[allow(rustdoc::bare_urls)]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod arch;
 
 // Pull in the `core_simd` crate directly into core. The contents of
@@ -409,9 +466,11 @@ pub mod arch;
 #[allow(missing_debug_implementations, dead_code, unsafe_op_in_unsafe_fn)]
 #[allow(rustdoc::bare_urls)]
 #[unstable(feature = "portable_simd", issue = "86656")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod core_simd;
 
 #[unstable(feature = "portable_simd", issue = "86656")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod simd {
     #![doc = include_str!("../../portable-simd/crates/core_simd/src/core_simd_docs.md")]
 

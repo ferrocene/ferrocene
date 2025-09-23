@@ -4,8 +4,6 @@
 Using the core library
 ======================
 
-.. include:: ../../../core-certification/src/partials/pre-release.rst
-
 Use the certified core library exactly how you'd use the normal core library.
 
 Required compiler flags

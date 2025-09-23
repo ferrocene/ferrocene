@@ -6,8 +6,6 @@
 Constraints
 ===========
 
-.. include:: ../../../core-certification/src/partials/pre-release.rst
-
 Only use certified subset
 -------------------------
 

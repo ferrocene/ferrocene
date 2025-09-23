@@ -1,4 +1,6 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::Hash;
 
 /// An unbounded range (`..`).
@@ -38,11 +40,12 @@ use crate::hash::Hash;
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeFull"]
 #[doc(alias = "..")]
-#[derive(Copy, Clone, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, Default, PartialEq, Eq, Hash))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFull;
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Debug for RangeFull {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")
@@ -75,7 +78,7 @@ impl fmt::Debug for RangeFull {
 /// ```
 #[lang = "Range"]
 #[doc(alias = "..")]
-#[derive(Clone, Default, PartialEq, Eq, Hash)] // not Copy -- see #27186
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Default, PartialEq, Eq, Hash))] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
@@ -87,6 +90,7 @@ pub struct Range<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -96,6 +100,7 @@ impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -184,7 +189,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 /// ```
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
-#[derive(Clone, PartialEq, Eq, Hash)] // not Copy -- see #27186
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
@@ -193,6 +198,7 @@ pub struct RangeFrom<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -201,6 +207,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -266,7 +273,7 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeTo"]
 #[doc(alias = "..")]
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq, Hash))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeTo<Idx> {
     /// The upper bound of the range (exclusive).
@@ -275,6 +282,7 @@ pub struct RangeTo<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")?;
@@ -283,6 +291,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -340,7 +349,7 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 /// ```
 #[lang = "RangeInclusive"]
 #[doc(alias = "..=")]
-#[derive(Clone, PartialEq, Eq, Hash)] // not Copy -- see #27186
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeInclusive<Idx> {
     // Note that the fields here are not public to allow changing the
@@ -442,11 +451,13 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_inner(self) -> (Idx, Idx) {
         (self.start, self.end)
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.
@@ -462,6 +473,7 @@ impl RangeInclusive<usize> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -474,6 +486,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -587,7 +600,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeToInclusive"]
 #[doc(alias = "..=")]
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq, Hash))]
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)
@@ -596,6 +609,7 @@ pub struct RangeToInclusive<Idx> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..=")?;
@@ -604,6 +618,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -668,7 +683,7 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
 ///
 /// [`BTreeMap::range`]: ../../std/collections/btree_map/struct.BTreeMap.html#method.range
 #[stable(feature = "collections_bound", since = "1.17.0")]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, Debug, Hash, PartialEq, Eq))]
 pub enum Bound<T> {
     /// An inclusive bound.
     #[stable(feature = "collections_bound", since = "1.17.0")]
@@ -810,6 +825,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// assert!(!(f32::NAN..1.0).contains(&0.5));
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,
@@ -878,6 +894,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// assert!( (Excluded(3), Excluded(1)).is_empty());
     /// ```
     #[unstable(feature = "range_bounds_is_empty", issue = "137300")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_empty(&self) -> bool
     where
         T: PartialOrd,
@@ -941,6 +958,7 @@ pub trait IntoBounds<T>: RangeBounds<T> {
     /// assert!(!(-12..387).intersect(0..256).is_empty());
     /// assert!((1..5).intersect(6..).is_empty());
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn intersect<R>(self, other: R) -> (Bound<T>, Bound<T>)
     where
         Self: Sized,
@@ -1131,6 +1149,7 @@ impl<T> IntoBounds<T> for (Bound<T>, Bound<T>) {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: ?Sized + 'a> RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
     fn start_bound(&self) -> Bound<&T> {
         self.0

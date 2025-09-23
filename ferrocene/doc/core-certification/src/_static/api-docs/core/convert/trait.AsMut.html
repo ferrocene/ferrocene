@@ -1,0 +1,106 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Used to do a cheap mutable-to-mutable reference conversion."><title>AsMut in core::convert - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0</span></h2></div><div class="version">(e925a16bd	2025-08-18)</div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">AsMut</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#generic-implementations" title="Generic Implementations">Generic Implementations</a></li><li><a href="#reflexivity" title="Reflexivity">Reflexivity</a></li><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.as_mut" title="as_mut">as_mut</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>convert</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">convert</a></div><h1>Trait <span class="trait">AsMut</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/convert/mod.rs.html#374-378">Source</a> </span></div><pre class="rust item-decl"><code>pub trait AsMut&lt;T: ?<a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>&gt; {
+    // Required method
+    fn <a href="#tymethod.as_mut" class="fn">as_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="../primitive.reference.html">&amp;mut T</a>;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Used to do a cheap mutable-to-mutable reference conversion.</p>
+<p>This trait is similar to <a href="trait.AsRef.html" title="trait core::convert::AsRef"><code>AsRef</code></a> but used for converting between mutable
+references. If you need to do a costly conversion it is better to
+implement <a href="trait.From.html" title="trait core::convert::From"><code>From</code></a> with type <code>&amp;mut T</code> or write a custom function.</p>
+<p><strong>Note: This trait must not fail</strong>. If the conversion can fail, use a
+dedicated method which returns an <a href="../option/enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> or a <a href="../result/enum.Result.html" title="enum core::result::Result"><code>Result&lt;T, E&gt;</code></a>.</p>
+<h2 id="generic-implementations"><a class="doc-anchor" href="#generic-implementations">§</a>Generic Implementations</h2>
+<p><code>AsMut</code> auto-dereferences if the inner type is a mutable reference
+(e.g.: <code>foo.as_mut()</code> will work the same if <code>foo</code> has type <code>&amp;mut Foo</code> or <code>&amp;mut &amp;mut Foo</code>).</p>
+<p>Note that due to historic reasons, the above currently does not hold generally for all
+<a href="../ops/deref/trait.DerefMut.html" title="trait core::ops::deref::DerefMut">mutably dereferenceable types</a>, e.g. <code>foo.as_mut()</code> will <em>not</em> work the same as
+<code>Box::new(foo).as_mut()</code>. Instead, many smart pointers provide an <code>as_mut</code> implementation which
+simply returns a reference to the <a href="../ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">pointed-to value</a> (but do not perform a cheap
+reference-to-reference conversion for that value). However, <a href="trait.AsMut.html#tymethod.as_mut" title="method core::convert::AsMut::as_mut"><code>AsMut::as_mut</code></a> should not be
+used for the sole purpose of mutable dereferencing; instead <a href="../ops/deref/trait.DerefMut.html#mutable-deref-coercion" title="trait core::ops::deref::DerefMut">‘<code>Deref</code> coercion’</a> can be used:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>x = Box::new(<span class="number">5i32</span>);
+<span class="comment">// Avoid this:
+// let y: &amp;mut i32 = x.as_mut();
+// Better just write:
+</span><span class="kw">let </span>y: <span class="kw-2">&amp;mut </span>i32 = <span class="kw-2">&amp;mut </span>x;</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+mut+x+=+Box::new(5i32);%0A++++//+Avoid+this:%0A++++//+let+y:+%26mut+i32+=+x.as_mut();%0A++++//+Better+just+write:%0A++++let+y:+%26mut+i32+=+%26mut+x;%0A%7D&amp;edition=2024"></a></div>
+<p>Types which implement <a href="../ops/deref/trait.DerefMut.html" title="trait core::ops::deref::DerefMut"><code>DerefMut</code></a> should consider to add an implementation of <code>AsMut&lt;T&gt;</code> as
+follows:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">impl</span>&lt;T&gt; AsMut&lt;T&gt; <span class="kw">for </span>SomeType
+<span class="kw">where
+    </span>&lt;SomeType <span class="kw">as </span>Deref&gt;::Target: AsMut&lt;T&gt;,
+{
+    <span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
+        <span class="self">self</span>.deref_mut().as_mut()
+    }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23%5Ballow(unused_extern_crates)%5D%0Aextern+crate+r%23core;%0Afn+main()+%7B%0A++++use+core::ops::%7BDeref,+DerefMut%7D;%0A++++struct+SomeType;%0A++++impl+Deref+for+SomeType+%7B%0A++++++++type+Target+=+%5Bu8%5D;%0A++++++++fn+deref(%26self)+-%3E+%26%5Bu8%5D+%7B%0A++++++++++++%26%5B%5D%0A++++++++%7D%0A++++%7D%0A++++impl+DerefMut+for+SomeType+%7B%0A++++++++fn+deref_mut(%26mut+self)+-%3E+%26mut+%5Bu8%5D+%7B%0A++++++++++++%26mut+%5B%5D%0A++++++++%7D%0A++++%7D%0A++++impl%3CT%3E+AsMut%3CT%3E+for+SomeType%0A++++where%0A++++++++%3CSomeType+as+Deref%3E::Target:+AsMut%3CT%3E,%0A++++%7B%0A++++++++fn+as_mut(%26mut+self)+-%3E+%26mut+T+%7B%0A++++++++++++self.deref_mut().as_mut()%0A++++++++%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<h2 id="reflexivity"><a class="doc-anchor" href="#reflexivity">§</a>Reflexivity</h2>
+<p>Ideally, <code>AsMut</code> would be reflexive, i.e. there would be an <code>impl&lt;T: ?Sized&gt; AsMut&lt;T&gt; for T</code>
+with <a href="trait.AsMut.html#tymethod.as_mut" title="method core::convert::AsMut::as_mut"><code>as_mut</code></a> simply returning its argument unchanged.
+Such a blanket implementation is currently <em>not</em> provided due to technical restrictions of
+Rust’s type system (it would be overlapping with another existing blanket implementation for
+<code>&amp;mut T where T: AsMut&lt;U&gt;</code> which allows <code>AsMut</code> to auto-dereference, see “Generic
+Implementations” above).</p>
+<p>A trivial implementation of <code>AsMut&lt;T&gt; for T</code> must be added explicitly for a particular type <code>T</code>
+where needed or desired. Note, however, that not all types from <code>std</code> contain such an
+implementation, and those cannot be added by external code due to orphan rules.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Using <code>AsMut</code> as trait bound for a generic function, we can accept all mutable references that
+can be converted to type <code>&amp;mut T</code>. Unlike <a href="../ops/deref/trait.DerefMut.html" title="trait core::ops::deref::DerefMut">dereference</a>, which has a single <a href="../ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">target type</a>,
+there can be multiple implementations of <code>AsMut</code> for a type. In particular, <code>Vec&lt;T&gt;</code> implements
+both <code>AsMut&lt;Vec&lt;T&gt;&gt;</code> and <code>AsMut&lt;[T]&gt;</code>.</p>
+<p>In the following, the example functions <code>caesar</code> and <code>null_terminate</code> provide a generic
+interface which work with any type that can be converted by cheap mutable-to-mutable conversion
+into a byte slice (<code>[u8]</code>) or byte vector (<code>Vec&lt;u8&gt;</code>), respectively.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct </span>Document {
+    info: String,
+    content: Vec&lt;u8&gt;,
+}
+
+<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; AsMut&lt;T&gt; <span class="kw">for </span>Document
+<span class="kw">where
+    </span>Vec&lt;u8&gt;: AsMut&lt;T&gt;,
+{
+    <span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
+        <span class="self">self</span>.content.as_mut()
+    }
+}
+
+<span class="kw">fn </span>caesar&lt;T: AsMut&lt;[u8]&gt;&gt;(data: <span class="kw-2">&amp;mut </span>T, key: u8) {
+    <span class="kw">for </span>byte <span class="kw">in </span>data.as_mut() {
+        <span class="kw-2">*</span>byte = byte.wrapping_add(key);
+    }
+}
+
+<span class="kw">fn </span>null_terminate&lt;T: AsMut&lt;Vec&lt;u8&gt;&gt;&gt;(data: <span class="kw-2">&amp;mut </span>T) {
+    <span class="comment">// Using a non-generic inner function, which contains most of the
+    // functionality, helps to minimize monomorphization overhead.
+    </span><span class="kw">fn </span>doit(data: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;) {
+        <span class="kw">let </span>len = data.len();
+        <span class="kw">if </span>len == <span class="number">0 </span>|| data[len-<span class="number">1</span>] != <span class="number">0 </span>{
+            data.push(<span class="number">0</span>);
+        }
+    }
+    doit(data.as_mut());
+}
+
+<span class="kw">fn </span>main() {
+    <span class="kw">let </span><span class="kw-2">mut </span>v: Vec&lt;u8&gt; = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+    caesar(<span class="kw-2">&amp;mut </span>v, <span class="number">5</span>);
+    <span class="macro">assert_eq!</span>(v, [<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
+    null_terminate(<span class="kw-2">&amp;mut </span>v);
+    <span class="macro">assert_eq!</span>(v, [<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">0</span>]);
+    <span class="kw">let </span><span class="kw-2">mut </span>doc = Document {
+        info: String::from(<span class="string">"Example"</span>),
+        content: <span class="macro">vec!</span>[<span class="number">17</span>, <span class="number">19</span>, <span class="number">8</span>],
+    };
+    caesar(<span class="kw-2">&amp;mut </span>doc, <span class="number">1</span>);
+    <span class="macro">assert_eq!</span>(doc.content, [<span class="number">18</span>, <span class="number">20</span>, <span class="number">9</span>]);
+    null_terminate(<span class="kw-2">&amp;mut </span>doc);
+    <span class="macro">assert_eq!</span>(doc.content, [<span class="number">18</span>, <span class="number">20</span>, <span class="number">9</span>, <span class="number">0</span>]);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Astruct+Document+%7B%0A++++info:+String,%0A++++content:+Vec%3Cu8%3E,%0A%7D%0A%0Aimpl%3CT:+?Sized%3E+AsMut%3CT%3E+for+Document%0Awhere%0A++++Vec%3Cu8%3E:+AsMut%3CT%3E,%0A%7B%0A++++fn+as_mut(%26mut+self)+-%3E+%26mut+T+%7B%0A++++++++self.content.as_mut()%0A++++%7D%0A%7D%0A%0Afn+caesar%3CT:+AsMut%3C%5Bu8%5D%3E%3E(data:+%26mut+T,+key:+u8)+%7B%0A++++for+byte+in+data.as_mut()+%7B%0A++++++++*byte+=+byte.wrapping_add(key);%0A++++%7D%0A%7D%0A%0Afn+null_terminate%3CT:+AsMut%3CVec%3Cu8%3E%3E%3E(data:+%26mut+T)+%7B%0A++++//+Using+a+non-generic+inner+function,+which+contains+most+of+the%0A++++//+functionality,+helps+to+minimize+monomorphization+overhead.%0A++++fn+doit(data:+%26mut+Vec%3Cu8%3E)+%7B%0A++++++++let+len+=+data.len();%0A++++++++if+len+==+0+%7C%7C+data%5Blen-1%5D+!=+0+%7B%0A++++++++++++data.push(0);%0A++++++++%7D%0A++++%7D%0A++++doit(data.as_mut());%0A%7D%0A%0Afn+main()+%7B%0A++++let+mut+v:+Vec%3Cu8%3E+=+vec!%5B1,+2,+3%5D;%0A++++caesar(%26mut+v,+5);%0A++++assert_eq!(v,+%5B6,+7,+8%5D);%0A++++null_terminate(%26mut+v);%0A++++assert_eq!(v,+%5B6,+7,+8,+0%5D);%0A++++let+mut+doc+=+Document+%7B%0A++++++++info:+String::from(%22Example%22),%0A++++++++content:+vec!%5B17,+19,+8%5D,%0A++++%7D;%0A++++caesar(%26mut+doc,+1);%0A++++assert_eq!(doc.content,+%5B18,+20,+9%5D);%0A++++null_terminate(%26mut+doc);%0A++++assert_eq!(doc.content,+%5B18,+20,+9,+0%5D);%0A%7D&amp;edition=2024"></a></div>
+<p>Note, however, that APIs don’t need to be generic. In many cases taking a <code>&amp;mut [u8]</code> or
+<code>&amp;mut Vec&lt;u8&gt;</code>, for example, is the better choice (callers need to pass the correct type then).</p>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.as_mut" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/convert/mod.rs.html#377">Source</a></span><h4 class="code-header">fn <a href="#tymethod.as_mut" class="fn">as_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="../primitive.reference.html">&amp;mut T</a></h4></section></summary><div class="docblock"><p>Converts this type into a mutable reference of the (usually inferred) input type.</p>
+</div></details></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-AsMut%3Cstr%3E-for-str" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.51.0">1.51.0</span> · <a class="src" href="../../src/core/convert/mod.rs.html#855-860">Source</a></span><a href="#impl-AsMut%3Cstr%3E-for-str" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.AsMut.html" title="trait core::convert::AsMut">AsMut</a>&lt;str&gt; for str</h3></section><section id="impl-AsMut%3C%5BT%5D%3E-for-%5BT%5D" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/convert/mod.rs.html#838-843">Source</a></span><a href="#impl-AsMut%3C%5BT%5D%3E-for-%5BT%5D" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="trait.AsMut.html" title="trait core::convert::AsMut">AsMut</a>&lt;[T]&gt; for [T]</h3></section><section id="impl-AsMut%3CU%3E-for-%26mut+T" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/convert/mod.rs.html#735-743">Source</a></span><a href="#impl-AsMut%3CU%3E-for-%26mut+T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U: ?<a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>&gt; <a class="trait" href="trait.AsMut.html" title="trait core::convert::AsMut">AsMut</a>&lt;U&gt; for <a class="primitive" href="../primitive.reference.html">&amp;mut T</a><div class="where">where
+    T: <a class="trait" href="trait.AsMut.html" title="trait core::convert::AsMut">AsMut</a>&lt;U&gt; + ?<a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></div><script src="../../trait.impl/core/convert/trait.AsMut.js" async></script></section></div></main></body></html>

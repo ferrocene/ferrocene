@@ -4,8 +4,6 @@
 Usage
 =====
 
-.. include:: ../../../core-certification/src/partials/pre-release.rst
-
 Use the certified core library exactly how you'd use the normal Rust core library,
 with the following additions and modifications:
 

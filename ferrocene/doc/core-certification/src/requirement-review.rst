@@ -4,8 +4,6 @@
 Requirement violation review
 ============================
 
-.. include:: ./partials/pre-release.rst
-
 This is a list of functions, with associated assessments, that do not meet function requirements.
 
 .. csv-table::

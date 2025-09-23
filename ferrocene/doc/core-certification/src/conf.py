@@ -20,6 +20,7 @@ ferrocene_id = "CLC"
 html_theme = "ferrocene"
 html_title = "Ferrocene Core Library Certification"
 html_short_title = "Core Library Certification"
+html_static_path = ["_static"]
 
 # Do not generate the index pages. We don't need them, and they cause
 # linkchecker to fail due to them including *all* glossary entries, including

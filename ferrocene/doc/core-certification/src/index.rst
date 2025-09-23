@@ -4,8 +4,6 @@
 Core Library Certification
 ==========================
 
-.. include:: ./partials/pre-release.rst
-
 .. toctree::
    :numbered:
    :maxdepth: 2

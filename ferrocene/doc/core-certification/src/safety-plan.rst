@@ -4,8 +4,6 @@
 Safety Plan
 ===========
 
-.. include:: ./partials/pre-release.rst
-
 Purpose of this document
 ------------------------
 

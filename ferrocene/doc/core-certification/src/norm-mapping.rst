@@ -4,8 +4,6 @@
 Norm mapping of IEC-61508 standard requirements
 ===============================================
 
-.. include:: ./partials/pre-release.rst
-
 IEC-61508-1
 -----------
 

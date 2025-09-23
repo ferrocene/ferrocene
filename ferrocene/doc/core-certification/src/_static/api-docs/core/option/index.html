@@ -1,0 +1,405 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Optional values."><title>core::option - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0</span></h2></div><div class="version">(e925a16bd	2025-08-18)</div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module option</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#options-and-pointers-nullable-pointers" title="Options and pointers (“nullable” pointers)">Options and pointers (“nullable” pointers)</a></li><li><a href="#the-question-mark-operator-" title="The question mark operator, `?`">The question mark operator, <code>?</code></a></li><li><a href="#representation" title="Representation">Representation</a></li><li><a href="#method-overview" title="Method overview">Method overview</a><ul><li><a href="#querying-the-variant" title="Querying the variant">Querying the variant</a></li><li><a href="#adapters-for-working-with-references" title="Adapters for working with references">Adapters for working with references</a></li><li><a href="#extracting-the-contained-value" title="Extracting the contained value">Extracting the contained value</a></li><li><a href="#transforming-contained-values" title="Transforming contained values">Transforming contained values</a></li><li><a href="#boolean-operators" title="Boolean operators">Boolean operators</a></li><li><a href="#comparison-operators" title="Comparison operators">Comparison operators</a></li><li><a href="#iterating-over-option" title="Iterating over `Option`">Iterating over <code>Option</code></a></li><li><a href="#collecting-into-option" title="Collecting into `Option`">Collecting into <code>Option</code></a></li><li><a href="#modifying-an-option-in-place" title="Modifying an `Option` in-place">Modifying an <code>Option</code> in-place</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate core</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a></div><h1>Module <span>option</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/option.rs.html#1-2673">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Optional values.</p>
+<p>Type <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> represents an optional value: every <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>
+is either <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> and contains a value, or <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>, and
+does not. <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> types are very common in Rust code, as
+they have a number of uses:</p>
+<ul>
+<li>Initial values</li>
+<li>Return values for functions that are not defined
+over their entire input range (partial functions)</li>
+<li>Return value for otherwise reporting simple errors, where <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> is
+returned on error</li>
+<li>Optional struct fields</li>
+<li>Struct fields that can be loaned or “taken”</li>
+<li>Optional function arguments</li>
+<li>Nullable pointers</li>
+<li>Swapping things out of difficult situations</li>
+</ul>
+<p><a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>s are commonly paired with pattern matching to query the presence
+of a value and take action, always accounting for the <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> case.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>divide(numerator: f64, denominator: f64) -&gt; <span class="prelude-ty">Option</span>&lt;f64&gt; {
+    <span class="kw">if </span>denominator == <span class="number">0.0 </span>{
+        <span class="prelude-val">None
+    </span>} <span class="kw">else </span>{
+        <span class="prelude-val">Some</span>(numerator / denominator)
+    }
+}
+
+<span class="comment">// The return value of the function is an option
+</span><span class="kw">let </span>result = divide(<span class="number">2.0</span>, <span class="number">3.0</span>);
+
+<span class="comment">// Pattern match to retrieve the value
+</span><span class="kw">match </span>result {
+    <span class="comment">// The division was valid
+    </span><span class="prelude-val">Some</span>(x) =&gt; <span class="macro">println!</span>(<span class="string">"Result: {x}"</span>),
+    <span class="comment">// The division was invalid
+    </span><span class="prelude-val">None    </span>=&gt; <span class="macro">println!</span>(<span class="string">"Cannot divide by 0"</span>),
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++fn+divide(numerator:+f64,+denominator:+f64)+-%3E+Option%3Cf64%3E+%7B%0A++++++++if+denominator+==+0.0+%7B%0A++++++++++++None%0A++++++++%7D+else+%7B%0A++++++++++++Some(numerator+/+denominator)%0A++++++++%7D%0A++++%7D%0A++++%0A++++//+The+return+value+of+the+function+is+an+option%0A++++let+result+=+divide(2.0,+3.0);%0A++++%0A++++//+Pattern+match+to+retrieve+the+value%0A++++match+result+%7B%0A++++++++//+The+division+was+valid%0A++++++++Some(x)+=%3E+println!(%22Result:+%7Bx%7D%22),%0A++++++++//+The+division+was+invalid%0A++++++++None++++=%3E+println!(%22Cannot+divide+by+0%22),%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<h2 id="options-and-pointers-nullable-pointers"><a class="doc-anchor" href="#options-and-pointers-nullable-pointers">§</a>Options and pointers (“nullable” pointers)</h2>
+<p>Rust’s pointer types must always point to a valid location; there are
+no “null” references. Instead, Rust has <em>optional</em> pointers, like
+the optional owned box, <code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="../../std/boxed/struct.Box.html">Box&lt;T&gt;</a>&gt;</code>.</p>
+<p>The following example uses <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> to create an optional box of
+<a href="../primitive.i32.html" title="primitive i32"><code>i32</code></a>. Notice that in order to use the inner <a href="../primitive.i32.html" title="primitive i32"><code>i32</code></a> value, the
+<code>check_optional</code> function first needs to use pattern matching to
+determine whether the box has a value (i.e., it is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(...)</code></a>) or
+not (<a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>).</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>optional = <span class="prelude-val">None</span>;
+check_optional(optional);
+
+<span class="kw">let </span>optional = <span class="prelude-val">Some</span>(Box::new(<span class="number">9000</span>));
+check_optional(optional);
+
+<span class="kw">fn </span>check_optional(optional: <span class="prelude-ty">Option</span>&lt;Box&lt;i32&gt;&gt;) {
+    <span class="kw">match </span>optional {
+        <span class="prelude-val">Some</span>(p) =&gt; <span class="macro">println!</span>(<span class="string">"has value {p}"</span>),
+        <span class="prelude-val">None </span>=&gt; <span class="macro">println!</span>(<span class="string">"has no value"</span>),
+    }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+optional+=+None;%0A++++check_optional(optional);%0A++++%0A++++let+optional+=+Some(Box::new(9000));%0A++++check_optional(optional);%0A++++%0A++++fn+check_optional(optional:+Option%3CBox%3Ci32%3E%3E)+%7B%0A++++++++match+optional+%7B%0A++++++++++++Some(p)+=%3E+println!(%22has+value+%7Bp%7D%22),%0A++++++++++++None+=%3E+println!(%22has+no+value%22),%0A++++++++%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<h2 id="the-question-mark-operator-"><a class="doc-anchor" href="#the-question-mark-operator-">§</a>The question mark operator, <code>?</code></h2>
+<p>Similar to the <a href="../result/enum.Result.html" title="enum core::result::Result"><code>Result</code></a> type, when writing code that calls many functions that return the
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> type, handling <code>Some</code>/<code>None</code> can be tedious. The question mark
+operator, <a href="../ops/try_trait/trait.Try.html" title="trait core::ops::try_trait::Try"><code>?</code></a>, hides some of the boilerplate of propagating values
+up the call stack.</p>
+<p>It replaces this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>add_last_numbers(stack: <span class="kw-2">&amp;mut </span>Vec&lt;i32&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
+    <span class="kw">let </span>a = stack.pop();
+    <span class="kw">let </span>b = stack.pop();
+
+    <span class="kw">match </span>(a, b) {
+        (<span class="prelude-val">Some</span>(x), <span class="prelude-val">Some</span>(y)) =&gt; <span class="prelude-val">Some</span>(x + y),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+    }
+}
+</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Ballow(dead_code)%5D%0A%0Afn+main()+%7B%0A++++fn+add_last_numbers(stack:+%26mut+Vec%3Ci32%3E)+-%3E+Option%3Ci32%3E+%7B%0A++++++++let+a+=+stack.pop();%0A++++++++let+b+=+stack.pop();%0A++++%0A++++++++match+(a,+b)+%7B%0A++++++++++++(Some(x),+Some(y))+=%3E+Some(x+%2B+y),%0A++++++++++++_+=%3E+None,%0A++++++++%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p>With this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>add_last_numbers(stack: <span class="kw-2">&amp;mut </span>Vec&lt;i32&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
+    <span class="prelude-val">Some</span>(stack.pop()<span class="question-mark">? </span>+ stack.pop()<span class="question-mark">?</span>)
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Ballow(dead_code)%5D%0A%0Afn+main()+%7B%0A++++fn+add_last_numbers(stack:+%26mut+Vec%3Ci32%3E)+-%3E+Option%3Ci32%3E+%7B%0A++++++++Some(stack.pop()?+%2B+stack.pop()?)%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p><em>It’s much nicer!</em></p>
+<p>Ending the expression with <a href="../ops/try_trait/trait.Try.html" title="trait core::ops::try_trait::Try"><code>?</code></a> will result in the <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>’s unwrapped value, unless the
+result is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>, in which case <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> is returned early from the enclosing function.</p>
+<p><a href="../ops/try_trait/trait.Try.html" title="trait core::ops::try_trait::Try"><code>?</code></a> can be used in functions that return <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> because of the
+early return of <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> that it provides.</p>
+<h2 id="representation"><a class="doc-anchor" href="#representation">§</a>Representation</h2>
+<p>Rust guarantees to optimize the following types <code>T</code> such that
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> has the same size, alignment, and <a href="../primitive.fn.html#abi-compatibility">function call ABI</a> as <code>T</code>. In some
+of these cases, Rust further guarantees that
+<code>transmute::&lt;_, Option&lt;T&gt;&gt;([0u8; size_of::&lt;T&gt;()])</code> is sound and
+produces <code>Option::&lt;T&gt;::None</code>. These cases are identified by the
+second column:</p>
+<div><table><thead><tr><th><code>T</code></th><th><code>transmute::&lt;_, Option&lt;T&gt;&gt;([0u8; size_of::&lt;T&gt;()])</code> sound?</th></tr></thead><tbody>
+<tr><td><a href="../../std/boxed/struct.Box.html"><code>Box&lt;U&gt;</code></a> (specifically, only <code>Box&lt;U, Global&gt;</code>)</td><td>when <code>U: Sized</code></td></tr>
+<tr><td><code>&amp;U</code></td><td>when <code>U: Sized</code></td></tr>
+<tr><td><code>&amp;mut U</code></td><td>when <code>U: Sized</code></td></tr>
+<tr><td><code>fn</code>, <code>extern "C" fn</code><sup id="fnref1"><a href="#fn1">1</a></sup></td><td>always</td></tr>
+<tr><td><a href="../num/index.html" title="mod core::num"><code>num::NonZero*</code></a></td><td>always</td></tr>
+<tr><td><a href="../ptr/non_null/struct.NonNull.html" title="struct core::ptr::non_null::NonNull"><code>ptr::NonNull&lt;U&gt;</code></a></td><td>when <code>U: Sized</code></td></tr>
+<tr><td><code>#[repr(transparent)]</code> struct around one of the types in this list.</td><td>when it holds for the inner type</td></tr>
+</tbody></table>
+</div>
+<p>Under some conditions the above types <code>T</code> are also null pointer optimized when wrapped in a <a href="../result/index.html#representation" title="mod core::result"><code>Result</code></a>.</p>
+<p>This is called the “null pointer optimization” or NPO.</p>
+<p>It is further guaranteed that, for the cases above, one can
+[<code>mem::transmute</code>] from all valid values of <code>T</code> to <code>Option&lt;T&gt;</code> and
+from <code>Some::&lt;T&gt;(_)</code> to <code>T</code> (but transmuting <code>None::&lt;T&gt;</code> to <code>T</code>
+is undefined behavior).</p>
+<h2 id="method-overview"><a class="doc-anchor" href="#method-overview">§</a>Method overview</h2>
+<p>In addition to working with pattern matching, <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> provides a wide
+variety of different methods.</p>
+<h3 id="querying-the-variant"><a class="doc-anchor" href="#querying-the-variant">§</a>Querying the variant</h3>
+<p>The <a href="enum.Option.html#method.is_some" title="method core::option::Option::is_some"><code>is_some</code></a> and <a href="Option::is_none"><code>is_none</code></a> methods return <a href="../primitive.bool.html" title="primitive bool"><code>true</code></a> if the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>
+is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> or <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>, respectively.</p>
+<p>The <a href="enum.Option.html#method.is_some_and" title="method core::option::Option::is_some_and"><code>is_some_and</code></a> and <a href="enum.Option.html#method.is_none_or" title="method core::option::Option::is_none_or"><code>is_none_or</code></a> methods apply the provided function
+to the contents of the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> to produce a boolean value.
+If this is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> then a default result is returned instead without executing the function.</p>
+<h3 id="adapters-for-working-with-references"><a class="doc-anchor" href="#adapters-for-working-with-references">§</a>Adapters for working with references</h3>
+<ul>
+<li><a href="enum.Option.html#method.as_ref" title="method core::option::Option::as_ref"><code>as_ref</code></a> converts from <code><a href="../primitive.reference.html" title="shared reference">&amp;</a><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</code> to <code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="../primitive.reference.html" title="shared reference">&amp;</a>T&gt;</code></li>
+<li><a href="enum.Option.html#method.as_mut" title="method core::option::Option::as_mut"><code>as_mut</code></a> converts from <code><a href="../primitive.reference.html" title="mutable reference">&amp;mut</a> <a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</code> to <code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="../primitive.reference.html" title="mutable reference">&amp;mut</a> T&gt;</code></li>
+<li><a href="enum.Option.html#method.as_deref" title="method core::option::Option::as_deref"><code>as_deref</code></a> converts from <code><a href="../primitive.reference.html" title="shared reference">&amp;</a><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</code> to
+<code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="../primitive.reference.html" title="shared reference">&amp;</a>T::<a href="../ops/deref/trait.Deref.html#associatedtype.Target" title="ops::Deref::Target">Target</a>&gt;</code></li>
+<li><a href="enum.Option.html#method.as_deref_mut" title="method core::option::Option::as_deref_mut"><code>as_deref_mut</code></a> converts from <code><a href="../primitive.reference.html" title="mutable reference">&amp;mut</a> <a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</code> to
+<code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="../primitive.reference.html" title="mutable reference">&amp;mut</a> T::<a href="../ops/deref/trait.Deref.html#associatedtype.Target" title="ops::Deref::Target">Target</a>&gt;</code></li>
+<li><a href="Option::as_pin_ref"><code>as_pin_ref</code></a> converts from <code>[Pin]&lt;<a href="../primitive.reference.html" title="shared reference">&amp;</a><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;&gt;</code> to
+<code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;[Pin]&lt;<a href="../primitive.reference.html" title="shared reference">&amp;</a>T&gt;&gt;</code></li>
+<li><a href="Option::as_pin_mut"><code>as_pin_mut</code></a> converts from <code>[Pin]&lt;<a href="../primitive.reference.html" title="mutable reference">&amp;mut</a> <a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;&gt;</code> to
+<code><a href="enum.Option.html" title="enum core::option::Option">Option</a>&lt;[Pin]&lt;<a href="../primitive.reference.html" title="mutable reference">&amp;mut</a> T&gt;&gt;</code></li>
+<li><a href="Option::as_slice"><code>as_slice</code></a> returns a one-element slice of the contained value, if any.
+If this is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>, an empty slice is returned.</li>
+<li><a href="Option::as_mut_slice"><code>as_mut_slice</code></a> returns a mutable one-element slice of the contained value, if any.
+If this is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>, an empty slice is returned.</li>
+</ul>
+<h3 id="extracting-the-contained-value"><a class="doc-anchor" href="#extracting-the-contained-value">§</a>Extracting the contained value</h3>
+<p>These methods extract the contained value in an <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> when it
+is the <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> variant. If the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>:</p>
+<ul>
+<li><a href="Option::expect"><code>expect</code></a> panics with a provided custom message</li>
+<li><a href="Option::unwrap"><code>unwrap</code></a> panics with a generic message</li>
+<li><a href="enum.Option.html#method.unwrap_or" title="method core::option::Option::unwrap_or"><code>unwrap_or</code></a> returns the provided default value</li>
+<li><a href="enum.Option.html#method.unwrap_or_default" title="method core::option::Option::unwrap_or_default"><code>unwrap_or_default</code></a> returns the default value of the type <code>T</code>
+(which must implement the <a href="../default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a> trait)</li>
+<li><a href="enum.Option.html#method.unwrap_or_else" title="method core::option::Option::unwrap_or_else"><code>unwrap_or_else</code></a> returns the result of evaluating the provided
+function</li>
+<li><a href="Option::unwrap_unchecked"><code>unwrap_unchecked</code></a> produces <em><a href="https://doc.rust-lang.org/reference/behavior-considered-undefined.html">undefined behavior</a></em></li>
+</ul>
+<h3 id="transforming-contained-values"><a class="doc-anchor" href="#transforming-contained-values">§</a>Transforming contained values</h3>
+<p>These methods transform <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> to <a href="../result/enum.Result.html" title="enum core::result::Result"><code>Result</code></a>:</p>
+<ul>
+<li><a href="enum.Option.html#method.ok_or" title="method core::option::Option::ok_or"><code>ok_or</code></a> transforms <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(v)</code></a> to <a href="../result/enum.Result.html#variant.Ok" title="variant core::result::Result::Ok"><code>Ok(v)</code></a>, and <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> to
+<a href="../result/enum.Result.html#variant.Err" title="variant core::result::Result::Err"><code>Err(err)</code></a> using the provided default <code>err</code> value</li>
+<li><a href="enum.Option.html#method.ok_or_else" title="method core::option::Option::ok_or_else"><code>ok_or_else</code></a> transforms <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(v)</code></a> to <a href="../result/enum.Result.html#variant.Ok" title="variant core::result::Result::Ok"><code>Ok(v)</code></a>, and <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> to
+a value of <a href="../result/enum.Result.html#variant.Err" title="variant core::result::Result::Err"><code>Err</code></a> using the provided function</li>
+<li><a href="enum.Option.html#method.transpose" title="method core::option::Option::transpose"><code>transpose</code></a> transposes an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> of a <a href="../result/enum.Result.html" title="enum core::result::Result"><code>Result</code></a> into a
+<a href="../result/enum.Result.html" title="enum core::result::Result"><code>Result</code></a> of an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a></li>
+</ul>
+<p>These methods transform the <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> variant:</p>
+<ul>
+<li><a href="enum.Option.html#method.filter" title="method core::option::Option::filter"><code>filter</code></a> calls the provided predicate function on the contained
+value <code>t</code> if the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(t)</code></a>, and returns <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(t)</code></a>
+if the function returns <code>true</code>; otherwise, returns <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+<li><a href="enum.Option.html#method.flatten" title="method core::option::Option::flatten"><code>flatten</code></a> removes one level of nesting from an <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;Option&lt;T&gt;&gt;</code></a></li>
+<li><a href="enum.Option.html#method.inspect" title="method core::option::Option::inspect"><code>inspect</code></a> method takes ownership of the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> and applies
+the provided function to the contained value by reference if <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a></li>
+<li><a href="enum.Option.html#method.map" title="method core::option::Option::map"><code>map</code></a> transforms <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> to <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;U&gt;</code></a> by applying the
+provided function to the contained value of <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> and leaving
+<a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> values unchanged</li>
+</ul>
+<p>These methods transform <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> to a value of a possibly
+different type <code>U</code>:</p>
+<ul>
+<li><a href="enum.Option.html#method.map_or" title="method core::option::Option::map_or"><code>map_or</code></a> applies the provided function to the contained value of
+<a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>, or returns the provided default value if the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is
+<a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+<li><a href="enum.Option.html#method.map_or_else" title="method core::option::Option::map_or_else"><code>map_or_else</code></a> applies the provided function to the contained value
+of <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>, or returns the result of evaluating the provided
+fallback function if the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+</ul>
+<p>These methods combine the <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> variants of two <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> values:</p>
+<ul>
+<li><a href="enum.Option.html#method.zip" title="method core::option::Option::zip"><code>zip</code></a> returns <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some((s, o))</code></a> if <code>self</code> is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(s)</code></a> and the
+provided <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> value is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(o)</code></a>; otherwise, returns <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+<li><a href="enum.Option.html#method.zip_with" title="method core::option::Option::zip_with"><code>zip_with</code></a> calls the provided function <code>f</code> and returns
+<a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(f(s, o))</code></a> if <code>self</code> is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(s)</code></a> and the provided
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> value is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(o)</code></a>; otherwise, returns <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+</ul>
+<h3 id="boolean-operators"><a class="doc-anchor" href="#boolean-operators">§</a>Boolean operators</h3>
+<p>These methods treat the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> as a boolean value, where <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>
+acts like <a href="../primitive.bool.html" title="primitive bool"><code>true</code></a> and <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> acts like <a href="../primitive.bool.html" title="primitive bool"><code>false</code></a>. There are two
+categories of these methods: ones that take an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> as input, and
+ones that take a function as input (to be lazily evaluated).</p>
+<p>The <a href="enum.Option.html#method.and" title="method core::option::Option::and"><code>and</code></a>, <a href="enum.Option.html#method.or" title="method core::option::Option::or"><code>or</code></a>, and <a href="enum.Option.html#method.xor" title="method core::option::Option::xor"><code>xor</code></a> methods take another <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> as
+input, and produce an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> as output. Only the <a href="enum.Option.html#method.and" title="method core::option::Option::and"><code>and</code></a> method can
+produce an <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;U&gt;</code></a> value having a different inner type <code>U</code> than
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a>.</p>
+<div><table><thead><tr><th>method</th><th>self</th><th>input</th><th>output</th></tr></thead><tbody>
+<tr><td><a href="enum.Option.html#method.and" title="method core::option::Option::and"><code>and</code></a></td><td><code>None</code></td><td>(ignored)</td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.and" title="method core::option::Option::and"><code>and</code></a></td><td><code>Some(x)</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.and" title="method core::option::Option::and"><code>and</code></a></td><td><code>Some(x)</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.or" title="method core::option::Option::or"><code>or</code></a></td><td><code>None</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.or" title="method core::option::Option::or"><code>or</code></a></td><td><code>None</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.or" title="method core::option::Option::or"><code>or</code></a></td><td><code>Some(x)</code></td><td>(ignored)</td><td><code>Some(x)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.xor" title="method core::option::Option::xor"><code>xor</code></a></td><td><code>None</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.xor" title="method core::option::Option::xor"><code>xor</code></a></td><td><code>None</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.xor" title="method core::option::Option::xor"><code>xor</code></a></td><td><code>Some(x)</code></td><td><code>None</code></td><td><code>Some(x)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.xor" title="method core::option::Option::xor"><code>xor</code></a></td><td><code>Some(x)</code></td><td><code>Some(y)</code></td><td><code>None</code></td></tr>
+</tbody></table>
+</div>
+<p>The <a href="enum.Option.html#method.and_then" title="method core::option::Option::and_then"><code>and_then</code></a> and <a href="enum.Option.html#method.or_else" title="method core::option::Option::or_else"><code>or_else</code></a> methods take a function as input, and
+only evaluate the function when they need to produce a new value. Only
+the <a href="enum.Option.html#method.and_then" title="method core::option::Option::and_then"><code>and_then</code></a> method can produce an <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;U&gt;</code></a> value having a
+different inner type <code>U</code> than <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a>.</p>
+<div><table><thead><tr><th>method</th><th>self</th><th>function input</th><th>function result</th><th>output</th></tr></thead><tbody>
+<tr><td><a href="enum.Option.html#method.and_then" title="method core::option::Option::and_then"><code>and_then</code></a></td><td><code>None</code></td><td>(not provided)</td><td>(not evaluated)</td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.and_then" title="method core::option::Option::and_then"><code>and_then</code></a></td><td><code>Some(x)</code></td><td><code>x</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.and_then" title="method core::option::Option::and_then"><code>and_then</code></a></td><td><code>Some(x)</code></td><td><code>x</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.or_else" title="method core::option::Option::or_else"><code>or_else</code></a></td><td><code>None</code></td><td>(not provided)</td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><a href="enum.Option.html#method.or_else" title="method core::option::Option::or_else"><code>or_else</code></a></td><td><code>None</code></td><td>(not provided)</td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><a href="enum.Option.html#method.or_else" title="method core::option::Option::or_else"><code>or_else</code></a></td><td><code>Some(x)</code></td><td>(not provided)</td><td>(not evaluated)</td><td><code>Some(x)</code></td></tr>
+</tbody></table>
+</div>
+<p>This is an example of using methods like <a href="enum.Option.html#method.and_then" title="method core::option::Option::and_then"><code>and_then</code></a> and <a href="enum.Option.html#method.or" title="method core::option::Option::or"><code>or</code></a> in a
+pipeline of method calls. Early stages of the pipeline pass failure
+values (<a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>) through unchanged, and continue processing on
+success values (<a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>). Toward the end, <a href="enum.Option.html#method.or" title="method core::option::Option::or"><code>or</code></a> substitutes an error
+message if it receives <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>bt = BTreeMap::new();
+bt.insert(<span class="number">20u8</span>, <span class="string">"foo"</span>);
+bt.insert(<span class="number">42u8</span>, <span class="string">"bar"</span>);
+<span class="kw">let </span>res = [<span class="number">0u8</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">200</span>, <span class="number">22</span>]
+    .into_iter()
+    .map(|x| {
+        <span class="comment">// `checked_sub()` returns `None` on error
+        </span>x.checked_sub(<span class="number">1</span>)
+            <span class="comment">// same with `checked_mul()`
+            </span>.and_then(|x| x.checked_mul(<span class="number">2</span>))
+            <span class="comment">// `BTreeMap::get` returns `None` on error
+            </span>.and_then(|x| bt.get(<span class="kw-2">&amp;</span>x))
+            <span class="comment">// Substitute an error message if we have `None` so far
+            </span>.or(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">"error!"</span>))
+            .copied()
+            <span class="comment">// Won't panic because we unconditionally used `Some` above
+            </span>.unwrap()
+    })
+    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(res, [<span class="string">"error!"</span>, <span class="string">"error!"</span>, <span class="string">"foo"</span>, <span class="string">"error!"</span>, <span class="string">"bar"</span>]);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::collections::BTreeMap;%0A++++let+mut+bt+=+BTreeMap::new();%0A++++bt.insert(20u8,+%22foo%22);%0A++++bt.insert(42u8,+%22bar%22);%0A++++let+res+=+%5B0u8,+1,+11,+200,+22%5D%0A++++++++.into_iter()%0A++++++++.map(%7Cx%7C+%7B%0A++++++++++++//+%60checked_sub()%60+returns+%60None%60+on+error%0A++++++++++++x.checked_sub(1)%0A++++++++++++++++//+same+with+%60checked_mul()%60%0A++++++++++++++++.and_then(%7Cx%7C+x.checked_mul(2))%0A++++++++++++++++//+%60BTreeMap::get%60+returns+%60None%60+on+error%0A++++++++++++++++.and_then(%7Cx%7C+bt.get(%26x))%0A++++++++++++++++//+Substitute+an+error+message+if+we+have+%60None%60+so+far%0A++++++++++++++++.or(Some(%26%22error!%22))%0A++++++++++++++++.copied()%0A++++++++++++++++//+Won't+panic+because+we+unconditionally+used+%60Some%60+above%0A++++++++++++++++.unwrap()%0A++++++++%7D)%0A++++++++.collect::%3CVec%3C_%3E%3E();%0A++++assert_eq!(res,+%5B%22error!%22,+%22error!%22,+%22foo%22,+%22error!%22,+%22bar%22%5D);%0A%7D&amp;edition=2024"></a></div>
+<h3 id="comparison-operators"><a class="doc-anchor" href="#comparison-operators">§</a>Comparison operators</h3>
+<p>If <code>T</code> implements <a href="../cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a> then <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> will derive its
+<a href="../cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a> implementation.  With this order, <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> compares as
+less than any <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>, and two <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> compare the same way as their
+contained values would in <code>T</code>.  If <code>T</code> also implements
+<a href="../cmp/trait.Ord.html" title="trait core::cmp::Ord"><code>Ord</code></a>, then so does <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">assert!</span>(<span class="prelude-val">None </span>&lt; <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<span class="macro">assert!</span>(<span class="prelude-val">Some</span>(<span class="number">0</span>) &lt; <span class="prelude-val">Some</span>(<span class="number">1</span>));</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++assert!(None+%3C+Some(0));%0A++++assert!(Some(0)+%3C+Some(1));%0A%7D&amp;edition=2024"></a></div>
+<h3 id="iterating-over-option"><a class="doc-anchor" href="#iterating-over-option">§</a>Iterating over <code>Option</code></h3>
+<p>An <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> can be iterated over. This can be helpful if you need an
+iterator that is conditionally empty. The iterator will either produce
+a single value (when the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a>), or produce no values
+(when the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>). For example, <a href="Option::into_iter"><code>into_iter</code></a> acts like
+<a href="crate::iter::once"><code>once(v)</code></a> if the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some(v)</code></a>, and like <a href="crate::iter::empty"><code>empty()</code></a> if
+the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>.</p>
+<p>Iterators over <a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a> come in three types:</p>
+<ul>
+<li><a href="Option::into_iter"><code>into_iter</code></a> consumes the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> and produces the contained
+value</li>
+<li><a href="enum.Option.html#method.iter" title="method core::option::Option::iter"><code>iter</code></a> produces an immutable reference of type <code>&amp;T</code> to the
+contained value</li>
+<li><a href="enum.Option.html#method.iter_mut" title="method core::option::Option::iter_mut"><code>iter_mut</code></a> produces a mutable reference of type <code>&amp;mut T</code> to the
+contained value</li>
+</ul>
+<p>An iterator over <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> can be useful when chaining iterators, for
+example, to conditionally insert items. (It’s not always necessary to
+explicitly call an iterator constructor: many <a href="../iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator"><code>Iterator</code></a> methods that
+accept other iterators will also accept iterable types that implement
+<a href="../iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a>, which includes <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>.)</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>yep = <span class="prelude-val">Some</span>(<span class="number">42</span>);
+<span class="kw">let </span>nope = <span class="prelude-val">None</span>;
+<span class="comment">// chain() already calls into_iter(), so we don't have to do so
+</span><span class="kw">let </span>nums: Vec&lt;i32&gt; = (<span class="number">0</span>..<span class="number">4</span>).chain(yep).chain(<span class="number">4</span>..<span class="number">8</span>).collect();
+<span class="macro">assert_eq!</span>(nums, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">42</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);
+<span class="kw">let </span>nums: Vec&lt;i32&gt; = (<span class="number">0</span>..<span class="number">4</span>).chain(nope).chain(<span class="number">4</span>..<span class="number">8</span>).collect();
+<span class="macro">assert_eq!</span>(nums, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+yep+=+Some(42);%0A++++let+nope+=+None;%0A++++//+chain()+already+calls+into_iter(),+so+we+don't+have+to+do+so%0A++++let+nums:+Vec%3Ci32%3E+=+(0..4).chain(yep).chain(4..8).collect();%0A++++assert_eq!(nums,+%5B0,+1,+2,+3,+42,+4,+5,+6,+7%5D);%0A++++let+nums:+Vec%3Ci32%3E+=+(0..4).chain(nope).chain(4..8).collect();%0A++++assert_eq!(nums,+%5B0,+1,+2,+3,+4,+5,+6,+7%5D);%0A%7D&amp;edition=2024"></a></div>
+<p>One reason to chain iterators in this way is that a function returning
+<code>impl Iterator</code> must have all possible return values be of the same
+concrete type. Chaining an iterated <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> can help with that.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>make_iter(do_insert: bool) -&gt; <span class="kw">impl </span>Iterator&lt;Item = i32&gt; {
+    <span class="comment">// Explicit returns to illustrate return types matching
+    </span><span class="kw">match </span>do_insert {
+        <span class="bool-val">true </span>=&gt; <span class="kw">return </span>(<span class="number">0</span>..<span class="number">4</span>).chain(<span class="prelude-val">Some</span>(<span class="number">42</span>)).chain(<span class="number">4</span>..<span class="number">8</span>),
+        <span class="bool-val">false </span>=&gt; <span class="kw">return </span>(<span class="number">0</span>..<span class="number">4</span>).chain(<span class="prelude-val">None</span>).chain(<span class="number">4</span>..<span class="number">8</span>),
+    }
+}
+<span class="macro">println!</span>(<span class="string">"{:?}"</span>, make_iter(<span class="bool-val">true</span>).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());
+<span class="macro">println!</span>(<span class="string">"{:?}"</span>, make_iter(<span class="bool-val">false</span>).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++fn+make_iter(do_insert:+bool)+-%3E+impl+Iterator%3CItem+=+i32%3E+%7B%0A++++++++//+Explicit+returns+to+illustrate+return+types+matching%0A++++++++match+do_insert+%7B%0A++++++++++++true+=%3E+return+(0..4).chain(Some(42)).chain(4..8),%0A++++++++++++false+=%3E+return+(0..4).chain(None).chain(4..8),%0A++++++++%7D%0A++++%7D%0A++++println!(%22%7B:?%7D%22,+make_iter(true).collect::%3CVec%3C_%3E%3E());%0A++++println!(%22%7B:?%7D%22,+make_iter(false).collect::%3CVec%3C_%3E%3E());%0A%7D&amp;edition=2024"></a></div>
+<p>If we try to do the same thing, but using <a href="crate::iter::once"><code>once()</code></a> and <a href="crate::iter::empty"><code>empty()</code></a>,
+we can’t return <code>impl Iterator</code> anymore because the concrete types of
+the return values differ.</p>
+
+<div class="example-wrap compile_fail"><a href="#" class="tooltip" title="This example deliberately fails to compile">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// This won't compile because all possible returns from the function
+// must have the same concrete type.
+</span><span class="kw">fn </span>make_iter(do_insert: bool) -&gt; <span class="kw">impl </span>Iterator&lt;Item = i32&gt; {
+    <span class="comment">// Explicit returns to illustrate return types not matching
+    </span><span class="kw">match </span>do_insert {
+        <span class="bool-val">true </span>=&gt; <span class="kw">return </span>(<span class="number">0</span>..<span class="number">4</span>).chain(once(<span class="number">42</span>)).chain(<span class="number">4</span>..<span class="number">8</span>),
+        <span class="bool-val">false </span>=&gt; <span class="kw">return </span>(<span class="number">0</span>..<span class="number">4</span>).chain(empty()).chain(<span class="number">4</span>..<span class="number">8</span>),
+    }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::iter::%7Bempty,+once%7D;%0A++++//+This+won't+compile+because+all+possible+returns+from+the+function%0A++++//+must+have+the+same+concrete+type.%0A++++fn+make_iter(do_insert:+bool)+-%3E+impl+Iterator%3CItem+=+i32%3E+%7B%0A++++++++//+Explicit+returns+to+illustrate+return+types+not+matching%0A++++++++match+do_insert+%7B%0A++++++++++++true+=%3E+return+(0..4).chain(once(42)).chain(4..8),%0A++++++++++++false+=%3E+return+(0..4).chain(empty()).chain(4..8),%0A++++++++%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<h3 id="collecting-into-option"><a class="doc-anchor" href="#collecting-into-option">§</a>Collecting into <code>Option</code></h3>
+<p><a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> implements the <a href="enum.Option.html#impl-FromIterator%3COption%3CA%3E%3E-for-Option%3CV%3E" title="enum core::option::Option"><code>FromIterator</code></a> trait,
+which allows an iterator over <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> values to be collected into an
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> of a collection of each contained value of the original
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> values, or <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> if any of the elements was <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>v = [<span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">8</span>)];
+<span class="kw">let </span>res: <span class="prelude-ty">Option</span>&lt;Vec&lt;<span class="kw">_</span>&gt;&gt; = v.into_iter().collect();
+<span class="macro">assert_eq!</span>(res, <span class="prelude-val">None</span>);
+<span class="kw">let </span>v = [<span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="prelude-val">Some</span>(<span class="number">8</span>)];
+<span class="kw">let </span>res: <span class="prelude-ty">Option</span>&lt;Vec&lt;<span class="kw">_</span>&gt;&gt; = v.into_iter().collect();
+<span class="macro">assert_eq!</span>(res, <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>]));</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+v+=+%5BSome(2),+Some(4),+None,+Some(8)%5D;%0A++++let+res:+Option%3CVec%3C_%3E%3E+=+v.into_iter().collect();%0A++++assert_eq!(res,+None);%0A++++let+v+=+%5BSome(2),+Some(4),+Some(8)%5D;%0A++++let+res:+Option%3CVec%3C_%3E%3E+=+v.into_iter().collect();%0A++++assert_eq!(res,+Some(vec!%5B2,+4,+8%5D));%0A%7D&amp;edition=2024"></a></div>
+<p><a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> also implements the <a href="enum.Option.html#impl-Product%3COption%3CU%3E%3E-for-Option%3CT%3E" title="enum core::option::Option"><code>Product</code></a> and
+<a href="enum.Option.html#impl-Sum%3COption%3CU%3E%3E-for-Option%3CT%3E" title="enum core::option::Option"><code>Sum</code></a> traits, allowing an iterator over <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> values
+to provide the [<code>product</code>][Iterator::product] and
+[<code>sum</code>][Iterator::sum] methods.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>v = [<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)];
+<span class="kw">let </span>res: <span class="prelude-ty">Option</span>&lt;i32&gt; = v.into_iter().sum();
+<span class="macro">assert_eq!</span>(res, <span class="prelude-val">None</span>);
+<span class="kw">let </span>v = [<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">21</span>)];
+<span class="kw">let </span>res: <span class="prelude-ty">Option</span>&lt;i32&gt; = v.into_iter().product();
+<span class="macro">assert_eq!</span>(res, <span class="prelude-val">Some</span>(<span class="number">42</span>));</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+v+=+%5BNone,+Some(1),+Some(2),+Some(3)%5D;%0A++++let+res:+Option%3Ci32%3E+=+v.into_iter().sum();%0A++++assert_eq!(res,+None);%0A++++let+v+=+%5BSome(1),+Some(2),+Some(21)%5D;%0A++++let+res:+Option%3Ci32%3E+=+v.into_iter().product();%0A++++assert_eq!(res,+Some(42));%0A%7D&amp;edition=2024"></a></div>
+<h3 id="modifying-an-option-in-place"><a class="doc-anchor" href="#modifying-an-option-in-place">§</a>Modifying an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> in-place</h3>
+<p>These methods return a mutable reference to the contained value of an
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option&lt;T&gt;</code></a>:</p>
+<ul>
+<li><a href="Option::insert"><code>insert</code></a> inserts a value, dropping any old contents</li>
+<li><a href="Option::get_or_insert"><code>get_or_insert</code></a> gets the current value, inserting a provided
+default value if it is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+<li><a href="Option::get_or_insert_default"><code>get_or_insert_default</code></a> gets the current value, inserting the
+default value of type <code>T</code> (which must implement <a href="../default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a>) if it is
+<a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+<li><a href="Option::get_or_insert_with"><code>get_or_insert_with</code></a> gets the current value, inserting a default
+computed by the provided function if it is <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+</ul>
+<p>These methods transfer ownership of the contained value of an
+<a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>:</p>
+<ul>
+<li><a href="Option::take"><code>take</code></a> takes ownership of the contained value of an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>, if
+any, replacing the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> with <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a></li>
+<li><a href="Option::replace"><code>replace</code></a> takes ownership of the contained value of an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>,
+if any, replacing the <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a> with a <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> containing the
+provided value</li>
+</ul>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Basic pattern matching on <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>msg = <span class="prelude-val">Some</span>(<span class="string">"howdy"</span>);
+
+<span class="comment">// Take a reference to the contained string
+</span><span class="kw">if let </span><span class="prelude-val">Some</span>(m) = <span class="kw-2">&amp;</span>msg {
+    <span class="macro">println!</span>(<span class="string">"{}"</span>, <span class="kw-2">*</span>m);
+}
+
+<span class="comment">// Remove the contained string, destroying the Option
+</span><span class="kw">let </span>unwrapped_msg = msg.unwrap_or(<span class="string">"default message"</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+msg+=+Some(%22howdy%22);%0A++++%0A++++//+Take+a+reference+to+the+contained+string%0A++++if+let+Some(m)+=+%26msg+%7B%0A++++++++println!(%22%7B%7D%22,+*m);%0A++++%7D%0A++++%0A++++//+Remove+the+contained+string,+destroying+the+Option%0A++++let+unwrapped_msg+=+msg.unwrap_or(%22default+message%22);%0A%7D&amp;edition=2024"></a></div>
+<p>Initialize a result to <a href="enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> before a loop:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">enum </span>Kingdom { Plant(u32, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str), Animal(u32, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) }
+
+<span class="comment">// A list of data to search through.
+</span><span class="kw">let </span>all_the_big_things = [
+    Kingdom::Plant(<span class="number">250</span>, <span class="string">"redwood"</span>),
+    Kingdom::Plant(<span class="number">230</span>, <span class="string">"noble fir"</span>),
+    Kingdom::Plant(<span class="number">229</span>, <span class="string">"sugar pine"</span>),
+    Kingdom::Animal(<span class="number">25</span>, <span class="string">"blue whale"</span>),
+    Kingdom::Animal(<span class="number">19</span>, <span class="string">"fin whale"</span>),
+    Kingdom::Animal(<span class="number">15</span>, <span class="string">"north pacific right whale"</span>),
+];
+
+<span class="comment">// We're going to search for the name of the biggest animal,
+// but to start with we've just got `None`.
+</span><span class="kw">let </span><span class="kw-2">mut </span>name_of_biggest_animal = <span class="prelude-val">None</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>size_of_biggest_animal = <span class="number">0</span>;
+<span class="kw">for </span>big_thing <span class="kw">in </span><span class="kw-2">&amp;</span>all_the_big_things {
+    <span class="kw">match </span><span class="kw-2">*</span>big_thing {
+        Kingdom::Animal(size, name) <span class="kw">if </span>size &gt; size_of_biggest_animal =&gt; {
+            <span class="comment">// Now we've found the name of some big animal
+            </span>size_of_biggest_animal = size;
+            name_of_biggest_animal = <span class="prelude-val">Some</span>(name);
+        }
+        Kingdom::Animal(..) | Kingdom::Plant(..) =&gt; ()
+    }
+}
+
+<span class="kw">match </span>name_of_biggest_animal {
+    <span class="prelude-val">Some</span>(name) =&gt; <span class="macro">println!</span>(<span class="string">"the biggest animal is {name}"</span>),
+    <span class="prelude-val">None </span>=&gt; <span class="macro">println!</span>(<span class="string">"there are no animals :("</span>),
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++enum+Kingdom+%7B+Plant(u32,+%26'static+str),+Animal(u32,+%26'static+str)+%7D%0A++++%0A++++//+A+list+of+data+to+search+through.%0A++++let+all_the_big_things+=+%5B%0A++++++++Kingdom::Plant(250,+%22redwood%22),%0A++++++++Kingdom::Plant(230,+%22noble+fir%22),%0A++++++++Kingdom::Plant(229,+%22sugar+pine%22),%0A++++++++Kingdom::Animal(25,+%22blue+whale%22),%0A++++++++Kingdom::Animal(19,+%22fin+whale%22),%0A++++++++Kingdom::Animal(15,+%22north+pacific+right+whale%22),%0A++++%5D;%0A++++%0A++++//+We're+going+to+search+for+the+name+of+the+biggest+animal,%0A++++//+but+to+start+with+we've+just+got+%60None%60.%0A++++let+mut+name_of_biggest_animal+=+None;%0A++++let+mut+size_of_biggest_animal+=+0;%0A++++for+big_thing+in+%26all_the_big_things+%7B%0A++++++++match+*big_thing+%7B%0A++++++++++++Kingdom::Animal(size,+name)+if+size+%3E+size_of_biggest_animal+=%3E+%7B%0A++++++++++++++++//+Now+we've+found+the+name+of+some+big+animal%0A++++++++++++++++size_of_biggest_animal+=+size;%0A++++++++++++++++name_of_biggest_animal+=+Some(name);%0A++++++++++++%7D%0A++++++++++++Kingdom::Animal(..)+%7C+Kingdom::Plant(..)+=%3E+()%0A++++++++%7D%0A++++%7D%0A++++%0A++++match+name_of_biggest_animal+%7B%0A++++++++Some(name)+=%3E+println!(%22the+biggest+animal+is+%7Bname%7D%22),%0A++++++++None+=%3E+println!(%22there+are+no+animals+:(%22),%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<div class="footnotes"><hr><ol><li id="fn1"><p>this remains true for any argument/return types and any other ABI: <code>extern "abi" fn</code> (<em>e.g.</em>, <code>extern "system" fn</code>)&nbsp;<a href="#fnref1">↩</a></p></li></ol></div></div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Item.html" title="struct core::option::Item">Item</a><span title="Restricted Visibility">&nbsp;🔒</span> </dt><dt><a class="struct" href="struct.Iter.html" title="struct core::option::Iter">Iter</a></dt><dd>An iterator over a reference to the <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> variant of an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>.</dd><dt><a class="struct" href="struct.IterMut.html" title="struct core::option::IterMut">IterMut</a></dt><dd>An iterator over a mutable reference to the <a href="enum.Option.html#variant.Some" title="variant core::option::Option::Some"><code>Some</code></a> variant of an <a href="enum.Option.html" title="enum core::option::Option"><code>Option</code></a>.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Option.html" title="enum core::option::Option">Option</a></dt><dd>The <code>Option</code> type. See <a href="index.html" title="mod core::option">the module level documentation</a> for more.</dd></dl></section></div></main></body></html>

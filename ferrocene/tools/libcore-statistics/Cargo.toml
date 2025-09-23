@@ -11,4 +11,4 @@ rustdoc-types = "0.55"
 serde_json = "1"
 syn = { version = "2", default-features = false, features = ["derive", "parsing"] }
 tempfile = "3"
-tokei = "12"
+tokei = { version = "12", default-features = true }

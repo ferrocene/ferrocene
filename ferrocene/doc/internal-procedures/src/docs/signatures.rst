@@ -35,6 +35,13 @@ We developed a small wrapper around the "cosign" tool to make it easy to
 sign our qualification documents. Cosign is fully managed by the Ferrocene build
 system: you don't need to install it manually.
 
+First, ensure your Git submodules are up to date, to ensure the right versions of
+submodules are used:
+
+.. code-block:: text
+
+   git submodule update --init
+
 To sign all of the Ferrocene documents, :ref:`authenticate with AWS <aws-auth>`
 (if you haven't done so today) and run:
 

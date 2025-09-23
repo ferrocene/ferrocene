@@ -27,6 +27,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     }
 
     cargo.rustflag("-Cinstrument-coverage");
+    // cargo.rustflag("-Zcoverage-options=condition");
 }
 
 pub(crate) fn measure_coverage(
@@ -102,10 +103,9 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
                 let path = res.expect("cannot inspect deps file").path();
 
                 #[cfg(target_os = "windows")]
-                let is_executable = path.extension().is_some_and(|e| e == "exe");
+                let is_executable = path.extension().is_some_and(|e| e == "exe" || e == "dll");
                 #[cfg(target_family = "unix")]
                 let is_executable = path.is_file() /* directories can have the executable flag set */
-                    && path.extension().is_none() /* filter `.so` files */
                     && (path.metadata().expect("cannot fetch metadata for deps file").permissions().mode() & 0o111 != 0);
 
                 if is_executable {

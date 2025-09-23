@@ -1019,6 +1019,7 @@ impl<'a> Builder<'a> {
                 llvm::Enzyme,
                 llvm::CrtBeginEnd,
                 crate::ferrocene::tool::SelfTest,
+                crate::ferrocene::tool::SymbolReport,
                 crate::ferrocene::tool::flip_link::FlipLink,
                 tool::FerroceneGenerateTarball,
                 tool::FerroceneTraceabilityMatrix,
@@ -1262,6 +1263,7 @@ impl<'a> Builder<'a> {
             Kind::Run => describe!(
                 crate::ferrocene::run::coverage_of_subset::CoverageForSubset,
                 crate::ferrocene::run::TraceabilityMatrix,
+                crate::ferrocene::run::CertifiedCoreSymbols,
                 run::BuildManifest,
                 run::BumpStage0,
                 run::ReplaceVersionPlaceholder,

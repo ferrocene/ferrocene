@@ -1,17 +1,17 @@
 use super::mystd::ffi::OsStr;
 use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::Path;
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
+use super::{Context, Endian, EndianSlice, Mapping, Stash, gimli};
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::ops::Deref;
 use core::str;
-use object::read::archive::ArchiveFile;
-use object::read::xcoff::{FileHeader, SectionHeader, XcoffFile, XcoffSymbol};
 use object::Object as _;
 use object::ObjectSection as _;
 use object::ObjectSymbol as _;
 use object::SymbolFlags;
+use object::read::archive::ArchiveFile;
+use object::read::xcoff::{FileHeader, SectionHeader, XcoffFile, XcoffSymbol};
 
 #[cfg(target_pointer_width = "32")]
 type Xcoff = object::xcoff::FileHeader32;

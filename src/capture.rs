@@ -1,9 +1,9 @@
 #![allow(clippy::from_over_into)]
 
+use crate::PrintFmt;
 #[cfg(feature = "serde")]
 use crate::resolve;
-use crate::PrintFmt;
-use crate::{resolve_frame, trace, BacktraceFmt, Symbol, SymbolName};
+use crate::{BacktraceFmt, Symbol, SymbolName, resolve_frame, trace};
 use core::ffi::c_void;
 use std::fmt;
 use std::path::{Path, PathBuf};

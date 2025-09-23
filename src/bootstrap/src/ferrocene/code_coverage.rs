@@ -14,7 +14,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
-use crate::{BootstrapCommand, Compiler, GitRepo, Mode, RemapScheme, t};
+use crate::{BootstrapCommand, Compiler, DocTests, GitRepo, Mode, RemapScheme, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -24,7 +24,35 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
         exit!(1);
     }
 
+    cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
+    cargo.rustflag("--cfg=ferrocene_coverage");
+    cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
+
+    // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
+    // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
+    // fetch profiler_builtins from somewhere else.
+    //
+    // Thankfully profiler_builtins is built as part of building the sysroot, so it will be
+    // placed in the `deps` directory inside of Cargo's target directory. In theory this
+    // would result in Cargo picking it up automatically, but in practice it doesn't.
+    //
+    // Turns out that Cargo passes `-L dependency=$target_dir/deps` to rustc instead of
+    // just `-L $target_dir/deps`. The `dependency=` prefix causes rustc to only load
+    // explicit dependencies from that directory, not implicitly injected crates.
+    //
+    // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
+    // the location of profiler_builtins without the `dependency=` prefix.
+    let compiler = builder.compiler(
+        // Note that for the standard library, stage 1 is tested when either --stage 1 or
+        // --stage 2 are passed.
+        1,
+        builder.host_target,
+    );
+    let target_dir =
+        builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
+
+    cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 }
 
 pub(crate) fn measure_coverage(
@@ -96,8 +124,22 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
-            for res in std::fs::read_dir(out_dir).expect("cannot read deps directory") {
-                let path = res.expect("cannot inspect deps file").path();
+
+            let res_doctest_bins = std::fs::read_dir(&paths.doctests_bins_dir);
+
+            let doctests_bins = (builder.doc_tests != DocTests::No)
+                .then(|| t!(res_doctest_bins, "cannot read doctests bins directory"))
+                .into_iter()
+                .flat_map(|read_dir| read_dir)
+                .flat_map(|res| {
+                    let path = t!(res, "cannot inspect doctest bin directory").path();
+                    t!(std::fs::read_dir(path), "cannot read doctest bin directory").into_iter()
+                });
+
+            for res in
+                t!(std::fs::read_dir(out_dir), "cannot read deps directory").chain(doctests_bins)
+            {
+                let path = t!(res, "cannot inspect deps file").path();
 
                 #[cfg(target_os = "windows")]
                 let is_executable = path.extension().is_some_and(|e| e == "exe");
@@ -110,6 +152,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
                     instrumented_binaries.push(path);
                 }
             }
+
             assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
             instrumented_binaries
         }
@@ -171,6 +214,11 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             metadata,
         });
     }
+
+    if builder.doc_tests != DocTests::No {
+        // Remove the doctest binaries so they're not distributed afterwards.
+        t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -179,16 +227,16 @@ pub(crate) struct CoverageState {
     compiler: Compiler,
     coverage_for: FerroceneCoverageFor,
 }
-
-struct Paths {
+pub(crate) struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
     lcov_file: PathBuf,
     metadata_file: PathBuf,
+    pub(crate) doctests_bins_dir: PathBuf,
 }
 
 impl Paths {
-    fn find(
+    pub(crate) fn find(
         builder: &Builder<'_>,
         target: TargetSelection,
         coverage_for: FerroceneCoverageFor,
@@ -200,6 +248,7 @@ impl Paths {
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
             lcov_file: out_dir.join(format!("lcov-{name}.info")),
             metadata_file: out_dir.join(format!("metadata-{name}.json")),
+            doctests_bins_dir: out_dir.join("doctests-bins"),
         }
     }
 

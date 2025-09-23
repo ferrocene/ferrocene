@@ -33,17 +33,12 @@ fn main() -> Result<(), Error> {
         std::fs::create_dir_all(&out_dir)?;
     }
 
-    // TODO: CLI arg to switch between modes
-    if false {
-        functions_tsv(&collector, &out_dir)?;
-        types_tsv(&collector, &out_dir)?;
-        traits_tsv(&collector, &out_dir)?;
-        items_tsv(&collector, &out_dir)?;
-        macros_tsv(&collector, out_dir)?;
-    } else {
-        // TODO: destructure collector and pass fields to functions
-        certified_subset_tsv(&mut collector, &out_dir)?;
-    }
+    // _functions_tsv(&collector, &out_dir)?;
+    // _types_tsv(&collector, &out_dir)?;
+    // _traits_tsv(&collector, &out_dir)?;
+    // _items_tsv(&collector, &out_dir)?;
+    // _macros_tsv(&collector, out_dir)?;
+    certified_subset_tsv(&mut collector, &out_dir)?;
 
     Ok(())
 }
@@ -153,7 +148,7 @@ fn safety_constraint(function: &stats::Function) -> &'static str {
     }
 }
 
-fn functions_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
+fn _functions_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut functions = TSV::new(
         &out_dir.join("functions.tsv"),
         [
@@ -196,7 +191,7 @@ fn functions_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Er
     Ok(())
 }
 
-fn types_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
+fn _types_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut types = TSV::new(
         &out_dir.join("types.tsv"),
         [
@@ -238,7 +233,7 @@ fn types_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error>
     Ok(())
 }
 
-fn traits_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
+fn _traits_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut traits = TSV::new(
         &out_dir.join("traits.tsv"),
         [
@@ -274,7 +269,7 @@ fn traits_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error
     Ok(())
 }
 
-fn items_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
+fn _items_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut items = TSV::new(
         &out_dir.join("items.tsv"),
         [
@@ -304,7 +299,7 @@ fn items_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error>
     Ok(())
 }
 
-fn macros_tsv(collector: &StatsCollector, out_dir: PathBuf) -> Result<(), Error> {
+fn _macros_tsv(collector: &StatsCollector, out_dir: PathBuf) -> Result<(), Error> {
     let mut macros = TSV::new(
         &out_dir.join("macros.tsv"),
         [

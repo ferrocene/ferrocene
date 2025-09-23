@@ -40,6 +40,6 @@ build/$target/json-doc/core.json
 ### rustdoc JSON for certified libcore subset
 
 ```console
-$ git switch libcore-cert
+$ cd path/to/ferrocene_or_rust
 $ ./x doc --json library/core --set rust.std-features="['certified_subset']"
 ```

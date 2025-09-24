@@ -204,19 +204,16 @@ pub struct TestProps {
     /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
-<<<<<<< HEAD
-    // Flag to execute the test within a temporary directory
-    pub ferrocene_execute_in_temp: bool,
-=======
     /// Add these flags to the build of `minicore`.
     pub core_stubs_compile_flags: Vec<String>,
     /// Whether line annotatins are required for the given error kind.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub dont_require_annotations: HashSet<ErrorKind>,
     /// Whether pretty printers should be disabled in gdb.
     pub disable_gdb_pretty_printers: bool,
     /// Compare the output by lines, rather than as a single string.
     pub compare_output_by_lines: bool,
+    // Flag to execute the test within a temporary directory
+    pub ferrocene_execute_in_temp: bool,
 }
 
 mod directives {
@@ -325,14 +322,11 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
-<<<<<<< HEAD
-            ferrocene_execute_in_temp: false,
-=======
             core_stubs_compile_flags: vec![],
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             dont_require_annotations: Default::default(),
             disable_gdb_pretty_printers: false,
             compare_output_by_lines: false,
+            ferrocene_execute_in_temp: false,
         }
     }
 

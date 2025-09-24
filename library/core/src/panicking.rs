@@ -43,16 +43,10 @@ pub(crate) type PanicFmt<'a> = fmt::Arguments<'a>;
 pub(crate) type PanicFmt<'a> = &'a &'static str;
 
 #[cfg(feature = "panic_immediate_abort")]
-<<<<<<< HEAD
-// blocked on `assert`
-#[cfg(not(feature = "ferrocene_certified"))]
-const _: () = assert!(cfg!(panic = "abort"), "panic_immediate_abort requires -C panic=abort");
-=======
 compile_error!(
     "panic_immediate_abort is now a real panic strategy! \
     Enable it with the compiler flags `-Zunstable-options -Cpanic=immediate-abort`"
 );
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // First we define the two main entry points that all panics go through.
 // In the end both are just convenience wrappers around `panic_impl`.
@@ -71,13 +65,9 @@ compile_error!(
 #[lang = "panic_fmt"] // needed for const-evaluated panics
 #[rustc_do_not_const_check] // hooked by const-eval
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-<<<<<<< HEAD
+// Ferrocene change: `fmt` is a type alias to accomodate certified core
 pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
-    if cfg!(feature = "panic_immediate_abort") {
-=======
-pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
     if cfg!(panic = "immediate-abort") {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         super::intrinsics::abort()
     }
 

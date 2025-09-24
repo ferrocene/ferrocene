@@ -1468,8 +1468,8 @@ pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) 
     radix <= 16 && digits.len() <= size_of::<T>() * 2 - is_signed_ty as usize
 }
 
-#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
-#[cfg_attr(feature = "panic_immediate_abort", inline)]
+#[cfg_attr(not(panic = "immediate-abort"), inline(never))]
+#[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
 #[cfg(not(feature = "ferrocene_certified"))]

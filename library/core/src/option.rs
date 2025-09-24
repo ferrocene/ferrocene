@@ -2185,8 +2185,8 @@ impl<T, E> Option<Result<T, E>> {
     }
 }
 
-#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
-#[cfg_attr(feature = "panic_immediate_abort", inline)]
+#[cfg_attr(not(panic = "immediate-abort"), inline(never))]
+#[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -2195,8 +2195,8 @@ const fn unwrap_failed() -> ! {
 }
 
 // This is a separate function to reduce the code size of .expect() itself.
-#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
-#[cfg_attr(feature = "panic_immediate_abort", inline)]
+#[cfg_attr(not(panic = "immediate-abort"), inline(never))]
+#[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
 #[cfg(not(feature = "ferrocene_certified"))]

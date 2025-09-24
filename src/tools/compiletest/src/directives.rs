@@ -204,8 +204,14 @@ pub struct TestProps {
     /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
+<<<<<<< HEAD
     // Flag to execute the test within a temporary directory
     pub ferrocene_execute_in_temp: bool,
+=======
+    /// Add these flags to the build of `minicore`.
+    pub core_stubs_compile_flags: Vec<String>,
+    /// Whether line annotatins are required for the given error kind.
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub dont_require_annotations: HashSet<ErrorKind>,
     /// Whether pretty printers should be disabled in gdb.
     pub disable_gdb_pretty_printers: bool,
@@ -258,6 +264,7 @@ mod directives {
     pub const FILECHECK_FLAGS: &'static str = "filecheck-flags";
     pub const NO_AUTO_CHECK_CFG: &'static str = "no-auto-check-cfg";
     pub const ADD_CORE_STUBS: &'static str = "add-core-stubs";
+    pub const CORE_STUBS_COMPILE_FLAGS: &'static str = "core-stubs-compile-flags";
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
     pub const DISABLE_GDB_PRETTY_PRINTERS: &'static str = "disable-gdb-pretty-printers";
@@ -318,7 +325,11 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
+<<<<<<< HEAD
             ferrocene_execute_in_temp: false,
+=======
+            core_stubs_compile_flags: vec![],
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             dont_require_annotations: Default::default(),
             disable_gdb_pretty_printers: false,
             compare_output_by_lines: false,
@@ -665,6 +676,21 @@ impl TestProps {
                     config.set_name_directive(ln, NO_AUTO_CHECK_CFG, &mut self.no_auto_check_cfg);
 
                     self.update_add_core_stubs(ln, config);
+
+                    if let Some(flags) = config.parse_name_value_directive(
+                        ln,
+                        directives::CORE_STUBS_COMPILE_FLAGS,
+                        testfile,
+                        line_number,
+                    ) {
+                        let flags = split_flags(&flags);
+                        for flag in &flags {
+                            if flag == "--edition" || flag.starts_with("--edition=") {
+                                panic!("you must use `//@ edition` to configure the edition");
+                            }
+                        }
+                        self.core_stubs_compile_flags.extend(flags);
+                    }
 
                     if let Some(err_kind) = config.parse_name_value_directive(
                         ln,

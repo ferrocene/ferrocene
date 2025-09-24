@@ -14,7 +14,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
-use crate::{BootstrapCommand, Compiler, GitRepo, Mode, RemapScheme, t};
+use crate::{BootstrapCommand, Compiler, DocTests, GitRepo, Mode, RemapScheme, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -47,11 +47,11 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
         // Note that for the standard library, stage 1 is tested when either --stage 1 or
         // --stage 2 are passed.
         1,
-        builder.host_target
+        builder.host_target,
     );
     let target_dir =
         builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
-    
+
     cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 }
 
@@ -124,12 +124,19 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
-            let doctests_bins = std::fs::read_dir(paths.doctests_bins_dir)
-                .expect("cannot read doctests bins directory")
-                .flat_map(|res| {
+
+            let res_doctest_bins = std::fs::read_dir(paths.doctests_bins_dir);
+
+            if builder.doc_tests != DocTests::No && res_doctest_bins.is_err() {
+                panic!("cannot read doctests bins directory")
+            }
+
+            let doctests_bins = res_doctest_bins.ok().into_iter().flat_map(|read_dir| {
+                read_dir.flat_map(|res| {
                     let path = res.expect("cannot inspect doctest bin directory").path();
                     std::fs::read_dir(path).expect("cannot read doctest bin directory")
-                });
+                })
+            });
 
             for res in
                 std::fs::read_dir(out_dir).expect("cannot read deps directory").chain(doctests_bins)

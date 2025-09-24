@@ -48,7 +48,7 @@ You will need access to the following tools to be able to work on Ferrocene:
      - GitHub
      - CI/CD
    * - `Customer portal <https://customers.ferrocene.dev>`_
-     - Individual account
+     - Individual account, ask the :doc:`Technical Lead <qualification-plan:organization>`
      - Access to `rendered documentation <https://docs.ferrocene.dev>`_ and `releases <https://releases.ferrocene.dev>`_
 
 Depending on your tasks, you might also need access to:

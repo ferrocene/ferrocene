@@ -813,7 +813,7 @@ impl Display for BorrowMutError {
 }
 
 // This ensures the panicking code is outlined from `borrow_mut` for `RefCell`.
-#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
+#[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -826,7 +826,7 @@ const fn panic_already_borrowed(err: BorrowMutError) -> ! {
 }
 
 // This ensures the panicking code is outlined from `borrow` for `RefCell`.
-#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
+#[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Cpanic
-//~? ERROR requires either `unwind` or `abort`
+//~? ERROR requires either `unwind`, `abort`, or `immediate-abort`
 
 fn main() {}
 

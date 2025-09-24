@@ -43,7 +43,11 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     //
     // To fix the problem, we add our own `--extern` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins.
-    let compiler = builder.compiler(builder.top_stage, builder.host_target);
+    let compiler = builder.compiler(
+        // Avoid a cycle while assembling the stage2 sysroot
+        if builder.top_stage == 2 { 1 } else { builder.top_stage },
+        builder.host_target
+    );
     let target_dir =
         builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
     

@@ -2,5 +2,5 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 [files]
-"pinned.toml" = "809313ac-a02c-4318-9506-25b78a221b2e"
-"safety-manager.cosign-bundle" = "b869709b-c8cd-461c-b575-479ea2909e97"
+"pinned.toml" = "a7f2846a-631c-4022-b8fb-140162e42791"
+"safety-manager.cosign-bundle" = "b5f9cec7-42d6-4d0b-be7b-fc53bda4047b"

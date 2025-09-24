@@ -38,6 +38,7 @@ pub enum ToolArtifactKind {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
+// Ferrocene addition: pub(crate) for use in ferrocene::tool::SymbolReport
 pub(crate) struct ToolBuild {
     /// Compiler that will build this tool.
     pub(crate) build_compiler: Compiler,

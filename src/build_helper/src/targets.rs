@@ -5,7 +5,7 @@
 // NOTE: this is pulled out to `build_helpers` to share this hack between `bootstrap` and
 // `compiletest`.
 pub fn target_supports_std(target_tuple: &str) -> bool {
-    !(dbg!(target_tuple).contains("-none")
+    !(target_tuple.contains("-none")
         || target_tuple.contains("lynxos178") // Ferrocene addition
         || target_tuple.contains("ferrocene.certified") // Ferrocene addition
         || target_tuple.contains("nvptx")

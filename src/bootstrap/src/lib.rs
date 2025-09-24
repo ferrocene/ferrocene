@@ -1493,7 +1493,7 @@ impl Build {
 
     /// Returns `true` if this is a no-std `target`, if defined
     fn no_std(&self, target: TargetSelection) -> Option<bool> {
-        self.config.target_config.get(&target).map(|t| dbg!(t).no_std)
+        self.config.target_config.get(&target).map(|t| t.no_std)
     }
 
     /// Returns `true` if the target will be tested using the `remote-test-client`

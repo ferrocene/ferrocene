@@ -118,8 +118,8 @@ impl Step for TraceabilityMatrix {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols {
-    build_compiler: Compiler,
-    target: TargetSelection,
+    pub(super) build_compiler: Compiler,
+    pub(super) target: TargetSelection,
 }
 
 impl Step for CertifiedCoreSymbols {
@@ -154,11 +154,11 @@ impl Step for CertifiedCoreSymbols {
             certified_target,
             Kind::Check,
         );
-        std_cargo(builder, certified_target, &mut cargo);
-        let crates = vec!["core"];  // currently, only core is certified
+        let crates = vec!["core".to_owned()];  // currently, only core is certified
         for krate in &*crates {
             cargo.arg("-p").arg(krate);
         }
+        std_cargo(builder, certified_target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);
         let report = builder.cargo_out(build_compiler, Mode::Std, certified_target).join("symbol-report.txt");
         cargo.env("SYMBOL_REPORT_OUT", &report);

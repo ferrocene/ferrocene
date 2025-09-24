@@ -16,6 +16,7 @@ use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
+use crate::ferrocene::run::CertifiedCoreSymbols;
 use crate::{BootstrapCommand, Compiler, DocTests, GitRepo, Mode, RemapScheme, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
@@ -176,6 +177,12 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     builder.info("Generating rustdoc-json for the certified libcore subset");
     builder.ensure(CertifiedApiDocs { target: builder.config.host_target, format: DocumentationFormat::Json });
+
+    builder.info("Listing symbols for the certified libcore subset");
+    builder.ensure(CertifiedCoreSymbols {
+        build_compiler: builder.compiler(builder.top_stage.max(1), builder.config.host_target),
+        target: builder.config.host_target
+    });
 
     builder.info("Generating lcov dump of the code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));

@@ -118,7 +118,16 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
-            for res in std::fs::read_dir(out_dir).expect("cannot read deps directory") {
+            let doctests_bins = std::fs::read_dir(paths.doctests_bins_dir)
+                .expect("cannot read doctests bins directory")
+                .flat_map(|res| {
+                    let path = res.expect("cannot inspect doctest bin directory").path();
+                    std::fs::read_dir(path).expect("cannot read doctest bin directory")
+                });
+
+            for res in
+                std::fs::read_dir(out_dir).expect("cannot read deps directory").chain(doctests_bins)
+            {
                 let path = res.expect("cannot inspect deps file").path();
 
                 #[cfg(target_os = "windows")]
@@ -132,6 +141,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
                     instrumented_binaries.push(path);
                 }
             }
+
             assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
             instrumented_binaries
         }
@@ -201,16 +211,16 @@ pub(crate) struct CoverageState {
     compiler: Compiler,
     coverage_for: FerroceneCoverageFor,
 }
-
-struct Paths {
+pub(crate) struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
     lcov_file: PathBuf,
     metadata_file: PathBuf,
+    pub(crate) doctests_bins_dir: PathBuf,
 }
 
 impl Paths {
-    fn find(
+    pub(crate) fn find(
         builder: &Builder<'_>,
         target: TargetSelection,
         coverage_for: FerroceneCoverageFor,
@@ -222,6 +232,7 @@ impl Paths {
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
             lcov_file: out_dir.join(format!("lcov-{name}.info")),
             metadata_file: out_dir.join(format!("metadata-{name}.json")),
+            doctests_bins_dir: out_dir.join("doctests-bins"),
         }
     }
 

@@ -30,7 +30,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{
     CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
-use crate::ferrocene::code_coverage::instrument_coverage;
+use crate::ferrocene::code_coverage::{Paths, instrument_coverage};
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
@@ -716,6 +716,9 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, cargo: &mut Car
     cargo.rustdocflag(&html_root);
 
     cargo.rustdocflag("-Zcrate-attr=warn(rust_2018_idioms)");
+
+    let paths = Paths::find(builder, target, FerroceneCoverageFor::Library);
+    cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
 
     instrument_coverage(builder, cargo);
 

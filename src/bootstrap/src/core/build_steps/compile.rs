@@ -717,10 +717,11 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, cargo: &mut Car
 
     cargo.rustdocflag("-Zcrate-attr=warn(rust_2018_idioms)");
 
-    let paths = Paths::find(builder, target, FerroceneCoverageFor::Library);
-    cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
-
-    instrument_coverage(builder, cargo);
+    if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library) {
+        let paths = Paths::find(builder, target, FerroceneCoverageFor::Library);
+        cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
+        instrument_coverage(builder, cargo);
+    }
 
     // ferrocene addition: `cfg` used to adapt libstd to our "secret sauce" libc
     if target.contains("facade") {

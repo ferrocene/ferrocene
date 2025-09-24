@@ -43,12 +43,16 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     //
     // To fix the problem, we add our own `--extern` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins.
-    let compiler = builder.compiler(1, builder.host_target);
+    let compiler = builder.compiler(builder.top_stage, builder.host_target);
     let target_dir =
         builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
     
+    // Sometimes we do not have a target_dir yet, in this case we can't add the extern flag
     let mut needle = None;
-    for hay in std::fs::read_dir(target_dir).unwrap() {
+    let Ok(read_dir) = std::fs::read_dir(target_dir) else {
+        return
+    };
+    for hay in read_dir {
         let hay = hay.unwrap().path();
         let hay_file = hay.file_name().unwrap().to_str().unwrap();
         if !hay_file.ends_with(".rlib") {

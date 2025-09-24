@@ -17,24 +17,28 @@ use rustc_middle::ty::TyCtxt;
 use rustc_session::config::ErrorOutputType;
 use rustc_session::EarlyDiagCtxt;
 use rustc_span::FileNameDisplayPreference;
-use rustc_span::def_id::LOCAL_CRATE;
-use rustc_middle::ty::print::with_no_trimmed_paths;
+use rustc_middle::ty::print::{with_no_trimmed_paths, with_resolve_crate_name, with_no_visible_paths};
 
-struct LoadCoreSymbols {
-    out: Box<dyn Write + Send>,
-}
+struct LoadCoreSymbols;
 
 impl Callbacks for LoadCoreSymbols {
     fn after_expansion(&mut self, _: &Compiler, tcx: TyCtxt<'_>) -> Compilation {
-        let krate = tcx.crate_name(LOCAL_CRATE).to_string();
+        // NOTE: this can't be in main because it shouldn't execute when only running
+        // --print=file-names
+        let mut out = match std::env::var("SYMBOL_REPORT_OUT") {
+            Ok(p) => Box::new(File::create(&p).expect(&format!("could not create file {p}")))
+                as Box<dyn Write + Send>,
+            Err(_) => Box::new(io::stdout()) as _,
+        };
+
         for def in tcx.hir_crate_items(()).definitions() {
             if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&tcx.def_kind(def)) {
                 continue;
             }
-            let path = with_no_trimmed_paths!(format!("{}::{}", krate, tcx.def_path_str(def)));
+            let path = with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))));
             let span = tcx.def_span(def);
             let lines = tcx.sess.source_map().span_to_lines(span).expect("failed to look up span");
-            writeln!(self.out, "{path} @ {}:{}-{}",
+            writeln!(out, "{path} @ {}:{}-{}",
                 lines.file.name.display(FileNameDisplayPreference::Local),
                 lines.lines.first().unwrap().line_index,
                 lines.lines.last().unwrap().line_index,
@@ -51,15 +55,9 @@ fn main() {
     );
     let handler = EarlyDiagCtxt::new(ErrorOutputType::default());
     rustc_driver::init_rustc_env_logger(&handler);
-    let out = match std::env::var("SYMBOL_REPORT_OUT") {
-        Ok(p) => Box::new(File::create(&p).expect(&format!("could not create file {p}")))
-            as Box<dyn Write + Send>,
-        Err(_) => Box::new(io::stdout()) as _,
-    };
-    let mut printer = LoadCoreSymbols { out };
     std::process::exit(rustc_driver::catch_with_exit_code(move || {
         let args: Vec<String> = std::env::args().collect();
-        rustc_driver::run_compiler(&args, &mut printer)
+        rustc_driver::run_compiler(&args, &mut LoadCoreSymbols)
     }))
 }
 

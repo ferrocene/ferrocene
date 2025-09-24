@@ -41,12 +41,29 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     // just `-L $target_dir/deps`. The `dependency=` prefix causes rustc to only load
     // explicit dependencies from that directory, not implicitly injected crates.
     //
-    // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
-    // the location of profiler_builtins without the `dependency=` prefix.
+    // To fix the problem, we add our own `--extern` flag to the Cargo invocation, pointing to
+    // the location of profiler_builtins.
     let compiler = builder.compiler(1, builder.host_target);
     let target_dir =
         builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
-    cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
+    
+    let mut needle = None;
+    for hay in std::fs::read_dir(target_dir).unwrap() {
+        let hay = hay.unwrap().path();
+        let hay_file = hay.file_name().unwrap().to_str().unwrap();
+        if !hay_file.ends_with(".rlib") {
+            continue
+        }
+        if hay_file.starts_with("libprofiler_builtins") {
+            needle = Some(hay);
+        }
+    }
+    let Some(needle) = needle else {
+        panic!("No libprofiler_builtins found for `--extern libprofiler_builtins=...` arg");
+    };
+
+    cargo.rustflag("--extern");
+    cargo.rustflag(&format!("profiler_builtins={}", needle.display()));
 }
 
 pub(crate) fn measure_coverage(

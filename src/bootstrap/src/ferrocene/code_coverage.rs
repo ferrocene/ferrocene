@@ -44,8 +44,9 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins without the `dependency=` prefix.
     let compiler = builder.compiler(
-        // Avoid a cycle while assembling the stage2 sysroot
-        if builder.top_stage == 2 { 1 } else { builder.top_stage },
+        // Note that for the standard library, stage 1 is tested when either --stage 1 or
+        // --stage 2 are passed.
+        1,
         builder.host_target
     );
     let target_dir =

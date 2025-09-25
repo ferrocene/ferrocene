@@ -1351,9 +1351,10 @@ impl f64 {
     /// }
     /// ```
     #[stable(feature = "total_cmp", since = "1.62.0")]
+    #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     #[must_use]
     #[inline]
-    pub fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {
+    pub const fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {
         let mut left = self.to_bits() as i64;
         let mut right = other.to_bits() as i64;
 
@@ -1447,8 +1448,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
     pub const fn abs(self) -> f64 {
-        // SAFETY: this is actually a safe intrinsic
-        unsafe { intrinsics::fabsf64(self) }
+        intrinsics::fabsf64(self)
     }
 
     /// Returns a number that represents the sign of `self`.
@@ -1506,8 +1506,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
     pub const fn copysign(self, sign: f64) -> f64 {
-        // SAFETY: this is actually a safe intrinsic
-        unsafe { intrinsics::copysignf64(self, sign) }
+        intrinsics::copysignf64(self, sign)
     }
 
     /// Float addition that allows optimizations based on algebraic rules.

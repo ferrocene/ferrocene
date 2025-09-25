@@ -18,6 +18,106 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.89.0
+-------------------------------
+
+- `Stabilize explicitly inferred const arguments (feature(generic_arg_infer)) <https://github.com/rust-lang/rust/pull/141610>`_
+
+  - New paragraphs:
+
+    - :p:`fls_reASCId0i117`
+    - :p:`fls_Ft5rGeL7QwJM`
+    - :p:`fls_7epZNsTYNmgE`
+    - :p:`fls_TvuMMQnR0drL`
+
+  - Changed paragraph: :p:`fls_imr2jx6cbuzq`
+
+- `Add a warn-by-default mismatched_lifetime_syntaxes lint <https://github.com/rust-lang/rust/pull/138677>`_.
+  This lint detects when the same lifetime is referred to by different syntax categories between function arguments and return values, which can be confusing to read, especially in unsafe code.
+  This lint supersedes the warn-by-default ``elided_named_lifetimes`` lint.
+
+  - No change: lints are not part of the FLS
+
+- `Expand unpredictable_function_pointer_comparisons to also lint on function pointer comparisons in external macros <https://github.com/rust-lang/rust/pull/134536>`_
+
+  - No change: lints are not part of the FLS
+
+- `Make the dangerous_implicit_autorefs lint deny-by-default <https://github.com/rust-lang/rust/pull/141661>`_
+
+  - No change: lints are not part of the FLS
+
+- `Stabilize the avx512 target features <https://github.com/rust-lang/rust/pull/138940>`_
+
+  - Changed syntax: :s:`Feature`
+
+  - New paragraphs:
+
+    - :p:`fls_8HPcvIaahaB9`
+    - :p:`fls_lxcfj6XCKyMh`
+    - :p:`fls_fh7i1Pcmqjdm`
+    - :p:`fls_M9ne2sqhRB5L`
+    - :p:`fls_xWcGvl83bVWC`
+    - :p:`fls_5CVTkOoLHAvW`
+    - :p:`fls_hThb8qn820wJ`
+    - :p:`fls_1T0VYMtG3loD`
+    - :p:`fls_AlBD9ckWKecQ`
+    - :p:`fls_72cwAExPDMQ8`
+    - :p:`fls_pSSIwmUAnUly`
+    - :p:`fls_YOW8lcBQ5lNI`
+    - :p:`fls_8PrvVL6dkr31`
+    - :p:`fls_hKvaSExdlKgd`
+    - :p:`fls_r5KEicrmEGJt`
+    - :p:`fls_Qnx9nNiJeIAX`
+    - :p:`fls_ZrcPWy4pxlTX`
+    - :p:`fls_YW7otDxAliSj`
+    - :p:`fls_G4aOoX8a7i7r`
+    - :p:`fls_HGKiXfM5fGVo`
+    - :p:`fls_gRf8F9PIGySt`
+    - :p:`fls_NNj4H6A9VTR8`
+
+- `Stabilize these target featires for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
+
+  - Changed syntax: :s:`Feature`
+
+  - New paragraphs:
+
+    - :p:`fls_gtoLNHFmmBzd`
+    - :p:`fls_qZO82VdU5Iz9`
+
+- `Stabilize these target features for x86: sha512, sm3, sm4 <https://github.com/rust-lang/rust/pull/140767>`_
+
+  - Changed syntax: :s:`Feature`
+
+  - New paragraphs:
+
+    - :p:`fls_UPhNSZS89sYr`
+    - :p:`fls_HoNwaLtDzwZi`
+    - :p:`fls_VqjfIihpRe9m`
+
+- `Stabilize these LoongArch target features: f, d, frecipe, lasx, lbt, lsx, lvz <https://github.com/rust-lang/rust/pull/135015>`_
+
+  - No change: the target is outside the scope of the FLS
+
+- `Remove i128 and u128 from improper_ctypes_definitions lint <https://github.com/rust-lang/rust/pull/137306>`_
+
+  - No change: lints are not part of the FLS
+
+- `Stabilize repr128 (#[repr(u128), #repr(i128)]) <https://github.com/rust-lang/rust/pull/138285>`_
+
+  - No change: this was erroneously documented as if it was already true
+
+- `Allow #![doc(test(attr(..))) everywhere <https://github.com/rust-lang/rust/pull/140560>`_
+
+  - No change: documentation tests are outside the scope of the FLS
+
+- `Extend temporary lifetime extension to also go through tuple struct and tuple variant constructors <https://github.com/rust-lang/rust/pull/140593>`_
+
+  - New paragraph: :p:`fls_rT33l0YwUGlK`
+
+- `extern "C" functions on the wasm32-unknown-unknown target now have a standards compliant ABI <https://blog.rust-lang.org/2025/04/04/c-abi-changes-for-wasm32-unknown-unknown/>`_
+
+  - No change: the target is outside the scope of the FLS
+
 Language changes in Rust 1.88.0
 -------------------------------
 

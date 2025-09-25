@@ -51,7 +51,7 @@ pub struct ShowCommand {
     debug: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum CoverageStatus {
     Tested,
     Untested,
@@ -66,6 +66,9 @@ struct LineCoverage {
 impl LineCoverage {
     fn len(&self) -> usize {
         self.lines.len()
+    }
+    fn unconsidered(&self) -> usize {
+        self.lines.iter().filter(|(_, s)| matches!(s, CoverageStatus::Ignored)).count()
     }
     fn considered(&self) -> usize {
         self.lines.iter().filter(|(_, s)| !matches!(s, CoverageStatus::Ignored)).count()
@@ -166,10 +169,21 @@ impl ShowCommand {
                     func.lines.lines.last().unwrap().0);
                 unconsidered += 1;
             } else {
-                println!("{}/{} covered ({} lines unconsidered)",
+                let missing = func.lines.lines.iter()
+                    .filter(|(_, status)| *status == CoverageStatus::Untested)
+                    .map(|(linenum, _)| format!("{}:{}", func.filename.display(), linenum))
+                    .collect::<Vec<_>>();
+                println!("{} / {} covered ({} lines unconsidered)\
+                    {}\
+                ",
                     func.lines.tested(),
                     func.lines.considered(),
-                    func.lines.len(),
+                    func.lines.unconsidered(),
+                    if !missing.is_empty() {
+                        format!("\n\tMissing lines:\n\t\t{}\n", missing.join("\n\t\t"))
+                    } else {
+                        "".into()
+                    },
                 );
                 fully_covered += (func.lines.tested() == func.lines.considered()) as usize;
             }

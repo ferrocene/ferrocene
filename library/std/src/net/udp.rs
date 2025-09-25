@@ -8,6 +8,9 @@
         target_os = "trusty",
     ))
 ))]
+#[cfg(not(test))]
+// Ferrocene addition: disabled temporarily as these fail when running the test suite with coverage
+// instrumentation enabled.
 mod tests;
 
 use crate::fmt;

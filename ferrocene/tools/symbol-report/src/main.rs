@@ -7,6 +7,9 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 
+extern crate serde;
+extern crate serde_json;
+
 use std::fs::File;
 use std::io::{self, Write};
 
@@ -19,31 +22,44 @@ use rustc_session::EarlyDiagCtxt;
 use rustc_span::FileNameDisplayPreference;
 use rustc_middle::ty::print::{with_no_trimmed_paths, with_resolve_crate_name, with_no_visible_paths};
 
+#[derive(serde::Serialize)]
+#[serde(transparent)]
+struct Symbols(Vec<Function>);
+
+#[derive(serde::Serialize)]
+struct Function(String, String, usize, usize);
+
 struct LoadCoreSymbols;
 
 impl Callbacks for LoadCoreSymbols {
     fn after_expansion(&mut self, _: &Compiler, tcx: TyCtxt<'_>) -> Compilation {
         // NOTE: this can't be in main because it shouldn't execute when only running
         // --print=file-names
-        let mut out = match std::env::var("SYMBOL_REPORT_OUT") {
+        let out = match std::env::var("SYMBOL_REPORT_OUT") {
             Ok(p) => Box::new(File::create(&p).expect(&format!("could not create file {p}")))
                 as Box<dyn Write + Send>,
             Err(_) => Box::new(io::stdout()) as _,
         };
 
+        let mut symbols = vec![];
         for def in tcx.hir_crate_items(()).definitions() {
-            if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&tcx.def_kind(def)) {
+            let kind = tcx.def_kind(def);
+            if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {
                 continue;
             }
-            let path = with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))));
-            let span = tcx.def_span(def);
+            // TODO: skip associated default functions inherited from the trait
+            // https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/ty/struct.TyCtxt.html#method.provided_trait_methods
+            if kind == DefKind::AssocFn {
+            }
+            let qualified_name = with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))));
+            let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
             let lines = tcx.sess.source_map().span_to_lines(span).expect("failed to look up span");
-            writeln!(out, "{path} @ {}:{}-{}",
-                lines.file.name.display(FileNameDisplayPreference::Local),
-                lines.lines.first().unwrap().line_index,
-                lines.lines.last().unwrap().line_index,
-            ).expect("failed to write output");
+            let filename = lines.file.name.display(FileNameDisplayPreference::Local).to_string();
+            let start = lines.lines.first().unwrap().line_index;
+            let end = lines.lines.last().unwrap().line_index;
+            symbols.push(Function(qualified_name, filename, start + 1, end + 1));
         }
+        serde_json::to_writer(out, &Symbols(symbols)).expect("failed to serialize symbols");
         Compilation::Stop
     }
 }

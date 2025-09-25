@@ -1,15 +1,16 @@
 // Derived from https://github.com/xd009642/llvm-profparser/blob/f12a20d33b371f62a3b63f3a19d2320c25aa48b9/src/bin/cov.rs
 
-#![feature(normalize_lexically)]
-
+#[allow(unused_imports)]
 use anyhow::{Context as _, Result};
 use llvm_profparser::*;
-use rustdoc_types::{Function, Item, ItemEnum, Span};
-use std::fs::{self, File};
 use std::path::PathBuf;
+use std::fs::{self};
 use structopt::StructOpt;
 use tracing_subscriber::filter::filter_fn;
 use tracing_subscriber::{Layer, Registry};
+
+// mod rustdoc;
+mod rustc_driver;
 
 #[derive(Clone, Debug, Eq, PartialEq, StructOpt)]
 pub struct Opts {
@@ -39,8 +40,10 @@ pub struct ShowCommand {
     /// order `source,dest`
     #[structopt(long = "path-equivalence")]
     path_remapping: Option<PathRemapping>,
-    #[structopt(long = "rustdoc-json", short = "j")]
-    rustdoc_json: PathBuf,
+    // #[structopt(long = "rustdoc-json", short = "j")]
+    // rustdoc_json: PathBuf,
+    #[structopt(long = "report", short = "r")]
+    symbol_report: PathBuf,
     #[structopt(long = "ferrocene-src", short = "s")]
     ferrocene: PathBuf,
     /// Turn on debug logging
@@ -75,21 +78,32 @@ impl LineCoverage {
 #[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
-    // symbol_name: String,
+    #[allow(dead_code)]
     filename: PathBuf,
     lines: LineCoverage,
 }
 
-fn get_coverage(report: &CoverageReport, func: &Function, span: Span, ferrocene: &std::path::Path, source_name: String) -> Result<FunctionCoverage> {
-    let Span { mut filename, begin: (start_line, _), end: (end_line, _), .. } = span;
+#[derive(Clone)]
+enum FunctionType {
+    Canonical(String),  // qualified path
+    ProvidedDefault,    // appears in traits
+}
+
+struct Span {
+    filename: PathBuf,
+    start_line: usize,
+    end_line: usize,
+}
+
+fn get_coverage(report: &CoverageReport, span: Span, ferrocene: &std::path::Path, source_name: String) -> Result<FunctionCoverage> {
+    let Span { mut filename, start_line, end_line } = span;
     if filename.is_relative() {
         filename = ferrocene.join(filename);
     }
     let filename = if filename.is_absolute() {
         fs::canonicalize(&filename).context(format!("failed to canonicalize {filename:?}"))
     } else {
-        panic!();
-        // filename.normalize_lexically().context(format!("failed to normalize {filename:?}"))
+        panic!("--ferrocene-src was not absolute")
     }?;
     let source_lines = start_line..=end_line;
     let no_coverage = FunctionCoverage {
@@ -126,9 +140,6 @@ impl ShowCommand {
         if self.debug {
             let _ = enable_debug_logging();
         }
-        let rustdoc: rustdoc_types::Crate = serde_json::from_reader(
-            File::open(&self.rustdoc_json).context(format!("failed to open rustdoc-json file {}", self.rustdoc_json.display()))?
-        )?;
         let instr_prof = if self.instr_profile.len() == 1 {
             parse(&self.instr_profile[0])?
         } else if self.instr_profile.len() > 1 {
@@ -142,21 +153,17 @@ impl ShowCommand {
             report.apply_remapping(remapping);
         }
 
-        let mut coverage = vec![];
-        for item in rustdoc.index.values() {
-            if let ItemEnum::Function(func) = &item.inner {
-                let span = item.span.as_ref().expect("TODO: handle no span for rustdoc-json function");
-                let name = item.name.clone().expect("no name for rustdoc-json function?");
-                coverage.push(get_coverage(&report, func, span.clone(), &self.ferrocene, name)?);
-            }
-        }
-
+        // let coverage = rustdoc::coverage(self, &report)?;
+        let coverage = rustc_driver::coverage(self, &report)?;
         let mut unconsidered = 0;
         let mut fully_covered = 0;
         for func in &coverage {
             print!("{}: ", func.source_name);
             if func.lines.considered() == 0 {
-                println!("BUG: no lines considered");
+                println!("BUG: no lines considered (span: {}:{}-{})",
+                    func.filename.display(),
+                    func.lines.lines.first().unwrap().0,
+                    func.lines.lines.last().unwrap().0);
                 unconsidered += 1;
             } else {
                 println!("{}/{} covered ({} lines unconsidered)",
@@ -169,24 +176,9 @@ impl ShowCommand {
         }
         let total = coverage.len();
         println!("{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions", total - unconsidered - fully_covered);
+        println!("hits for <u8 as PartialOrd>::partial_cmp: {:?}",
+            report.files.get(&self.ferrocene.join("library/core/src/cmp.rs")).unwrap().hits_for_line(1978));
 
-        // for (path, result) in report.files.iter() {
-        //     // Read file to string
-        //     if let Ok(source) = fs::read_to_string(path) {
-        //         if report.files.len() > 1 {
-        //             println!("{}", path.display());
-        //         }
-        //         for (line, source) in source.lines().enumerate() {
-        //             print!("{: >5}|", line + 1);
-        //             if let Some(hits) = result.hits_for_line(line + 1) {
-        //                 println!("{: >7}|{}", hits, source);
-        //             } else {
-        //                 println!("       |{}", source);
-        //             }
-        //         }
-        //         println!();
-        //     }
-        // }
         Ok(())
     }
 }

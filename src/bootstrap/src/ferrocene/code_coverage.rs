@@ -125,7 +125,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
 
-            let res_doctest_bins = std::fs::read_dir(paths.doctests_bins_dir);
+            let res_doctest_bins = std::fs::read_dir(&paths.doctests_bins_dir);
 
             if builder.doc_tests != DocTests::No && res_doctest_bins.is_err() {
                 panic!("cannot read doctests bins directory")
@@ -216,6 +216,9 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             metadata,
         });
     }
+
+    // Remove the doctest binaries so they're not distributed afterwards.
+    t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
 }
 
 #[derive(Debug, PartialEq, Eq)]

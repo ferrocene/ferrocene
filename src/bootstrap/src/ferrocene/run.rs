@@ -160,7 +160,7 @@ impl Step for CertifiedCoreSymbols {
         }
         std_cargo(builder, certified_target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);
-        let report = builder.cargo_out(build_compiler, Mode::Std, certified_target).join("symbol-report.txt");
+        let report = builder.cargo_out(build_compiler, Mode::Std, certified_target).join("symbol-report.json");
         cargo.env("SYMBOL_REPORT_OUT", &report);
 
         let _guard = builder.msg(

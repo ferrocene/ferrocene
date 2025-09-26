@@ -218,7 +218,10 @@ unsafe fn resolve_with_inline(
     Some(())
 }
 
-/// This function is only meant to be called with SymFromAddrW as the argument
+/// This function is only meant to be called with certain Windows API functions as its arguments,
+/// using closures to simplify away here-unspecified arguments:
+/// - `sym_from_addr`: either `SymFromAddrW` or `SymFromInlineContextW`
+/// - `get_line_from_addr`: `SymGetLineFromAddrW64` or `SymGetLineFromInlineContextW`
 unsafe fn do_resolve(
     sym_from_addr: impl FnOnce(*mut SYMBOL_INFOW) -> BOOL,
     get_line_from_addr: impl FnOnce(&mut IMAGEHLP_LINEW64) -> BOOL,

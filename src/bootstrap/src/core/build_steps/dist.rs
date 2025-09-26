@@ -1154,13 +1154,7 @@ impl Step for Src {
         );
 
         // Ferrocene addition: We have a different libc location, we need to copy that in:
-        copy_src_dirs(
-            builder,
-            &builder.src,
-            &["ferrocene/library/libc", "ferrocene/library/backtrace-rs"],
-            &[],
-            &dst_src,
-        );
+        copy_src_dirs(builder, &builder.src, &["ferrocene/library/libc"], &[], &dst_src);
 
         tarball.generate()
     }

@@ -215,8 +215,10 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         });
     }
 
-    // Remove the doctest binaries so they're not distributed afterwards.
-    t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
+    if builder.doc_tests != DocTests::No {
+        // Remove the doctest binaries so they're not distributed afterwards.
+        t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

@@ -128,12 +128,13 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             let res_doctest_bins = std::fs::read_dir(&paths.doctests_bins_dir);
 
             if builder.doc_tests != DocTests::No && res_doctest_bins.is_err() {
-                panic!("cannot read doctests bins directory")
+                t!(res_doctest_bins, "cannot read doctests bins directory");
+                return;
             }
 
             let doctests_bins = res_doctest_bins.ok().into_iter().flat_map(|read_dir| {
                 read_dir.flat_map(|res| {
-                    let path = res.expect("cannot inspect doctest bin directory").path();
+                    let path = t!(res, "cannot inspect doctest bin directory").path();
                     std::fs::read_dir(path).expect("cannot read doctest bin directory")
                 })
             });

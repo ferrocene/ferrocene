@@ -3028,8 +3028,6 @@ impl Step for Crate {
             }
 
             measure_coverage(builder, cargo.as_mut(), build_compiler, target, coverage_for);
-            // cargo.rustflag("--cfg=ferrocene_coverage");
-            // cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
         }
 
         let mut crates = self.crates.clone();

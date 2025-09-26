@@ -1,0 +1,23 @@
+.fully-ignored > summary {
+    color: gray;
+}
+
+.fully-untested > summary {
+    color: red;
+}
+
+.fully-tested > summary {
+    color: green;
+}
+
+.partially-tested > summary {
+    color: orange;
+}
+
+.tested {
+    color: green;
+}
+
+.untested {
+    color: red;
+}

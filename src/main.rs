@@ -80,9 +80,6 @@ struct LineCoverage {
 }
 
 impl LineCoverage {
-    fn len(&self) -> usize {
-        self.lines.len()
-    }
     fn unconsidered(&self) -> usize {
         self.lines
             .iter()
@@ -109,12 +106,6 @@ struct FunctionCoverage {
     #[allow(dead_code)]
     filename: PathBuf,
     lines: LineCoverage,
-}
-
-#[derive(Clone)]
-enum FunctionType {
-    Canonical(String), // qualified path
-    ProvidedDefault,   // appears in traits
 }
 
 struct Span {

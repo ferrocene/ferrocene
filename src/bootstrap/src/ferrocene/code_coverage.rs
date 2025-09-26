@@ -121,7 +121,6 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             "\\.cargo/registry", // Without remap-path-prefix
             "/rust/deps",        // With remap-path-prefix
             // Ignore files we don't currently handle:
-            "ferrocene/library/backtrace-rs",
             "ferrocene/library/libc",
             "library/alloc",
             "library/panic_unwind",

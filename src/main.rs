@@ -4,16 +4,16 @@
 use anyhow::{Context as _, Result};
 use llvm_profparser::*;
 use maud::Render;
-use std::path::PathBuf;
-use std::fs::{self};
 use std::fmt;
+use std::fs::{self};
+use std::path::PathBuf;
 use structopt::StructOpt;
 use tracing_subscriber::filter::filter_fn;
 use tracing_subscriber::{Layer, Registry};
 
 // mod rustdoc;
-mod rustc_driver;
 mod html_report;
+mod rustc_driver;
 
 #[derive(Clone, Debug, Eq, PartialEq, StructOpt)]
 pub struct Opts {
@@ -84,13 +84,22 @@ impl LineCoverage {
         self.lines.len()
     }
     fn unconsidered(&self) -> usize {
-        self.lines.iter().filter(|(_, s)| matches!(s, CoverageStatus::Ignored)).count()
+        self.lines
+            .iter()
+            .filter(|(_, s)| matches!(s, CoverageStatus::Ignored))
+            .count()
     }
     fn considered(&self) -> usize {
-        self.lines.iter().filter(|(_, s)| !matches!(s, CoverageStatus::Ignored)).count()
+        self.lines
+            .iter()
+            .filter(|(_, s)| !matches!(s, CoverageStatus::Ignored))
+            .count()
     }
     fn tested(&self) -> usize {
-        self.lines.iter().filter(|(_, s)| matches!(s, CoverageStatus::Tested)).count()
+        self.lines
+            .iter()
+            .filter(|(_, s)| matches!(s, CoverageStatus::Tested))
+            .count()
     }
 }
 
@@ -104,8 +113,8 @@ struct FunctionCoverage {
 
 #[derive(Clone)]
 enum FunctionType {
-    Canonical(String),  // qualified path
-    ProvidedDefault,    // appears in traits
+    Canonical(String), // qualified path
+    ProvidedDefault,   // appears in traits
 }
 
 struct Span {
@@ -114,8 +123,17 @@ struct Span {
     end_line: usize,
 }
 
-fn get_coverage(report: &CoverageReport, span: Span, ferrocene: &std::path::Path, source_name: String) -> Result<FunctionCoverage> {
-    let Span { mut filename, start_line, end_line } = span;
+fn get_coverage(
+    report: &CoverageReport,
+    span: Span,
+    ferrocene: &std::path::Path,
+    source_name: String,
+) -> Result<FunctionCoverage> {
+    let Span {
+        mut filename,
+        start_line,
+        end_line,
+    } = span;
     if filename.is_relative() {
         filename = ferrocene.join(filename);
     }
@@ -132,12 +150,17 @@ fn get_coverage(report: &CoverageReport, span: Span, ferrocene: &std::path::Path
         // we didn't get any hits from the tool, so we don't know which lines shouldn't be
         // considered. report them all as considered and missing coverage.
         lines: LineCoverage {
-            lines: source_lines.clone()
-                .map(|i| (i, CoverageStatus::Untested)).collect(),
+            lines: source_lines
+                .clone()
+                .map(|i| (i, CoverageStatus::Untested))
+                .collect(),
         },
     };
     let Some(func_coverage) = report.files.get(&filename) else {
-        println!("warning: couldn't find source file {} in coverage report", filename.display());
+        println!(
+            "warning: couldn't find source file {} in coverage report",
+            filename.display()
+        );
         return Ok(no_coverage);
     };
     let mut covered = vec![];
@@ -151,7 +174,10 @@ fn get_coverage(report: &CoverageReport, span: Span, ferrocene: &std::path::Path
         };
         covered.push((line, status));
     }
-    Ok(FunctionCoverage { lines: LineCoverage { lines: covered }, ..no_coverage })
+    Ok(FunctionCoverage {
+        lines: LineCoverage { lines: covered },
+        ..no_coverage
+    })
 }
 
 impl ShowCommand {
@@ -179,17 +205,23 @@ impl ShowCommand {
         for func in &coverage {
             print!("{}: ", func.source_name);
             if func.lines.considered() == 0 {
-                println!("BUG: no lines considered (span: {}:{}-{})",
+                println!(
+                    "BUG: no lines considered (span: {}:{}-{})",
                     func.filename.display(),
                     func.lines.lines.first().unwrap().0,
-                    func.lines.lines.last().unwrap().0);
+                    func.lines.lines.last().unwrap().0
+                );
                 unconsidered += 1;
             } else {
-                let missing = func.lines.lines.iter()
+                let missing = func
+                    .lines
+                    .lines
+                    .iter()
                     .filter(|(_, status)| *status == CoverageStatus::Untested)
                     .map(|(linenum, _)| format!("{}:{}", func.filename.display(), linenum))
                     .collect::<Vec<_>>();
-                println!("{} / {} covered ({} lines unconsidered)\
+                println!(
+                    "{} / {} covered ({} lines unconsidered)\
                     {}\
                 ",
                     func.lines.tested(),
@@ -205,9 +237,18 @@ impl ShowCommand {
             }
         }
         let total = coverage.len();
-        println!("{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions", total - unconsidered - fully_covered);
-        println!("hits for <u8 as PartialOrd>::partial_cmp: {:?}",
-            report.files.get(&self.ferrocene.join("library/core/src/cmp.rs")).unwrap().hits_for_line(1978));
+        println!(
+            "{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions",
+            total - unconsidered - fully_covered
+        );
+        println!(
+            "hits for <u8 as PartialOrd>::partial_cmp: {:?}",
+            report
+                .files
+                .get(&self.ferrocene.join("library/core/src/cmp.rs"))
+                .unwrap()
+                .hits_for_line(1978)
+        );
 
         if let Some(ref html_out) = self.html_out {
             let html = html_report::generate(coverage, &self.ferrocene)?;

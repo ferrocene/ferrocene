@@ -1088,7 +1088,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::SafetyManual,
                 crate::ferrocene::doc::TraceabilityMatrix,
                 crate::ferrocene::doc::CompilerTechnicalReport,
-                crate::ferrocene::doc::CoreTechnicalReport,
+                // crate::ferrocene::doc::CoreTechnicalReport,
                 // In 1.88 we identified problems with core coverage being inconsistent,
                 // so we use a static report we inspected for correctness.
                 // crate::ferrocene::doc::code_coverage::AllCoverageReports,

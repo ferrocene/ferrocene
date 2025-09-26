@@ -52,8 +52,17 @@ pub(super) fn parse_maps() -> Result<Vec<MapsEntry>, &'static str> {
         .map_err(|_| "Couldn't read /proc/self/maps")?;
 
     let mut v = Vec::new();
-    for line in buf.lines() {
+    let mut buf = buf.as_str();
+    while let Some(match_idx) = buf.bytes().position(|b| b == b'\n') {
+        // Unsafe is unfortunately necessary to get the bounds check removed (for code size).
+
+        // SAFETY: match_idx is the position of the newline, so it must be valid.
+        let line = unsafe { buf.get_unchecked(..match_idx) };
+
         v.push(line.parse()?);
+
+        // SAFETY: match_idx is the position of the newline, so the byte after it must be valid.
+        buf = unsafe { buf.get_unchecked((match_idx + 1)..) };
     }
 
     Ok(v)
@@ -81,11 +90,39 @@ impl FromStr for MapsEntry {
     // e.g.: "ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]"
     // e.g.: "7f5985f46000-7f5985f48000 rw-p 00039000 103:06 76021795                  /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2"
     // e.g.: "35b1a21000-35b1a22000 rw-p 00000000 00:00 0"
-    //
-    // Note that paths may contain spaces, so we can't use `str::split` for parsing (until
-    // Split::remainder is stabilized #77998).
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-       fn error(msg: &str) -> &str {
+        // While there are nicer standard library APIs available for this, we aim for minimal code size.
+
+        let mut state = s;
+
+        fn parse_start<'a>(state: &mut &'a str) -> &'a str {
+            // Unsafe is unfortunately necessary to get the bounds check removed (for code size).
+
+            let start_idx = state.bytes().position(|b| b != b' ');
+            if let Some(start_idx) = start_idx {
+                // SAFETY: It comes from position, so it's in bounds.
+                //         It must be on a UTF-8 boundary as it's the first byte that isn't ' '.
+                *state = unsafe { state.get_unchecked(start_idx..) };
+            }
+            let match_idx = state.bytes().position(|b| b == b' ');
+            match match_idx {
+                None => {
+                    let result = *state;
+                    *state = "";
+                    result
+                }
+                Some(match_idx) => {
+                    // SAFETY: match_index comes from .bytes().position() of an ASCII character,
+                    //         so it's both in bounds and a UTF-8 boundary
+                    let result = unsafe { state.get_unchecked(..match_idx) };
+                    // SAFETY: Since match_idx is the ' ', there must be at least the end after it.
+                    *state = unsafe { state.get_unchecked((match_idx + 1)..) };
+                    result
+                }
+            }
+        }
+
+        fn error(msg: &str) -> &str {
             if cfg!(debug_assertions) {
                 msg
             } else {
@@ -93,34 +130,33 @@ impl FromStr for MapsEntry {
             }
         }
 
-
-        let (range_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
+        let range_str = parse_start(&mut state);
         if range_str.is_empty() {
             return Err(error("Couldn't find address"));
         }
 
-        let (perms_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
+        let perms_str = parse_start(&mut state);
         if perms_str.is_empty() {
             return Err(error("Couldn't find permissions"));
         }
 
-        let (offset_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
+        let offset_str = parse_start(&mut state);
         if offset_str.is_empty() {
             return Err(error("Couldn't find offset"));
         }
 
-        let (dev_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
+        let dev_str = parse_start(&mut state);
         if dev_str.is_empty() {
             return Err(error("Couldn't find dev"));
         }
 
-        let (inode_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
+        let inode_str = parse_start(&mut state);
         if inode_str.is_empty() {
             return Err(error("Couldn't find inode"));
         }
 
         // Pathname may be omitted in which case it will be empty
-        let pathname_str = s.trim_start();
+        let pathname_str = state.trim_ascii_start();
 
         let hex = |s| usize::from_str_radix(s, 16).map_err(|_| error("Couldn't parse hex number"));
         let hex64 = |s| u64::from_str_radix(s, 16).map_err(|_| error("Couldn't parse hex number"));
@@ -130,7 +166,6 @@ impl FromStr for MapsEntry {
         } else {
             return Err(error("Couldn't parse address range"));
         };
-
         let offset = hex64(offset_str)?;
         let pathname = pathname_str.into();
 

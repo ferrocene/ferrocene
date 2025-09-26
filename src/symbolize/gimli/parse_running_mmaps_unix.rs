@@ -13,20 +13,8 @@ use core::str::FromStr;
 pub(super) struct MapsEntry {
     /// start (inclusive) and limit (exclusive) of address range.
     address: (usize, usize),
-    /// The perms field are the permissions for the entry
-    ///
-    /// r = read
-    /// w = write
-    /// x = execute
-    /// s = shared
-    /// p = private (copy on write)
-    perms: [char; 4],
     /// Offset into the file (or "whatever").
     offset: u64,
-    /// device (major, minor)
-    dev: (usize, usize),
-    /// inode on the device. 0 indicates that no inode is associated with the memory region (e.g. uninitalized data aka BSS).
-    inode: usize,
     /// Usually the file backing the mapping.
     ///
     /// Note: The man page for proc includes a note about "coordination" by
@@ -132,30 +120,13 @@ impl FromStr for MapsEntry {
         } else {
             return Err("Couldn't parse address range");
         };
-        let perms: [char; 4] = {
-            let mut chars = perms_str.chars();
-            let mut c = || chars.next().ok_or("insufficient perms");
-            let perms = [c()?, c()?, c()?, c()?];
-            if chars.next().is_some() {
-                return Err("too many perms");
-            }
-            perms
-        };
+
         let offset = hex64(offset_str)?;
-        let dev = if let Some((major, minor)) = dev_str.split_once(':') {
-            (hex(major)?, hex(minor)?)
-        } else {
-            return Err("Couldn't parse dev");
-        };
-        let inode = hex(inode_str)?;
         let pathname = pathname_str.into();
 
         Ok(MapsEntry {
             address,
-            perms,
             offset,
-            dev,
-            inode,
             pathname,
         })
     }
@@ -172,10 +143,7 @@ fn check_maps_entry_parsing_64bit() {
             .unwrap(),
         MapsEntry {
             address: (0xffffffffff600000, 0xffffffffff601000),
-            perms: ['-', '-', 'x', 'p'],
             offset: 0x00000000,
-            dev: (0x00, 0x00),
-            inode: 0x0,
             pathname: "[vsyscall]".into(),
         }
     );
@@ -187,10 +155,7 @@ fn check_maps_entry_parsing_64bit() {
             .unwrap(),
         MapsEntry {
             address: (0x7f5985f46000, 0x7f5985f48000),
-            perms: ['r', 'w', '-', 'p'],
             offset: 0x00039000,
-            dev: (0x103, 0x06),
-            inode: 0x76021795,
             pathname: "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2".into(),
         }
     );
@@ -200,10 +165,7 @@ fn check_maps_entry_parsing_64bit() {
             .unwrap(),
         MapsEntry {
             address: (0x35b1a21000, 0x35b1a22000),
-            perms: ['r', 'w', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x00, 0x00),
-            inode: 0x0,
             pathname: Default::default(),
         }
     );
@@ -224,10 +186,7 @@ fn check_maps_entry_parsing_32bit() {
             .unwrap(),
         MapsEntry {
             address: (0x08056000, 0x08077000),
-            perms: ['r', 'w', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x00, 0x00),
-            inode: 0x0,
             pathname: "[heap]".into(),
         }
     );
@@ -239,10 +198,7 @@ fn check_maps_entry_parsing_32bit() {
             .unwrap(),
         MapsEntry {
             address: (0xb7c79000, 0xb7e02000),
-            perms: ['r', '-', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x08, 0x01),
-            inode: 0x60662705,
             pathname: "/usr/lib/locale/locale-archive".into(),
         }
     );
@@ -252,10 +208,7 @@ fn check_maps_entry_parsing_32bit() {
             .unwrap(),
         MapsEntry {
             address: (0xb7e02000, 0xb7e03000),
-            perms: ['r', 'w', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x00, 0x00),
-            inode: 0x0,
             pathname: Default::default(),
         }
     );
@@ -266,10 +219,7 @@ fn check_maps_entry_parsing_32bit() {
             .unwrap(),
         MapsEntry {
             address: (0xb7c79000, 0xb7e02000),
-            perms: ['r', '-', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x08, 0x01),
-            inode: 0x60662705,
             pathname: "/executable/path/with some spaces".into(),
         }
     );
@@ -280,10 +230,7 @@ fn check_maps_entry_parsing_32bit() {
             .unwrap(),
         MapsEntry {
             address: (0xb7c79000, 0xb7e02000),
-            perms: ['r', '-', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x08, 0x01),
-            inode: 0x60662705,
             pathname: "/executable/path/with  multiple-continuous    spaces  ".into(),
         }
     );
@@ -294,10 +241,7 @@ fn check_maps_entry_parsing_32bit() {
             .unwrap(),
         MapsEntry {
             address: (0xb7c79000, 0xb7e02000),
-            perms: ['r', '-', '-', 'p'],
             offset: 0x00000000,
-            dev: (0x08, 0x01),
-            inode: 0x60662705,
             pathname: "/executable/path/starts-with-spaces".into(),
         }
     );

@@ -1,12 +1,15 @@
 use std::{collections::HashSet, fs, path::Path};
 
-use maud::{Markup, PreEscaped, Render, DOCTYPE};
+use maud::{DOCTYPE, Markup, PreEscaped, Render};
 
 use crate::{CoverageStatus, FunctionCoverage};
 
 const CSS: &str = include_str!("../assets/html_report.css");
 
-pub(crate) fn generate(coverage: Vec<FunctionCoverage>, sources: &Path) -> std::io::Result<PreEscaped<std::string::String>> {
+pub(crate) fn generate(
+    coverage: Vec<FunctionCoverage>,
+    sources: &Path,
+) -> std::io::Result<PreEscaped<std::string::String>> {
     let mut fragments = Vec::with_capacity(coverage.len());
     for function in &coverage {
         let fragment = generate_function(function, sources)?;
@@ -31,27 +34,41 @@ pub(crate) fn generate(coverage: Vec<FunctionCoverage>, sources: &Path) -> std::
     Ok(html)
 }
 
-fn generate_function(function: &FunctionCoverage, sources: &Path) -> std::io::Result<PreEscaped<std::string::String>> {
+fn generate_function(
+    function: &FunctionCoverage,
+    sources: &Path,
+) -> std::io::Result<PreEscaped<std::string::String>> {
     let line_coverage = &function.lines.lines;
     let source_path = sources.join(&function.filename);
     let file = std::fs::read_to_string(&source_path)?;
-    
+
     let mut lines = Vec::with_capacity(line_coverage.len());
     for (linenum, line) in file.lines().enumerate() {
         let linenum = linenum + 1; // `enumerate()` starts at 0, lines start at 1.
-        let maybe_line = line_coverage.iter().find(|(covered_linenum, _)| linenum == *covered_linenum);
+        let maybe_line = line_coverage
+            .iter()
+            .find(|(covered_linenum, _)| linenum == *covered_linenum);
         if let Some((actual_linenum, status)) = maybe_line {
             lines.push((actual_linenum, line, status))
         }
     }
 
-    let function_status = if lines.iter().all(|(_, _, status)| **status == CoverageStatus::Ignored) {
+    let function_status = if lines
+        .iter()
+        .all(|(_, _, status)| **status == CoverageStatus::Ignored)
+    {
         // This is the bad place, the function was in the subset but entirely ignored.
         "fully-ignored"
-    } else if  lines.iter().all(|(_, _, status)| **status == CoverageStatus::Untested || **status == CoverageStatus::Ignored) {
+    } else if lines
+        .iter()
+        .all(|(_, _, status)| **status != CoverageStatus::Tested)
+    {
         // The function is completely untested
         "fully-untested"
-    } else if lines.iter().all(|(_, _, status)| **status == CoverageStatus::Tested || **status == CoverageStatus::Ignored) {
+    } else if lines
+        .iter()
+        .all(|(_, _, status)| **status != CoverageStatus::Untested)
+    {
         // The function is completely tested
         "fully-tested"
     } else {
@@ -82,6 +99,6 @@ fn generate_function(function: &FunctionCoverage, sources: &Path) -> std::io::Re
                 }
             }
         }
-    ); 
+    );
     Ok(html)
 }

@@ -44,13 +44,14 @@ pub(super) struct MapsEntry {
 }
 
 pub(super) fn parse_maps() -> Result<Vec<MapsEntry>, &'static str> {
-    let mut v = Vec::new();
     let mut proc_self_maps =
         File::open("/proc/self/maps").map_err(|_| "Couldn't open /proc/self/maps")?;
     let mut buf = String::new();
     let _bytes_read = proc_self_maps
         .read_to_string(&mut buf)
         .map_err(|_| "Couldn't read /proc/self/maps")?;
+
+    let mut v = Vec::new();
     for line in buf.lines() {
         v.push(line.parse()?);
     }
@@ -84,41 +85,50 @@ impl FromStr for MapsEntry {
     // Note that paths may contain spaces, so we can't use `str::split` for parsing (until
     // Split::remainder is stabilized #77998).
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+       fn error(msg: &str) -> &str {
+            if cfg!(debug_assertions) {
+                msg
+            } else {
+                "invalid map entry"
+            }
+        }
+
+
         let (range_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if range_str.is_empty() {
-            return Err("Couldn't find address");
+            return Err(error("Couldn't find address"));
         }
 
         let (perms_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if perms_str.is_empty() {
-            return Err("Couldn't find permissions");
+            return Err(error("Couldn't find permissions"));
         }
 
         let (offset_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if offset_str.is_empty() {
-            return Err("Couldn't find offset");
+            return Err(error("Couldn't find offset"));
         }
 
         let (dev_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if dev_str.is_empty() {
-            return Err("Couldn't find dev");
+            return Err(error("Couldn't find dev"));
         }
 
         let (inode_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if inode_str.is_empty() {
-            return Err("Couldn't find inode");
+            return Err(error("Couldn't find inode"));
         }
 
         // Pathname may be omitted in which case it will be empty
         let pathname_str = s.trim_start();
 
-        let hex = |s| usize::from_str_radix(s, 16).map_err(|_| "Couldn't parse hex number");
-        let hex64 = |s| u64::from_str_radix(s, 16).map_err(|_| "Couldn't parse hex number");
+        let hex = |s| usize::from_str_radix(s, 16).map_err(|_| error("Couldn't parse hex number"));
+        let hex64 = |s| u64::from_str_radix(s, 16).map_err(|_| error("Couldn't parse hex number"));
 
         let address = if let Some((start, limit)) = range_str.split_once('-') {
             (hex(start)?, hex(limit)?)
         } else {
-            return Err("Couldn't parse address range");
+            return Err(error("Couldn't parse address range"));
         };
 
         let offset = hex64(offset_str)?;

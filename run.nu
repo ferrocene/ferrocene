@@ -1,6 +1,8 @@
 #!/usr/bin/env nu
 use std/dirs
 
+let host_os = (sys host).name
+
 def main [
   --debug # Toggle debug
   --std # If std should be tested, too
@@ -17,7 +19,14 @@ def main [
     let std_build = $"($ferrocene)/build/host/stage1-std/($host)/release/deps/"
     let symbols = $"($ferrocene)/build/host/stage1-std/($certified_host)/release/symbol-report.json"
     
-    let std_obj = ls $std_build | where name =~ "libstd.*so" | get name | first
+    let std_obj = if $host_os == "Linux" {
+        ls $std_build | where name =~ "libstd.*so" | get name | first
+    } else if $host_os == "Darwin" {
+        ls $std_build | where name =~ "libstd.*dylib" | get name | first
+    } else {
+        print "Unsupported OS"
+        exit 1
+    }
     let corebenches_bin = ls $std_build | where name =~ "corebenches" | get name | first
     let coretests_bin = ls $std_build | where name =~ "coretests" | get name | first
     
@@ -43,7 +52,6 @@ def main [
         --report $symbols
         --path-equivalence $"/rustc/($rev),/home/ci/project/ferrocene"
         --ferrocene-src $ferrocene
-        --html-out coverage-report.html
         ...$extra_arg
     )
 }

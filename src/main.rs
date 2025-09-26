@@ -3,14 +3,17 @@
 #[allow(unused_imports)]
 use anyhow::{Context as _, Result};
 use llvm_profparser::*;
+use maud::Render;
 use std::path::PathBuf;
 use std::fs::{self};
+use std::fmt;
 use structopt::StructOpt;
 use tracing_subscriber::filter::filter_fn;
 use tracing_subscriber::{Layer, Registry};
 
 // mod rustdoc;
 mod rustc_driver;
+mod html_report;
 
 #[derive(Clone, Debug, Eq, PartialEq, StructOpt)]
 pub struct Opts {
@@ -49,6 +52,9 @@ pub struct ShowCommand {
     /// Turn on debug logging
     #[structopt(long)]
     debug: bool,
+    /// Produce a HTML report
+    #[structopt(long)]
+    html_out: Option<PathBuf>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -56,6 +62,16 @@ enum CoverageStatus {
     Tested,
     Untested,
     Ignored,
+}
+
+impl fmt::Display for CoverageStatus {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            CoverageStatus::Tested => write!(f, "Tested"),
+            CoverageStatus::Untested => write!(f, "Untested"),
+            CoverageStatus::Ignored => write!(f, "Ignored"),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -192,6 +208,11 @@ impl ShowCommand {
         println!("{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions", total - unconsidered - fully_covered);
         println!("hits for <u8 as PartialOrd>::partial_cmp: {:?}",
             report.files.get(&self.ferrocene.join("library/core/src/cmp.rs")).unwrap().hits_for_line(1978));
+
+        if let Some(ref html_out) = self.html_out {
+            let html = html_report::generate(coverage, &self.ferrocene)?;
+            std::fs::write(html_out, html.render().into_string())?;
+        }
 
         Ok(())
     }

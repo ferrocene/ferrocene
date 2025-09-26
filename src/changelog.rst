@@ -104,7 +104,7 @@ Language changes in Rust 1.89.0
 
 - `Stabilize repr128 (#[repr(u128), #repr(i128)]) <https://github.com/rust-lang/rust/pull/138285>`_
 
-  - No change: this was erroneously documented as if it was already true
+  - No change: this was erroneously documented as if it were already true
 
 - `Allow #![doc(test(attr(..))) everywhere <https://github.com/rust-lang/rust/pull/140560>`_
 

@@ -1395,7 +1395,7 @@ pub fn log2f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmaf16(a: f16, b: f16, c: f16) -> f16;
+pub const fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values.
 ///
 /// The stabilized version of this intrinsic is
@@ -1403,7 +1403,7 @@ pub fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmaf32(a: f32, b: f32, c: f32) -> f32;
+pub const fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values.
 ///
 /// The stabilized version of this intrinsic is
@@ -1411,7 +1411,7 @@ pub fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmaf64(a: f64, b: f64, c: f64) -> f64;
+pub const fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values.
 ///
 /// The stabilized version of this intrinsic is
@@ -1419,7 +1419,7 @@ pub fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmaf128(a: f128, b: f128, c: f128) -> f128;
+pub const fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -1434,7 +1434,7 @@ pub fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
+pub const fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
 /// intermediate result.
@@ -1448,7 +1448,7 @@ pub fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
+pub const fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
 /// intermediate result.
@@ -1462,7 +1462,7 @@ pub fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
+pub const fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
 /// intermediate result.
@@ -1476,7 +1476,7 @@ pub fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
+pub const fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns the largest integer less than or equal to an `f16`.
 ///

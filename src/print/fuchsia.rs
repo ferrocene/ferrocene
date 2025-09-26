@@ -171,9 +171,10 @@ fn take_bytes_align4<'a>(num: usize, bytes: &mut &'a [u8]) -> Option<&'a [u8]> {
     Some(out)
 }
 
-// This function has no invariants the caller must uphold, but it will return `None`
-// if 'bytes' is not correctly aligned.  The values in the Elf_Nhdr fields might be
-// nonsense but this function ensures no such thing.
+/// This function has no invariants the caller must uphold, but
+/// it will return `None`, without mutating, if `bytes` has insufficient size or alignment.
+/// If this returns `Some(nhdr)`, then `bytes` was and remains 4-byte-aligned.
+/// The values in the Elf_Nhdr fields might be nonsense.
 fn take_nhdr<'a>(bytes: &mut &'a [u8]) -> Option<&'a Elf_Nhdr> {
     let (out, rest) = object::pod::from_bytes::<Elf_Nhdr>(bytes).ok()?;
     // Note that size_of::<Elf_Nhdr>() is always a multiple of 4-bytes, so the

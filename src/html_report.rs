@@ -2,7 +2,7 @@ use std::path::Path;
 
 use maud::{DOCTYPE, PreEscaped};
 
-use crate::{CoverageStatus, FunctionCoverage};
+use crate::{FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
 
 const CSS: &str = include_str!("../assets/html_report.css");
 
@@ -16,6 +16,27 @@ pub(crate) fn generate(
         fragments.push(fragment);
     }
 
+    let mut count_fully_tested = 0;
+    let mut count_partially_tested = 0;
+    let mut count_fully_untested = 0;
+    let mut count_fully_ignored = 0;
+    for function in coverage {
+        match function.status {
+            FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
+            FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
+            FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
+            FunctionCoverageStatus::FullyIngored => count_fully_ignored += 1,
+        };
+    }
+    let summary = maud::html!(
+        div class="summary" {
+            (count_fully_tested) " Fully Tested, "
+            (count_partially_tested) " Partially Tested, "
+            (count_fully_untested) " Fully Untested, "
+            (count_fully_ignored) " Fully Ignored"
+        }
+    );
+
     let html = maud::html!(
         (DOCTYPE)
         html {
@@ -25,6 +46,7 @@ pub(crate) fn generate(
                 }
             }
             body {
+                (summary)
                 @for fragment in fragments {
                     (fragment)
                 }
@@ -53,31 +75,10 @@ fn generate_function(
         }
     }
 
-    let function_status = if lines
-        .iter()
-        .all(|(_, _, status)| **status == CoverageStatus::Ignored)
-    {
-        // This is the bad place, the function was in the subset but entirely ignored.
-        "fully-ignored"
-    } else if lines
-        .iter()
-        .all(|(_, _, status)| **status != CoverageStatus::Tested)
-    {
-        // The function is completely untested
-        "fully-untested"
-    } else if lines
-        .iter()
-        .all(|(_, _, status)| **status != CoverageStatus::Untested)
-    {
-        // The function is completely tested
-        "fully-tested"
-    } else {
-        // The function is mixed
-        "partially-tested"
-    };
+    let function_status = &function.status;
 
     let html = maud::html!(
-        details class=(function_status) {
+        details class=(function_status.to_css_class()) {
             summary {
                 (function.source_name)
             }
@@ -85,13 +86,13 @@ fn generate_function(
                 pre {
                     @for (linenum, line, status) in lines {
                         @match status {
-                            CoverageStatus::Tested => span class="tested" {
+                            LineCoverageStatus::Tested => span class="tested" {
                                 (linenum) "|" (line) "\n"
                             },
-                            CoverageStatus::Untested => span class="untested" {
+                            LineCoverageStatus::Untested => span class="untested" {
                                 (linenum) "|" (line) "\n"
                             },
-                            CoverageStatus::Ignored => {
+                            LineCoverageStatus::Ignored => {
                                 (linenum) "|" (line) "\n"
                             },
                         }

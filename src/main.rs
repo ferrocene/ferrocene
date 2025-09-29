@@ -58,54 +58,100 @@ pub struct ShowCommand {
 }
 
 #[derive(Debug, PartialEq)]
-enum CoverageStatus {
+enum LineCoverageStatus {
     Tested,
     Untested,
     Ignored,
 }
 
-impl fmt::Display for CoverageStatus {
+impl fmt::Display for LineCoverageStatus {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            CoverageStatus::Tested => write!(f, "Tested"),
-            CoverageStatus::Untested => write!(f, "Untested"),
-            CoverageStatus::Ignored => write!(f, "Ignored"),
+            LineCoverageStatus::Tested => write!(f, "Tested"),
+            LineCoverageStatus::Untested => write!(f, "Untested"),
+            LineCoverageStatus::Ignored => write!(f, "Ignored"),
         }
     }
 }
 
 #[derive(Debug)]
 struct LineCoverage {
-    lines: Vec<(usize, CoverageStatus)>,
+    lines: Vec<(usize, LineCoverageStatus)>,
 }
 
 impl LineCoverage {
     fn unconsidered(&self) -> usize {
         self.lines
             .iter()
-            .filter(|(_, s)| matches!(s, CoverageStatus::Ignored))
+            .filter(|(_, s)| matches!(s, LineCoverageStatus::Ignored))
             .count()
     }
     fn considered(&self) -> usize {
         self.lines
             .iter()
-            .filter(|(_, s)| !matches!(s, CoverageStatus::Ignored))
+            .filter(|(_, s)| !matches!(s, LineCoverageStatus::Ignored))
             .count()
     }
     fn tested(&self) -> usize {
         self.lines
             .iter()
-            .filter(|(_, s)| matches!(s, CoverageStatus::Tested))
+            .filter(|(_, s)| matches!(s, LineCoverageStatus::Tested))
             .count()
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum FunctionCoverageStatus {
+    FullyTested,
+    PartiallyTested,
+    FullyUntested,
+    FullyIngored,
+}
+
+impl FunctionCoverageStatus {
+    fn new(lines: &LineCoverage) -> Self {
+        match lines {
+            lines if lines.lines.iter().all(|(_, status)| {
+                *status == LineCoverageStatus::Ignored
+            }) => FunctionCoverageStatus::FullyIngored,
+            lines if lines.lines.iter().all(|(_, status)| {
+                *status != LineCoverageStatus::Untested
+            }) => FunctionCoverageStatus::FullyTested,
+            lines if lines.lines.iter().all(|(_, status)| {
+                *status != LineCoverageStatus::Tested
+            }) => FunctionCoverageStatus::FullyUntested,
+            _ => FunctionCoverageStatus::PartiallyTested,
+        }
+    }
+
+    fn to_css_class(&self) -> &str {
+        match self {
+            FunctionCoverageStatus::FullyTested => "fully-tested",
+            FunctionCoverageStatus::PartiallyTested => "partially-tested",
+            FunctionCoverageStatus::FullyUntested => "fully-untested",
+            FunctionCoverageStatus::FullyIngored => "fully-ignored",
+        }
     }
 }
 
 #[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
-    #[allow(dead_code)]
     filename: PathBuf,
     lines: LineCoverage,
+    status: FunctionCoverageStatus,
+}
+
+impl FunctionCoverage {
+    fn new(source_name: String, filename: PathBuf, lines: LineCoverage) -> Self {
+        let status = FunctionCoverageStatus::new(&lines); 
+        Self {
+            source_name,
+            filename,
+            lines,
+            status,
+        }
+    }
 }
 
 struct Span {
@@ -134,41 +180,45 @@ fn get_coverage(
         panic!("--ferrocene-src was not absolute")
     }?;
     let source_lines = start_line..=end_line;
-    let no_coverage = FunctionCoverage {
-        source_name,
-        // symbol_name: "TODO sorry".into(),
-        filename: filename.clone(),
-        // we didn't get any hits from the tool, so we don't know which lines shouldn't be
-        // considered. report them all as considered and missing coverage.
-        lines: LineCoverage {
+    let source_name = source_name;
+    let filename = filename.clone();
+
+    // we didn't get any hits from the tool, so we don't know which lines shouldn't be
+    // considered. report them all as considered and missing coverage.
+    let Some(func_coverage) = report.files.get(&filename) else {
+        let no_coverage = LineCoverage {
             lines: source_lines
                 .clone()
-                .map(|i| (i, CoverageStatus::Untested))
+                .map(|i| (i, LineCoverageStatus::Untested))
                 .collect(),
-        },
-    };
-    let Some(func_coverage) = report.files.get(&filename) else {
+        };
         println!(
             "warning: couldn't find source file {} in coverage report",
             filename.display()
         );
-        return Ok(no_coverage);
+        return Ok(FunctionCoverage::new(
+            source_name,
+            filename,
+            no_coverage,
+        ))
     };
+    
     let mut covered = vec![];
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
         let status = match func_coverage.hits_for_line(line) {
-            None => CoverageStatus::Ignored,
-            Some(0) => CoverageStatus::Untested,
-            Some(_) => CoverageStatus::Tested,
+            None => LineCoverageStatus::Ignored,
+            Some(0) => LineCoverageStatus::Untested,
+            Some(_) => LineCoverageStatus::Tested,
         };
         covered.push((line, status));
     }
-    Ok(FunctionCoverage {
-        lines: LineCoverage { lines: covered },
-        ..no_coverage
-    })
+    Ok(FunctionCoverage::new(
+        source_name,
+        filename,
+        LineCoverage { lines: covered },
+    ))
 }
 
 impl ShowCommand {
@@ -208,7 +258,7 @@ impl ShowCommand {
                     .lines
                     .lines
                     .iter()
-                    .filter(|(_, status)| *status == CoverageStatus::Untested)
+                    .filter(|(_, status)| *status == LineCoverageStatus::Untested)
                     .map(|(linenum, _)| format!("{}:{}", func.filename.display(), linenum))
                     .collect::<Vec<_>>();
                 println!(

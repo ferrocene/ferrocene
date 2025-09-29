@@ -5,15 +5,16 @@ use maud::{DOCTYPE, PreEscaped};
 use crate::{FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
 
 const CSS: &str = include_str!("../assets/html_report.css");
+const JS: &str = include_str!("../assets/html_report.js");
 
 pub(crate) fn generate(
-    coverage: Vec<FunctionCoverage>,
+    coverage: &[FunctionCoverage],
     sources: &Path,
 ) -> std::io::Result<PreEscaped<std::string::String>> {
-    let mut fragments = Vec::with_capacity(coverage.len());
-    for function in &coverage {
+    let mut functions = Vec::with_capacity(coverage.len());
+    for function in coverage {
         let fragment = generate_function(function, sources)?;
-        fragments.push(fragment);
+        functions.push(fragment);
     }
 
     let mut count_fully_tested = 0;
@@ -28,12 +29,29 @@ pub(crate) fn generate(
             FunctionCoverageStatus::FullyIngored => count_fully_ignored += 1,
         };
     }
+
+    let fully_tested_class = FunctionCoverageStatus::FullyTested.to_css_class();
+    let partially_tested_class = FunctionCoverageStatus::PartiallyTested.to_css_class();
+    let fully_untested_class = FunctionCoverageStatus::FullyUntested.to_css_class();
+    let fully_ignored_class = FunctionCoverageStatus::FullyIngored.to_css_class();
+
     let summary = maud::html!(
         div class="summary" {
-            (count_fully_tested) " Fully Tested, "
-            (count_partially_tested) " Partially Tested, "
-            (count_fully_untested) " Fully Untested, "
-            (count_fully_ignored) " Fully Ignored"
+            div class=(fully_tested_class) data-filter=(fully_tested_class) {
+                (count_fully_tested) " Fully Tested"
+            }
+            div class=(partially_tested_class) data-filter=(partially_tested_class) {
+                (count_partially_tested) " Partially Tested"
+            }
+            div class=(fully_untested_class) data-filter=(fully_untested_class) {
+                (count_fully_untested) " Fully Untested"
+            }
+            div class=(fully_ignored_class) data-filter=(fully_ignored_class) {
+                (count_fully_ignored) " Fully Ignored"
+            }
+            div id="reset" {
+                "Reset"
+            }
         }
     );
 
@@ -47,8 +65,13 @@ pub(crate) fn generate(
             }
             body {
                 (summary)
-                @for fragment in fragments {
-                    (fragment)
+                div class="functions" {
+                    @for fragment in functions {
+                        (fragment)
+                    }
+                }
+                script defer=(true) {
+                    (PreEscaped(JS))
                 }
             }
         }
@@ -76,9 +99,10 @@ fn generate_function(
     }
 
     let function_status = &function.status;
+    let function_css_class = function_status.to_css_class();
 
     let html = maud::html!(
-        details class=(function_status.to_css_class()) {
+        details class=(function_css_class) data-status=(function_css_class) {
             summary {
                 (function.source_name)
             }

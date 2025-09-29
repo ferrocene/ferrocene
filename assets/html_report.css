@@ -1,23 +1,42 @@
-.fully-ignored > summary {
+.summary > div {
+    cursor: pointer;
+}
+
+.functions .fully-ignored > summary {
     color: gray;
 }
+.functions[data-filter="fully-ignored"] details:not([data-status="fully-ignored"]) {
+    display: none;
+}
 
-.fully-untested > summary {
+
+.functions .fully-untested > summary {
     color: red;
 }
-
-.fully-tested > summary {
-    color: green;
+.functions[data-filter="fully-untested"] details:not([data-status="fully-untested"]) {
+    display: none;
 }
 
-.partially-tested > summary {
+.functions .fully-tested > summary {
+    color: green;
+}
+.functions[data-filter="fully-tested"] details:not([data-status="fully-tested"]) {
+    display: none;
+}
+
+.functions .partially-tested > summary {
     color: orange;
 }
+.functions[data-filter="partially-tested"] details:not([data-status="partially-tested"]) {
+    display: none;
+}
 
-.tested {
+
+.functions .tested {
     color: green;
 }
 
-.untested {
+.functions .untested {
     color: red;
 }
+

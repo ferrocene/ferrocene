@@ -239,8 +239,10 @@ impl ShowCommand {
             report.apply_remapping(remapping);
         }
 
-        // let coverage = rustdoc::coverage(self, &report)?;
-        let coverage = rustc_driver::coverage(self, &report)?;
+        let mut coverage = rustc_driver::coverage(self, &report)?;
+        coverage.sort_by(|f1, f2| f1.source_name.cmp(&f2.source_name));
+        let coverage = coverage;
+
         for func in &coverage {
             print!("{}: ", func.source_name);
             if func.lines.considered() == 0 {
@@ -305,7 +307,7 @@ impl ShowCommand {
         );
 
         if let Some(ref html_out) = self.html_out {
-            let html = html_report::generate(coverage, &self.ferrocene)?;
+            let html = html_report::generate(&coverage, &self.ferrocene)?;
             std::fs::write(html_out, html.render().into_string())?;
         }
 

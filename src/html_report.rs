@@ -1,6 +1,6 @@
-use std::{collections::HashSet, fs, path::Path};
+use std::path::Path;
 
-use maud::{DOCTYPE, Markup, PreEscaped, Render};
+use maud::{DOCTYPE, PreEscaped};
 
 use crate::{CoverageStatus, FunctionCoverage};
 

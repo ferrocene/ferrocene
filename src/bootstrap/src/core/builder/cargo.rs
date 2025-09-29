@@ -6,7 +6,8 @@ use super::{Builder, Kind};
 use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::SplitDebuginfo;
-use crate::core::config::flags::Color;
+use crate::core::config::flags::{Color, FerroceneCoverageFor};
+use crate::ferrocene::code_coverage::{Paths, instrument_coverage};
 use crate::utils::build_stamp;
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, linker_args, linker_flags};
 use crate::{
@@ -125,6 +126,14 @@ impl Cargo {
             _ => {
                 cargo.configure_linker(builder);
             }
+        }
+
+        if compiler.stage == builder.top_stage
+            && builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
+        {
+            let paths = Paths::find(builder, target, FerroceneCoverageFor::Library);
+            cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
+            instrument_coverage(builder, &mut cargo);
         }
 
         cargo

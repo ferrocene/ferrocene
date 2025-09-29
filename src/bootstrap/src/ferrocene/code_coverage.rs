@@ -8,16 +8,13 @@ use std::path::PathBuf;
 use build_helper::exit;
 
 use crate::builder::Builder;
-use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
-use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
-use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::ferrocene::run::CertifiedCoreSymbols;
-use crate::{BootstrapCommand, Compiler, DocTests, GitRepo, Mode, RemapScheme, t};
+use crate::{BootstrapCommand, Compiler, DocTests, Mode, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -56,7 +53,6 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
         builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
 
     cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
-    // cargo.rustflag("-Zcoverage-options=condition");
 }
 
 pub(crate) fn measure_coverage(
@@ -175,57 +171,15 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         ],
     };
 
-    builder.info("Generating rustdoc-json for the certified libcore subset");
-    builder.ensure(CertifiedApiDocs { target: builder.config.host_target, format: DocumentationFormat::Json });
-
     builder.info("Listing symbols for the certified libcore subset");
     builder.ensure(CertifiedCoreSymbols {
+        // We need at least stage 1 so that our compiler knows about .certified targets.
         build_compiler: builder.compiler(builder.top_stage.max(1), builder.config.host_target),
         target: builder.config.host_target
     });
 
-    builder.info("Generating lcov dump of the code coverage measurements");
-    let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
-    cmd.arg("export").args(instrumented_binaries).arg("--instr-profile").arg(&paths.profdata_file);
-    cmd.arg("--format").arg("lcov");
-
-    // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
-    // llvm-cov makes all paths relative to the common ancestor.
-    for path in ignored_path_regexes {
-        cmd.arg("--ignore-filename-regex").arg(path);
-    }
-
-    let result = cmd.run_capture_stdout(builder);
-    if result.is_failure() {
-        eprintln!("Failed to run llvm-cov to generate a report!");
-        eprintln!();
-        eprintln!("If the error message mentions \"function name is empty\" please check the");
-        eprintln!("comment at the bottom of {}.", file!());
-        exit!(1);
-    }
-
-    let metadata = CoverageMetadata {
-        metadata_version: CoverageMetadata::CURRENT_VERSION,
-        path_prefix: if let Some(path) =
-            builder.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
-        {
-            path.into()
-        } else {
-            builder.src.clone()
-        },
-    };
-
-    t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));
-    t!(std::fs::write(&paths.metadata_file, &t!(serde_json::to_vec_pretty(&metadata))));
-
-    if builder.config.ferrocene_generate_coverage_report_after_tests {
-        builder.ensure(SingleCoverageReport {
-            target: state.target,
-            name: format!("{}-{}", state.coverage_for.as_str(), state.target.triple),
-            lcov: paths.lcov_file,
-            metadata,
-        });
-    }
+    builder.info(&format!("Now run `../blanket/run.nu --ferrocene-src {}` to get a coverage report.",
+        builder.src.display()));
 
     if builder.doc_tests != DocTests::No {
         // Remove the doctest binaries so they're not distributed afterwards.

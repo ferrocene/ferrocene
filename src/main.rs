@@ -6,6 +6,7 @@ use llvm_profparser::*;
 use maud::Render;
 use std::fmt;
 use std::fs::{self};
+use std::os::macos::raw::stat;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use tracing_subscriber::filter::filter_fn;
@@ -111,15 +112,19 @@ enum FunctionCoverageStatus {
 impl FunctionCoverageStatus {
     fn new(lines: &LineCoverage) -> Self {
         match lines {
+            // If all lines are ignored, the function is ignored.
             lines if lines.lines.iter().all(|(_, status)| {
                 *status == LineCoverageStatus::Ignored
             }) => FunctionCoverageStatus::FullyIgnored,
+            // If all lines are either covered or ignored, the function is fully tested.
             lines if lines.lines.iter().all(|(_, status)| {
-                *status != LineCoverageStatus::Untested
+                *status == LineCoverageStatus::Ignored || *status == LineCoverageStatus::Tested
             }) => FunctionCoverageStatus::FullyTested,
+            // If all lines are uncovered or ignored, the function is fully untested
             lines if lines.lines.iter().all(|(_, status)| {
-                *status != LineCoverageStatus::Tested
+                *status == LineCoverageStatus::Untested || *status == LineCoverageStatus::Ignored
             }) => FunctionCoverageStatus::FullyUntested,
+            // Otherwise, the function mixes uncovered and covered lines.
             _ => FunctionCoverageStatus::PartiallyTested,
         }
     }

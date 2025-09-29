@@ -174,7 +174,7 @@ An :dt:`inferred constant` is a :t:`constant argument` which is inferred
 from the surrounding context by using ``_`` (underscore) in its place.
 
 :dp:`fls_Ft5rGeL7QwJM`
-An :t:`inferred constant` can only be used inside a :t:`function body`.
+An :t:`inferred constant` cannot be used in :t:`item` signatures.
 
 :dp:`fls_7epZNsTYNmgE`
 An :t:`inferred constant` cannot be surrounded by ``{}`` (curly braces).

@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 use std/dirs
 
-let host_os = (sys host).name
+let host = (sys host)
 
 def main [
   --debug # Toggle debug
@@ -9,19 +9,19 @@ def main [
   --ferrocene-src: string # The path to ferrocene
 ] {
     let ferrocene = $ferrocene_src | default "/home/ci/project/ferrocene"
-    let host = (rustc --print host-tuple)
-    let certified_host = if ($host | str starts-with "x86_64") {
+    let host_tuple = (rustc --print host-tuple)
+    let certified_host = if ($host_tuple | str starts-with "x86_64") {
         "x86_64-unknown-ferrocene.certified"
     } else {
         "aarch64-unknown-ferrocene.certified"
     }
-    let prof = $"($ferrocene)/build/tmp/ferrocene-library-($host).profdata"
-    let std_build = $"($ferrocene)/build/host/stage1-std/($host)/release/deps/"
+    let prof = $"($ferrocene)/build/tmp/ferrocene-library-($host_tuple).profdata"
+    let std_build = $"($ferrocene)/build/host/stage1-std/($host_tuple)/release/deps/"
     let symbols = $"($ferrocene)/build/host/stage1-std/($certified_host)/release/symbol-report.json"
     
-    let std_obj = if $host_os == "Linux" {
+    let std_obj = if ($host | get long_os_version | str starts-with "Linux") {
         ls $std_build | where name =~ "libstd.*so" | get name | first
-    } else if $host_os == "Darwin" {
+    } else if ($host | get long_os_version | str starts-with "macOS") {
         ls $std_build | where name =~ "libstd.*dylib" | get name | first
     } else {
         print "Unsupported OS"

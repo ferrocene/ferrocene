@@ -105,7 +105,7 @@ enum FunctionCoverageStatus {
     FullyTested,
     PartiallyTested,
     FullyUntested,
-    FullyIngored,
+    FullyIgnored,
 }
 
 impl FunctionCoverageStatus {
@@ -113,7 +113,7 @@ impl FunctionCoverageStatus {
         match lines {
             lines if lines.lines.iter().all(|(_, status)| {
                 *status == LineCoverageStatus::Ignored
-            }) => FunctionCoverageStatus::FullyIngored,
+            }) => FunctionCoverageStatus::FullyIgnored,
             lines if lines.lines.iter().all(|(_, status)| {
                 *status != LineCoverageStatus::Untested
             }) => FunctionCoverageStatus::FullyTested,
@@ -129,7 +129,7 @@ impl FunctionCoverageStatus {
             FunctionCoverageStatus::FullyTested => "fully-tested",
             FunctionCoverageStatus::PartiallyTested => "partially-tested",
             FunctionCoverageStatus::FullyUntested => "fully-untested",
-            FunctionCoverageStatus::FullyIngored => "fully-ignored",
+            FunctionCoverageStatus::FullyIgnored => "fully-ignored",
         }
     }
 }
@@ -285,7 +285,7 @@ impl ShowCommand {
                 FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
                 FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
                 FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
-                FunctionCoverageStatus::FullyIngored => count_fully_ignored += 1,
+                FunctionCoverageStatus::FullyIgnored => count_fully_ignored += 1,
             };
         }
         println!("\

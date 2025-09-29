@@ -26,14 +26,14 @@ pub(crate) fn generate(
             FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
             FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
             FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
-            FunctionCoverageStatus::FullyIngored => count_fully_ignored += 1,
+            FunctionCoverageStatus::FullyIgnored => count_fully_ignored += 1,
         };
     }
 
     let fully_tested_class = FunctionCoverageStatus::FullyTested.to_css_class();
     let partially_tested_class = FunctionCoverageStatus::PartiallyTested.to_css_class();
     let fully_untested_class = FunctionCoverageStatus::FullyUntested.to_css_class();
-    let fully_ignored_class = FunctionCoverageStatus::FullyIngored.to_css_class();
+    let fully_ignored_class = FunctionCoverageStatus::FullyIgnored.to_css_class();
 
     let summary = maud::html!(
         div class="summary" {

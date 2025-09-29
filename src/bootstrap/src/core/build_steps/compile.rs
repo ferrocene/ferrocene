@@ -277,6 +277,9 @@ impl Step for Std {
             // Note that for the standard library, stage 1 is tested when either --stage 1 or
             // --stage 2 are passed.
             && build_compiler.stage == 1
+            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
+            // likely to break.
+            && target == build_compiler.host
         {
             instrument_coverage(builder, &mut cargo);
         }
@@ -722,12 +725,6 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, cargo: &mut Car
     cargo.rustdocflag(&html_root);
 
     cargo.rustdocflag("-Zcrate-attr=warn(rust_2018_idioms)");
-
-    if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library) {
-        let paths = Paths::find(builder, target, FerroceneCoverageFor::Library);
-        cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
-        instrument_coverage(builder, cargo);
-    }
 
     // ferrocene addition: `cfg` used to adapt libstd to our "secret sauce" libc
     if target.contains("facade") {

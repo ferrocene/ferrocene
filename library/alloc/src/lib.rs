@@ -190,12 +190,7 @@
 // not-alphbetical-end
 //
 // Rustdoc features:
-<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
-#![feature(doc_cfg_hide)]
-=======
-#![feature(doc_cfg)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 // Technically, this is a bug in rustdoc: rustdoc sees the documentation on `#[lang = slice_alloc]`
 // blocks is for `&[T]`, which also has documentation using this feature in `core`, and gets mad
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs

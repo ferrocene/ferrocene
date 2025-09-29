@@ -27,3 +27,8 @@
   after:
     # cargo update -p libc --manifest-path=library/Cargo.toml
     - update-cargo-lock libc library
+
+# Be sure to track the version upstream tracks: https://github.com/rust-lang/rust/tree/master/library
+- path: library/backtrace
+  repo: rust-lang/backtrace-rs
+  pull: branch:0.3.75

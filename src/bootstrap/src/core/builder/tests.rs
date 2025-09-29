@@ -545,6 +545,8 @@ fn any_debug() {
 
 /// These tests use insta for snapshot testing.
 /// See bootstrap's README on how to bless the snapshots.
+///
+/// Ferrocene note: many snapshots differ from upstream, which is due to custom bootstrap changes.
 mod snapshot {
     use std::path::PathBuf;
 
@@ -1113,9 +1115,6 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1230,9 +1229,6 @@ mod snapshot {
                 "--set",
                 "rust.lld=true",
             ])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
             .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1306,9 +1302,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target()])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1382,9 +1375,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target()])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1448,9 +1438,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1533,9 +1520,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[])
                 .targets(&[TEST_TRIPLE_1])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1558,9 +1542,6 @@ mod snapshot {
                 .hosts(&[TEST_TRIPLE_1])
                 .targets(&[TEST_TRIPLE_1])
                 .args(&["--set", "rust.channel=nightly", "--set", "build.extended=true"])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>

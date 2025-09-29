@@ -109,7 +109,7 @@ enum DownloadSource {
 /// Functions that are only ever called once, but named for clarity and to avoid thousand-line functions.
 impl Config {
     pub(crate) fn download_clippy(&self) -> PathBuf {
-        self.verbose(|| println!("downloading stage0 clippy artifacts"));
+        self.do_if_verbose(|| println!("downloading stage0 clippy artifacts"));
 
         let date = &self.stage0_metadata.compiler.date;
         let version = &self.stage0_metadata.compiler.version;
@@ -154,7 +154,9 @@ impl Config {
     }
 
     pub(crate) fn download_ci_rustc(&self, commit: &str) {
-        self.verbose(|| println!("using downloaded stage2 artifacts from CI (commit {commit})"));
+        self.do_if_verbose(|| {
+            println!("using downloaded stage2 artifacts from CI (commit {commit})")
+        });
 
         let version = self.artifact_version_part(commit);
         // download-rustc doesn't need its own cargo, it can just use beta's. But it does need the
@@ -261,7 +263,7 @@ impl Config {
         let llvm_root = self.ci_llvm_root();
         let llvm_freshness =
             detect_llvm_freshness(self, self.rust_info.is_managed_git_subrepository());
-        self.verbose(|| {
+        self.do_if_verbose(|| {
             eprintln!("LLVM freshness: {llvm_freshness:?}");
         });
         let llvm_sha = match llvm_freshness {
@@ -507,7 +509,7 @@ pub(crate) fn maybe_download_rustfmt<'a>(
         return Some(PathBuf::new());
     }
 
-    let VersionMetadata { date, version } = dwn_ctx.stage0_metadata.rustfmt.as_ref()?;
+    let VersionMetadata { date, version, .. } = dwn_ctx.stage0_metadata.rustfmt.as_ref()?;
     let channel = format!("{version}-{date}");
 
     let host = dwn_ctx.host_target;
@@ -560,7 +562,7 @@ pub(crate) fn download_beta_toolchain<'a>(dwn_ctx: impl AsRef<DownloadContext<'a
 #[cfg(not(test))]
 pub(crate) fn download_beta_toolchain<'a>(dwn_ctx: impl AsRef<DownloadContext<'a>>, out: &Path) {
     let dwn_ctx = dwn_ctx.as_ref();
-    dwn_ctx.exec_ctx.verbose(|| {
+    dwn_ctx.exec_ctx.do_if_verbose(|| {
         println!("downloading stage0 beta artifacts");
     });
 
@@ -815,7 +817,7 @@ fn download_component<'a>(
                 unpack(dwn_ctx.exec_ctx, &tarball, &bin_root, prefix);
                 return;
             } else {
-                dwn_ctx.exec_ctx.verbose(|| {
+                dwn_ctx.exec_ctx.do_if_verbose(|| {
                     println!(
                         "ignoring cached file {} due to failed verification",
                         tarball.display()
@@ -856,7 +858,7 @@ download-rustc = false
 pub(crate) fn verify(exec_ctx: &ExecutionContext, path: &Path, expected: &str) -> bool {
     use sha2::Digest;
 
-    exec_ctx.verbose(|| {
+    exec_ctx.do_if_verbose(|| {
         println!("verifying {}", path.display());
     });
 
@@ -949,7 +951,7 @@ fn unpack(exec_ctx: &ExecutionContext, tarball: &Path, dst: &Path, pattern: &str
 
         let dst_path = dst.join(short_path);
 
-        exec_ctx.verbose(|| {
+        exec_ctx.do_if_verbose(|| {
             println!("extracting {} to {}", original_path.display(), dst.display());
         });
 
@@ -981,7 +983,7 @@ fn download_file<'a>(
 ) {
     let dwn_ctx = dwn_ctx.as_ref();
 
-    dwn_ctx.exec_ctx.verbose(|| {
+    dwn_ctx.exec_ctx.do_if_verbose(|| {
         println!("download {url}");
     });
     // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.

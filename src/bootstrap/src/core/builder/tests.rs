@@ -24,13 +24,7 @@ fn configure(cmd: &str, host: &[&str], target: &[&str]) -> Config {
 }
 
 fn configure_with_args(cmd: &[&str], host: &[&str], target: &[&str]) -> Config {
-    TestCtx::new()
-        .config(cmd[0])
-        .args(&cmd[1..])
-        .hosts(host)
-        .targets(target)
-        .args(&["--build", TEST_TRIPLE_1])
-        .create_config()
+    TestCtx::new().config(cmd[0]).args(&cmd[1..]).hosts(host).targets(target).create_config()
 }
 
 fn first<A, B>(v: Vec<(A, B)>) -> Vec<A> {
@@ -246,18 +240,17 @@ fn prepare_rustc_checkout(ctx: &mut GitCtx) {
 
 /// Parses a Config directory from `path`, with the given value of `download_rustc`.
 fn parse_config_download_rustc_at(path: &Path, download_rustc: &str, ci: bool) -> Config {
-    Config::parse_inner(
-        Flags::parse(&[
-            "build".to_owned(),
-            "--dry-run".to_owned(),
-            "--ci".to_owned(),
-            if ci { "true" } else { "false" }.to_owned(),
-            format!("--set=rust.download-rustc='{download_rustc}'"),
-            "--src".to_owned(),
-            path.to_str().unwrap().to_owned(),
-        ]),
-        |&_| Ok(Default::default()),
-    )
+    TestCtx::new()
+        .config("build")
+        .args(&[
+            "--ci",
+            if ci { "true" } else { "false" },
+            format!("--set=rust.download-rustc='{download_rustc}'").as_str(),
+            "--src",
+            path.to_str().unwrap(),
+        ])
+        .no_override_download_ci_llvm()
+        .create_config()
 }
 
 mod dist {
@@ -265,6 +258,7 @@ mod dist {
 
     use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build};
     use crate::Flags;
+    use crate::core::builder::tests::host_target;
     use crate::core::builder::*;
 
     fn configure(host: &[&str], target: &[&str]) -> Config {
@@ -273,11 +267,11 @@ mod dist {
 
     #[test]
     fn llvm_out_behaviour() {
-        let mut config = configure(&[TEST_TRIPLE_1], &[TEST_TRIPLE_2]);
+        let mut config = configure(&[], &[TEST_TRIPLE_2]);
         config.llvm_from_ci = true;
         let build = Build::new(config.clone());
 
-        let target = TargetSelection::from_user(TEST_TRIPLE_1);
+        let target = TargetSelection::from_user(&host_target());
         assert!(build.llvm_out(target).ends_with("ci-llvm"));
         let target = TargetSelection::from_user(TEST_TRIPLE_2);
         assert!(build.llvm_out(target).ends_with("llvm"));
@@ -342,7 +336,7 @@ mod sysroot_target_dirs {
 /// cg_gcc tests instead.
 #[test]
 fn test_test_compiler() {
-    let config = configure_with_args(&["test", "compiler"], &[TEST_TRIPLE_1], &[TEST_TRIPLE_1]);
+    let config = configure_with_args(&["test", "compiler"], &[&host_target()], &[TEST_TRIPLE_1]);
     let cache = run_build(&config.paths.clone(), config);
 
     let compiler = cache.contains::<test::CrateLibrustc>();
@@ -375,7 +369,7 @@ fn test_test_coverage() {
         // Print each test case so that if one fails, the most recently printed
         // case is the one that failed.
         println!("Testing case: {cmd:?}");
-        let config = configure_with_args(cmd, &[TEST_TRIPLE_1], &[TEST_TRIPLE_1]);
+        let config = configure_with_args(cmd, &[], &[TEST_TRIPLE_1]);
         let mut cache = run_build(&config.paths.clone(), config);
 
         let modes =
@@ -387,14 +381,7 @@ fn test_test_coverage() {
 #[test]
 fn test_prebuilt_llvm_config_path_resolution() {
     fn configure(config: &str) -> Config {
-        Config::parse_inner(
-            Flags::parse(&[
-                "build".to_string(),
-                "--dry-run".to_string(),
-                "--config=/does/not/exist".to_string(),
-            ]),
-            |&_| toml::from_str(&config),
-        )
+        TestCtx::new().config("build").with_default_toml_config(config).create_config()
     }
 
     // Removes Windows disk prefix if present
@@ -2878,8 +2865,12 @@ mod snapshot {
                     // Using backslashes fails with `--set`
                     "--set", &format!("install.prefix={}", ctx.dir().display()).replace("\\", "/"),
                     "--set", &format!("install.sysconfdir={}", ctx.dir().display()).replace("\\", "/"),
-                    "--set", "build.extended=true"
+                    "--set", "build.extended=true",
+                    // For Cranelift to be disted
+                    "--build", "x86_64-unknown-linux-gnu",
+                    "--host", "x86_64-unknown-linux-gnu"
                 ])
+<<<<<<< HEAD
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -2936,6 +2927,67 @@ mod snapshot {
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
         "###);
+=======
+                .get_steps()
+                .render_with(RenderConfig {
+                    normalize_host: false
+                }), @r"
+        [build] llvm <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> WasmComponentLd 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
+        [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
+        [doc] book (book) <x86_64-unknown-linux-gnu>
+        [doc] book/first-edition (book) <x86_64-unknown-linux-gnu>
+        [doc] book/second-edition (book) <x86_64-unknown-linux-gnu>
+        [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
+        [build] rustdoc 1 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> standalone 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> WasmComponentLd 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
+        [doc] nomicon (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> reference (book) 2 <x86_64-unknown-linux-gnu>
+        [doc] rustdoc (book) <x86_64-unknown-linux-gnu>
+        [doc] rust-by-example (book) <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> LintDocs 1 <x86_64-unknown-linux-gnu>
+        [doc] rustc (book) <x86_64-unknown-linux-gnu>
+        [doc] cargo (book) <x86_64-unknown-linux-gnu>
+        [doc] clippy (book) <x86_64-unknown-linux-gnu>
+        [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
+        [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
+        [doc] style-guide (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> releases 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+        [dist] docs <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
+        [build] rustdoc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer-proc-macro-srv 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> GenerateCopyright 1 <x86_64-unknown-linux-gnu>
+        [dist] rustc <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> cargo 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustfmt 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-fmt 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustfmt 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> clippy-driver 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-clippy 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> clippy 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> miri 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-miri 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> miri 2 <x86_64-unknown-linux-gnu>
+        [dist] src <>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc_codegen_cranelift 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustc_codegen_cranelift 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> LlvmBitcodeLinker 2 <x86_64-unknown-linux-gnu>
+        ");
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     // Check that `x run miri --target FOO` actually builds miri for the host.

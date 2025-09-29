@@ -7,3 +7,6 @@ members = [
   "self-test",
   "traceability-matrix",
 ]
+
+[workspace.package]
+edition = "2024"

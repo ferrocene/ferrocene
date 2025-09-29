@@ -3,7 +3,7 @@
 
 [package]
 name = "traceability-matrix"
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 anyhow = "1.0.51"

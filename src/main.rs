@@ -241,8 +241,6 @@ impl ShowCommand {
 
         // let coverage = rustdoc::coverage(self, &report)?;
         let coverage = rustc_driver::coverage(self, &report)?;
-        let mut unconsidered = 0;
-        let mut fully_covered = 0;
         for func in &coverage {
             print!("{}: ", func.source_name);
             if func.lines.considered() == 0 {
@@ -252,7 +250,6 @@ impl ShowCommand {
                     func.lines.lines.first().unwrap().0,
                     func.lines.lines.last().unwrap().0
                 );
-                unconsidered += 1;
             } else {
                 let missing = func
                     .lines
@@ -274,14 +271,30 @@ impl ShowCommand {
                         "".into()
                     },
                 );
-                fully_covered += (func.lines.tested() == func.lines.considered()) as usize;
             }
         }
         let total = coverage.len();
-        println!(
-            "{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions",
-            total - unconsidered - fully_covered
-        );
+        let mut count_fully_tested = 0;
+        let mut count_partially_tested = 0;
+        let mut count_fully_untested = 0;
+        let mut count_fully_ignored = 0;
+        for function in &coverage {
+            match function.status {
+                FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
+                FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
+                FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
+                FunctionCoverageStatus::FullyIngored => count_fully_ignored += 1,
+            };
+        }
+        println!("\
+            ---\n\
+            Fully Tested: {count_fully_tested}\n\
+            Partially tested: {count_partially_tested}\n\
+            Fully untested: {count_fully_untested}\n\
+            Fully ignored: {count_fully_ignored}\n\
+            Total: {total}\n\
+            ---\
+        ");
         println!(
             "hits for <u8 as PartialOrd>::partial_cmp: {:?}",
             report

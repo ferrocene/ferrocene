@@ -11,7 +11,7 @@
 ))]
 // Ferrocene addition: disabled temporarily as these fail when running the test suite with coverage
 // instrumentation enabled.
-#[cfg(not(test))]
+#[cfg(not(ferrocene_coverage))]
 mod tests;
 
 use crate::fmt;

@@ -8,7 +8,7 @@
         target_os = "trusty",
     ))
 ))]
-#[cfg(not(test))]
+#[cfg(not(ferrocene_coverage))]
 // Ferrocene addition: disabled temporarily as these fail when running the test suite with coverage
 // instrumentation enabled.
 mod tests;

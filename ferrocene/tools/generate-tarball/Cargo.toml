@@ -4,7 +4,7 @@
 
 [package]
 name = "generate-tarball"
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 anyhow = "1.0.19"

@@ -2,6 +2,7 @@
 use std/dirs
 
 let host = (sys host)
+cd ($env.CURRENT_FILE | path dirname)
 
 def main [
   --debug # Toggle debug
@@ -18,7 +19,7 @@ def main [
     let prof = $"($ferrocene)/build/tmp/ferrocene-library-($host_tuple).profdata"
     let std_build = $"($ferrocene)/build/host/stage1-std/($host_tuple)/release/deps/"
     let symbols = $"($ferrocene)/build/host/stage1-std/($certified_host)/release/symbol-report.json"
-    
+
     let std_obj = if ($host | get long_os_version | str starts-with "Linux") {
         ls $std_build | where name =~ "libstd.*so" | get name | first
     } else if ($host | get long_os_version | str starts-with "macOS") {
@@ -29,7 +30,7 @@ def main [
     }
     let corebenches_bin = ls $std_build | where name =~ "corebenches" | get name | first
     let coretests_bin = ls $std_build | where name =~ "coretests" | get name | first
-    
+
     dirs add $ferrocene
     let rev = (git log --pretty=format:'%H' -n 1)
     dirs drop
@@ -42,15 +43,15 @@ def main [
         let stdbenches_bin = ls $std_build | where name =~ "stdbenches" | get name | first
         $extra_arg = $extra_arg ++ ["--object", "--debug"]
     }
-    
-    
+
+
     (cargo run --release -- show
         --instr-profile $prof
         --object $std_obj
         --object $corebenches_bin
         --object $coretests_bin
         --report $symbols
-        --path-equivalence $"/rustc/($rev),/home/ci/project/ferrocene"
+        --path-equivalence $"/rustc/($rev),($ferrocene)"
         --ferrocene-src $ferrocene
         ...$extra_arg
     )

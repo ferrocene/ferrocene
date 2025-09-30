@@ -1444,7 +1444,6 @@ impl<T> *const MaybeUninit<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *const [T] {
     /// Returns the length of a raw slice.
     ///
@@ -1541,6 +1540,7 @@ impl<T> *const [T] {
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
     where
         I: [const] SliceIndex<[T]>,
@@ -1552,6 +1552,7 @@ impl<T> *const [T] {
     #[doc = include_str!("docs/as_uninit_slice.md")]
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_slice<'a>(self) -> Option<&'a [MaybeUninit<T>]> {
         if self.is_null() {
             None

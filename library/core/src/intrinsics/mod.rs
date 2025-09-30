@@ -410,7 +410,6 @@ pub const unsafe fn unreachable() -> !;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn assume(b: bool) {
     if !b {
         // SAFETY: the caller must guarantee the argument is never `false`
@@ -915,7 +914,6 @@ pub const fn needs_drop<T: ?Sized>() -> bool;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn offset<Ptr: bounds::BuiltinDeref, Delta>(dst: Ptr, offset: Delta) -> Ptr;
 
 /// Calculates the offset from a pointer, potentially wrapping.
@@ -955,7 +953,6 @@ pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 ///   always the case for references, but needs to be upheld manually for pointers
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn slice_get_unchecked<
     ItemPtr: bounds::ChangePointee<[T], Pointee = T, Output = SlicePtr>,
     SlicePtr,

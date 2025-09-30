@@ -26,6 +26,8 @@ use crate::mem::{self, MaybeUninit};
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
+#[cfg(feature = "ferrocene_certified")]
+use crate::ops::{Index, IndexMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -415,7 +417,6 @@ impl<'a, T, const N: usize> IntoIterator for &'a mut [T; N] {
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, I, const N: usize> const Index<I> for [T; N]
 where
     [T]: [const] Index<I>,
@@ -430,7 +431,6 @@ where
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, I, const N: usize> const IndexMut<I> for [T; N]
 where
     [T]: [const] IndexMut<I>,

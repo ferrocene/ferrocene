@@ -118,7 +118,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(lazy_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
+#![feature(panic_internals)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]

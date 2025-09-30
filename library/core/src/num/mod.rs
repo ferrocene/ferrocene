@@ -2,19 +2,17 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "ferrocene_certified")]
-use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::str::FromStr;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ascii, intrinsics, mem};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{intrinsics, mem};
 
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! try_opt {
     ($e:expr) => {
         match $e {
@@ -66,7 +64,6 @@ mod int_sqrt;
 pub(crate) mod libm;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod nonzero;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod overflow_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod saturating;
@@ -113,7 +110,6 @@ pub use saturating::Saturating;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use wrapping::Wrapping;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! u8_xe_bytes_doc {
     () => {
         "
@@ -126,7 +122,6 @@ with larger integer types.
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! i8_xe_bytes_doc {
     () => {
         "
@@ -140,7 +135,6 @@ with larger integer types. You can cast from and to `u8` using
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! usize_isize_to_xe_bytes_doc {
     () => {
         "
@@ -152,7 +146,6 @@ depending on the target pointer size.
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! usize_isize_from_xe_bytes_doc {
     () => {
         "

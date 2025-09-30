@@ -315,7 +315,6 @@ pub mod ops;
 
 /* Core types and methods on primitives */
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod any;
 pub mod array;
 #[cfg(not(feature = "ferrocene_certified"))]

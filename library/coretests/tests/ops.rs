@@ -2,8 +2,8 @@ mod control_flow;
 mod from_residual;
 
 use core::ops::{
-    Bound, Deref, DerefMut, OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeFrom,
-    RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
+    Bound, Deref, DerefMut, IntoBounds, OneSidedRange, OneSidedRangeBound, Range, RangeBounds,
+    RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
 };
 
 // Test the Range structs and syntax.
@@ -144,6 +144,20 @@ fn test_range_bounds() {
 }
 
 #[test]
+fn test_range_into_bounds() {
+    assert_eq!((0..5).into_bounds(), (Bound::Included(0), Bound::Excluded(5)));
+    assert_eq!((0..=5).into_bounds(), (Bound::Included(0), Bound::Included(5)));
+    assert_eq!((0..).into_bounds(), (Bound::Included(0), Bound::Unbounded));
+    assert_eq!((..5).into_bounds(), (Bound::Unbounded, Bound::Excluded(5)));
+    assert_eq!((..=5).into_bounds(), (Bound::Unbounded, Bound::Included(5)));
+    assert_eq!((..).into_bounds(), (Bound::<i32>::Unbounded, Bound::<i32>::Unbounded));
+
+    let mut range = 0..=0;
+    range.next().unwrap();
+    assert_eq!(range.into_bounds(), (Bound::Included(0), Bound::Excluded(0)));
+}
+
+#[test]
 fn test_one_sided_range_bound() {
     assert!(matches!((..1u32).bound(), (OneSidedRangeBound::End, 1)));
     assert!(matches!((1u32..).bound(), (OneSidedRangeBound::StartInclusive, 1)));
@@ -171,7 +185,6 @@ fn test_bound_as_ref() {
     assert_eq!(Bound::Excluded(3).as_ref(), Bound::Excluded(&3));
     assert_eq!(Bound::<i32>::Unbounded.as_ref(), Bound::<&i32>::Unbounded);
 }
-
 
 #[test]
 fn test_bound_as_mut() {

@@ -4,8 +4,11 @@
     reason = "for core, alloc, and std internals until pattern types are further along"
 )]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::StructuralPartialEq;
 
@@ -14,7 +17,8 @@ macro_rules! define_valid_range_type {
         $(#[$m:meta])*
         $vis:vis struct $name:ident($int:ident as $uint:ident in $low:literal..=$high:literal);
     )+) => {$(
-        #[derive(Clone, Copy, Eq)]
+        #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, Eq))]
+        #[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy))]
         #[repr(transparent)]
         #[rustc_layout_scalar_valid_range_start($low)]
         #[rustc_layout_scalar_valid_range_end($high)]
@@ -74,6 +78,7 @@ macro_rules! define_valid_range_type {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl Ord for $name {
             #[inline]
             fn cmp(&self, other: &Self) -> Ordering {
@@ -81,6 +86,7 @@ macro_rules! define_valid_range_type {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl PartialOrd for $name {
             #[inline]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -88,6 +94,7 @@ macro_rules! define_valid_range_type {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl Hash for $name {
             // Required method
             fn hash<H: Hasher>(&self, state: &mut H) {
@@ -95,6 +102,7 @@ macro_rules! define_valid_range_type {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl fmt::Debug for $name {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 <$int as fmt::Debug>::fmt(&self.as_inner(), f)
@@ -120,6 +128,7 @@ impl const Default for Nanoseconds {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct NonZeroU8Inner(u8 as u8 in 1..=0xff);
     pub struct NonZeroU16Inner(u16 as u16 in 1..=0xff_ff);
@@ -137,24 +146,28 @@ define_valid_range_type! {
 }
 
 #[cfg(target_pointer_width = "16")]
+#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff);
 }
 #[cfg(target_pointer_width = "32")]
+#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff_ffff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff_ffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff_ffff);
 }
 #[cfg(target_pointer_width = "64")]
+#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff_ffff_ffff_ffff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff_ffff_ffff_ffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff_ffff_ffff_ffff);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct U32NotAllOnes(u32 as u32 in 0..=0xffff_fffe);
     pub struct I32NotAllOnes(i32 as u32 in 0..=0xffff_fffe);
@@ -163,31 +176,40 @@ define_valid_range_type! {
     pub struct I64NotAllOnes(i64 as u64 in 0..=0xffff_ffff_ffff_fffe);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait NotAllOnesHelper {
     type Type;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 pub type NotAllOnes<T> = <T as NotAllOnesHelper>::Type;
+#[cfg(not(feature = "ferrocene_certified"))]
 impl NotAllOnesHelper for u32 {
     type Type = U32NotAllOnes;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl NotAllOnesHelper for i32 {
     type Type = I32NotAllOnes;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl NotAllOnesHelper for u64 {
     type Type = U64NotAllOnes;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl NotAllOnesHelper for i64 {
     type Type = I64NotAllOnes;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct CodePointInner(u32 as u32 in 0..=0x10ffff);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl CodePointInner {
     pub const ZERO: Self = CodePointInner::new(0).unwrap();
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Default for CodePointInner {
     #[inline]
     fn default() -> Self {

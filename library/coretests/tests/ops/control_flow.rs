@@ -28,3 +28,15 @@ fn control_flow_continue_ok() {
     assert_eq!(ControlFlow::<char, i32>::Break('b').continue_ok(), Err('b'));
     assert_eq!(ControlFlow::<char, i32>::Continue(3).continue_ok(), Ok(3));
 }
+
+#[test]
+fn map_continue() {
+    assert_eq!(
+        ControlFlow::<char, i32>::Continue(3).map_continue(|n| n.is_positive()),
+        ControlFlow::<char, bool>::Continue(true)
+    );
+    assert_eq!(
+        ControlFlow::<char, i32>::Break('b').map_continue(|n| n.is_positive()),
+        ControlFlow::<char, bool>::Break('b')
+    );
+}

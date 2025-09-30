@@ -66,6 +66,11 @@ fn test_bool() {
     assert_eq!(false.cmp(&false), Equal);
     assert_eq!(true.cmp(&false), Greater);
     assert_eq!(false.cmp(&true), Less);
+
+    assert_eq!(true.partial_cmp(&true), Some(Equal));
+    assert_eq!(false.partial_cmp(&false), Some(Equal));
+    assert_eq!(true.partial_cmp(&false), Some(Greater));
+    assert_eq!(false.partial_cmp(&true), Some(Less));
 }
 
 #[test]

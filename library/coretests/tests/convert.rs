@@ -13,4 +13,6 @@ fn convert() {
 
     const BAR: Vec<String> = into(Vec::new());
     assert_eq!(BAR, Vec::<String>::new());
+
+    assert_eq!(FOO, core::convert::identity(FOO));
 }

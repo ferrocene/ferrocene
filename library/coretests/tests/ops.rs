@@ -154,6 +154,26 @@ fn test_range_into_bounds() {
 }
 
 #[test]
+fn test_range_start_bound() {
+    assert_eq!((0..5).start_bound(), Bound::Included(&0));
+    assert_eq!((0..=5).start_bound(), Bound::Included(&0));
+    assert_eq!((0..).start_bound(), Bound::Included(&0));
+    assert_eq!((..5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..=5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..).start_bound(), Bound::<&i32>::Unbounded);
+}
+
+#[test]
+fn test_range_end_bound() {
+    assert_eq!((0..5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((0..=5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((0..).end_bound(), (Bound::<&i32>::Unbounded));
+    assert_eq!((..5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((..=5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((..).end_bound(), (Bound::<&i32>::Unbounded));
+}
+
+#[test]
 fn test_one_sided_range_bound() {
     assert!(matches!((..1u32).bound(), (OneSidedRangeBound::End, 1)));
     assert!(matches!((1u32..).bound(), (OneSidedRangeBound::StartInclusive, 1)));

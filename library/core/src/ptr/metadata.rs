@@ -4,14 +4,10 @@
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Freeze, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
-#[cfg(feature = "ferrocene_certified")]
-use crate::{intrinsics::aggregate_raw_ptr, marker::PointeeSized};
 
 /// Provides the pointer metadata type of any pointed-to type.
 ///
@@ -75,7 +71,7 @@ pub trait Pointee: PointeeSized {
     /// The type for metadata in pointers and references to `Self`.
     #[lang = "metadata_type"]
     #[cfg(feature = "ferrocene_certified")]
-    type Metadata: Copy + Send + Sync + Ord;
+    type Metadata: Copy + Send + Sync + Ord + Freeze;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.
@@ -108,7 +104,6 @@ pub trait Thin = Pointee<Metadata = ()> + PointeeSized;
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn metadata<T: PointeeSized>(ptr: *const T) -> <T as Pointee>::Metadata {
     ptr_metadata(ptr)
 }

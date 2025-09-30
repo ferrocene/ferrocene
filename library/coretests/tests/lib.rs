@@ -23,6 +23,7 @@
 #![feature(const_mul_add)]
 #![feature(const_ops)]
 #![feature(const_option_ops)]
+#![feature(const_raw_ptr_comparison)]
 #![feature(const_ref_cell)]
 #![feature(const_result_trait_fn)]
 #![feature(const_trait_impl)]

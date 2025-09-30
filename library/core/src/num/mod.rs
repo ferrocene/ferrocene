@@ -75,7 +75,6 @@ mod wrapping;
 
 /// 100% perma-unstable
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod niche_types;
 
 #[stable(feature = "rust1", since = "1.0.0")]

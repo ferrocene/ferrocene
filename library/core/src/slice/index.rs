@@ -1,7 +1,6 @@
 //! Indexing implementations for `[T]`.
 
 use crate::intrinsics::slice_get_unchecked;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ops, range};
@@ -35,7 +34,7 @@ where
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[allow(unused_variables)]
 const fn slice_index_fail(start: usize, end: usize, len: usize) -> ! {
     if start > len {
         const_panic!(
@@ -80,7 +79,6 @@ const fn slice_index_fail(start: usize, end: usize, len: usize) -> ! {
 // which use intrinsics directly to get *no* extra checks.
 
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
 const unsafe fn get_offset_len_noubcheck<T>(
     ptr: *const [T],
     offset: usize,
@@ -93,7 +91,6 @@ const unsafe fn get_offset_len_noubcheck<T>(
 }
 
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
 const unsafe fn get_offset_len_mut_noubcheck<T>(
     ptr: *mut [T],
     offset: usize,
@@ -360,7 +357,6 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
 /// - the end of the range is out of bounds.
 #[stable(feature = "slice_get_slice_impls", since = "1.15.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
     type Output = [T];
 
@@ -502,7 +498,6 @@ unsafe impl<T> const SliceIndex<[T]> for range::Range<usize> {
 /// The methods `index` and `index_mut` panic if the end of the range is out of bounds.
 #[stable(feature = "slice_get_slice_impls", since = "1.15.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::RangeTo<usize> {
     type Output = [T];
 
@@ -542,7 +537,6 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeTo<usize> {
 /// The methods `index` and `index_mut` panic if the start of the range is out of bounds.
 #[stable(feature = "slice_get_slice_impls", since = "1.15.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::RangeFrom<usize> {
     type Output = [T];
 
@@ -628,7 +622,6 @@ unsafe impl<T> const SliceIndex<[T]> for range::RangeFrom<usize> {
 
 #[stable(feature = "slice_get_slice_impls", since = "1.15.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::RangeFull {
     type Output = [T];
 
@@ -669,7 +662,6 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeFull {
 /// - the end of the range is out of bounds.
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::RangeInclusive<usize> {
     type Output = [T];
 
@@ -768,7 +760,6 @@ unsafe impl<T> const SliceIndex<[T]> for range::RangeInclusive<usize> {
 /// The methods `index` and `index_mut` panic if the end of the range is out of bounds.
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::RangeToInclusive<usize> {
     type Output = [T];
 

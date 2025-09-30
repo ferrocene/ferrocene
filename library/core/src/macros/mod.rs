@@ -293,7 +293,6 @@ pub macro cfg_select($($tt:tt)*) {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "debug_assert_macro"]
 #[allow_internal_unstable(edition_panic)]
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! debug_assert {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {

@@ -396,6 +396,29 @@ fn test_cloned() {
 }
 
 #[test]
+fn test_clone_from() {
+    let mut placeholder: Option<i32> = Some(0);
+
+    placeholder.clone_from(&Some(1));
+    assert_eq!(placeholder, Some(1));
+
+    placeholder.clone_from(&None);
+    assert_eq!(placeholder, None);
+}
+
+#[test]
+fn test_from() {
+    let mut opt = Option::from(1);
+    assert_eq!(opt, Some(1));
+
+    let opt_ref = Option::<&i32>::from(&opt);
+    assert_eq!(opt_ref, Some(&1));
+
+    let opt_ref_mut = Option::<&mut i32>::from(&mut opt);
+    assert_eq!(opt_ref_mut, Some(&mut 1));
+}
+
+#[test]
 fn test_try() {
     fn try_option_some() -> Option<u8> {
         let val = Some(1)?;

@@ -428,7 +428,7 @@ mod metadata;
 pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[cfg(feature = "ferrocene_certified")]
-pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut};
+pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
 
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
@@ -1195,7 +1195,6 @@ pub const fn from_mut<T: PointeeSized>(r: &mut T) -> *mut T {
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts", since = "1.64.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
     from_raw_parts(data, len)
 }
@@ -1242,7 +1241,6 @@ pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts_mut"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn slice_from_raw_parts_mut<T>(data: *mut T, len: usize) -> *mut [T] {
     from_raw_parts_mut(data, len)
 }

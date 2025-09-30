@@ -167,7 +167,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
+#![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
 #![feature(negative_impls)]
@@ -363,7 +363,6 @@ pub mod unsafe_binder;
 pub mod fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod slice;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod str;

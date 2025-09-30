@@ -56,10 +56,7 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ffi::va_list::{VaArgSafe, VaListImpl};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
-#[cfg(feature = "ferrocene_certified")]
-use crate::marker::{ConstParamTy, DiscriminantKind, Tuple};
 use crate::ptr;
 
 mod bounds;
@@ -3026,7 +3023,6 @@ where
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + PointeeSized, M>(ptr: *const P) -> M;
 
 /// This is an accidentally-stable alias to [`ptr::copy_nonoverlapping`]; use that instead.

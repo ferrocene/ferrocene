@@ -576,3 +576,10 @@ fn atomic_const_from() {
     const _ATOMIC_PTR: AtomicPtr<u32> = AtomicPtr::from(core::ptr::null_mut());
 }
 */
+
+#[test]
+fn atomic_default() {
+    use Ordering::*;
+
+    assert_eq!(AtomicU32::default().load(Relaxed), AtomicU32::from(0).load(Relaxed));
+}

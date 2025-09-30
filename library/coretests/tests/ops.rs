@@ -154,6 +154,43 @@ fn test_range_into_bounds() {
     let mut range = 0..=0;
     range.next().unwrap();
     assert_eq!(range.into_bounds(), (Bound::Included(0), Bound::Excluded(0)));
+
+    let r = (Bound::Included(0), Bound::Excluded(5));
+    assert_eq!(r.into_bounds(), r);
+}
+
+#[test]
+fn test_range_start_bound() {
+    assert_eq!((0..5).start_bound(), Bound::Included(&0));
+    assert_eq!((0..=5).start_bound(), Bound::Included(&0));
+    assert_eq!((0..).start_bound(), Bound::Included(&0));
+    assert_eq!((..5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..=5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..).start_bound(), Bound::<&i32>::Unbounded);
+
+    assert_eq!((&0..&5).start_bound(), Bound::Included(&0));
+    assert_eq!((&0..=&5).start_bound(), Bound::Included(&0));
+    assert_eq!((&0..).start_bound(), Bound::Included(&0));
+    assert_eq!((..&5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..=&5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..).start_bound(), Bound::<&i32>::Unbounded);
+}
+
+#[test]
+fn test_range_end_bound() {
+    assert_eq!((0..5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((0..=5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((0..).end_bound(), (Bound::<&i32>::Unbounded));
+    assert_eq!((..5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((..=5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((..).end_bound(), (Bound::<&i32>::Unbounded));
+
+    assert_eq!((&0..&5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((&0..=&5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((&0..).end_bound(), (Bound::<&i32>::Unbounded));
+    assert_eq!((..&5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((..=&5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((..).end_bound(), (Bound::<&i32>::Unbounded));
 }
 
 #[test]

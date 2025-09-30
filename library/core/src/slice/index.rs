@@ -983,7 +983,6 @@ where
 
 /// Converts a pair of `ops::Bound`s into `ops::Range` without performing any
 /// bounds checking or (in debug) overflow checking.
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) fn into_range_unchecked(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
@@ -1004,7 +1003,6 @@ pub(crate) fn into_range_unchecked(
 
 /// Converts pair of `ops::Bound`s into `ops::Range`.
 /// Returns `None` on overflowing indices.
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) fn into_range(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
@@ -1030,7 +1028,6 @@ pub(crate) fn into_range(
 
 /// Converts pair of `ops::Bound`s into `ops::Range`.
 /// Panics on overflowing indices.
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) fn into_slice_range(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
@@ -1061,7 +1058,6 @@ pub(crate) fn into_slice_range(
 }
 
 #[stable(feature = "slice_index_with_ops_bound_pair", since = "1.53.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> SliceIndex<[T]> for (ops::Bound<usize>, ops::Bound<usize>) {
     type Output = [T];
 

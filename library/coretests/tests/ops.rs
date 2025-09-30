@@ -165,6 +165,21 @@ fn test_bound_cloned_excluded() {
 }
 
 #[test]
+fn test_bound_as_ref() {
+    assert_eq!(Bound::Included(3).as_ref(), Bound::Included(&3));
+    assert_eq!(Bound::Excluded(3).as_ref(), Bound::Excluded(&3));
+    assert_eq!(Bound::<i32>::Unbounded.as_ref(), Bound::<&i32>::Unbounded);
+}
+
+
+#[test]
+fn test_bound_as_mut() {
+    assert_eq!(Bound::Included(3).as_mut(), Bound::Included(&mut 3));
+    assert_eq!(Bound::Excluded(3).as_mut(), Bound::Excluded(&mut 3));
+    assert_eq!(Bound::<i32>::Unbounded.as_mut(), Bound::<&mut i32>::Unbounded);
+}
+
+#[test]
 #[allow(unused_comparisons)]
 #[allow(unused_mut)]
 fn test_range_syntax() {

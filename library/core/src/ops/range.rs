@@ -457,7 +457,6 @@ impl<Idx> RangeInclusive<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.

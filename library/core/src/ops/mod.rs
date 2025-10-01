@@ -201,7 +201,6 @@ pub use self::reborrow::{CoerceShared, Reborrow};
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 pub use self::try_trait::Residual;
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::try_trait::Yeet;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};

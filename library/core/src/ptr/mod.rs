@@ -414,7 +414,11 @@ use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
 #[cfg(feature = "ferrocene_certified")]
-use crate::{intrinsics, marker::PointeeSized, mem};
+use crate::{
+    intrinsics,
+    marker::{Destruct, PointeeSized},
+    mem,
+};
 #[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
 use crate::{mem::SizedTypeProperties, ub_checks};
 
@@ -820,7 +824,6 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 #[lang = "drop_in_place"]
 #[allow(unconditional_recursion)]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
-#[cfg(not(feature = "ferrocene_certified"))]
 #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
 pub const unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T)
 where

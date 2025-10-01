@@ -16,10 +16,8 @@ use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use manually_drop::ManuallyDrop;
 
 #[cfg(not(feature = "ferrocene_certified"))]

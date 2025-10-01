@@ -152,7 +152,11 @@ use crate::ptr;
 /// [`MaybeUninit`]: crate::mem::MaybeUninit
 #[stable(feature = "manually_drop", since = "1.20.0")]
 #[lang = "manually_drop"]
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified"),
+    derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)
+)]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone, PartialEq))]
 #[repr(transparent)]
 #[rustc_pub_transparent]
 pub struct ManuallyDrop<T: ?Sized> {

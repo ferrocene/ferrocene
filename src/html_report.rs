@@ -17,18 +17,19 @@ pub(crate) fn generate(
         functions.push(fragment);
     }
 
-    let mut count_fully_tested = 0;
-    let mut count_partially_tested = 0;
-    let mut count_fully_untested = 0;
-    let mut count_fully_ignored = 0;
+    let mut fully_tested = vec![];
+    let mut partially_tested = vec![];
+    let mut fully_untested = vec![];
+    let mut fully_ignored = vec![];
     for function in coverage {
         match function.status {
-            FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
-            FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
-            FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
-            FunctionCoverageStatus::FullyIgnored => count_fully_ignored += 1,
+            FunctionCoverageStatus::FullyTested => fully_tested.push(function),
+            FunctionCoverageStatus::PartiallyTested => partially_tested.push(function),
+            FunctionCoverageStatus::FullyUntested => fully_untested.push(function),
+            FunctionCoverageStatus::FullyIgnored => fully_ignored.push(function),
         };
     }
+    assert_eq!(fully_tested.len() + partially_tested.len() + fully_untested.len() + fully_ignored.len(), coverage.len());
 
     let fully_tested_class = FunctionCoverageStatus::FullyTested.to_css_class();
     let partially_tested_class = FunctionCoverageStatus::PartiallyTested.to_css_class();
@@ -36,24 +37,34 @@ pub(crate) fn generate(
     let fully_ignored_class = FunctionCoverageStatus::FullyIgnored.to_css_class();
 
     let summary = maud::html!(
+        div class="instructions" {
+            "Below is a list of all functions within the certified subset. Use the expander to review line coverage of any function."
+            br {}
+            "To filter for specific coverage status, select below:"
+        }
         div class="summary" {
-            div class=(fully_tested_class) data-filter=(fully_tested_class) {
-                (count_fully_tested) " Fully Tested"
+            button class=(fully_tested_class) data-filter=(fully_tested_class) {
+                (fully_tested.len()) " Fully Tested"
             }
-            div class=(partially_tested_class) data-filter=(partially_tested_class) {
-                (count_partially_tested) " Partially Tested"
+            button class=(partially_tested_class) data-filter=(partially_tested_class) {
+                (partially_tested.len()) " Partially Tested"
             }
-            div class=(fully_untested_class) data-filter=(fully_untested_class) {
-                (count_fully_untested) " Fully Untested"
+            button class=(fully_untested_class) data-filter=(fully_untested_class) {
+                (fully_untested.len()) " Fully Untested"
             }
-            div class=(fully_ignored_class) data-filter=(fully_ignored_class) {
-                (count_fully_ignored) " Fully Ignored"
-            }
-            div id="reset" {
-                "Reset"
+            button class=(fully_ignored_class) data-filter=(fully_ignored_class) {
+                (fully_ignored.len()) " Fully Ignored"
             }
         }
     );
+
+    let sections = [
+        generate_section(FunctionCoverageStatus::FullyUntested, fully_untested, sources)?,
+        generate_section(FunctionCoverageStatus::PartiallyTested, partially_tested, sources)?,
+        generate_section(FunctionCoverageStatus::FullyTested, fully_tested, sources)?,
+        generate_section(FunctionCoverageStatus::FullyIgnored, fully_ignored, sources)?,
+    ];
+
 
     let html = maud::html!(
         (DOCTYPE)
@@ -66,8 +77,8 @@ pub(crate) fn generate(
             body {
                 (summary)
                 div class="functions" {
-                    @for fragment in functions {
-                        (fragment)
+                    @for section in sections {
+                        (section)
                     }
                 }
                 script defer=(true) {
@@ -79,12 +90,39 @@ pub(crate) fn generate(
     Ok(html)
 }
 
+fn generate_section(
+    status: FunctionCoverageStatus,
+    functions: Vec<&FunctionCoverage>,
+    sources: &Path,
+) -> std::io::Result<PreEscaped<std::string::String>> {
+    let mut fragments = Vec::with_capacity(functions.len());
+    for function in functions {
+        assert_eq!(function.status, status);
+        let fragment = generate_function(function, sources)?;
+        fragments.push(fragment);
+    }
+
+    let class = status.to_css_class();
+    let human = status.to_human();
+    let section = maud::html!(
+        section class=(class) data-status=(class)  {
+            h1 { (human) }
+            div class="list" {
+                @for fragment in fragments {
+                    (fragment)
+                }
+            }
+        }
+    );
+    Ok(section)
+}
+
 fn generate_function(
     function: &FunctionCoverage,
     sources: &Path,
 ) -> std::io::Result<PreEscaped<std::string::String>> {
     let line_coverage = &function.lines.lines;
-    let source_path = sources.join(&function.filename);
+    let source_path = sources.join(&function.relative_path);
     let file = std::fs::read_to_string(&source_path)?;
 
     let mut lines = Vec::with_capacity(line_coverage.len());
@@ -106,19 +144,24 @@ fn generate_function(
             summary {
                 (function.source_name)
             }
-            code {
-                pre {
-                    @for (linenum, line, status) in lines {
-                        @match status {
-                            LineCoverageStatus::Tested => span class="tested" {
-                                (linenum) "|" (line) "\n"
-                            },
-                            LineCoverageStatus::Untested => span class="untested" {
-                                (linenum) "|" (line) "\n"
-                            },
-                            LineCoverageStatus::Ignored => {
-                                (linenum) "|" (line) "\n"
-                            },
+            div {
+                div {
+                    "File: " (function.relative_path.display())
+                }
+                code {
+                    pre {
+                        @for (linenum, line, status) in lines {
+                            @match status {
+                                LineCoverageStatus::Tested => span class="tested" {
+                                    (linenum) "|" (line) "\n"
+                                },
+                                LineCoverageStatus::Untested => span class="untested" {
+                                    (linenum) "|" (line) "\n"
+                                },
+                                LineCoverageStatus::Ignored => {
+                                    (linenum) "|" (line) "\n"
+                                },
+                            }
                         }
                     }
                 }

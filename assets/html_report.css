@@ -1,37 +1,60 @@
 .summary > div {
     cursor: pointer;
 }
+.summary {
+    display: flex;
+    justify-content: space-around;
+}
 
+/* Fully ignored */
 .functions .fully-ignored > summary {
     color: gray;
 }
-.functions[data-filter="fully-ignored"] details:not([data-status="fully-ignored"]) {
+.functions[data-filter="fully-ignored"] section:not([data-status="fully-ignored"]) {
     display: none;
 }
+.summary:has(+ .functions[data-filter="fully-ignored"]) :not([data-filter="fully-ignored"]) {
+    color: grey;
+    text-decoration: line-through;
+}
 
-
+/* Fully untested */
 .functions .fully-untested > summary {
     color: red;
 }
-.functions[data-filter="fully-untested"] details:not([data-status="fully-untested"]) {
+.functions[data-filter="fully-untested"] section:not([data-status="fully-untested"]) {
     display: none;
 }
+.summary:has(+ .functions[data-filter="fully-untested"]) :not([data-filter="fully-untested"]) {
+    color: grey;
+    text-decoration: line-through;
+}
 
+/* Fully tested */
 .functions .fully-tested > summary {
     color: green;
 }
-.functions[data-filter="fully-tested"] details:not([data-status="fully-tested"]) {
+.functions[data-filter="fully-tested"] section:not([data-status="fully-tested"]) {
     display: none;
 }
+.summary:has(+ .functions[data-filter="fully-tested"]) :not([data-filter="fully-tested"]) {
+    color: grey;
+    text-decoration: line-through;
+}
 
+/* Partially tested */
 .functions .partially-tested > summary {
     color: orange;
 }
-.functions[data-filter="partially-tested"] details:not([data-status="partially-tested"]) {
+.functions[data-filter="partially-tested"] section:not([data-status="partially-tested"]) {
     display: none;
 }
+.summary:has(+ .functions[data-filter="partially-tested"]) :not([data-filter="partially-tested"]) {
+    color: grey;
+    text-decoration: line-through;
+}
 
-
+/* Lines */
 .functions .tested {
     color: green;
 }

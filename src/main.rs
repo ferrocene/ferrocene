@@ -6,7 +6,6 @@ use llvm_profparser::*;
 use maud::Render;
 use std::fmt;
 use std::fs::{self};
-use std::os::macos::raw::stat;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use tracing_subscriber::filter::filter_fn;
@@ -101,7 +100,7 @@ impl LineCoverage {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 enum FunctionCoverageStatus {
     FullyTested,
     PartiallyTested,
@@ -137,12 +136,21 @@ impl FunctionCoverageStatus {
             FunctionCoverageStatus::FullyIgnored => "fully-ignored",
         }
     }
+    
+    fn to_human(&self) -> &str {
+        match self {
+            FunctionCoverageStatus::FullyTested => "Fully Tested",
+            FunctionCoverageStatus::PartiallyTested => "Partially Tested",
+            FunctionCoverageStatus::FullyUntested => "Fully Untested",
+            FunctionCoverageStatus::FullyIgnored => "Fully Ignored",
+        }
+    }
 }
 
 #[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
-    filename: PathBuf,
+    relative_path: PathBuf,
     lines: LineCoverage,
     status: FunctionCoverageStatus,
 }
@@ -152,7 +160,7 @@ impl FunctionCoverage {
         let status = FunctionCoverageStatus::new(&lines); 
         Self {
             source_name,
-            filename,
+            relative_path: filename,
             lines,
             status,
         }
@@ -172,25 +180,22 @@ fn get_coverage(
     source_name: String,
 ) -> Result<FunctionCoverage> {
     let Span {
-        mut filename,
+        filename,
         start_line,
         end_line,
     } = span;
-    if filename.is_relative() {
-        filename = ferrocene.join(filename);
-    }
-    let filename = if filename.is_absolute() {
-        fs::canonicalize(&filename).context(format!("failed to canonicalize {filename:?}"))
+    let absolute_path = if filename.is_relative() {
+        ferrocene.join(&filename).canonicalize().context(format!("failed to canonicalize {filename:?}"))?
     } else {
-        panic!("--ferrocene-src was not absolute")
-    }?;
+        return Err(anyhow::anyhow!("Absolute paths are forbidden, they break reproducability."));
+    };
+
     let source_lines = start_line..=end_line;
     let source_name = source_name;
-    let filename = filename.clone();
 
     // we didn't get any hits from the tool, so we don't know which lines shouldn't be
     // considered. report them all as considered and missing coverage.
-    let Some(func_coverage) = report.files.get(&filename) else {
+    let Some(func_coverage) = report.files.get(&absolute_path) else {
         let no_coverage = LineCoverage {
             lines: source_lines
                 .clone()
@@ -199,7 +204,7 @@ fn get_coverage(
         };
         println!(
             "warning: couldn't find source file {} in coverage report",
-            filename.display()
+            absolute_path.display()
         );
         return Ok(FunctionCoverage::new(
             source_name,
@@ -253,7 +258,7 @@ impl ShowCommand {
             if func.lines.considered() == 0 {
                 println!(
                     "BUG: no lines considered (span: {}:{}-{})",
-                    func.filename.display(),
+                    func.relative_path.display(),
                     func.lines.lines.first().unwrap().0,
                     func.lines.lines.last().unwrap().0
                 );
@@ -263,7 +268,7 @@ impl ShowCommand {
                     .lines
                     .iter()
                     .filter(|(_, status)| *status == LineCoverageStatus::Untested)
-                    .map(|(linenum, _)| format!("{}:{}", func.filename.display(), linenum))
+                    .map(|(linenum, _)| format!("{}:{}", func.relative_path.display(), linenum))
                     .collect::<Vec<_>>();
                 println!(
                     "{} / {} covered ({} lines unconsidered)\

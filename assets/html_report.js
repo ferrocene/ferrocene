@@ -14,9 +14,14 @@ function main() {
     let functionsElem = document.querySelector(functionsSelector);
     for (selector of summarySelectors) {
         let summaryItemElem = document.querySelector(selector);
-        summaryItemElem.addEventListener("click", _ => {
-            functionsElem.dataset.filter = summaryItemElem.dataset.filter;
-        });
+        let filter_listener = _ => {
+            if (functionsElem.dataset.filter == summaryItemElem.dataset.filter) {
+                delete(functionsElem.dataset.filter);
+            } else {
+                functionsElem.dataset.filter = summaryItemElem.dataset.filter;
+            }
+        }
+        summaryItemElem.addEventListener("click", filter_listener);
     }
     document.querySelector("#reset").addEventListener("click", _ => {
         functionsElem.dataset.filter = null;

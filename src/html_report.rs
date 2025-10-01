@@ -59,8 +59,8 @@ pub(crate) fn generate(
     );
 
     let sections = [
-        generate_section(FunctionCoverageStatus::FullyUntested, fully_untested, sources)?,
         generate_section(FunctionCoverageStatus::PartiallyTested, partially_tested, sources)?,
+        generate_section(FunctionCoverageStatus::FullyUntested, fully_untested, sources)?,
         generate_section(FunctionCoverageStatus::FullyTested, fully_tested, sources)?,
         generate_section(FunctionCoverageStatus::FullyIgnored, fully_ignored, sources)?,
     ];
@@ -96,7 +96,7 @@ fn generate_section(
     sources: &Path,
 ) -> std::io::Result<PreEscaped<std::string::String>> {
     let mut fragments = Vec::with_capacity(functions.len());
-    for function in functions {
+    for function in &functions {
         assert_eq!(function.status, status);
         let fragment = generate_function(function, sources)?;
         fragments.push(fragment);
@@ -106,7 +106,7 @@ fn generate_section(
     let human = status.to_human();
     let section = maud::html!(
         section class=(class) data-status=(class)  {
-            h1 { (human) }
+            h1 { (functions.len()) " " (human) }
             div class="list" {
                 @for fragment in fragments {
                     (fragment)
@@ -137,10 +137,10 @@ fn generate_function(
             .iter()
             .find(|(covered_linenum, _)| linenum == *covered_linenum);
         if let Some((actual_linenum, status)) = maybe_line {
-            lines.push((actual_linenum, line, status))
-        }
-        if line.contains("// Ferrocene annotation") {
-            class_set.insert("annotation");
+            lines.push((actual_linenum, line, status));
+            if line.contains("// Ferrocene annotation") {
+                class_set.insert("annotation");
+            }
         }
     }
 

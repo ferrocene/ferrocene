@@ -1,3 +1,12 @@
+:root {
+    /* Colorblind friendly according to https://visualisingdata.com/2019/08/five-ways-to-design-for-red-green-colour-blindness/ */
+    --var-tested: #006164;
+    --var-untested: #DB4325;
+    --var-partial: #B3589A;
+    --var-ignored: gray;
+
+}
+
 .summary > div {
     cursor: pointer;
 }
@@ -8,64 +17,86 @@
 
 /* Fully ignored */
 .functions .fully-ignored > summary {
-    color: gray;
+    color: var(--var-ignored);
 }
 .functions[data-filter="fully-ignored"] section:not([data-status="fully-ignored"]) {
     display: none;
 }
 .summary:has(+ .functions[data-filter="fully-ignored"]) :not([data-filter="fully-ignored"]) {
-    color: grey;
+    color: var(--var-ignored);
     text-decoration: line-through;
 }
 
 /* Fully untested */
 .functions .fully-untested > summary {
-    color: red;
+    color: var(--var-untested);
 }
 .functions[data-filter="fully-untested"] section:not([data-status="fully-untested"]) {
     display: none;
 }
 .summary:has(+ .functions[data-filter="fully-untested"]) :not([data-filter="fully-untested"]) {
-    color: grey;
+    color: var(--var-ignored);
     text-decoration: line-through;
 }
 
 /* Fully tested */
 .functions .fully-tested > summary {
-    color: green;
+    color: var(--var-tested);
 }
 .functions[data-filter="fully-tested"] section:not([data-status="fully-tested"]) {
     display: none;
 }
 .summary:has(+ .functions[data-filter="fully-tested"]) :not([data-filter="fully-tested"]) {
-    color: grey;
+    color: var(--var-ignored);
     text-decoration: line-through;
 }
 
 /* Partially tested */
 .functions .partially-tested > summary {
-    color: orange;
+    color: var(--var-partial);
 }
 .functions[data-filter="partially-tested"] section:not([data-status="partially-tested"]) {
     display: none;
 }
 .summary:has(+ .functions[data-filter="partially-tested"]) :not([data-filter="partially-tested"]) {
-    color: grey;
+    color: var(--var-partial);
     text-decoration: line-through;
 }
 
 details.annotation summary::after {
-    content: "(Annotated)";
-    padding-left: 2rem;
-    color: unset;
+    content: " (Annotated)";
+    color: black;
 }
 
 /* Lines */
 .functions .tested {
-    color: green;
+    color: var(--var-tested);
 }
 
 .functions .untested {
-    color: red;
+    color: var(--var-untested);
 }
 
+.functions code {
+    color: var(--var-ignored);
+}
+
+button.fully-tested {
+    content: "█";
+    color: var(--var-tested);
+}
+
+button.partially-tested {
+    content: "█";
+    color: var(--var-partial);
+}
+
+button.fully-untested {
+    content: "█";
+    color: var(--var-untested);
+}
+
+button.fully-ignored {
+    content: "█";
+    color: var(--var-ignored);
+}

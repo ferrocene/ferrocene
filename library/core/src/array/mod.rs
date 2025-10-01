@@ -37,7 +37,6 @@ use crate::slice::{Iter, IterMut};
 mod ascii;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod drain;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod equality;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod iter;

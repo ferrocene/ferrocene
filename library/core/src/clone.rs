@@ -609,11 +609,10 @@ mod impls {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128
         f32 f64
-        bool
+        bool char
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl Clone for ! {
         #[inline]
         fn clone(&self) -> Self {

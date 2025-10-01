@@ -486,7 +486,6 @@ pub macro Copy($item:item) {
 // Implementations that cannot be described in Rust
 // are implemented in `traits::SelectionContext::copy_clone_conditions()`
 // in `rustc_trait_selection`.
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[stable(feature = "rust1", since = "1.0.0")]
     Copy for
@@ -497,18 +496,6 @@ marker_impls! {
         {T: PointeeSized} *const T,
         {T: PointeeSized} *mut T,
 
-}
-
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[stable(feature = "rust1", since = "1.0.0")]
-    Copy for
-        usize, u8, u16, u32, u64, u128,
-        isize, i8, i16, i32, i64, i128,
-        f32, f64,
-        bool, char,
-        {T: PointeeSized} *const T,
-        {T: PointeeSized} *mut T,
 }
 
 #[unstable(feature = "never_type", issue = "35121")]

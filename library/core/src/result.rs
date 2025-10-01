@@ -533,13 +533,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(feature = "ferrocene_certified")]
+use crate::convert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops::{Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{convert, fmt, hint};
 
@@ -2203,7 +2202,6 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E> const ops::Try for Result<T, E> {
     type Output = T;
     type Residual = Result<convert::Infallible, E>;
@@ -2224,7 +2222,6 @@ impl<T, E> const ops::Try for Result<T, E> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E, F: [const] From<E>> const ops::FromResidual<Result<convert::Infallible, E>>
     for Result<T, F>
 {
@@ -2239,7 +2236,6 @@ impl<T, E, F: [const] From<E>> const ops::FromResidual<Result<convert::Infallibl
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E, F: [const] From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
     #[inline]
     fn from_residual(ops::Yeet(e): ops::Yeet<E>) -> Self {
@@ -2249,7 +2245,6 @@ impl<T, E, F: [const] From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E> const ops::Residual<T> for Result<convert::Infallible, E> {
     type TryType = Result<T, E>;
 }

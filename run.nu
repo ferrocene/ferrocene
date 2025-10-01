@@ -28,8 +28,8 @@ def main [
         print "Unsupported OS"
         exit 1
     }
-    let corebenches_bin = ls $std_build | where name =~ "corebenches" | get name | first
-    let coretests_bin = ls $std_build | where name =~ "coretests" | get name | first
+    let corebenches_bin = ls $std_build | where name =~ "corebenches" | where type == file | get name | first
+    let coretests_bin = ls $std_build | where name =~ "coretests" | where type == file | get name | first
 
     dirs add $ferrocene
     let rev = (git log --pretty=format:'%H' -n 1)

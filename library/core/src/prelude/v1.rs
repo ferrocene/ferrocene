@@ -10,12 +10,7 @@
 // Re-exported core operators
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-#[cfg(feature = "ferrocene_certified")]
-pub use crate::marker::{Copy, Send, Sized, Sync};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
@@ -30,12 +25,7 @@ pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 pub use crate::mem::drop;
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
-#[stable(feature = "size_of_prelude", since = "1.80.0")]
-#[doc(no_inline)]
-#[cfg(feature = "ferrocene_certified")]
-pub use crate::mem::{size_of, align_of};
 
 // Re-exported types and traits
 #[stable(feature = "core_prelude", since = "1.4.0")]
@@ -77,16 +67,11 @@ pub use crate::hash::macros::Hash;
 
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::{
     assert, cfg, column, compile_error, concat, env, file, format_args,
     format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
     stringify, trace_macros,
 };
-#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[doc(no_inline)]
-#[cfg(feature = "ferrocene_certified")]
-pub use crate::{assert, cfg, concat, stringify, include_str};
 
 #[unstable(
     feature = "concat_bytes",

@@ -1,14 +1,12 @@
 #![allow(clippy::enum_clike_unportable_variant)]
 
+#[cfg(feature = "ferrocene_certified")]
+use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, fmt, hash, mem, num};
-// Ferrocene addition: imports used by certified subset
-#[cfg(feature = "ferrocene_certified")]
-use crate::{mem, ub_checks::assert_unsafe_precondition};
 
 /// A type storing a `usize` which is a power of two, and thus
 /// represents a possible alignment in the Rust abstract machine.

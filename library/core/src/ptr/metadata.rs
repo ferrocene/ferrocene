@@ -71,7 +71,8 @@ pub trait Pointee: PointeeSized {
     /// The type for metadata in pointers and references to `Self`.
     #[lang = "metadata_type"]
     #[cfg(feature = "ferrocene_certified")]
-    type Metadata: Copy + Send + Sync + Ord + Freeze;
+    #[rustfmt::skip]
+    type Metadata: /* fmt::Debug */ Copy + Send + Sync + Ord /* Hash */ + Unpin + Freeze;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.

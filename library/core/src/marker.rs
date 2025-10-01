@@ -916,7 +916,7 @@ pub trait DiscriminantKind {
     /// bounds required by `mem::Discriminant`.
     #[lang = "discriminant_type"]
     #[cfg(feature = "ferrocene_certified")]
-    type Discriminant: Clone + Copy + Eq + PartialEq + Send + Sync;
+    type Discriminant: Clone + Copy + /* Debug */ Eq + PartialEq + /* Hash */ Send + Sync + Unpin;
 }
 
 /// Used to determine whether a type contains
@@ -1043,7 +1043,6 @@ unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
     message = "`{Self}` cannot be unpinned"
 )]
 #[lang = "unpin"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub auto trait Unpin {}
 
 /// A marker type which does not implement `Unpin`.

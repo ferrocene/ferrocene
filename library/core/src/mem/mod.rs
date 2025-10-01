@@ -376,7 +376,6 @@ pub const fn size_of<T>() -> usize {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_size_of_val", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_size_of_val"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: `val` is a reference, so it's a valid raw pointer
     unsafe { intrinsics::size_of_val(val) }
@@ -527,7 +526,6 @@ pub const fn align_of<T>() -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_align_of_val", since = "1.85.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: val is a reference, so it's a valid raw pointer
     unsafe { intrinsics::align_of_val(val) }

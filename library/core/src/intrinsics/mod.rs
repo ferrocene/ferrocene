@@ -2933,7 +2933,6 @@ pub const fn variant_count<T>() -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// The required alignment of the referenced value.
@@ -2947,7 +2946,6 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// Gets a static string slice containing the name of a type.

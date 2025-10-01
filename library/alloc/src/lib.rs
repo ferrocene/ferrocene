@@ -190,7 +190,7 @@
 // not-alphbetical-end
 //
 // Rustdoc features:
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
+#![feature(doc_cfg)]
 // Technically, this is a bug in rustdoc: rustdoc sees the documentation on `#[lang = slice_alloc]`
 // blocks is for `&[T]`, which also has documentation using this feature in `core`, and gets mad
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs

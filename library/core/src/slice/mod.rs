@@ -48,7 +48,6 @@ pub mod sort;
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod ascii;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod cmp;
 pub(crate) mod index;
 #[cfg(not(feature = "ferrocene_certified"))]

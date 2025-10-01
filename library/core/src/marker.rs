@@ -269,7 +269,6 @@ pub trait StructuralPartialEq {
     // Empty.
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[unstable(feature = "structural_match", issue = "31434")]
     StructuralPartialEq for
@@ -282,13 +281,6 @@ marker_impls! {
         {T, const N: usize} [T; N],
         {T} [T],
         {T: PointeeSized} &T,
-}
-
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[unstable(feature = "structural_match", issue = "31434")]
-    StructuralPartialEq for
-        usize
 }
 
 /// Types whose values can be duplicated simply by copying bits.
@@ -514,13 +506,12 @@ marker_impls! {
         usize, u8, u16, u32, u64, u128,
         isize, i8, i16, i32, i64, i128,
         f32, f64,
-        bool,
+        bool, char,
         {T: PointeeSized} *const T,
         {T: PointeeSized} *mut T,
 }
 
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Copy for ! {}
 
 /// Shared references can be copied, but mutable references *cannot*!
@@ -1155,7 +1146,6 @@ pub macro ConstParamTy($item:item) {
 }
 
 // FIXME(adt_const_params): handle `ty::FnDef`/`ty::Closure`
-#[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
     #[unstable(feature = "adt_const_params", issue = "95174")]
     ConstParamTy_ for
@@ -1165,13 +1155,6 @@ marker_impls! {
         char,
         (),
         {T: ConstParamTy_, const N: usize} [T; N],
-}
-
-#[cfg(feature = "ferrocene_certified")]
-marker_impls! {
-    #[unstable(feature = "adt_const_params", issue = "95174")]
-    ConstParamTy_ for
-        usize
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]

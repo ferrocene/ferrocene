@@ -576,13 +576,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(feature = "ferrocene_certified")]
+use crate::convert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops::{Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panicking::{panic, panic_display};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -2714,7 +2713,6 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::Try for Option<T> {
     type Output = T;
     type Residual = Option<convert::Infallible>;
@@ -2737,7 +2735,6 @@ impl<T> const ops::Try for Option<T> {
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
     #[inline]
     fn from_residual(residual: Option<convert::Infallible>) -> Self {
@@ -2760,7 +2757,6 @@ impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::Residual<T> for Option<convert::Infallible> {
     type TryType = Option<T>;
 }

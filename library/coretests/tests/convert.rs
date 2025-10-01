@@ -1,3 +1,5 @@
+use core::convert::AsMut;
+
 /* FIXME(#110395)
 #[test]
 fn convert() {
@@ -18,3 +20,14 @@ fn convert() {
     assert_eq!(FOO, core::convert::identity(FOO));
 }
 */
+
+#[test]
+fn as_mut_impls() {
+    let mut s = String::from("hello");
+    let mut s_mut = &mut s;
+    let slice: &mut str = <&mut String as AsMut<str>>::as_mut(&mut s_mut);
+    let _: &mut str = <str as AsMut<str>>::as_mut(slice);
+
+    let mut b = Vec::from(b"hello");
+    let _: &mut [u8] = <[u8] as AsMut<[u8]>>::as_mut(b.as_mut_slice());
+}

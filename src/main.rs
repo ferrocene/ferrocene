@@ -116,11 +116,11 @@ impl FunctionCoverageStatus {
             lines if lines.lines.iter().all(|(_, status)| {
                 *status == LineCoverageStatus::Ignored
             }) => FunctionCoverageStatus::FullyIgnored,
-            // If all lines are either covered or ignored, the function is fully tested.
+            // If at least one line is covered and all other lines are either covered or ignored, the function is fully tested.
             lines if lines.lines.iter().all(|(_, status)| {
                 *status == LineCoverageStatus::Ignored || *status == LineCoverageStatus::Tested
             }) => FunctionCoverageStatus::FullyTested,
-            // If all lines are uncovered or ignored, the function is fully untested
+            // If at least one line is uncovered and all other lines are uncovered or ignored, the function is fully untested
             lines if lines.lines.iter().all(|(_, status)| {
                 *status == LineCoverageStatus::Untested || *status == LineCoverageStatus::Ignored
             }) => FunctionCoverageStatus::FullyUntested,
@@ -314,6 +314,7 @@ impl ShowCommand {
         if let Some(ref html_out) = self.html_out {
             let html = html_report::generate(&coverage, &self.ferrocene)?;
             std::fs::write(html_out, html.render().into_string())?;
+            println!("Generated coverage report at {}", html_out.display());
         }
 
         Ok(())

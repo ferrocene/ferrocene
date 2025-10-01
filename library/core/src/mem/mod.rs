@@ -6,8 +6,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
-#[cfg(feature = "ferrocene_certified")]
-use crate::intrinsics;
 use crate::marker::Destruct;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
@@ -15,6 +13,8 @@ use crate::marker::DiscriminantKind;
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{intrinsics, ptr};
 
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
@@ -1056,7 +1056,6 @@ pub const fn copy<T: Copy>(x: &T) -> T {
 #[track_caller]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_transmute_copy", since = "1.74.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
     assert!(
         size_of::<Src>() >= size_of::<Dst>(),

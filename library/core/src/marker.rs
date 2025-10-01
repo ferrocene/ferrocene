@@ -524,7 +524,6 @@ impl<T: PointeeSized> Copy for &T {}
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait BikeshedGuaranteedNoDrop {}
 
 /// Types for which it is safe to share references between threads.

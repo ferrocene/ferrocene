@@ -185,7 +185,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(transparent_unions))]
+#![feature(transparent_unions)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]

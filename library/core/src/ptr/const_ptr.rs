@@ -1196,7 +1196,6 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,

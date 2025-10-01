@@ -20,10 +20,8 @@ mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
 pub use manually_drop::ManuallyDrop;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod maybe_uninit;
 #[stable(feature = "maybe_uninit", since = "1.36.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use maybe_uninit::MaybeUninit;
 
 #[cfg(not(feature = "ferrocene_certified"))]

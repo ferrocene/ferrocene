@@ -414,7 +414,11 @@ use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
 #[cfg(feature = "ferrocene_certified")]
-use crate::{intrinsics, marker::PointeeSized, mem};
+use crate::{
+    intrinsics,
+    marker::PointeeSized,
+    mem::{self, MaybeUninit},
+};
 #[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
 use crate::{mem::SizedTypeProperties, ub_checks};
 
@@ -539,7 +543,6 @@ mod mut_ptr;
 #[inline(always)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy_nonoverlapping"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize) {
     ub_checks::assert_unsafe_precondition!(
         check_language_ub,
@@ -1846,7 +1849,6 @@ pub const unsafe fn read<T>(src: *const T) -> T {
 #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
 #[track_caller]
 #[rustc_diagnostic_item = "ptr_read_unaligned"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn read_unaligned<T>(src: *const T) -> T {
     let mut tmp = MaybeUninit::<T>::uninit();
     // SAFETY: the caller must guarantee that `src` is valid for reads.

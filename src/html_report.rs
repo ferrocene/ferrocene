@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{collections::HashSet, path::Path};
 
 use maud::{DOCTYPE, PreEscaped};
 
@@ -125,6 +125,11 @@ fn generate_function(
     let source_path = sources.join(&function.relative_path);
     let file = std::fs::read_to_string(&source_path)?;
 
+    let mut class_set = HashSet::new();
+    let function_css_class = function.status.to_css_class();
+
+    class_set.insert(function_css_class);
+
     let mut lines = Vec::with_capacity(line_coverage.len());
     for (linenum, line) in file.lines().enumerate() {
         let linenum = linenum + 1; // `enumerate()` starts at 0, lines start at 1.
@@ -134,13 +139,14 @@ fn generate_function(
         if let Some((actual_linenum, status)) = maybe_line {
             lines.push((actual_linenum, line, status))
         }
+        if line.contains("// Ferrocene annotation") {
+            class_set.insert("annotation");
+        }
     }
 
-    let function_status = &function.status;
-    let function_css_class = function_status.to_css_class();
 
     let html = maud::html!(
-        details class=(function_css_class) data-status=(function_css_class) {
+        details class=(class_set.into_iter().collect::<Vec<_>>().join(" ")) data-status=(function_css_class) {
             summary {
                 (function.source_name)
             }

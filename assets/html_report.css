@@ -54,6 +54,12 @@
     text-decoration: line-through;
 }
 
+details.annotation summary::after {
+    content: "(Annotated)";
+    padding-left: 2rem;
+    color: unset;
+}
+
 /* Lines */
 .functions .tested {
     color: green;

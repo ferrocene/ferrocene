@@ -364,7 +364,6 @@ pub mod fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
 pub mod slice;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod str;
 pub mod time;
 

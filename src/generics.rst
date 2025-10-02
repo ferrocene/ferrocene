@@ -170,7 +170,7 @@ A :t:`constant parameter` shall be used in the following contexts:
   As a :t:`value` of any :t:`expression` within a :t:`function body`.
 
 :dp:`fls_reASCId0i117`
-An :dt:`inferred constant` is a :t:`constant argument` which is inferred
+An :dt:`inferred constant` is a :t:`constant argument` whose :t:`value` is inferred
 from the surrounding context by using ``_`` (underscore) in its place.
 
 :dp:`fls_Ft5rGeL7QwJM`

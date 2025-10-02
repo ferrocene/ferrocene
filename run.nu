@@ -63,6 +63,7 @@ def main [
         --report $symbols
         --path-equivalence $"/rustc/($rev),($ferrocene)"
         --ferrocene-src $ferrocene
+        --html-out coverage-report.html
         ...$extra_arg
     )
 }

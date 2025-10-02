@@ -58,54 +58,113 @@ pub struct ShowCommand {
 }
 
 #[derive(Debug, PartialEq)]
-enum CoverageStatus {
+enum LineCoverageStatus {
     Tested,
     Untested,
     Ignored,
 }
 
-impl fmt::Display for CoverageStatus {
+impl fmt::Display for LineCoverageStatus {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            CoverageStatus::Tested => write!(f, "Tested"),
-            CoverageStatus::Untested => write!(f, "Untested"),
-            CoverageStatus::Ignored => write!(f, "Ignored"),
+            LineCoverageStatus::Tested => write!(f, "Tested"),
+            LineCoverageStatus::Untested => write!(f, "Untested"),
+            LineCoverageStatus::Ignored => write!(f, "Ignored"),
         }
     }
 }
 
 #[derive(Debug)]
 struct LineCoverage {
-    lines: Vec<(usize, CoverageStatus)>,
+    lines: Vec<(usize, LineCoverageStatus)>,
 }
 
 impl LineCoverage {
     fn unconsidered(&self) -> usize {
         self.lines
             .iter()
-            .filter(|(_, s)| matches!(s, CoverageStatus::Ignored))
+            .filter(|(_, s)| matches!(s, LineCoverageStatus::Ignored))
             .count()
     }
     fn considered(&self) -> usize {
         self.lines
             .iter()
-            .filter(|(_, s)| !matches!(s, CoverageStatus::Ignored))
+            .filter(|(_, s)| !matches!(s, LineCoverageStatus::Ignored))
             .count()
     }
     fn tested(&self) -> usize {
         self.lines
             .iter()
-            .filter(|(_, s)| matches!(s, CoverageStatus::Tested))
+            .filter(|(_, s)| matches!(s, LineCoverageStatus::Tested))
             .count()
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+enum FunctionCoverageStatus {
+    FullyTested,
+    PartiallyTested,
+    FullyUntested,
+    FullyIgnored,
+}
+
+impl FunctionCoverageStatus {
+    fn new(lines: &LineCoverage) -> Self {
+        match lines {
+            // If all lines are ignored, the function is ignored.
+            lines if lines.lines.iter().all(|(_, status)| {
+                *status == LineCoverageStatus::Ignored
+            }) => FunctionCoverageStatus::FullyIgnored,
+            // If at least one line is covered and all other lines are either covered or ignored, the function is fully tested.
+            lines if lines.lines.iter().all(|(_, status)| {
+                *status == LineCoverageStatus::Ignored || *status == LineCoverageStatus::Tested
+            }) => FunctionCoverageStatus::FullyTested,
+            // If at least one line is uncovered and all other lines are uncovered or ignored, the function is fully untested
+            lines if lines.lines.iter().all(|(_, status)| {
+                *status == LineCoverageStatus::Untested || *status == LineCoverageStatus::Ignored
+            }) => FunctionCoverageStatus::FullyUntested,
+            // Otherwise, the function mixes uncovered and covered lines.
+            _ => FunctionCoverageStatus::PartiallyTested,
+        }
+    }
+
+    fn to_css_class(&self) -> &str {
+        match self {
+            FunctionCoverageStatus::FullyTested => "fully-tested",
+            FunctionCoverageStatus::PartiallyTested => "partially-tested",
+            FunctionCoverageStatus::FullyUntested => "fully-untested",
+            FunctionCoverageStatus::FullyIgnored => "fully-ignored",
+        }
+    }
+    
+    fn to_human(&self) -> &str {
+        match self {
+            FunctionCoverageStatus::FullyTested => "Fully Tested",
+            FunctionCoverageStatus::PartiallyTested => "Partially Tested",
+            FunctionCoverageStatus::FullyUntested => "Fully Untested",
+            FunctionCoverageStatus::FullyIgnored => "Fully Ignored",
+        }
     }
 }
 
 #[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
-    #[allow(dead_code)]
-    filename: PathBuf,
+    relative_path: PathBuf,
     lines: LineCoverage,
+    status: FunctionCoverageStatus,
+}
+
+impl FunctionCoverage {
+    fn new(source_name: String, filename: PathBuf, lines: LineCoverage) -> Self {
+        let status = FunctionCoverageStatus::new(&lines); 
+        Self {
+            source_name,
+            relative_path: filename,
+            lines,
+            status,
+        }
+    }
 }
 
 struct Span {
@@ -121,54 +180,55 @@ fn get_coverage(
     source_name: String,
 ) -> Result<FunctionCoverage> {
     let Span {
-        mut filename,
+        filename,
         start_line,
         end_line,
     } = span;
-    if filename.is_relative() {
-        filename = ferrocene.join(filename);
-    }
-    let filename = if filename.is_absolute() {
-        fs::canonicalize(&filename).context(format!("failed to canonicalize {filename:?}"))
+    let absolute_path = if filename.is_relative() {
+        ferrocene.join(&filename).canonicalize().context(format!("failed to canonicalize {filename:?}"))?
     } else {
-        panic!("--ferrocene-src was not absolute")
-    }?;
+        return Err(anyhow::anyhow!("Absolute paths are forbidden, they break reproducability."));
+    };
+
     let source_lines = start_line..=end_line;
-    let no_coverage = FunctionCoverage {
-        source_name,
-        // symbol_name: "TODO sorry".into(),
-        filename: filename.clone(),
-        // we didn't get any hits from the tool, so we don't know which lines shouldn't be
-        // considered. report them all as considered and missing coverage.
-        lines: LineCoverage {
+    let source_name = source_name;
+
+    // we didn't get any hits from the tool, so we don't know which lines shouldn't be
+    // considered. report them all as considered and missing coverage.
+    let Some(func_coverage) = report.files.get(&absolute_path) else {
+        let no_coverage = LineCoverage {
             lines: source_lines
                 .clone()
-                .map(|i| (i, CoverageStatus::Untested))
+                .map(|i| (i, LineCoverageStatus::Untested))
                 .collect(),
-        },
-    };
-    let Some(func_coverage) = report.files.get(&filename) else {
+        };
         println!(
             "warning: couldn't find source file {} in coverage report",
-            filename.display()
+            absolute_path.display()
         );
-        return Ok(no_coverage);
+        return Ok(FunctionCoverage::new(
+            source_name,
+            filename,
+            no_coverage,
+        ))
     };
+    
     let mut covered = vec![];
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
         let status = match func_coverage.hits_for_line(line) {
-            None => CoverageStatus::Ignored,
-            Some(0) => CoverageStatus::Untested,
-            Some(_) => CoverageStatus::Tested,
+            None => LineCoverageStatus::Ignored,
+            Some(0) => LineCoverageStatus::Untested,
+            Some(_) => LineCoverageStatus::Tested,
         };
         covered.push((line, status));
     }
-    Ok(FunctionCoverage {
-        lines: LineCoverage { lines: covered },
-        ..no_coverage
-    })
+    Ok(FunctionCoverage::new(
+        source_name,
+        filename,
+        LineCoverage { lines: covered },
+    ))
 }
 
 impl ShowCommand {
@@ -189,27 +249,26 @@ impl ShowCommand {
             report.apply_remapping(remapping);
         }
 
-        // let coverage = rustdoc::coverage(self, &report)?;
-        let coverage = rustc_driver::coverage(self, &report)?;
-        let mut unconsidered = 0;
-        let mut fully_covered = 0;
+        let mut coverage = rustc_driver::coverage(self, &report)?;
+        coverage.sort_by(|f1, f2| f1.source_name.cmp(&f2.source_name));
+        let coverage = coverage;
+
         for func in &coverage {
             print!("{}: ", func.source_name);
             if func.lines.considered() == 0 {
                 println!(
                     "BUG: no lines considered (span: {}:{}-{})",
-                    func.filename.display(),
+                    func.relative_path.display(),
                     func.lines.lines.first().unwrap().0,
                     func.lines.lines.last().unwrap().0
                 );
-                unconsidered += 1;
             } else {
                 let missing = func
                     .lines
                     .lines
                     .iter()
-                    .filter(|(_, status)| *status == CoverageStatus::Untested)
-                    .map(|(linenum, _)| format!("{}:{}", func.filename.display(), linenum))
+                    .filter(|(_, status)| *status == LineCoverageStatus::Untested)
+                    .map(|(linenum, _)| format!("{}:{}", func.relative_path.display(), linenum))
                     .collect::<Vec<_>>();
                 println!(
                     "{} / {} covered ({} lines unconsidered)\
@@ -224,14 +283,30 @@ impl ShowCommand {
                         "".into()
                     },
                 );
-                fully_covered += (func.lines.tested() == func.lines.considered()) as usize;
             }
         }
         let total = coverage.len();
-        println!(
-            "{fully_covered}/{}/{unconsidered}/{total} (fully covered / partially covered / unconsidered / total) functions",
-            total - unconsidered - fully_covered
-        );
+        let mut count_fully_tested = 0;
+        let mut count_partially_tested = 0;
+        let mut count_fully_untested = 0;
+        let mut count_fully_ignored = 0;
+        for function in &coverage {
+            match function.status {
+                FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
+                FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
+                FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
+                FunctionCoverageStatus::FullyIgnored => count_fully_ignored += 1,
+            };
+        }
+        println!("\
+            ---\n\
+            Fully Tested: {count_fully_tested}\n\
+            Partially tested: {count_partially_tested}\n\
+            Fully untested: {count_fully_untested}\n\
+            Fully ignored: {count_fully_ignored}\n\
+            Total: {total}\n\
+            ---\
+        ");
         println!(
             "hits for <u8 as PartialOrd>::partial_cmp: {:?}",
             report
@@ -242,8 +317,9 @@ impl ShowCommand {
         );
 
         if let Some(ref html_out) = self.html_out {
-            let html = html_report::generate(coverage, &self.ferrocene)?;
+            let html = html_report::generate(&coverage, &self.ferrocene)?;
             std::fs::write(html_out, html.render().into_string())?;
+            println!("Generated coverage report at {}", html_out.display());
         }
 
         Ok(())

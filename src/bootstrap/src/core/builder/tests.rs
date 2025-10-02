@@ -532,6 +532,8 @@ fn any_debug() {
 
 /// These tests use insta for snapshot testing.
 /// See bootstrap's README on how to bless the snapshots.
+///
+/// Ferrocene note: many snapshots differ from upstream, which is due to custom bootstrap changes.
 mod snapshot {
     use std::path::PathBuf;
 
@@ -1093,6 +1095,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_baseline() {
         let ctx = TestCtx::new();
         // Note that stdlib is uplifted, that is why `[dist] rustc 1 <host> -> std <host>` is in
@@ -1100,9 +1105,6 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1204,6 +1206,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_extended() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1216,9 +1221,6 @@ mod snapshot {
                 "--set",
                 "rust.lld=true",
             ])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
             .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1285,6 +1287,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_with_targets() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1292,9 +1297,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target()])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1361,6 +1363,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_with_hosts() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1368,9 +1373,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target()])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1427,6 +1429,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_with_targets_and_hosts() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1434,9 +1439,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1519,9 +1521,6 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[])
                 .targets(&[TEST_TRIPLE_1])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1544,9 +1543,6 @@ mod snapshot {
                 .hosts(&[TEST_TRIPLE_1])
                 .targets(&[TEST_TRIPLE_1])
                 .args(&["--set", "rust.channel=nightly", "--set", "build.extended=true"])
-                // Ferrocene annotation: Our snapshot differs from upstream, as our process
-                // is somewhat different.
-                // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1682,6 +1678,9 @@ mod snapshot {
     /// Enable dist cranelift tarball by default with `x dist` if cranelift is enabled in
     /// `rust.codegen-backends`.
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_cranelift_by_default() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -2855,6 +2854,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn install_extended() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(

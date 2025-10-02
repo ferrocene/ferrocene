@@ -12,6 +12,7 @@
 #![feature(bigint_helper_methods)]
 #![feature(bool_to_result)]
 #![feature(bound_as_ref)]
+#![feature(bound_copied)]
 #![feature(bstr)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(char_max_len)]

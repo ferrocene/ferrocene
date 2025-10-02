@@ -3966,6 +3966,8 @@ atomic_int_ptr_sized! {
 
 #[inline]
 #[cfg(target_has_atomic)]
+/// Ferrocene annotation: we don't cover this function because its only use is in the deprecated
+/// `compare_and_swap`.
 fn strongest_failure_ordering(order: Ordering) -> Ordering {
     match order {
         Release => Relaxed,

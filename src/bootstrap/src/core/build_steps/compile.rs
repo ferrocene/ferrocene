@@ -30,7 +30,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{
     CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
-use crate::ferrocene::code_coverage::{Paths, instrument_coverage};
+use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;

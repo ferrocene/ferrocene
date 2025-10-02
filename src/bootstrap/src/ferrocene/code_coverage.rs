@@ -120,6 +120,10 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     //
     // A possible improvement would be to capture `cargo test` stderr and fetch the path of every
     // binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
+    //
+    // FIXME(@jyn514): running blanket should be part of bootstrap directly, not a shell script,
+    // at which ponit we'll need these binaries.
+    #[allow(unused_variables)]
     let instrumented_binaries = match state.coverage_for {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
@@ -155,20 +159,6 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
             instrumented_binaries
         }
-    };
-
-    let ignored_path_regexes: &[&str] = match state.coverage_for {
-        FerroceneCoverageFor::Library => &[
-            // Ignore Cargo dependencies:
-            "\\.cargo/registry", // Without remap-path-prefix
-            "/rust/deps",        // With remap-path-prefix
-            // Ignore files we don't currently handle:
-            "ferrocene/library/backtrace-rs",
-            "ferrocene/library/libc",
-            "library/alloc",
-            "library/panic_unwind",
-            "library/std",
-        ],
     };
 
     builder.info("Listing symbols for the certified libcore subset");

@@ -424,7 +424,6 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_conversions", since = "1.32.0")]
         #[must_use]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_le(x: Self) -> Self {
             #[cfg(target_endian = "little")]
             {
@@ -3899,7 +3898,6 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_conversion", since = "1.44.0")]
         #[must_use]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_le_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             Self::from_le(Self::from_ne_bytes(bytes))
         }
@@ -3943,7 +3941,6 @@ macro_rules! int_impl {
         // SAFETY: const sound because integers are plain old datatypes so we can always
         // transmute to them
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_ne_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             // SAFETY: integers are plain old datatypes so we can always transmute to them
             unsafe { mem::transmute(bytes) }

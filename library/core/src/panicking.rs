@@ -68,6 +68,8 @@ compile_error!(
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 // Ferrocene change: `fmt` is a type alias to accomodate certified core
 pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
+    // Ferrocene annotation: The `immediate-abort` behavior is not certified, we only support
+    // `abort`.
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }
@@ -104,6 +106,7 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+// Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
 pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) -> ! {
     const_eval_select!(
         @capture { fmt: PanicFmt<'_>, _force_no_backtrace: bool } -> !:
@@ -246,6 +249,7 @@ pub mod panic_const {
 #[lang = "panic_nounwind"] // needed by codegen for non-unwinding panics
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
+// Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
@@ -368,6 +372,7 @@ fn panic_invalid_enum_construction(source: u128) -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[lang = "panic_cannot_unwind"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
+// Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
 fn panic_cannot_unwind() -> ! {
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind("panic in a function that cannot unwind")

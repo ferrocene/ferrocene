@@ -1,5 +1,5 @@
 use core::cmp::Ordering;
-use core::ops::ControlFlow;
+use core::ops::{Bound, ControlFlow};
 
 #[test]
 fn ordering_equality() {
@@ -35,4 +35,16 @@ fn control_flow_into_value() {
 
     let b = ControlFlow::<i32, i32>::Break(1);
     assert_eq!(b.into_value(), 1);
+}
+
+#[test]
+fn bound_methods() {
+    let one = Bound::Included(&0).copied().map(|x| x + 1);
+    assert_eq!(one, Bound::Included(1));
+
+    let two = Bound::Excluded(&1).copied().map(|x| x + 1);
+    assert_eq!(two, Bound::Excluded(2));
+
+    let unbounded = Bound::<&i32>::Unbounded.copied().map(|x| x + 1);
+    assert_eq!(unbounded, Bound::Unbounded);
 }

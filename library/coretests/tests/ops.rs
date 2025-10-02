@@ -378,3 +378,13 @@ fn test_fmt() {
     assert_eq!(format!("{:?}", ..=1), "..=1");
     assert_eq!(format!("{:?}", ..), "..");
 }
+
+#[test]
+fn test_closure_impl_for_refs() {
+    fn calls_closure<T, F: Fn(T) -> T>(f: F, t: T) -> T {
+        f(t)
+    }
+
+    calls_closure(&(|x: i32| x), 0);
+    calls_closure(&core::convert::identity::<i32>, 0);
+}

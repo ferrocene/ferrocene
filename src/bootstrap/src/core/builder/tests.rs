@@ -1108,6 +1108,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_baseline() {
         let ctx = TestCtx::new();
         // Note that stdlib is uplifted, that is why `[dist] rustc 1 <host> -> std <host>` is in
@@ -1217,6 +1220,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_extended() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1295,6 +1301,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_with_targets() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1368,6 +1377,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_with_hosts() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1431,6 +1443,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_with_targets_and_hosts() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1677,6 +1692,9 @@ mod snapshot {
     /// Enable dist cranelift tarball by default with `x dist` if cranelift is enabled in
     /// `rust.codegen-backends`.
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
+    #[cfg(target_arch = "x86_64")]
     fn dist_cranelift_by_default() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -2851,6 +2869,9 @@ mod snapshot {
     }
 
     #[test]
+    // Avoids a fail due to not having this line in the snapshot of non-amd64 linux:
+    // [doc] rustc 2 <host> -> std 2 <x86_64-unknown-ferrocene.certified> cratesinin=[core]
+    #[cfg(target_arch = "x86_64")]
     fn install_extended() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(

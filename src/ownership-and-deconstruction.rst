@@ -638,12 +638,12 @@ An :dt:`extending expression` is any of the following:
   :t:`extending expression`.
 
 * :dp:`fls_eeaJtK4w5gVK`
-  The :t:`argument operand` to a :t:`tuple struct call expression`
-  of an extending :t:`tuple struct`.
+  A :t:`call expression` that is an :t:`extending expression`
+  where the :t:`call operand` resolves to a :t:`tuple struct`.
 
 * :dp:`fls_rT33l0YwUGlK`
-  The :t:`argument operand` to a  :t:`tuple struct call expression`
-  of an extending :t:`tuple enum variant`.
+  A :t:`call expression` that is an :t:`extending expression`
+  where the :t:`call operand` resolves to a :t:`tuple enum variant`.
 
 :dp:`fls_aq01wjpkxhq9`
 The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression` that is an

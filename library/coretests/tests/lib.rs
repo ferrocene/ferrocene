@@ -28,6 +28,7 @@
 #![feature(const_ref_cell)]
 #![feature(const_result_trait_fn)]
 #![feature(const_trait_impl)]
+#![feature(control_flow_into_value)]
 #![feature(control_flow_ok)]
 #![feature(core_float_math)]
 #![feature(core_intrinsics)]

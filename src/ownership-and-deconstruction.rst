@@ -610,8 +610,12 @@ If the :t:`pattern-without-alternation` of a :t:`let statement` is an
 the :t:`let statement` is extended to the :t:`drop scope` of the
 :t:`block expression` that contains the :t:`let statement`.
 
+:dp:`fls_YeeZWqTdMivX`
+An :dt:`extending expression` is an :t:`expression` with an
+:t:`extended drop scope <drop scope extension>`.
+
 :dp:`fls_wyzau8hhq74d`
-An :dt:`extending expression` is any of the following:
+An :t:`extending expression` is any of the following:
 
 * :dp:`fls_ju7cpftd8r2g`
   The :t:`expression` of a :t:`let statement`.

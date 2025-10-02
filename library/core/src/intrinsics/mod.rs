@@ -430,6 +430,7 @@ pub const unsafe fn assume(b: bool) {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.
@@ -470,6 +471,7 @@ pub const fn likely(b: bool) -> bool {
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
 #[inline(always)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();
@@ -1808,6 +1810,7 @@ pub const fn ctpop<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn ctlz<T: Copy>(x: T) -> u32;
 
 /// Like `ctlz`, but extra-unsafe as it returns `undef` when
@@ -1830,6 +1833,7 @@ pub const fn ctlz<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 
 /// Returns the number of trailing unset bits (zeroes) in an integer type `T`.
@@ -1871,6 +1875,7 @@ pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cttz<T: Copy>(x: T) -> u32;
 
 /// Like `cttz`, but extra-unsafe as it returns `undef` when
@@ -1909,6 +1914,7 @@ pub const unsafe fn cttz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn bswap<T: Copy>(x: T) -> T;
 
 /// Reverses the bits in an integer type `T`.
@@ -1924,6 +1930,7 @@ pub const fn bswap<T: Copy>(x: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn bitreverse<T: Copy>(x: T) -> T;
 
 /// Does a three-way comparison between the two arguments,
@@ -1972,6 +1979,7 @@ pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: 
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer subtraction
@@ -1987,6 +1995,7 @@ pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer multiplication
@@ -2002,6 +2011,7 @@ pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs full-width multiplication and addition with a carry:
@@ -2040,6 +2050,7 @@ pub const fn carrying_mul_add<T: [const] fallback::CarryingMulAdd<Unsigned = U>,
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
 
 /// Performs an unchecked division, resulting in undefined behavior
@@ -2051,6 +2062,7 @@ pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_div<T: Copy>(x: T, y: T) -> T;
 /// Returns the remainder of an unchecked division, resulting in
 /// undefined behavior when `y == 0` or `x == T::MIN && y == -1`
@@ -2061,6 +2073,7 @@ pub const unsafe fn unchecked_div<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_rem<T: Copy>(x: T, y: T) -> T;
 
 /// Performs an unchecked left shift, resulting in undefined behavior when
@@ -2072,6 +2085,7 @@ pub const unsafe fn unchecked_rem<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_shl<T: Copy, U: Copy>(x: T, y: U) -> T;
 /// Performs an unchecked right shift, resulting in undefined behavior when
 /// `y < 0` or `y >= N`, where N is the width of T in bits.
@@ -2082,6 +2096,7 @@ pub const unsafe fn unchecked_shl<T: Copy, U: Copy>(x: T, y: U) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_shr<T: Copy, U: Copy>(x: T, y: U) -> T;
 
 /// Returns the result of an unchecked addition, resulting in
@@ -2092,6 +2107,7 @@ pub const unsafe fn unchecked_shr<T: Copy, U: Copy>(x: T, y: U) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_add<T: Copy>(x: T, y: T) -> T;
 
 /// Returns the result of an unchecked subtraction, resulting in
@@ -2112,6 +2128,7 @@ pub const unsafe fn unchecked_sub<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 
 /// Performs rotate left.
@@ -2127,6 +2144,7 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 
 /// Performs rotate right.
@@ -2142,6 +2160,7 @@ pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
 
 /// Returns (a + b) mod 2<sup>N</sup>, where N is the width of T in bits.
@@ -2157,6 +2176,7 @@ pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 /// Returns (a - b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -2171,6 +2191,7 @@ pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
 /// Returns (a * b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -2185,6 +2206,7 @@ pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn wrapping_mul<T: Copy>(a: T, b: T) -> T;
 
 /// Computes `a + b`, saturating at numeric bounds.
@@ -2200,6 +2222,7 @@ pub const fn wrapping_mul<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn saturating_add<T: Copy>(a: T, b: T) -> T;
 /// Computes `a - b`, saturating at numeric bounds.
 ///
@@ -2214,6 +2237,7 @@ pub const fn saturating_add<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 
 /// Funnel Shift left.
@@ -2654,6 +2678,7 @@ pub(crate) macro const_eval_select {
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
     false
 }

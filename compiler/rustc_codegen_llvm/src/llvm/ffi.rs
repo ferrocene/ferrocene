@@ -25,10 +25,11 @@ use rustc_target::spec::SymbolVisibility;
 use super::RustString;
 use super::debuginfo::{
     DIArray, DIBuilder, DIDerivedType, DIDescriptor, DIEnumerator, DIFile, DIFlags,
-    DIGlobalVariableExpression, DILocation, DISPFlags, DIScope, DISubprogram, DISubrange,
-    DITemplateTypeParameter, DIType, DIVariable, DebugEmissionKind, DebugNameTableKind,
+    DIGlobalVariableExpression, DILocation, DISPFlags, DIScope, DISubprogram,
+    DITemplateTypeParameter, DIType, DebugEmissionKind, DebugNameTableKind,
 };
 use crate::llvm;
+use crate::llvm::MetadataKindId;
 
 /// In the LLVM-C API, boolean values are passed as `typedef int LLVMBool`,
 /// which has a different ABI from Rust or C++ `bool`.
@@ -513,31 +514,6 @@ pub(crate) enum FileType {
     ObjectFile,
 }
 
-/// LLVMMetadataType
-#[derive(Copy, Clone)]
-#[repr(C)]
-#[expect(dead_code, reason = "Some variants are unused, but are kept to match LLVM-C")]
-pub(crate) enum MetadataType {
-    MD_dbg = 0,
-    MD_tbaa = 1,
-    MD_prof = 2,
-    MD_fpmath = 3,
-    MD_range = 4,
-    MD_tbaa_struct = 5,
-    MD_invariant_load = 6,
-    MD_alias_scope = 7,
-    MD_noalias = 8,
-    MD_nontemporal = 9,
-    MD_mem_parallel_loop_access = 10,
-    MD_nonnull = 11,
-    MD_unpredictable = 15,
-    MD_align = 17,
-    MD_type = 19,
-    MD_vcall_visibility = 28,
-    MD_noundef = 29,
-    MD_kcfi_type = 36,
-}
-
 /// Must match the layout of `LLVMInlineAsmDialect`.
 #[derive(Copy, Clone, PartialEq)]
 #[repr(C)]
@@ -807,6 +783,8 @@ unsafe extern "C" {
     pub(crate) type Metadata;
     pub(crate) type BasicBlock;
     pub(crate) type Comdat;
+    /// `&'ll DbgRecord` represents `LLVMDbgRecordRef`.
+    pub(crate) type DbgRecord;
 }
 #[repr(C)]
 pub(crate) struct Builder<'a>(InvariantOpaque<'a>);
@@ -891,7 +869,6 @@ pub(crate) mod debuginfo {
     pub(crate) type DIVariable = DIDescriptor;
     pub(crate) type DIGlobalVariableExpression = DIDescriptor;
     pub(crate) type DIArray = DIDescriptor;
-    pub(crate) type DISubrange = DIDescriptor;
     pub(crate) type DIEnumerator = DIDescriptor;
     pub(crate) type DITemplateTypeParameter = DIDescriptor;
 
@@ -1034,16 +1011,6 @@ pub(crate) type GetSymbolsCallback =
     unsafe extern "C" fn(*mut c_void, *const c_char) -> *mut c_void;
 pub(crate) type GetSymbolsErrorCallback = unsafe extern "C" fn(*const c_char) -> *mut c_void;
 
-#[derive(Copy, Clone)]
-#[repr(transparent)]
-pub(crate) struct MetadataKindId(c_uint);
-
-impl From<MetadataType> for MetadataKindId {
-    fn from(value: MetadataType) -> Self {
-        Self(value as c_uint)
-    }
-}
-
 unsafe extern "C" {
     // Create and destroy contexts.
     pub(crate) fn LLVMContextDispose(C: &'static mut Context);
@@ -1138,7 +1105,11 @@ unsafe extern "C" {
     pub(crate) fn LLVMSetValueName2(Val: &Value, Name: *const c_char, NameLen: size_t);
     pub(crate) fn LLVMReplaceAllUsesWith<'a>(OldVal: &'a Value, NewVal: &'a Value);
     pub(crate) safe fn LLVMSetMetadata<'a>(Val: &'a Value, KindID: MetadataKindId, Node: &'a Value);
-    pub(crate) fn LLVMGlobalSetMetadata<'a>(Val: &'a Value, KindID: c_uint, Metadata: &'a Metadata);
+    pub(crate) fn LLVMGlobalSetMetadata<'a>(
+        Val: &'a Value,
+        KindID: MetadataKindId,
+        Metadata: &'a Metadata,
+    );
     pub(crate) safe fn LLVMValueAsMetadata(Node: &Value) -> &Metadata;
 
     // Operations on constants of any type
@@ -1992,6 +1963,59 @@ unsafe extern "C" {
         Scope: Option<&'ll Metadata>,
         AlignInBits: u32, // (optional; default is 0)
     ) -> &'ll Metadata;
+
+    pub(crate) fn LLVMDIBuilderGetOrCreateSubrange<'ll>(
+        Builder: &DIBuilder<'ll>,
+        LowerBound: i64,
+        Count: i64,
+    ) -> &'ll Metadata;
+
+    pub(crate) fn LLVMDIBuilderGetOrCreateArray<'ll>(
+        Builder: &DIBuilder<'ll>,
+        Data: *const Option<&'ll Metadata>,
+        NumElements: size_t,
+    ) -> &'ll Metadata;
+
+    pub(crate) fn LLVMDIBuilderCreateExpression<'ll>(
+        Builder: &DIBuilder<'ll>,
+        Addr: *const u64,
+        Length: size_t,
+    ) -> &'ll Metadata;
+
+    pub(crate) fn LLVMDIBuilderInsertDeclareRecordAtEnd<'ll>(
+        Builder: &DIBuilder<'ll>,
+        Storage: &'ll Value,
+        VarInfo: &'ll Metadata,
+        Expr: &'ll Metadata,
+        DebugLoc: &'ll Metadata,
+        Block: &'ll BasicBlock,
+    ) -> &'ll DbgRecord;
+
+    pub(crate) fn LLVMDIBuilderCreateAutoVariable<'ll>(
+        Builder: &DIBuilder<'ll>,
+        Scope: &'ll Metadata,
+        Name: *const c_uchar, // See "PTR_LEN_STR".
+        NameLen: size_t,
+        File: &'ll Metadata,
+        LineNo: c_uint,
+        Ty: &'ll Metadata,
+        AlwaysPreserve: llvm::Bool, // "If true, this descriptor will survive optimizations."
+        Flags: DIFlags,
+        AlignInBits: u32,
+    ) -> &'ll Metadata;
+
+    pub(crate) fn LLVMDIBuilderCreateParameterVariable<'ll>(
+        Builder: &DIBuilder<'ll>,
+        Scope: &'ll Metadata,
+        Name: *const c_uchar, // See "PTR_LEN_STR".
+        NameLen: size_t,
+        ArgNo: c_uint,
+        File: &'ll Metadata,
+        LineNo: c_uint,
+        Ty: &'ll Metadata,
+        AlwaysPreserve: llvm::Bool, // "If true, this descriptor will survive optimizations."
+        Flags: DIFlags,
+    ) -> &'ll Metadata;
 }
 
 #[link(name = "llvm-wrapper", kind = "static")]
@@ -2005,7 +2029,7 @@ unsafe extern "C" {
     // Operations on all values
     pub(crate) fn LLVMRustGlobalAddMetadata<'a>(
         Val: &'a Value,
-        KindID: c_uint,
+        KindID: MetadataKindId,
         Metadata: &'a Metadata,
     );
     pub(crate) fn LLVMRustIsNonGVFunctionPointerTy(Val: &Value) -> bool;
@@ -2202,8 +2226,11 @@ unsafe extern "C" {
         ConstraintsLen: size_t,
     ) -> bool;
 
+    /// A list of pointer-length strings is passed as two pointer-length slices,
+    /// one slice containing pointers and one slice containing their corresponding
+    /// lengths. The implementation will check that both slices have the same length.
     pub(crate) fn LLVMRustCoverageWriteFilenamesToBuffer(
-        Filenames: *const *const c_char,
+        Filenames: *const *const c_uchar, // See "PTR_LEN_STR".
         FilenamesLen: size_t,
         Lengths: *const size_t,
         LengthsLen: size_t,
@@ -2226,18 +2253,25 @@ unsafe extern "C" {
 
     pub(crate) fn LLVMRustCoverageCreatePGOFuncNameVar(
         F: &Value,
-        FuncName: *const c_char,
+        FuncName: *const c_uchar, // See "PTR_LEN_STR".
         FuncNameLen: size_t,
     ) -> &Value;
-    pub(crate) fn LLVMRustCoverageHashBytes(Bytes: *const c_char, NumBytes: size_t) -> u64;
+    pub(crate) fn LLVMRustCoverageHashBytes(
+        Bytes: *const c_uchar, // See "PTR_LEN_STR".
+        NumBytes: size_t,
+    ) -> u64;
 
-    pub(crate) fn LLVMRustCoverageWriteCovmapSectionNameToString(M: &Module, OutStr: &RustString);
+    pub(crate) safe fn LLVMRustCoverageWriteCovmapSectionNameToString(
+        M: &Module,
+        OutStr: &RustString,
+    );
+    pub(crate) safe fn LLVMRustCoverageWriteCovfunSectionNameToString(
+        M: &Module,
+        OutStr: &RustString,
+    );
+    pub(crate) safe fn LLVMRustCoverageWriteCovmapVarNameToString(OutStr: &RustString);
 
-    pub(crate) fn LLVMRustCoverageWriteCovfunSectionNameToString(M: &Module, OutStr: &RustString);
-
-    pub(crate) fn LLVMRustCoverageWriteCovmapVarNameToString(OutStr: &RustString);
-
-    pub(crate) fn LLVMRustCoverageMappingVersion() -> u32;
+    pub(crate) safe fn LLVMRustCoverageMappingVersion() -> u32;
     pub(crate) fn LLVMRustDebugMetadataVersion() -> u32;
     pub(crate) fn LLVMRustVersionMajor() -> u32;
     pub(crate) fn LLVMRustVersionMinor() -> u32;
@@ -2357,43 +2391,6 @@ unsafe extern "C" {
         Decl: Option<&'a DIDescriptor>,
         AlignInBits: u32,
     ) -> &'a DIGlobalVariableExpression;
-
-    pub(crate) fn LLVMRustDIBuilderCreateVariable<'a>(
-        Builder: &DIBuilder<'a>,
-        Tag: c_uint,
-        Scope: &'a DIDescriptor,
-        Name: *const c_char,
-        NameLen: size_t,
-        File: &'a DIFile,
-        LineNo: c_uint,
-        Ty: &'a DIType,
-        AlwaysPreserve: bool,
-        Flags: DIFlags,
-        ArgNo: c_uint,
-        AlignInBits: u32,
-    ) -> &'a DIVariable;
-
-    pub(crate) fn LLVMRustDIBuilderGetOrCreateSubrange<'a>(
-        Builder: &DIBuilder<'a>,
-        Lo: i64,
-        Count: i64,
-    ) -> &'a DISubrange;
-
-    pub(crate) fn LLVMRustDIBuilderGetOrCreateArray<'a>(
-        Builder: &DIBuilder<'a>,
-        Ptr: *const Option<&'a DIDescriptor>,
-        Count: c_uint,
-    ) -> &'a DIArray;
-
-    pub(crate) fn LLVMRustDIBuilderInsertDeclareAtEnd<'a>(
-        Builder: &DIBuilder<'a>,
-        Val: &'a Value,
-        VarInfo: &'a DIVariable,
-        AddrOps: *const u64,
-        AddrOpsCount: c_uint,
-        DL: &'a DILocation,
-        InsertAtEnd: &'a BasicBlock,
-    );
 
     pub(crate) fn LLVMRustDIBuilderCreateEnumerator<'a>(
         Builder: &DIBuilder<'a>,

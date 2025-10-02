@@ -51,7 +51,7 @@
     test(attr(allow(dead_code, deprecated, unused_variables, unused_mut)))
 )]
 #![doc(rust_logo)]
-#![doc(cfg_hide(
+#![doc(auto_cfg(hide(
     no_fp_fmt_parse,
     target_pointer_width = "16",
     target_pointer_width = "32",
@@ -71,7 +71,7 @@
     target_has_atomic_load_store = "32",
     target_has_atomic_load_store = "64",
     target_has_atomic_load_store = "ptr",
-))]
+)))]
 #![no_core]
 #![rustc_coherence_is_core]
 #![rustc_preserve_ub_checks]
@@ -150,13 +150,12 @@
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(derive_const))]
-#![feature(doc_cfg_hide)]
+#![feature(doc_cfg)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(funnel_shifts))]

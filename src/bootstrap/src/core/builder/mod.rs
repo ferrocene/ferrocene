@@ -554,7 +554,7 @@ impl StepDescription {
         if !builder.config.skip.is_empty()
             && !matches!(builder.config.get_dry_run(), DryRun::SelfCheck)
         {
-            builder.verbose(|| {
+            builder.do_if_verbose(|| {
                 println!(
                     "{:?} not skipped for {:?} -- not in {:?}",
                     pathset, self.name, builder.config.skip
@@ -958,7 +958,7 @@ impl Step for Libdir {
             // Sysroot`).
             if !builder.download_rustc() {
                 let sysroot_target_libdir = sysroot.join(self.target).join("lib");
-                builder.verbose(|| {
+                builder.do_if_verbose(|| {
                     eprintln!(
                         "Removing sysroot {} to avoid caching bugs",
                         sysroot_target_libdir.display()
@@ -1258,6 +1258,23 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
+                // Ferrocene annotation
+                // install::Docs,
+                // install::Std,
+                // // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
+                // // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
+                // // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
+                // // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
+                // install::Rustc,
+                // install::Cargo,
+                // install::RustAnalyzer,
+                // install::Rustfmt,
+                // install::Clippy,
+                // install::Miri,
+                // install::LlvmTools,
+                // install::Src,
+                // install::RustcCodegenCranelift,
+                // install::LlvmBitcodeLinker
                 crate::ferrocene::install::Std,
                 crate::ferrocene::install::Rustc,
                 crate::ferrocene::install::Cargo,

@@ -1,16 +1,18 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-:upcoming-release:
-
 Ferrocene 25.08.0
 =================
 
-New features
-------------
+New experimental features
+-------------------------
 
-A subset of the ``core`` library has been certified to IEC-61508 SIL 2. For more information,
-see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview.
+
+* A subset of the ``core`` library is being certified to IEC-61508 SIL 2.
+  This is currently in pre-release and uncertified. For more information,
+  see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
 
 Removed experimental features
 -----------------------------

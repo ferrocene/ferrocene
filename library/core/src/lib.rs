@@ -118,7 +118,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(lazy_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
+#![feature(panic_internals)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
@@ -155,8 +155,8 @@
 #![feature(doc_cfg_hide)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
+#![feature(f128)]
+#![feature(f16)]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(funnel_shifts))]
@@ -168,7 +168,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
+#![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
 #![feature(negative_impls)]
@@ -186,7 +186,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(transparent_unions))]
+#![feature(transparent_unions)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
@@ -316,7 +316,6 @@ pub mod ops;
 
 /* Core types and methods on primitives */
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod any;
 pub mod array;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -354,7 +353,6 @@ pub mod pin;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod range;
 pub mod result;
 pub mod sync;
@@ -365,11 +363,8 @@ pub mod unsafe_binder;
 pub mod fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod slice;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod str;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod time;
 
 #[cfg(not(feature = "ferrocene_certified"))]

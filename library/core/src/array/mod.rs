@@ -26,6 +26,8 @@ use crate::mem::{self, MaybeUninit};
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
+#[cfg(feature = "ferrocene_certified")]
+use crate::ops::{Index, IndexMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -35,7 +37,6 @@ use crate::slice::{Iter, IterMut};
 mod ascii;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod drain;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod equality;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
@@ -183,7 +184,6 @@ where
 /// Converts a reference to `T` into a reference to an array of length 1 (without copying).
 #[stable(feature = "array_from_ref", since = "1.53.0")]
 #[rustc_const_stable(feature = "const_array_from_ref_shared", since = "1.63.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn from_ref<T>(s: &T) -> &[T; 1] {
     // SAFETY: Converting `&T` to `&[T; 1]` is sound.
     unsafe { &*(s as *const T).cast::<[T; 1]>() }
@@ -192,7 +192,6 @@ pub const fn from_ref<T>(s: &T) -> &[T; 1] {
 /// Converts a mutable reference to `T` into a mutable reference to an array of length 1 (without copying).
 #[stable(feature = "array_from_ref", since = "1.53.0")]
 #[rustc_const_stable(feature = "const_array_from_ref", since = "1.83.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
     // SAFETY: Converting `&mut T` to `&mut [T; 1]` is sound.
     unsafe { &mut *(s as *mut T).cast::<[T; 1]>() }
@@ -417,7 +416,6 @@ impl<'a, T, const N: usize> IntoIterator for &'a mut [T; N] {
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, I, const N: usize> const Index<I> for [T; N]
 where
     [T]: [const] Index<I>,
@@ -432,7 +430,6 @@ where
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, I, const N: usize> const IndexMut<I> for [T; N]
 where
     [T]: [const] IndexMut<I>,

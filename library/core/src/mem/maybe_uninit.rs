@@ -1,6 +1,10 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::any::type_name;
 use crate::mem::ManuallyDrop;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, intrinsics, ptr, slice};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{intrinsics, ptr, slice};
 
 /// A wrapper type to construct uninitialized instances of `T`.
 ///
@@ -273,6 +277,7 @@ impl<T: Copy> Clone for MaybeUninit<T> {
 }
 
 #[stable(feature = "maybe_uninit_debug", since = "1.41.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> fmt::Debug for MaybeUninit<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // NB: there is no `.pad_fmt` so we can't use a simpler `format_args!("MaybeUninit<{..}>").
@@ -1019,6 +1024,7 @@ impl<T> MaybeUninit<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> [MaybeUninit<T>] {
     /// Copies the elements from `src` to `self`,
     /// returning a mutable reference to the now initialized contents of `self`.
@@ -1472,11 +1478,13 @@ impl<T, const N: usize> [MaybeUninit<T>; N] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 struct Guard<'a, T> {
     slice: &'a mut [MaybeUninit<T>],
     initialized: usize,
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Drop for Guard<'a, T> {
     fn drop(&mut self) {
         let initialized_part = &mut self.slice[..self.initialized];
@@ -1487,10 +1495,12 @@ impl<'a, T> Drop for Guard<'a, T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecFill<T> {
     fn spec_fill(&mut self, value: T);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone> SpecFill<T> for [MaybeUninit<T>] {
     default fn spec_fill(&mut self, value: T) {
         let mut guard = Guard { slice: self, initialized: 0 };
@@ -1507,6 +1517,7 @@ impl<T: Clone> SpecFill<T> for [MaybeUninit<T>] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> SpecFill<T> for [MaybeUninit<T>] {
     fn spec_fill(&mut self, value: T) {
         self.fill(MaybeUninit::new(value));

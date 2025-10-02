@@ -173,7 +173,6 @@ pub unsafe trait PanicPayload: crate::fmt::Display {
 // All uses of this macro are FIXME(const-hack).
 #[unstable(feature = "panic_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro const_panic {
     ($const_msg:literal, $runtime_msg:literal, $($arg:ident : $ty:ty = $val:expr),* $(,)?) => {{
         // Wrap call to `const_eval_select` in a function so that we can

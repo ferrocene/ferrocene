@@ -148,7 +148,6 @@ mod coroutine;
 mod deref;
 mod drop;
 mod function;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod index;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod index_range;
@@ -185,7 +184,6 @@ pub use self::drop::Drop;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::function::{Fn, FnMut, FnOnce};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::index::{Index, IndexMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::index_range::IndexRange;
@@ -200,7 +198,6 @@ pub use self::range::{Range, RangeFrom, RangeFull, RangeTo};
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 pub use self::try_trait::Residual;
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::try_trait::Yeet;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};

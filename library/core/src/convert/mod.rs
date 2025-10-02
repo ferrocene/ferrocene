@@ -967,7 +967,6 @@ impl Error for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const PartialEq for Infallible {
     fn eq(&self, _: &Infallible) -> bool {
         match *self {}
@@ -976,7 +975,6 @@ impl const PartialEq for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Eq for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]

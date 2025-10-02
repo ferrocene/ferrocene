@@ -638,7 +638,7 @@ An :dt:`extending expression` is any of the following:
   :t:`extending expression`.
 
 * :dp:`fls_eeaJtK4w5gVK`
-  A :t:`call expression` that is an :t:`extending expression`
+  The :t:`call expression` that is the :t:`extending expression`
   where the :t:`call operand` resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
 
 :dp:`fls_aq01wjpkxhq9`

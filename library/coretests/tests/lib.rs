@@ -185,6 +185,7 @@ mod manually_drop;
 mod mem;
 mod net;
 mod nonzero;
+mod not_doctests;
 mod num;
 mod ops;
 mod option;

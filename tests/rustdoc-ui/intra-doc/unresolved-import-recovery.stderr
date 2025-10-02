@@ -1,5 +1,5 @@
 error[E0433]: failed to resolve: use of unresolved module or unlinked crate `unresolved_crate`
-  --> $DIR/unresolved-import-recovery.rs:3:5
+  --> $DIR/unresolved-import-recovery.rs:4:5
    |
 LL | use unresolved_crate::module::Name;
    |     ^^^^^^^^^^^^^^^^ use of unresolved module or unlinked crate `unresolved_crate`

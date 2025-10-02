@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test of #43913.
 
 //@ run-rustfix

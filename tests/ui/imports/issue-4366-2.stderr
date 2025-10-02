@@ -4,7 +4,7 @@ error[E0412]: cannot find type `Bar` in this scope
 LL |         fn sub() -> Bar { 1 }
    |                     ^^^ not found in this scope
    |
-note: type alias `a::b::Bar` exists but is inaccessible
+note: type alias `crate::a::b::Bar` exists but is inaccessible
   --> $DIR/issue-4366-2.rs:11:9
    |
 LL |         type Bar = isize;
@@ -16,14 +16,14 @@ error[E0423]: expected function, found module `foo`
 LL |     foo();
    |     ^^^ not a function
    |
-note: function `m1::foo` exists but is inaccessible
+note: function `crate::m1::foo` exists but is inaccessible
   --> $DIR/issue-4366-2.rs:21:5
    |
 LL |     fn foo() {}
    |     ^^^^^^^^ not accessible
 help: consider importing this function instead
    |
-LL + use foo::foo;
+LL + use crate::foo::foo;
    |
 
 error: aborting due to 2 previous errors

@@ -1,4 +1,5 @@
 //@ compile-flags: --playground-url=https://example.com/ -Z unstable-options
+//@ edition: 2015
 
 #![crate_name = "foo"]
 

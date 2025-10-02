@@ -8,13 +8,13 @@ note: these functions exist but are inaccessible
   --> $DIR/privacy-ns2.rs:14:5
    |
 LL |     fn Bar() { }
-   |     ^^^^^^^^ `foo1::Bar`: not accessible
+   |     ^^^^^^^^ `crate::foo1::Bar`: not accessible
 ...
 LL |     fn Bar() { }
-   |     ^^^^^^^^ `foo3::Bar`: not accessible
+   |     ^^^^^^^^ `crate::foo3::Bar`: not accessible
 help: consider importing this function instead
    |
-LL + use foo2::Bar;
+LL + use crate::foo2::Bar;
    |
 
 error[E0423]: expected function, tuple struct or tuple variant, found trait `Bar`
@@ -30,10 +30,10 @@ note: these functions exist but are inaccessible
   --> $DIR/privacy-ns2.rs:14:5
    |
 LL |     fn Bar() { }
-   |     ^^^^^^^^ `foo1::Bar`: not accessible
+   |     ^^^^^^^^ `crate::foo1::Bar`: not accessible
 ...
 LL |     fn Bar() { }
-   |     ^^^^^^^^ `foo3::Bar`: not accessible
+   |     ^^^^^^^^ `crate::foo3::Bar`: not accessible
 help: a unit struct with a similar name exists
    |
 LL -     Bar();
@@ -41,7 +41,7 @@ LL +     Baz();
    |
 help: consider importing this function instead
    |
-LL + use foo2::Bar;
+LL + use crate::foo2::Bar;
    |
 
 error[E0573]: expected type, found function `Bar`
@@ -54,10 +54,10 @@ note: these traits exist but are inaccessible
   --> $DIR/privacy-ns2.rs:31:5
    |
 LL |     trait Bar {
-   |     ^^^^^^^^^ `foo2::Bar`: not accessible
+   |     ^^^^^^^^^ `crate::foo2::Bar`: not accessible
 ...
 LL |     trait Bar {
-   |     ^^^^^^^^^ `foo3::Bar`: not accessible
+   |     ^^^^^^^^^ `crate::foo3::Bar`: not accessible
 help: use `=` if you meant to assign
    |
 LL -     let _x : Bar();
@@ -65,7 +65,7 @@ LL +     let _x = Bar();
    |
 help: consider importing this trait instead
    |
-LL + use foo1::Bar;
+LL + use crate::foo1::Bar;
    |
 
 error[E0603]: trait `Bar` is private

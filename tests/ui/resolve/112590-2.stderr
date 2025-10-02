@@ -6,7 +6,7 @@ LL |         let _: Vec<i32> = super::foo::baf::baz::MyVec::new();
    |
 help: consider importing this struct through its public re-export
    |
-LL +     use foo::bar::baz::MyVec;
+LL +     use crate::foo::bar::baz::MyVec;
    |
 help: if you import `MyVec`, refer to it directly
    |
@@ -23,7 +23,7 @@ LL |         let _: Vec<i32> = fox::bar::baz::MyVec::new();
    = help: you might be missing a crate named `fox`
 help: consider importing this struct through its public re-export
    |
-LL +     use foo::bar::baz::MyVec;
+LL +     use crate::foo::bar::baz::MyVec;
    |
 help: if you import `MyVec`, refer to it directly
    |

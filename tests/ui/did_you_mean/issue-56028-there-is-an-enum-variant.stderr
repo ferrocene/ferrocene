@@ -4,19 +4,19 @@ error[E0412]: cannot find type `Set` in this scope
 LL | fn setup() -> Set { Set }
    |               ^^^ not found in this scope
    |
-help: there is an enum variant `AffixHeart::Set` and 7 others; try using the variant's enum
+help: there is an enum variant `crate::AffixHeart::Set` and 7 others; try using the variant's enum
    |
 LL - fn setup() -> Set { Set }
-LL + fn setup() -> AffixHeart { Set }
+LL + fn setup() -> crate::AffixHeart { Set }
    |
 LL - fn setup() -> Set { Set }
-LL + fn setup() -> CauseToBe { Set }
+LL + fn setup() -> crate::CauseToBe { Set }
    |
 LL - fn setup() -> Set { Set }
-LL + fn setup() -> Determine { Set }
+LL + fn setup() -> crate::Determine { Set }
    |
 LL - fn setup() -> Set { Set }
-LL + fn setup() -> PutDown { Set }
+LL + fn setup() -> crate::PutDown { Set }
    |
    = and 3 other candidates
 
@@ -28,13 +28,13 @@ LL | fn setup() -> Set { Set }
    |
 help: consider importing one of these unit variants
    |
-LL + use AffixHeart::Set;
+LL + use crate::AffixHeart::Set;
    |
-LL + use CauseToBe::Set;
+LL + use crate::CauseToBe::Set;
    |
-LL + use Determine::Set;
+LL + use crate::Determine::Set;
    |
-LL + use PutDown::Set;
+LL + use crate::PutDown::Set;
    |
    = and 3 other candidates
 

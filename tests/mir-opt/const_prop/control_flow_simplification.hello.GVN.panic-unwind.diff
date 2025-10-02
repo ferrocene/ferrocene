@@ -4,7 +4,7 @@
   fn hello() -> () {
       let mut _0: ();
       let mut _1: bool;
-      let mut _2: !;
+      let _2: !;
   
       bb0: {
           StorageLive(_1);
@@ -15,16 +15,12 @@
       }
   
       bb1: {
-          _2 = begin_panic::<&str>(const "explicit panic") -> unwind continue;
+          _2 = panic_cold_explicit() -> unwind continue;
       }
   
       bb2: {
           StorageDead(_1);
           return;
       }
-  }
-  
-  ALLOC0 (size: 14, align: 1) {
-      65 78 70 6c 69 63 69 74 20 70 61 6e 69 63       │ explicit panic
   }
   

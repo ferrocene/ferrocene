@@ -2,6 +2,7 @@
 // that it was referenced by a var debug info from another code generation unit.
 //
 //@ build-pass
+//@ edition: 2015
 //@ revisions: limited full
 //@ compile-flags: -Ccodegen-units=4
 //@[limited] compile-flags: -Cdebuginfo=limited

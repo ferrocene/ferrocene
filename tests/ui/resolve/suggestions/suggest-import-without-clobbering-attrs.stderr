@@ -6,7 +6,7 @@ LL |     z();
    |
 help: consider importing this function
    |
-LL + use y::z;
+LL + use crate::y::z;
    |
 
 error: aborting due to 1 previous error

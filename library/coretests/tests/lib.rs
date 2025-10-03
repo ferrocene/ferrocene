@@ -9,6 +9,8 @@
 #![feature(ascii_char_variants)]
 #![feature(async_iter_from_iter)]
 #![feature(async_iterator)]
+#![feature(atomic_from_mut)]
+#![feature(atomic_try_update)]
 #![feature(bigint_helper_methods)]
 #![feature(bool_to_result)]
 #![feature(bound_as_ref)]

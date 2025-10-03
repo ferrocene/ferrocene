@@ -640,7 +640,7 @@ impl Builder<'_> {
             }
             None => {
                 // Second condition is specific to Ferrocene
-                if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() { // hmm
+                if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() {
                     // The standard library defaults to the legacy scheme
                     false
                 } else {
@@ -1402,8 +1402,10 @@ impl Builder<'_> {
             release_build,
         };
 
-        if mode == Mode::Std && cmd_kind == Kind::Test
-            && self.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library) {
+        if mode == Mode::Std
+            && cmd_kind == Kind::Test
+            && self.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
+        {
             let paths = Paths::find(self, target, FerroceneCoverageFor::Library);
             cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
         }

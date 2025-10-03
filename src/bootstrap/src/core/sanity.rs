@@ -350,8 +350,8 @@ than building it.
             .or_insert_with(|| Target::from_triple(&target.triple));
 
         // Ferrocene addition: set `no_std` for certified targets.
-        // TODO: seems weird to hard-code this in multiple places, maybe edit `build.targets`
-        // somewhere central instead?
+        // FIXME: bootstrap shouldn't silently assume std if it doesn't find a target, instead it
+        // should panic ...
         if let Some(certified_target) = target.certified_equivalent() {
             build
                 .config

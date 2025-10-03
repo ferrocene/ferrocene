@@ -51,7 +51,9 @@ members = [
   "ferrocene/tools/document-signatures",
   "ferrocene/tools/generate-tarball",
   "ferrocene/tools/self-test",
-  "ferrocene/tools/traceability-matrix", "ferrocene/tools/symbol-report",
+  "ferrocene/tools/traceability-matrix",
+  "ferrocene/tools/symbol-report",
+  "ferrocene/tools/blanket",
 ]
 
 exclude = [

@@ -3,19 +3,19 @@
 
 pub(crate) mod coverage_of_subset;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use crate::Compiler;
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
-use crate::core::build_steps::tool::{Tool, SourceType};
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
+use crate::core::build_steps::tool::{SourceType, Tool};
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use crate::ferrocene::tool::{SymbolReport, SYMBOL_PATH};
-use crate::utils::exec::BootstrapCommand;
-use crate::utils::build_stamp;
-use crate::{Kind, Mode};
+use crate::ferrocene::tool::{Blanket, SYMBOL_PATH, SymbolReport};
+use crate::utils::channel::GitInfo;
+use crate::utils::exec::{self, BootstrapCommand};
+use crate::utils::{build_stamp, helpers};
+use crate::{Compiler, Kind, Mode};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
@@ -154,25 +154,30 @@ impl Step for CertifiedCoreSymbols {
             certified_target,
             Kind::Check,
         );
-        let crates = vec!["core".to_owned()];  // currently, only core is certified
+        let crates = vec!["core".to_owned()]; // currently, only core is certified
         for krate in &*crates {
             cargo.arg("-p").arg(krate);
         }
         std_cargo(builder, certified_target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);
-        let report = builder.cargo_out(build_compiler, Mode::Std, certified_target).join("symbol-report.json");
+        let report = builder
+            .cargo_out(build_compiler, Mode::Std, certified_target)
+            .join("symbol-report.json");
         cargo.env("SYMBOL_REPORT_OUT", &report);
 
         let _guard = builder.msg(
             Kind::Run,
-            format_args!("symbol-report for certified library subset{}", crate_description(&crates)),
+            format_args!(
+                "symbol-report for certified library subset{}",
+                crate_description(&crates)
+            ),
             Mode::Std,
             build_compiler,
             certified_target,
         );
 
-        let check_stamp =
-            build_stamp::libstd_stamp(builder, build_compiler, certified_target).with_prefix("symbol-report");
+        let check_stamp = build_stamp::libstd_stamp(builder, build_compiler, certified_target)
+            .with_prefix("symbol-report");
         run_cargo(
             builder,
             cargo,
@@ -186,5 +191,83 @@ impl Step for CertifiedCoreSymbols {
 
         println!("Generated report at {}", report.display());
         report
+    }
+}
+
+// FIXME(@jyn514): this is not a good CLI interface.
+// What I would like is to have it be `x run coverage-report` and have that do everything
+// automatically.
+// That doesn't work right now because there's no way for a Step to imply a `--coverage` flag.
+//
+// Additionally, we would like to let people choose which tests get run when the report is
+// generated, especially since doctests don't work with coverage today but will likely get fixed soon.
+// Rather than trying to make this Step very smart, it's done as part of `generate_coverage_report`
+// after running tests.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct CoverageReport {
+    pub(super) certified_target: TargetSelection,
+    pub(super) profdata: PathBuf,
+    pub(super) symbol_report: PathBuf,
+    pub(super) instrumented_binaries: Vec<PathBuf>,
+}
+
+impl Step for CoverageReport {
+    type Output = PathBuf;
+    const DEFAULT: bool = false;
+    const IS_HOST: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.never()
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let src = to_str(&builder.src);
+        let html_out =
+            builder.doc_out(self.certified_target).join("certified-coverage-report.html");
+        let sha_buf;
+        let sha = match builder.rust_info() {
+            GitInfo::Absent => panic!(
+                "collecting coverage for dist profile requires git info, either through a .git repo or a hash recorded in a tarball"
+            ),
+            GitInfo::RecordedForTarball(recorded) => &recorded.sha,
+            GitInfo::Present(Some(cached)) => &cached.sha,
+            // In `dev` builds, `omit_git_info` will be set to false.
+            // Rather than refactoring all of bootstrap to try and switch on that info,
+            // just run `git rev-parse` here real quick.
+            GitInfo::Present(None) => {
+                sha_buf = helpers::git(None)
+                    .args(&["rev-parse", "HEAD"])
+                    .run_capture_stdout(&builder.config)
+                    .stdout();
+                sha_buf.trim()
+            }
+        };
+        let remap_path = format!("/rustc/{sha},{src}");
+        fn to_str(p: &Path) -> &str {
+            p.as_os_str().to_str().expect("invalid utf8 in path")
+        }
+
+        let mut blanket = exec::command(builder.ensure(Blanket {}));
+        blanket.args(&[
+            "show",
+            "--instr-profile",
+            to_str(&self.profdata),
+            "--report",
+            to_str(&self.symbol_report),
+            "--path-equivalence",
+            &remap_path,
+            "--ferrocene-src",
+            src,
+            "--html-out",
+            to_str(&html_out),
+        ]);
+        for bin in self.instrumented_binaries {
+            blanket.args(&["--object", to_str(&bin)]);
+        }
+        if builder.is_verbose() {
+            blanket.arg("--debug");
+        }
+        blanket.run(&builder.config);
+        html_out
     }
 }

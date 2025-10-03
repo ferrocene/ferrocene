@@ -54,7 +54,8 @@ impl Step for CertifiedApiDocs {
         };
 
         // Copy the files from the certified target to the host target
-        let host_target_doc_out = builder.doc_out(self.target).join("certification").join(doc_out_name);
+        let host_target_doc_out =
+            builder.doc_out(self.target).join("certification").join(doc_out_name);
         builder.create_dir(&host_target_doc_out);
         builder.cp_link_r(&certified_target_doc_out, &host_target_doc_out);
 

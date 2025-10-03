@@ -522,7 +522,12 @@ fn compiler_rt_for_profiler(builder: &Builder<'_>) -> PathBuf {
 
 /// Configure cargo to compile the standard library, adding appropriate env vars
 /// and such.
-pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, cargo: &mut Cargo, crates: &[String]) {
+pub fn std_cargo(
+    builder: &Builder<'_>,
+    target: TargetSelection,
+    cargo: &mut Cargo,
+    crates: &[String],
+) {
     // rustc already ensures that it builds with the minimum deployment
     // target, so ideally we shouldn't need to do anything here.
     //

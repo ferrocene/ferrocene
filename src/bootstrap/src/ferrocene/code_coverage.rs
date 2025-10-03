@@ -13,7 +13,7 @@ use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::download_and_extract_ci_outcomes;
-use crate::ferrocene::run::CertifiedCoreSymbols;
+use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::{BootstrapCommand, Compiler, DocTests, Mode, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
@@ -122,7 +122,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     // binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
     //
     // FIXME(@jyn514): running blanket should be part of bootstrap directly, not a shell script,
-    // at which ponit we'll need these binaries.
+    // at which point we'll need these binaries.
     #[allow(unused_variables)]
     let instrumented_binaries = match state.coverage_for {
         FerroceneCoverageFor::Library => {
@@ -162,14 +162,18 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     };
 
     builder.info("Listing symbols for the certified libcore subset");
-    builder.ensure(CertifiedCoreSymbols {
+    let symbol_report = builder.ensure(CertifiedCoreSymbols {
         // We need at least stage 1 so that our compiler knows about .certified targets.
         build_compiler: builder.compiler(builder.top_stage.max(1), builder.config.host_target),
-        target: builder.config.host_target
+        target: builder.config.host_target,
     });
 
-    builder.info(&format!("Now run `../blanket/run.nu --ferrocene-src {}` to get a coverage report.",
-        builder.src.display()));
+    builder.ensure(CoverageReport {
+        certified_target: builder.config.host_target.certified_equivalent().unwrap(),
+        profdata: paths.profdata_file,
+        instrumented_binaries,
+        symbol_report,
+    });
 
     if builder.doc_tests != DocTests::No {
         // Remove the doctest binaries so they're not distributed afterwards.

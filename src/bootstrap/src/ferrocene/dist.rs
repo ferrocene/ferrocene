@@ -52,7 +52,10 @@ impl Step for Docs {
         // NOTE: must be called before .add_directory, since it places the
         // certified API docs in the doc_out
         if self.target.certified_equivalent().is_some() {
-            builder.ensure(CertifiedApiDocs { target: self.target, format: DocumentationFormat::Html});
+            builder.ensure(CertifiedApiDocs {
+                target: self.target,
+                format: DocumentationFormat::Html,
+            });
         } else {
             builder.info(&format!("skipping Build certified-core-docs ({})", self.target));
         }

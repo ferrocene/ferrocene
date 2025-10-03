@@ -1,5 +1,5 @@
-use core::num;
-use std::{collections::HashSet, path::Path};
+use std::collections::HashSet;
+use std::path::Path;
 
 use maud::{DOCTYPE, PreEscaped};
 
@@ -40,7 +40,10 @@ pub(crate) fn generate(
             }
         }
     }
-    assert_eq!(fully_tested.len() + partially_tested.len() + fully_untested.len() + fully_ignored.len(), coverage.len());
+    assert_eq!(
+        fully_tested.len() + partially_tested.len() + fully_untested.len() + fully_ignored.len(),
+        coverage.len()
+    );
 
     let fully_tested_class = FunctionCoverageStatus::FullyTested.to_css_class();
     let partially_tested_class = FunctionCoverageStatus::PartiallyTested.to_css_class();
@@ -82,7 +85,6 @@ pub(crate) fn generate(
         generate_section(FunctionCoverageStatus::FullyTested, fully_tested, sources)?,
         generate_section(FunctionCoverageStatus::FullyIgnored, fully_ignored, sources)?,
     ];
-
 
     let html = maud::html!(
         (DOCTYPE)
@@ -151,9 +153,8 @@ fn generate_function(
     let mut lines = Vec::with_capacity(line_coverage.len());
     for (linenum, line) in file.lines().enumerate() {
         let linenum = linenum + 1; // `enumerate()` starts at 0, lines start at 1.
-        let maybe_line = line_coverage
-            .iter()
-            .find(|(covered_linenum, _)| linenum == *covered_linenum);
+        let maybe_line =
+            line_coverage.iter().find(|(covered_linenum, _)| linenum == *covered_linenum);
         if let Some((actual_linenum, status)) = maybe_line {
             lines.push((actual_linenum, line, status));
             if line.contains("// Ferrocene annotation") {

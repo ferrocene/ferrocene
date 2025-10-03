@@ -117,6 +117,9 @@ JOBS_DEFINITION: JobsDefinition = {
                 # `rustdoc-gui` requires nodejs, npm and chromium to be installed
                 # in the container, which is currently not the case.
                 "rustdoc-gui",
+                # `rustdoc-js-std` tests are frequently unstable and this is not part of our
+                # qualified tooling.
+                "rustdoc-js-std",
             ],
             deprioritize=[
                 # This test suite interferes with the others (notably the UI

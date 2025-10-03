@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 pub(crate) mod code_coverage;
+#[cfg(test)]
+mod tests;
 
 use std::collections::HashMap;
 use std::ffi::{OsStr, OsString};
@@ -980,17 +982,41 @@ fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
     if result.components().count() == 0 { PathBuf::from(".") } else { result }
 }
 
+/// Extract the version of a submodule from `git submodule status`.
+///
+/// [None] if there is no entry for the requested `submodule_path`.
 fn get_submodule_version(
     submodule_path: &str,
     exec_ctx: impl AsRef<ExecutionContext>,
 ) -> Option<String> {
     let submodule_status = git(None).args(["submodule", "status"]).run_capture(exec_ctx).stdout();
-    let mut submodule_version = None;
-    for line in submodule_status.lines() {
-        if line.contains(submodule_path) {
-            let (commit, _) = line.trim().split_once(' ').unwrap();
-            submodule_version = Some(commit.to_string())
-        }
+    submodule_status.lines().find_map(|line| parse_submodule_line(line, submodule_path))
+}
+
+/// Parse a single line from `git submodule status`.
+///
+/// [None] if the `line` is not related to the `submodule_path`.
+///
+/// # Panics
+///
+/// Panics if the `line` is related to the `submodule_path`, but the commit starts with `+` or `U`.
+/// See the [git submodule status documentation] for details.
+///
+/// [git submodule status documentation]: https://git-scm.com/docs/git-submodule#Documentation/git-submodule.txt-status--cached--recursive--path
+fn parse_submodule_line(line: &str, submodule_path: &str) -> Option<String> {
+    let commit = line.contains(submodule_path).then(|| line.trim().split_once(' ').unwrap().0)?;
+    match &commit[..1] {
+        "+" => panic!(
+            "The currently checked out submodule commit of \"{submodule_path}\" does \
+            not match the commit found in the index of the containing repository. \
+            Please fix this by running `git submodule update {submodule_path}`"
+        ),
+        "U" => panic!(
+            "The submodule \"{submodule_path}\" has merge conflicts. \
+            Please resolve them."
+        ),
+        // "-" means the submodule is not initialized. That's okay.
+        "-" => Some(commit[1..].to_string()),
+        _ => Some(commit.to_string()),
     }
-    submodule_version
 }

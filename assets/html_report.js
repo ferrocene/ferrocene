@@ -1,7 +1,7 @@
-const summaryFullyTestedSelector = ".summary .fully-tested"
-const summaryPartiallyTestedSelector = ".summary .partially-tested"
-const summaryUntestedSelector = ".summary .fully-untested"
-const summaryIgnoredSelector = ".summary .fully-ignored"
+const summaryFullyTestedSelector = ".picker-buttons .fully-tested"
+const summaryPartiallyTestedSelector = ".picker-buttons .partially-tested"
+const summaryUntestedSelector = ".picker-buttons .fully-untested"
+const summaryIgnoredSelector = ".picker-buttons .fully-ignored"
 const summarySelectors = [
     summaryFullyTestedSelector,
     summaryPartiallyTestedSelector,
@@ -23,9 +23,13 @@ function main() {
         }
         summaryItemElem.addEventListener("click", filter_listener);
     }
-    document.querySelector("#reset").addEventListener("click", _ => {
-        functionsElem.dataset.filter = null;
-    });
+    for (elem of document.querySelectorAll(".line")) {
+        elem.addEventListener("click", async event => {
+            let filename = event.target.dataset.filename;
+            let linenum = event.target.dataset.linenum;
+            await navigator.clipboard.writeText(`${filename}:${linenum}`);
+        });
+    }
 }
 
 if (document.readyState === "loading") {

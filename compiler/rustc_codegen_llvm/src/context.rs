@@ -34,7 +34,7 @@ use smallvec::SmallVec;
 use crate::back::write::to_llvm_code_model;
 use crate::callee::get_fn;
 use crate::debuginfo::metadata::apply_vcall_visibility_metadata;
-use crate::llvm::Metadata;
+use crate::llvm::{Metadata, MetadataKindId};
 use crate::type_::Type;
 use crate::value::Value;
 use crate::{attributes, common, coverageinfo, debuginfo, llvm, llvm_util};
@@ -370,7 +370,8 @@ pub(crate) unsafe fn create_module<'ll>(
         );
     }
 
-    if let Some(BranchProtection { bti, pac_ret }) = sess.opts.unstable_opts.branch_protection {
+    if let Some(BranchProtection { bti, pac_ret, gcs }) = sess.opts.unstable_opts.branch_protection
+    {
         if sess.target.arch == "aarch64" {
             llvm::add_module_flag_u32(
                 llmod,
@@ -402,6 +403,12 @@ pub(crate) unsafe fn create_module<'ll>(
                 llvm::ModuleFlagMergeBehavior::Min,
                 "sign-return-address-with-bkey",
                 u32::from(pac_opts.key == PAuthKey::B),
+            );
+            llvm::add_module_flag_u32(
+                llmod,
+                llvm::ModuleFlagMergeBehavior::Min,
+                "guarded-control-stack",
+                gcs.into(),
             );
         } else {
             bug!(
@@ -869,7 +876,7 @@ impl<'ll, 'tcx> MiscCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                 } else {
                     let fty = self.type_variadic_func(&[], self.type_i32());
                     let llfn = self.declare_cfn(name, llvm::UnnamedAddr::Global, fty);
-                    let target_cpu = attributes::target_cpu_attr(self);
+                    let target_cpu = attributes::target_cpu_attr(self, self.sess());
                     attributes::apply_to_llfn(llfn, llvm::AttributePlace::Function, &[target_cpu]);
                     llfn
                 }
@@ -884,15 +891,15 @@ impl<'ll, 'tcx> MiscCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
     }
 
     fn set_frame_pointer_type(&self, llfn: &'ll Value) {
-        if let Some(attr) = attributes::frame_pointer_type_attr(self) {
+        if let Some(attr) = attributes::frame_pointer_type_attr(self, self.sess()) {
             attributes::apply_to_llfn(llfn, llvm::AttributePlace::Function, &[attr]);
         }
     }
 
     fn apply_target_cpu_attr(&self, llfn: &'ll Value) {
         let mut attrs = SmallVec::<[_; 2]>::new();
-        attrs.push(attributes::target_cpu_attr(self));
-        attrs.extend(attributes::tune_cpu_attr(self));
+        attrs.push(attributes::target_cpu_attr(self, self.sess()));
+        attrs.extend(attributes::tune_cpu_attr(self, self.sess()));
         attributes::apply_to_llfn(llfn, llvm::AttributePlace::Function, &attrs);
     }
 
@@ -911,7 +918,7 @@ impl<'ll, 'tcx> MiscCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
             attributes::apply_to_llfn(
                 llfn,
                 llvm::AttributePlace::Function,
-                attributes::target_features_attr(self, vec![]).as_slice(),
+                attributes::target_features_attr(self, self.tcx, vec![]).as_slice(),
             );
             Some(llfn)
         } else {
@@ -999,11 +1006,11 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
     pub(crate) fn set_metadata<'a>(
         &self,
         val: &'a Value,
-        kind_id: impl Into<llvm::MetadataKindId>,
+        kind_id: MetadataKindId,
         md: &'ll Metadata,
     ) {
         let node = self.get_metadata_value(md);
-        llvm::LLVMSetMetadata(val, kind_id.into(), node);
+        llvm::LLVMSetMetadata(val, kind_id, node);
     }
 }
 
@@ -1037,7 +1044,10 @@ impl<'tcx, 'll> HasTypingEnv<'tcx> for CodegenCx<'ll, 'tcx> {
 impl<'tcx> LayoutOfHelpers<'tcx> for CodegenCx<'_, 'tcx> {
     #[inline]
     fn handle_layout_err(&self, err: LayoutError<'tcx>, span: Span, ty: Ty<'tcx>) -> ! {
-        if let LayoutError::SizeOverflow(_) | LayoutError::ReferencesError(_) = err {
+        if let LayoutError::SizeOverflow(_)
+        | LayoutError::ReferencesError(_)
+        | LayoutError::InvalidSimd { .. } = err
+        {
             self.tcx.dcx().emit_fatal(Spanned { span, node: err.into_diagnostic() })
         } else {
             self.tcx.dcx().emit_fatal(ssa_errors::FailedToGetLayout { span, ty, err })
@@ -1054,7 +1064,11 @@ impl<'tcx> FnAbiOfHelpers<'tcx> for CodegenCx<'_, 'tcx> {
         fn_abi_request: FnAbiRequest<'tcx>,
     ) -> ! {
         match err {
-            FnAbiError::Layout(LayoutError::SizeOverflow(_) | LayoutError::Cycle(_)) => {
+            FnAbiError::Layout(
+                LayoutError::SizeOverflow(_)
+                | LayoutError::Cycle(_)
+                | LayoutError::InvalidSimd { .. },
+            ) => {
                 self.tcx.dcx().emit_fatal(Spanned { span, node: err });
             }
             _ => match fn_abi_request {

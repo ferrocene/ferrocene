@@ -560,6 +560,7 @@ impl Step for CI {
                 "clippy::same_item_push".into(),
                 "clippy::single_char_add_str".into(),
                 "clippy::to_string_in_format_args".into(),
+                "clippy::unconditional_recursion".into(),
             ],
             forbid: vec![],
         };
@@ -587,6 +588,7 @@ impl Step for CI {
                 "clippy::same_item_push".into(),
                 "clippy::single_char_add_str".into(),
                 "clippy::to_string_in_format_args".into(),
+                "clippy::unconditional_recursion".into(),
             ],
             forbid: vec![],
         };

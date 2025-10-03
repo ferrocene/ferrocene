@@ -8,11 +8,12 @@ What are known problems
 -----------------------
 
 Known problems are what we call the currently discovered soundness issues in
-the Rust compiler.
+the Rust compiler and included libraries.
 We need to list and describe these in a manner that we
 can show them to customers to make them aware of these issues.
 
 The database and tooling for these live in https://github.com/ferrocene/problems.
+The customer facing database lives at https://problems.ferrocene.dev/.
 
 Classifying and describing a problem
 ------------------------------------

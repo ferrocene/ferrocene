@@ -1,5 +1,6 @@
 use core::cmp::Ordering;
 use core::ops::{Bound, ControlFlow};
+use core::panic::Location;
 use core::sync::atomic::AtomicU32;
 
 #[test]
@@ -198,4 +199,12 @@ fn atomic_methods() {
     let _ = AtomicU32::get_mut_slice(AtomicU32::from_mut_slice(arr.get_mut(0..1).unwrap()));
 
     let _ = unsafe { AtomicU32::from_ptr(arr.get_mut(0).unwrap() as *mut u32) };
+}
+
+#[test]
+fn panic_location() {
+    let loc = Location::caller();
+
+    let _ = loc.line();
+    let _ = loc.column();
 }

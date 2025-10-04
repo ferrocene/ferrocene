@@ -254,6 +254,8 @@ path = [
     "requirements.txt",
     ".python-version",
     "src/bootstrap/src/ferrocene/**",
+    "ferrocene/tools/blanket/**",
+    "ferrocene/tools/symbol-report/**",
     "ferrocene/doc/core-certification/src/spreadsheets/*",
     "ferrocene/doc/core-certification/src/_static/**",
 ]

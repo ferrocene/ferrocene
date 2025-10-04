@@ -314,36 +314,66 @@ fn atomic_compare_exchange() {
 
     static ATOMIC: AtomicIsize = AtomicIsize::new(0);
 
-    ATOMIC.compare_exchange(0, 1, Relaxed, Relaxed).ok();
-    ATOMIC.compare_exchange(0, 1, Relaxed, Acquire).ok();
-    ATOMIC.compare_exchange(0, 1, Relaxed, SeqCst).ok();
-    ATOMIC.compare_exchange(0, 1, Acquire, Relaxed).ok();
-    ATOMIC.compare_exchange(0, 1, Acquire, Acquire).ok();
-    ATOMIC.compare_exchange(0, 1, Acquire, SeqCst).ok();
-    ATOMIC.compare_exchange(0, 1, Release, Relaxed).ok();
-    ATOMIC.compare_exchange(0, 1, Release, Acquire).ok();
-    ATOMIC.compare_exchange(0, 1, Release, SeqCst).ok();
-    ATOMIC.compare_exchange(0, 1, AcqRel, Relaxed).ok();
-    ATOMIC.compare_exchange(0, 1, AcqRel, Acquire).ok();
-    ATOMIC.compare_exchange(0, 1, AcqRel, SeqCst).ok();
-    ATOMIC.compare_exchange(0, 1, SeqCst, Relaxed).ok();
-    ATOMIC.compare_exchange(0, 1, SeqCst, Acquire).ok();
-    ATOMIC.compare_exchange(0, 1, SeqCst, SeqCst).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Relaxed, Relaxed).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Relaxed, Acquire).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Relaxed, SeqCst).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Acquire, Relaxed).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Acquire, Acquire).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Acquire, SeqCst).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Release, Relaxed).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Release, Acquire).ok();
-    ATOMIC.compare_exchange_weak(0, 1, Release, SeqCst).ok();
-    ATOMIC.compare_exchange_weak(0, 1, AcqRel, Relaxed).ok();
-    ATOMIC.compare_exchange_weak(0, 1, AcqRel, Acquire).ok();
-    ATOMIC.compare_exchange_weak(0, 1, AcqRel, SeqCst).ok();
-    ATOMIC.compare_exchange_weak(0, 1, SeqCst, Relaxed).ok();
-    ATOMIC.compare_exchange_weak(0, 1, SeqCst, Acquire).ok();
-    ATOMIC.compare_exchange_weak(0, 1, SeqCst, SeqCst).ok();
+    assert!(ATOMIC.compare_exchange(0, 0, Relaxed, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Relaxed, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Relaxed, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Relaxed, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Relaxed, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Relaxed, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Acquire, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Acquire, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Acquire, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Acquire, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Acquire, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Acquire, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Release, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Release, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Release, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Release, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, Release, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, Release, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, AcqRel, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, AcqRel, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, AcqRel, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, AcqRel, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, AcqRel, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, AcqRel, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, SeqCst, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, SeqCst, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, SeqCst, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, SeqCst, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange(0, 0, SeqCst, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange(1, 1, SeqCst, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Relaxed, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Relaxed, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Relaxed, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Relaxed, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Relaxed, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Relaxed, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Acquire, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Acquire, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Acquire, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Acquire, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Acquire, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Acquire, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Release, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Release, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Release, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Release, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, Release, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, Release, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, AcqRel, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, AcqRel, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, AcqRel, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, AcqRel, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, AcqRel, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, AcqRel, SeqCst).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, SeqCst, Relaxed).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, SeqCst, Relaxed).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, SeqCst, Acquire).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, SeqCst, Acquire).is_err());
+    assert!(ATOMIC.compare_exchange_weak(0, 0, SeqCst, SeqCst).is_ok());
+    assert!(ATOMIC.compare_exchange_weak(1, 1, SeqCst, SeqCst).is_err());
 }
 
 #[test]
@@ -546,3 +576,10 @@ fn atomic_const_from() {
     const _ATOMIC_PTR: AtomicPtr<u32> = AtomicPtr::from(core::ptr::null_mut());
 }
 */
+
+#[test]
+fn atomic_default() {
+    use Ordering::*;
+
+    assert_eq!(AtomicU32::default().load(Relaxed), AtomicU32::from(0).load(Relaxed));
+}

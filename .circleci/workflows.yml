@@ -106,7 +106,8 @@ jobs:
       - setup-uv
       - run:
           name: Perform licensing checks
-          command: uvx reuse --include-submodules lint
+          command: |
+            uvx reuse@5.1.1 --include-submodules lint
       - ferrocene-ci
 
   # x86_64-unknown-linux-gnu jobs

@@ -491,7 +491,8 @@ of elements.
 The :t:`element type` shall be a :t:`fixed sized type`.
 
 :dp:`fls_imr2jx6cbuzq`
-The :t:`size operand` shall be a :t:`constant expression` or an :t:`inferred constant`.
+The :t:`size operand` shall be a :t:`constant expression`
+or an :t:`inferred constant`.
 
 :dp:`fls_r8nqxry2dlww`
 The :t:`type` of the :t:`size operand` is :t:`type` :c:`usize`.

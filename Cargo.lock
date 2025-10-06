@@ -1184,6 +1184,7 @@ dependencies = [
  "anyhow",
  "serde",
  "serde_json",
+ "similar",
  "spdx-rs",
 ]
 

@@ -265,18 +265,13 @@ fn parse_cfg_name_directive<'a>(
         message: "when performing tests on dist toolchain"
     }
 
-<<<<<<< HEAD
     // ferrocene addition
     condition! {
         name: "ferrocene.facade",
         condition: config.target.contains("ferrocene.facade"),
         message: "when the target is part of the Ferrocene facade target family"
     }
-
-    if prefix == "ignore" && outcome == MatchOutcome::Invalid {
-=======
     if prefix == "ignore-" && outcome == MatchOutcome::Invalid {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // Don't error out for ignore-tidy-* diretives, as those are not handled by compiletest.
         if name.starts_with("tidy-") {
             outcome = MatchOutcome::External;

@@ -133,11 +133,8 @@ pub struct Error;
 /// [`std::io::Write`]: ../../std/io/trait.Write.html
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_diagnostic_item = "FmtWrite"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.

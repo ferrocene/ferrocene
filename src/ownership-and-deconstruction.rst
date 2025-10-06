@@ -643,7 +643,7 @@ An :t:`extending expression` is any of the following:
 
 * :dp:`fls_eeaJtK4w5gVK`
   The :t:`[argument operand]s` of an extending :t:`call expression`
-  of a :t:`tuple struct` or a :t:`tuple enum variant`.
+  that resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
 
 :dp:`fls_aq01wjpkxhq9`
 The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression` that is an

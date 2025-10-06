@@ -256,16 +256,10 @@ use crate::cmp::Ordering;
 use crate::fmt::{self, Debug, Display};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PhantomData, Unsize};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::mem;
-#[cfg(not(feature = "ferrocene_certified"))]
-use crate::ops::{CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::mem::{self, ManuallyDrop};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::PinCoerceUnsized;

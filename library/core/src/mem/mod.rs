@@ -10,11 +10,8 @@ use crate::alloc::Layout;
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::panic::const_assert;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
 #[cfg(not(feature = "ferrocene_certified"))]

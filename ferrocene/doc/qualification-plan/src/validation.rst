@@ -76,6 +76,14 @@ They must also do a quick check to ensure there are no unexpected problems
 with the end product and that the automation successfully executed without
 warnings.
 
+Quick checks should always include ensuring:
+
+* the :ref:`qualification-report:requirements-traceability` is still satisfied
+* the :ref:`qualification-report:test-results-overview` shows expected counts
+* the Specification :ref:`specification:fls_fo1c7pg2mw1` documents the right version
+* the :ref:`release-notes:index` for the version are correct, follow
+  the process in :ref:`release-notes-maintenance` and do not have an ``:upcoming-release:`` tag
+
 Build and Testing Validation
 ----------------------------
 

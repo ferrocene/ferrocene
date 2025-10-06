@@ -6912,7 +6912,7 @@ tuple struct call expression
 
 :dp:`fls_DQaCUkskfXzk`
 A :dt:`tuple struct call expression` is a :t:`call expression` where the
-:t:`call operand` resolves to a :t:`tuple struct`.
+:t:`call operand` resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
 
 .. _fls_xx4slbg8s63e:
 

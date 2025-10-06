@@ -112,6 +112,7 @@ Language changes in Rust 1.89.0
 
 - `Extend temporary lifetime extension to also go through tuple struct and tuple variant constructors <https://github.com/rust-lang/rust/pull/140593>`_
 
+  - Changed paragraph: :p:`fls_DQaCUkskfXzk`
   - New paragraphs:
 
     - :p:`fls_YeeZWqTdMivX`

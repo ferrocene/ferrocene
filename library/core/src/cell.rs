@@ -260,11 +260,13 @@ use crate::marker::{PhantomData, Unsize};
 use crate::mem::{self, ManuallyDrop};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::PinCoerceUnsized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{self, NonNull};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::range;
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -785,26 +787,35 @@ impl<T, const N: usize> Cell<[T; N]> {
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
 // Allow potential overlapping implementations in user code
 #[marker]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait CloneFromCell: Clone {}
 
 // `CloneFromCell` can be implemented for types that don't have indirection and which don't access
 // `Cell`s in their `Clone` implementation. A commonly-used subset is covered here.
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: CloneFromCell, const N: usize> CloneFromCell for [T; N] {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for Option<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: CloneFromCell, E: CloneFromCell> CloneFromCell for Result<T, E> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> CloneFromCell for PhantomData<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for ManuallyDrop<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for ops::Range<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for range::Range<T> {}
 
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: CloneFromCell> Cell<T> {
     /// Get a clone of the `Cell` that contains a copy of the original value.
     ///

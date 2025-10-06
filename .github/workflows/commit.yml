@@ -59,7 +59,7 @@ jobs:
           INSTALL_LLVM: 1
 
       - name: Install licensing tool
-        run: uv tool install reuse
+        run: uv tool install reuse@5.1.1
 
       # We deliberately avoid using docker containers as that would require either adding
       # a couple minutes to the build, or doing auth/trust related things that would impact

@@ -483,22 +483,49 @@ Attribute ``target_feature``
      | $$aes$$
      | $$avx$$
      | $$avx2$$
+     | $$avx512bf16$$
+     | $$avx512bitalg$$
+     | $$avx512bw$$
+     | $$avx512cd$$
+     | $$avx512dq$$
+     | $$avx512f$$
+     | $$avx512fp16$$
+     | $$avx512ifma$$
+     | $$avx512vbmi$$
+     | $$avx512vbmi2$$
+     | $$avx512vl$$
+     | $$avx512vnni$$
+     | $$avx512vp2intersect$$
+     | $$avx512vpopcntdq$$
+     | $$avxifma$$
+     | $$avxneconvert$$
+     | $$avxvnni$$
+     | $$avxvnniint16$$
+     | $$avxvnniint8$$
      | $$bmi1$$
      | $$bmi2$$
      | $$fma$$
      | $$fxsr$$
+     | $$gfni$$
+     | $$kl$$
      | $$lzcnt$$
      | $$pclmulqdq$$
      | $$popcnt$$
      | $$rdrand$$
      | $$rdseed$$
      | $$sha$$
+     | $$sha512$$
+     | $$sm3$$
+     | $$sm4$$
      | $$sse$$
      | $$sse2$$
      | $$sse3$$
      | $$sse4.1$$
      | $$sse4.2$$
      | $$ssse3$$
+     | $$vaes$$
+     | $$vpclmulqdq$$
+     | $$widekl$$
      | $$xsave$$
      | $$xsavec$$
      | $$xsaveopt$$
@@ -540,6 +567,82 @@ The target architecture features are as follows:
      - avx2
      - avx
      - Advanced Vector Extensions 2
+   * - :dp:`fls_8HPcvIaahaB9`
+     - avx512bf16
+     - avx512bw
+     - Advanced Vector Extensions 512-bit - Bfloat16 Extensions
+   * - :dp:`fls_lxcfj6XCKyMh`
+     - vx512bitalg
+     - avx512bw
+     - Advanced Vector Extensions 512-bit - Bit Algorithms
+   * - :dp:`fls_fh7i1Pcmqjdm`
+     - avx512bw
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Byte and Word Instructions
+   * - :dp:`fls_M9ne2sqhRB5L`
+     - avx512cd
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Conflict Detection Instructions
+   * - :dp:`fls_xWcGvl83bVWC`
+     - avx512dq
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Doubleword and Quadword Instructions
+   * - :dp:`fls_5CVTkOoLHAvW`
+     - avx512f
+     - avx2, fma, f16c
+     - Advanced Vector Extensions 512-bit - Foundation
+   * - :dp:`fls_hThb8qn820wJ`
+     - avx512fp16
+     - avx512bw
+     - Advanced Vector Extensions 512-bit - Float16 Extensions
+   * - :dp:`fls_1T0VYMtG3loD`
+     - avx512ifma
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Integer Fused Multiply Add
+   * - :dp:`fls_AlBD9ckWKecQ`
+     - avx512vbmi
+     - avx512bw
+     - Advanced Vector Extensions 512-bit - Vector Byte Manipulation Instructions
+   * - :dp:`fls_72cwAExPDMQ8`
+     - avx512vbmi2
+     - avx512bw
+     - Advanced Vector Extensions 512-bit - Vector Byte Manipulation Instructions 2
+   * - :dp:`fls_pSSIwmUAnUly`
+     - avx512vl
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Vector Length Extensions
+   * - :dp:`fls_YOW8lcBQ5lNI`
+     - avx512vnni
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Vector Neural Network Instructions
+   * - :dp:`fls_8PrvVL6dkr31`
+     - avx512vp2intersect
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Vector Pair Intersection to a Pair of Mask Registers
+   * - :dp:`fls_hKvaSExdlKgd`
+     - avx512vpopcntdq
+     - avx512f
+     - Advanced Vector Extensions 512-bit - Vector Population Count Instruction
+   * - :dp:`fls_r5KEicrmEGJt`
+     - avxifma
+     - avx2
+     - Advanced Vector Extensions - Integer Fused Multiply Add
+   * - :dp:`fls_Qnx9nNiJeIAX`
+     - avxneconvert
+     - avx2
+     - Advanced Vector Extensions - No-Exception Floating-Point conversion Instructions
+   * - :dp:`fls_ZrcPWy4pxlTX`
+     - avxvnni
+     - avx2
+     - Advanced Vector Extensions - Vector Neural Network Instructions
+   * - :dp:`fls_YW7otDxAliSj`
+     - avxvnniint16
+     - avx2
+     - Advanced Vector Extensions - Vector Neural Network Instructions with 16-bit Integers
+   * - :dp:`fls_G4aOoX8a7i7r`
+     - avxvnniint8
+     - avx2
+     - Advanced Vector Extensions - Vector Neural Network Instructions with 8-bit Integers
    * - :dp:`fls_eglaup5zyfsk`
      - bmi1
      -
@@ -556,6 +659,14 @@ The target architecture features are as follows:
      - fxsr
      -
      - Save and restore x87 FPU, MMX technology, and SSE state
+   * - :dp:`fls_HGKiXfM5fGVo`
+     - gfni
+     - sse2
+     - Galois Field New Instructions
+   * - :dp:`fls_gtoLNHFmmBzd`
+     - kl
+     - sse2
+     - Intel Key Locker Instructions
    * - :dp:`fls_406ltkru11tk`
      - lzcnt
      -
@@ -580,6 +691,18 @@ The target architecture features are as follows:
      - sha
      - sse2
      - Secure Hash Algorithm
+   * - :dp:`fls_UPhNSZS89sYr`
+     - sha512
+     - avx2
+     - Secure Hash Algorithm with 512-bit digest
+   * - :dp:`fls_HoNwaLtDzwZi`
+     - sm3
+     - avx
+     - ShangMi 3 Hash Algorithm
+   * - :dp:`fls_VqjfIihpRe9m`
+     - sm4
+     - avx2
+     - ShangMi 4 Hash Algorithm
    * - :dp:`fls_7c31e21g6bdj`
      - sse
      -
@@ -604,6 +727,18 @@ The target architecture features are as follows:
      - ssse3
      - sse3
      - Supplemental Streaming SIMD Extensions 3
+   * - :dp:`fls_gRf8F9PIGySt`
+     - vaes
+     - avx2, aes
+     - Vector AES Instructions
+   * - :dp:`fls_NNj4H6A9VTR8`
+     - vpclmulqdq
+     - avx, pclmulqdq
+     - Vector Carry-less multiplication of Quadwords
+   * - :dp:`fls_qZO82VdU5Iz9`
+     - widekl
+     - kl
+     - Intel Wide Keylocker Instructions
    * - :dp:`fls_rilqwazchfpp`
      - xsave
      -

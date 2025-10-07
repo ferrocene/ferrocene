@@ -5,7 +5,7 @@ use crate::spec::{
 
 pub(crate) fn target() -> Target {
     // Ferrocene annotation: Ferrocene has `lld` enabled for this target,
-    // so the `TargetOptions`` are moved out of the `Target`,
+    // so the `TargetOptions` are moved out of the `Target`,
     // these changes can likely go away once https://github.com/rust-lang/rust/pull/146604
     // lands.
     let mut base = TargetOptions {

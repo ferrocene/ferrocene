@@ -62,8 +62,8 @@ are ready to release it as a stable release.
 Add version to Known Problems
 -----------------------------
 
-Add the new version to the Known Problems database by adding the version and branch
-to the ``src/config.yml`` file then running the tool.
+Add the new version to the `Known Problems repository <https://github.com/ferrocene/problems/>`_
+by adding the version and branch to the ``src/config.yml`` file then running the tool.
 
 Validate that the site now has the version and known problems are tracked for it.
 
@@ -100,7 +100,7 @@ Perform :ref:`qualification-plan:release-validation` on the ``release/1.NN`` bra
 Signing
 -------
 
-Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` perform the
+Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` to perform the
 :ref:`documentation signatures <internal-procedures:signing-all-documents>`.
 
 Delivering the documentation package

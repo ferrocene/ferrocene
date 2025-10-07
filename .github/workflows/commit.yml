@@ -12,6 +12,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Does the absolute bare minimum to run `x test tidy`, so the author can get fast feedback.
+  # Does not cancel other jobs if it fails.
+  tidy:
+    name: "Tidy"
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone only necessary submodules
+        run: ferrocene/ci/scripts/checkout-submodules.sh library/backtrace src/doc/reference src/doc/book src/tools/cargo src/tools/rustc-perf
+
+      - name: Run tidy
+        run: ferrocene/ci/run.sh
+        env:
+          FERROCENE_UNPRIVILEGED_CI: 1
+          FERROCENE_HOST: x86_64-unknown-linux-gnu
+          SCRIPT: ./x test tidy
+
   # Job dedicated to running quick checks for each commit pushed in open
   # PRs and personal branches. The job must balance providing quick feedback
   # and providing useful feedback, focusing on catching the most common errors
@@ -71,7 +92,6 @@ jobs:
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           SCRIPT: |
             set -e
-            ./x test tidy
             ./x check rustc
             ./x run ferrocene/tools/traceability-matrix
             ./x test collect-license-metadata

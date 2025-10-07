@@ -114,13 +114,12 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(paths.profraw_dir);
     cmd.fail_fast().run(builder);
 
-    // FIXME(@pvdrz): llvm-cov needs to receive the path to the binaries that were instrumented.
+    // FIXME(@pvdrz): `blanket` needs to receive the path to the binaries that were instrumented.
     // However there is no quick and easy way to fetch those. For now, we just go inside the
     // dependencies and assume that every executable file is an instrumented binary.
     //
     // A possible improvement would be to capture `cargo test` stderr and fetch the path of every
     // binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
-    #[allow(unused_variables)]
     let instrumented_binaries = match state.coverage_for {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];

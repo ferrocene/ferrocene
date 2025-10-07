@@ -441,10 +441,7 @@ mod tests {
         assert_fail("libcore-0123456789abcdef"); // No extension
     }
 
-    #[cfg(all(target_os = "linux", target_arch = "x86_64"))] // Only on x86_64 Linux since the test is specific to that.
-    #[test]
-    fn test_check_target_default_link_args() -> Result<(), Error> {
-        let tuple = "x86_64-unknown-linux-gnu";
+    fn check_target_default_link_args(tuple: &'static str) -> Result<(), Error> {
         let target = TargetSpec { tuple, std: true, linker: Linker::HostCc };
 
         let utils = TestUtils::new();
@@ -455,5 +452,17 @@ mod tests {
             .stdout("-fuse-ld=lld")
             .create();
         check_default_link_args(utils.sysroot(), &target)
+    }
+
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+    #[test]
+    fn test_check_target_default_link_args_x86_64() -> Result<(), Error> {
+        check_target_default_link_args("x86_64-unknown-linux-gnu")
+    }
+
+    #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
+    #[test]
+    fn test_check_target_default_link_args_x86_64() -> Result<(), Error> {
+        check_target_default_link_args("aarch64-unknown-linux-gnu")
     }
 }

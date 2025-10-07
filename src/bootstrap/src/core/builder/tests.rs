@@ -1318,10 +1318,20 @@ mod snapshot {
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
+<<<<<<< HEAD
+=======
+        [build] rustc 1 <host> -> std 1 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] book (book) <target1>
         [doc] book/first-edition (book) <target1>
         [doc] book/second-edition (book) <target1>
         [doc] book/2018-edition (book) <target1>
+<<<<<<< HEAD
+=======
+        [build] rustdoc 1 <host>
+        [doc] rustc 1 <host> -> standalone 2 <host>
+        [doc] rustc 1 <host> -> standalone 2 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> error-index 2 <host>
@@ -1460,10 +1470,20 @@ mod snapshot {
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
+<<<<<<< HEAD
+=======
+        [build] rustc 1 <host> -> std 1 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] book (book) <target1>
         [doc] book/first-edition (book) <target1>
         [doc] book/second-edition (book) <target1>
         [doc] book/2018-edition (book) <target1>
+<<<<<<< HEAD
+=======
+        [build] rustdoc 1 <host>
+        [doc] rustc 1 <host> -> standalone 2 <host>
+        [doc] rustc 1 <host> -> standalone 2 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> error-index 2 <host>
@@ -1509,7 +1529,31 @@ mod snapshot {
                 .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustc 1 <host> -> std 1 <target1>
+        [doc] book (book) <target1>
+        [doc] book/first-edition (book) <target1>
+        [doc] book/second-edition (book) <target1>
+        [doc] book/2018-edition (book) <target1>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        [doc] rustc 1 <host> -> standalone 2 <target1>
+        [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] nomicon (book) <target1>
+        [doc] rustc 1 <host> -> reference (book) 2 <target1>
+        [doc] rustdoc (book) <target1>
+        [doc] rust-by-example (book) <target1>
+        [doc] cargo (book) <target1>
+        [doc] clippy (book) <target1>
+        [doc] embedded-book (book) <target1>
+        [doc] edition-guide (book) <target1>
+        [doc] style-guide (book) <target1>
+        [doc] rustc 1 <host> -> releases 2 <target1>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] rustc 1 <host> -> json-docs 2 <target1>
@@ -1532,7 +1576,38 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustc 1 <host> -> std 1 <target1>
+        [doc] book (book) <target1>
+        [doc] book/first-edition (book) <target1>
+        [doc] book/second-edition (book) <target1>
+        [doc] book/2018-edition (book) <target1>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        [doc] rustc 1 <host> -> standalone 2 <target1>
+        [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] llvm <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <target1>
+        [build] rustc 1 <host> -> error-index 2 <target1>
+        [doc] rustc 1 <host> -> error-index 2 <target1>
+        [doc] nomicon (book) <target1>
+        [doc] rustc 1 <host> -> reference (book) 2 <target1>
+        [doc] rustdoc (book) <target1>
+        [doc] rust-by-example (book) <target1>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [doc] rustc (book) <target1>
+        [doc] cargo (book) <target1>
+        [doc] clippy (book) <target1>
+        [doc] embedded-book (book) <target1>
+        [doc] edition-guide (book) <target1>
+        [doc] style-guide (book) <target1>
+        [doc] rustc 1 <host> -> releases 2 <target1>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] rustc 1 <host> -> json-docs 2 <target1>

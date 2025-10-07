@@ -254,19 +254,17 @@ impl ShowCommand {
                     .filter(|(_, status)| *status == LineCoverageStatus::Untested)
                     .map(|(linenum, _)| format!("{}:{}", func.relative_path.display(), linenum))
                     .collect::<Vec<_>>();
-                println!(
-                    "{} / {} covered ({} lines unconsidered)\
-                    {}\
-                ",
-                    func.lines.tested(),
-                    func.lines.considered(),
-                    func.lines.unconsidered(),
-                    if !missing.is_empty() {
-                        format!("\n\tMissing lines:\n\t\t{}\n", missing.join("\n\t\t"))
-                    } else {
-                        "".into()
-                    },
-                );
+                if self.debug || !missing.is_empty() {
+                    println!(
+                        "{} / {} covered ({} lines unconsidered)\n\
+                        \tMissing lines:\n\t\t{}\n\
+                        ",
+                        func.lines.tested(),
+                        func.lines.considered(),
+                        func.lines.unconsidered(),
+                        missing.join("\n\t\t"),
+                    );
+                }
             }
         }
         let total = coverage.len();
@@ -293,8 +291,10 @@ impl ShowCommand {
         );
 
         if let Some(ref html_out) = self.html_out {
-            let html = html_report::generate(&coverage, &self.ferrocene)?;
-            std::fs::write(html_out, html.render().into_string())?;
+            let html = html_report::generate(&coverage, &self.ferrocene)
+                .context("failed to generate HTML report")?;
+            std::fs::write(html_out, html.render().into_string())
+                .context("failed to write HTML report to disk")?;
             println!("Generated coverage report at {}", html_out.display());
         }
 

@@ -33,6 +33,8 @@ Certified subset
 
 The certification does not cover the entirety of the core library, but instead a subset. This is to reduce the effort of the certification.
 
+The `Certified core library API docs <../../api-docs/core/index.html>`_ is the autoritative document stating which items are included.
+
 Project Setup
 -------------
 

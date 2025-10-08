@@ -1060,3 +1060,14 @@ fn test_guaranteed_eq() {
     assert_eq!(ptr.guaranteed_eq(ptr3), Some(false));
     assert_ne!(ptr, ptr3);
 }
+
+#[test]
+fn test_clone() {
+    let mut arr = [0, 1, 2];
+
+    let ptr = arr.as_ptr();
+    let mut_ptr = arr.as_mut_ptr();
+
+    assert_eq!(Clone::clone(&ptr), ptr);
+    assert_eq!(Clone::clone(&mut_ptr), mut_ptr);
+}

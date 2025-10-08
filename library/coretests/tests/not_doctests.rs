@@ -102,6 +102,18 @@ fn option_methods() {
 }
 
 #[test]
+#[should_panic = "reached"]
+fn filter_option() {
+    let _ = Some("foo").filter(|_| panic!("reached"));
+}
+
+#[test]
+#[should_panic = "reached"]
+fn inspect_option() {
+    let _ = Some("foo").inspect(|_| panic!("reached"));
+}
+
+#[test]
 fn result_methods() {
     let s = String::from("hello");
     let mut ok = Ok::<&&String, &&String>(&&s);
@@ -150,6 +162,18 @@ fn result_methods() {
 
     assert!(Err::<&mut i32, i32>(x).cloned().is_err_and(|x| x == 5));
     assert!(Err::<&mut i32, i32>(x).copied().is_err_and(|x| x == 5));
+}
+
+#[test]
+#[should_panic = "reached"]
+fn inspect_result() {
+    let _ = Ok::<&str, &str>("foo").inspect(|_| panic!("reached"));
+}
+
+#[test]
+#[should_panic = "reached"]
+fn inspect_result_err() {
+    let _ = Err::<&str, &str>("foo").inspect_err(|_| panic!("reached"));
 }
 
 #[test]

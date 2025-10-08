@@ -1203,7 +1203,9 @@ impl<T> Option<T> {
     {
         if let Some(ref x) = self {
             // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
-            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
+            // test in `coretests`. Additionally, the `inspect_option` test guarantees that `f` is
+            // being called by panicking inside the `predicate` body and marking the test as
+            // `#[should_panic]`.
             f(x);
         }
 
@@ -1591,7 +1593,9 @@ impl<T> Option<T> {
     {
         if let Some(x) = self {
             // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
-            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
+            // test in `coretests`. Additionally, the `filter_option` test guarantees that
+            // `predicate` is being called by panicking inside the `predicate` body and marking the
+            // test as `#[should_panic]`.
             if predicate(&x) {
                 return Some(x);
             }

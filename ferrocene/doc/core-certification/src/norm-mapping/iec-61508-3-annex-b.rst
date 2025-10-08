@@ -54,7 +54,7 @@ Table B.4 - Failure analysis
 3
 "
 
-Covered by :ref:`safety-plan:Failure analysis`.
+Covered by :ref:`safety-plan/index:Failure analysis`.
 
 
 Table B.5 - Modelling
@@ -81,7 +81,7 @@ N/A
 Table B.7 - Semi-formal methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Covered by :ref:`safety-plan:Requirements Management`.
+Covered by :ref:`safety-plan/index:requirements management`.
 
 Table B.8 - Static analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -30,7 +30,7 @@ Covered by
 
 Covered by
 
-- :doc:`Certified core library API docs <core-certification:subset-api-docs>`
+- `Certified core library API docs <../../api-docs/core/index.html>`_
 - :doc:`Code coverage report <core-certification:code-coverage>`
 - :doc:`Requirements review <core-certification:requirement-review>`
 

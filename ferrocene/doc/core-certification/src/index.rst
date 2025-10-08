@@ -37,7 +37,6 @@ Core Library Certification
    :caption: Certified Subset
    
    subset
-   subset-api-docs
 
 .. appendices::
    :numbered:

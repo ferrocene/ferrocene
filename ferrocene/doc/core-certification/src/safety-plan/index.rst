@@ -12,24 +12,36 @@ This document describes the approach and the activities to be performed to achie
 Certification scope
 -------------------
 
-The core library shall be suitable to be used in safety applications according to IEC 61508, up to SIL 2.
+The core library shall be suitable to be used in safety applications according to following safety standards:
 
-Therefore, we are evaluating the core library through an "assessment of non-compliant development” (according to Route 3S of 7.4.2.12). This assessment targets a full compliance statement to IEC 61508, SIL2, as far as it is applicable for a Software Safety Element out of Context.
+- |iec_ref|, up to |iec_sil|
 
-The targeted version of the core library is |rust_version|, and will apply to all qualified targets of Ferrocene :doc:`user-manual:targets/index`.
+The core library is evaluated as an "assessment of non-compliant development” (according to Route 3S of |iec_ref| section 7.4.2.12). This assessment targets a full compliance statement to the standards above, as far as it is applicable for a Software Safety Element out of Context.
+
+Certified version
+~~~~~~~~~~~~~~~~~
+
+The certified version of the core library is |rust_version|.
+
+Certified targets
+~~~~~~~~~~~~~~~~~
+
+The core library is certified for all compilation targets Ferrocene rustc is qualified for. See :doc:`user-manual:targets/index` for a full list.
+
+Certified subset
+~~~~~~~~~~~~~~~~
+
+The certification does not cover the entirety of the core library, but instead a subset. This is to reduce the effort of the certification.
 
 Project Setup
 -------------
 
-Timeline
-~~~~~~~~
-
-Our first milestone is to be "certification-ready” by July 2025. Because of the short timeline we will focus on solutions that prioritize feasibility over user convenience. The second milestone will focus on convenience, tooling, and automation.
-
 Release cadence
 ~~~~~~~~~~~~~~~
 
-Due to the use of internal apis, the core library versions are only compatible with one matching Ferrocene release. The core library will be recertified for every Ferrocene release.
+Due to the use of internal apis, the core library versions are only compatible with one matching Ferrocene release. The core library will be recertified for every Ferrocene release. That is approximately every three months.
+
+The first Ferrocene release to include the certified core library is "Ferrocene 25.11.0". Ferrocene distributes an uncertified version of the core library since the first Ferrocene release.
 
 Roles and responsibilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,48 +51,48 @@ Roles and responsibilities (e.g. Safety Manager, Product Manager) are documented
 Lifecycle Phases Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Pull changes to the core library codebase, as part of daily upstream pulls (see :doc:`internal-procedures:upstream-pulls`).
-2. On a regular cadence, latest before the release, examine the diff and follow the code-review checklist (see below)
+1. Changes to the core library are pulled from the Upstream Rust project, as part of daily upstream pulls (see :doc:`internal-procedures:upstream-pulls`).
+2. On a regular cadence, latest before the release, the changes are examined and it is ensured the certification requirements are upheld.
 
-The first time this is executed it will be a lot of work because we go from zero to the first subset of the core library. In the future the changes will be smaller because they will only be changes to the existing subset and potentially new functions added to the subset.
+The requirements are:
 
-Code-Review checklist
-"""""""""""""""""""""
-
-On every upstream pull we need to review:
-
-- no uncertified code is called from certified code
-- quality of doc-comments
-- changes to doc-comments
-- tests the adherence to the coding standard (rustc lints + rustfmt)
-- 100% line code coverage
-
-In the long run we want to automate as much as possible. In the beginning many of the checks will be manual.
+- No uncertified code is used from certified code
+- Every public function of the certified subset has a requirement with sufficient quality
+- The certified code adheres to the coding standard
+- The certified subset is tested with 100% statement coverage
 
 Internal procedures
 ~~~~~~~~~~~~~~~~~~~
 
-Describes the internal engineering procedures for the Ferrocene project, based on software engineering best practices, to be updated upon detection of shortcomings in the development process.
-
-See :doc:`internal-procedures:index`.
+The :doc:`qualification-plan:index` describes how the Ferrocene organisation works, among others: Infrastructure, and the Development, Build, Testing and Release process. It is based on software engineering best practices, to be updated upon detection of shortcomings in the development process.
 
 Deliverables and Documents
 --------------------------
 
-We are delivering following documents to the assessor and to customers:
+The following deliverables are delivered to the assessor and to customers:
 
-- Product Documentation
-   - User Manual
-   - The core library API docs, which include
-      - Requirements (the function doc-comments)
-      - Software Design (the module doc-comments)
-- Functional Safety Management
-   - Safety Plan
-   - Norm Mapping
-   - Review Evidence for requirements and software design
-   - Safety Manual
-   - Test Plan, Test cases and Test results
-- Binaries in the delivery
+Product Documentation
+~~~~~~~~~~~~~~~~~~~~~
+
+- :doc:`user-manual:index`
+- The `Certified core library API docs <../../api-docs/core/index.html>`_, which include
+   - Requirements (the function doc-comments)
+   - Software Design (the module doc-comments)
+
+Functional Safety Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Safety Plan (this document)
+- :doc:`core-certification:norm-mapping/index` for all safety standards
+- :doc:`safety-manual:index`
+- :doc:`core-certification:testing-plan`
+- Test cases (``coretests`` test suite), and
+- :doc:`qualification-report:rustc/index`
+
+Binaries in the delivery
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `rust-std-<TARGET>.tar.xz` archives contain the precompiled core library for each certified target.
 
 Requirements Management
 -----------------------
@@ -474,11 +486,6 @@ Failure modes
 - Modify generated documentation
    - Risk: Erroneous documentation
    - Mitigation: If detected, report error.
-
-Qualification targets
----------------------
-
-We certify the core library for all compilation targets rustc is qualified for. We already run the core library test suite for all qualified targets in our CI. So there is no additional work that needs to be done here.
 
 Failure analysis
 ----------------

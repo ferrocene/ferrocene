@@ -940,6 +940,8 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     pub fn inspect<F: FnOnce(&T)>(self, f: F) -> Self {
         if let Ok(ref t) = self {
+            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
+            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
             f(t);
         }
 
@@ -964,6 +966,8 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     pub fn inspect_err<F: FnOnce(&E)>(self, f: F) -> Self {
         if let Err(ref e) = self {
+            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
+            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
             f(e);
         }
 

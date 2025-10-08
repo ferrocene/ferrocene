@@ -3429,6 +3429,9 @@ macro_rules! atomic_int {
             where F: FnMut($int_type) -> Option<$int_type> {
                 let mut prev = self.load(fetch_order);
                 while let Some(next) = f(prev) {
+                    // Ferrocene annotation: Both arms of this match expression are covered, which
+                    // means that scrutinee expression itself must have been evaluated in either
+                    // case.
                     match self.compare_exchange_weak(prev, next, set_order, fetch_order) {
                         x @ Ok(_) => return x,
                         Err(next_prev) => prev = next_prev
@@ -4129,7 +4132,15 @@ pub unsafe fn atomic_compare_exchange<T: Copy>(
             (_, Release) => panic!("there is no such thing as a release failure ordering"),
         }
     };
-    if ok { Ok(val) } else { Err(val) }
+    // Ferrocene annotation: Both branches of this conditional are covered, which means that the
+    // `ok` boolean must have been evaluated in either case.
+    if ok {
+        //
+        Ok(val)
+    } else {
+        //
+        Err(val)
+    }
 }
 
 #[inline]
@@ -4194,7 +4205,15 @@ unsafe fn atomic_compare_exchange_weak<T: Copy>(
             (_, Release) => panic!("there is no such thing as a release failure ordering"),
         }
     };
-    if ok { Ok(val) } else { Err(val) }
+    // Ferrocene annotation: Both branches of this conditional are covered, which means that the
+    // `ok` boolean must have been evaluated in either case.
+    if ok {
+        //
+        Ok(val)
+    } else {
+        //
+        Err(val)
+    }
 }
 
 #[inline]

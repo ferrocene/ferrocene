@@ -1,0 +1,183 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+IEC 61508-1
+-----------
+
+5.2.1
+~~~~~
+
+Covered by :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle Phases Overview>`.
+
+5.2.2
+~~~~~
+
+Covered by
+
+- :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle Phases Overview>`
+- :ref:`Safety Plan - Roles and Responsibilities <safety-plan:Roles and Responsibilities>`
+
+5.2.3
+~~~~~
+
+Covered by
+
+- :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle Phases Overview>`
+- :ref:`Safety Plan - Release Cadence <safety-plan:Release Cadence>`
+
+5.2.4
+~~~~~
+
+Covered by
+
+- :doc:`Certified core library API docs <core-certification:subset-api-docs>`
+- :doc:`Code coverage report <core-certification:code-coverage>`
+- :doc:`Requirements review <core-certification:requirement-review>`
+
+5.2.5
+~~~~~
+
+All docs available in the :doc:`Ferrocene documentation package <index>`.
+
+5.2.6
+~~~~~
+
+Covered by :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
+
+5.2.7
+~~~~~
+
+The core library certification documentation follows the structure of the other documents in the :doc:`Ferrocene documentation package <index>`.
+
+5.2.8
+~~~~~
+
+Processes from the Rustc qualification are used, unless specific needs for the core library certification require otherwise.
+
+5.2.9
+~~~~~
+
+Covered by :doc:`qualification-plan:change-tracking`.
+
+5.2.10
+~~~~~~
+
+Changes to the certified core library are included in the Ferrocene release notes. When new releases of the certified core library, which is released with Ferrocene, include new functionality such as an expanded subset, this will be covered in the release notes.
+
+5.2.11
+~~~~~~
+
+Covered by
+
+- :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`
+- :ref:`safety-plan:Roles and Responsibilities`
+
+6.2
+~~~
+
+See subsections.
+
+6.2.1
+~~~~~
+
+Covered by :ref:`Safety Plan - Roles and responsibilities <safety-plan:Roles and Responsibilities>`.
+
+6.2.2
+~~~~~
+
+Ferrous Systems is ISO 9001-2015 certified. See :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`.
+
+6.2.3
+~~~~~
+
+Covered by :ref:`safety-plan:Roles and Responsibilities`.
+
+6.2.4
+~~~~~
+
+Covered by :doc:`safety-manual:customer-interactions`.
+
+6.2.5
+~~~~~
+
+Covered by :doc:`qualification-plan:patching`.
+
+6.2.6
+~~~~~
+
+Covered by :ref:`safety-plan:Internal Procedures`.
+
+6.2.7
+~~~~~
+
+Covered by :ref:`safety-plan:Release Cadence`.
+
+6.2.8
+~~~~~
+
+Covered by :doc:`qualification-plan:development`.
+
+6.2.9
+~~~~~
+
+Covered by :doc:`qualification-plan:kp-tracking`.
+
+6.2.10
+~~~~~~
+
+Covered by :doc:`qualification-plan:infrastructure`.
+
+6.2.11
+~~~~~~
+
+N/A; No emergency services involved.
+
+6.2.12
+~~~~~~
+
+Covered by :doc:`qualification-plan:organization`.
+
+6.2.13
+~~~~~~
+
+Ferrous Systems maintains a database of staff competencies consisting of staff CVs as well as any training provided by Ferrous Systems. Prior to assigning major tasks, leadership verifies the competencies of the respective staff.
+Ferrous Systems's ISO 9001 managed internal handbook details how staff may undertake training for new skills, or re-training for existing skills.
+
+6.2.14
+~~~~~~
+
+When assigning staff to projects, leadership verifies that staff experience, training, decision making authority, responsibilities, and level of supervision required are a fit. Where appropriate, Ferrous Systems assigns more experienced staff to work alongside less experienced staff to facilitate hands-on training.
+
+6.2.15
+~~~~~~
+
+Ferrous Systems maintains a database of staff competencies consisting of their CVs as well as any training provided by Ferrous Systems.
+
+6.2.16
+~~~~~~
+
+Detailed in Ferrous Systems's ISO 9001 managed internal handbook and re-checked for each renewal of certification.
+
+6.2.17
+~~~~~~
+
+N/A; No suppliers involved.
+
+6.2.18
+~~~~~~
+
+Covered by
+
+- :ref:`Safety Plan - Release Cadence <safety-plan:Release Cadence>`
+
+7.4.2
+~~~~~
+
+Covered by :ref:`safety-plan:Failure analysis`.
+
+7.5.2
+~~~~~
+
+Covered by
+
+- :doc:`safety-manual:known-problems`

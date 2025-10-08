@@ -10,7 +10,7 @@ Table A.1
 1a
 ""
 
-Covered by :ref:`safety-plan:Requirements Management`.
+Covered by :ref:`safety-plan/index:requirements management`.
 
 Table A.2
 ~~~~~~~~~

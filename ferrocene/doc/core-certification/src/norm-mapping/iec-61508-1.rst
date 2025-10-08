@@ -7,23 +7,23 @@ IEC 61508-1
 5.2.1
 ~~~~~
 
-Covered by :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle Phases Overview>`.
+Covered by :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan/index:lifecycle phases overview>`.
 
 5.2.2
 ~~~~~
 
 Covered by
 
-- :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle Phases Overview>`
-- :ref:`Safety Plan - Roles and Responsibilities <safety-plan:Roles and Responsibilities>`
+- :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan/index:lifecycle phases overview>`
+- :ref:`Safety Plan - Roles and Responsibilities <safety-plan/index:roles and responsibilities>`
 
 5.2.3
 ~~~~~
 
 Covered by
 
-- :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle Phases Overview>`
-- :ref:`Safety Plan - Release Cadence <safety-plan:Release Cadence>`
+- :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan/index:lifecycle phases overview>`
+- :ref:`Safety Plan - Release Cadence <safety-plan/index:release cadence>`
 
 5.2.4
 ~~~~~
@@ -70,7 +70,7 @@ Changes to the certified core library are included in the Ferrocene release note
 Covered by
 
 - :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`
-- :ref:`safety-plan:Roles and Responsibilities`
+- :ref:`safety-plan/index:roles and responsibilities`
 
 6.2
 ~~~
@@ -80,7 +80,7 @@ See subsections.
 6.2.1
 ~~~~~
 
-Covered by :ref:`Safety Plan - Roles and responsibilities <safety-plan:Roles and Responsibilities>`.
+Covered by :ref:`Safety Plan - Roles and responsibilities <safety-plan/index:roles and responsibilities>`.
 
 6.2.2
 ~~~~~
@@ -90,7 +90,7 @@ Ferrous Systems is ISO 9001-2015 certified. See :doc:`Qualification Plan - Ferro
 6.2.3
 ~~~~~
 
-Covered by :ref:`safety-plan:Roles and Responsibilities`.
+Covered by :ref:`safety-plan/index:roles and responsibilities`.
 
 6.2.4
 ~~~~~
@@ -105,12 +105,12 @@ Covered by :doc:`qualification-plan:patching`.
 6.2.6
 ~~~~~
 
-Covered by :ref:`safety-plan:Internal Procedures`.
+Covered by :ref:`safety-plan/index:internal procedures`.
 
 6.2.7
 ~~~~~
 
-Covered by :ref:`safety-plan:Release Cadence`.
+Covered by :ref:`safety-plan/index:release cadence`.
 
 6.2.8
 ~~~~~
@@ -168,12 +168,12 @@ N/A; No suppliers involved.
 
 Covered by
 
-- :ref:`Safety Plan - Release Cadence <safety-plan:Release Cadence>`
+- :ref:`Safety Plan - Release Cadence <safety-plan/index:release cadence>`
 
 7.4.2
 ~~~~~
 
-Covered by :ref:`safety-plan:Failure analysis`.
+Covered by :ref:`safety-plan/index:Failure analysis`.
 
 7.5.2
 ~~~~~

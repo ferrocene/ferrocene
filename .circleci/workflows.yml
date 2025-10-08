@@ -1462,7 +1462,6 @@ commands:
 
       - run:
           name: Generate resource usage report
-          when: always
           command: |
             mkdir -p /tmp/metrics
             ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html

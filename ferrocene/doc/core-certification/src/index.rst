@@ -31,13 +31,6 @@ Core Library Certification
    requirement-review
    code-coverage
 
-.. toctree::
-   :numbered:
-   :maxdepth: 2
-   :caption: Certified Subset
-   
-   subset
-
 .. appendices::
    :numbered:
    :maxdepth: 2

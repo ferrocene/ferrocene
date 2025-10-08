@@ -988,8 +988,10 @@ impl<T, E> Result<T, E> {
         F: [const] FnOnce(&T) + [const] Destruct,
     {
         if let Ok(ref t) = self {
-            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
-            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
+            // Ferrocene annotation: This function is thoroughly tested inside the `result_methods`
+            // test in `coretests`. Additionally, the `inspect_result` test guarantees that `f` is
+            // being called by panicking inside the `predicate` body and marking the test as
+            // `#[should_panic]`.
             f(t);
         }
 
@@ -1018,8 +1020,10 @@ impl<T, E> Result<T, E> {
         F: [const] FnOnce(&E) + [const] Destruct,
     {
         if let Err(ref e) = self {
-            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
-            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
+            // Ferrocene annotation: This function is thoroughly tested inside the `result_methods`
+            // test in `coretests`. Additionally, the `inspect_result_err` test guarantees that `f`
+            // is being called by panicking inside the `predicate` body and marking the test as
+            // `#[should_panic]`.
             f(e);
         }
 

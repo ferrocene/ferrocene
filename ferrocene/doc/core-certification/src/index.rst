@@ -7,10 +7,20 @@ Core Library Certification
 .. toctree::
    :numbered:
    :maxdepth: 2
+   :caption: Norm Mapping
+
+   norm-mapping/index
+   norm-mapping/iec-61508-1
+   norm-mapping/iec-61508-3
+   norm-mapping/iec-61508-3-annex-a
+   norm-mapping/iec-61508-3-annex-b
+
+.. toctree::
+   :numbered:
+   :maxdepth: 2
    :caption: Overview
 
    safety-plan
-   norm-mapping
    testing-plan
    requirement-review
    code-coverage

@@ -7,6 +7,13 @@ Core Library Certification
 .. toctree::
    :numbered:
    :maxdepth: 2
+   :caption: Safety Plan
+
+   safety-plan/index
+
+.. toctree::
+   :numbered:
+   :maxdepth: 2
    :caption: Norm Mapping
 
    norm-mapping/index
@@ -20,7 +27,6 @@ Core Library Certification
    :maxdepth: 2
    :caption: Overview
 
-   safety-plan
    testing-plan
    requirement-review
    code-coverage

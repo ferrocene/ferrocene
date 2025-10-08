@@ -291,11 +291,15 @@ impl ShowCommand {
         );
 
         if let Some(ref html_out) = self.html_out {
+            let out = html_out.display();
             let html = html_report::generate(&coverage, &self.ferrocene)
                 .context("failed to generate HTML report")?;
+            let parent = html_out.parent().unwrap();
+            std::fs::create_dir_all(parent)
+                .context(format!("Failed to create {}", parent.display()))?;
             std::fs::write(html_out, html.render().into_string())
-                .context("failed to write HTML report to disk")?;
-            println!("Generated coverage report at {}", html_out.display());
+                .context(format!("failed to write HTML report to {out}"))?;
+            println!("Generated coverage report at {out}");
         }
 
         Ok(())

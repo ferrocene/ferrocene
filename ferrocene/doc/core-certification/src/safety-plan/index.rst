@@ -12,9 +12,16 @@ This document describes the approach and the activities to be performed to achie
 Certification scope
 -------------------
 
-The core library shall be suitable to be used in safety applications according to following safety standards:
+The core library shall be suitable to be used in safety applications according to following safety standards up to the specified safety level:
 
-- |iec_ref|, up to |iec_sil|
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Safety Standard
+     - Safety Level
+   * - |iec_ref|
+     - |iec_sil|
 
 The core library is evaluated as an "assessment of non-compliant development” (according to Route 3S of |iec_ref| section 7.4.2.12). This assessment targets a full compliance statement to the standards above, as far as it is applicable for a Software Safety Element out of Context.
 
@@ -33,7 +40,19 @@ Certified subset
 
 The certification does not cover the entirety of the core library, but instead a subset. This is to reduce the effort of the certification.
 
-The `Certified core library API docs <../../api-docs/core/index.html>`_ is the autoritative document stating which items are included.
+The subset included in the safety certification is defined and documented in the :doc:`Safety Manual <safety-manual:core/subset>`.
+
+Systematic capabilities
+-----------------------
+
+All public functions of the certified subset are considered "software safety functions” and are going to be certified for all safety standards up to the safety level specified. That means our customers can use all of those functions for use cases up to the highest safety level specified. Since we consider all of them safety relevant we do not consider independence.
+
+The systematic capability of these functions is based on:
+
+- The requirements and the documented completeness of these requirements and their implementation in the code and tests
+- The absence of any undocumented and untested code in the safety certification scope
+- The required test coverage
+- The adherence of the code within the safety scope to the Coding Guidelines
 
 Project Setup
 -------------
@@ -99,22 +118,25 @@ The `rust-std-<TARGET>.tar.xz` archives contain the precompiled core library for
 Requirements Management
 -----------------------
 
-Structure of Requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Doc-comments
+~~~~~~~~~~~~
 
-The Doc-comments described below cover the single level of functional requirements for each function. The documentation for each module also covers the purpose and overview, and as such is suitable for the design requirement. We don't have an architecture document due to the small size of the core library, as well as the fact that it is pre-existing software.
+Requirements are implemented as doc-comments.
+
+The Doc-comments described below cover the single level of functional requirements for each function.
+
+The documentation for each module covers the purpose and overview, and as such is suitable for the design requirement.
 
 Doc-comments in general
 """""""""""""""""""""""
 
-Rust has a concept called "doc-comments” also known as documentation comments. They are denoted by triple-slashes, while normal comments are denoted by double-slashes. They support markdown, and code inside code blocks is automatically run as tests, to ensure the code and docs strings do not get out of sync.
-
-For example:
+Rust has a concept called "doc-comments” also known as documentation comments. They are denoted by triple-slashes, while normal comments are denoted by double-slashes. They support markdown, and code inside code blocks is automatically run as tests, to ensure the code and documentation do not get out of sync.
 
 .. code-block:: rust
   :linenos:
 
   /// Add two `u32`s.
+  ///
   /// ```
   /// assert_eq!(add(1, 5), 6);
   /// ```
@@ -123,11 +145,13 @@ For example:
   // This is not a doc-comment
   fn add(x: u32, y: u32) -> u32 { /* */ }
 
-Those doc-comments are picked up by Rust tooling and used to generate documentation with the rustdoc tool. Every crate on [crates.io](http://crates.io/), the standard Rust crate registry, automatically gets this documentation built.
+In the exampe above, the function ``add(x: u32, y: u32) -> u32`` has a six-line doc comment and directly after a two-line comment which is not a doc-comment.
 
-See [the heapless documentation](https://docs.rs/heapless/latest/heapless/) as an example.
+Those doc-comments are picked up by Rust tooling and used to generate documentation with the rustdoc tool. Every crate on `<http://crates.io/>`_, the standard Rust crate registry, automatically gets this documentation built for every release.
 
-Read more about doc comments here: <https://doc.rust-lang.org/rust-by-example/meta/doc.html>.
+See `the heapless documentation <https://docs.rs/heapless/latest/heapless/>`_ as an example.
+
+Read more about doc comments here: `<https://doc.rust-lang.org/rust-by-example/meta/doc.html>`_.
 
 Doc-comments in the core library
 """"""""""""""""""""""""""""""""
@@ -138,69 +162,56 @@ The doc-comments of both modules and functions are compiled, together with the f
 
 Overall the doc-comments in the core library are very extensive, very high-quality and a lot of work has been and continues to be put into them.
 
-That's why we want to rely on them for multiple purposes of the certification, after making sure the following conditions are met:
-
-- Each method must have a description of what it does.
-- Each method must state the return type of the method, and the types of each argument it takes.
-- Each method should list one or more useful examples as verified doctests.
-- Where applicable, each method should reference safety information.
-- Where applicable, each method should reference panic information.
-
-Architecture and software design
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The core library does not need a software architecture (see above).
-
-But it needs a software design document. Here we are going to build upon the doc-comments of the modules. Those doc-comments already describe the design of those modules.
+That's why we want to rely on them for multiple purposes of the certification.
 
 Requirements
 ~~~~~~~~~~~~
 
 For requirements we will rely on the doc-comments plus the signature of the function. The signature describes the types of the input and output parameters, which are enforced by the compiler. The doc-comments describe the expected behaviour, which is tested by unit tests.
 
+Doc-comments used as requirements must:
+
+- Describe what the function does.
+- Include one or more examples, which will be executed as doctests.
+- Where applicable, include safety information.
+- Where applicable, include panic information.
+
+Architecture and software design
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The core library does not need a software architecture, due to its small size.
+
+The core library uses the doc-comments of the modules as their module design.
+
+Doc-comments used as module design must:
+
+- Describe the purpose of the module.
+- Describe the functionality included in it.
+
 Quality of the doc-comments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We will assess the quality of both the module and function doc-comments and their fitness for usage as software design and requirements respectively, via a design standard.
+The requirements for doc-comments used as requirements or module design are regularly checked. If gaps are found, the fixes will be upstreamed, which has the advantage of getting additional reviews by Rust experts and creating a consensus in the Rust community.
 
-Note that only functions, methods, and trait methods are reviewed according to the standard, as trait method definitions do not have independent documentation from their defining trait method.
+Requirement to test tracing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If we find gaps we will upstream the solutions, which has the advantage of getting additional reviews by Rust experts and creating a consensus in the Rust community.
-
-We will track if the doc-comments change, because that could mean our requirements change and tests need to be updated. Paying close attention to changes to doc-comments is part of the review checklist.
-
-Requirements and tests
-----------------------
-
-One of the major pieces of work is going to be having requirements and tests for the certified core library subset.
-
-Subset of the core library
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The subset included in the safety certification is defined and documented in the Safety Manual.
-
-Requirements
-~~~~~~~~~~~~
-
-As described above we are going to build upon the doc-comments as requirements.
-
-Tracing
-"""""""
-
-Firstly, our requirements are doc comments which are on top of functions, therefore the requirements are already traced to functions. Secondly, we are relying on code coverage to ensure that functions are covered by tests. Combining this, if all functions are covered by tests, also all requirements are covered by tests. Therefore we do not need to manually trace tests to requirements.
+1. Firstly, the requirement of a function is the doc comment which is on top of that functions. Therefore the requirements is traced to the function.
+2. Secondly, the certification relies on code coverage to ensure that each function is sufficiently covered by tests.
+3. Combining one and two, if all functions are covered by tests, also all requirements are covered by tests. Therefore tests do not need to be manually traced to requirements.
 
 Requirement identifier
-""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~
 
-Each function has one doc-comment aka. one requirement. The module path of a function is unique, which is ensured by the compiler, and can therefore be used as an identifier for that requirement. Doc comments might change between versions, so to ensure uniqueness across versions, that requirement id is the combination of version and module path of the function.
+Each function has one doc-comment aka. one requirement. The module path of a function is unique, which is ensured by the compiler, and can therefore be used as an identifier for that requirement. Doc comments might change between versions, so to ensure uniqueness across versions, that requirement id is the combination of the version of Ferrocene and the module path of the function.
 
 Requirement status
-""""""""""""""""""
+~~~~~~~~~~~~~~~~~~
 
 A requirement is in one of three statuses: draft, approved, retired. If a requirement gets proposed via a pull request, it is in draft status. As soon as it is merged, the status is approved. If a pull request changes an existing requirement, the old requirement becomes retired. If a function gets marked as deprecated the requirement becomes retired as well.
 
 Verification of Requirements
-""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All requirements must fulfill the basic properties of good requirements:
 
@@ -211,31 +222,15 @@ All requirements must fulfill the basic properties of good requirements:
 - Free from vague terms like "some”, "several”, "many”, "sufficient”, "reasonable", "any” etc.
 - Technically and logically feasible
 
-The adherence to these basic properties are checked during diff review.
-
-Tests
------
-
-For tests we will rely on the existing coretests test suite. Gaps in code coverage will be filled by adding tests to the coretests test suite.
-
-Tests must cover all requirements specified for the safety certification scope and the defined reactions to unexpected inputs or behaviour. If functionality or failure reactions cannot be tested, the code will be inspected by a code review that will be documented.
-
-Code with SIL2 systematic capability
-------------------------------------
-
-All public functions of the certified subset are considered "software safety functions” and are going to be certified for SIL 2. That means our customers can use all of those functions for SIL 2 use cases. Since we consider all of them safety relevant we do not consider independence. Usually for independence we would have to prove that non-safety functions do not impact safety functions, but since all functions in the subset are safety functions this is not a problem.
-
-The systematic capability of these functions is based on:
-
-- The requirements and the documented completeness of these requirements and their implementation in the code and test
-- The absence of any undocumented and untested code in the safety certification scope
-- The required test coverage
-- The adherence of the code within the safety scope to the Coding Guidelines
-
 Private functions
------------------
+~~~~~~~~~~~~~~~~~
 
-We will first and foremost specify and test the public functions that are part of our subset. Functionality of a private function is usually included in the functionality described for the public function and is covered by overall statement test coverage.
+Only public functions that are part of the certified subset must have an associated requirement. Functionality of a private function is usually included in the functionality described for the public function. Private function still must have full statement test coverage.
+
+Testing
+-------
+
+See the :doc:`core-certification:testing-plan` for how the certified core library is tested.
 
 Uncertified code
 ----------------

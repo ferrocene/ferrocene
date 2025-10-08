@@ -1203,6 +1203,8 @@ impl<T> Option<T> {
         F: [const] FnOnce(&T) + [const] Destruct,
     {
         if let Some(ref x) = self {
+            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
+            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
             f(x);
         }
 
@@ -1591,6 +1593,8 @@ impl<T> Option<T> {
         T: [const] Destruct,
     {
         if let Some(x) = self {
+            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
+            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
             if predicate(&x) {
                 return Some(x);
             }

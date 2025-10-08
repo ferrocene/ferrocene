@@ -988,6 +988,8 @@ impl<T, E> Result<T, E> {
         F: [const] FnOnce(&T) + [const] Destruct,
     {
         if let Ok(ref t) = self {
+            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
+            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
             f(t);
         }
 
@@ -1016,6 +1018,8 @@ impl<T, E> Result<T, E> {
         F: [const] FnOnce(&E) + [const] Destruct,
     {
         if let Err(ref e) = self {
+            // Ferrocene annotation: This function is thoroughly tested inside the `option_methods`
+            // test in `coretests`. It is unclear why this particular line is marked as uncovered.
             f(e);
         }
 

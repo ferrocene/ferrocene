@@ -163,12 +163,12 @@ impl Step for CertifiedCoreSymbols {
 
         let _guard = builder.msg(
             Kind::Run,
-            build_compiler.stage +1,
+            build_compiler.stage,
             format_args!(
                 "symbol-report for certified library subset{}",
                 crate_description(&crates)
             ),
-            build_compiler,
+            build_compiler.host,
             certified_target,
         );
 

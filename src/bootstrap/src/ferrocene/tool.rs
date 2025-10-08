@@ -93,10 +93,11 @@ impl Step for SymbolReport {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let mode = Mode::ToolRustcPrivate;
-        let compilers = RustcPrivateCompilers::from_target_compiler(builder, self.target_compiler);
+        let mode = Mode::ToolRustc;
+        assert!(self.target_compiler.stage > 0 && !builder.download_rustc());
+        let build_compiler = builder.compiler(self.target_compiler.stage - 1, builder.config.host_target);
         let tool_build = ToolBuild {
-            build_compiler: compilers.build_compiler(),
+            build_compiler,
             target: self.target_compiler.host,
             tool: "symbol-report",
             mode,

@@ -9,6 +9,6 @@ maud = { version = "0.27.0" }
 serde = { version = "1.0.226", features = ["derive"] }
 serde_json = "1.0.145"
 structopt = { version = "0.3.26", features = ["color"] }
-tracing = "0.1.41"
-tracing-subscriber = "0.3.20"
+tracing = "0.1"
+tracing-subscriber = "0.3"
 

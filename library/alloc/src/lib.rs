@@ -99,6 +99,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cast_maybe_uninit))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(cell_get_cloned))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(char_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(char_max_len))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(clone_to_uninit))]

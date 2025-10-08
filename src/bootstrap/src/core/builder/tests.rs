@@ -2488,7 +2488,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("doc")
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -2496,7 +2496,6 @@ mod snapshot {
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
-        [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -2518,7 +2517,7 @@ mod snapshot {
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        ");
+        "###);
     }
 
     #[test]

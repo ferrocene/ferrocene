@@ -75,7 +75,7 @@ Product Documentation
 ~~~~~~~~~~~~~~~~~~~~~
 
 - User Manual (:doc:`user-manual:index`)
-- The `certified core library API docs <../../api-docs/core/index.html>`_, which include
+- The `Certified core library API docs <../../api-docs/core/index.html>`_, which include
    - Requirements (the function doc-comments)
    - Software Design (the module doc-comments)
 

@@ -72,7 +72,8 @@ Version Bump Release Notes
 
 Rename ``ferrocene/doc/release-notes/src/next.rst`` to
 ``ferrocene/doc/release-notes/src/${version}.rst``.
-Ensure the upcoming release is marked with ``:upcoming-release:``.
+Backport this PR according to :ref:`handling-backports`. Then, on the
+``release/1.NN`` branch, remove the ``:upcoming-release:`` from the version.
 
 Create a new ``ferrocene/doc/release-notes/src/next.rst`` with the following content:
 
@@ -89,8 +90,7 @@ Create a new ``ferrocene/doc/release-notes/src/next.rst`` with the following con
    This page contains the changes to be introduced in the upcoming Ferrocene
    release.
 
-Backport this PR according to :ref:`handling-backports`. Then, on the
-``release/1.NN`` branch, remove the ``:upcoming-release:`` from the version.
+Ensure the upcoming release is marked with ``:upcoming-release:``.
 
 Precautionary validation
 ------------------------

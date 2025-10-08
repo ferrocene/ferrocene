@@ -30,8 +30,8 @@ impl Step for CertifiedApiDocs {
 
         // Build the docs for the certified target
         let certified_target_doc_out = builder.ensure(
-            doc::Std::from_build_compiler(
-                builder.compiler(builder.top_stage, builder.host_target),
+            doc::Std::new(
+                builder.top_stage,
                 certified_target,
                 doc::DocumentationFormat::Html,
             )

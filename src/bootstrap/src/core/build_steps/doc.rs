@@ -583,7 +583,8 @@ impl Std {
 }
 
 impl Step for Std {
-    type Output = ();
+    /// Path to a directory with the built documentation.
+    type Output = PathBuf;
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -613,7 +614,7 @@ impl Step for Std {
     ///
     /// This will generate all documentation for the standard library and its
     /// dependencies. This is largely just a wrapper around `cargo doc`.
-    fn run(self, builder: &Builder<'_>) {
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
         let stage = self.stage;
         let target = self.target;
         let crates = if self.crates.is_empty() {
@@ -660,7 +661,7 @@ impl Step for Std {
 
         // Don't open if the format is json
         if let DocumentationFormat::Json = self.format {
-            return;
+            return out;
         }
 
         if builder.paths.iter().any(|path| path.ends_with("library")) {
@@ -676,6 +677,9 @@ impl Step for Std {
                 }
             }
         }
+
+
+        out
     }
 
     fn metadata(&self) -> Option<StepMetadata> {

@@ -15,6 +15,7 @@ use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
+use crate::ferrocene::doc::code_coverage::AllCoverageReports;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
@@ -52,6 +53,7 @@ impl Step for Docs {
         // certified API docs in the doc_out
         if self.target.certified_equivalent().is_some() {
             builder.ensure(CertifiedApiDocs { target: self.target });
+            builder.ensure(AllCoverageReports { target: self.target });
         } else {
             builder.info(&format!("skipping Build certified-core-docs ({})", self.target));
         }

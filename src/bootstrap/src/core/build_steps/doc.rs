@@ -574,10 +574,17 @@ impl Std {
     pub(crate) fn new(stage: u32, target: TargetSelection, format: DocumentationFormat) -> Self {
         Std { stage, target, format, crates: vec![] }
     }
+
+    // Ferrocene addition
+    pub(crate) fn with_crates(mut self, crates: Vec<String>) -> Self {
+        self.crates = crates;
+        self
+    }
 }
 
 impl Step for Std {
-    type Output = ();
+    /// Path to a directory with the built documentation.
+    type Output = PathBuf;
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -607,7 +614,7 @@ impl Step for Std {
     ///
     /// This will generate all documentation for the standard library and its
     /// dependencies. This is largely just a wrapper around `cargo doc`.
-    fn run(self, builder: &Builder<'_>) {
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
         let stage = self.stage;
         let target = self.target;
         let crates = if self.crates.is_empty() {
@@ -654,7 +661,7 @@ impl Step for Std {
 
         // Don't open if the format is json
         if let DocumentationFormat::Json = self.format {
-            return;
+            return out;
         }
 
         if builder.paths.iter().any(|path| path.ends_with("library")) {
@@ -670,6 +677,9 @@ impl Step for Std {
                 }
             }
         }
+
+
+        out
     }
 
     fn metadata(&self) -> Option<StepMetadata> {
@@ -762,6 +772,7 @@ fn doc_std(
     // Ferrocene addition
     if target.contains("ferrocene.certified") {
         cargo.rustdocflag("--cfg=ferrocene_certified");
+        cargo.arg("--features").arg("ferrocene_certified");
     }
 
     if builder.config.library_docs_private_items {

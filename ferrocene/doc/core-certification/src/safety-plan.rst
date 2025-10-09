@@ -274,7 +274,7 @@ Safety Assessment
 - Tool Classification: T2
 - Level of reliance: Low, it is not involved in ensuring correctness, but only a measure of quality of the test suite.
 
-The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard mechanism of collecting code coverage information in Rust. But, since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
+The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard mechanism of collecting code coverage information in Rust. Since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
 
 ``blanket`` and ``symbol-report`` are tools developed by Ferrous Systems. They are developed because the previously used tool ``llvm-cov`` inferred the total number of functions which resulted in undercounting regularly.
 

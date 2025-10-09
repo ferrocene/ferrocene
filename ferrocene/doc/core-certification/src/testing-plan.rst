@@ -62,13 +62,13 @@ How it works:
 
 1. ``rustc`` is instructed to instrument the binary by passing ``-Cinstrument-coverage``.
 2. The ``coretests`` test suite is executed. Due to the instrumentation, this will create ``.profraw`` files that contain the coverage information.
-3. ``symbol-report`` is used to generate a ``symbol-report.json`` including all symbols in the certified subset and their span.
+3. ``symbol-report`` is used to generate a ``symbol-report.json`` including all symbols in the certified subset and their spans.
 4. ``blanket`` is used to generate a HTML coverage report from the ``.profraw`` files, the ``symbol-report.json`` and the instrumented binaries.
 
 Manual test coverage
 """"""""""""""""""""
 
-If a line cannot be covered by automated tests it will be marked with a ``// Ferrocene annotation: REASON`` comment stating the reson.
+If a line cannot be covered by automated tests it will be marked with a ``// Ferrocene annotation: REASON`` comment stating the reson. This annotation will be displayed in the generated HTML report.
 
 Tidy test suite
 ~~~~~~~~~~~~~~~

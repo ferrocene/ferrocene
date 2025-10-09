@@ -42,6 +42,12 @@ impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
             _ => panic!("only the sign command supports signing documents"),
         };
 
+        // Ensure we always have all submodules updated, otherwise the signatures
+        // produced locally may be different than what CI produces.
+        // While this is not strictly required, it has caught us during release and
+        // caused an abundance of stress.
+        builder.require_and_update_all_submodules();
+
         let document = builder.ensure(self.document);
         document_signatures_cmd::<S>(builder)
             .arg("sign")

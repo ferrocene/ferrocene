@@ -138,7 +138,6 @@ with larger integer types. You can cast from and to `u8` using
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! usize_isize_to_xe_bytes_doc {
     () => {
         "

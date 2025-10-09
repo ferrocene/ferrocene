@@ -9,6 +9,7 @@ use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_descripti
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::build_steps::tool::{SourceType, Tool};
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
+use crate::ferrocene::code_coverage::coverage_file;
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::tool::{Blanket, SYMBOL_PATH, SymbolReport};
@@ -219,8 +220,7 @@ impl Step for CoverageReport {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let src = to_str(&builder.src);
-        let html_out =
-            builder.doc_out(self.certified_target).join("certified-coverage-report.html");
+        let html_out = coverage_file(&builder, self.certified_target);
         let sha_buf;
         let sha = match builder.rust_info() {
             GitInfo::Absent => panic!(

@@ -177,6 +177,14 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     }
 }
 
+fn coverage_dir(builder: &Builder<'_>, t: TargetSelection) -> PathBuf {
+    builder.doc_out(t).join("coverage")
+}
+
+pub(super) fn coverage_file(builder: &Builder<'_>, t: TargetSelection) -> PathBuf {
+    coverage_dir(builder, t).join("certified-coverage-report.html")
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct CoverageState {
     target: TargetSelection,
@@ -244,7 +252,8 @@ impl Step for CoverageOutcomesDir {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
             FerroceneCoverageOutcomes::Local => {
-                Some(builder.out.join("ferrocene").join("coverage"))
+                let certified_target = builder.host_target.certified_equivalent().unwrap();
+                Some(coverage_dir(builder, certified_target))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
         }

@@ -253,6 +253,7 @@ wasm32-wali-linux-musl
 wasm32-wasip1
 wasm32-wasip1-threads
 wasm32-wasip2
+wasm32-wasip3
 wasm32v1-none
 wasm64-unknown-unknown
 x86_64-apple-darwin

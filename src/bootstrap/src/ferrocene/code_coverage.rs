@@ -164,17 +164,33 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         target: builder.config.host_target,
     });
 
-    builder.ensure(CoverageReport {
+    let html_report = builder.ensure(CoverageReport {
         certified_target: builder.config.host_target.certified_equivalent().unwrap(),
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
     });
 
+    let dist_report = builder
+        .out
+        .join("ferrocene")
+        .join("coverage")
+        .join(html_report.file_name().expect("No coverage report filename determined."));
+    builder.info(&format!("Saving coverage report to {}", dist_report.display()));
+    builder.copy_link(&html_report, &dist_report, crate::FileType::Regular);
+
     if builder.doc_tests != DocTests::No {
         // Remove the doctest binaries so they're not distributed afterwards.
         t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
     }
+}
+
+fn coverage_dir(builder: &Builder<'_>, t: TargetSelection) -> PathBuf {
+    builder.doc_out(t).join("coverage")
+}
+
+pub(super) fn coverage_file(builder: &Builder<'_>, t: TargetSelection) -> PathBuf {
+    coverage_dir(builder, t).join("certified-coverage-report.html")
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -244,7 +260,8 @@ impl Step for CoverageOutcomesDir {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
             FerroceneCoverageOutcomes::Local => {
-                Some(builder.out.join("ferrocene").join("coverage"))
+                let certified_target = builder.host_target.certified_equivalent().unwrap();
+                Some(coverage_dir(builder, certified_target))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
         }

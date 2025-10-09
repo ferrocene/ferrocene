@@ -49,6 +49,7 @@ pub static CRATES: &[&str] = &[
     "rustc-hash",
     "self_cell",
     "serde",
+    "serde_core",  // Ferrocene addition
     "sha2",
     "smallvec",
     "stable_deref_trait",

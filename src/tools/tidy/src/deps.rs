@@ -390,6 +390,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "self_cell",
     "semver",
     "serde",
+    "serde_core", // Ferrocene addition
     "serde_derive",
     "serde_json",
     "serde_path_to_error",

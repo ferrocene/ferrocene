@@ -1087,6 +1087,7 @@ impl<'a> Builder<'a> {
                 check::Bootstrap,
                 check::RunMakeSupport,
                 check::Compiletest,
+                check::RustdocGuiTest,
                 check::FeaturesStatusDump,
                 check::CoverageDump,
                 check::Linkchecker,
@@ -1684,6 +1685,14 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
         } else {
             self.sysroot(compiler).join("bin").join(exe("rustc", compiler.host))
         }
+    }
+
+    /// Gets a command to run the compiler specified, including the dynamic library
+    /// path in case the executable has not been build with `rpath` enabled.
+    pub fn rustc_cmd(&self, compiler: Compiler) -> BootstrapCommand {
+        let mut cmd = command(self.rustc(compiler));
+        self.add_rustc_lib_path(compiler, &mut cmd);
+        cmd
     }
 
     /// Gets the paths to all of the compiler's codegen backends.

@@ -1,11 +1,13 @@
-<<<<<<< HEAD
+//! Isolates the APIs used by `bin/main.rs`, to help minimize the surface area
+//! of public exports from the compiletest library crate.
+
 use std::env;
 use std::io::IsTerminal;
 use std::sync::Arc;
 
-use compiletest::{early_config_check, ferrocene_annotations, parse_config, run_tests};
+use crate::{early_config_check, parse_config, run_tests};
 
-fn main() {
+pub fn main() {
     tracing_subscriber::fmt::init();
 
     // colored checks stdout by default, but for some reason only stderr is a terminal.
@@ -16,15 +18,9 @@ fn main() {
         colored::control::set_override(true);
     }
 
-    ferrocene_annotations::maybe_collect_and_exit();
-
     let config = Arc::new(parse_config(env::args().collect()));
 
     early_config_check(&config);
 
     run_tests(config);
-=======
-fn main() {
-    compiletest::cli::main();
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }

@@ -1,5 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
+   SPDX-FileCopyrightText: The Rust Project Contributors
 
 .. default-domain:: spec
 
@@ -46,7 +47,7 @@ Scope
 -----
 
 :dp:`fls_srdq4mota5pr`
-This document specifies the form and meaning of programs written in the
+This document specifies the form and meaning of programs written in the 2021 Edition of the
 programming language Rust, as implemented by the :t:`rustc` |spec_version| compiler shipped
 with Ferrocene. It documents the current understanding for the purposes of
 compiler validation. As such, given any doubt, it prefers documenting behavior
@@ -58,9 +59,6 @@ This document is made available for contribution and review as it is useful
 outside of the Ferrocene effort and can be a place of shared understanding. It
 is not intended as a discussion ground for language evolution. It is also not
 intended as a document enabling conformance between compilers.
-
-:dp:`fls_osh9tiwpnsn1`
-Contribution and review is managed by the Ferrocene project developers.
 
 .. _fls_10yukmkhl0ng:
 
@@ -196,28 +194,14 @@ Conformity
 :dp:`fls_kdyqtnc6loam`
 A conforming tool shall:
 
-* :dp:`fls_ctwsz8sl7lbq`
-  Translate and correctly execute legal programs written in Rust, provided that
-  they are not so large as to exceed the capacity of the tool,
+* :dp:`fls_dBKu9jgx3OyH`
+  Correctly translate legal programs written in Rust,
 
-* :dp:`fls_bvpekhdaxctq`
-  Identify all programs or program units that are so large as to exceed the
-  capacity of the tool (or raise an appropriate exception at run time),
+* :dp:`fls_faRvWyJJpno8`
+  Reject programs that exceed the tool's implementation capacity,
 
-* :dp:`fls_kfs8gsd36d91`
-  Identify all programs or program units that contain errors whose detection is
-  required by this document,
-
-* :dp:`fls_k5sozk8jhrmg`
-  Supply all language-defined library units required by this document,
-
-* :dp:`fls_nwx1fdq6b4mg`
-  Contain no variations except those explicitly permitted by this document, or
-  those that are impossible or impractical to avoid given the tool's execution
-  environment,
-
-* :dp:`fls_n3ypaile1a36`
-  Specify all such variations in the manner prescribed by this document.
+* :dp:`fls_GZmxrO61eiJ1`
+  Reject programs that contain errors whose detection is required by this document,
 
 :dp:`fls_nnmx2qsu14ft`
 The external effect of the execution of a Rust program is defined in terms of
@@ -225,16 +209,16 @@ its interactions with its external environment. The following are defined as
 external interactions:
 
 * :dp:`fls_gu3331rmv2ho`
-  Any call on an foreign :t:`function`, including any :t:`[argument operand]s`
-  passed to it;
+  Any call to an :t:`external function`,
 
-* :dp:`fls_3iekobt8qqi`
-  Any result returned or :t:`panic` propagated from a :t:`program entry point`
-  or an :t:`exported function` to an external caller;
+* :dp:`fls_AR8ZIYlDRSNs`
+  Any interaction with an :t:`external static`,
 
-* :dp:`fls_qx9fxf4py0j0`
-  The imported and exported :t:`[value]s` at the time of any other interaction
-  with the external environment.
+* :dp:`fls_xAYhvEh7WWel`
+  Any result returned from a :t:`program entry point`,
+
+* :dp:`fls_QvFpU8v5p8Hb`
+  Any result returned from an :t:`exported function` to an external caller.
 
 :dp:`fls_pl0fyjcwslqm`
 A tool that conforms to this document shall produce for the execution of a given
@@ -261,7 +245,7 @@ The form of a Rust program is described by means of a context-free syntax
 together with context-dependent requirements expressed by narrative rules.
 
 :dp:`fls_ioyp4wux6skt`
-The meaning of a Rust program is described by means of narrative rules defining
+The semantic meaning of a Rust program is described by means of narrative rules defining
 both the effects of each construct and the composition rules for constructs.
 
 :dp:`fls_jsflt7691ye4`

@@ -210,7 +210,7 @@ its :t:`binding` is determined as follows:
 
 * :dp:`fls_f8zo4scodhcr`
   If the :t:`identifier pattern` has only :t:`keyword` ``ref``, then the
-  :t:`type` ``& bound_pattern_type``, where ``bound_pattern_type`` is the
+  :t:`type` is ``& bound_pattern_type``, where ``bound_pattern_type`` is the
   :t:`type` of the :t:`bound pattern`.
 
 * :dp:`fls_d3fs2h7oqjl0`

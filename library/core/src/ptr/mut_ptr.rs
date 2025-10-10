@@ -150,7 +150,6 @@ impl<T: PointeeSized> *mut T {
     #[must_use]
     #[inline(always)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn addr(self) -> usize {
         // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
         // address without exposing the provenance. Note that this is *not* a stable guarantee about

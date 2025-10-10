@@ -66,6 +66,34 @@ fn test_bool() {
     assert_eq!(false.cmp(&false), Equal);
     assert_eq!(true.cmp(&false), Greater);
     assert_eq!(false.cmp(&true), Less);
+
+    assert_eq!(true.partial_cmp(&true), Some(Equal));
+    assert_eq!(false.partial_cmp(&false), Some(Equal));
+    assert_eq!(true.partial_cmp(&false), Some(Greater));
+    assert_eq!(false.partial_cmp(&true), Some(Less));
+
+    assert!(true.min(true));
+    assert!(!(false.min(false)));
+    assert!(!(true.min(false)));
+    assert!(!(false.min(true)));
+
+    assert!(true.max(true));
+    assert!(!(false.max(false)));
+    assert!(true.max(false));
+    assert!(false.max(true));
+
+    assert!(true.clamp(true, true));
+    assert!(!(false.clamp(false, false)));
+    assert!(true.clamp(false, true));
+    assert!(false.clamp(true, true));
+    assert!(!(true.clamp(false, false)));
+    assert!(!(false.clamp(false, true)));
+}
+
+#[test]
+#[should_panic]
+fn test_invalid_clamp() {
+    assert!(true.clamp(true, false));
 }
 
 #[test]

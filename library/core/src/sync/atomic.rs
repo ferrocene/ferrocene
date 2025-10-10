@@ -875,6 +875,7 @@ impl AtomicBool {
     /// assert_eq!(some_bool.compare_and_swap(true, true, Ordering::Relaxed), false);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(
@@ -3024,6 +3025,7 @@ macro_rules! atomic_int {
             /// assert_eq!(some_var.compare_and_swap(6, 12, Ordering::Relaxed), 10);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
+            #[cfg(not(feature = "ferrocene_certified"))]
             #[inline]
             #[$stable]
             #[deprecated(
@@ -3422,6 +3424,9 @@ macro_rules! atomic_int {
             where F: FnMut($int_type) -> Option<$int_type> {
                 let mut prev = self.load(fetch_order);
                 while let Some(next) = f(prev) {
+                    // Ferrocene annotation: Both arms of this match expression are covered, which
+                    // means that scrutinee expression itself must have been evaluated in either
+                    // case.
                     match self.compare_exchange_weak(prev, next, set_order, fetch_order) {
                         x @ Ok(_) => return x,
                         Err(next_prev) => prev = next_prev
@@ -3964,6 +3969,7 @@ atomic_int_ptr_sized! {
     "64" 8
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[inline]
 #[cfg(target_has_atomic)]
 fn strongest_failure_ordering(order: Ordering) -> Ordering {
@@ -4121,7 +4127,15 @@ pub unsafe fn atomic_compare_exchange<T: Copy>(
             (_, Release) => panic!("there is no such thing as a release failure ordering"),
         }
     };
-    if ok { Ok(val) } else { Err(val) }
+    // Ferrocene annotation: Both branches of this conditional are covered, which means that the
+    // `ok` boolean must have been evaluated in either case.
+    if ok {
+        //
+        Ok(val)
+    } else {
+        //
+        Err(val)
+    }
 }
 
 #[inline]
@@ -4186,7 +4200,15 @@ unsafe fn atomic_compare_exchange_weak<T: Copy>(
             (_, Release) => panic!("there is no such thing as a release failure ordering"),
         }
     };
-    if ok { Ok(val) } else { Err(val) }
+    // Ferrocene annotation: Both branches of this conditional are covered, which means that the
+    // `ok` boolean must have been evaluated in either case.
+    if ok {
+        //
+        Ok(val)
+    } else {
+        //
+        Err(val)
+    }
 }
 
 #[inline]

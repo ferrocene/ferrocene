@@ -282,10 +282,8 @@ pub mod f128;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod f16;
 #[path = "num/f32.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f32;
 #[path = "num/f64.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f64;
 
 #[macro_use]

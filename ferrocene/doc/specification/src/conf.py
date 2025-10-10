@@ -49,12 +49,9 @@ ferrocene_id = "FLS"
 
 html_theme = "fls"
 html_theme_path = ["../themes"]
-<<<<<<< HEAD
 
 # override above theme settings
 html_theme = "ferrocene"
-=======
->>>>>>> ffab2d2cb91732b2cd215809e9a45dfec837d3c2
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",

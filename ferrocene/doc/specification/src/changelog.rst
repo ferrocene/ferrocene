@@ -18,8 +18,6 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
-<<<<<<< HEAD
-=======
 Language changes in Rust 1.89.0
 -------------------------------
 
@@ -125,7 +123,6 @@ Language changes in Rust 1.89.0
 
   - No change: the target is outside the scope of the FLS
 
->>>>>>> ffab2d2cb91732b2cd215809e9a45dfec837d3c2
 Language changes in Rust 1.88.0
 -------------------------------
 

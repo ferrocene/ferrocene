@@ -1,7 +1,6 @@
 use super::*;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
 #[cfg(feature = "ferrocene_certified")]
 use crate::marker::PointeeSized;
@@ -141,7 +140,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_const"]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn cast_const(self) -> *const T {
         self as _
     }
@@ -957,7 +955,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,

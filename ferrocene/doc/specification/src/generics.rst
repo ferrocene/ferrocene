@@ -169,6 +169,20 @@ A :t:`constant parameter` shall be used in the following contexts:
 * :dp:`fls_byqjs5fvy2bj`
   As a :t:`value` of any :t:`expression` within a :t:`function body`.
 
+:dp:`fls_reASCId0i117`
+An :dt:`inferred constant` is a :t:`constant argument` whose :t:`value` is
+inferred from the surrounding context by using ``_`` (underscore) in its place.
+
+:dp:`fls_Ft5rGeL7QwJM`
+An :t:`inferred constant` cannot be used in :t:`item` signatures.
+
+:dp:`fls_7epZNsTYNmgE`
+An :t:`inferred constant` cannot be surrounded by ``{}`` (curly braces).
+
+:dp:`fls_TvuMMQnR0drL`
+An :t:`inferred constant` can be surrounded by an arbitrary number of ``()``
+(parentheses).
+
 :dp:`fls_hidfwkwr2r73`
 A :t:`type parameter` has an implicit :std:`core::marker::Sized` :t:`bound`,
 unless an :t:`opt-out trait bound` for the :std:`core::marker::Sized` :t:`trait`

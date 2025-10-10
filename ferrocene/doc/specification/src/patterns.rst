@@ -210,7 +210,7 @@ its :t:`binding` is determined as follows:
 
 * :dp:`fls_f8zo4scodhcr`
   If the :t:`identifier pattern` has only :t:`keyword` ``ref``, then the
-  :t:`type` ``& bound_pattern_type``, where ``bound_pattern_type`` is the
+  :t:`type` is ``& bound_pattern_type``, where ``bound_pattern_type`` is the
   :t:`type` of the :t:`bound pattern`.
 
 * :dp:`fls_d3fs2h7oqjl0`
@@ -369,6 +369,12 @@ When a :t:`path pattern` refers to an :t:`associated constant` or a
 When a :t:`path pattern` refers to an :t:`associated constant` or a
 :t:`constant`, the :t:`type` of the :t:`associated constant` or :t:`constant`
 shall be :t:`structurally equal`.
+
+:dp:`fls_wJ9f906BlBvg`
+When a :t:`path pattern` refers to an :t:`associated constant` or a
+:t:`constant`, the :t:`constant` must not contain any references to
+:t:`[mutable static]s`, :t:`[static]s` with :t:`interior mutability`,
+or :t:`[external static]s`.
 
 :dp:`fls_hF19K8sWU8FF`
 When the type of the :t:`path pattern` is of an :t:`enum type` or

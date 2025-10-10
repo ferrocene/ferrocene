@@ -16,7 +16,6 @@ use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeInclusive};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
 #[cfg(feature = "ferrocene_certified")]
 use crate::ptr;
@@ -3953,7 +3952,6 @@ impl<T> [T] {
     #[stable(feature = "copy_from_slice", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_copy_from_slice", since = "1.87.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn copy_from_slice(&mut self, src: &[T])
     where
         T: Copy,

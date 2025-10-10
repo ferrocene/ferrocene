@@ -72,9 +72,6 @@ pub use index::{range, try_range};
 #[unstable(feature = "array_windows", issue = "75027")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::ArrayWindows;
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
-pub use iter::Iter;
 #[stable(feature = "slice_group_by", since = "1.77.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunkBy, ChunkByMut};
@@ -85,7 +82,6 @@ pub use iter::{Chunks, ChunksMut, Windows};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunksExact, ChunksExactMut};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{Iter, IterMut};
 #[stable(feature = "rchunks", since = "1.31.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1100,7 +1096,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(self)
     }

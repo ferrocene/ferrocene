@@ -303,7 +303,6 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "non_null_from_ref", since = "1.89.0")]
     #[rustc_const_stable(feature = "non_null_from_ref", since = "1.89.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_mut(r: &mut T) -> Self {
         // SAFETY: A mutable reference cannot be null.
         unsafe { NonNull { pointer: r as *mut T } }
@@ -497,7 +496,6 @@ impl<T: PointeeSized> NonNull<T> {
     #[rustc_const_stable(feature = "const_ptr_as_ref", since = "1.83.0")]
     #[must_use]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_mut<'a>(&mut self) -> &'a mut T {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a mutable reference.

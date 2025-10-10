@@ -36,7 +36,6 @@ impl<'a, T> IntoIterator for &'a [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> IntoIterator for &'a mut [T] {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
@@ -205,7 +204,6 @@ impl<T> AsRef<[T]> for Iter<'_, T> {
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct IterMut<'a, T: 'a> {
     /// The pointer to the next element to return, or the past-the-end location
     /// if the iterator is empty.
@@ -228,13 +226,10 @@ impl<T: fmt::Debug> fmt::Debug for IterMut<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: Sync> Sync for IterMut<'_, T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: Send> Send for IterMut<'_, T> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> IterMut<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a mut [T]) -> Self {
@@ -292,6 +287,7 @@ impl<'a, T> IterMut<'a, T> {
     /// ```
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn into_slice(self) -> &'a mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites
@@ -329,6 +325,7 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     #[stable(feature = "slice_iter_mut_as_slice", since = "1.53.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_slice(&self) -> &[T] {
         self.make_slice()
     }
@@ -364,6 +361,7 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     // FIXME: Uncomment the `AsMut<[T]>` impl when this gets stabilized.
     #[unstable(feature = "slice_iter_mut_as_mut_slice", issue = "93079")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites
@@ -388,7 +386,6 @@ impl<T> AsRef<[T]> for IterMut<'_, T> {
 //     }
 // }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 iterator! {struct IterMut -> *mut T, &'a mut T, mut, {mut}, as_mut, {}}
 
 /// An internal abstraction over the splitting iterators, so that

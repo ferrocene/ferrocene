@@ -157,7 +157,7 @@ LL |         A(..) => {}
    |
 help: consider importing this tuple variant
    |
-LL + use Foo::A;
+LL + use crate::Foo::A;
    |
 
 error[E0532]: expected tuple struct or tuple variant, found enum `Foo`

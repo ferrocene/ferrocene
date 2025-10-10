@@ -4,10 +4,10 @@ error[E0433]: failed to resolve: `V` is a variant, not a module
 LL |     E::V::associated_item;
    |        ^ `V` is a variant, not a module
    |
-help: there is an enum variant `E::V`; try using the variant's enum
+help: there is an enum variant `crate::E::V`; try using the variant's enum
    |
 LL -     E::V::associated_item;
-LL +     E::associated_item;
+LL +     crate::E::associated_item;
    |
 
 error[E0433]: failed to resolve: `V` is a variant, not a module
@@ -16,7 +16,12 @@ error[E0433]: failed to resolve: `V` is a variant, not a module
 LL |     V::associated_item;
    |     ^ `V` is a variant, not a module
    |
-help: there is an enum variant `E::V`; try using the variant's enum
+help: there is an enum variant `crate::E::V`; try using the variant's enum
+   |
+LL -     V::associated_item;
+LL +     crate::E::associated_item;
+   |
+help: an enum with a similar name exists
    |
 LL -     V::associated_item;
 LL +     E::associated_item;

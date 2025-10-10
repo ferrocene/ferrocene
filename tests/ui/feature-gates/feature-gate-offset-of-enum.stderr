@@ -5,7 +5,7 @@ LL |     offset_of!(Alpha::One, 0);
    |                ^^^^^^^^^^
    |                |
    |                not a type
-   |                help: try using the variant's enum: `Alpha`
+   |                help: try using the variant's enum: `crate::Alpha`
 
 error[E0658]: using enums in offset_of is experimental
   --> $DIR/feature-gate-offset-of-enum.rs:10:23

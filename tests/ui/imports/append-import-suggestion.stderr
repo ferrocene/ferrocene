@@ -5,7 +5,7 @@ LL | use mod2::{sub_mod::TraitA};
    |            ^^^^^^^ private module
    |
 help: consider importing this trait instead:
-      mod1::TraitA
+      crate::mod1::TraitA
   --> $DIR/append-import-suggestion.rs:13:12
    |
 LL | use mod2::{sub_mod::TraitA};

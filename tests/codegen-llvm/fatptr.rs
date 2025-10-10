@@ -1,5 +1,5 @@
 //@ compile-flags: -C no-prepopulate-passes
-
+//@ edition: 2015
 #![crate_type = "lib"]
 
 pub trait T {}

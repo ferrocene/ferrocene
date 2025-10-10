@@ -1,4 +1,5 @@
 //@ ignore-lldb
+//@ edition: 2015
 
 //@ compile-flags:-g
 // gdb-command:run

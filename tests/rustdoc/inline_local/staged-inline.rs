@@ -1,4 +1,5 @@
 // https://github.com/rust-lang/rust/issues/135078
+//@ edition: 2015
 #![crate_name = "foo"]
 #![feature(staged_api)]
 #![stable(feature = "v1", since="1.0.0")]

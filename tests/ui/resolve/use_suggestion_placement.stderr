@@ -17,7 +17,7 @@ LL |     let _ = A;
    |
 help: consider importing this constant
    |
-LL + use m::A;
+LL + use crate::m::A;
    |
 
 error[E0412]: cannot find type `HashMap` in this scope

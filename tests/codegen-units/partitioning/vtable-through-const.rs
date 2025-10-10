@@ -1,6 +1,7 @@
 //@ incremental
 // Need to disable optimizations to ensure consistent output across all CI runners.
 //@ compile-flags: -Copt-level=0
+//@ edition: 2015
 
 #![crate_type = "rlib"]
 

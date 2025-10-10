@@ -33,7 +33,7 @@ error[E0423]: expected value, found struct `xcrate::S`
 LL |     xcrate::S;
    |     ^^^^^^^^^ constructor is not visible here due to private fields
    |
-note: tuple struct `m::S` exists but is inaccessible
+note: tuple struct `crate::m::S` exists but is inaccessible
   --> $DIR/privacy-struct-ctor.rs:6:5
    |
 LL |     pub struct S(u8);

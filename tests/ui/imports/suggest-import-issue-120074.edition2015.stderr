@@ -10,7 +10,7 @@ LL |     println!("Hello, {}!", crate::foo::bar::do_the_thing);
    |                                   +++++
 help: consider importing this module
    |
-LL + use foo::bar;
+LL + use crate::foo::bar;
    |
 help: if you import `bar`, refer to it directly
    |

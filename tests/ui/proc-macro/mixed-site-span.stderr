@@ -302,7 +302,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:13:42
    |
 LL -     ($s:ident $i:ident) => { with_crate!{$crate $s $i} };
-LL +     ($s:ident $i:ident) => { with_crate!{ItemUse as _ $s $i} };
+LL +     ($s:ident $i:ident) => { with_crate!{crate::ItemUse as _ $s $i} };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -316,7 +316,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:18:42
    |
 LL -     ($s:ident $i:ident) => { with_crate!{krate $s $i} };
-LL +     ($s:ident $i:ident) => { with_crate!{ItemUse as _ $s $i} };
+LL +     ($s:ident $i:ident) => { with_crate!{crate::ItemUse as _ $s $i} };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -330,7 +330,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:13:30
    |
 LL -     ($s:ident $i:ident) => { with_crate!{$crate $s $i} };
-LL +     ($s:ident $i:ident) => { ItemUse as _ };
+LL +     ($s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -344,7 +344,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:18:30
    |
 LL -     ($s:ident $i:ident) => { with_crate!{krate $s $i} };
-LL +     ($s:ident $i:ident) => { ItemUse as _ };
+LL +     ($s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -358,7 +358,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:19:39
    |
 LL -     ($m:ident $s:ident $i:ident) => { with_crate!{$m $s $i} };
-LL +     ($m:ident $s:ident $i:ident) => { ItemUse as _ };
+LL +     ($m:ident $s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -371,7 +371,7 @@ LL |     with_crate!{krate mixed ItemUse}
 help: consider importing this struct instead
    |
 LL -     with_crate!{krate mixed ItemUse}
-LL +     ItemUse as _
+LL +     crate::ItemUse as _
    |
 
 error[E0432]: unresolved import `$crate`
@@ -385,7 +385,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:13:30
    |
 LL -     ($s:ident $i:ident) => { with_crate!{$crate $s $i} };
-LL +     ($s:ident $i:ident) => { ItemUse as _ };
+LL +     ($s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -399,7 +399,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:18:30
    |
 LL -     ($s:ident $i:ident) => { with_crate!{krate $s $i} };
-LL +     ($s:ident $i:ident) => { ItemUse as _ };
+LL +     ($s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -413,7 +413,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:19:39
    |
 LL -     ($m:ident $s:ident $i:ident) => { with_crate!{$m $s $i} };
-LL +     ($m:ident $s:ident $i:ident) => { ItemUse as _ };
+LL +     ($m:ident $s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -427,7 +427,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:19:39
    |
 LL -     ($m:ident $s:ident $i:ident) => { with_crate!{$m $s $i} };
-LL +     ($m:ident $s:ident $i:ident) => { ItemUse as _ };
+LL +     ($m:ident $s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -443,7 +443,7 @@ LL |     test!();
 help: consider importing this struct instead
    |
 LL -         with_crate!{$crate mixed ItemUse}
-LL +         ItemUse as _
+LL +         crate::ItemUse as _
    |
 
 error[E0432]: unresolved import `$crate`
@@ -457,7 +457,7 @@ help: consider importing this struct instead
   --> $DIR/auxiliary/token-site-span.rs:19:39
    |
 LL -     ($m:ident $s:ident $i:ident) => { with_crate!{$m $s $i} };
-LL +     ($m:ident $s:ident $i:ident) => { ItemUse as _ };
+LL +     ($m:ident $s:ident $i:ident) => { crate::ItemUse as _ };
    |
 
 error[E0432]: unresolved import `$crate`
@@ -585,7 +585,7 @@ LL |         proc_macro_rules!();
    = note: this error originates in the macro `proc_macro_rules` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider importing this struct
    |
-LL + use ItemUse;
+LL + use crate::ItemUse;
    |
 
 error[E0425]: cannot find value `local_use` in this scope

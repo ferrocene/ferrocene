@@ -1,6 +1,7 @@
 // Test where we change the body of a private method in an impl.
 // We then test what sort of functions must be rebuilt as a result.
 
+//@ edition: 2015
 //@ revisions:cfail1 cfail2
 //@ compile-flags: -Z query-dep-graph
 //@ build-pass

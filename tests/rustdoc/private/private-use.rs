@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test for <https://github.com/rust-lang/rust/pull/113374> to
 // ensure it doesn't panic.
 

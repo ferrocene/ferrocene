@@ -1,6 +1,7 @@
 //@ no-prefer-dynamic
 //@ revisions:rpass1 rpass2
 //@ compile-flags: -C lto
+//@ edition: 2015
 
 mod x {
     pub struct X {

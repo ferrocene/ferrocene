@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ known-bug: #130411
 trait Project {
     const SELF: Self;

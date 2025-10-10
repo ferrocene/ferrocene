@@ -8,8 +8,8 @@ fn main() -> () {
     let mut _0: ();
     let _1: std::option::Option<u8> as UserTypeProjection { base: UserType(0), projs: [] };
     let mut _2: !;
-    let _3: ();
-    let mut _4: !;
+    let _3: !;
+    let _4: !;
     let mut _6: isize;
     scope 1 {
         debug x => _1;
@@ -31,14 +31,12 @@ fn main() -> () {
     }
 
     bb1: {
-        StorageLive(_3);
         StorageLive(_4);
-        _4 = begin_panic::<&str>(const "explicit panic") -> bb8;
+        _4 = panic_cold_explicit() -> bb8;
     }
 
     bb2: {
         StorageDead(_4);
-        StorageDead(_3);
         unreachable;
     }
 
@@ -70,8 +68,4 @@ fn main() -> () {
     bb8 (cleanup): {
         resume;
     }
-}
-
-ALLOC0 (size: 14, align: 1) {
-    65 78 70 6c 69 63 69 74 20 70 61 6e 69 63       │ explicit panic
 }

@@ -1,4 +1,5 @@
 // https://github.com/rust-lang/rust/issues/43869
+//@ edition: 2015
 #![crate_name="foo"]
 
 pub fn g() -> impl Iterator<Item=u8> {

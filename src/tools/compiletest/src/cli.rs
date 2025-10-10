@@ -5,7 +5,7 @@ use std::env;
 use std::io::IsTerminal;
 use std::sync::Arc;
 
-use crate::{early_config_check, parse_config, run_tests};
+use crate::{early_config_check, ferrocene_annotations, parse_config, run_tests};
 
 pub fn main() {
     tracing_subscriber::fmt::init();
@@ -17,6 +17,8 @@ pub fn main() {
     {
         colored::control::set_override(true);
     }
+
+    ferrocene_annotations::maybe_collect_and_exit();
 
     let config = Arc::new(parse_config(env::args().collect()));
 

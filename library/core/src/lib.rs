@@ -150,7 +150,7 @@
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(derive_const))]
+#![feature(derive_const)]
 #![feature(doc_cfg)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]

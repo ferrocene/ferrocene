@@ -29,7 +29,6 @@ pub struct IntoIter<T, const N: usize> {
 
 impl<T, const N: usize> IntoIter<T, N> {
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn unsize(&self) -> &InnerUnsized<T> {
         &self.inner
     }
@@ -250,7 +249,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.unsize().size_hint()
     }

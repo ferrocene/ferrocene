@@ -18,16 +18,14 @@ use crate::fmt;
 use crate::hash::{self, Hash};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::transmute_unchecked;
+#[cfg(feature = "ferrocene_certified")]
+use crate::iter::UncheckedIterator;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{UncheckedIterator, repeat_n};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops::{Index, IndexMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -161,7 +159,6 @@ where
 /// ```
 #[inline]
 #[unstable(feature = "array_try_from_fn", issue = "89379")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn try_from_fn<R, const N: usize, F>(cb: F) -> ChangeOutputType<R, [R::Output; N]>
 where
     F: FnMut(usize) -> R,
@@ -475,11 +472,9 @@ impl<T: Ord, const N: usize> Ord for [T; N] {
 }
 
 #[stable(feature = "copy_clone_array_lib", since = "1.58.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy, const N: usize> Copy for [T; N] {}
 
 #[stable(feature = "copy_clone_array_lib", since = "1.58.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone, const N: usize> Clone for [T; N] {
     #[inline]
     fn clone(&self) -> Self {
@@ -487,17 +482,16 @@ impl<T: Clone, const N: usize> Clone for [T; N] {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn clone_from(&mut self, other: &Self) {
         self.clone_from_slice(other);
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecArrayClone: Clone {
     fn clone<const N: usize>(array: &[Self; N]) -> [Self; N];
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone> SpecArrayClone for T {
     #[inline]
     default fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
@@ -505,7 +499,6 @@ impl<T: Clone> SpecArrayClone for T {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> SpecArrayClone for T {
     #[inline]
     fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
@@ -894,13 +887,11 @@ impl<T, const N: usize> [T; N] {
 /// By depending on `TrustedLen`, however, we can do that check up-front (where
 /// it easily optimizes away) so it doesn't impact the loop that fills the array.
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn from_trusted_iterator<T, const N: usize>(iter: impl UncheckedIterator<Item = T>) -> [T; N] {
     try_from_trusted_iterator(iter.map(NeverShortCircuit)).0
 }
 
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn try_from_trusted_iterator<T, R, const N: usize>(
     iter: impl UncheckedIterator<Item = R>,
 ) -> ChangeOutputType<R, [T; N]>
@@ -934,7 +925,6 @@ where
 /// not optimizing away.  So if you give it a shot, make sure to watch what
 /// happens in the codegen tests.
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn try_from_fn_erased<T, R>(
     buffer: &mut [MaybeUninit<T>],
     mut generator: impl FnMut(usize) -> R,
@@ -966,7 +956,6 @@ where
 ///
 /// To minimize indirection fields are still pub but callers should at least use
 /// `push_unchecked` to signal that something unsafe is going on.
-#[cfg(not(feature = "ferrocene_certified"))]
 struct Guard<'a, T> {
     /// The array to be initialized.
     pub array_mut: &'a mut [MaybeUninit<T>],
@@ -974,7 +963,6 @@ struct Guard<'a, T> {
     pub initialized: usize,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Guard<'_, T> {
     /// Adds an item to the array and updates the initialized item counter.
     ///
@@ -993,7 +981,6 @@ impl<T> Guard<'_, T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Drop for Guard<'_, T> {
     #[inline]
     fn drop(&mut self) {

@@ -576,8 +576,6 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "ferrocene_certified")]
-use crate::convert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
@@ -588,6 +586,8 @@ use crate::panicking::{panic, panic_display};
 use crate::pin::Pin;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, convert, hint, mem, slice};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{convert, hint};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -1133,7 +1133,6 @@ impl<T> Option<T> {
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Some(val) => val,

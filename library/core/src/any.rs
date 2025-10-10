@@ -725,7 +725,6 @@ pub struct TypeId {
     /// the TypeId actually is, allowing CTFE and miri to operate based off it.
     /// At runtime all the pointers in the array contain bits of the hash, making
     /// the entire `TypeId` actually just be a `u128` hash of the type.
-    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     pub(crate) data: [*const (); 16 / size_of::<*const ()>()],
 }
 

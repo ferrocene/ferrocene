@@ -16,6 +16,9 @@ the documents again).
    attempt to sign documents if you don't want your work email address to be
    published in it.
 
+
+.. _signing-all-documents:
+
 Signing all documents
 ---------------------
 

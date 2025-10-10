@@ -18,6 +18,21 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.90.0
+-------------------------------
+
+- `Split up the unknown_or_malformed_diagnostic_attributes lint <https://github.com/rust-lang/rust/pull/140717>`_
+
+  - No change: lints are not part of the FLS
+
+- `Allow constants whose final value has references to mutable/external memory, but reject such constants as patterns <https://github.com/rust-lang/rust/pull/140942>`_
+
+  - New paragraph: :p:`fls_wJ9f906BlBvg`
+
+- `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
+
+  - No change: lints are not part of the FLS
+
 Language changes in Rust 1.89.0
 -------------------------------
 

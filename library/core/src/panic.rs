@@ -192,6 +192,8 @@ pub macro const_panic {
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         #[inline(always)] // inline the wrapper
         #[track_caller]
+        // Ferrocene addition: otherwise "unused variable" errors
+        #[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

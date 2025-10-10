@@ -1,10 +1,16 @@
 //! Defines the `IntoIter` owned iterator for arrays.
 
 use crate::intrinsics::transmute_unchecked;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccessNoCoerce};
 use crate::mem::{ManuallyDrop, MaybeUninit};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
+#[cfg(feature = "ferrocene_certified")]
+use crate::ops::{DerefMut as _, IndexRange};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, ptr};
 
 mod iter_inner;
@@ -23,6 +29,7 @@ pub struct IntoIter<T, const N: usize> {
 
 impl<T, const N: usize> IntoIter<T, N> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn unsize(&self) -> &InnerUnsized<T> {
         self.inner.deref()
     }
@@ -73,6 +80,7 @@ impl<T, const N: usize> IntoIterator for [T; N] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> IntoIter<T, N> {
     /// Creates a new iterator over the given `array`.
     #[stable(feature = "array_value_iter", since = "1.51.0")]
@@ -225,6 +233,7 @@ impl<T, const N: usize> IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_default", since = "1.89.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> Default for IntoIter<T, N> {
     fn default() -> Self {
         IntoIter::empty()
@@ -241,11 +250,13 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.unsize().size_hint()
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -254,6 +265,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -264,21 +276,25 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_by(n)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         // SAFETY: The caller must provide an idx that is in bound of the remainder.
         let elem_ref = unsafe { self.as_mut_slice().get_unchecked_mut(idx) };
@@ -289,6 +305,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -338,6 +355,7 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {
     #[inline]
     fn len(&self) -> usize {
@@ -350,6 +368,7 @@ impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> FusedIterator for IntoIter<T, N> {}
 
 // The iterator indeed reports the correct length. The number of "alive"
@@ -357,20 +376,24 @@ impl<T, const N: usize> FusedIterator for IntoIter<T, N> {}
 // This range is decremented in length in either `next` or `next_back`. It is
 // always decremented by 1 in those methods, but only if `Some(_)` is returned.
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T, const N: usize> TrustedLen for IntoIter<T, N> {}
 
 #[doc(hidden)]
 #[unstable(issue = "none", feature = "std_internals")]
 #[rustc_unsafe_specialization_marker]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait NonDrop {}
 
 // T: Copy as approximation for !Drop since get_unchecked does not advance self.alive
 // and thus we can't implement drop-handling
 #[unstable(issue = "none", feature = "std_internals")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> NonDrop for T {}
 
 #[doc(hidden)]
 #[unstable(issue = "none", feature = "std_internals")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T, const N: usize> TrustedRandomAccessNoCoerce for IntoIter<T, N>
 where
     T: NonDrop,
@@ -379,6 +402,7 @@ where
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for IntoIter<T, N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.unsize().fmt(f)

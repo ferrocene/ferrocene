@@ -1029,7 +1029,6 @@ impl<T> MaybeUninit<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> [MaybeUninit<T>] {
     /// Copies the elements from `src` to `self`,
     /// returning a mutable reference to the now initialized contents of `self`.
@@ -1075,6 +1074,7 @@ impl<T> [MaybeUninit<T>] {
     ///
     /// [`write_clone_of_slice`]: slice::write_clone_of_slice
     #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Copy,
@@ -1138,6 +1138,7 @@ impl<T> [MaybeUninit<T>] {
     ///
     /// [`write_copy_of_slice`]: slice::write_copy_of_slice
     #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Clone,
@@ -1192,6 +1193,7 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     #[doc(alias = "memset")]
     #[unstable(feature = "maybe_uninit_fill", issue = "117428")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn write_filled(&mut self, value: T) -> &mut [T]
     where
         T: Clone,
@@ -1225,6 +1227,7 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(initialized, &mut [1, 2, 3, 4, 5]);
     /// ```
     #[unstable(feature = "maybe_uninit_fill", issue = "117428")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn write_with<F>(&mut self, mut f: F) -> &mut [T]
     where
         F: FnMut(usize) -> T,
@@ -1301,6 +1304,7 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(iter.as_slice(), &[4, 5]);
     /// ```
     #[unstable(feature = "maybe_uninit_fill", issue = "117428")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn write_iter<I>(&mut self, it: I) -> (&mut [T], &mut [MaybeUninit<T>])
     where
         I: IntoIterator<Item = T>,
@@ -1343,6 +1347,7 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(&[val1, val2], &[0x1234u16, 0x5678u16]);
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_bytes(&self) -> &[MaybeUninit<u8>] {
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
@@ -1373,6 +1378,7 @@ impl<T> [MaybeUninit<T>] {
     /// }
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_bytes_mut(&mut self) -> &mut [MaybeUninit<u8>] {
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
@@ -1441,6 +1447,7 @@ impl<T> [MaybeUninit<T>] {
     /// be used to initialize a `MaybeUninit` slice.
     #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn assume_init_mut(&mut self) -> &mut [T] {
         // SAFETY: similar to safety notes for `slice_get_ref`, but we have a
         // mutable reference which is also guaranteed to be valid for writes.

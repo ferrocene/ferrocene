@@ -38,14 +38,11 @@ mod ascii;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod drain;
 mod equality;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
 
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use drain::drain_array_with;
 #[stable(feature = "array_value_iter", since = "1.51.0")]
-// blocked by IntoIter
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::IntoIter;
 
 /// Creates an array of type `[T; N]` by repeatedly cloning a value.

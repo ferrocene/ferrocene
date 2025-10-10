@@ -144,7 +144,6 @@ mod private_slice_index {
     #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::RangeFrom<usize> {}
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for ops::IndexRange {}
 }
 
@@ -289,7 +288,6 @@ unsafe impl<T> const SliceIndex<[T]> for usize {
 /// Because `IndexRange` guarantees `start <= end`, fewer checks are needed here
 /// than there are for a general `Range<usize>` (which might be `100..3`).
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
     type Output = [T];
 

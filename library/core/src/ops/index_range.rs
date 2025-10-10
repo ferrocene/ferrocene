@@ -1,5 +1,8 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{NeverShortCircuit, Try};
 use crate::ub_checks;
 
@@ -9,12 +12,13 @@ use crate::ub_checks;
 ///
 /// (Normal `Range` code needs to handle degenerate ranges like `10..0`,
 ///  which takes extra checks compared to only handling the canonical form.)
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug, PartialEq, Eq))]
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,
 }
 
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 impl IndexRange {
     /// # Safety
     /// - `start <= end`
@@ -30,6 +34,7 @@ impl IndexRange {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) const fn zero_to(end: usize) -> Self {
         IndexRange { start: 0, end }
     }
@@ -54,6 +59,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -66,6 +72,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn next_back_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -81,6 +88,7 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_by`.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn take_prefix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -101,6 +109,7 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_back_by`.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn take_suffix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -116,12 +125,14 @@ impl IndexRange {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn assume_range(&self) {
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Iterator for IndexRange {
     type Item = usize;
 
@@ -172,6 +183,7 @@ impl Iterator for IndexRange {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl DoubleEndedIterator for IndexRange {
     #[inline]
     fn next_back(&mut self) -> Option<usize> {
@@ -214,6 +226,7 @@ impl DoubleEndedIterator for IndexRange {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl ExactSizeIterator for IndexRange {
     #[inline]
     fn len(&self) -> usize {
@@ -222,6 +235,8 @@ impl ExactSizeIterator for IndexRange {
 }
 
 // SAFETY: Because we only deal in `usize`, our `len` is always perfect.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl TrustedLen for IndexRange {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl FusedIterator for IndexRange {}

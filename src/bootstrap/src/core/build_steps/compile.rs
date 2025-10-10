@@ -272,10 +272,7 @@ impl Step for Std {
                 target,
                 Kind::Build,
             );
-            std_cargo(builder, target, compiler.stage, &mut cargo);
-            for krate in &*self.crates {
-                cargo.arg("-p").arg(krate);
-            }
+            std_cargo(builder, target, compiler.stage, &mut cargo, &self.crates);
             cargo
         };
 
@@ -283,26 +280,10 @@ impl Step for Std {
             // Note that for the standard library, stage 1 is tested when either --stage 1 or
             // --stage 2 are passed.
             && compiler.stage == 1
+            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
+            // likely to break.
+            && target == compiler.host
         {
-            cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
-
-            // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
-            // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
-            // fetch profiler_builtins from somewhere else.
-            //
-            // Thankfully profiler_builtins is built as part of building the sysroot, so it will be
-            // placed in the `deps` directory inside of Cargo's target directory. In theory this
-            // would result in Cargo picking it up automatically, but in practice it doesn't.
-            //
-            // Turns out that Cargo passes `-L dependency=$target_dir/deps` to rustc instead of
-            // just `-L $target_dir/deps`. The `dependency=` prefix causes rustc to only load
-            // explicit dependencies from that directory, not implicitly injected crates.
-            //
-            // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
-            // the location of profiler_builtins without the `dependency=` prefix.
-            let target_dir = builder.cargo_out(compiler, Mode::Std, target).join("deps");
-            cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
-
             instrument_coverage(builder, &mut cargo);
         }
 
@@ -541,7 +522,7 @@ fn compiler_rt_for_profiler(builder: &Builder<'_>) -> PathBuf {
 
 /// Configure cargo to compile the standard library, adding appropriate env vars
 /// and such.
-pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, cargo: &mut Cargo) {
+pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, cargo: &mut Cargo, crates: &[String]) {
     // rustc already ensures that it builds with the minimum deployment
     // target, so ideally we shouldn't need to do anything here.
     //
@@ -651,6 +632,13 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
         cargo.env("CFG_DISABLE_UNSTABLE_FEATURES", "1");
     }
 
+    // Explicitly pass -p for all dependencies crates -- this will force cargo
+    // to also check the tests/benches/examples for these crates, rather
+    // than just the leaf crate.
+    for krate in crates {
+        cargo.args(["-p", krate]);
+    }
+
     let mut features = String::new();
 
     if builder.no_std(target) == Some(true) {
@@ -663,8 +651,10 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
             features += " ferrocene_certified";
         }
         // for no-std targets we only compile a few no_std crates
+        if crates.is_empty() {
+            cargo.args(["-p", "alloc"]);
+        }
         cargo
-            .args(["-p", "alloc"])
             .arg("--manifest-path")
             .arg(builder.src.join("library/alloc/Cargo.toml"))
             .arg("--features")

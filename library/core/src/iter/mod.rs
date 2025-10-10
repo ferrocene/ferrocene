@@ -422,7 +422,6 @@ pub use self::adapters::chain;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::adapters::try_process;
 #[stable(feature = "iter_zip", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -503,7 +502,6 @@ pub use self::traits::{
 #[cfg(feature = "ferrocene_certified")]
 pub use self::traits::{IntoIterator, Iterator};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod adapters;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod range;

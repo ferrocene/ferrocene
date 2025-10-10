@@ -13,6 +13,7 @@ use crate::ub_checks;
 /// (Normal `Range` code needs to handle degenerate ranges like `10..0`,
 ///  which takes extra checks compared to only handling the canonical form.)
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Clone, PartialEq))]
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,
@@ -34,7 +35,6 @@ impl IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) const fn zero_to(end: usize) -> Self {
         IndexRange { start: 0, end }
     }
@@ -59,7 +59,6 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -132,7 +131,6 @@ impl IndexRange {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Iterator for IndexRange {
     type Item = usize;
 
@@ -147,23 +145,27 @@ impl Iterator for IndexRange {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let taken = self.take_prefix(n);
         NonZero::new(n - taken.len()).map_or(Ok(()), Err)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,

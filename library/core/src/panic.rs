@@ -101,6 +101,17 @@ pub macro unreachable_2015 {
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(feature = "ferrocene_certified")]
+pub macro unreachable_2021 {
+    ($($t:tt)*) => (
+        $crate::panicking::panic("internal error: entered unreachable code")
+    ),
+}
+
+#[doc(hidden)]
+#[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
+#[allow_internal_unstable(panic_internals)]
+#[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub macro unreachable_2021 {
     () => (

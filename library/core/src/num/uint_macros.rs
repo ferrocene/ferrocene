@@ -723,7 +723,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_add(self, rhs: Self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,

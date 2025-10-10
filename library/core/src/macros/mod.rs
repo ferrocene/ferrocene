@@ -718,7 +718,6 @@ macro_rules! writeln {
 #[allow_internal_unstable(edition_panic)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "unreachable_macro"]
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! unreachable {
     // Expands to either `$crate::panic::unreachable_2015` or `$crate::panic::unreachable_2021`
     // depending on the edition of the caller.

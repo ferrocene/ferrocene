@@ -2981,7 +2981,6 @@ pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
     // Ferrocene annotation: Cannot be covered as this code cannot be reached during
     // runtime.

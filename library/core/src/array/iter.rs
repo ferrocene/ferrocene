@@ -6,10 +6,10 @@ use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccessNoCoerce};
 use crate::mem::{ManuallyDrop, MaybeUninit};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(feature = "ferrocene_certified")]
+use crate::ops::{Deref as _, DerefMut as _, IndexRange};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops::{DerefMut as _, IndexRange};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, ptr};
 
@@ -29,7 +29,6 @@ pub struct IntoIter<T, const N: usize> {
 
 impl<T, const N: usize> IntoIter<T, N> {
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn unsize(&self) -> &InnerUnsized<T> {
         self.inner.deref()
     }
@@ -250,7 +249,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.unsize().size_hint()
     }

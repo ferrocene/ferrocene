@@ -7,7 +7,6 @@
 /// Internally, this reads the `end` through a pointer-to-`NonNull` so that
 /// it'll get the appropriate non-null metadata in the backend without needing
 /// to call `assume` manually.
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! if_zst {
     (mut $this:ident, $len:ident => $zst_body:expr, $end:ident => $other_body:expr,) => {{
         #![allow(unused_unsafe)] // we're sometimes used within an unsafe block
@@ -73,7 +72,6 @@ macro_rules! iterator {
         $into_ref:ident,
         {$($extra:tt)*}
     ) => {
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl<'a, T> $name<'a, T> {
             /// Returns the last element and moves the end of the iterator backwards by 1.
             ///
@@ -81,6 +79,7 @@ macro_rules! iterator {
             ///
             /// The iterator must not be empty
             #[inline]
+            #[cfg(not(feature = "ferrocene_certified"))]
             unsafe fn next_back_unchecked(&mut self) -> $elem {
                 // SAFETY: the caller promised it's not empty, so
                 // the offsetting is in-bounds and there's an element to return.
@@ -89,6 +88,7 @@ macro_rules! iterator {
 
             // Helper function for creating a slice from the iterator.
             #[inline(always)]
+            #[cfg(not(feature = "ferrocene_certified"))]
             fn make_slice(&self) -> &'a [T] {
                 // SAFETY: the iterator was created from a slice with pointer
                 // `self.ptr` and length `len!(self)`. This guarantees that all
@@ -119,6 +119,7 @@ macro_rules! iterator {
             // returning the new end.
             // Unsafe because the offset must not exceed `self.len()`.
             #[inline(always)]
+            #[cfg(not(feature = "ferrocene_certified"))]
             unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {
                 if_zst!(mut self,
                     // SAFETY: By our precondition, `offset` can be at most the
@@ -477,10 +478,8 @@ macro_rules! iterator {
         impl<T> FusedIterator for $name<'_, T> {}
 
         #[unstable(feature = "trusted_len", issue = "37572")]
-        #[cfg(not(feature = "ferrocene_certified"))]
         unsafe impl<T> TrustedLen for $name<'_, T> {}
 
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl<'a, T> UncheckedIterator for $name<'a, T> {
             #[inline]
             unsafe fn next_unchecked(&mut self) -> $elem {

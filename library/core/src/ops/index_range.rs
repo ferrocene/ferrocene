@@ -145,7 +145,6 @@ impl Iterator for IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))

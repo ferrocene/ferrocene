@@ -158,7 +158,6 @@ pub use crate::intrinsics::transmute;
 #[rustc_const_stable(feature = "const_forget", since = "1.46.0")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_forget"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn forget<T>(t: T) {
     let _ = ManuallyDrop::new(t);
 }

@@ -11,7 +11,6 @@ mod array_chunks;
 mod by_ref_sized;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod chain;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod cloned;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod copied;
@@ -31,7 +30,6 @@ mod fuse;
 mod inspect;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod intersperse;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod map;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod map_while;
@@ -65,7 +63,6 @@ pub use self::by_ref_sized::ByRefSized;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::chain::chain;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::cloned::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -76,6 +73,9 @@ pub use self::flatten::Flatten;
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::intersperse::{Intersperse, IntersperseWith};
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "ferrocene_certified")]
+pub use self::map::Map;
 #[stable(feature = "iter_map_while", since = "1.57.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::map_while::MapWhile;

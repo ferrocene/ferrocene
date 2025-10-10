@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Debug};
@@ -92,7 +91,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         ZipImpl::size_hint(self)
     }
@@ -143,7 +141,6 @@ trait ZipImpl<A, B> {
     type Item;
     fn new(a: A, b: B) -> Self;
     fn next(&mut self) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>);
     #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item>;
@@ -235,7 +232,6 @@ where
     zip_impl_general_defaults! {}
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let (a_lower, a_upper) = self.a.size_hint();
         let (b_lower, b_upper) = self.b.size_hint();

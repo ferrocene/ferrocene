@@ -12,8 +12,6 @@ use crate::iter::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, UncheckedIterator,
 };
 use crate::marker::PhantomData;
-#[cfg(feature = "ferrocene_certified")]
-use crate::mem::SizedTypeProperties;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -21,6 +19,11 @@ use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, fmt};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{
+    iter::{TrustedLen, UncheckedIterator},
+    mem::SizedTypeProperties,
+};
 
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
 impl<T> !Iterator for [T] {}

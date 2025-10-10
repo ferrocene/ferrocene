@@ -64,7 +64,6 @@ where
 }
 
 #[allow(private_bounds)]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<DATA: ?Sized> PolymorphicIter<DATA>
 where
     DATA: PartialDrop,
@@ -184,7 +183,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))

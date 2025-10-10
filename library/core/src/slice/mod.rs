@@ -50,7 +50,6 @@ pub mod sort;
 mod ascii;
 mod cmp;
 pub(crate) mod index;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
 mod raw;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -74,6 +73,9 @@ pub use index::{range, try_range};
 #[unstable(feature = "array_windows", issue = "75027")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::ArrayWindows;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "ferrocene_certified")]
+pub use iter::Iter;
 #[stable(feature = "slice_group_by", since = "1.77.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunkBy, ChunkByMut};
@@ -1081,7 +1083,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[rustc_diagnostic_item = "slice_iter"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(self)
     }

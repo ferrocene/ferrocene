@@ -906,7 +906,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_sub(self, rhs: Self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
@@ -2726,7 +2725,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_add(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::add_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)
@@ -2828,7 +2826,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::sub_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)

@@ -280,7 +280,7 @@ The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard me
 
 The tools are designed to make it impossible to overcount code coverage. This is done by ``symbol-report`` using information from the compiler to ensure all the functions from the certified subset are being considered for code coverage.
 
-``blanket`` is build on top of the Rust library called ``llvm-profparser``. This library is developed by the ``cargo-tarpaulin`` project, which is widely used to measure code coverage for Rust projects.
+``blanket`` is built on top of the Rust library called ``llvm-profparser``. This library is developed by the ``cargo-tarpaulin`` project, which is widely used to measure code coverage for Rust projects.
 
 Failure modes
 '''''''''''''

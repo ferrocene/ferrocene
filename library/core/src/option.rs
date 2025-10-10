@@ -587,7 +587,7 @@ use crate::pin::Pin;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, convert, hint, mem, slice};
 #[cfg(feature = "ferrocene_certified")]
-use crate::{convert, hint};
+use crate::{convert, hint, panicking::panic};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -979,6 +979,21 @@ impl<T> Option<T> {
         }
     }
 
+    /// Ferrocene addition: `msg` is type `&'static str` instead of `&str`.
+    #[inline]
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "option_expect"]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[cfg(feature = "ferrocene_certified")]
+    pub const fn expect(self, msg: &'static str) -> T {
+        match self {
+            Some(val) => val,
+            None => panic(msg),
+        }
+    }
+
     /// Returns the contained [`Some`] value, consuming the `self` value.
     ///
     /// Because this function may panic, its use is generally discouraged.
@@ -1017,7 +1032,6 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_unwrap"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn unwrap(self) -> T {
         match self {
             Some(val) => val,
@@ -2200,7 +2214,6 @@ impl<T, E> Option<Result<T, E>> {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn unwrap_failed() -> ! {
     panic("called `Option::unwrap()` on a `None` value")
 }

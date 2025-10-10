@@ -200,7 +200,6 @@ impl Duration {
     #[inline]
     #[must_use]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn new(secs: u64, nanos: u32) -> Duration {
         if nanos < NANOS_PER_SEC {
             // SAFETY: nanos < NANOS_PER_SEC, therefore nanos is within the valid range

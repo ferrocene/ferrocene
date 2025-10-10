@@ -717,6 +717,7 @@ impl dyn Any + Send + Sync {
 /// ```
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, PartialOrd, Ord))]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
 pub struct TypeId {
@@ -737,7 +738,6 @@ unsafe impl Sync for TypeId {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const PartialEq for TypeId {
     #[inline]
     fn eq(&self, other: &Self) -> bool {

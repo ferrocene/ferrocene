@@ -54,25 +54,21 @@ Code coverage tests
 
 In order to gather code coverage information, an additional test run of the coretests test suite on the ``x86_64-unknown-linux-gnu`` target is performed.
 
-This run is different to the normal test run, because the ``core`` library and the ``coretests`` binary are instrumented with ``-Cinstrument-coverage``. This inserts llvm intrinsics into the binaries to collect code coverage information.
-
-The collected code coverage information is compiled into a code coverage report using ``grcov``.
-
 It is ensured that both the instrumented and not instrumented coretests run succeeds. This ensures that coverage instrumentation does not introduce any correctness issues.
+
+Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``. This is sufficient because the the code of the core library is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
+
+How it works:
+
+1. ``rustc`` is instructed to instrument the binary by passing ``-Cinstrument-coverage``.
+2. The ``coretests`` test suite is executed. Due to the instrumentation, this will create ``.profraw`` files that contain the coverage information.
+3. ``symbol-report`` is used to generate a ``symbol-report.json`` including all symbols in the certified subset and their spans.
+4. ``blanket`` is used to generate a HTML coverage report from the ``.profraw`` files, the ``symbol-report.json`` and the instrumented binaries.
 
 Manual test coverage
 """"""""""""""""""""
 
-If a function cannot be covered through automated tests, this function will be annotated with a comment that states the test cases the function is tested by and the function will get excluded from the code coverage report by annotating it with ``#[coverage(off)]``.
-
-Line vs. function coverage
-""""""""""""""""""""""""""
-
-The coverage report does show both "line coverage" and "function coverage".
-
-Line coverage states how many of the lines in source code are executed at least once. This is our primary metric and we aim to achieve 100% line coverage.
-
-Function coverage states how many functions are executed at least once. Note that one function in source code may map to more than one function in the binary. This is due to generics and macros. One generic function in source code will produce one function for each type it is used with. This is a secondary metric, and we do not aim to achieve 100% function coverage.
+If a line cannot be covered by automated tests it will be marked with a ``// Ferrocene annotation: REASON`` comment stating the reson. This annotation will be displayed in the generated HTML report.
 
 Tidy test suite
 ~~~~~~~~~~~~~~~

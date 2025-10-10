@@ -65,7 +65,6 @@ pub use ascii::EscapeAscii;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use ascii::is_ascii_simple;
 #[stable(feature = "slice_get_slice", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use index::SliceIndex;
 #[unstable(feature = "slice_range", issue = "76393")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -608,7 +607,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn get<I>(&self, index: I) -> Option<&I::Output>
     where
         I: [const] SliceIndex<Self>,
@@ -636,7 +634,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn get_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
         I: [const] SliceIndex<Self>,

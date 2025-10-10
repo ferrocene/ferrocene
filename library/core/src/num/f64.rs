@@ -1174,7 +1174,6 @@ impl f64 {
     #[must_use]
     #[inline]
     #[allow(unnecessary_transmutes)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_bits(v: u64) -> Self {
         // It turns out the safety issues with sNaN were overblown! Hooray!
         // SAFETY: `u64` is a plain old datatype so we can always transmute from it.
@@ -1294,7 +1293,6 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_le_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_le_bytes(bytes))
     }

@@ -717,7 +717,8 @@ impl dyn Any + Send + Sync {
 /// ```
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, PartialOrd, Ord))]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy))]
+#[cfg_attr(feature = "ferrocene_certified", derive_const(Clone))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
 pub struct TypeId {

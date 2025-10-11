@@ -256,21 +256,17 @@ Code coverage
 Version
 """""""
 
-- grcov: |grcov_version|
-- llvm-cov: |llvm_version|
+- blanket: |ferrocene_version| (in-tree)
+- llvm-profdata: |llvm_version|
 - rustc: |rust_version|
+- symbol-report: |ferrocene_version| (in-tree)
 
 Usage
 """""
 
-1. ``rustc`` is instructed to instrument the binary by passing ``-Cinstrument-coverage``.
-2. The ``coretests`` test suite is executed. Due to the instrumentation, this will create ``.profraw`` files that contain the coverage information.
-3. ``llvm-cov`` is used to merge the multiple raw coverage files into one ``info`` file with all the coverage information.
-4. ``grcov`` is used to generate the HTML report from the ``info`` file.
+See :ref:`testing-plan:Code coverage tests` for details of how it works.
 
 Developer usage is described in :doc:`internal-procedures:code-coverage`.
-
-Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``. This is sufficient because the the code of the core library is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
 
 Safety Assessment
 """""""""""""""""
@@ -278,22 +274,37 @@ Safety Assessment
 - Tool Classification: T2
 - Level of reliance: Low, it is not involved in ensuring correctness, but only a measure of quality of the test suite.
 
-The instrumentation mechanism using ``-Cinstrument-coverage`` and ``llvm-cov`` is the standard mechanism of collecting code coverage information in Rust. But, since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
+The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard mechanism of collecting code coverage information in Rust. Since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
 
-``grcov`` is a tool that builds on top of ``llvm-cov`` and adds functionality to simplify the generation of a coverage report. It developed by Mozilla to collect code coverage information for the Firefox browser, and is widely used in the Rust ecosystem. The widespread usage and that it is developed by Mozilla, a trustworthy vendor, gives us confidence it its usage.
+``blanket`` and ``symbol-report`` are tools developed by Ferrous Systems. They are developed because the previously used tool ``llvm-cov`` inferred the total number of functions which resulted in undercounting regularly.
+
+The tools are designed to make it impossible to overcount code coverage. This is done by ``symbol-report`` using information from the compiler to ensure all the functions from the certified subset are being considered for code coverage.
+
+``blanket`` is build on top of the Rust library called ``llvm-profparser``. This library is developed by the ``cargo-tarpaulin`` project, which is widely used to measure code coverage for Rust projects.
 
 Failure modes
 '''''''''''''
 
-- False-positive A function is reported as covered, although it is not covered
+- False-positive: A function is reported as covered, although it is not covered
   - Risk: Overreporting, could result in testing gap.
   - Mitigation: No mitigation, since we assume the likeliehood of such an error low.
 - False-negative: A function is reported as not covered, although it is covered
   - Risk: Underreporting, will not result in testing gap.
   - Mitigation: Since we want to achieve 100% line coverage this would stand out and be manually investigated.
-- The code coverage instrumentation introduces bugs into the test runner
+- The code coverage instrumentation introduces bugs into the library or the test runner
   - Risk: That results in failing tests being reported as successful or successful tests being reported as failing
   - Mitigation: Running the test suite once with and once without code coverage instrumentation and ensuring both report the same result.
+- Undercounting: Total number of functions is too high
+  - Risk: A function is being considered, although it is not part of the certified subset
+  - Mitigation: Not a risk as it only results in us testing more than necessary
+- Overcounting: Total number of functions is too low
+  - Risk: A function is not being considered, although it is part of the certified subset
+  - Mitigation: Developing ``symbol-report`` which uses exactly the same information as the compiler
+- Line that can be executed not being reported as executable
+  - Risk: Underreporting, code that should be tested may not being tested
+  - Mitigation:
+    - ``blanket`` warns if a function has no executable line
+    - (Future work) End-to-end test that ensures the correct lines are being reported as executable
 
 Compiler
 ~~~~~~~~

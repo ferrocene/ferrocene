@@ -875,6 +875,7 @@ impl AtomicBool {
     /// assert_eq!(some_bool.compare_and_swap(true, true, Ordering::Relaxed), false);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(
@@ -3029,6 +3030,7 @@ macro_rules! atomic_int {
             /// assert_eq!(some_var.compare_and_swap(6, 12, Ordering::Relaxed), 10);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
+            #[cfg(not(feature = "ferrocene_certified"))]
             #[inline]
             #[$stable]
             #[deprecated(
@@ -3969,6 +3971,7 @@ atomic_int_ptr_sized! {
     "64" 8
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[inline]
 #[cfg(target_has_atomic)]
 fn strongest_failure_ordering(order: Ordering) -> Ordering {

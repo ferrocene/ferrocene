@@ -19,7 +19,7 @@ pub(crate) struct IndexRange {
     end: usize,
 }
 
-#[expect(dead_code)]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 impl IndexRange {
     /// # Safety
     /// - `start <= end`

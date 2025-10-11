@@ -1,5 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
+   SPDX-FileCopyrightText: The Rust Project Contributors
 
 .. default-domain:: spec
 
@@ -5890,8 +5891,7 @@ rustc
 ^^^^^
 
 :dp:`fls_zdgbeixirjfm`
-Rust-c (or :dt:`rustc`) is a compiler that implements the Ferrocene Language
-Specification.
+:dt:`rustc` is a compiler that implements the FLS.
 
 .. _fls_Q4MRIo7cWv5K:
 
@@ -6912,7 +6912,7 @@ tuple struct call expression
 
 :dp:`fls_DQaCUkskfXzk`
 A :dt:`tuple struct call expression` is a :t:`call expression` where the
-:t:`call operand` resolves to a :t:`tuple struct`.
+:t:`call operand` resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
 
 .. _fls_xx4slbg8s63e:
 

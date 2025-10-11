@@ -43,7 +43,6 @@ use crate::fmt;
 use crate::hash::{Hash, Hasher};
 use crate::marker::PointeeSized;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod num;
 
 #[unstable(feature = "convert_float_to_int", issue = "67057")]

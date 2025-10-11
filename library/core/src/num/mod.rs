@@ -55,7 +55,6 @@ mod int_macros; // import int_impl!
 #[macro_use]
 mod uint_macros; // import uint_impl!
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod error;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod int_log10;
@@ -87,7 +86,6 @@ pub use error::IntErrorKind;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use error::ParseIntError;
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use error::TryFromIntError;
 #[stable(feature = "generic_nonzero", since = "1.79.0")]
 #[cfg(not(feature = "ferrocene_certified"))]

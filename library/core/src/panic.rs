@@ -101,6 +101,17 @@ pub macro unreachable_2015 {
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(feature = "ferrocene_certified")]
+pub macro unreachable_2021 {
+    ($($t:tt)*) => (
+        $crate::panicking::panic("internal error: entered unreachable code")
+    ),
+}
+
+#[doc(hidden)]
+#[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
+#[allow_internal_unstable(panic_internals)]
+#[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub macro unreachable_2021 {
     () => (
@@ -173,7 +184,6 @@ pub unsafe trait PanicPayload: crate::fmt::Display {
 // All uses of this macro are FIXME(const-hack).
 #[unstable(feature = "panic_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro const_panic {
     ($const_msg:literal, $runtime_msg:literal, $($arg:ident : $ty:ty = $val:expr),* $(,)?) => {{
         // Wrap call to `const_eval_select` in a function so that we can
@@ -182,6 +192,8 @@ pub macro const_panic {
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         #[inline(always)] // inline the wrapper
         #[track_caller]
+        // Ferrocene addition: otherwise "unused variable" errors
+        #[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

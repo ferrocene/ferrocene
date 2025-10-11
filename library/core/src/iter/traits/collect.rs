@@ -313,7 +313,6 @@ pub trait IntoIterator {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Iterator> IntoIterator for I {
     type Item = I::Item;
     type IntoIter = I;

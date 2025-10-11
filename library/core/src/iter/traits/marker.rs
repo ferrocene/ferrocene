@@ -1,4 +1,6 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::Step;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 
 /// Same as FusedIterator
@@ -10,6 +12,7 @@ use crate::num::NonZero;
 #[unstable(issue = "none", feature = "trusted_fused")]
 #[doc(hidden)]
 #[rustc_specialization_trait]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait TrustedFused {}
 
 /// An iterator that always continues to yield `None` when exhausted.
@@ -29,9 +32,11 @@ pub unsafe trait TrustedFused {}
 // FIXME: this should be a #[marker] and have another blanket impl for T: TrustedFused
 // but that ICEs iter::Fuse specializations.
 #[lang = "fused_iterator"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait FusedIterator: Iterator {}
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: FusedIterator + ?Sized> FusedIterator for &mut I {}
 
 /// An iterator that reports an accurate length using size_hint.
@@ -87,6 +92,7 @@ unsafe impl<I: TrustedLen + ?Sized> TrustedLen for &mut I {}
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[doc(hidden)]
 #[rustc_specialization_trait]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait InPlaceIterable {
     /// The product of one-to-many item expansions that happen throughout the iterator pipeline.
     /// E.g. [[u8; 4]; 4].iter().flatten().flatten() would have a `EXPAND_BY` of 16.
@@ -113,4 +119,5 @@ pub unsafe trait InPlaceIterable {
 /// for details. Consumers are free to rely on the invariants in unsafe code.
 #[unstable(feature = "trusted_step", issue = "85731")]
 #[rustc_specialization_trait]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait TrustedStep: Step + Copy {}

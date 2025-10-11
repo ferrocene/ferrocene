@@ -56,10 +56,7 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ffi::va_list::{VaArgSafe, VaListImpl};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
-#[cfg(feature = "ferrocene_certified")]
-use crate::marker::{ConstParamTy, DiscriminantKind, Tuple};
 use crate::ptr;
 
 mod bounds;
@@ -413,7 +410,6 @@ pub const unsafe fn unreachable() -> !;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn assume(b: bool) {
     if !b {
         // SAFETY: the caller must guarantee the argument is never `false`
@@ -434,7 +430,6 @@ pub const unsafe fn assume(b: bool) {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.
@@ -475,7 +470,6 @@ pub const fn likely(b: bool) -> bool {
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();
@@ -517,7 +511,6 @@ pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn assert_inhabited<T>();
 
 /// A guard for unsafe functions that cannot ever be executed if `T` does not permit
@@ -878,7 +871,6 @@ pub const unsafe fn transmute<Src, Dst>(src: Src) -> Dst;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn transmute_unchecked<Src, Dst>(src: Src) -> Dst;
 
 /// Returns `true` if the actual type given as `T` requires drop
@@ -920,7 +912,6 @@ pub const fn needs_drop<T: ?Sized>() -> bool;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn offset<Ptr: bounds::BuiltinDeref, Delta>(dst: Ptr, offset: Delta) -> Ptr;
 
 /// Calculates the offset from a pointer, potentially wrapping.
@@ -960,7 +951,6 @@ pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 ///   always the case for references, but needs to be upheld manually for pointers
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn slice_get_unchecked<
     ItemPtr: bounds::ChangePointee<[T], Pointee = T, Output = SlicePtr>,
     SlicePtr,
@@ -1987,7 +1977,6 @@ pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: 
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer subtraction
@@ -2003,7 +1992,6 @@ pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer multiplication
@@ -2019,7 +2007,6 @@ pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs full-width multiplication and addition with a carry:
@@ -2115,7 +2102,6 @@ pub const unsafe fn unchecked_shr<T: Copy, U: Copy>(x: T, y: U) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_add<T: Copy>(x: T, y: T) -> T;
 
 /// Returns the result of an unchecked subtraction, resulting in
@@ -2199,7 +2185,6 @@ pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
 /// Returns (a * b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -2951,7 +2936,6 @@ pub const fn variant_count<T>() -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// The required alignment of the referenced value.
@@ -2965,7 +2949,6 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// Gets a static string slice containing the name of a type.
@@ -2979,7 +2962,6 @@ pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn type_name<T: ?Sized>() -> &'static str;
 
 /// Gets an identifier which is globally unique to the specified type. This
@@ -2995,7 +2977,6 @@ pub const fn type_name<T: ?Sized>() -> &'static str;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
 
 /// Tests (at compile-time) if two [`crate::any::TypeId`] instances identify the
@@ -3007,7 +2988,6 @@ pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
     a.data == b.data
 }
@@ -3032,7 +3012,6 @@ where
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + PointeeSized, M>(ptr: *const P) -> M;
 
 /// This is an accidentally-stable alias to [`ptr::copy_nonoverlapping`]; use that instead.
@@ -3044,7 +3023,6 @@ pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + PointeeSized, M>(ptr: 
 #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize);
 
 /// This is an accidentally-stable alias to [`ptr::copy`]; use that instead.
@@ -3068,7 +3046,6 @@ pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize);
 #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize);
 
 /// Returns the minimum (IEEE 754-2008 minNum) of two `f16` values.

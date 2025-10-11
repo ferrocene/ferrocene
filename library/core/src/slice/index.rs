@@ -893,6 +893,7 @@ unsafe impl<T> const SliceIndex<[T]> for range::RangeToInclusive<usize> {
 #[track_caller]
 #[unstable(feature = "slice_range", issue = "76393")]
 #[must_use]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn range<R>(range: R, bounds: ops::RangeTo<usize>) -> ops::Range<usize>
 where
     R: ops::RangeBounds<usize>,
@@ -955,6 +956,7 @@ where
 /// [`Index::index`]: ops::Index::index
 #[unstable(feature = "slice_range", issue = "76393")]
 #[must_use]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn try_range<R>(range: R, bounds: ops::RangeTo<usize>) -> Option<ops::Range<usize>>
 where
     R: ops::RangeBounds<usize>,

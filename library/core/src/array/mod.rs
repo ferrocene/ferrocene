@@ -193,8 +193,7 @@ pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
 
 /// The error type returned when a conversion from a slice to an array fails.
 #[stable(feature = "try_from", since = "1.34.0")]
-#[derive(Debug, Copy, Clone)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Copy, Clone))]
 pub struct TryFromSliceError(());
 
 #[stable(feature = "core_array", since = "1.35.0")]
@@ -271,7 +270,6 @@ impl<T, const N: usize> const BorrowMut<[T]> for [T; N] {
 /// ```
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> const TryFrom<&[T]> for [T; N]
 where
     T: Copy,
@@ -298,7 +296,6 @@ where
 /// ```
 #[stable(feature = "try_from_mut_slice_to_array", since = "1.59.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> const TryFrom<&mut [T]> for [T; N]
 where
     T: Copy,
@@ -325,7 +322,6 @@ where
 /// ```
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T, const N: usize> const TryFrom<&'a [T]> for &'a [T; N] {
     type Error = TryFromSliceError;
 
@@ -349,7 +345,6 @@ impl<'a, T, const N: usize> const TryFrom<&'a [T]> for &'a [T; N] {
 /// ```
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T, const N: usize> const TryFrom<&'a mut [T]> for &'a mut [T; N] {
     type Error = TryFromSliceError;
 

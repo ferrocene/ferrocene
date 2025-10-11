@@ -47,7 +47,6 @@ pub mod rust_2021 {
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub use crate::convert::{TryFrom, TryInto};
 }
 
@@ -67,7 +66,6 @@ pub mod rust_2024 {
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub use crate::convert::{TryFrom, TryInto};
 
     #[stable(feature = "prelude_2024", since = "1.85.0")]

@@ -1,5 +1,5 @@
 use core::cmp::Ordering;
-use core::ops::{Bound, ControlFlow};
+use core::ops::ControlFlow;
 use core::panic::Location;
 use core::sync::atomic::AtomicU32;
 
@@ -40,18 +40,6 @@ fn control_flow_into_value() {
 }
 
 #[test]
-fn bound_methods() {
-    let one = Bound::Included(&0).copied().map(|x| x + 1);
-    assert_eq!(one, Bound::Included(1));
-
-    let two = Bound::Excluded(&1).copied().map(|x| x + 1);
-    assert_eq!(two, Bound::Excluded(2));
-
-    let unbounded = Bound::<&i32>::Unbounded.copied().map(|x| x + 1);
-    assert_eq!(unbounded, Bound::Unbounded);
-}
-
-#[test]
 fn option_methods() {
     let s = String::from("hello");
     let mut some = Some(&&s);
@@ -73,11 +61,6 @@ fn option_methods() {
 
     assert_eq!(some.copied().cloned().map_or_default(|s| s.len()), 5);
     assert_eq!(none.copied().cloned().map_or_default(|s| s.len()), 0);
-
-    assert_eq!(some.reduce(some, |x, _| x), some);
-    assert_eq!(some.reduce(none, |x, _| x), some);
-    assert_eq!(none.reduce(some, |x, _| x), some);
-    assert_eq!(none.reduce(none, |x, _| x), none);
 
     assert_eq!(some.xor(some), none);
     assert_eq!(some.xor(none), some);

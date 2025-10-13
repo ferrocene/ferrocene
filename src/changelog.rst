@@ -27,7 +27,8 @@ Language changes in Rust 1.90.0
 
 - `Allow constants whose final value has references to mutable/external memory, but reject such constants as patterns <https://github.com/rust-lang/rust/pull/140942>`_
 
-  - New paragraph: :p:`fls_wJ9f906BlBvg`
+  - This lifted restriction was not specified in the FLS
+  - The restriction on patterns is documented in :p:`fls_wJ9f906BlBvg`
 
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 

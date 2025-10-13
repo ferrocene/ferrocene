@@ -40,6 +40,15 @@ fn control_flow_into_value() {
 }
 
 #[test]
+fn control_flow_continue_value() {
+    let c = ControlFlow::<i32, i32>::Continue(0);
+    assert_eq!(c.continue_value(), Some(0));
+
+    let b = ControlFlow::<i32, i32>::Break(1);
+    assert_eq!(b.continue_value(), None);
+}
+
+#[test]
 fn bound_methods() {
     let one = Bound::Included(&0).copied().map(|x| x + 1);
     assert_eq!(one, Bound::Included(1));

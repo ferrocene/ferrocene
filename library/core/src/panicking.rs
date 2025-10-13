@@ -375,7 +375,8 @@ fn panic_invalid_enum_construction(source: u128) -> ! {
 #[rustc_nounwind]
 fn panic_cannot_unwind() -> ! {
     // Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
-
+    //
+    // Not part of annotation:
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind("panic in a function that cannot unwind")
 }

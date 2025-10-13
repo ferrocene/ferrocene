@@ -592,6 +592,9 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: PointeeSized> Clone for *const T {
         #[inline(always)]
+        // Ferrocene annotation: This function is thoroughly tested inside the `test_clone`
+        // test in `coretests`. The fact that is shown as uncovered is a bug in our coverage
+        // tooling.
         fn clone(&self) -> Self {
             *self
         }
@@ -600,6 +603,9 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: PointeeSized> Clone for *mut T {
         #[inline(always)]
+        // Ferrocene annotation: This function is thoroughly tested inside the `test_clone`
+        // test in `coretests`. The fact that is shown as uncovered is a bug in our coverage
+        // tooling.
         fn clone(&self) -> Self {
             *self
         }

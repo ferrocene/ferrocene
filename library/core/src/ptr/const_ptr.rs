@@ -850,6 +850,7 @@ impl<T: PointeeSized> *const T {
         T: Sized,
     {
         match intrinsics::ptr_guaranteed_cmp(self, other) {
+            // Ferrocene annotation: This cannot be reached in runtime code so it cannot be covered.
             2 => None,
             other => Some(other == 1),
         }

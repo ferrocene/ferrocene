@@ -610,16 +610,20 @@ If the :t:`pattern-without-alternation` of a :t:`let statement` is an
 the :t:`let statement` is extended to the :t:`drop scope` of the
 :t:`block expression` that contains the :t:`let statement`.
 
+:dp:`fls_YeeZWqTdMivX`
+An :dt:`extending expression` is an :t:`expression` with an
+:t:`extended drop scope <drop scope extension>`.
+
 :dp:`fls_wyzau8hhq74d`
-An :dt:`extending expression` is either
+An :t:`extending expression` is any of the following:
 
 * :dp:`fls_ju7cpftd8r2g`
-  The :t:`expression` of a :t:`let statement`, or
+  The :t:`expression` of a :t:`let statement`.
 
 * :dp:`fls_gjd1ow3l7swe`
   The :t:`operand` of an :t:`extending expression` that is an
   :t:`array expression`, a :t:`borrow expression`, a :t:`struct expression`, a
-  :t:`tuple expression`, or a :t:`type cast expression`, or
+  :t:`tuple expression`, or a :t:`type cast expression`.
 
 * :dp:`fls_Rj9zhVutfQod`
   The :t:`block expression` and :t:`else expression` of an :t:`if expression`
@@ -636,6 +640,10 @@ An :dt:`extending expression` is either
 * :dp:`fls_iqw0d1l1lj3i`
   The :t:`tail expression` of a :t:`block expression` that is an
   :t:`extending expression`.
+
+* :dp:`fls_eeaJtK4w5gVK`
+  The :t:`[argument operand]s` of a :t:`tuple struct call expression`
+  that is an :t:`extending expression`.
 
 :dp:`fls_aq01wjpkxhq9`
 The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression` that is an

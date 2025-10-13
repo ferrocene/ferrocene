@@ -9,8 +9,11 @@
 #![feature(ascii_char_variants)]
 #![feature(async_iter_from_iter)]
 #![feature(async_iterator)]
+#![feature(atomic_from_mut)]
+#![feature(atomic_try_update)]
 #![feature(bigint_helper_methods)]
 #![feature(bool_to_result)]
+#![feature(bound_as_ref)]
 #![feature(bstr)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(char_max_len)]
@@ -19,8 +22,10 @@
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(const_ops)]
+#![feature(const_raw_ptr_comparison)]
 #![feature(const_ref_cell)]
 #![feature(const_trait_impl)]
+#![feature(control_flow_into_value)]
 #![feature(core_float_math)]
 #![feature(core_intrinsics)]
 #![feature(core_intrinsics_fallbacks)]
@@ -80,8 +85,11 @@
 #![feature(numfmt)]
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
+#![feature(pointer_try_cast_aligned)]
 #![feature(portable_simd)]
 #![feature(ptr_metadata)]
+#![feature(range_into_bounds)]
+#![feature(result_option_map_or_default)]
 #![feature(slice_from_ptr_range)]
 #![feature(slice_internals)]
 #![feature(slice_partition_dedup)]
@@ -181,6 +189,7 @@ mod manually_drop;
 mod mem;
 mod net;
 mod nonzero;
+mod not_doctests;
 mod num;
 mod ops;
 mod option;

@@ -1048,3 +1048,29 @@ fn test_ptr_default() {
     let default = PtrMutDefaultTest::default();
     assert!(default.ptr.is_null());
 }
+
+#[test]
+fn test_guaranteed_eq() {
+    let arr = [0, 1, 2];
+    let ptr = arr.as_ptr();
+    assert_eq!(ptr.guaranteed_eq(ptr), Some(true));
+    assert_eq!(ptr, ptr);
+
+    let ptr2 = arr.get(0).unwrap();
+    assert_eq!(ptr, ptr2);
+
+    let ptr3 = arr.get(1).unwrap();
+    assert_eq!(ptr.guaranteed_eq(ptr3), Some(false));
+    assert_ne!(ptr, ptr3);
+}
+
+#[test]
+fn test_clone() {
+    let mut arr = [0, 1, 2];
+
+    let ptr = arr.as_ptr();
+    let mut_ptr = arr.as_mut_ptr();
+
+    assert_eq!(Clone::clone(&ptr), ptr);
+    assert_eq!(Clone::clone(&mut_ptr), mut_ptr);
+}

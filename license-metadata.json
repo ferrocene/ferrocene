@@ -207,6 +207,17 @@
               {
                 "license": {
                   "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/src/glossary.rst",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
                     "2016, 2017, 2018, 2019, 2020, 2021 AXE Consultants. All Rights",
                     "Notice",
                     "The Ferrocene Developers"
@@ -214,6 +225,17 @@
                   "spdx": "Apache-2.0 OR MIT"
                 },
                 "name": "doc/specification/src/licenses.rst",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/version.rst",
                 "type": "file"
               },
               {

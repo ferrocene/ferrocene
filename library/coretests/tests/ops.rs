@@ -2,8 +2,8 @@ mod control_flow;
 mod from_residual;
 
 use core::ops::{
-    Bound, Deref, DerefMut, OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeFrom,
-    RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
+    Bound, Deref, DerefMut, IntoBounds, OneSidedRange, OneSidedRangeBound, Range, RangeBounds,
+    RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
 };
 
 // Test the Range structs and syntax.
@@ -143,6 +143,57 @@ fn test_range_bounds() {
 }
 
 #[test]
+fn test_range_into_bounds() {
+    assert_eq!((0..5).into_bounds(), (Bound::Included(0), Bound::Excluded(5)));
+    assert_eq!((0..=5).into_bounds(), (Bound::Included(0), Bound::Included(5)));
+    assert_eq!((0..).into_bounds(), (Bound::Included(0), Bound::Unbounded));
+    assert_eq!((..5).into_bounds(), (Bound::Unbounded, Bound::Excluded(5)));
+    assert_eq!((..=5).into_bounds(), (Bound::Unbounded, Bound::Included(5)));
+    assert_eq!((..).into_bounds(), (Bound::<i32>::Unbounded, Bound::<i32>::Unbounded));
+
+    let mut range = 0..=0;
+    range.next().unwrap();
+    assert_eq!(range.into_bounds(), (Bound::Included(0), Bound::Excluded(0)));
+
+    let r = (Bound::Included(0), Bound::Excluded(5));
+    assert_eq!(r.into_bounds(), r);
+}
+
+#[test]
+fn test_range_start_bound() {
+    assert_eq!((0..5).start_bound(), Bound::Included(&0));
+    assert_eq!((0..=5).start_bound(), Bound::Included(&0));
+    assert_eq!((0..).start_bound(), Bound::Included(&0));
+    assert_eq!((..5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..=5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..).start_bound(), Bound::<&i32>::Unbounded);
+
+    assert_eq!((&0..&5).start_bound(), Bound::Included(&0));
+    assert_eq!((&0..=&5).start_bound(), Bound::Included(&0));
+    assert_eq!((&0..).start_bound(), Bound::Included(&0));
+    assert_eq!((..&5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..=&5).start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!((..).start_bound(), Bound::<&i32>::Unbounded);
+}
+
+#[test]
+fn test_range_end_bound() {
+    assert_eq!((0..5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((0..=5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((0..).end_bound(), (Bound::<&i32>::Unbounded));
+    assert_eq!((..5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((..=5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((..).end_bound(), (Bound::<&i32>::Unbounded));
+
+    assert_eq!((&0..&5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((&0..=&5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((&0..).end_bound(), (Bound::<&i32>::Unbounded));
+    assert_eq!((..&5).end_bound(), (Bound::Excluded(&5)));
+    assert_eq!((..=&5).end_bound(), (Bound::Included(&5)));
+    assert_eq!((..).end_bound(), (Bound::<&i32>::Unbounded));
+}
+
+#[test]
 fn test_one_sided_range_bound() {
     assert!(matches!((..1u32).bound(), (OneSidedRangeBound::End, 1)));
     assert!(matches!((1u32..).bound(), (OneSidedRangeBound::StartInclusive, 1)));
@@ -162,6 +213,20 @@ fn test_bound_cloned_included() {
 #[test]
 fn test_bound_cloned_excluded() {
     assert_eq!(Bound::Excluded(&3).cloned(), Bound::Excluded(3));
+}
+
+#[test]
+fn test_bound_as_ref() {
+    assert_eq!(Bound::Included(3).as_ref(), Bound::Included(&3));
+    assert_eq!(Bound::Excluded(3).as_ref(), Bound::Excluded(&3));
+    assert_eq!(Bound::<i32>::Unbounded.as_ref(), Bound::<&i32>::Unbounded);
+}
+
+#[test]
+fn test_bound_as_mut() {
+    assert_eq!(Bound::Included(3).as_mut(), Bound::Included(&mut 3));
+    assert_eq!(Bound::Excluded(3).as_mut(), Bound::Excluded(&mut 3));
+    assert_eq!(Bound::<i32>::Unbounded.as_mut(), Bound::<&mut i32>::Unbounded);
 }
 
 #[test]
@@ -311,4 +376,14 @@ fn test_fmt() {
     assert_eq!(format!("{:?}", ..1), "..1");
     assert_eq!(format!("{:?}", ..=1), "..=1");
     assert_eq!(format!("{:?}", ..), "..");
+}
+
+#[test]
+fn test_closure_impl_for_refs() {
+    fn calls_closure<T, F: Fn(T) -> T>(f: F, t: T) -> T {
+        f(t)
+    }
+
+    calls_closure(&(|x: i32| x), 0);
+    calls_closure(&core::convert::identity::<i32>, 0);
 }

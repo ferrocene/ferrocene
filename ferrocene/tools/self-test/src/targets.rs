@@ -444,6 +444,7 @@ mod tests {
         assert_fail("libcore-0123456789abcdef"); // No extension
     }
 
+    #[cfg_attr(not(target_os = "linux"), allow(unused))]
     fn check_target_default_link_args(tuple: &'static str) -> Result<(), Error> {
         let target = TargetSpec { tuple, std: true, linker: Linker::HostCc };
 

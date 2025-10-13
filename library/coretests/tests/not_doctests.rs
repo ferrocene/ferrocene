@@ -252,3 +252,19 @@ fn try_cast_aligned() {
     assert!(aligned.try_cast_aligned::<u32>().is_some());
     assert!(unaligned.try_cast_aligned::<u32>().is_none());
 }
+
+#[test]
+fn range_bound_map() {
+    use core::ops::Bound;
+
+    use Bound::*;
+
+    let bound_string = Included("Hello, World!");
+    assert_eq!(bound_string.map(|s| s.len()), Included(13));
+
+    let bound_string = Excluded("Hello, World!");
+    assert_eq!(bound_string.map(|s| s.len()), Excluded(13));
+
+    let unbounded_string: Bound<String> = Unbounded;
+    assert_eq!(unbounded_string.map(|s| s.len()), Unbounded);
+}

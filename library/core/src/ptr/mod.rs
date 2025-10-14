@@ -428,11 +428,7 @@ pub use alignment::Alignment;
 
 mod metadata;
 #[unstable(feature = "ptr_metadata", issue = "81513")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
-#[unstable(feature = "ptr_metadata", issue = "81513")]
-#[cfg(feature = "ferrocene_certified")]
-pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
 
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]

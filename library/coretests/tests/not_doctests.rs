@@ -39,6 +39,16 @@ fn control_flow_into_value() {
     assert_eq!(b.into_value(), 1);
 }
 
+
+#[test]
+fn control_flow_continue_value() {
+    let c = ControlFlow::<i32, i32>::Continue(0);
+    assert_eq!(c.continue_value(), Some(0));
+
+    let b = ControlFlow::<i32, i32>::Break(1);
+    assert_eq!(b.continue_value(), None);
+}
+
 #[test]
 fn option_methods() {
     let s = String::from("hello");
@@ -225,4 +235,57 @@ fn try_cast_aligned() {
 
     assert!(aligned.try_cast_aligned::<u32>().is_some());
     assert!(unaligned.try_cast_aligned::<u32>().is_none());
+}
+
+#[test]
+fn range_bound_map() {
+    use core::ops::Bound;
+    use Bound::*;
+
+    let bound_string = Included("Hello, World!");
+    assert_eq!(bound_string.map(|s| s.len()), Included(13));
+
+    let bound_string = Excluded("Hello, World!");
+    assert_eq!(bound_string.map(|s| s.len()), Excluded(13));
+
+    let unbounded_string: Bound<String> = Unbounded;
+    assert_eq!(unbounded_string.map(|s| s.len()), Unbounded);
+}
+
+#[test]
+fn default_chaining_impl() {
+    assert!((1, 2) <= (1, 2));
+    assert!((3, 4) >= (1, 2));
+    assert!((1, 2) < (3, 4));
+    assert!((3, 4) > (1, 2));
+
+    assert!((1, 2) <= (1, 2));
+    assert!((1, 2) >= (1, 2));
+    assert_eq!((1, 2) <= (2, 2), true);
+    assert_eq!((2, 2) >= (1, 2), true);
+}
+
+
+#[test]
+fn tuple_comparison() {
+    let data = [
+        ("core::iter::adapters::Chain", 123_usize),
+        ("core::iter::adapters::Clone", 456_usize),
+        ("core::iter::adapters::Copie", 789_usize),
+        ("core::iter::adapters::Cycle", 123_usize),
+        ("core::iter::adapters::Flatt", 456_usize),
+        ("core::iter::adapters::TakeN", 789_usize),
+    ];
+
+    for val in data.windows(2) {
+        let x = val[0];
+        let y = val[1];
+        assert_eq!([x < y, x <= y, x > y, x >= y], [true, true, false, false]);
+    }
+
+    assert!(("1", "2", "3") < ("1", "2", "4"));
+    assert!(("1", "2", "3") < ("1", "2", "4"));
+    #[derive(PartialOrd, PartialEq)]
+    struct Float(f32);
+    assert!(!((Float(f32::NAN), Float(f32::NAN), "3") < (Float(1.0), Float(f32::NAN), "4")));
 }

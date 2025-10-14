@@ -433,3 +433,16 @@ fn type_name() {
 fn assume() {
     unsafe { core::hint::assert_unchecked(true) };
 }
+
+#[test]
+fn array_iter_mut() {
+    let mut arr = [0u8; 10];
+
+    for x in &mut arr {
+        *x = 1;
+    }
+
+    let sum = arr.into_iter().sum::<u8>();
+
+    assert_eq!(sum as usize, arr.len());
+}

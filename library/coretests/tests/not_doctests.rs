@@ -305,3 +305,25 @@ fn tuple_comparison() {
     struct Float(f32);
     assert!(!((Float(f32::NAN), Float(f32::NAN), "3") < (Float(1.0), Float(f32::NAN), "4")));
 }
+
+macro_rules! nums_to_bytes_tests {
+    ($($int:ty),*) => {
+        $({
+            let int = <$int>::MAX;
+            let le_bytes = int.to_le_bytes();
+            let be_bytes = int.to_be_bytes();
+
+            assert_eq!(<$int>::from_le_bytes(le_bytes), int);
+            assert_eq!(<$int>::from_be_bytes(be_bytes), int);
+        })*
+    }
+}
+
+#[test]
+fn numbers_to_bytes() {
+    nums_to_bytes_tests! {
+        u8, u16, u32, u64, u128, usize,
+        i8, i16, i32, i64, i128, isize,
+        f32, f64
+    }
+}

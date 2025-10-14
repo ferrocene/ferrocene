@@ -214,6 +214,7 @@ impl<T> const From<Range<T>> for legacy::Range<T> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<legacy::Range<T>> for Range<T> {
     #[inline]
     fn from(value: legacy::Range<T>) -> Self {
@@ -405,6 +406,7 @@ impl<T> const From<RangeInclusive<T>> for legacy::RangeInclusive<T> {
 }
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<legacy::RangeInclusive<T>> for RangeInclusive<T> {
     #[inline]
     fn from(value: legacy::RangeInclusive<T>) -> Self {
@@ -564,6 +566,7 @@ impl<T> const From<RangeFrom<T>> for legacy::RangeFrom<T> {
 }
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<legacy::RangeFrom<T>> for RangeFrom<T> {
     #[inline]
     fn from(value: legacy::RangeFrom<T>) -> Self {

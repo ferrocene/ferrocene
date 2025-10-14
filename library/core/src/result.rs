@@ -533,14 +533,14 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "ferrocene_certified")]
-use crate::convert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{convert, fmt, hint};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{convert, hint};
 
 /// `Result` is a type that represents either success ([`Ok`]) or failure ([`Err`]).
 ///
@@ -1103,7 +1103,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
-    // blocked on Iterator
+    // Ferrocene: blocked on Iterator
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter { inner: self.as_ref().ok() }
@@ -1129,7 +1129,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
-    // blocked on Iterator
+    // Ferrocene: blocked on Iterator
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut { inner: self.as_mut().ok() }
@@ -1185,7 +1185,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
-    // blocked on Debug
+    // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn expect(self, msg: &str) -> T
     where
@@ -1235,7 +1235,7 @@ impl<T, E> Result<T, E> {
     #[inline(always)]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
-    // blocked on Debug
+    // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn unwrap(self) -> T
     where
@@ -1303,7 +1303,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect_err", since = "1.17.0")]
-    // blocked on Debug
+    // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn expect_err(self, msg: &str) -> E
     where
@@ -1336,7 +1336,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
-    // blocked on Debug
+    // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn unwrap_err(self) -> E
     where
@@ -1375,7 +1375,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-    // blocked on !
+    // Ferrocene: blocked on !
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_ok(self) -> T
     where
@@ -1414,7 +1414,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-    // blocked on !
+    // Ferrocene: blocked on !
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_err(self) -> E
     where
@@ -1667,8 +1667,6 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
-    // blocked on hint
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
@@ -1705,8 +1703,6 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
-    // blocked on hint
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn unwrap_err_unchecked(self) -> E {
         match self {
             // Ferrocene annotation: This line cannot be covered as reaching `unreachable_unchecked`
@@ -1879,7 +1875,7 @@ impl<T, E> Result<Result<T, E>, E> {
     #[stable(feature = "result_flattening", since = "1.89.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "result_flattening", since = "1.89.0")]
-    // blocked on const impl Drop for Result<Result<T, E>>
+    // Ferrocene: blocked on const impl Drop for Result<Result<T, E>>
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
@@ -1895,7 +1891,7 @@ impl<T, E> Result<Result<T, E>, E> {
 #[inline(never)]
 #[cold]
 #[track_caller]
-// blocked on Debug
+// Ferrocene: blocked on Debug
 #[cfg(not(feature = "ferrocene_certified"))]
 fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
     panic!("{msg}: {error:?}");
@@ -1909,7 +1905,7 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 #[inline]
 #[cold]
 #[track_caller]
-// blocked on Debug
+// Ferrocene: blocked on Debug
 #[cfg(not(feature = "ferrocene_certified"))]
 const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
     panic!()

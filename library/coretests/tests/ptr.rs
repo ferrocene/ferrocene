@@ -1086,3 +1086,11 @@ fn test_as_array() {
     assert!(mut_ptr.as_mut_array::<{ core::mem::size_of::<u32>() }>().is_some());
     assert!(mut_ptr.as_mut_array::<{ core::mem::size_of::<u64>() }>().is_none());
 }
+
+#[test]
+fn test_is_empty() {
+    let arr: [u8; 0] = [];
+
+    let ptr = &arr as *const [u8];
+    assert!(ptr.is_empty());
+}

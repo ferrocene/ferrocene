@@ -153,7 +153,7 @@
 #![feature(derive_const)]
 #![feature(doc_cfg)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
+#![feature(extern_types)]
 #![feature(f128)]
 #![feature(f16)]
 #![feature(freeze_impls)]

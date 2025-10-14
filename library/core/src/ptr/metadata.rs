@@ -6,7 +6,6 @@ use crate::fmt;
 use crate::hash::{Hash, Hasher};
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 use crate::marker::{Freeze, PointeeSized};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
 
 /// Provides the pointer metadata type of any pointed-to type.
@@ -164,13 +163,11 @@ pub const fn from_raw_parts_mut<T: PointeeSized>(
 /// duplicated in multiple codegen units), and pointers to vtables of *different* types/traits can
 /// compare equal (since identical vtables can be deduplicated within a codegen unit).
 #[lang = "dyn_metadata"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct DynMetadata<Dyn: PointeeSized> {
     _vtable_ptr: NonNull<VTable>,
     _phantom: crate::marker::PhantomData<Dyn>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe extern "C" {
     /// Opaque type for accessing vtables.
     ///

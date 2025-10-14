@@ -1067,7 +1067,9 @@ fn test_clone() {
 
     let ptr = arr.as_ptr();
     let mut_ptr = arr.as_mut_ptr();
+    let non_null = NonNull::new(mut_ptr).unwrap();
 
     assert_eq!(Clone::clone(&ptr), ptr);
     assert_eq!(Clone::clone(&mut_ptr), mut_ptr);
+    assert_eq!(Clone::clone(&non_null), non_null);
 }

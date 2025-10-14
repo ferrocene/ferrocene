@@ -70,6 +70,8 @@ pub const trait Index<Idx: ?Sized> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_no_implicit_autorefs]
     #[track_caller]
+    // Ferrocene annotation: This method declaration has no code to be covered, the fact that this
+    // shows up as uncovered is a bug in our coverage tooling.
     fn index(&self, index: Idx) -> &Self::Output;
 }
 
@@ -176,5 +178,7 @@ pub const trait IndexMut<Idx: ?Sized>: [const] Index<Idx> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_no_implicit_autorefs]
     #[track_caller]
+    // Ferrocene annotation: This method declaration has no code to be covered, the fact that this
+    // shows up as uncovered is a bug in our coverage tooling.
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output;
 }

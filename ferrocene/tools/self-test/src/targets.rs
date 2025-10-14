@@ -141,7 +141,7 @@ fn check_default_link_args(sysroot: &Path, target: &TargetSpec) -> Result<(), Er
         Linker::HostCc => (),
         Linker::BundledLld | Linker::CrossCc(_) => return Ok(()), // No default link args expected
     }
-    if target.tuple.contains("apple-darwin") || target.tuple.contains("windows-msvc") {
+    if !target.tuple.contains("linux-gnu") {
         return Ok(());
     }
 

@@ -327,3 +327,24 @@ fn numbers_to_bytes() {
         f32, f64
     }
 }
+
+#[test]
+fn abs_diff_vectorization() {
+    fn sad_iter(a: &[u8; 8], b: &[u8; 8]) -> u32 {
+        a.iter().zip(b).map(|(&a, &b)| a.abs_diff(b) as u32).sum()
+    }
+
+    fn sad_loop(a: &[u8; 8], b: &[u8; 8]) -> u32 {
+        let mut sum = 0;
+        for i in 0..a.len() {
+            sum += a[i].abs_diff(b[i]) as u32;
+        }
+        sum
+    }
+
+    let max_buf = [u8::MAX; 8];
+    let min_buf = [u8::MIN; 8];
+
+    assert_eq!(sad_iter(&max_buf, &min_buf), 8 * (u8::MAX as u32));
+    assert_eq!(sad_loop(&max_buf, &min_buf), 8 * (u8::MAX as u32));
+}

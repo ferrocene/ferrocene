@@ -367,3 +367,19 @@ fn maybe_uninit() {
 
     assert_eq!(*unsafe { maybe.assume_init_ref() }, u64::MAX);
 }
+
+#[test]
+fn slice_methods() {
+    let mut arr = [0; 10];
+    let slice = arr.as_mut_slice();
+
+    assert_eq!(slice.len(), 10);
+
+    assert!(slice.first_chunk_mut::<11>().is_none());
+    assert!(slice.first_chunk_mut::<1>().is_some());
+
+    assert!(slice.split_first_mut().is_some());
+
+    let mut empty = [0; 0];
+    assert!(empty.as_mut_slice().split_first_mut().is_none());
+}

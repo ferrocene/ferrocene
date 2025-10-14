@@ -411,3 +411,11 @@ fn duration_methods() {
     assert!(!secs.is_zero());
     assert!(Duration::from_secs(0).is_zero());
 }
+
+#[test]
+fn unit_comparisons() {
+    assert!(!(() != ()));
+    assert!(!(&() != &mut ()));
+    assert!(!(&mut () != &()));
+    assert!(!(() < ()));
+}

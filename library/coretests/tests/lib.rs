@@ -103,6 +103,7 @@
 #![feature(ptr_metadata)]
 #![feature(range_into_bounds)]
 #![feature(result_option_map_or_default)]
+#![feature(slice_as_array)]
 #![feature(slice_from_ptr_range)]
 #![feature(slice_internals)]
 #![feature(slice_partition_dedup)]

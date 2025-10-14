@@ -112,6 +112,7 @@
 #![feature(split_as_slice)]
 #![feature(std_internals)]
 #![feature(step_trait)]
+#![feature(str_as_str)]
 #![feature(str_internals)]
 #![feature(strict_provenance_lints)]
 #![feature(test)]

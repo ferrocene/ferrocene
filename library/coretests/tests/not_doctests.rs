@@ -383,3 +383,14 @@ fn slice_methods() {
     let mut empty = [0; 0];
     assert!(empty.as_mut_slice().split_first_mut().is_none());
 }
+
+#[test]
+fn str_methods() {
+    let s = <&str>::default();
+    assert_eq!(s.as_str(), "");
+
+    let mut buf = String::from("a");
+    let s = unsafe { core::slice::from_raw_parts_mut(buf.as_mut_str().as_mut_ptr(), 1) };
+    s[0] = b'b';
+    assert_eq!(buf, "b");
+}

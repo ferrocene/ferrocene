@@ -13,15 +13,14 @@ Core Library Certification
    norm-mapping
    testing-plan
    requirement-review
-   code-coverage
 
 .. toctree::
    :numbered:
    :maxdepth: 2
    :caption: Certified Subset
    
-   subset
    subset-api-docs
+   code-coverage
 
 .. appendices::
    :numbered:

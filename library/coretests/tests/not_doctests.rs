@@ -3,6 +3,7 @@ use core::mem::MaybeUninit;
 use core::ops::{Bound, ControlFlow};
 use core::panic::Location;
 use core::sync::atomic::AtomicU32;
+use core::time::Duration;
 
 #[test]
 fn ordering_equality() {
@@ -393,4 +394,20 @@ fn str_methods() {
     let s = unsafe { core::slice::from_raw_parts_mut(buf.as_mut_str().as_mut_ptr(), 1) };
     s[0] = b'b';
     assert_eq!(buf, "b");
+}
+
+#[test]
+fn duration_methods() {
+    let secs = Duration::from_secs(1);
+
+    assert_eq!(secs.as_micros(), 1_000_000);
+
+    assert_eq!(secs.as_millis(), 1_000);
+    assert_eq!(secs.as_millis_f32(), 1_000.0);
+    assert_eq!(secs.as_millis_f64(), 1_000.0);
+
+    assert_eq!(secs.as_secs_f32(), 1.0);
+
+    assert!(!secs.is_zero());
+    assert!(Duration::from_secs(0).is_zero());
 }

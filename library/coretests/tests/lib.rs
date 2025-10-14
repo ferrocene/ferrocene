@@ -46,6 +46,7 @@
 #![feature(duration_constants)]
 #![feature(duration_constructors)]
 #![feature(duration_from_nanos_u128)]
+#![feature(duration_millis_float)]
 #![feature(error_generic_member_access)]
 #![feature(exact_div)]
 #![feature(exact_size_is_empty)]

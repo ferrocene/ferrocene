@@ -28,7 +28,6 @@ use crate::ops::{
 };
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{Iter, IterMut};
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -382,7 +381,6 @@ impl<T: fmt::Debug, const N: usize> fmt::Debug for [T; N] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T, const N: usize> IntoIterator for &'a [T; N] {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
@@ -393,7 +391,6 @@ impl<'a, T, const N: usize> IntoIterator for &'a [T; N] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T, const N: usize> IntoIterator for &'a mut [T; N] {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;

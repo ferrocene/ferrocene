@@ -335,7 +335,6 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> Drop for IntoIter<T, N> {
     #[inline]
     fn drop(&mut self) {

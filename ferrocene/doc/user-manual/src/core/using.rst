@@ -20,4 +20,4 @@ Using the certified core library in an existing Rust project
 ------------------------------------------------------------
 
 To use the certified core library in an existing project, make sure you're using only the permitted functions listed
-in the :doc:`core-certification:subset`.
+in the :doc:`core-certification:subset-api-docs`.

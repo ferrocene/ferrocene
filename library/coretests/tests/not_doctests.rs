@@ -446,3 +446,20 @@ fn array_iter_mut() {
 
     assert_eq!(sum as usize, arr.len());
 }
+
+#[test]
+fn slice_partial_eq() {
+    #[derive(Debug, Eq, PartialEq, Copy, Clone)]
+    struct Byte(u8);
+
+    let a1 = [Byte(0u8); 100];
+    let a2 = [Byte(0u8); 99];
+    let mut a3 = [Byte(0u8); 100];
+
+    assert_ne!(a1.as_slice(), a2.as_slice());
+
+    assert_eq!(a1.as_slice(), a3.as_slice());
+
+    a3[a3.len() - 1] = Byte(1);
+    assert_ne!(a1.as_slice(), a3.as_slice());
+}

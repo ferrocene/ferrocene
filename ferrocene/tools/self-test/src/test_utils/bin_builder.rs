@@ -21,6 +21,10 @@ pub(crate) struct BinBuilder<'a> {
     stderr: Option<String>,
     exit: Option<i32>,
     expected_args: Option<&'a [&'a str]>,
+    /// If true test that all expected args and no additional ones are present.
+    /// If false only check expected args are present and in order,
+    /// but there can be additional arguments before, between, or after.
+    expected_args_strict: bool,
     dest: BinaryDestination,
     program: &'static str,
 }
@@ -36,6 +40,7 @@ impl<'a> BinBuilder<'a> {
             stderr: None,
             exit: None,
             expected_args: None,
+            expected_args_strict: true,
             dest: BinaryDestination::Sysroot,
             program: BIN_PROGRAM,
         }
@@ -91,6 +96,11 @@ impl<'a> BinBuilder<'a> {
         self
     }
 
+    pub(crate) fn expected_args_strict(mut self, strict: bool) -> Self {
+        self.expected_args_strict = strict;
+        self
+    }
+
     pub(crate) fn program_source(mut self, source: &'static str) -> Self {
         self.program = source;
         self
@@ -134,11 +144,13 @@ impl<'a> BinBuilder<'a> {
         if let Some(expected_args) = self.expected_args {
             rustc.env("EXPECTED_ARGS", expected_args.join("\t"));
         }
+        rustc.env("EXPECTED_ARGS_STRICT", self.expected_args_strict.to_string());
 
         let mut rustc = rustc.spawn().unwrap();
         let stdin = rustc.stdin.as_mut().unwrap();
         stdin.write_all(self.program.as_bytes()).unwrap();
-        assert!(rustc.wait().unwrap().success());
+        let res = rustc.wait_with_output().unwrap();
+        assert!(res.status.success(), "stdout: \n{}", String::from_utf8_lossy(&res.stdout));
 
         #[cfg(not(windows))]
         if let Some(mode) = self.mode {
@@ -160,8 +172,20 @@ const BIN_PROGRAM: &str = r#"
 fn main() {
     if let Some(expected_args) = option_env!("EXPECTED_ARGS") {
         let expected = expected_args.split("\t").collect::<Vec<_>>();
-        let found = std::env::args().skip(1).collect::<Vec<_>>();
-        assert_eq!(expected, found);
+        let mut found = std::env::args().skip(1).collect::<Vec<_>>();
+        if Some("true") == option_env!("EXPECTED_ARGS_STRICT") {
+            assert_eq!(expected, found);
+        } else {
+            // Validate each of the args is present in the order provided,
+            // ignore the rest.
+            for item in expected {
+                let val = found.iter().enumerate().find(|(_, v)| *v == &item.to_string());
+                assert!(val.is_some(), "Did not find argument");
+                // Get rid of all the previous args so that we can validate the expected
+                // args are in-order.
+                found = found.split_off(val.unwrap().0);
+            }
+        }
     }
     if let Some(stdout) = option_env!("OVERRIDE_STDOUT") {
         print!("{stdout}");

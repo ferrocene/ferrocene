@@ -1138,6 +1138,11 @@ impl<T> Option<T> {
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Some(val) => val,
+            // Ferrocene annotation: This line cannot be covered as reaching `unreachable_unchecked`
+            // is undefined behavior. Meaning that if it is reached, the compiler might have put
+            // non-sensical code here. If debug assertions are enabled, this will be an unwinding
+            // panic that cannot be covered either.
+            //
             // SAFETY: the safety contract must be upheld by the caller.
             None => unsafe { hint::unreachable_unchecked() },
         }

@@ -43,7 +43,7 @@ The certification does not cover the entirety of the core library, but instead a
 The subset included in the safety certification is defined and documented in the :doc:`Safety Manual <safety-manual:core/subset>`.
 
 Systematic capabilities
------------------------
+"""""""""""""""""""""""
 
 All public functions of the certified subset are considered "software safety functions” and are going to be certified for all safety standards up to the safety level specified. That means our customers can use all of those functions for use cases up to the highest safety level specified. Since we consider all of them safety relevant we do not consider independence.
 
@@ -235,20 +235,22 @@ See the :doc:`core-certification:testing-plan` for how the certified core librar
 Uncertified code
 ----------------
 
-We need to make sure no uncertified code is being used. This means for us, code that is not part of the safety certification effort where we do not yet provide evidence for requirements and/or sufficient test coverage.
+It has to be ensured that no uncertified code from the core library is being used in a customer project.
 
-We achieve this by instructing customers to verify that they only call functions from the certified subset in their source code. Initially via providing a list of certified functions, and moving on to tooling and automation in the second half of the year 2025 for the next release and its certification.
+This is achieved in two steps.
 
-We will ensure that all certified functions, and functions called by those certified functions, are 100% statement-covered by tests and described by requirements and design. In best case through tests of the certified functions, but maybe also through tests of the private functions (see "Private functions” section).
+Firstly, it is ensured that the certified subset only contains certified code.
 
-All uncertified functions and certified functions that are not called are unused code (see "Unused code”).
+Secondly, customers must ensure they only use code from the certified subset.
+
+All uncertified code and certified code that is not called, is unused code.
 
 Unused code
 -----------
 
-We rely on the qualified Ferrocene compiler to ensure that only functions that are intentionally called by the customer and functions called by those intentionally called functions are used. If the compiler fails to do that correctly that is a problem with the compiler qualification and not the core library certification.
+The qualified Ferrocene compiler ensures that no code that is not used in source code is being executed.
 
-The compiler usually removes unused functions, but that behavior is not specified and can therefore not be relied upon.
+Additionally the compiler usually removes unused functions from the final binary. But this behavior is not specified and can therefore not be relied upon.
 
 Tool safety assessments
 -----------------------
@@ -332,7 +334,7 @@ Nightly features
 
 The core library relies on a few so-called "nightly features" of the compiler. Regular users of Ferrocene are not allowed to use them, therefore they are not part of the compiler qualification.
 This is because they are either "experimental" or "internal”. They do work well, but they can change between compiler versions and do not fall under the usual Rust stability guarantees.
-This is not a problem for the core library, because rustc and the core library are developed and tested together.
+This is not a problem for the core library, because rustc and the core library are developed, build and tested together.
 
 Nightly features are activated by setting the ``RUSTC_BOOTSTRAP`` environment variable when executing ``rustc``.
 
@@ -343,11 +345,33 @@ Nightly features are tested by the ``compiletest`` test suite, by tests that act
 Compiler built-in functions
 '''''''''''''''''''''''''''
 
-There are functions in the core library that are "compiler built-in”. That means they are not implemented in the library codebase but in the compiler codebase. They can be found by searching for "compiler built-in” in the ferrocene repository (e.g. ``rg "compiler built-in" library/core``).
+There are functions in the core library that are "compiler built-in”. That means they are not implemented in the core library codebase but in the compiler codebase.
 
-All of those functions are macros. They generate different code on every use. Customers have to ensure the generated code is correct. This is documented in the safety manual.
+They fall in two categories:
 
-At the time of writing there are 59 such functions. An example of such a function is ` ``pub macro Clone`` <https://github.com/ferrocene/ferrocene/blob/c711094a96c03fc27f98d58e2bf85a1ab6996940/library/core/src/clone.rs#L184>`_.
+Macros
+++++++
+
+Macros generate different code on every use.
+
+Customers have to ensure the generated code is correct. This is documented in the safety manual.
+
+At the time of writing there are 60 compiler built-in macros (``rg "compiler built-in" library/core``). Not all of them are certified.
+
+An example of such a built-in macro is ``pub macro Clone`` (`<https://github.com/ferrocene/ferrocene/blob/3ab6d2e0eb60057ec912d9619542ab590da45a51/library/core/src/clone.rs#L258-L260>`_).
+
+Intrinsics
+++++++++++
+
+Intrinsics are "implementation details of ``core`` and should not be used outside of the standard library" (quote from the intrinsics module doc-comment).
+
+All instrinsic function are in the ``intrinsics`` module and its submodules.
+
+They are not availble in stable Rust and therefore cannot be used directly by customers.
+
+At the time of writing there are 395 intrinsic function (``rg "fn" library/core/src/intrinsics``). Not all of them are certified.
+
+An example of such a intrinsic function is ``fn unaligned_volatile_load<T>(src: *const T) -> T`` (`<https://github.com/ferrocene/ferrocene/blob/3ab6d2e0eb60057ec912d9619542ab590da45a51/library/core/src/intrinsics/mod.rs#L1050>`_).
 
 Safety Assessment
 """""""""""""""""
@@ -369,8 +393,8 @@ Version
 Usage
 """""
 
-Upstream already has very good coding practices for the core library, which are enforced by the tidy test suite.
-The "tidy” test suite executes rustc and clippy lints to enforce consistency in semantics and ``rustfmt`` to enforce consistency in syntax.
+Upstream already has very good coding practices for the core library, which are enforced by the ``tidy`` test suite.
+The ``tidy`` test suite executes rustc and clippy lints to enforce consistency in semantics and ``rustfmt`` to enforce consistency in syntax.
 
 It does not make sense for us to come up with a separate coding standard and try to force it upon the upstream core library.
 If we would start to come up with new rules from our coding standard we would have to work against upstream and either convince them to refactor their code without a clear benefit for them or we would have to carry a big changeset which has a big potential to introduce bugs.
@@ -419,7 +443,7 @@ Failure modes
 
 - False-positive: Report test as successful, although it is failing
    - Risk: Not detect incorrect code.
-   - Mitigation: None. If found, report issue upstream.
+   - Mitigation: Report issue upstream.
 - False-negative: Report test as failing, although it is successful
    - Risk: None
    - Mitigation: Report issue upstream.
@@ -467,7 +491,7 @@ Version
 Usage
 """""
 
-``rustdoc`` is used to generate the API documentation from source code as well as generating the spreadsheet of all functions in the subset.
+``rustdoc`` is used to generate the API documentation from source code as well as generating the symbols for the code coverage report.
 
 Safety Assessment
 """""""""""""""""
@@ -475,7 +499,7 @@ Safety Assessment
 - Tool classification: T2
 - Level of reliance: Medium
 
-``rustdoc`` is the standard tool to generate documentation of Rust libraries and is very widely used. Each version of each crate published on <https://crates.io> automatically gets its documentation build by ``rustdoc`` and published on <https://doc.rs>. This means it is executed hundreds of times per day for a wide variety of crates and documentations. This wide and diverse usage gives high confidence in its quality and robustness.
+``rustdoc`` is the standard tool to generate documentation of Rust libraries and is very widely used. Each version of each crate published on `<https://crates.io>`_ automatically gets its documentation build by ``rustdoc`` and published on `<https://doc.rs>`_. This means it is executed hundreds of times per day for a wide variety of crates and documentations. This wide and diverse usage gives high confidence in its quality and robustness.
 
 Failure modes
 ~~~~~~~~~~~~~

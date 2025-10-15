@@ -32,7 +32,7 @@ Covered by
 
 - `Certified core library API docs <../../api-docs/core/index.html>`_
 - :doc:`Code coverage report <core-certification:code-coverage>`
-- :doc:`Requirements review <core-certification:requirement-review>`
+- :ref:`safety-plan/index:quality of the doc-comments`
 
 5.2.5
 ~~~~~

@@ -1018,7 +1018,20 @@
 # This overrides the global `rust.jemalloc` option. See that option for more info.
 #jemalloc = rust.jemalloc (bool)
 
-<<<<<<< HEAD
+# The linker configuration that will *override* the default linker used for Linux
+# targets in the built compiler.
+#
+# The following values are supported:
+# - `off` => do not apply any override and use the default linker. This can be used to opt out of
+#   linker overrides set by bootstrap for specific targets (see below).
+# - `self-contained-lld-cc` => override the default linker to be self-contained LLD (`rust-lld`)
+#   that is invoked through `cc`.
+#
+# Currently, the following targets automatically opt into the self-contained LLD linker, unless you
+# pass `off`:
+# - x86_64-unknown-linux-gnu
+#default-linker-linux-override = "off" (for most targets)
+
 # =============================================================================
 # Distribution options
 #
@@ -1163,18 +1176,3 @@
 # while working locally.
 # https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html#configuring-aws-cli
 #aws-profile = "ferrocene-ci"
-=======
-# The linker configuration that will *override* the default linker used for Linux
-# targets in the built compiler.
-#
-# The following values are supported:
-# - `off` => do not apply any override and use the default linker. This can be used to opt out of
-#   linker overrides set by bootstrap for specific targets (see below).
-# - `self-contained-lld-cc` => override the default linker to be self-contained LLD (`rust-lld`)
-#   that is invoked through `cc`.
-#
-# Currently, the following targets automatically opt into the self-contained LLD linker, unless you
-# pass `off`:
-# - x86_64-unknown-linux-gnu
-#default-linker-linux-override = "off" (for most targets)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

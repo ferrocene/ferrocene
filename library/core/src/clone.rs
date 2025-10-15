@@ -614,13 +614,9 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl Clone for ! {
-=======
     #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Clone for ! {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         #[inline]
         fn clone(&self) -> Self {
             *self

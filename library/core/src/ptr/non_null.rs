@@ -1,14 +1,10 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
-<<<<<<< HEAD
 #[cfg(feature = "ferrocene_certified")]
 use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::{PointeeSized, Unsize};
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::{Destruct, PointeeSized, Unsize};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;

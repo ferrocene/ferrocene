@@ -1047,7 +1047,6 @@ fn test_ptr_default() {
 }
 
 #[test]
-<<<<<<< HEAD
 fn test_guaranteed_eq() {
     let arr = [0, 1, 2];
     let ptr = arr.as_ptr();
@@ -1071,7 +1070,8 @@ fn test_clone() {
 
     assert_eq!(Clone::clone(&ptr), ptr);
     assert_eq!(Clone::clone(&mut_ptr), mut_ptr);
-=======
+}
+
 fn test_const_drop_in_place() {
     const COUNTER: usize = {
         let mut counter = 0;
@@ -1108,5 +1108,4 @@ fn test_const_drop_in_place() {
         counter
     };
     assert_eq!(COUNTER, 3);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }

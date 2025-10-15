@@ -18,6 +18,7 @@ Commands:
   setup    Set up the environment for development
   vendor   Vendor dependencies
   perf     Perform profiling and benchmarking of the compiler using `rustc-perf`
+  sign     Sign Ferrocene qualification documents
 
 Arguments:
   [PATHS]...  paths for the subcommand

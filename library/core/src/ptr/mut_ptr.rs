@@ -4,12 +4,11 @@ use super::*;
 use crate::cmp::Ordering::{Equal, Greater, Less};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
-<<<<<<< HEAD
+#[cfg(feature = "ferrocene_certified")]
 use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::{Destruct, PointeeSized};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
@@ -1442,15 +1441,11 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
     #[inline(always)]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub unsafe fn drop_in_place(self) {
-=======
     pub const unsafe fn drop_in_place(self)
     where
         T: [const] Destruct,
     {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // SAFETY: the caller must uphold the safety contract for `drop_in_place`.
         unsafe { drop_in_place(self) }
     }

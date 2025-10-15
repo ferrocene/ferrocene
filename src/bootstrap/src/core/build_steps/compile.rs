@@ -26,11 +26,8 @@ use crate::core::builder;
 use crate::core::builder::{
     Builder, Cargo, Kind, RunConfig, ShouldRun, Step, StepMetadata, crate_description,
 };
-<<<<<<< HEAD
 use crate::core::config::flags::FerroceneCoverageFor;
-=======
 use crate::core::config::toml::target::DefaultLinuxLinkerOverride;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::core::config::{
     CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
@@ -663,12 +660,6 @@ pub fn std_cargo(
         cargo.env("CFG_DISABLE_UNSTABLE_FEATURES", "1");
     }
 
-<<<<<<< HEAD
-    // Explicitly pass -p for all dependencies crates -- this will force cargo
-    // to also check the tests/benches/examples for these crates, rather
-    // than just the leaf crate.
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     for krate in crates {
         cargo.args(["-p", krate]);
     }

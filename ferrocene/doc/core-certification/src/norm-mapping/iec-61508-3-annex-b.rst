@@ -12,20 +12,10 @@ Table B.1 - Design and coding standards
 
 .. include:: ../partials/implicit-coding-standard.rst
 
-2
-"
+2, 7, 8
+"""""""
 
-The core library does not use heap-allocation.
-
-7
-"
-
-Rust does not allow unstructured control flow (i.e. goto statements), except in inline assembly.
-
-8
-"
-
-Type conversions in Rust are exclicit (``.into`` or ``as``), except for convenience (e.g. `& &mut T` to `&T`) or method dispatch.
+Covered by :doc:`core-certification:safety-plan/programming-language`.
 
 Table B.2 - Dynamic analysis and testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,27 +79,12 @@ Table B.8 - Static analysis
 3-4
 """
 
-The Ferrocene rustc compiler performs thorough control flow and data flow analysis. The data flow analysis is usually referred to as "Borrow Checker" and is one of the core features of Rust. One example for the outstanding control flow analysis is that rustc detects when some variants of an enum are not handled and throws a hard error.
+Covered by :doc:`core-certification:safety-plan/programming-language`.
 
 Table B.9 - Modular approach
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1
-"
+1, 3, 5, 6
+""""""""""
 
-The core library does not impose a module size limit, but instead structures modules according to their function.
-
-3
-"
-
-All fields and methods of a data structure are private by default and must be made public explicitly.
-
-5
-"
-
-Functions in Rust can only be called through one interface (i.e. no overloading).
-
-6
-"
-
-All items within a module are private by default and must be made public explicitly.
+Covered by :doc:`core-certification:safety-plan/programming-language`.

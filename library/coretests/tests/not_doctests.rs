@@ -463,3 +463,12 @@ fn slice_partial_eq() {
     a3[a3.len() - 1] = Byte(1);
     assert_ne!(a1.as_slice(), a3.as_slice());
 }
+
+#[test]
+fn as_mut_array() {
+    let mut arr = [0u8; 1];
+    let slice = arr.as_mut_slice();
+
+    assert!(slice.as_mut_array::<2>().is_none());
+    assert!(slice.as_mut_array::<1>().is_some());
+}

@@ -38,7 +38,7 @@ Table B.2 - Dynamic analysis and testing
 7b
 ""
 
-Covered by :doc:`core-certification:code-coverage`.
+Covered by :doc:`core-certification:safety-report/code-coverage`.
 
 Table B.3 - Functional and black-box testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

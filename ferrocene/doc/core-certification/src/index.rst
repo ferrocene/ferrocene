@@ -22,6 +22,14 @@ Core Library Certification
 
 .. toctree::
    :numbered:
+   :maxdepth: 2
+   :caption: Safety Report
+
+   safety-report/index
+   safety-report/code-coverage
+
+.. toctree::
+   :numbered:
    :maxdepth: 1
    :caption: Norm Mapping
 
@@ -30,13 +38,6 @@ Core Library Certification
    norm-mapping/iec-61508-3
    norm-mapping/iec-61508-3-annex-a
    norm-mapping/iec-61508-3-annex-b
-
-.. toctree::
-   :numbered:
-   :maxdepth: 2
-   :caption: Overview
-
-   code-coverage
 
 .. appendices::
    :numbered:

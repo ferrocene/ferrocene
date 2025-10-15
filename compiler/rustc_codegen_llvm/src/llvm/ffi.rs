@@ -22,9 +22,9 @@ use libc::{c_char, c_int, c_uchar, c_uint, c_ulonglong, c_void, size_t};
 
 use super::RustString;
 use super::debuginfo::{
-    DIArray, DIBuilder, DIDerivedType, DIDescriptor, DIEnumerator, DIFile, DIFlags,
-    DIGlobalVariableExpression, DILocation, DISPFlags, DIScope, DISubprogram,
-    DITemplateTypeParameter, DIType, DebugEmissionKind, DebugNameTableKind,
+    DIArray, DIBuilder, DIDerivedType, DIDescriptor, DIEnumerator, DIFile, DIFlags, DILocation,
+    DISPFlags, DIScope, DISubprogram, DITemplateTypeParameter, DIType, DebugEmissionKind,
+    DebugNameTableKind,
 };
 use crate::llvm::MetadataKindId;
 use crate::{TryFromU32, llvm};
@@ -781,7 +781,6 @@ pub(crate) mod debuginfo {
     pub(crate) type DIDerivedType = DIType;
     pub(crate) type DICompositeType = DIDerivedType;
     pub(crate) type DIVariable = DIDescriptor;
-    pub(crate) type DIGlobalVariableExpression = DIDescriptor;
     pub(crate) type DIArray = DIDescriptor;
     pub(crate) type DIEnumerator = DIDescriptor;
     pub(crate) type DITemplateTypeParameter = DIDescriptor;
@@ -905,7 +904,9 @@ pub(crate) type GetSymbolsErrorCallback = unsafe extern "C" fn(*const c_char) ->
 
 unsafe extern "C" {
     // Create and destroy contexts.
+    pub(crate) fn LLVMContextCreate() -> &'static mut Context;
     pub(crate) fn LLVMContextDispose(C: &'static mut Context);
+    pub(crate) fn LLVMContextSetDiscardValueNames(C: &Context, Discard: Bool);
     pub(crate) fn LLVMGetMDKindIDInContext(
         C: &Context,
         Name: *const c_char,
@@ -1875,6 +1876,22 @@ unsafe extern "C" {
         Length: size_t,
     ) -> &'ll Metadata;
 
+    pub(crate) fn LLVMDIBuilderCreateGlobalVariableExpression<'ll>(
+        Builder: &DIBuilder<'ll>,
+        Scope: Option<&'ll Metadata>,
+        Name: *const c_uchar, // See "PTR_LEN_STR".
+        NameLen: size_t,
+        Linkage: *const c_uchar, // See "PTR_LEN_STR".
+        LinkLen: size_t,
+        File: &'ll Metadata,
+        LineNo: c_uint,
+        Ty: &'ll Metadata,
+        LocalToUnit: llvm::Bool,
+        Expr: &'ll Metadata,
+        Decl: Option<&'ll Metadata>,
+        AlignInBits: u32,
+    ) -> &'ll Metadata;
+
     pub(crate) fn LLVMDIBuilderInsertDeclareRecordAtEnd<'ll>(
         Builder: &DIBuilder<'ll>,
         Storage: &'ll Value,
@@ -1924,9 +1941,6 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub(crate) fn LLVMRustInstallErrorHandlers();
     pub(crate) fn LLVMRustDisableSystemDialogsOnCrash();
-
-    // Create and destroy contexts.
-    pub(crate) fn LLVMRustContextCreate(shouldDiscardNames: bool) -> &'static mut Context;
 
     // Operations on all values
     pub(crate) fn LLVMRustGlobalAddMetadata<'a>(
@@ -2213,22 +2227,6 @@ unsafe extern "C" {
         Flags: DIFlags,
         Ty: &'a DIType,
     ) -> &'a DIType;
-
-    pub(crate) fn LLVMRustDIBuilderCreateStaticVariable<'a>(
-        Builder: &DIBuilder<'a>,
-        Context: Option<&'a DIScope>,
-        Name: *const c_char,
-        NameLen: size_t,
-        LinkageName: *const c_char,
-        LinkageNameLen: size_t,
-        File: &'a DIFile,
-        LineNo: c_uint,
-        Ty: &'a DIType,
-        isLocalToUnit: bool,
-        Val: &'a Value,
-        Decl: Option<&'a DIDescriptor>,
-        AlignInBits: u32,
-    ) -> &'a DIGlobalVariableExpression;
 
     pub(crate) fn LLVMRustDIBuilderCreateEnumerator<'a>(
         Builder: &DIBuilder<'a>,

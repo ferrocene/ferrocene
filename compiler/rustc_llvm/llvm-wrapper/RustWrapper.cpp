@@ -123,12 +123,6 @@ extern "C" void LLVMRustSetLastError(const char *Err) {
   LastError = strdup(Err);
 }
 
-extern "C" LLVMContextRef LLVMRustContextCreate(bool shouldDiscardNames) {
-  auto ctx = new LLVMContext();
-  ctx->setDiscardValueNames(shouldDiscardNames);
-  return wrap(ctx);
-}
-
 extern "C" void LLVMRustSetNormalizedTarget(LLVMModuleRef M,
                                             const char *Target) {
 #if LLVM_VERSION_GE(21, 0)
@@ -1042,37 +1036,6 @@ extern "C" LLVMMetadataRef LLVMRustDIBuilderCreateVariantMemberType(
       unwrapDI<DIDescriptor>(Scope), StringRef(Name, NameLen),
       unwrapDI<DIFile>(File), LineNo, SizeInBits, AlignInBits, OffsetInBits, D,
       fromRust(Flags), unwrapDI<DIType>(Ty)));
-}
-
-extern "C" LLVMMetadataRef LLVMRustDIBuilderCreateStaticVariable(
-    LLVMDIBuilderRef Builder, LLVMMetadataRef Context, const char *Name,
-    size_t NameLen, const char *LinkageName, size_t LinkageNameLen,
-    LLVMMetadataRef File, unsigned LineNo, LLVMMetadataRef Ty,
-    bool IsLocalToUnit, LLVMValueRef V, LLVMMetadataRef Decl = nullptr,
-    uint32_t AlignInBits = 0) {
-  llvm::GlobalVariable *InitVal = cast<llvm::GlobalVariable>(unwrap(V));
-
-  llvm::DIExpression *InitExpr = nullptr;
-  if (llvm::ConstantInt *IntVal = llvm::dyn_cast<llvm::ConstantInt>(InitVal)) {
-    InitExpr = unwrap(Builder)->createConstantValueExpression(
-        IntVal->getValue().getSExtValue());
-  } else if (llvm::ConstantFP *FPVal =
-                 llvm::dyn_cast<llvm::ConstantFP>(InitVal)) {
-    InitExpr = unwrap(Builder)->createConstantValueExpression(
-        FPVal->getValueAPF().bitcastToAPInt().getZExtValue());
-  }
-
-  llvm::DIGlobalVariableExpression *VarExpr =
-      unwrap(Builder)->createGlobalVariableExpression(
-          unwrapDI<DIDescriptor>(Context), StringRef(Name, NameLen),
-          StringRef(LinkageName, LinkageNameLen), unwrapDI<DIFile>(File),
-          LineNo, unwrapDI<DIType>(Ty), IsLocalToUnit,
-          /* isDefined */ true, InitExpr, unwrapDIPtr<MDNode>(Decl),
-          /* templateParams */ nullptr, AlignInBits);
-
-  InitVal->setMetadata("dbg", VarExpr);
-
-  return wrap(VarExpr);
 }
 
 extern "C" LLVMMetadataRef

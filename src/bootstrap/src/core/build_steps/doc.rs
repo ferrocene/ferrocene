@@ -801,7 +801,11 @@ fn doc_std(
         Kind::Doc,
     );
 
+<<<<<<< HEAD
     compile::std_cargo(builder, target, &mut cargo, &requested_crates);
+=======
+    compile::std_cargo(builder, target, &mut cargo, requested_crates);
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     cargo
         .arg("--no-deps")
         .arg("--target-dir")
@@ -830,6 +834,7 @@ fn doc_std(
         }
     }
 
+<<<<<<< HEAD
     // Ferrocene addition
     if target.contains("ferrocene.certified") {
         cargo.rustdocflag("--cfg=ferrocene_certified");
@@ -840,6 +845,8 @@ fn doc_std(
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
     }
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     let description =
         format!("library{} in {} format", crate_description(requested_crates), format.as_str());
     let _guard = builder.msg(Kind::Doc, description, Mode::Std, build_compiler, target);

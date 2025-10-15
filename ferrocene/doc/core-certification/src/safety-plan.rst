@@ -276,18 +276,17 @@ Safety Assessment
 
 The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard mechanism of collecting code coverage information in Rust. Since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
 
-``blanket`` and ``symbol-report`` are tools developed by Ferrous Systems. They are developed because the previously used tool ``llvm-cov`` inferred the total number of functions which resulted in undercounting regularly.
+``blanket`` and ``symbol-report`` are tools developed by Ferrous Systems. ``symbol-report`` uses information from the compiler to ensure all the functions from the certified subset are being considered for code coverage. ``blanket`` is built on top of the Rust library called ``llvm-profparser`` and uses the output of ``symbol-report``. This library is developed by the ``cargo-tarpaulin`` project, which is widely used to measure code coverage for Rust projects.
 
-The tools are designed to make it impossible to overcount code coverage. This is done by ``symbol-report`` using information from the compiler to ensure all the functions from the certified subset are being considered for code coverage.
+The tools are designed to not overcount code coverage.
 
-``blanket`` is build on top of the Rust library called ``llvm-profparser``. This library is developed by the ``cargo-tarpaulin`` project, which is widely used to measure code coverage for Rust projects.
 
 Failure modes
 '''''''''''''
 
 - False-positive: A function is reported as covered, although it is not covered
   - Risk: Overreporting, could result in testing gap.
-  - Mitigation: No mitigation, since we assume the likeliehood of such an error low.
+  - Mitigation: No mitigation, since we assume the likelihood of such an error low.
 - False-negative: A function is reported as not covered, although it is covered
   - Risk: Underreporting, will not result in testing gap.
   - Mitigation: Since we want to achieve 100% line coverage this would stand out and be manually investigated.

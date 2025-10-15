@@ -24,7 +24,7 @@ Version
 Usage
 ~~~~~
 
-See :ref:`testing-plan:Code coverage tests` for details of how it works.
+See :ref:`safety-plan/testing-plan:Code coverage tests` for details of how it works.
 
 Developer usage is described in :doc:`internal-procedures:code-coverage`.
 

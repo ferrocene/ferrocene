@@ -15,7 +15,7 @@ Core Library Certification
    safety-plan/project-setup
    safety-plan/deliverables
    safety-plan/requirements
-   safety-plan/testing
+   safety-plan/testing-plan
    safety-plan/uncertified-unused
    safety-plan/tools
    safety-plan/failure-analysis
@@ -36,7 +36,6 @@ Core Library Certification
    :maxdepth: 2
    :caption: Overview
 
-   testing-plan
    code-coverage
 
 .. appendices::

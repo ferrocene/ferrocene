@@ -732,9 +732,6 @@ fn is_ferrocene_exception(file: &Path, link: &str) -> bool {
 
     if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
         true
-    } else if file.ends_with("certification/core/subset.html") && link.starts_with("#id") {
-        // The links in the csv-table are not expected to work
-        true
     } else if is_certified_docs {
         // The certified API docs have many broken links, because of subsetting
         true

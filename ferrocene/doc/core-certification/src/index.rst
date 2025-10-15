@@ -13,7 +13,7 @@ Core Library Certification
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Norm Mapping
 
    norm-mapping/index

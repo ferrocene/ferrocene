@@ -58,7 +58,7 @@ Covered by :doc:`core-certification:norm-mapping/iec-61508-3-annex-a`.
 
 The following relevant artefacts are included in the deliverables:
 
-- :doc:`Code coverage report <core-certification:code-coverage>`
+- :doc:`Code coverage report <core-certification:safety-report/code-coverage>`
 - :doc:`Test results <qualification-report:rustc/index>`
 - :ref:`safety-plan/requirements:quality of the doc-comments`
 - `Certified core library API docs <../../api-docs/core/index.html>`_

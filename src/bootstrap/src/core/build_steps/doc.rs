@@ -835,6 +835,10 @@ fn doc_std(
         cargo.rustdocflag("--cfg=ferrocene_certified");
         cargo.arg("--features").arg("ferrocene_certified");
     }
+    // Ferrocene addition
+    if builder.config.library_docs_private_items {
+        cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
+    }
 
     let description =
         format!("library{} in {} format", crate_description(requested_crates), format.as_str());

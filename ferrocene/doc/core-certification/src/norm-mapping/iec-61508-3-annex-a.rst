@@ -40,15 +40,10 @@ N/A; core is a library.
 Table A.3
 ~~~~~~~~~
 
-1-2
-"""
+1, 2, 4a
+""""""""
 
-Rust has strong typing and assertions, is memory safe, and is well suited to structured and defensive programming. It is fully defined by the Ferrocene language specification and is a widely used general purpose programming language.
-
-4a
-""
-
-The certified core library uses Ferrocene, the fully qualified Rust compiler according to IEC 61508.
+Covered by :doc:`core-certification:safety-plan/programming-language`.
 
 Table A.4
 ~~~~~~~~~
@@ -77,7 +72,7 @@ As such, the certified core library does not have a coding standard.
 6
 "
 
-The Rust programming language encourages structured programming. It has support for modular designs and does not support goto jumps. Rust has complex return types and therefore the use of out parameters is not common.
+Covered by :doc:`core-certification:safety-plan/programming-language`.
 
 7
 "
@@ -126,7 +121,7 @@ Table A.8
 1-3, 4a
 """""""
 
-The complete toolchain is reverified for every change. For every change, all tests are run, and all release artifacts are built.
+Covered by :ref:`safety-plan/testing-plan:re-verification scope`.
 
 5
 "
@@ -144,7 +139,7 @@ Table A.9
 3
 "
 
-The Ferrocene compiler performs various kinds of static analysis and lints when compiling the core library.
+Covered by :ref:`safety-plan/testing-plan:rustc lints`.
 
 4
 "

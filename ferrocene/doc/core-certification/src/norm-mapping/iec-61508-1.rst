@@ -62,7 +62,7 @@ Covered by :doc:`qualification-plan:change-tracking`.
 5.2.10
 ~~~~~~
 
-Changes to the certified core library are included in the Ferrocene release notes. When new releases of the certified core library, which is released with Ferrocene, include new functionality such as an expanded subset, this will be covered in the release notes.
+Covered by :ref:`safety-plan/project-setup:release notes`.
 
 5.2.11
 ~~~~~~

@@ -19,6 +19,7 @@ Core Library Certification
    safety-plan/uncertified-unused
    safety-plan/tools
    safety-plan/failure-analysis
+   safety-plan/programming-language
 
 .. toctree::
    :numbered:

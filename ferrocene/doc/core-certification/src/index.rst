@@ -28,7 +28,6 @@ Core Library Certification
    :caption: Overview
 
    testing-plan
-   requirement-review
    code-coverage
 
 .. appendices::

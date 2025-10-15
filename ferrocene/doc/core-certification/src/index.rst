@@ -10,6 +10,15 @@ Core Library Certification
    :caption: Safety Plan
 
    safety-plan/index
+   safety-plan/purpose
+   safety-plan/scope
+   safety-plan/project-setup
+   safety-plan/deliverables
+   safety-plan/requirements
+   safety-plan/testing
+   safety-plan/uncertified-unused
+   safety-plan/tools
+   safety-plan/failure-analysis
 
 .. toctree::
    :numbered:

@@ -1673,6 +1673,11 @@ impl<T, E> Result<T, E> {
     pub unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
+            // Ferrocene annotation: This line cannot be covered as reaching `unreachable_unchecked`
+            // is undefined behavior. Meaning that if it is reached, the compiler might have put
+            // non-sensical code here. If debug assertions are enabled, this will be an unwinding
+            // panic that cannot be covered either.
+            //
             // SAFETY: the safety contract must be upheld by the caller.
             Err(_) => unsafe { hint::unreachable_unchecked() },
         }
@@ -1705,6 +1710,11 @@ impl<T, E> Result<T, E> {
     #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn unwrap_err_unchecked(self) -> E {
         match self {
+            // Ferrocene annotation: This line cannot be covered as reaching `unreachable_unchecked`
+            // is undefined behavior. Meaning that if it is reached, the compiler might have put
+            // non-sensical code here. If debug assertions are enabled, this will be an unwinding
+            // panic that cannot be covered either.
+            //
             // SAFETY: the safety contract must be upheld by the caller.
             Ok(_) => unsafe { hint::unreachable_unchecked() },
             Err(e) => e,

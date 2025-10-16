@@ -1,7 +1,9 @@
 use core::cmp::Ordering;
+use core::mem::MaybeUninit;
 use core::ops::{Bound, ControlFlow};
 use core::panic::Location;
 use core::sync::atomic::AtomicU32;
+use core::time::Duration;
 
 #[test]
 fn ordering_equality() {
@@ -304,4 +306,169 @@ fn tuple_comparison() {
     #[derive(PartialOrd, PartialEq)]
     struct Float(f32);
     assert!(!((Float(f32::NAN), Float(f32::NAN), "3") < (Float(1.0), Float(f32::NAN), "4")));
+}
+
+macro_rules! nums_to_bytes_tests {
+    ($($int:ty),*) => {
+        $({
+            let int = <$int>::MAX;
+            let le_bytes = int.to_le_bytes();
+            let be_bytes = int.to_be_bytes();
+
+            assert_eq!(<$int>::from_le_bytes(le_bytes), int);
+            assert_eq!(<$int>::from_be_bytes(be_bytes), int);
+        })*
+    }
+}
+
+#[test]
+fn numbers_to_bytes() {
+    nums_to_bytes_tests! {
+        u8, u16, u32, u64, u128, usize,
+        i8, i16, i32, i64, i128, isize,
+        f32, f64
+    }
+}
+
+#[test]
+fn abs_diff_vectorization() {
+    fn sad_iter(a: &[u8; 8], b: &[u8; 8]) -> u32 {
+        a.iter().zip(b).map(|(&a, &b)| a.abs_diff(b) as u32).sum()
+    }
+
+    fn sad_loop(a: &[u8; 8], b: &[u8; 8]) -> u32 {
+        let mut sum = 0;
+        for i in 0..a.len() {
+            sum += a[i].abs_diff(b[i]) as u32;
+        }
+        sum
+    }
+
+    let max_buf = [u8::MAX; 8];
+    let min_buf = [u8::MIN; 8];
+
+    assert_eq!(sad_iter(&max_buf, &min_buf), 8 * (u8::MAX as u32));
+    assert_eq!(sad_loop(&max_buf, &min_buf), 8 * (u8::MAX as u32));
+}
+
+#[test]
+fn maybe_uninit() {
+    let mut maybe = MaybeUninit::new(u64::MIN);
+
+    let mut ptr = MaybeUninit::slice_as_ptr(maybe.as_bytes());
+
+    for _ in 0..core::mem::size_of::<u64>() {
+        assert_eq!(unsafe { ptr.read() }, u8::MIN);
+        ptr = unsafe { ptr.add(1) };
+    }
+
+    for byte in maybe.as_bytes_mut() {
+        byte.write(u8::MAX);
+    }
+
+    assert_eq!(*unsafe { maybe.assume_init_ref() }, u64::MAX);
+}
+
+#[test]
+fn slice_methods() {
+    let mut arr = [0; 10];
+    let slice = arr.as_mut_slice();
+
+    assert_eq!(slice.len(), 10);
+
+    assert!(slice.first_chunk_mut::<11>().is_none());
+    assert!(slice.first_chunk_mut::<1>().is_some());
+
+    assert!(slice.split_first_mut().is_some());
+
+    let mut empty = [0; 0];
+    assert!(empty.as_mut_slice().split_first_mut().is_none());
+}
+
+#[test]
+fn str_methods() {
+    let s = <&str>::default();
+    assert_eq!(s.as_str(), "");
+
+    let mut buf = String::from("a");
+    let s = unsafe { core::slice::from_raw_parts_mut(buf.as_mut_str().as_mut_ptr(), 1) };
+    s[0] = b'b';
+    assert_eq!(buf, "b");
+}
+
+#[test]
+fn duration_methods() {
+    let secs = Duration::new(1, 0);
+
+    assert_eq!(secs.as_micros(), 1_000_000);
+
+    assert_eq!(secs.as_millis(), 1_000);
+    assert_eq!(secs.as_millis_f32(), 1_000.0);
+    assert_eq!(secs.as_millis_f64(), 1_000.0);
+
+    assert_eq!(secs.as_secs_f32(), 1.0);
+
+    assert!(!secs.is_zero());
+    assert!(Duration::from_secs(0).is_zero());
+
+    assert_eq!(Duration::from_hours(1).as_secs(), 60 * 60);
+    assert_eq!(Duration::from_days(1).as_secs(), 60 * 60 * 24);
+    assert_eq!(Duration::from_weeks(1).as_secs(), 60 * 60 * 24 * 7);
+}
+
+#[test]
+fn unit_comparisons() {
+    assert!(!(() != ()));
+    assert!(!(&() != &mut ()));
+    assert!(!(&mut () != &()));
+    assert!(!(() < ()));
+}
+
+#[test]
+fn type_name() {
+    assert_eq!(core::any::type_name::<u8>(), core::any::type_name_of_val(&0u8));
+}
+
+#[test]
+fn assume() {
+    unsafe { core::hint::assert_unchecked(true) };
+}
+
+#[test]
+fn array_iter_mut() {
+    let mut arr = [0u8; 10];
+
+    for x in &mut arr {
+        *x = 1;
+    }
+
+    let sum = arr.into_iter().sum::<u8>();
+
+    assert_eq!(sum as usize, arr.len());
+}
+
+#[test]
+fn slice_partial_eq() {
+    #[derive(Debug, Eq, PartialEq, Copy, Clone)]
+    struct Byte(u8);
+
+    let a1 = [Byte(0u8); 100];
+    let a2 = [Byte(0u8); 99];
+    let mut a3 = [Byte(0u8); 100];
+
+    assert_ne!(a1.as_slice(), a2.as_slice());
+
+    assert_eq!(a1.as_slice(), a3.as_slice());
+
+    a3[a3.len() - 1] = Byte(1);
+    assert_ne!(a1.as_slice(), a3.as_slice());
+}
+
+#[test]
+fn as_mut_array() {
+    let mut arr = [0u8; 1];
+    let slice = arr.as_mut_slice();
+
+    assert!(slice.as_mut_array::<2>().is_none());
+    assert!(slice.as_mut_array::<1>().is_some());
 }

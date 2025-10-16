@@ -63,6 +63,8 @@ fn test_range_inclusive() {
     r = RangeInclusive::new(1, -1);
     assert_eq!(r.size_hint(), (0, Some(0)));
     assert_eq!(r.next(), None);
+
+    assert_eq!(r.into_inner(), (1, -1));
 }
 
 #[test]

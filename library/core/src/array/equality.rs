@@ -1,3 +1,4 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::BytewiseEq;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -150,6 +151,7 @@ impl<T: [const] PartialEq<Other>, Other, const N: usize> const SpecArrayEq<Other
 }
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: [const] BytewiseEq<U>, U, const N: usize> const SpecArrayEq<U, N> for T {
     fn spec_eq(a: &[T; N], b: &[U; N]) -> bool {
         // SAFETY: Arrays are compared element-wise, and don't add any padding

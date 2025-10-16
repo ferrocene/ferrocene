@@ -369,7 +369,6 @@ pub const trait Residual<O> {
 
 #[unstable(feature = "pub_crate_should_not_need_unstable_attr", issue = "none")]
 #[allow(type_alias_bounds)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
     <T::Residual as Residual<V>>::TryType;
 
@@ -381,7 +380,6 @@ pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
 ///
 /// Not currently planned to be exposed publicly, so just `pub(crate)`.
 #[repr(transparent)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) struct NeverShortCircuit<T>(pub T);
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -403,10 +401,8 @@ impl<T> NeverShortCircuit<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) enum NeverShortCircuitResidual {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Try for NeverShortCircuit<T> {
     type Output = T;
     type Residual = NeverShortCircuitResidual;
@@ -422,7 +418,6 @@ impl<T> Try for NeverShortCircuit<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> FromResidual for NeverShortCircuit<T> {
     #[inline]
     fn from_residual(never: NeverShortCircuitResidual) -> Self {
@@ -430,7 +425,6 @@ impl<T> FromResidual for NeverShortCircuit<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Residual<T> for NeverShortCircuitResidual {
     type TryType = NeverShortCircuit<T>;
 }

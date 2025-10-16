@@ -6,25 +6,21 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
-#[cfg(feature = "ferrocene_certified")]
-use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{intrinsics, ptr};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use manually_drop::ManuallyDrop;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod maybe_uninit;
 #[stable(feature = "maybe_uninit", since = "1.36.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use maybe_uninit::MaybeUninit;
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -161,7 +157,6 @@ pub use crate::intrinsics::transmute;
 #[rustc_const_stable(feature = "const_forget", since = "1.46.0")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_forget"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn forget<T>(t: T) {
     let _ = ManuallyDrop::new(t);
 }
@@ -375,7 +370,6 @@ pub const fn size_of<T>() -> usize {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_size_of_val", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_size_of_val"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: `val` is a reference, so it's a valid raw pointer
     unsafe { intrinsics::size_of_val(val) }
@@ -526,7 +520,6 @@ pub const fn align_of<T>() -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_align_of_val", since = "1.85.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: val is a reference, so it's a valid raw pointer
     unsafe { intrinsics::align_of_val(val) }
@@ -1056,7 +1049,6 @@ pub const fn copy<T: Copy>(x: &T) -> T {
 #[track_caller]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_transmute_copy", since = "1.74.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
     assert!(
         size_of::<Src>() >= size_of::<Dst>(),

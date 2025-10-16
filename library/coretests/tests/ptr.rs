@@ -1072,6 +1072,7 @@ fn test_clone() {
     assert_eq!(Clone::clone(&mut_ptr), mut_ptr);
 }
 
+#[test]
 fn test_const_drop_in_place() {
     const COUNTER: usize = {
         let mut counter = 0;

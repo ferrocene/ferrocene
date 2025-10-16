@@ -1,8 +1,11 @@
 //! Indexing implementations for `[T]`.
 
 use crate::intrinsics::slice_get_unchecked;
+#[cfg(feature = "ferrocene_certified")]
+use crate::ops;
 use crate::panic::const_panic;
 use crate::ub_checks::assert_unsafe_precondition;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ops, range};
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -102,6 +105,9 @@ const unsafe fn get_offset_len_mut_noubcheck<T>(
 }
 
 mod private_slice_index {
+    #[cfg(feature = "ferrocene_certified")]
+    use super::ops;
+    #[cfg(not(feature = "ferrocene_certified"))]
     use super::{ops, range};
 
     #[stable(feature = "slice_get_slice", since = "1.28.0")]
@@ -125,12 +131,16 @@ mod private_slice_index {
     impl Sealed for (ops::Bound<usize>, ops::Bound<usize>) {}
 
     #[unstable(feature = "new_range_api", issue = "125687")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::Range<usize> {}
     #[unstable(feature = "new_range_api", issue = "125687")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::RangeInclusive<usize> {}
     #[unstable(feature = "new_range_api", issue = "125687")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::RangeToInclusive<usize> {}
     #[unstable(feature = "new_range_api", issue = "125687")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::RangeFrom<usize> {}
 
     impl Sealed for ops::IndexRange {}
@@ -455,6 +465,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for range::Range<usize> {
     type Output = [T];
 
@@ -579,6 +590,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeFrom<usize> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for range::RangeFrom<usize> {
     type Output = [T];
 
@@ -715,6 +727,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeInclusive<usize> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for range::RangeInclusive<usize> {
     type Output = [T];
 
@@ -793,6 +806,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeToInclusive<usize> {
 /// The methods `index` and `index_mut` panic if the end of the range is out of bounds.
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T> const SliceIndex<[T]> for range::RangeToInclusive<usize> {
     type Output = [T];
 

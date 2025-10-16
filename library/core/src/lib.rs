@@ -350,6 +350,7 @@ pub mod pin;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod range;
 pub mod result;
 pub mod sync;

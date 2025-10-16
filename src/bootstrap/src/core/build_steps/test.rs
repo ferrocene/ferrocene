@@ -15,7 +15,7 @@ use crate::core::build_steps::compile::{Std, run_cargo};
 use crate::core::build_steps::doc::{DocumentationFormat, prepare_doc_compiler};
 use crate::core::build_steps::gcc::{Gcc, add_cg_gcc_cargo_flags};
 use crate::core::build_steps::llvm::get_llvm_version;
-use crate::core::build_steps::run::get_completion_paths;
+use crate::core::build_steps::run::{get_completion_paths, get_help_path};
 use crate::core::build_steps::synthetic_targets::MirOptPanicAbortSyntheticTarget;
 use crate::core::build_steps::tool::{
     self, RustcPrivateCompilers, SourceType, TEST_FLOAT_PARSE_ALLOW_FEATURES, Tool,
@@ -28,7 +28,9 @@ use crate::core::builder::{
     crate_description,
 };
 use crate::core::config::TargetSelection;
-use crate::core::config::flags::{FerroceneCoverageFor, Subcommand, get_completion};
+use crate::core::config::flags::{
+    FerroceneCoverageFor, Subcommand, get_completion, top_level_help,
+};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
@@ -1306,6 +1308,23 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
             );
             crate::exit!(1);
         }
+
+        builder.info("x.py help check");
+        if builder.config.cmd.bless() {
+            builder.ensure(crate::core::build_steps::run::GenerateHelp);
+        } else {
+            let help_path = get_help_path(builder);
+            let cur_help = std::fs::read_to_string(&help_path).unwrap_or_else(|err| {
+                eprintln!("couldn't read {}: {}", help_path.display(), err);
+                crate::exit!(1);
+            });
+            let new_help = top_level_help();
+
+            if new_help != cur_help {
+                eprintln!("x.py help was changed; run `x.py run generate-help` to update it");
+                crate::exit!(1);
+            }
+        }
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -1939,6 +1958,17 @@ HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}
                 );
                 crate::exit!(1);
             }
+
+            if let CodegenBackendKind::Gcc = codegen_backend
+                && builder.config.rustc_debug_assertions
+            {
+                eprintln!(
+                    r#"WARNING: Running tests with the GCC codegen backend while rustc debug assertions are enabled. This might lead to test failures.
+Please disable assertions with `rust.debug-assertions = false`.
+        "#
+                );
+            }
+
             // Tells compiletest that we want to use this codegen in particular and to override
             // the default one.
             cmd.arg("--override-codegen-backend").arg(codegen_backend.name());
@@ -3336,6 +3366,8 @@ fn distcheck_plain_source_tarball(builder: &Builder<'_>, plain_src_dir: &Path) {
         .env("GITHUB_ACTIONS", "0")
         .current_dir(plain_src_dir)
         .run(builder);
+    // Mitigate pressure on small-capacity disks.
+    builder.remove_dir(plain_src_dir);
 }
 
 /// Check that rust-src has all of libstd's dependencies
@@ -3361,6 +3393,8 @@ fn distcheck_rust_src(builder: &Builder<'_>, src_dir: &Path) {
         .arg(&toml)
         .current_dir(src_dir)
         .run(builder);
+    // Mitigate pressure on small-capacity disks.
+    builder.remove_dir(src_dir);
 }
 
 /// Check that rustc-dev's compiler crate source code can be loaded with `cargo metadata`
@@ -3385,6 +3419,8 @@ fn distcheck_rustc_dev(builder: &Builder<'_>, dir: &Path) {
         .env("RUSTC", &builder.initial_rustc)
         .current_dir(dir)
         .run(builder);
+    // Mitigate pressure on small-capacity disks.
+    builder.remove_dir(dir);
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::Path;
 
 use rustc_abi::{Align, AlignFromBytesError, CanonAbi, Size};
-use rustc_ast::expand::allocator::alloc_error_handler_name;
+use rustc_ast::expand::allocator::AllocatorKind;
 use rustc_hir::attrs::Linkage;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::CrateNum;
@@ -16,6 +16,7 @@ use rustc_target::callconv::FnAbi;
 
 use super::alloc::EvalContextExt as _;
 use super::backtrace::EvalContextExt as _;
+use crate::concurrency::GenmcEvalContextExt as _;
 use crate::helpers::EvalContextExt as _;
 use crate::*;
 
@@ -51,6 +52,9 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
         // Some shims forward to other MIR bodies.
         match link_name.as_str() {
+            // This allocator function has forwarding shims synthesized during normal codegen
+            // (see `allocator_shim_contents`); this is where we emulate that behavior.
+            // FIXME should use global_fn_name, but mangle_internal_symbol requires a static str.
             name if name == this.mangle_internal_symbol("__rust_alloc_error_handler") => {
                 // Forward to the right symbol that implements this function.
                 let Some(handler_kind) = this.tcx.alloc_error_handler_kind(()) else {
@@ -59,12 +63,16 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                         "`__rust_alloc_error_handler` cannot be called when no alloc error handler is set"
                     );
                 };
-                let name = Symbol::intern(
-                    this.mangle_internal_symbol(alloc_error_handler_name(handler_kind)),
-                );
-                let handler =
-                    this.lookup_exported_symbol(name)?.expect("missing alloc error handler symbol");
-                return interp_ok(Some(handler));
+                if handler_kind == AllocatorKind::Default {
+                    let name =
+                        Symbol::intern(this.mangle_internal_symbol("__rdl_alloc_error_handler"));
+                    let handler = this
+                        .lookup_exported_symbol(name)?
+                        .expect("missing alloc error handler symbol");
+                    return interp_ok(Some(handler));
+                }
+                // Fall through to the `lookup_exported_symbol` below which should find
+                // a `__rust_alloc_error_handler`.
             }
             _ => {}
         }
@@ -485,6 +493,17 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 }
             }
 
+            // GenMC mode: Assume statements block the current thread when their condition is false.
+            "miri_genmc_assume" => {
+                let [condition] =
+                    this.check_shim_sig_lenient(abi, CanonAbi::Rust, link_name, args)?;
+                if this.machine.data_race.as_genmc_ref().is_some() {
+                    this.handle_genmc_verifier_assume(condition)?;
+                } else {
+                    throw_unsup_format!("miri_genmc_assume is only supported in GenMC mode")
+                }
+            }
+
             // Aborting the process.
             "exit" => {
                 let [code] = this.check_shim_sig_lenient(abi, CanonAbi::C, link_name, args)?;
@@ -813,6 +832,23 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 // This reads at least 1 byte, so we are already enforcing that this is a valid pointer.
                 let n = this.read_c_str(ptr_src)?.len().strict_add(1);
                 this.mem_copy(ptr_src, ptr_dest, Size::from_bytes(n), true)?;
+                this.write_pointer(ptr_dest, dest)?;
+            }
+            "memset" => {
+                let [ptr_dest, val, n] =
+                    this.check_shim_sig_lenient(abi, CanonAbi::C, link_name, args)?;
+                let ptr_dest = this.read_pointer(ptr_dest)?;
+                let val = this.read_scalar(val)?.to_i32()?;
+                let n = this.read_target_usize(n)?;
+                // The docs say val is "interpreted as unsigned char".
+                #[expect(clippy::as_conversions)]
+                let val = val as u8;
+
+                // C requires that this must always be a valid pointer, even if `n` is zero, so we better check that.
+                this.ptr_get_alloc_id(ptr_dest, 0)?;
+
+                let bytes = std::iter::repeat_n(val, n.try_into().unwrap());
+                this.write_bytes_ptr(ptr_dest, bytes)?;
                 this.write_pointer(ptr_dest, dest)?;
             }
 

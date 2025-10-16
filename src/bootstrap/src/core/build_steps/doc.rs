@@ -801,7 +801,7 @@ fn doc_std(
         Kind::Doc,
     );
 
-    compile::std_cargo(builder, target, &mut cargo, &requested_crates);
+    compile::std_cargo(builder, target, &mut cargo, requested_crates);
     cargo
         .arg("--no-deps")
         .arg("--target-dir")
@@ -835,7 +835,7 @@ fn doc_std(
         cargo.rustdocflag("--cfg=ferrocene_certified");
         cargo.arg("--features").arg("ferrocene_certified");
     }
-
+    // Ferrocene addition
     if builder.config.library_docs_private_items {
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
     }

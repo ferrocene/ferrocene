@@ -406,7 +406,7 @@ use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::{FnPtr, PointeeSized};
+use crate::marker::{Destruct, FnPtr, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -821,7 +821,11 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 #[allow(unconditional_recursion)]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T) {
+#[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
+pub const unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T)
+where
+    T: [const] Destruct,
+{
     // Code here does not matter - this is replaced by the
     // real drop glue by the compiler.
 

@@ -51,6 +51,7 @@ mod errors;
 mod ffi_unwind_calls;
 mod lint;
 mod lint_tail_expr_drop_order;
+mod liveness;
 mod patch;
 mod shim;
 mod ssa;
@@ -139,6 +140,7 @@ declare_passes! {
     mod dest_prop : DestinationPropagation;
     pub mod dump_mir : Marker;
     mod early_otherwise_branch : EarlyOtherwiseBranch;
+    mod erase_deref_temps : EraseDerefTemps;
     mod elaborate_box_derefs : ElaborateBoxDerefs;
     mod elaborate_drops : ElaborateDrops;
     mod function_item_references : FunctionItemReferences;
@@ -215,6 +217,7 @@ pub fn provide(providers: &mut Providers) {
         mir_for_ctfe,
         mir_coroutine_witnesses: coroutine::mir_coroutine_witnesses,
         optimized_mir,
+        check_liveness: liveness::check_liveness,
         is_mir_available,
         is_ctfe_mir_available: is_mir_available,
         mir_callgraph_cyclic: inline::cycle::mir_callgraph_cyclic,
@@ -512,6 +515,8 @@ fn mir_drops_elaborated_and_const_checked(tcx: TyCtxt<'_>, def: LocalDefId) -> &
         }
     }
 
+    tcx.ensure_done().check_liveness(def);
+
     let (body, _) = tcx.mir_promoted(def);
     let mut body = body.steal();
 
@@ -619,6 +624,7 @@ fn run_runtime_lowering_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
         // `AddRetag` needs to run after `ElaborateDrops` but before `ElaborateBoxDerefs`.
         // Otherwise it should run fairly late, but before optimizations begin.
         &add_retag::AddRetag,
+        &erase_deref_temps::EraseDerefTemps,
         &elaborate_box_derefs::ElaborateBoxDerefs,
         &coroutine::StateTransform,
         &Lint(known_panics_lint::KnownPanicsLint),

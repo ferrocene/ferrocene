@@ -61,6 +61,26 @@ WSL2 from an administrator Powershell if you haven't done so already, then setup
 
 From there, follow the Linux instructions above.
 
+Reproducing CI precisely with ``act``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following shell script shows how to invoke [act](https://nektosact.com/introduction.html)
+to run CI precisely as Github Actions would.
+You may have to change the "event" type; see [the act manual](https://nektosact.com/usage/index.html#events).
+
+```sh
+branch=${1:-$(git branch --show-current)}
+workflow=${2:-"automation-pull-subtrees"}
+event=${3:-"--detect-event"}
+exec act -W .github/workflows/${workflow}.yml $event \
+    --matrix branch:$branch \
+    -a ferrocene/ferrocene --env GITHUB_REF=refs/heads/${branch} \
+    --env GITHUB_REPOSITORY=ferrocene/ferrocene \
+    -P ubuntu-24.04=catthehacker/ubuntu:act-24.04
+```
+
+The remaining sections of this document are about reproducing the *configuration* of CI using a local build.
+
 Using Python scripts and tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

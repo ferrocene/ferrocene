@@ -6,11 +6,15 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
+<<<<<<< HEAD
 #[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+use crate::marker::{Destruct, DiscriminantKind};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
@@ -985,8 +989,13 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 /// [`RefCell`]: crate::cell::RefCell
 #[inline]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_destruct", issue = "133214")]
 #[rustc_diagnostic_item = "mem_drop"]
-pub fn drop<T>(_x: T) {}
+pub const fn drop<T>(_x: T)
+where
+    T: [const] Destruct,
+{
+}
 
 /// Bitwise-copies a value.
 ///

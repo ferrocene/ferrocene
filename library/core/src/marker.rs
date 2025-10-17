@@ -1118,7 +1118,7 @@ marker_impls! {
 #[rustc_on_unimplemented(message = "can't drop `{Self}`", append_const_msg)]
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
-pub const trait Destruct {}
+pub const trait Destruct: PointeeSized {}
 
 /// A marker for tuple types.
 ///

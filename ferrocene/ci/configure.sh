@@ -148,6 +148,10 @@ add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
 # used for compilation.
 add --host="${FERROCENE_HOST}"
 
+if python_version=$(uv python find); then
+    add --set "build.python=$python_version"
+fi
+
 # Set the targets to build. The environment variable is set from the CI
 # configuration (see the .circleci directory), and if the variable is not set
 # the host target will be used.

@@ -29,6 +29,7 @@ Language changes in Rust 1.90.0
 
   - This lifted restriction was not specified in the FLS
   - The restriction on patterns is documented in :p:`fls_wJ9f906BlBvg`
+  - New paragraph: :p:`fls_zyuxqty09SDO`
 
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 

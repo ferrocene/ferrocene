@@ -331,8 +331,15 @@ Language changes in Rust 1.83.0
 
 * `Stabilize \`&mut\`, \`*mut\`, \`&Cell\`, and \`*const Cell\` in const. <https://github.com/rust-lang/rust/pull/129195>`_
 
-  * Changed paragraphs: :p:`fls_to4e7imq2c0w`, :p:`fls_6g7c1kjrmfnr`, :p:`fls_hkbwa8xx2fwx`
-  * Removed paragraph: :p:`fls_ox6sgl9n43g2`
+  * Changed paragraphs:
+
+    - :p:`fls_to4e7imq2c0w`
+
+    - :p:`fls_6g7c1kjrmfnr`
+
+    - :p:`fls_hkbwa8xx2fwx`
+
+    - :p:`fls_ox6sgl9n43g2`
 
 * `Allow creating references to statics in \`const\` initializers. <https://github.com/rust-lang/rust/pull/129759>`_
 

@@ -264,6 +264,9 @@ def update_subtree(repo_root, subtree):
 
         log(f"updating subtree {subtree.path}")
         commit_before = resolve_commit("HEAD")
+        # HACK: `git diff-index`, used internally by git-subtree, sometimes reports the tree is dirty when it's not.
+        # Manually update the index to refresh whatever internal cache it's using.
+        run(["git", "reset", "HEAD"])
         try:
             run(
                 [

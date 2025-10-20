@@ -99,12 +99,6 @@ define_helper!(
     /// cycle errors, this can result in extra or suboptimal error output,
     /// so this variable disables that check.
     fn with_forced_impl_filename_line(ForcedImplGuard, FORCE_IMPL_FILENAME_LINE);
-<<<<<<< HEAD
-    // Ferrocene annotation: This allows printing fully-qualified source names for `symbol-report`.
-    /// Adds the crate name prefix to paths where appropriate.
-    /// Unlike `with_crate_prefix`, this unconditionally uses `tcx.crate_name` instead of sometimes
-    /// using `crate::` for local items.
-=======
     /// Adds the crate name prefix to paths where appropriate.
     /// Unlike `with_crate_prefix`, this unconditionally uses `tcx.crate_name` instead of sometimes
     /// using `crate::` for local items.
@@ -113,7 +107,6 @@ define_helper!(
 
     // This function is not currently used in-tree, but it's used by a downstream rustc-driver in
     // Ferrocene. Please check with them before removing it.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn with_resolve_crate_name(CrateNamePrefixGuard, SHOULD_PREFIX_WITH_CRATE_NAME);
     /// Adds the `crate::` prefix to paths where appropriate.
     ///

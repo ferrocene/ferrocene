@@ -6,15 +6,12 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
-<<<<<<< HEAD
 #[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics;
+use crate::marker::Destruct;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
-use crate::marker::{Destruct, DiscriminantKind};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};

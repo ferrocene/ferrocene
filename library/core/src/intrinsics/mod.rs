@@ -2797,27 +2797,6 @@ pub const unsafe fn const_make_global(ptr: *mut u8) -> *const u8 {
     ptr
 }
 
-<<<<<<< HEAD
-/// Returns whether we should perform contract-checking at runtime.
-///
-/// This is meant to be similar to the ub_checks intrinsic, in terms
-/// of not prematurely committing at compile-time to whether contract
-/// checking is turned on, so that we can specify contracts in libstd
-/// and let an end user opt into turning them on.
-#[rustc_const_unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
-#[unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
-#[inline(always)]
-#[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub const fn contract_checks() -> bool {
-    // FIXME: should this be `false` or `cfg!(contract_checks)`?
-
-    // cfg!(contract_checks)
-    false
-}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 /// Check if the pre-condition `cond` has been met.
 ///
 /// By default, if `contract_checks` is enabled, this will panic with no unwind if the condition
@@ -2862,15 +2841,11 @@ pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {
 #[rustc_const_unstable(feature = "contracts", issue = "128044")]
 #[lang = "contract_check_ensures"]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(cond: C, ret: Ret) -> Ret {
-=======
 pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(
     cond: Option<C>,
     ret: Ret,
 ) -> Ret {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const_eval_select!(
         @capture[C: Fn(&Ret) -> bool + Copy, Ret] { cond: Option<C>, ret: Ret } -> Ret :
         if const {

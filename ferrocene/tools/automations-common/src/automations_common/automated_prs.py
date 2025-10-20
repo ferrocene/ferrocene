@@ -58,7 +58,12 @@ def cmd_capture(*args, **kwargs):
     kwargs.setdefault("stdout", subprocess.PIPE)
     kwargs.setdefault("text", True)
     if (stdout := cmd(*args, **kwargs).stdout) is not None:
-        log("stdout:", stdout)
+        lines = stdout.splitlines()
+        if len(lines):
+            log("stdout:", lines[0])
+        if len(lines) > 1:
+            log("stdout: ...")
+        print(file=sys.stderr)
         return stdout.strip()
 
 
@@ -101,8 +106,8 @@ class AutomatedPR(abc.ABC):
 
         existing_pull = self.__find_open("pulls", self.pr_title(), self.pr_labels())
         if existing_pull is not None:
-            info("An automated PR is already open, a new one won't be created.")
-            info(f"==> {existing_pull['html_url']}")
+            log("An automated PR is already open, a new one won't be created.")
+            log(f"==> {existing_pull['html_url']}")
             return
 
         existing_conflict_issue = self.__find_open(

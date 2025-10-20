@@ -268,7 +268,7 @@ jobs:
 
   x86_64-linux-library-coverage:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -431,8 +431,8 @@ jobs:
 
   aarch64-darwin-llvm:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "26.0.1"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: aarch64-apple-darwin
@@ -456,8 +456,8 @@ jobs:
 
   aarch64-darwin-build:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "26.0.1"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -471,8 +471,8 @@ jobs:
 
   aarch64-darwin-dist:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "26.0.1"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -487,8 +487,8 @@ jobs:
 
   aarch64-darwin-dist-tools:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "26.0.1"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -502,8 +502,8 @@ jobs:
 
   aarch64-darwin-self-test:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.medium.gen1 # 4 cores
+      xcode: "26.0.1"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
@@ -519,7 +519,7 @@ jobs:
 
   aarch64-darwin-generic-test-runner:
     macos:
-      xcode: "15.3.0"
+      xcode: "26.0.1"
     parameters:
       job:
         type: string
@@ -1089,25 +1089,25 @@ workflows:
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test
           job: test
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.medium # 6 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library
           job: test:library
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.medium # 6 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-compiletest
           job: test:compiletest
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.medium # 6 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library-std
           job: test:library-std
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.medium # 6 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-self-test:

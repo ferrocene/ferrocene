@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+# SPDX-FileCopyrightText: The Rust Project Contributors
 
 # -- Path setup --------------------------------------------------------------
 
@@ -11,9 +12,9 @@ sys.path.append(os.path.abspath("../exts"))
 
 # -- Project information -----------------------------------------------------
 
-project = "Ferrocene Language Specification"
-copyright = "The Ferrocene Developers"
-author = "The Ferrocene Developers"
+project = "FLS"
+copyright = "The Ferrocene Developers and The Rust Project Contributors"
+author = "The Ferrocene Developers and The Rust Project Contributors"
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,16 +49,19 @@ ferrocene_id = "FLS"
 
 html_theme = "fls"
 html_theme_path = ["../themes"]
+<<<<<<< HEAD
 
 # override above theme settings
 html_theme = "ferrocene"
+=======
+>>>>>>> ffab2d2cb91732b2cd215809e9a45dfec837d3c2
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",
 }
 
-html_title = "Ferrocene Language Specification"
-html_short_title = "Language Specification"
+html_title = "FLS"
+html_short_title = "FLS"
 
 # -- Options for linting -----------------------------------------------------
 

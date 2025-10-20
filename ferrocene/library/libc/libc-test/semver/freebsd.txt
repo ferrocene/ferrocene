@@ -683,8 +683,6 @@ JAIL_API_VERSION
 JAIL_ATTACH
 JAIL_CREATE
 JAIL_DYING
-JAIL_GET_MASK
-JAIL_SET_MASK
 JAIL_SYS_DISABLE
 JAIL_SYS_INHERIT
 JAIL_SYS_NEW
@@ -1726,6 +1724,7 @@ XUCRED_VERSION
 XU_NGROUPS
 YESEXPR
 YESSTR
+_CS_PATH
 _IOFBF
 _IOLBF
 _IONBF
@@ -1935,6 +1934,7 @@ dirfd
 dirname
 dl_iterate_phdr
 dl_phdr_info
+dlvsym
 drand48
 dup3
 duplocale
@@ -2248,6 +2248,7 @@ ptsname_r
 pututxline
 pwritev
 qsort
+qsort_r
 querylocale
 rallocx
 rand
@@ -2375,6 +2376,7 @@ shmid_ds
 sigaltstack
 sigevent
 siginfo_t
+sigqueue
 sigsuspend
 sigtimedwait
 sigwait

@@ -1613,6 +1613,8 @@ pub const _PC_2_SYMLINKS: c_int = 13;
 pub const _PC_ACL_EXTENDED: c_int = 14;
 pub const _PC_MIN_HOLE_SIZE: c_int = 15;
 
+pub const _CS_PATH: c_int = 1;
+
 pub const _SC_SYNCHRONIZED_IO: c_int = 31;
 pub const _SC_IOV_MAX: c_int = 32;
 pub const _SC_MAPPED_FILES: c_int = 33;
@@ -2301,10 +2303,8 @@ pub const TFD_NONBLOCK: i32 = crate::O_NONBLOCK;
 pub const TFD_TIMER_ABSTIME: i32 = crate::O_WRONLY;
 pub const TFD_TIMER_CANCEL_ON_SET: i32 = crate::O_RDWR;
 
-const_fn! {
-    {const} fn _ALIGN(p: usize) -> usize {
-        (p + _ALIGNBYTES) & !_ALIGNBYTES
-    }
+const fn _ALIGN(p: usize) -> usize {
+    (p + _ALIGNBYTES) & !_ALIGNBYTES
 }
 
 f! {
@@ -2312,7 +2312,7 @@ f! {
         (cmsg as *mut c_uchar).add(_ALIGN(size_of::<cmsghdr>()))
     }
 
-    pub {const} fn CMSG_LEN(length: c_uint) -> c_uint {
+    pub const fn CMSG_LEN(length: c_uint) -> c_uint {
         _ALIGN(size_of::<cmsghdr>()) as c_uint + length
     }
 
@@ -2329,7 +2329,7 @@ f! {
         }
     }
 
-    pub {const} fn CMSG_SPACE(length: c_uint) -> c_uint {
+    pub const fn CMSG_SPACE(length: c_uint) -> c_uint {
         (_ALIGN(size_of::<cmsghdr>()) + _ALIGN(length as usize)) as c_uint
     }
 
@@ -2355,23 +2355,23 @@ f! {
 }
 
 safe_f! {
-    pub {const} fn WSTOPSIG(status: c_int) -> c_int {
+    pub const fn WSTOPSIG(status: c_int) -> c_int {
         status >> 8
     }
 
-    pub {const} fn WIFSIGNALED(status: c_int) -> bool {
+    pub const fn WIFSIGNALED(status: c_int) -> bool {
         (status & 0o177) != 0o177 && (status & 0o177) != 0
     }
 
-    pub {const} fn WIFSTOPPED(status: c_int) -> bool {
+    pub const fn WIFSTOPPED(status: c_int) -> bool {
         (status & 0o177) == 0o177
     }
 
-    pub {const} fn WIFCONTINUED(status: c_int) -> bool {
+    pub const fn WIFCONTINUED(status: c_int) -> bool {
         status == 0xffff
     }
 
-    pub {const} fn makedev(major: c_uint, minor: c_uint) -> crate::dev_t {
+    pub const fn makedev(major: c_uint, minor: c_uint) -> crate::dev_t {
         let major = major as crate::dev_t;
         let minor = minor as crate::dev_t;
         let mut dev = 0;
@@ -2381,11 +2381,11 @@ safe_f! {
         dev
     }
 
-    pub {const} fn major(dev: crate::dev_t) -> c_int {
+    pub const fn major(dev: crate::dev_t) -> c_int {
         (((dev as u32) & 0x000fff00) >> 8) as c_int
     }
 
-    pub {const} fn minor(dev: crate::dev_t) -> c_int {
+    pub const fn minor(dev: crate::dev_t) -> c_int {
         let mut res = 0;
         res |= ((dev as u32) & 0xfff00000) >> 12;
         res |= (dev as u32) & 0x000000ff;
@@ -2687,6 +2687,11 @@ extern "C" {
         new_value: *const crate::itimerspec,
         old_value: *mut crate::itimerspec,
     ) -> c_int;
+    pub fn dlvsym(
+        handle: *mut c_void,
+        symbol: *const c_char,
+        version: *const c_char,
+    ) -> *mut c_void;
 
     // Added in `NetBSD` 7.0
     pub fn explicit_memset(b: *mut c_void, c: c_int, len: size_t);
@@ -2756,6 +2761,14 @@ extern "C" {
         new_value: *const itimerspec,
         old_value: *mut itimerspec,
     ) -> c_int;
+
+    pub fn qsort_r(
+        base: *mut c_void,
+        num: size_t,
+        size: size_t,
+        compar: Option<unsafe extern "C" fn(*const c_void, *const c_void, *mut c_void) -> c_int>,
+        arg: *mut c_void,
+    );
 }
 
 #[link(name = "rt")]

@@ -4,7 +4,9 @@
     --var-untested: #DB4325;
     --var-partial: #B3589A;
     --var-ignored: gray;
-
+    --var-untested-annotated: var(--var-untested);
+    --var-partial-annotated: var(--var-partial);
+    --var-annotated-text: none;
 }
 
 body {
@@ -44,6 +46,10 @@ code {
 .functions .fully-untested > summary {
     color: var(--var-untested);
 }
+.functions .fully-untested .annotation > summary {
+    color: var(--var-untested-annotated);
+    text-decoration: var(--var-annotated-text);
+}
 .functions[data-filter="fully-untested"] section:not([data-status="fully-untested"]) {
     display: none;
 }
@@ -67,6 +73,10 @@ code {
 /* Partially tested */
 .functions .partially-tested > summary {
     color: var(--var-partial);
+}
+.functions .partially-tested .annotation > summary {
+    color: var(--var-partial-annotated);
+    text-decoration: var(--var-annotated-text);
 }
 .functions[data-filter="partially-tested"] section:not([data-status="partially-tested"]) {
     display: none;

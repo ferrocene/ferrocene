@@ -77,6 +77,10 @@ pub(crate) fn generate(
                     (fully_ignored.len()) " Fully Ignored"
                 }
         }
+        div class="misc-checkboxes" {
+                input type="checkbox" name="annotated-checkbox" unchecked;
+                "Line-through annotated functions"
+        }
     );
 
     let sections = [

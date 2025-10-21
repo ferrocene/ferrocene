@@ -579,16 +579,18 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops::{Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panicking::{panic, panic_display};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::Pin;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, convert, hint, mem, slice};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::{convert, hint, panicking::panic};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -972,11 +974,17 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_expect"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn expect(self, msg: &str) -> T {
+    pub const fn expect(
+        self,
+        #[cfg(not(feature = "ferrocene_certified"))] msg: &str,
+        #[cfg(feature = "ferrocene_certified")] msg: &'static str,
+    ) -> T {
         match self {
             Some(val) => val,
+            #[cfg(not(feature = "ferrocene_certified"))]
             None => expect_failed(msg),
+            #[cfg(feature = "ferrocene_certified")]
+            None => panic(msg),
         }
     }
 
@@ -1018,7 +1026,6 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_unwrap"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn unwrap(self) -> T {
         match self {
             Some(val) => val,
@@ -1134,7 +1141,6 @@ impl<T> Option<T> {
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Some(val) => val,
@@ -2202,7 +2208,6 @@ impl<T, E> Option<Result<T, E>> {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn unwrap_failed() -> ! {
     panic("called `Option::unwrap()` on a `None` value")
 }
@@ -2492,7 +2497,7 @@ unsafe impl<A> TrustedLen for Item<A> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 pub struct Iter<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
+    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     inner: Item<&'a A>,
 }
 
@@ -2549,7 +2554,7 @@ impl<A> Clone for Iter<'_, A> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 pub struct IterMut<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
+    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     inner: Item<&'a mut A>,
 }
 
@@ -2714,7 +2719,6 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::Try for Option<T> {
     type Output = T;
     type Residual = Option<convert::Infallible>;
@@ -2737,7 +2741,6 @@ impl<T> const ops::Try for Option<T> {
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
     #[inline]
     fn from_residual(residual: Option<convert::Infallible>) -> Self {
@@ -2760,7 +2763,6 @@ impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::Residual<T> for Option<convert::Infallible> {
     type TryType = Option<T>;
 }

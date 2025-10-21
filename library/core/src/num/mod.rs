@@ -2,16 +2,18 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "ferrocene_certified")]
-use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::str::FromStr;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ascii, intrinsics, mem};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::{intrinsics, mem};
 
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -56,7 +58,6 @@ mod int_macros; // import int_impl!
 #[macro_use]
 mod uint_macros; // import uint_impl!
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod error;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod int_log10;
@@ -75,7 +76,6 @@ mod wrapping;
 
 /// 100% perma-unstable
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod niche_types;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -89,7 +89,6 @@ pub use error::IntErrorKind;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use error::ParseIntError;
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use error::TryFromIntError;
 #[stable(feature = "generic_nonzero", since = "1.79.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -114,7 +113,6 @@ pub use saturating::Saturating;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use wrapping::Wrapping;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! u8_xe_bytes_doc {
     () => {
         "
@@ -127,7 +125,6 @@ with larger integer types.
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! i8_xe_bytes_doc {
     () => {
         "
@@ -141,7 +138,6 @@ with larger integer types. You can cast from and to `u8` using
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! usize_isize_to_xe_bytes_doc {
     () => {
         "
@@ -153,7 +149,6 @@ depending on the target pointer size.
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! usize_isize_from_xe_bytes_doc {
     () => {
         "

@@ -385,10 +385,8 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
-#[cfg_attr(
-    not(feature = "ferrocene_certified"),
-    derive_const(Clone, Eq, PartialOrd, Ord, PartialEq)
-)]
+#[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq, PartialOrd, Ord, PartialEq))]
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.
 // It has no special behavior, but does require that the three variants
@@ -1873,7 +1871,6 @@ where
 mod impls {
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
     use crate::hint::unreachable_unchecked;
-    #[cfg(not(feature = "ferrocene_certified"))]
     use crate::marker::PointeeSized;
     use crate::ops::ControlFlow::{self, Break, Continue};
 
@@ -1892,7 +1889,6 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialEq for () {
         #[inline]
         fn eq(&self, _other: &()) -> bool {
@@ -1904,14 +1900,8 @@ mod impls {
         }
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     partial_eq_impl! {
         bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128
-    }
-
-    #[cfg(feature = "ferrocene_certified")]
-    partial_eq_impl! {
-        bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64
     }
 
     macro_rules! eq_impl {
@@ -1922,11 +1912,7 @@ mod impls {
         )*)
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     eq_impl! { () bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
-
-    #[cfg(feature = "ferrocene_certified")]
-    eq_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[rustfmt::skip]
     macro_rules! partial_ord_methods_primitive_impl {
@@ -1989,7 +1975,6 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialOrd for () {
         #[inline]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
@@ -2008,11 +1993,7 @@ mod impls {
         partial_ord_methods_primitive_impl!();
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     partial_ord_impl! { f16 f32 f64 f128 }
-
-    #[cfg(feature = "ferrocene_certified")]
-    partial_ord_impl! { f32 f64 }
 
     macro_rules! ord_impl {
         ($($t:ty)*) => ($(
@@ -2040,7 +2021,6 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Ord for () {
         #[inline]
         fn cmp(&self, _other: &()) -> Ordering {
@@ -2085,15 +2065,10 @@ mod impls {
         }
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     ord_impl! { char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
-
-    #[cfg(feature = "ferrocene_certified")]
-    ord_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialEq for ! {
         #[inline]
         fn eq(&self, _: &!) -> bool {
@@ -2103,12 +2078,10 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Eq for ! {}
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const PartialOrd for ! {
         #[inline]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
@@ -2118,7 +2091,6 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Ord for ! {
         #[inline]
         fn cmp(&self, _: &!) -> Ordering {
@@ -2130,7 +2102,6 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &A
     where
         A: [const] PartialEq<B>,
@@ -2202,14 +2173,12 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized> const Eq for &A where A: [const] Eq {}
 
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &mut A
     where
         A: [const] PartialEq<B>,
@@ -2281,12 +2250,10 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized> const Eq for &mut A where A: [const] Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &A
     where
         A: [const] PartialEq<B>,
@@ -2303,7 +2270,6 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &mut A
     where
         A: [const] PartialEq<B>,

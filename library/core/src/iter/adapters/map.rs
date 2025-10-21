@@ -1,9 +1,20 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::zip::try_get_unchecked;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, UncheckedIterator};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Try;
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::iter::{TrustedLen, UncheckedIterator};
 
 /// An iterator that maps the values of `iter` with `f`.
 ///
@@ -69,18 +80,21 @@ impl<I, F> Map<I, F> {
         Map { iter, f }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn into_inner(self) -> I {
         self.iter
     }
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: fmt::Debug, F> fmt::Debug for Map<I, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Map").field("iter", &self.iter).finish()
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 fn map_fold<T, B, Acc>(
     mut f: impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> Acc,
@@ -88,6 +102,7 @@ fn map_fold<T, B, Acc>(
     move |acc, elt| g(acc, f(elt))
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 fn map_try_fold<'a, T, B, Acc, R>(
     f: &'a mut impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> R + 'a,
@@ -112,6 +127,7 @@ where
         self.iter.size_hint()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -121,6 +137,7 @@ where
         self.iter.try_fold(init, map_try_fold(&mut self.f, g))
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,
@@ -129,6 +146,7 @@ where
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> B
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -140,6 +158,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<B, I: DoubleEndedIterator, F> DoubleEndedIterator for Map<I, F>
 where
     F: FnMut(I::Item) -> B,
@@ -167,6 +186,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<B, I: ExactSizeIterator, F> ExactSizeIterator for Map<I, F>
 where
     F: FnMut(I::Item) -> B,
@@ -181,9 +201,11 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<B, I: FusedIterator, F> FusedIterator for Map<I, F> where F: FnMut(I::Item) -> B {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I: TrustedFused, F> TrustedFused for Map<I, F> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
@@ -209,10 +231,12 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I, F> TrustedRandomAccess for Map<I, F> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I, F> TrustedRandomAccessNoCoerce for Map<I, F>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -221,6 +245,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I, F> SourceIter for Map<I, F>
 where
     I: SourceIter,
@@ -235,6 +260,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I: InPlaceIterable, F> InPlaceIterable for Map<I, F> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;

@@ -22,6 +22,7 @@
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
 
 from automations_common import AutomatedPR, AutomationResult, PRLinker
+from automations_common import cmd as run, cmd_capture as run_capture, err, warn, log
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -63,7 +64,7 @@ def parse_configuration(path):
             repo = item["repo"]
             raw_pull = item["pull"]
         except KeyError as e:
-            print(f"error: missing required key in config item: {e}")
+            err(f"missing required key in config item: {e}")
             poisoned = True
             continue
 
@@ -72,7 +73,7 @@ def parse_configuration(path):
         elif raw_pull.startswith("branch:"):
             pull = PullBranch(name=raw_pull.removeprefix("branch:"))
         else:
-            print(f"error: invalid pull key: {raw_pull}")
+            err(f"invalid pull key: {raw_pull}")
             poisoned = True
             continue
 
@@ -80,7 +81,7 @@ def parse_configuration(path):
         if "after" in item:
             for action in item["after"]:
                 if action.split(" ")[0] not in AFTER_ACTIONS:
-                    print(f"error: unknown after action: {action}")
+                    err(f"unknown after action: {action}")
                     poisoned = True
                     continue
                 actions.append(action)
@@ -107,7 +108,7 @@ def resolve_commit(ref):
 
 def fetch_latest_commit(subtree):
     if isinstance(subtree.pull, PullLatestTag):
-        print(f"fetching latest tag from {subtree.repo}")
+        log(f"fetching latest tag from {subtree.repo}")
         tags = run_capture(
             [
                 "git",
@@ -147,7 +148,7 @@ def fetch_latest_commit(subtree):
     else:
         raise RuntimeError(f"unknown subtree.pull: {subtree.pull}")
 
-    print(f"fetching ref {ref} from {subtree.repo}")
+    log(f"fetching ref {ref} from {subtree.repo}")
     run(
         [
             "git",
@@ -195,7 +196,7 @@ def find_previous_commit(subtree):
         # otherwise rerun the search starting from the commit before the one we
         # found just now.
         if not message.startswith(f"bump subtree {subtree.path} to"):
-            print(f"warning: commit {hash} is not a subtree pull, skipping")
+            warn(f"commit {hash} is not a subtree pull, skipping")
             before = hash
             continue
         return resolve_commit(message.split(" ")[-1])
@@ -252,17 +253,20 @@ def update_subtree(repo_root, subtree):
     if (repo_root / subtree.path).is_dir():
         previous_commit = find_previous_commit(subtree)
         if previous_commit is None:
-            print("warning: could not find any commit previously bumping this subtree")
+            warn("could not find any commit previously bumping this subtree")
         elif previous_commit == latest_commit:
-            print(f"subtree {subtree.path} is already up to date")
+            log(f"subtree {subtree.path} is already up to date")
             return
         else:
             diff = generate_merged_pull_requests_list(
                 subtree, previous_commit, latest_commit
             )
 
-        print(f"updating subtree {subtree.path}")
+        log(f"updating subtree {subtree.path}")
         commit_before = resolve_commit("HEAD")
+        # HACK: `git diff-index`, used internally by git-subtree, sometimes reports the tree is dirty when it's not.
+        # Manually update the index to refresh whatever internal cache it's using.
+        run(["git", "reset", "HEAD"])
         try:
             run(
                 [
@@ -278,8 +282,11 @@ def update_subtree(repo_root, subtree):
                 cwd=repo_root,
             )
         except subprocess.CalledProcessError:
-            print("pull-subtrees: there are unresolved merge conflicts")
-            print("pull-subtrees: comitting with merge conflicts markers in the source")
+            # NOTE: this can be wrong if `git subtree` failed for a reason other than merge conflicts.
+            # Unfortunately, it gives us no way to detect that other than parsing stderr :/
+            # This will hopefully be caught in `run()` when `git merge --continue` fails.
+            err("pull-subtrees: there are unresolved merge conflicts")
+            err("pull-subtrees: comitting with merge conflicts markers in the source")
 
             # handle deleted files
             git_status = run_capture(["git", "status", "--porcelain=v1"])
@@ -309,10 +316,10 @@ def update_subtree(repo_root, subtree):
         # was created by the subtree pull. Otherwise the PR automation will try
         # creating a PR without diff, which will be rejected by GitHub.
         if resolve_commit("HEAD") == commit_before:
-            print("warning: tried to update subtree, but no change was committed")
+            warn("tried to update subtree, but no change was committed")
             return
     else:
-        print(f"creating subtree {subtree.path}")
+        log(f"creating subtree {subtree.path}")
         (repo_root / subtree.path.parent).mkdir(parents=True, exist_ok=True)
         run(
             [
@@ -329,7 +336,7 @@ def update_subtree(repo_root, subtree):
         )
 
     for action in subtree.after:
-        print(f"executing after action {action}")
+        log(f"executing after action {action}")
         action = action.split(" ")
         AFTER_ACTIONS[action[0]](subtree, repo_root, action[1:])
 
@@ -407,7 +414,16 @@ class PullSubtreePR(AutomatedPR):
             else:
                 return AutomationResult.SUCCESS
         except subprocess.CalledProcessError:
-            self.cmd(["git", "merge", "--abort"], check=False)
+            # if we can't even abort the merge, something has really gone wrong.
+            # check that this succeeds even though we're already handling an error.
+            try:
+                self.cmd(["git", "merge", "--abort"])
+            except subprocess.CalledProcessError:
+                # run `git status` one last time to try and figure out what went wrong.
+                # don't check if that fails; raise the original error from `merge --abort`.
+                self.cmd(["git", "status", "--ignore-submodules=none"], check=False)
+                self.cmd(["git", "submodule", "foreach", "git", "status"], check=False)
+                raise
             return AutomationResult.FAILURE
 
     def base_branch(self):
@@ -480,20 +496,9 @@ local branch to GitHub and open a PR for it.
         return f"The automation failed to pull the latest changes from {self.repo_link} again."
 
 
-def run(*args, **kwargs):
-    kwargs.setdefault("check", True)
-    return subprocess.run(*args, **kwargs)
-
-
-def run_capture(*args, **kwargs):
-    kwargs.setdefault("check", True)
-    kwargs.setdefault("stdout", subprocess.PIPE)
-    kwargs.setdefault("text", True)
-    return subprocess.run(*args, **kwargs).stdout.strip()
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dry-run", action='store_true', help="run git commands and fetch from GitHub API, but do not open PRs or make comments")
     exclusive = parser.add_mutually_exclusive_group()
     exclusive.add_argument("--automation-for-branch", help="run the automation for the provided branch")
     exclusive.add_argument("subtree_repo", help="the subtree to pull", default=None, nargs="?")
@@ -508,7 +513,7 @@ if __name__ == "__main__":
         for subtree in subtrees:
             if args.automation_for_branch not in subtree.into:
                 continue
-            PullSubtreePR(subtree, args.automation_for_branch).create()
+            PullSubtreePR(subtree, args.automation_for_branch).create(dry_run=args.dry_run)
     # We can use an `elif` here because automation_for_branch and subtree_repo are mutually exclusive
     elif args.subtree_repo is not None:
         subtree = None
@@ -517,7 +522,7 @@ if __name__ == "__main__":
                 subtree = candidate
                 break
         if subtree is None:
-            print(f"error: no subtree for repository {args.subtree_repo}")
+            err(f"no subtree for repository {args.subtree_repo}")
             exit(1)
         update_subtree(repo_root, subtree)
     else:

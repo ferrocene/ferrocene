@@ -424,7 +424,6 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_conversions", since = "1.32.0")]
         #[must_use]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_le(x: Self) -> Self {
             #[cfg(target_endian = "little")]
             {
@@ -488,7 +487,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn to_le(self) -> Self {
             #[cfg(target_endian = "little")]
             {
@@ -2168,7 +2166,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn wrapping_sub(self, rhs: Self) -> Self {
             intrinsics::wrapping_sub(self, rhs)
         }
@@ -2337,7 +2334,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn wrapping_neg(self) -> Self {
             (0 as $SelfT).wrapping_sub(self)
         }
@@ -2419,7 +2415,6 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[allow(unused_attributes)]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn wrapping_abs(self) -> Self {
              if self.is_negative() {
                  self.wrapping_neg()
@@ -2444,7 +2439,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn unsigned_abs(self) -> $UnsignedT {
              self.wrapping_abs() as $UnsignedT
         }
@@ -3764,7 +3758,6 @@ macro_rules! int_impl {
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn is_negative(self) -> bool { self < 0 }
 
         /// Returns the memory representation of this integer as a byte array in
@@ -3804,7 +3797,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn to_le_bytes(self) -> [u8; size_of::<Self>()] {
             self.to_le().to_ne_bytes()
         }
@@ -3842,7 +3834,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn to_ne_bytes(self) -> [u8; size_of::<Self>()] {
             // SAFETY: integers are plain old datatypes so we can always transmute them to
             // arrays of bytes
@@ -3904,7 +3895,6 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_conversion", since = "1.44.0")]
         #[must_use]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_le_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             Self::from_le(Self::from_ne_bytes(bytes))
         }
@@ -3948,7 +3938,6 @@ macro_rules! int_impl {
         // SAFETY: const sound because integers are plain old datatypes so we can always
         // transmute to them
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_ne_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             // SAFETY: integers are plain old datatypes so we can always transmute to them
             unsafe { mem::transmute(bytes) }

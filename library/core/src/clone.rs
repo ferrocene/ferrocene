@@ -597,7 +597,6 @@ mod impls {
         }
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl_clone! {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128
@@ -605,17 +604,8 @@ mod impls {
         bool char
     }
 
-    #[cfg(feature = "ferrocene_certified")]
-    impl_clone! {
-        usize u8 u16 u32 u64 u128
-        isize i8 i16 i32 i64 i128
-        f32 f64
-        bool
-    }
-
     #[unstable(feature = "never_type", issue = "35121")]
     #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl const Clone for ! {
         #[inline]
         fn clone(&self) -> Self {
@@ -662,6 +652,5 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<T: PointeeSized> !Clone for &mut T {}
 }

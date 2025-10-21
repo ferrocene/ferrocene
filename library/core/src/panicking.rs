@@ -31,10 +31,13 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
-#[cfg(feature = "ferrocene_certified")]
-use crate::panic::PanicInfo;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::panic::PanicInfo;
 
 /// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -181,7 +184,6 @@ pub const fn panic(expr: &'static str) -> ! {
 //
 // This is especially important when this code is called often (e.g., with -Coverflow-checks) for
 // reducing binary size impact.
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! panic_const {
     ($($lang:ident = $message:expr,)+) => {
         $(
@@ -205,7 +207,10 @@ macro_rules! panic_const {
                 // truncation and padding (even though none is used here). Using
                 // Arguments::new_const may allow the compiler to omit Formatter::pad from the
                 // output binary, saving up to a few kilobytes.
+                #[cfg(not(feature = "ferrocene_certified"))]
                 panic_fmt(fmt::Arguments::new_const(&[$message]));
+                #[cfg(feature = "ferrocene_certified")]
+                panic_fmt(&$message);
             }
         )+
     }
@@ -215,7 +220,6 @@ macro_rules! panic_const {
 // slightly different forms. It's not clear if there's a good way to deduplicate without adding
 // special cases to the compiler (e.g., a const generic function wouldn't have a single definition
 // shared across crates, which is exactly what we want here).
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod panic_const {
     use super::*;
     panic_const! {

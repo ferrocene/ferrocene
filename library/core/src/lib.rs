@@ -118,7 +118,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(lazy_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
+#![feature(panic_internals)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
@@ -150,12 +150,12 @@
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(derive_const))]
+#![feature(derive_const)]
 #![feature(doc_cfg)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
+#![feature(extern_types)]
+#![feature(f128)]
+#![feature(f16)]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(funnel_shifts))]
@@ -167,7 +167,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
+#![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
 #![feature(negative_impls)]
@@ -185,7 +185,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(transparent_unions))]
+#![feature(transparent_unions)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
@@ -282,10 +282,8 @@ pub mod f128;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod f16;
 #[path = "num/f32.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f32;
 #[path = "num/f64.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod f64;
 
 #[macro_use]
@@ -315,7 +313,6 @@ pub mod ops;
 
 /* Core types and methods on primitives */
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod any;
 pub mod array;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -364,11 +361,8 @@ pub mod unsafe_binder;
 pub mod fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod slice;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod str;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod time;
 
 #[cfg(not(feature = "ferrocene_certified"))]

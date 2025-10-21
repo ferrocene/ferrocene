@@ -390,7 +390,6 @@ pub use self::adapters::ArrayChunks;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::ByRefSized;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -422,7 +421,6 @@ pub use self::adapters::chain;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::adapters::try_process;
 #[stable(feature = "iter_zip", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -487,23 +485,26 @@ pub use self::traits::Iterator;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::TrustedFused;
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::TrustedLen;
 #[unstable(feature = "trusted_step", issue = "85731")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::TrustedStep;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::traits::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::{
     DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
 };
+
+// Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
-pub use self::traits::{IntoIterator, Iterator};
+#[rustfmt::skip]
+pub use self::{
+    adapters::Map,
+    traits::{IntoIterator, Iterator},
+};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod adapters;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod range;

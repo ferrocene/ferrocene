@@ -16,6 +16,11 @@ use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use super::super::{Cloned, Map};
+
 #[cfg(not(feature = "ferrocene_certified"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
 
@@ -192,7 +197,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, None)
     }
@@ -788,7 +792,6 @@ pub trait Iterator {
     #[rustc_diagnostic_item = "IteratorMap"]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn map<B, F>(self, f: F) -> Map<Self, F>
     where
         Self: Sized,
@@ -3526,7 +3529,6 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_cloned"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn cloned<'a, T>(self) -> Cloned<Self>
     where
         T: Clone + 'a,
@@ -4214,7 +4216,6 @@ where
 ///
 /// This implementation passes all method calls on to the original iterator.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Iterator + ?Sized> Iterator for &mut I {
     type Item = I::Item;
     #[inline]
@@ -4224,18 +4225,22 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
     fn size_hint(&self) -> (usize, Option<usize>) {
         (**self).size_hint()
     }
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         (**self).advance_by(n)
     }
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         (**self).nth(n)
     }
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
     {
         self.spec_fold(init, f)
     }
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,

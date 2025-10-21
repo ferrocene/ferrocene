@@ -9,6 +9,7 @@
 import abc
 import enum
 import os
+import sys
 import random
 import requests
 import string
@@ -18,6 +19,59 @@ import subprocess
 DEFAULT_BASE_BRANCH = "main"
 ORIGIN = "origin"
 
+#####################
+#                   #
+#     Utilities     #
+#                   #
+#####################
+
+# These log to stderr to avoid interleaving output between stdout and stderr.
+def log(*args, **kwargs):
+    print("info:", *args, file=sys.stderr, **kwargs)
+def warn(*args, **kwargs):
+    print("warning:", *args, file=sys.stderr, **kwargs)
+def err(*args, **kwargs):
+    print("error:", *args, file=sys.stderr, **kwargs)
+
+def pretty_print_cmd(*args, **kwargs):
+    if isinstance(args[0], list):
+        args = args[0]
+    # TODO: make this prettier
+    return '"' + '" "'.join([str(a) for a in args]) + '"'
+
+def cmd(*args, dry_run=False, **kwargs):
+    """
+    Run a command and error out if it fails to execute.
+    """
+    kwargs.setdefault("check", True)
+    c = pretty_print_cmd(*args, **kwargs)
+    if dry_run:
+        log(f"dry_run: not running command: {c}")
+    else:
+        log(f"run cmd: {c}")
+        return subprocess.run(*args, **kwargs)
+
+def cmd_capture(*args, **kwargs):
+    """
+    Run a command, error out if it fails to execute and return its stdout.
+    """
+    kwargs.setdefault("stdout", subprocess.PIPE)
+    kwargs.setdefault("text", True)
+    if (stdout := cmd(*args, **kwargs).stdout) is not None:
+        lines = stdout.splitlines()
+        if len(lines):
+            log("stdout:", lines[0])
+        if len(lines) > 1:
+            log("stdout: ...")
+        print(file=sys.stderr)
+        return stdout.strip()
+
+
+#####################
+#                   #
+#        API        #
+#                   #
+#####################
 
 class AutomationResult(enum.Enum):
     SUCCESS = 1
@@ -26,10 +80,23 @@ class AutomationResult(enum.Enum):
 
 
 class AutomatedPR(abc.ABC):
-    def create(self):
+    # backcompat to avoid runtime errors
+    def cmd(self, *args, **kwargs):
+        return cmd(*args, **kwargs)
+    def cmd_capture(self, *args, **kwargs):
+        return cmd_capture(*args, **kwargs)
+
+    #####################
+    #                   #
+    #    Entrypoints    #
+    #                   #
+    #####################
+
+    def create(self, dry_run=False):
         """
         Handle the creation of the PR, and open an issue if an error occurs.
         """
+        self.dry_run = dry_run
         self.origin = ORIGIN
 
         self.http = requests.Session()
@@ -39,8 +106,8 @@ class AutomatedPR(abc.ABC):
 
         existing_pull = self.__find_open("pulls", self.pr_title(), self.pr_labels())
         if existing_pull is not None:
-            print("An automated PR is already open, a new one won't be created.")
-            print(f"==> {existing_pull['html_url']}")
+            log("An automated PR is already open, a new one won't be created.")
+            log(f"==> {existing_pull['html_url']}")
             return
 
         existing_conflict_issue = self.__find_open(
@@ -61,11 +128,25 @@ class AutomatedPR(abc.ABC):
 
         result = self.run()
         if result == AutomationResult.SUCCESS:
-            self.cmd(["git", "branch", "-D", branch_name], check=False)
-            self.cmd(["git", "checkout", "-b", branch_name])
-            self.cmd(["git", "push", self.origin, branch_name, "-f"])
+            self.on_success(branch_name, current_branch, existing_conflict_issue)
+        elif result == AutomationResult.FAILURE:
+            self.on_failure(existing_conflict_issue)
+        else:
+            assert(result == AutomationResult.NO_CHANGES)
 
-            # Create the PR
+        # Reset the commit at the state it was before the automation ran.
+        # Otherwise, if multiple automations are executed in the same job,
+        # the following PRs will also include the changes of the previous PRs.
+        self.cmd(["git", "reset", "--hard", current_hash], dry_run=self.dry_run)
+
+    def on_success(self, branch_name, current_branch, existing_conflict_issue):
+        self.cmd(["git", "checkout", "-B", branch_name], dry_run=self.dry_run)
+        self.cmd(["git", "push", self.origin, branch_name, "-f"], dry_run=self.dry_run)
+
+        # Create the PR
+        if self.dry_run:
+            log(f"dry_run: not opening PR for {branch_name}->{self.base_branch()}")
+        else:
             response = self.http.post(
                 self.__repo_api("pulls"),
                 json={
@@ -87,8 +168,11 @@ class AutomatedPR(abc.ABC):
                 },
             ).raise_for_status()
 
-            # Close the "there is a conflict" if it's still open
-            if existing_conflict_issue is not None:
+        # Close the "there is a conflict" if it's still open
+        if existing_conflict_issue is not None:
+            if self.dry_run:
+                log(f"dry_run: not closing existing issue {existing_conflict_issue['url']}")
+            else:
                 self.http.post(
                     existing_conflict_issue["comments_url"],
                     json={
@@ -102,10 +186,14 @@ class AutomatedPR(abc.ABC):
                     },
                 ).raise_for_status()
 
-            self.cmd(["git", "checkout", current_branch])
-            self.cmd(["git", "branch", "-D", branch_name])
+        self.cmd(["git", "checkout", current_branch], dry_run=self.dry_run)
+        self.cmd(["git", "branch", "-D", branch_name], dry_run=self.dry_run)
 
-        elif result == AutomationResult.FAILURE and existing_conflict_issue is None:
+    def on_failure(self, existing_conflict_issue):
+        if self.dry_run:
+            log("dry_run: not opening remote issue")
+            return
+        if existing_conflict_issue is None:
             # Create an issue alerting the team that the pull failed
             response = self.http.post(
                 self.__repo_api("issues"),
@@ -125,7 +213,7 @@ class AutomatedPR(abc.ABC):
                 },
             ).raise_for_status()
 
-        elif result == AutomationResult.FAILURE:
+        else:
             # If an issue already exists just post a status update
             self.http.post(
                 existing_conflict_issue["comments_url"],
@@ -133,33 +221,6 @@ class AutomatedPR(abc.ABC):
                     "body": self.error_issue_repeated_comment(),
                 },
             ).raise_for_status()
-
-        # Reset the commit at the state it was before the automation ran.
-        # Otherwise, if multiple automations are executed in the same job,
-        # the following PRs will also include the changes of the previous PRs.
-        self.cmd(["git", "reset", "--hard", current_hash])
-
-    #####################
-    #                   #
-    #     Utilities     #
-    #                   #
-    #####################
-
-    def cmd(self, *args, **kwargs):
-        """
-        Run a command and error out if it fails to execute.
-        """
-        kwargs.setdefault("check", True)
-        return subprocess.run(*args, **kwargs)
-
-    def cmd_capture(self, *args, **kwargs):
-        """
-        Run a command, error out if it fails to execute and return its stdout.
-        """
-        kwargs.setdefault("check", True)
-        kwargs.setdefault("stdout", subprocess.PIPE)
-        kwargs.setdefault("text", True)
-        return subprocess.run(*args, **kwargs).stdout.strip()
 
     ############################
     #                          #

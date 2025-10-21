@@ -27,10 +27,14 @@ pub(crate) trait UncheckedIterator: TrustedLen {
     /// point you might want to implement this manually instead.
     #[unstable(feature = "trusted_len_next_unchecked", issue = "37572")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn next_unchecked(&mut self) -> Self::Item {
         let opt = self.next();
         // SAFETY: The caller promised that we're not empty, and
         // `Self: TrustedLen` so we can actually trust the `size_hint`.
         unsafe { opt.unwrap_unchecked() }
     }
+    // Ferrocene addition: gate the default implementation
+    #[cfg(feature = "ferrocene_certified")]
+    unsafe fn next_unchecked(&mut self) -> Self::Item;
 }

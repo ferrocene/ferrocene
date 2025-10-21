@@ -451,13 +451,11 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_inner(self) -> (Idx, Idx) {
         (self.start, self.end)
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.

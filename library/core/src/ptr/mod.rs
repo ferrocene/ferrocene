@@ -413,9 +413,17 @@ use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
-use crate::{intrinsics, marker::PointeeSized, mem};
+#[rustfmt::skip]
+use crate::{
+    intrinsics,
+    marker::{Destruct, PointeeSized},
+    mem::{self, MaybeUninit},
+};
 #[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
+#[rustfmt::skip]
 use crate::{mem::SizedTypeProperties, ub_checks};
 
 mod alignment;
@@ -424,11 +432,7 @@ pub use alignment::Alignment;
 
 mod metadata;
 #[unstable(feature = "ptr_metadata", issue = "81513")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
-#[unstable(feature = "ptr_metadata", issue = "81513")]
-#[cfg(feature = "ferrocene_certified")]
-pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut};
 
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
@@ -539,7 +543,6 @@ mod mut_ptr;
 #[inline(always)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy_nonoverlapping"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize) {
     ub_checks::assert_unsafe_precondition!(
         check_language_ub,
@@ -712,7 +715,6 @@ pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {
 #[inline(always)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_write_bytes"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
     // SAFETY: the safety contract for `write_bytes` must be upheld by the caller.
     unsafe {
@@ -820,7 +822,6 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 #[lang = "drop_in_place"]
 #[allow(unconditional_recursion)]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
-#[cfg(not(feature = "ferrocene_certified"))]
 #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
 pub const unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T)
 where
@@ -1195,7 +1196,6 @@ pub const fn from_mut<T: PointeeSized>(r: &mut T) -> *mut T {
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts", since = "1.64.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
     from_raw_parts(data, len)
 }
@@ -1242,7 +1242,6 @@ pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts_mut"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn slice_from_raw_parts_mut<T>(data: *mut T, len: usize) -> *mut [T] {
     from_raw_parts_mut(data, len)
 }
@@ -1854,7 +1853,6 @@ pub const unsafe fn read<T>(src: *const T) -> T {
 #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
 #[track_caller]
 #[rustc_diagnostic_item = "ptr_read_unaligned"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn read_unaligned<T>(src: *const T) -> T {
     let mut tmp = MaybeUninit::<T>::uninit();
     // SAFETY: the caller must guarantee that `src` is valid for reads.

@@ -1,9 +1,19 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use core::num::NonZero;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::zip::try_get_unchecked;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen, UncheckedIterator};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Try;
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::iter::{TrustedLen, UncheckedIterator};
 
 /// An iterator that clones the elements of an underlying iterator.
 ///
@@ -14,7 +24,8 @@ use crate::ops::Try;
 /// [`Iterator`]: trait.Iterator.html
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Clone))]
 pub struct Cloned<I> {
     it: I,
 }
@@ -25,6 +36,7 @@ impl<I> Cloned<I> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 fn clone_try_fold<T: Clone, Acc, R>(mut f: impl FnMut(Acc, T) -> R) -> impl FnMut(Acc, &T) -> R {
     move |acc, elt| f(acc, elt.clone())
 }
@@ -45,6 +57,7 @@ where
         self.it.size_hint()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -54,6 +67,7 @@ where
         self.it.try_fold(init, clone_try_fold(f))
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -61,6 +75,7 @@ where
         self.it.map(T::clone).fold(init, f)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> T
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -72,6 +87,7 @@ where
 }
 
 #[stable(feature = "iter_cloned", since = "1.1.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, I, T: 'a> DoubleEndedIterator for Cloned<I>
 where
     I: DoubleEndedIterator<Item = &'a T>,
@@ -99,6 +115,7 @@ where
 }
 
 #[stable(feature = "iter_cloned", since = "1.1.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, I, T: 'a> ExactSizeIterator for Cloned<I>
 where
     I: ExactSizeIterator<Item = &'a T>,
@@ -114,6 +131,7 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, I, T: 'a> FusedIterator for Cloned<I>
 where
     I: FusedIterator<Item = &'a T>,
@@ -123,10 +141,12 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> TrustedRandomAccess for Cloned<I> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Cloned<I>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -156,6 +176,7 @@ where
 }
 
 #[stable(feature = "default_iters", since = "1.70.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Default> Default for Cloned<I> {
     /// Creates a `Cloned` iterator from the default value of `I`
     /// ```
@@ -170,6 +191,7 @@ impl<I: Default> Default for Cloned<I> {
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> SourceIter for Cloned<I>
 where
     I: SourceIter,
@@ -184,6 +206,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Cloned<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;

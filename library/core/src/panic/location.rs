@@ -39,7 +39,7 @@ use crate::ptr::NonNull;
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone))]
 pub struct Location<'a> {
     // A raw pointer is used rather than a reference because the pointer is valid for one more byte

@@ -2,13 +2,14 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, fmt, hash, mem, num};
-// Ferrocene addition: imports used by certified subset
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
-use crate::{mem, ub_checks::assert_unsafe_precondition};
+#[rustfmt::skip]
+use crate::mem;
 
 /// A type storing a `usize` which is a power of two, and thus
 /// represents a possible alignment in the Rust abstract machine.

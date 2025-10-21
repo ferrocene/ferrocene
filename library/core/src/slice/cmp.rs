@@ -1,10 +1,16 @@
 //! Comparison traits for `[T]`.
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use super::{from_raw_parts, memchr};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ascii;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::{self, BytewiseEq, Ordering};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::compare_bytes;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::ControlFlow;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -28,6 +34,7 @@ impl<T: [const] Eq> const Eq for [T] {}
 
 /// Implements comparison of slices [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Ord> Ord for [T] {
     fn cmp(&self, other: &[T]) -> Ordering {
         SliceOrd::compare(self, other)
@@ -35,6 +42,7 @@ impl<T: Ord> Ord for [T] {
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 const fn as_underlying(x: ControlFlow<bool>) -> u8 {
     // SAFETY: This will only compile if `bool` and `ControlFlow<bool>` have the same
     // size (which isn't guaranteed but this is libcore). Because they have the same
@@ -47,6 +55,7 @@ const fn as_underlying(x: ControlFlow<bool>) -> u8 {
 
 /// Implements comparison of slices [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PartialOrd> PartialOrd for [T] {
     #[inline]
     fn partial_cmp(&self, other: &[T]) -> Option<Ordering> {
@@ -136,6 +145,7 @@ where
 // When each element can be compared byte-wise, we can compare all the bytes
 // from the whole size in one call to the intrinsics.
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A, B> const SlicePartialEq<B> for [A]
 where
     A: [const] BytewiseEq<B>,
@@ -158,6 +168,7 @@ where
 #[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 // intermediate trait for specialization of slice's PartialOrd
+#[cfg(not(feature = "ferrocene_certified"))]
 trait SlicePartialOrd: Sized {
     fn partial_compare(left: &[Self], right: &[Self]) -> Option<Ordering>;
 }
@@ -166,6 +177,7 @@ trait SlicePartialOrd: Sized {
 #[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 // intermediate trait for specialization of slice's PartialOrd chaining methods
+#[cfg(not(feature = "ferrocene_certified"))]
 trait SliceChain: Sized {
     fn chaining_lt(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
     fn chaining_le(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
@@ -173,8 +185,10 @@ trait SliceChain: Sized {
     fn chaining_ge(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 type AlwaysBreak<B> = ControlFlow<B, crate::convert::Infallible>;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: PartialOrd> SlicePartialOrd for A {
     default fn partial_compare(left: &[A], right: &[A]) -> Option<Ordering> {
         let elem_chain = |a, b| match PartialOrd::partial_cmp(a, b) {
@@ -187,6 +201,7 @@ impl<A: PartialOrd> SlicePartialOrd for A {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: PartialOrd> SliceChain for A {
     default fn chaining_lt(left: &[Self], right: &[Self]) -> ControlFlow<bool> {
         chaining_impl(left, right, PartialOrd::__chaining_lt, usize::__chaining_lt)
@@ -203,6 +218,7 @@ impl<A: PartialOrd> SliceChain for A {
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 fn chaining_impl<'l, 'r, A: PartialOrd, B, C>(
     left: &'l [A],
     right: &'r [A],
@@ -237,6 +253,7 @@ where
 */
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: [const] AlwaysApplicableOrd> const SlicePartialOrd for A {
     fn partial_compare(left: &[A], right: &[A]) -> Option<Ordering> {
         Some(SliceOrd::compare(left, right))
@@ -246,14 +263,17 @@ impl<A: [const] AlwaysApplicableOrd> const SlicePartialOrd for A {
 #[rustc_specialization_trait]
 #[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 trait AlwaysApplicableOrd: [const] SliceOrd + [const] Ord {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! always_applicable_ord {
     ($([$($p:tt)*] $t:ty,)*) => {
         $(impl<$($p)*> AlwaysApplicableOrd for $t {})*
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 always_applicable_ord! {
     [] u8, [] u16, [] u32, [] u64, [] u128, [] usize,
     [] i8, [] i16, [] i32, [] i64, [] i128, [] isize,
@@ -268,10 +288,12 @@ always_applicable_ord! {
 #[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 // intermediate trait for specialization of slice's Ord
+#[cfg(not(feature = "ferrocene_certified"))]
 trait SliceOrd: Sized {
     fn compare(left: &[Self], right: &[Self]) -> Ordering;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Ord> SliceOrd for A {
     default fn compare(left: &[Self], right: &[Self]) -> Ordering {
         let elem_chain = |a, b| match Ord::cmp(a, b) {
@@ -293,22 +315,29 @@ impl<A: Ord> SliceOrd for A {
 ///   value as `Ord::cmp(transmute::<_, u8>(x), transmute::<_, u8>(y))`.
 #[rustc_specialization_trait]
 #[const_trait]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe trait UnsignedBytewiseOrd: [const] Ord {}
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const UnsignedBytewiseOrd for bool {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const UnsignedBytewiseOrd for u8 {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const UnsignedBytewiseOrd for NonZero<u8> {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const UnsignedBytewiseOrd for Option<NonZero<u8>> {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const UnsignedBytewiseOrd for ascii::Char {}
 
 // `compare_bytes` compares a sequence of unsigned bytes lexicographically, so
 // use it if the requirements for `UnsignedBytewiseOrd` are fulfilled.
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: [const] Ord + [const] UnsignedBytewiseOrd> const SliceOrd for A {
     #[inline]
     fn compare(left: &[Self], right: &[Self]) -> Ordering {
@@ -336,6 +365,7 @@ impl<A: [const] Ord + [const] UnsignedBytewiseOrd> const SliceOrd for A {
 // Don't generate our own chaining loops for `memcmp`-able things either.
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: [const] PartialOrd + [const] UnsignedBytewiseOrd> const SliceChain for A {
     #[inline]
     fn chaining_lt(left: &[Self], right: &[Self]) -> ControlFlow<bool> {
@@ -367,10 +397,12 @@ impl<A: [const] PartialOrd + [const] UnsignedBytewiseOrd> const SliceChain for A
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(super) trait SliceContains: Sized {
     fn slice_contains(&self, x: &[Self]) -> bool;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> SliceContains for T
 where
     T: PartialEq,
@@ -380,6 +412,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl SliceContains for u8 {
     #[inline]
     fn slice_contains(&self, x: &[Self]) -> bool {
@@ -387,6 +420,7 @@ impl SliceContains for u8 {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl SliceContains for i8 {
     #[inline]
     fn slice_contains(&self, x: &[Self]) -> bool {
@@ -400,6 +434,7 @@ impl SliceContains for i8 {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! impl_slice_contains {
     ($($t:ty),*) => {
         $(
@@ -424,4 +459,5 @@ macro_rules! impl_slice_contains {
     };
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl_slice_contains!(u16, u32, u64, i16, i32, i64, f32, f64, usize, isize, char);

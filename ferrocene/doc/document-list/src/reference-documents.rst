@@ -10,11 +10,11 @@ Reference Documents
    
    * - Document
      - Version
-   * - |iec_doc|
-     - |iec_ref|
-   * - |9001_doc|
-     - |9001_ref|
-   * - |iso_doc|
-     - |iso_ref|
-   * - |iec_med_doc|
-     - |iec_med_ref|
+   * - |iec_61508_doc|
+     - |iec_61508_ref|
+   * - |iso_9001_doc|
+     - |iso_9001_ref|
+   * - |iso_26262_doc|
+     - |iso_26262_ref|
+   * - |iec_62304_doc|
+     - |iec_62304_ref|

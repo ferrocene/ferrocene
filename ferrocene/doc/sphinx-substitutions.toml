@@ -6,16 +6,18 @@
 
 # look at substitutions.py for the rest of the substitutions
 
-ferrocene_ASIL = "ASIL D"
-ferrocene_TCL = "TCL 3"
-ferrocene_TQL = "class T3"
+iso_26262_ref = "ISO 26262:2018"
+iso_26262_doc = "Road Vehicles - Functional Safety"
+iso_26262_ferrocene_asil = "ASIL D"
+iso_26262_ferrocene_tcl = "TCL 3"
+iso_26262_ferrocene_tql = "class T3"
 
-iso_ref = "ISO 26262:2018"
-iso_doc = "Road Vehicles - Functional Safety"
-iec_ref = "IEC 61508:2010"
-iec_doc = "Functional safety of electrical/electronic/programmable electronic safety-related systems"
-iec_sil = "SIL 2"
-9001_ref = "ISO 9001:2015"
-9001_doc = "Quality management systems — Requirements"
-iec_med_ref = "IEC 62304:2006 + AMD 1:2015"
-iec_med_doc = "Medical device software - Software life cycle processes"
+iec_61508_ref = "IEC 61508:2010"
+iec_61508_doc = "Functional safety of electrical/electronic/programmable electronic safety-related systems"
+iec_61508_core_sil = "SIL 2"
+
+iso_9001_ref = "ISO 9001:2015"
+iso_9001_doc = "Quality management systems — Requirements"
+
+iec_62304_ref = "IEC 62304:2006 + AMD 1:2015"
+iec_62304_doc = "Medical device software - Software life cycle processes"

@@ -12,10 +12,10 @@ The core library shall be suitable to be used in safety applications according t
 
    * - Safety Standard
      - Safety Level
-   * - |iec_ref|
-     - |iec_sil|
+   * - |iec_61508_ref|
+     - |iec_61508_core_sil|
 
-The core library is evaluated as an "assessment of non-compliant development” (according to Route 3S of |iec_ref| section 7.4.2.12). This assessment targets a full compliance statement to the standards above, as far as it is applicable for a Software Safety Element out of Context.
+The core library is evaluated as an "assessment of non-compliant development” (according to Route 3S of |iec_61508_ref| section 7.4.2.12). This assessment targets a full compliance statement to the standards above, as far as it is applicable for a Software Safety Element out of Context.
 
 Certified version
 -----------------

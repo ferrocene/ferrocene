@@ -4,7 +4,7 @@
 IEC 61508 requirements
 ======================
 
-The following are sections in |iec_ref| Part 3.
+The following are sections in |iec_61508_ref| Part 3.
 
 .. list-table::
    :header-rows: 1

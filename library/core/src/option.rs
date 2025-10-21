@@ -971,25 +971,16 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_expect"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn expect(self, msg: &str) -> T {
+    pub const fn expect(
+        self,
+        #[cfg(not(feature = "ferrocene_certified"))] msg: &str,
+        #[cfg(feature = "ferrocene_certified")] msg: &'static str,
+    ) -> T {
         match self {
             Some(val) => val,
+            #[cfg(not(feature = "ferrocene_certified"))]
             None => expect_failed(msg),
-        }
-    }
-
-    /// Ferrocene addition: `msg` is type `&'static str` instead of `&str`.
-    #[inline]
-    #[track_caller]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_diagnostic_item = "option_expect"]
-    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(feature = "ferrocene_certified")]
-    pub const fn expect(self, msg: &'static str) -> T {
-        match self {
-            Some(val) => val,
+            #[cfg(feature = "ferrocene_certified")]
             None => panic(msg),
         }
     }

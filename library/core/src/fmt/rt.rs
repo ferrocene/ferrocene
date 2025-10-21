@@ -7,11 +7,14 @@
 //! Do not modify them without understanding the consequences for the format_args!() macro.
 
 use super::*;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::unreachable_unchecked;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
 
 #[lang = "format_placeholder"]
 #[derive(Copy, Clone)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Placeholder {
     pub position: usize,
     pub flags: u32,
@@ -23,6 +26,7 @@ pub struct Placeholder {
 /// and [precision](https://doc.rust-lang.org/std/fmt/#precision) specifiers.
 #[lang = "format_count"]
 #[derive(Copy, Clone)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub enum Count {
     /// Specified with a literal number, stores the value
     Is(u16),
@@ -33,6 +37,7 @@ pub enum Count {
 }
 
 #[derive(Copy, Clone)]
+#[cfg(not(feature = "ferrocene_certified"))]
 enum ArgumentType<'a> {
     Placeholder {
         // INVARIANT: `formatter` has type `fn(&T, _) -> _` for some `T`, and `value`
@@ -56,10 +61,12 @@ enum ArgumentType<'a> {
 ///   precision and width.
 #[lang = "format_argument"]
 #[derive(Copy, Clone)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! argument_new {
     ($t:ty, $x:expr, $f:expr) => {
         Argument {
@@ -105,6 +112,7 @@ macro_rules! argument_new {
     };
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Argument<'_> {
     #[inline]
     pub const fn new_display<T: Display>(x: &T) -> Argument<'_> {
@@ -191,9 +199,17 @@ impl Argument<'_> {
 #[rustc_diagnostic_item = "FmtArgumentsNew"]
 impl<'a> Arguments<'a> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn new_const<const N: usize>(pieces: &'a [&'static str; N]) -> Self {
         const { assert!(N <= 1) };
         Arguments { pieces, fmt: None, args: &[] }
+    }
+
+    #[inline]
+    #[cfg(feature = "ferrocene_certified")]
+    pub const fn new_const<const N: usize>(pieces: &'a [&'static str; N]) -> &'a &'static str {
+        const { assert!(N <= 1) };
+        &pieces[0]
     }
 
     /// When using the format_args!() macro, this function is used to generate the
@@ -206,6 +222,7 @@ impl<'a> Arguments<'a> {
     /// const _: () = if false { panic!("a {}", "a") };
     /// ```
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn new_v1<const P: usize, const A: usize>(
         pieces: &'a [&'static str; P],
         args: &'a [rt::Argument<'a>; A],
@@ -228,6 +245,7 @@ impl<'a> Arguments<'a> {
     /// const _: () = if false { panic!("a {:1}", "a") };
     /// ```
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn new_v1_formatted(
         pieces: &'a [&'static str],
         args: &'a [rt::Argument<'a>],

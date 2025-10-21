@@ -28,7 +28,6 @@
     issue = "none"
 )]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
 use crate::panic::{Location, PanicInfo};
@@ -159,10 +158,7 @@ pub const fn panic(expr: &'static str) -> ! {
     // payload without any allocation or copying. Shorter-lived strings would become invalid as
     // stack frames get popped during unwinding, and couldn't be directly referenced from the
     // payload.
-    #[cfg(not(feature = "ferrocene_certified"))]
     panic_fmt(fmt::Arguments::new_const(&[expr]));
-    #[cfg(feature = "ferrocene_certified")]
-    panic_fmt(&expr)
 }
 
 // We generate functions for usage by compiler-generated assertions.
@@ -196,10 +192,7 @@ macro_rules! panic_const {
                 // truncation and padding (even though none is used here). Using
                 // Arguments::new_const may allow the compiler to omit Formatter::pad from the
                 // output binary, saving up to a few kilobytes.
-                #[cfg(not(feature = "ferrocene_certified"))]
                 panic_fmt(fmt::Arguments::new_const(&[$message]));
-                #[cfg(feature = "ferrocene_certified")]
-                panic_fmt(&$message);
             }
         )+
     }
@@ -250,10 +243,7 @@ pub mod panic_const {
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     // Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
-    #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
-    #[cfg(feature = "ferrocene_certified")]
-    panic_nounwind_fmt(&expr, /* force_no_backtrace */ false);
 }
 
 /// Like `panic_nounwind`, but also inhibits showing a backtrace.

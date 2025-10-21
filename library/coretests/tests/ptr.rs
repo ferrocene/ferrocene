@@ -1067,9 +1067,32 @@ fn test_clone() {
 
     let ptr = arr.as_ptr();
     let mut_ptr = arr.as_mut_ptr();
+    let non_null = NonNull::new(mut_ptr).unwrap();
 
     assert_eq!(Clone::clone(&ptr), ptr);
     assert_eq!(Clone::clone(&mut_ptr), mut_ptr);
+    assert_eq!(Clone::clone(&non_null), non_null);
+}
+
+#[test]
+fn test_as_array() {
+    let mut arr = u32::MAX.to_ne_bytes();
+
+    let ptr = &arr as *const [u8];
+    assert!(ptr.as_array::<{ core::mem::size_of::<u32>() }>().is_some());
+    assert!(ptr.as_array::<{ core::mem::size_of::<u64>() }>().is_none());
+
+    let mut_ptr = &mut arr as *mut [u8];
+    assert!(mut_ptr.as_mut_array::<{ core::mem::size_of::<u32>() }>().is_some());
+    assert!(mut_ptr.as_mut_array::<{ core::mem::size_of::<u64>() }>().is_none());
+}
+
+#[test]
+fn test_is_empty() {
+    let arr: [u8; 0] = [];
+
+    let ptr = &arr as *const [u8];
+    assert!(ptr.is_empty());
 }
 
 #[test]

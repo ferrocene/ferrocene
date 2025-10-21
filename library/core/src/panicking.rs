@@ -195,6 +195,10 @@ macro_rules! panic_const {
             #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
             #[lang = stringify!($lang)]
             pub const fn $lang() -> ! {
+                // Ferrocene annotation: Cannot be covered as this code cannot be reached during
+                // runtime.
+                //
+                // Not part of the annotation:
                 // Use Arguments::new_const instead of format_args!("{expr}") to potentially
                 // reduce size overhead. The format_args! macro uses str's Display trait to
                 // write expr, which calls Formatter::pad, which must accommodate string

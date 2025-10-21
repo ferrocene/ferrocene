@@ -619,6 +619,8 @@ mod impls {
     impl const Clone for ! {
         #[inline]
         fn clone(&self) -> Self {
+            // Ferrocene annotation: This function cannot be executed because it is impossible to
+            // create a value of type `!`.
             *self
         }
     }

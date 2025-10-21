@@ -7,7 +7,7 @@ Programming language
 Compiler
 --------
 
-The certified core library is being build with the safety Qualified Ferrocene compiler. It is qualified for the same safety standards as the core library, see :doc:`evaluation-plan:index`.
+The certified core library is being built with the safety qualified Ferrocene compiler. It is qualified for the same safety standards as the core library, see :doc:`evaluation-plan:index`.
 
 The Ferrocene compiler uses Rust as defined by the Ferrocene language specification.
 

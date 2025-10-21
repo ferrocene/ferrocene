@@ -15,7 +15,7 @@ Firstly, it is ensured that the certified subset only contains certified code.
 
 Secondly, customers must ensure they only use code from the certified subset.
 
-All uncertified code and certified code that is not called, is unused code.
+All uncertified code, and certified code that is not called, is unused code.
 
 Unused code
 -----------

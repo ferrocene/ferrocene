@@ -31,7 +31,7 @@ Rust has a concept called "doc-comments” also known as documentation comments.
   // This is not a doc-comment
   fn add(x: u32, y: u32) -> u32 { /* */ }
 
-In the exampe above, the function ``add(x: u32, y: u32) -> u32`` has a six-line doc comment and directly after a two-line comment which is not a doc-comment.
+In the example above, the function ``add(x: u32, y: u32) -> u32`` has a six line doc comment and directly after a two line comment which is not a doc-comment.
 
 Those doc-comments are picked up by Rust tooling and used to generate documentation with the rustdoc tool. Every crate on `<http://crates.io/>`_, the standard Rust crate registry, automatically gets this documentation built for every release.
 
@@ -42,7 +42,7 @@ Read more about doc comments here: `<https://doc.rust-lang.org/rust-by-example/m
 Doc-comments in the core library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The core library makes heavy use of those doc-comments. Modules contain doc-comments that describe the functionality and structure in that module. Functions contain doc-comments that include a description of the behaviour, usage examples and safety comments. The Ferrocene compiler automatically enforces that all publicly exposed functions in the core library have a doc-comment through the missing_docs lint.
+The core library makes heavy use of those doc-comments. Modules contain doc-comments that describe the functionality and structure in that module. Functions contain doc-comments that include a description of the behaviour, usage examples and safety comments where applicable. The Ferrocene compiler automatically enforces that all publicly exposed functions in the core library have a doc-comment through the ``missing_docs`` lint.
 
 The doc-comments of both modules and functions are compiled, together with the function signatures, into the core library API docs.
 
@@ -79,10 +79,10 @@ Quality of the doc-comments
 
 The requirements for doc-comments used as requirements or module design are regularly checked. If gaps are found, the fixes will be upstreamed, which has the advantage of getting additional reviews by Rust experts and creating a consensus in the Rust community.
 
-Requirement to test tracing
----------------------------
+Tracing requirements to tests
+-----------------------------
 
-1. Firstly, the requirement of a function is the doc comment which is on top of that functions. Therefore the requirements is traced to the function.
+1. Firstly, the requirement of a function is the doc comment which is on top of that function. Therefore the requirements is traced to the function.
 2. Secondly, the certification relies on code coverage to ensure that each function is sufficiently covered by tests.
 3. Combining one and two, if all functions are covered by tests, also all requirements are covered by tests. Therefore tests do not need to be manually traced to requirements.
 

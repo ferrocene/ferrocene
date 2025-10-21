@@ -82,7 +82,7 @@ Nightly features
 
 The core library relies on a few so-called "nightly features" of the compiler. Regular users of Ferrocene are not allowed to use them, therefore they are not part of the compiler qualification.
 This is because they are either "experimental" or "internal”. They do work well, but they can change between compiler versions and do not fall under the usual Rust stability guarantees.
-This is not a problem for the core library, because rustc and the core library are developed, build and tested together.
+This is not a problem for the core library, because ``rustc`` and the core library are developed, built, and tested together.
 
 Nightly features are activated by setting the ``RUSTC_BOOTSTRAP`` environment variable when executing ``rustc``.
 

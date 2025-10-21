@@ -37,7 +37,7 @@ The subset included in the safety certification is defined and documented in the
 Systematic capabilities
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-All public functions of the certified subset are considered "software safety functions” and are going to be certified for all safety standards up to the safety level specified. That means our customers can use all of those functions for use cases up to the highest safety level specified. Since we consider all of them safety relevant we do not consider independence.
+All public functions of the certified subset are considered "software safety functions" and are going to be certified for all safety standards up to the safety level specified. That means our customers can use all of those functions for use cases up to the highest safety level specified. Since we consider all of them safety relevant we do not consider independence.
 
 The systematic capability of these functions is based on:
 

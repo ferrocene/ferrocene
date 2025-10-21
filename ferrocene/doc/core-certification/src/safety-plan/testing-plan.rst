@@ -7,7 +7,7 @@ Testing Plan
 Re-verification scope
 ---------------------
 
-On every pull request, the full Ferrocene test suite is executed, which includes the tests for the core library, and all release artifacts are build. Therefore no impact assessment is necessary, since all tests are run anyways.
+On every pull request, the full Ferrocene test suite is executed, which includes the tests for the core library, and all release artifacts are built. Therefore no impact assessment is necessary, since all tests are run anyways.
 
 Test workflow
 -------------

@@ -9,7 +9,8 @@ Release cadence
 
 Due to the use of internal apis, the core library versions are only compatible with one matching Ferrocene release. The core library will be recertified for every Ferrocene release. That is approximately every three months.
 
-The first Ferrocene release to include the certified core library is "Ferrocene 25.11.0". Ferrocene distributes an uncertified version of the core library since the first Ferrocene release.
+The first Ferrocene release to include the certified core library is "Ferrocene 25.11.0".
+Ferrocene has distributed an uncertified version of the core library since the first Ferrocene release.
 
 Release notes
 -------------
@@ -36,7 +37,8 @@ The requirements are:
 - No uncertified code is used from certified code
 - Every public function of the certified subset has a requirement with sufficient quality
 - The certified code adheres to the coding standard
-- The certified subset is tested with 100% statement coverage
+- The certified subset is tested with 100% statement coverage. 
+    - There are a few lines that cannot be covered by automatic tests. These are annotated with an explanation.
 
 Internal procedures
 -------------------
@@ -48,7 +50,7 @@ V-Model
 
 We diverge from the V-Model, because we are certifying an existing project, not developing the code from scratch.
 
-To explain it in V-model-terms: The Rust project, who is maintaining the upstream core library, performs the requirement specification, the software architecture, the software design, the module design and the coding. Ferrous Systems, consumes the output of those activities from upstream and performs module testing, integration testing, and validation testing on the code received from upstream pull requests.
+To explain it in V-model-terms: The Rust project, who is maintaining the upstream core library, performs the requirement specification, the software architecture, the software design, the module design and the coding. Ferrous Systems consumes the output of those activities from upstream and performs module testing, integration testing, and validation testing on the code received from upstream pull requests.
 
 Responsibility split
 --------------------
@@ -58,7 +60,7 @@ Upstream
 
 The upstream Rust project is responsible for developing the core library.
 
-All upstream Rust code is reviewed by a documented team of appointed Rust experts, and heavily tested, before being merged. Changes are reviewed by an expert who was not involved in the change. Test results and review evidence are public.
+All upstream Rust code is reviewed by a documented team of appointed Rust experts and heavily tested before being merged. Changes are reviewed by an expert who was not involved in the change. Test results and review evidence are public.
 
 See :ref:`history:contributing to upstream` for more details on the upstream development and quality management process.
 

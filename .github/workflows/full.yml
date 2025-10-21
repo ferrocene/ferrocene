@@ -178,7 +178,7 @@ jobs:
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ferrocene-images/ci:ubuntu-20-main
       test-device-addr: "172.31.1.11:12345"
-      emulator-container: ferrocene-images/ci:ubuntu-24-main
+      # emulator-container: ferrocene-images/ci:ubuntu-24-main
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
       qnx-version: "710-472"
@@ -208,7 +208,7 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ferrocene-images/ci:ubuntu-20-main
+      # container: ferrocene-images/ci:ubuntu-20-main
       test-device-addr: "172.31.1.105:12345"
       emulator-container: ferrocene-images/ci:ubuntu-24-main
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare

@@ -9,7 +9,6 @@ Core Library Certification
    :maxdepth: 2
    :caption: Safety Plan
 
-   safety-plan/index
    safety-plan/purpose
    safety-plan/scope
    safety-plan/project-setup
@@ -26,7 +25,6 @@ Core Library Certification
    :maxdepth: 2
    :caption: Safety Report
 
-   safety-report/index
    safety-report/code-coverage
 
 .. toctree::

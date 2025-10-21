@@ -25,7 +25,7 @@ Covered by :ref:`6.2 of IEC 61508-1 <norm-mapping/iec-61508-1:6.2>`.
 6.2.2
 ~~~~~
 
-Covered by :doc:`core-certification:safety-plan/index`.
+Covered by :doc:`the Safety Plan <core-certification:safety-plan/purpose>`.
 
 6.2.3
 ~~~~~

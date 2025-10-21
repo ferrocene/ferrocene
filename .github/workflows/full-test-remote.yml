@@ -175,7 +175,7 @@ jobs:
         if: ${{ inputs.emulator-start-command != '' }}
         with:
           container-prepare: ${{ inputs.container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.container) || ''}}
-          container-run: ${{ inputs.container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.emulator-container) || ''}}
+          container-run: ${{ inputs.emulator-container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.emulator-container) || ''}}
           command-prepare: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}

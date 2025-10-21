@@ -187,7 +187,8 @@ fn display_help() {
     println!("{}", help_message());
 }
 
-const BUG_REPORT_URL: &str = "https://github.com/rust-lang/rust-clippy/issues/new?template=ice.yml";
+// Ferrocene addition: report bugs downstream, not upstream.
+const BUG_REPORT_URL: &str = "https://github.com/ferrocene/ferrocene/issues/new";
 
 #[allow(clippy::too_many_lines)]
 #[allow(clippy::ignored_unit_patterns)]

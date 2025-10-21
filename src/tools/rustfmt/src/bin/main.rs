@@ -22,7 +22,8 @@ use crate::rustfmt::{
     FormatReportFormatterBuilder, Input, Session, StyleEdition, Verbosity, Version, load_config,
 };
 
-const BUG_REPORT_URL: &str = "https://github.com/rust-lang/rustfmt/issues/new?labels=bug";
+// Ferrocene addition: report bugs downstream, not upstream.
+const BUG_REPORT_URL: &str = "https://github.com/ferrocene/ferrocene/issues/new";
 
 // N.B. these crates are loaded from the sysroot, so they need extern crate.
 extern crate rustc_driver;

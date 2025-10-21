@@ -14,7 +14,7 @@ note: delayed at clippy_lints_internal/src/produce_ice.rs - disabled backtrace
 LL | fn it_looks_like_you_are_trying_to_kill_clippy() {}
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-note: we would appreciate a bug report: https://github.com/rust-lang/rust-clippy/issues/new?template=ice.yml
+note: we would appreciate a bug report: https://github.com/ferrocene/ferrocene/issues/new
 
 note: please make sure that you have updated to the latest nightly
 

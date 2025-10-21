@@ -13,4 +13,4 @@ fn wrong()
 //~^ ERROR expected one of
 
 //~? RAW aborting due to
-//~? RAW we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-rustdoc&template=ice.md
+//~? RAW we would appreciate a bug report: https://github.com/ferrocene/ferrocene/issues/new

@@ -158,9 +158,10 @@ pub fn main() {
 
     let mut early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
 
+    // Ferrocene addition: report bugs downstream, not upstream.
+    #[rustfmt::skip]
     rustc_driver::install_ice_hook(
-        "https://github.com/rust-lang/rust/issues/new\
-    ?labels=C-bug%2C+I-ICE%2C+T-rustdoc&template=ice.md",
+        "https://github.com/ferrocene/ferrocene/issues/new",
         |_| (),
     );
 

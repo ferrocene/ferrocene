@@ -77,7 +77,7 @@ macro_rules! assert_unsafe_precondition {
                     #[cfg(not(feature = "ferrocene_certified"))]
                     ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::from_str(msg), false);
                     #[cfg(feature = "ferrocene_certified")]
-                    ::core::panicking::panic_nounwind(msg);
+                    ::core::panicking::panic_nounwind_fmt(&msg, false);
                 }
             }
 

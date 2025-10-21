@@ -27,7 +27,6 @@ mod nofloat;
 mod num;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod num_buffer;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
@@ -643,16 +642,18 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Arguments<'a> {
     // Format string pieces to print.
+    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     pieces: &'a [&'static str],
 
     // Placeholder specs, or `None` if all specs are default (as in "{}{}").
+    #[cfg(not(feature = "ferrocene_certified"))]
     fmt: Option<&'a [rt::Placeholder]>,
 
     // Dynamic arguments for interpolation, to be interleaved with string
     // pieces. (Every argument is preceded by a string piece.)
+    #[cfg(not(feature = "ferrocene_certified"))]
     args: &'a [rt::Argument<'a>],
 }
 

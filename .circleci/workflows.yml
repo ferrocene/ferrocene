@@ -15,6 +15,8 @@ version: 2.1
 #
 # * `docker-image-tag--`: calculates the appropriate tag for the named image.
 # * `docker-repository-url--`: calculates the URL of an ECR repository
+# * `llvm-rebuild--`: calculates if the llvm cache must be invalidated
+# * `targets--`: calculates the compilation targets to execute the job for
 #
 parameters:
   docker-image-tag--x86_64--ubuntu-20:
@@ -81,6 +83,9 @@ parameters:
     type: string
     default: ""
   targets--x86_64-pc-windows-msvc--self-test:
+    type: string
+    default: ""
+  targets--certified-targets--build:
     type: string
     default: ""
 
@@ -187,7 +192,7 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       # Certified targets only
-      FERROCENE_TARGETS: aarch64-unknown-ferrocene.certified,x86_64-unknown-ferrocene.certified,thumbv7em-ferrocene.certified-eabi,thumbv7em-ferrocene.certified-eabihf
+      FERROCENE_TARGETS: << pipeline.parameters.targets--certified-targets--build >>
       SCRIPT: |
         ./x.py build --stage 2 library/core
         ./x.py doc   --stage 2 library/core

@@ -48,6 +48,7 @@ pub macro panic_2015 {
     }),
 }
 
+// Ferrocene addition: avoid depending in fmt
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use panic!() instead")]
 #[allow_internal_unstable(panic_internals, const_format_args)]
@@ -97,6 +98,7 @@ pub macro unreachable_2015 {
     ),
 }
 
+// Ferrocene addition: avoid depending in fmt
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]

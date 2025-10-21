@@ -18,7 +18,10 @@ use crate::slice::{self, SliceIndex};
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, mem, ptr};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{intrinsics, marker::PointeeSized, mem};
 
 /// `*mut T` but non-zero and [covariant].

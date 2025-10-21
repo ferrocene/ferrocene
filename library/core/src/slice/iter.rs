@@ -19,7 +19,10 @@ use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, fmt};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{
     iter::{TrustedLen, UncheckedIterator},
     mem::SizedTypeProperties,

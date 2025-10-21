@@ -29,6 +29,9 @@ pub use self::{
     iterator::Iterator,
     marker::{FusedIterator, TrustedLen},
 };
+
+// Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 pub use self::{collect::IntoIterator, iterator::Iterator, marker::TrustedLen};

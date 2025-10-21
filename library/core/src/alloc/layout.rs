@@ -14,7 +14,10 @@ use crate::mem::SizedTypeProperties;
 use crate::ptr::{Alignment, NonNull};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{assert_unsafe_precondition, fmt, mem};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, ptr::Alignment};
 
 // While this function is used in one place and its implementation

@@ -18,8 +18,6 @@ use crate::fmt;
 use crate::hash::{self, Hash};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::transmute_unchecked;
-#[cfg(feature = "ferrocene_certified")]
-use crate::iter::UncheckedIterator;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{UncheckedIterator, repeat_n};
 use crate::mem::{self, MaybeUninit};
@@ -29,6 +27,11 @@ use crate::ops::{
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::iter::UncheckedIterator;
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod ascii;

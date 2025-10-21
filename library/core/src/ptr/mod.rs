@@ -413,13 +413,17 @@ use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{
     intrinsics,
     marker::{Destruct, PointeeSized},
     mem::{self, MaybeUninit},
 };
 #[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
+#[rustfmt::skip]
 use crate::{mem::SizedTypeProperties, ub_checks};
 
 mod alignment;

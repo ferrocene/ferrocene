@@ -73,9 +73,6 @@ pub use self::flatten::Flatten;
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::intersperse::{Intersperse, IntersperseWith};
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
-pub use self::map::Map;
 #[stable(feature = "iter_map_while", since = "1.57.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::map_while::MapWhile;
@@ -100,6 +97,12 @@ pub use self::{
     flatten::FlatMap, fuse::Fuse, inspect::Inspect, map::Map, peekable::Peekable, rev::Rev,
     scan::Scan, skip::Skip, skip_while::SkipWhile, take::Take, take_while::TakeWhile, zip::Zip,
 };
+
+// Ferrocene addition: imports for certified subset
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+pub use self::map::Map;
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline
 /// under the conditions that

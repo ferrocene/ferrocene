@@ -13,14 +13,17 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::convert::FloatToInt;
-#[cfg(feature = "ferrocene_certified")]
-use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::FpCategory;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cfg_select, intrinsics, mem};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::mem;
 
 /// The radix or base of the internal representation of `f32`.
 /// Use [`f32::RADIX`] instead.

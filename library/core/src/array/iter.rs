@@ -6,12 +6,15 @@ use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccessNoCoerce};
 use crate::mem::{ManuallyDrop, MaybeUninit};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops::{Deref as _, DerefMut as _, IndexRange};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, ptr};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ops::{Deref as _, DerefMut as _, IndexRange};
 
 mod iter_inner;
 

@@ -4,7 +4,10 @@ use crate::marker::Destruct;
 use crate::mem::ManuallyDrop;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, intrinsics, ptr, slice};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{intrinsics, ptr, slice};
 
 /// A wrapper type to construct uninitialized instances of `T`.

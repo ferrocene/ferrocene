@@ -17,14 +17,17 @@ use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeInclusive};
 use crate::panic::const_panic;
-#[cfg(feature = "ferrocene_certified")]
-use crate::ptr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::simd::{self, Simd};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hint, ptr, range, slice};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ptr;
 
 #[unstable(
     feature = "slice_internals",

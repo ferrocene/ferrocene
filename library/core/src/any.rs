@@ -86,10 +86,13 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "ferrocene_certified")]
-use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::intrinsics;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Any trait

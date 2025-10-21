@@ -6,12 +6,15 @@ use crate::iter::adapters::zip::try_get_unchecked;
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, UncheckedIterator};
-#[cfg(feature = "ferrocene_certified")]
-use crate::iter::{TrustedLen, UncheckedIterator};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Try;
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::iter::{TrustedLen, UncheckedIterator};
 
 /// An iterator that maps the values of `iter` with `f`.
 ///

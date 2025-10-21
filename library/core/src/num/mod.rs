@@ -9,7 +9,10 @@ use crate::str::FromStr;
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ascii, intrinsics, mem};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{intrinsics, mem};
 
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.

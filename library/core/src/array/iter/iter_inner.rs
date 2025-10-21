@@ -7,7 +7,10 @@ use crate::num::NonZero;
 use crate::ops::{IndexRange, NeverShortCircuit, Try};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, iter};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{iter, ops::IndexRange};
 
 #[allow(private_bounds)]

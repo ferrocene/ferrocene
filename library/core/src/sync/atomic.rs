@@ -246,11 +246,14 @@ use self::Ordering::*;
 use crate::cell::UnsafeCell;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::spin_loop;
-#[cfg(feature = "ferrocene_certified")]
-use crate::intrinsics;
 use crate::intrinsics::AtomicOrdering as AO;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, intrinsics};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::intrinsics;
 
 trait Sealed {}
 

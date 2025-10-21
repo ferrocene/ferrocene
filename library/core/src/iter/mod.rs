@@ -495,8 +495,11 @@ pub(crate) use self::traits::UncheckedIterator;
 pub use self::traits::{
     DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
 };
+
+// Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 pub use self::{
     adapters::Map,
     traits::{IntoIterator, Iterator},

@@ -539,7 +539,10 @@ use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{convert, fmt, hint};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{convert, hint};
 
 /// `Result` is a type that represents either success ([`Ok`]) or failure ([`Err`]).

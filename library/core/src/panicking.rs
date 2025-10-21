@@ -31,10 +31,13 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
-#[cfg(feature = "ferrocene_certified")]
-use crate::panic::PanicInfo;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::panic::PanicInfo;
 
 /// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
 #[cfg(not(feature = "ferrocene_certified"))]

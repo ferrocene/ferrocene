@@ -23,8 +23,6 @@ mod validations;
 use self::pattern::{DoubleEndedSearcher, Pattern, ReverseSearcher, Searcher};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::{self, EscapeDebugExtArgs};
-#[cfg(feature = "ferrocene_certified")]
-use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Range;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -33,6 +31,11 @@ use crate::slice::{self, SliceIndex};
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ascii, mem};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::mem;
 
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod pattern;

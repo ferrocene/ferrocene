@@ -586,7 +586,10 @@ use crate::panicking::{panic, panic_display};
 use crate::pin::Pin;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, convert, hint, mem, slice};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{convert, hint, panicking::panic};
 
 /// The `Option` type. See [the module level documentation](self) for more.

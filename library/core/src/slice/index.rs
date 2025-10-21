@@ -1,12 +1,15 @@
 //! Indexing implementations for `[T]`.
 
 use crate::intrinsics::slice_get_unchecked;
-#[cfg(feature = "ferrocene_certified")]
-use crate::ops;
 use crate::panic::const_panic;
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ops, range};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ops;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
@@ -105,10 +108,13 @@ const unsafe fn get_offset_len_mut_noubcheck<T>(
 }
 
 mod private_slice_index {
-    #[cfg(feature = "ferrocene_certified")]
-    use super::ops;
     #[cfg(not(feature = "ferrocene_certified"))]
     use super::{ops, range};
+
+    // Ferrocene addition: imports for certified subset
+    #[cfg(feature = "ferrocene_certified")]
+    #[rustfmt::skip]
+    use super::ops;
 
     #[stable(feature = "slice_get_slice", since = "1.28.0")]
     pub trait Sealed {}

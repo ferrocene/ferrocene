@@ -5,8 +5,6 @@ use super::super::{
     Product, Rev, Scan, Skip, SkipWhile, StepBy, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce,
     Zip, try_process,
 };
-#[cfg(feature = "ferrocene_certified")]
-use super::super::{Cloned, Map};
 #[cfg(not(feature = "ferrocene_certified"))]
 use super::TrustedLen;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -17,6 +15,11 @@ use crate::cmp::{self, Ordering};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use super::super::{Cloned, Map};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}

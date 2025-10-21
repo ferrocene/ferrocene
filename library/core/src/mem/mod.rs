@@ -13,7 +13,10 @@ use crate::marker::DiscriminantKind;
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
+
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use crate::{intrinsics, ptr};
 
 mod manually_drop;

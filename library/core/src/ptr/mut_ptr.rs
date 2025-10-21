@@ -2,14 +2,17 @@ use super::*;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
 use crate::intrinsics::const_eval_select;
-#[cfg(feature = "ferrocene_certified")]
-use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Destruct, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::marker::PointeeSized;
 
 impl<T: PointeeSized> *mut T {
     #[doc = include_str!("docs/is_null.md")]

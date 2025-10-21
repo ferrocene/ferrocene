@@ -46,14 +46,17 @@ pub use crate::default::Default;
 pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator, Iterator};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
-#[cfg(feature = "ferrocene_certified")]
-pub use crate::iter::{IntoIterator, Iterator};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
 pub use crate::option::Option::{self, None, Some};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::result::Result::{self, Err, Ok};
+
+// Ferrocene addition: imports for certified subset
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+pub use crate::iter::{IntoIterator, Iterator};
 
 // Re-exported built-in macros
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]

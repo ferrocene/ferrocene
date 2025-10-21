@@ -71,28 +71,30 @@ subset = "default"
 
 [groups.cross-compilation]
 targets = [
+  # tidy-alphabetical-start
+  "aarch64-unknown-ferrocene.certified",
+  "aarch64-unknown-ferrocene.facade",
   "aarch64-unknown-linux-gnu",
   "aarch64-unknown-linux-musl",
   "aarch64-unknown-none",
-  "aarch64-unknown-ferrocene.facade",
   "armebv7r-none-eabihf",
   "armv7r-none-eabihf",
   "armv8r-none-eabihf",
   "riscv64gc-unknown-linux-gnu",
   "thumbv6m-none-eabi",
-  "thumbv7em-none-eabi",
+  "thumbv7em-ferrocene.certified-eabihf",
+  "thumbv7em-ferrocene.certified-eabi",
   "thumbv7em-ferrocene.facade-eabi",
-  "thumbv7em-none-eabihf",
   "thumbv7em-ferrocene.facade-eabihf",
+  "thumbv7em-none-eabi",
+  "thumbv7em-none-eabihf",
   "thumbv8m.base-none-eabi",
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
   "wasm32-unknown-unknown",
-  "x86_64-unknown-linux-musl",
-  "aarch64-unknown-ferrocene.certified",
-  "thumbv7em-ferrocene.certified-eabi",
-  "thumbv7em-ferrocene.certified-eabihf",
   "x86_64-unknown-ferrocene.certified",
+  "x86_64-unknown-linux-musl",
+  # tidy-alphabetical-end
 ]
 
 [[groups.cross-compilation.packages]]

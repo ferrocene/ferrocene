@@ -515,8 +515,8 @@ marker_impls! {
         isize, i8, i16, i32, i64, i128,
         f32, f64,
         bool,
-        {T: ?Sized} *const T,
-        {T: ?Sized} *mut T,
+        {T: PointeeSized} *const T,
+        {T: PointeeSized} *mut T,
 }
 
 #[unstable(feature = "never_type", issue = "35121")]
@@ -1118,7 +1118,7 @@ marker_impls! {
 #[rustc_on_unimplemented(message = "can't drop `{Self}`", append_const_msg)]
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
-pub const trait Destruct {}
+pub const trait Destruct: PointeeSized {}
 
 /// A marker for tuple types.
 ///

@@ -8,7 +8,6 @@ use std::{fmt, iter, slice};
 use Chunk::*;
 #[cfg(feature = "nightly")]
 use rustc_macros::{Decodable_NoContext, Encodable_NoContext};
-use smallvec::{SmallVec, smallvec};
 
 use crate::{Idx, IndexVec};
 
@@ -118,7 +117,7 @@ macro_rules! bit_relations_inherent_impls {
 #[derive(Eq, PartialEq, Hash)]
 pub struct DenseBitSet<T> {
     domain_size: usize,
-    words: SmallVec<[Word; 2]>,
+    words: Vec<Word>,
     marker: PhantomData<T>,
 }
 
@@ -134,7 +133,7 @@ impl<T: Idx> DenseBitSet<T> {
     #[inline]
     pub fn new_empty(domain_size: usize) -> DenseBitSet<T> {
         let num_words = num_words(domain_size);
-        DenseBitSet { domain_size, words: smallvec![0; num_words], marker: PhantomData }
+        DenseBitSet { domain_size, words: vec![0; num_words], marker: PhantomData }
     }
 
     /// Creates a new, filled bitset with a given `domain_size`.
@@ -142,7 +141,7 @@ impl<T: Idx> DenseBitSet<T> {
     pub fn new_filled(domain_size: usize) -> DenseBitSet<T> {
         let num_words = num_words(domain_size);
         let mut result =
-            DenseBitSet { domain_size, words: smallvec![!0; num_words], marker: PhantomData };
+            DenseBitSet { domain_size, words: vec![!0; num_words], marker: PhantomData };
         result.clear_excess_bits();
         result
     }
@@ -800,27 +799,39 @@ impl<T: Idx> BitRelations<ChunkedBitSet<T>> for ChunkedBitSet<T> {
                     // words, and this happens often enough that it's a
                     // performance win. Also, we only need to operate on the
                     // in-use words, hence the slicing.
-                    let op = |a, b| a | b;
                     let num_words = num_words(chunk_domain_size as usize);
-                    if bitwise_changes(
+
+                    // If both sides are the same, nothing will change. This
+                    // case is very common and it's a pretty fast check, so
+                    // it's a performance win to do it.
+                    if self_chunk_words[0..num_words] == other_chunk_words[0..num_words] {
+                        continue;
+                    }
+
+                    // Do a more precise "will anything change?" test. Also a
+                    // performance win.
+                    let op = |a, b| a | b;
+                    if !bitwise_changes(
                         &self_chunk_words[0..num_words],
                         &other_chunk_words[0..num_words],
                         op,
                     ) {
-                        let self_chunk_words = Rc::make_mut(self_chunk_words);
-                        let has_changed = bitwise(
-                            &mut self_chunk_words[0..num_words],
-                            &other_chunk_words[0..num_words],
-                            op,
-                        );
-                        debug_assert!(has_changed);
-                        *self_chunk_count =
-                            count_ones(&self_chunk_words[0..num_words]) as ChunkSize;
-                        if *self_chunk_count == chunk_domain_size {
-                            *self_chunk = Ones;
-                        }
-                        changed = true;
+                        continue;
                     }
+
+                    // If we reach here, `self_chunk_words` is definitely changing.
+                    let self_chunk_words = Rc::make_mut(self_chunk_words);
+                    let has_changed = bitwise(
+                        &mut self_chunk_words[0..num_words],
+                        &other_chunk_words[0..num_words],
+                        op,
+                    );
+                    debug_assert!(has_changed);
+                    *self_chunk_count = count_ones(&self_chunk_words[0..num_words]) as ChunkSize;
+                    if *self_chunk_count == chunk_domain_size {
+                        *self_chunk = Ones;
+                    }
+                    changed = true;
                 }
             }
         }
@@ -861,7 +872,7 @@ impl<T: Idx> BitRelations<ChunkedBitSet<T>> for ChunkedBitSet<T> {
                     let mut self_chunk_words = **other_chunk_words;
                     for word in self_chunk_words[0..num_words].iter_mut().rev() {
                         *word = !*word & tail_mask;
-                        tail_mask = u64::MAX;
+                        tail_mask = Word::MAX;
                     }
                     let self_chunk_count = chunk_domain_size - *other_chunk_count;
                     debug_assert_eq!(
@@ -874,28 +885,29 @@ impl<T: Idx> BitRelations<ChunkedBitSet<T>> for ChunkedBitSet<T> {
                     Mixed(self_chunk_count, self_chunk_words),
                     Mixed(_other_chunk_count, other_chunk_words),
                 ) => {
-                    // See [`<Self as BitRelations<ChunkedBitSet<T>>>::union`] for the explanation
-                    let op = |a: u64, b: u64| a & !b;
+                    // See `ChunkedBitSet::union` for details on what is happening here.
                     let num_words = num_words(chunk_domain_size as usize);
-                    if bitwise_changes(
+                    let op = |a: Word, b: Word| a & !b;
+                    if !bitwise_changes(
                         &self_chunk_words[0..num_words],
                         &other_chunk_words[0..num_words],
                         op,
                     ) {
-                        let self_chunk_words = Rc::make_mut(self_chunk_words);
-                        let has_changed = bitwise(
-                            &mut self_chunk_words[0..num_words],
-                            &other_chunk_words[0..num_words],
-                            op,
-                        );
-                        debug_assert!(has_changed);
-                        *self_chunk_count =
-                            count_ones(&self_chunk_words[0..num_words]) as ChunkSize;
-                        if *self_chunk_count == 0 {
-                            *self_chunk = Zeros;
-                        }
-                        changed = true;
+                        continue;
                     }
+
+                    let self_chunk_words = Rc::make_mut(self_chunk_words);
+                    let has_changed = bitwise(
+                        &mut self_chunk_words[0..num_words],
+                        &other_chunk_words[0..num_words],
+                        op,
+                    );
+                    debug_assert!(has_changed);
+                    *self_chunk_count = count_ones(&self_chunk_words[0..num_words]) as ChunkSize;
+                    if *self_chunk_count == 0 {
+                        *self_chunk = Zeros;
+                    }
+                    changed = true;
                 }
             }
         }
@@ -931,28 +943,29 @@ impl<T: Idx> BitRelations<ChunkedBitSet<T>> for ChunkedBitSet<T> {
                     Mixed(self_chunk_count, self_chunk_words),
                     Mixed(_other_chunk_count, other_chunk_words),
                 ) => {
-                    // See [`<Self as BitRelations<ChunkedBitSet<T>>>::union`] for the explanation
-                    let op = |a, b| a & b;
+                    // See `ChunkedBitSet::union` for details on what is happening here.
                     let num_words = num_words(chunk_domain_size as usize);
-                    if bitwise_changes(
+                    let op = |a, b| a & b;
+                    if !bitwise_changes(
                         &self_chunk_words[0..num_words],
                         &other_chunk_words[0..num_words],
                         op,
                     ) {
-                        let self_chunk_words = Rc::make_mut(self_chunk_words);
-                        let has_changed = bitwise(
-                            &mut self_chunk_words[0..num_words],
-                            &other_chunk_words[0..num_words],
-                            op,
-                        );
-                        debug_assert!(has_changed);
-                        *self_chunk_count =
-                            count_ones(&self_chunk_words[0..num_words]) as ChunkSize;
-                        if *self_chunk_count == 0 {
-                            *self_chunk = Zeros;
-                        }
-                        changed = true;
+                        continue;
                     }
+
+                    let self_chunk_words = Rc::make_mut(self_chunk_words);
+                    let has_changed = bitwise(
+                        &mut self_chunk_words[0..num_words],
+                        &other_chunk_words[0..num_words],
+                        op,
+                    );
+                    debug_assert!(has_changed);
+                    *self_chunk_count = count_ones(&self_chunk_words[0..num_words]) as ChunkSize;
+                    if *self_chunk_count == 0 {
+                        *self_chunk = Zeros;
+                    }
+                    changed = true;
                 }
             }
         }
@@ -1370,7 +1383,7 @@ impl<T: Idx> From<DenseBitSet<T>> for GrowableBitSet<T> {
 pub struct BitMatrix<R: Idx, C: Idx> {
     num_rows: usize,
     num_columns: usize,
-    words: SmallVec<[Word; 2]>,
+    words: Vec<Word>,
     marker: PhantomData<(R, C)>,
 }
 
@@ -1383,7 +1396,7 @@ impl<R: Idx, C: Idx> BitMatrix<R, C> {
         BitMatrix {
             num_rows,
             num_columns,
-            words: smallvec![0; num_rows * words_per_row],
+            words: vec![0; num_rows * words_per_row],
             marker: PhantomData,
         }
     }

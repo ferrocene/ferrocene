@@ -515,8 +515,8 @@ marker_impls! {
         isize, i8, i16, i32, i64, i128,
         f32, f64,
         bool,
-        {T: ?Sized} *const T,
-        {T: ?Sized} *mut T,
+        {T: PointeeSized} *const T,
+        {T: PointeeSized} *mut T,
 }
 
 #[unstable(feature = "never_type", issue = "35121")]

@@ -1,6 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Display};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::Location;
 use crate::panicking::PanicFmt;
 
@@ -14,14 +13,11 @@ use crate::panicking::PanicFmt;
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 pub struct PanicInfo<'a> {
-    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     message: &'a PanicFmt<'a>,
-    #[cfg(not(feature = "ferrocene_certified"))]
     location: &'a Location<'a>,
-    #[cfg(not(feature = "ferrocene_certified"))]
     can_unwind: bool,
-    #[cfg(not(feature = "ferrocene_certified"))]
     force_no_backtrace: bool,
 }
 
@@ -37,17 +33,6 @@ pub struct PanicMessage<'a> {
     message: &'a fmt::Arguments<'a>,
 }
 
-// Ferrocene addition: When `ferrocene_certified` is enabled, `PanicInfo` only holds a reference to
-// a static string with the panic message. This `impl` adds a new builder to reflect that.
-#[cfg(feature = "ferrocene_certified")]
-impl<'a> PanicInfo<'a> {
-    #[inline]
-    pub(crate) fn new(message: &'a PanicFmt<'a>) -> Self {
-        PanicInfo { message }
-    }
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> PanicInfo<'a> {
     #[inline]
     pub(crate) fn new(
@@ -78,6 +63,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_info_message", since = "1.81.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn message(&self) -> PanicMessage<'_> {
         PanicMessage { message: self.message }
     }
@@ -108,6 +94,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn location(&self) -> Option<&Location<'_>> {
         // NOTE: If this is changed to sometimes return None,
         // deal with that case in std::panicking::default_hook and core::panicking::panic_fmt.
@@ -127,6 +114,7 @@ impl<'a> PanicInfo<'a> {
     #[deprecated(since = "1.81.0", note = "this never returns anything useful")]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[allow(deprecated, deprecated_in_future)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn payload(&self) -> &(dyn crate::any::Any + Send) {
         struct NoPayload;
         &NoPayload
@@ -144,6 +132,7 @@ impl<'a> PanicInfo<'a> {
     /// again.
     #[must_use]
     #[unstable(feature = "panic_can_unwind", issue = "92988")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn can_unwind(&self) -> bool {
         self.can_unwind
     }
@@ -155,6 +144,7 @@ impl<'a> PanicInfo<'a> {
     )]
     #[doc(hidden)]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn force_no_backtrace(&self) -> bool {
         self.force_no_backtrace
     }

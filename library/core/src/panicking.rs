@@ -31,13 +31,7 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
-#[rustfmt::skip]
-use crate::panic::PanicInfo;
 
 /// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -85,15 +79,13 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
         fn panic_impl(pi: &PanicInfo<'_>) -> !;
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     let pi = PanicInfo::new(
         &fmt,
         Location::caller(),
         /* can_unwind */ true,
         /* force_no_backtrace */ false,
     );
-    #[cfg(feature = "ferrocene_certified")]
-    let pi = PanicInfo::new(&fmt);
+
     // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
     unsafe { panic_impl(&pi) }
 }
@@ -131,15 +123,12 @@ pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) ->
             }
 
             // PanicInfo with the `can_unwind` flag set to false forces an abort.
-            #[cfg(not(feature = "ferrocene_certified"))]
             let pi = PanicInfo::new(
                 &fmt,
                 Location::caller(),
                 /* can_unwind */ false,
                 _force_no_backtrace,
             );
-            #[cfg(feature = "ferrocene_certified")]
-            let pi = PanicInfo::new(&fmt);
 
             // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
             unsafe { panic_impl(&pi) }

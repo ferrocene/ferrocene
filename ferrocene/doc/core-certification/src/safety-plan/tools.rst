@@ -59,10 +59,10 @@ Failure modes
   - Risk: A function is not being considered, although it is part of the certified subset
   - Mitigation: Developing ``symbol-report`` which uses exactly the same information as the compiler
 - Line that can be executed not being reported as executable
-  - Risk: Underreporting, code that should be tested may not being tested
-  - Mitigation:
-    - ``blanket`` warns if a function has no executable line
-    - (Future work) End-to-end test that ensures the correct lines are being reported as executable
+    - Risk: Underreporting, code that should be tested may not being tested
+    - Mitigation:
+        - ``blanket`` warns if a function has no executable line
+        - (Future work) End-to-end test that ensures the correct lines are being reported as executable
 
 Compiler
 --------

@@ -128,9 +128,4 @@ jobs:
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        if: ${{ always() }}
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-          name: ${{ env.ARTIFACT }}
+

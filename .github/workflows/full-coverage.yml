@@ -95,15 +95,14 @@ jobs:
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
 
-      # Note: We do not restore the build cache in this job since `core` needs to be rebuilt and we'll get "multiple candidate" errors
-      # - name: Restore build cache
-      #   uses: ./.github/actions/restore-build-cache/
-      #   if: ${{ inputs.use-minio == false }}
-      #   with:
-      #     build-artifact: ${{ inputs.build-artifact }}
-      #     build-run-id: ${{ inputs.build-run-id }}
-      #     bucket: ${{ inputs.cache-bucket }}
-      #     prefix: ${{ inputs.cache-prefix }}
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -113,7 +112,7 @@ jobs:
         with:
           container: ${{ inputs.container }}
           script: |
-            ./x.py test --no-doc --coverage=library library/core
+            ./x.py test --coverage=library library/core library/std --no-doc
 
       - name: Upload artifacts to S3
         env:

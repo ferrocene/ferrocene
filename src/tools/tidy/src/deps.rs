@@ -814,10 +814,12 @@ fn check_license_exceptions(
                 }
             }
         }
-        if LICENSES.contains(license) || LICENSES_TOOLS.contains(license) {
-            check.error(format!(
+        for license in licenses {
+            if LICENSES.contains(license) || LICENSES_TOOLS.contains(license) {
+                check.error(format!(
                 "dependency exception `{name}` is not necessary. `{license}` is an allowed license"
             ));
+            }
         }
     }
 

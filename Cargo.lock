@@ -735,6 +735,7 @@ name = "blanket"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "build_helper",
  "clap",
  "llvm_profparser",
  "maud",

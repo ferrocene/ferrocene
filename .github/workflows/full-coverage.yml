@@ -74,19 +74,19 @@ jobs:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       # Note: We do not restore the build cache in this job since `core` needs to be rebuilt and we'll get "multiple candidate" errors
-      # - name: Restore build cache
-      #   uses: ./.github/actions/restore-build-cache/
-      #   if: ${{ inputs.use-minio == true }}
-      #   env:
-      #     AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-      #     AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-      #   with:
-      #     build-artifact: ${{ inputs.build-artifact }}
-      #     build-run-id: ${{ inputs.build-run-id }}
-      #     bucket: ${{ inputs.cache-bucket }}
-      #     prefix: ${{ inputs.cache-prefix }}
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

@@ -25,19 +25,11 @@ const LICENSES: &[&str] = &[
     "Apache-2.0 OR ISC OR MIT",
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
-<<<<<<< HEAD
-    "Apache-2.0",
-    "Apache-2.0/ISC/MIT",
-    "Apache-2.0/MIT",
-    "BSD-2-Clause OR Apache-2.0 OR MIT",                   // zerocopy
-    "BSD-2-Clause",                                        // zerocopy
-=======
     "Apache-2.0/MIT",
     "BSD-2-Clause OR Apache-2.0 OR MIT",                   // zerocopy
     "BSD-2-Clause OR MIT OR Apache-2.0",
     "BSD-3-Clause/MIT",
     "CC0-1.0 OR MIT-0 OR Apache-2.0",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "ISC",
     "MIT / Apache-2.0",
     "MIT AND (MIT OR Apache-2.0)",
@@ -73,11 +65,7 @@ const LICENSES_TOOLS: &[&str] = &[
     "Unicode-3.0",                                         // icu4x
     "Unicode-DFS-2016",                                    // tinystr
     "Zlib OR Apache-2.0 OR MIT",                           // tinyvec
-<<<<<<< HEAD
-    "Zlib",                                                // hashbrown, foldhash
-=======
     "Zlib",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // tidy-alphabetical-end
 ];
 
@@ -200,46 +188,8 @@ pub(crate) const WORKSPACES: &[WorkspaceInfo<'static>] = &[
 #[rustfmt::skip]
 const EXCEPTIONS: ExceptionList = &[
     // tidy-alphabetical-start
-<<<<<<< HEAD
-    ("ar_archive_writer", "Apache-2.0 WITH LLVM-exception"), // rustc
-    ("arrayref", "BSD-2-Clause"),                            // rustc
-    ("aws-config", "Apache-2.0"),                            // generate-tarball, through criticaltrust
-    ("aws-credential-types", "Apache-2.0"),                  // generate-tarball, through criticaltrust
-    ("aws-http", "Apache-2.0"),                              // generate-tarball, through criticaltrust
-    ("aws-runtime", "Apache-2.0"),                           // generate-tarball, through criticaltrust
-    ("aws-sdk-kms", "Apache-2.0"),                           // generate-tarball, through criticaltrust
-    ("aws-sdk-sso", "Apache-2.0"),                           // generate-tarball, through criticaltrust
-    ("aws-sdk-sts", "Apache-2.0"),                           // generate-tarball, through criticaltrust
-    ("aws-sigv4", "Apache-2.0"),                             // generate-tarball, through criticaltrust
-    ("aws-smithy-async", "Apache-2.0"),                      // generate-tarball, through criticaltrust
-    ("aws-smithy-client", "Apache-2.0"),                     // generate-tarball, through criticaltrust
-    ("aws-smithy-http", "Apache-2.0"),                       // generate-tarball, through criticaltrust
-    ("aws-smithy-http-tower", "Apache-2.0"),                 // generate-tarball, through criticaltrust
-    ("aws-smithy-json", "Apache-2.0"),                       // generate-tarball, through criticaltrust
-    ("aws-smithy-query", "Apache-2.0"),                      // generate-tarball, through criticaltrust
-    ("aws-smithy-runtime", "Apache-2.0"),                    // generate-tarball, through criticaltrust
-    ("aws-smithy-runtime-api", "Apache-2.0"),                // generate-tarball, through criticaltrust
-    ("aws-smithy-types", "Apache-2.0"),                      // generate-tarball, through criticaltrust
-    ("aws-smithy-xml", "Apache-2.0"),                        // generate-tarball, through criticaltrust
-    ("aws-types", "Apache-2.0"),                             // generate-tarball, through criticaltrust
-    ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),  // rustc
-    ("colored", "MPL-2.0"),                                  // rustfmt
-    ("constant_time_eq", "CC0-1.0 OR MIT-0 OR Apache-2.0"),  // rustc
-    ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
-    ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
-    ("foldhash", "Zlib"),                                    // rustc
-    ("insta", "Apache-2.0"),                                 // generate-tarball
-    ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
-    ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
-    ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0                       // cargo/... (because of serde)
-    ("self_cell", "Apache-2.0"),                             // rustc (fluent translations)
-    ("similar", "Apache-2.0"),                               // generate-tarball
-    ("subtle", "BSD-3-Clause"),                              // generate-tarball
-    ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"), // rustc
-=======
     ("colored", "MPL-2.0"),                                  // rustfmt
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // tidy-alphabetical-end
 ];
 

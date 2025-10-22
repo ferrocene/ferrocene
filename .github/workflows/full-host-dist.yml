@@ -47,16 +47,14 @@ on:
         description: The cache prefix
       environment:
         type: string
+      usage:
+        type: string
+        description: The name of the resource usage report artifact
+        
     outputs:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      artifact:
-        description: The name of the artifact
-        value: ${{ jobs.dist.outputs.artifact-name }}
-      artifact-usage:
-        description: The name of the resource usage report artifact for the dist job
-        value: ${{ jobs.dist.outputs.artifact-usage }}
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
@@ -69,15 +67,10 @@ jobs:
   dist:
     runs-on: ${{ inputs.runner }}
     env:
-      ARTIFACT: dist-${{inputs.host-triple}}
-      ARTIFACT_USAGE: usage-dist-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
       AWS_REGION: us-east-1
       AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-    outputs:
-      artifact-name: ${{ env.ARTIFACT }}
-      artifact-usage: ${{ env.ARTIFACT }}-usage
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -125,6 +118,6 @@ jobs:
       - name: Upload artifacts to S3
         env:
           CIRCLE_SHA1: ${{ github.sha }}
-          CIRCLE_JOB: ${{ env.ARTIFACT }}
+          CIRCLE_JOB: ${{ inputs.usage }}
         run: |
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh

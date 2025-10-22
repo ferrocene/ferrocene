@@ -3117,7 +3117,7 @@ fn normalize_target(target: TargetSelection, config: &RenderConfig) -> String {
         target = target.replace(&host_target(), "host");
         // Ferrocene addition: makes it possible to run tests for certified targets in a
         // platform-independent way.
-        if let Some(certified) = get_host_target().certified_equivalent() {
+        if let Some(certified) = get_host_target().try_certified_equivalent() {
             target = target.replace(&certified.to_string(), "host.certified");
         }
     }

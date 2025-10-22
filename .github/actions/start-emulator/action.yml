@@ -26,7 +26,7 @@ runs:
   steps:
     - name: Create emulator dir
       shell: bash
-      run: mkdir /tmp/emulator
+      run: mkdir -p /tmp/emulator
       
     - name: Prepare emulator (in container)
       if: ${{ (inputs.command-prepare != '') && (inputs.container-prepare != '') }}

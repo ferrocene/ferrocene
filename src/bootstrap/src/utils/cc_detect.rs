@@ -83,7 +83,7 @@ pub fn fill_compilers(build: &mut Build) {
                 .cloned()
                 .chain(iter::once(build.host_target))
                 // Ferrocene addition: Load the matching certified target
-                .flat_map(|t| std::iter::once(t).chain(t.certified_equivalent()))
+                .flat_map(|t| std::iter::once(t).chain(t.try_certified_equivalent()))
                 .collect()
         }
     };

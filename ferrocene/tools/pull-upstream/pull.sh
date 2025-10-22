@@ -6,6 +6,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
+FERROCENE_REPO=https://github.com/ferrocene/ferrocene
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 X_HELP=src/etc/xhelp
@@ -68,7 +69,9 @@ if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then
 fi
 upstream_branch="$1"
 if [[ $# -ge 2 ]]; then
-    current_branch="$2"
+    # Allow not having the ref fetched locally (can happen from manual workflow_dispatch runs)
+    git fetch "$FERROCENE_REPO" "$2"
+    current_branch="$(git rev-parse FETCH_HEAD)"
 else
     current_branch="$(git rev-parse HEAD)"
 fi

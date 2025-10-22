@@ -51,7 +51,7 @@ impl Step for Docs {
         //
         // NOTE: must be called before .add_directory, since it places the
         // certified API docs in the doc_out
-        if self.target.certified_equivalent().is_some() {
+        if self.target.try_certified_equivalent().is_some() {
             builder.ensure(CertifiedApiDocs { target: self.target });
             builder.ensure(AllCoverageReports { target: self.target });
         } else {

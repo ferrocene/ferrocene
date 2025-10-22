@@ -136,7 +136,7 @@ jobs:
     secrets: inherit
     with:
       script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux --test-variant 2021
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant 2021
       host-triple: ${{ matrix.host }}
       runner:  ${{ matrix.runner }}
       use-minio: true
@@ -155,7 +155,6 @@ jobs:
           - test
           - test:compiletest 
           - test:library
-          - test:library-std
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64

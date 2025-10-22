@@ -93,6 +93,14 @@ AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
 X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
 
+# Targets with a certified core library
+CERTIFIED_TARGETS = [
+    "aarch64-unknown-ferrocene.certified",
+    "thumbv7em-ferrocene.certified-eabi",
+    "thumbv7em-ferrocene.certified-eabihf",
+    "x86_64-unknown-ferrocene.certified",
+]
+
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
@@ -173,7 +181,7 @@ def calculate_targets(host_plus_stage: str):
     """
     Calculates the list of targets to pass.
 
-    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test`
+    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std`, or `self-test`
     """
     host, stage = host_plus_stage.split("--", 1)
 
@@ -187,6 +195,8 @@ def calculate_targets(host_plus_stage: str):
                 targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
             case "x86_64-pc-windows-msvc":
                 targets = X86_64_WINDOWS_BUILD_HOSTS
+            case "certified-targets":
+                targets = CERTIFIED_TARGETS
             case _:
                 raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":

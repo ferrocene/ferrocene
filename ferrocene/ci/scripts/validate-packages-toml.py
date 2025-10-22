@@ -37,8 +37,6 @@ IGNORE_PATTERNS = [
     "rust-docs-json-*.tar.*",
     "rustc-dev-*.tar.*",
     "rust-dev-*.tar.*",
-    # Skip x86_64 as it is only used for local testing
-    "rust-std-x86_64-unknown-ferrocene.certified-*.tar.*",
 ]
 
 

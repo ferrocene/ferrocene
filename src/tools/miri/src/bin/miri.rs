@@ -480,7 +480,8 @@ fn main() {
     }
 
     // Add an ICE bug report hook.
-    rustc_driver::install_ice_hook("https://github.com/rust-lang/miri/issues/new", |_| ());
+    // Ferrocene addition: report bugs downstream, not upstream.
+    rustc_driver::install_ice_hook("https://github.com/ferrocene/ferrocene/issues/new", |_| ());
 
     // Init loggers the Miri way.
     init_early_loggers(&early_dcx);

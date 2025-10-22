@@ -30,6 +30,27 @@ function main() {
             await navigator.clipboard.writeText(`${filename}:${linenum}`);
         });
     }
+    let checkbox = document.querySelector("input[name=annotated-checkbox]");
+
+    checkbox.addEventListener('change', function() {
+        var r = document.querySelector(':root');
+        var rs = getComputedStyle(r);
+        if (this.checked) {
+            let color = rs.getPropertyValue("--var-ignored");
+            r.style.setProperty("--var-untested-annotated", color);
+            r.style.setProperty("--var-partial-annotated", color);
+
+            r.style.setProperty("--var-annotated-text", "line-through");
+        } else {
+            let color_untested = rs.getPropertyValue("--var-untested");
+            r.style.setProperty("--var-untested-annotated", color_untested);
+
+            let color_partial = rs.getPropertyValue("--var-partial");
+            r.style.setProperty("--var-partial-annotated", color_partial);
+
+            r.style.setProperty("--var-annotated-text", null);
+        }
+    });
 }
 
 if (document.readyState === "loading") {

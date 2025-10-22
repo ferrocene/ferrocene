@@ -31,7 +31,7 @@ thread 'rustc' ($TID) panicked at compiler/rustc_hir_typeck/src/lib.rs:LL:CC:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
-note: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-compiler&template=ice.md
+note: we would appreciate a bug report: https://github.com/ferrocene/ferrocene/issues/new
 
 note: please make sure that you have updated to the latest nightly
 

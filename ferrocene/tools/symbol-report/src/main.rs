@@ -7,12 +7,14 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 
-extern crate serde;
+extern crate build_helper;
 extern crate serde_json;
 
 use std::fs::File;
 use std::io::{self, Write};
 
+// error[E0463]: can't find crate for `build_helper`
+use build_helper::symbol_report::{Function, Symbols};
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
 use rustc_interface::interface::Compiler;
@@ -23,13 +25,6 @@ use rustc_middle::ty::print::{
 use rustc_session::EarlyDiagCtxt;
 use rustc_session::config::ErrorOutputType;
 use rustc_span::FileNameDisplayPreference;
-
-#[derive(serde::Serialize)]
-#[serde(transparent)]
-struct Symbols(Vec<Function>);
-
-#[derive(serde::Serialize)]
-struct Function(String, String, usize, usize);
 
 struct LoadCoreSymbols;
 
@@ -58,9 +53,9 @@ impl Callbacks for LoadCoreSymbols {
             let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
             let lines = tcx.sess.source_map().span_to_lines(span).expect("failed to look up span");
             let filename = lines.file.name.display(FileNameDisplayPreference::Local).to_string();
-            let start = lines.lines.first().unwrap().line_index;
-            let end = lines.lines.last().unwrap().line_index;
-            symbols.push(Function(qualified_name, filename, start + 1, end + 1));
+            let start_line = lines.lines.first().unwrap().line_index + 1;
+            let end_line = lines.lines.last().unwrap().line_index + 1;
+            symbols.push(Function { qualified_name, filename, start_line, end_line });
         }
         serde_json::to_writer(out, &Symbols(symbols)).expect("failed to serialize symbols");
         Compilation::Stop

@@ -348,7 +348,7 @@ than building it.
         // Ferrocene addition: set `no_std` for certified targets.
         // FIXME: bootstrap shouldn't silently assume std if it doesn't find a target, instead it
         // should panic ...
-        if let Some(certified_target) = target.certified_equivalent() {
+        if let Some(certified_target) = target.try_certified_equivalent() {
             build
                 .config
                 .target_config

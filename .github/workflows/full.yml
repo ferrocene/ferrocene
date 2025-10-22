@@ -8,6 +8,7 @@ env:
   # Do not try to break these up...
   LINUX_TARGETS: aarch64-unknown-linux-gnu,riscv64gc-unknown-linux-gnu
   BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
+  CERTIFIED_TARGETS: aarch64-unknown-ferrocene.certified,x86_64-unknown-ferrocene.certified,thumbv7em-ferrocene.certified-eabi,thumbv7em-ferrocene.certified-eabihf
   QNX_TARGETS: aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710
   ARTIFACTS_BUCKET: ferrocene-ci-artifacts
   ARTIFACTS_PREFIX: gha-testing/ferrocene/dist
@@ -70,7 +71,15 @@ jobs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
+    strategy:
+      matrix:
+        script:
+          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+            uv run x.py --stage 2 dist rust-std
+
+          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
+      script: ${{ matrix.script }}
       host-triple: x86_64-unknown-linux-gnu
       triples: "x86_64-unknown-linux-gnu"
       runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -81,7 +90,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-
 
   self-test-x86_64-unknown-linux-gnu:
     name: Self-test (x86_64-unknown-linux-gnu)
@@ -245,7 +253,15 @@ jobs:
       - calculate-envs
       - build-aarch64-unknown-linux-gnu
     secrets: inherit
+    strategy:
+      matrix:
+        script:
+          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+            uv run x.py --stage 2 dist rust-std
+
+          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
+      script: ${{ matrix.script }}
       host-triple: aarch64-unknown-linux-gnu
       triples: "aarch64-unknown-linux-gnu"
       runner: ferrocene-arc-runners-ubuntu-20-arm64

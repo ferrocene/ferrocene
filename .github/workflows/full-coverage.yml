@@ -80,6 +80,11 @@ jobs:
       - name: Get LLVM cache
         if: ${{ inputs.use-minio == true }}
         shell: bash
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         run: |
           if [ -z "${AWS_CA_BUNDLE}" ]; then
             unset AWS_CA_BUNDLE

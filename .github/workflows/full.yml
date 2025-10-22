@@ -112,19 +112,19 @@ jobs:
             test-std: true
             test-variant: "2021"
           - target: aarch64-unknown-none
-            test-triple: aarch64-unknown-ferrocenecoretest
+            test-triple: aarch64-unknown-ferrocene.facade
             test-host-tools: false
             test-std: false
             test-variant: "2021-cortex-a53"
             qemu-arch: qemu-aarch64
           - target: thumbv7em-none-eabi
-            test-triple: thumbv7em-ferrocenecoretest-eabi
+            test-triple: thumbv7em-ferrocene.facade-eabi
             test-host-tools: false
             test-std: false
             test-variant: "2021-cortex-m4"
             qemu-arch: qemu-arm
           - target: thumbv7em-none-eabihf
-            test-triple: thumbv7em-ferrocenecoretest-eabihf
+            test-triple: thumbv7em-ferrocene.facade-eabihf
             test-host-tools: false
             test-std: false
             test-variant: "2021-cortex-m4"

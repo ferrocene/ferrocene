@@ -782,12 +782,8 @@ fn check_license_exceptions(
     exceptions: &[(&str, &str)],
     check: &mut RunningCheck,
 ) {
-    // to handle multiple versions of a crate with difference licensing terms we group
-    // repeated entries in `exceptions`
-    let grouped_exceptions: HashMap<&str, Vec<&str>> = HashMap::new();
-
     // Validate the EXCEPTIONS list hasn't changed.
-    for (name, licenses) in &grouped_exceptions {
+    for (name, license) in exceptions {
         // Check that the package actually exists.
         if !metadata.packages.iter().any(|p| *p.name == *name) {
             check.error(format!(
@@ -805,21 +801,19 @@ fn check_license_exceptions(
                     ));
                 }
                 Some(pkg_license) => {
-                    if licenses.iter().all(|license| *license != pkg_license.as_str()) {
+                    if pkg_license.as_str() != *license {
                         check.error(format!(r#"dependency exception `{name}` license in workspace `{workspace}` has changed
-    previously `{licenses:?}` now `{pkg_license}`
+    previously `{license}` now `{pkg_license}`
     update EXCEPTIONS for the new license
 "#));
                     }
                 }
             }
         }
-        for license in licenses {
-            if LICENSES.contains(license) || LICENSES_TOOLS.contains(license) {
-                check.error(format!(
+        if LICENSES.contains(license) || LICENSES_TOOLS.contains(license) {
+            check.error(format!(
                 "dependency exception `{name}` is not necessary. `{license}` is an allowed license"
             ));
-            }
         }
     }
 

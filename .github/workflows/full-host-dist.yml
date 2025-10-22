@@ -50,27 +50,21 @@ on:
       usage:
         type: string
         description: The name of the resource usage report artifact
-        
-    outputs:
-      run-id:
-        description: The id of the workflow run
-        value: ${{ github.run_id }}
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  FERROCENE_HOST: ${{ inputs.host-triple }}
+  FERROCENE_TARGETS: ${{ inputs.triples }}
+  AWS_REGION: us-east-1
+  AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
         
 jobs:
 
   dist:
     runs-on: ${{ inputs.runner }}
-    env:
-      FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
-      AWS_REGION: us-east-1
-      AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,8 +1,9 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
+   SPDX-FileCopyrightText: The Rust Project Contributors
 
-Ferrocene Language Specification
-================================
+FLS
+===
 
 .. toctree::
    :numbered:
@@ -41,6 +42,7 @@ Ferrocene Language Specification
    glossary
    undefined-behavior
    changelog
+   background
 
 Indices and tables
 ------------------

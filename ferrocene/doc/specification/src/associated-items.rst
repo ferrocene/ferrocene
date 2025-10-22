@@ -173,7 +173,7 @@ The type of a :t:`self parameter` shall be one of the following:
   enumeration, or
 
 * :dp:`fls_IKSPR7ZQMErU`
-  :std:`core::pin::Pin<T> <core::pin::Pin>` where ``T`` is one of the the :t:`[type]s` listed in this
+  :std:`core::pin::Pin<T> <core::pin::Pin>` where ``T`` is one of the :t:`[type]s` listed in this
   enumeration.
 
 :dp:`fls_oHxzyaiT7Qm6`

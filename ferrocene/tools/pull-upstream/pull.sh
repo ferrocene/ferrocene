@@ -70,7 +70,7 @@ upstream_branch="$1"
 if [[ $# -ge 2 ]]; then
     current_branch="$2"
 else
-    current_branch="$(git branch --show-current)"
+    current_branch="$(git rev-parse HEAD)"
 fi
 if [[ $# -ge 3 ]]; then
     upstream_commit="$3"

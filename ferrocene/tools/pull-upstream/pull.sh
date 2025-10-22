@@ -197,11 +197,13 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     #
     # To solve that, when a submodule gets in an unmerged state, the conflict is
     # fixed automatically by resetting the submodule to upstream's commit.
+    # FIXME: if there are any Ferrocene changes to the submodule, those are discarded entirely.
+    # This should open a Github issue saying the repo is invalid state and someone needs to manually fix it.
     all_submodules="$(git config --file .gitmodules --get-regexp 'submodule\..+\.path' | awk '{print($2)}')"
     for changed_file in $(git status --porcelain=v1 | sed -n 's/^UU //p'); do
         if grep -q "^${changed_file}$" <(echo "${all_submodules}"); then
             git reset "${upstream_commit}" -- "${changed_file}"
-            echo "pull-upstream: automatically resolved conflict for submodule ${changed_file}"
+            echo "pull-upstream: discarded all changes for submodule ${changed_file} and reset to upstream's version"
         fi
     done
 
@@ -299,14 +301,6 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
         git add "${lock}"
         git commit -m "update ${lock} to match ${manifest}"
-    fi
-    if [ "${upstream_branch}" == "master" ]; then
-        echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
-        cargo update --manifest-path "${manifest}"
-        if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
-            git add "${lock}"
-            git commit -m "update ${lock} to latest semver-compatible crates"
-        fi
     fi
 done
 

@@ -8,6 +8,7 @@ IFS=$'\n\t'
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
+X_HELP=src/etc/xhelp
 
 # We handle some lockfiles separately from upstream:
 # - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
@@ -48,6 +49,16 @@ automation_warning() {
     # printed to stdout. That way the automation can include them in the PR body.
     if [[ -n "${PULL_WARNINGS_FILE+x}" ]]; then
         echo "${message}" >> "${PULL_WARNINGS_FILE}"
+    fi
+}
+
+commit_if_modified() {
+    file="$1"
+    message="$2"
+
+    if git status --porcelain=v1 | grep "^ M ${file}$" >/dev/null; then
+        git add "${file}"
+        git commit -m "${message}"
     fi
 }
 
@@ -298,10 +309,7 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
         echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
         continue
     fi
-    if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
-        git add "${lock}"
-        git commit -m "update ${lock} to match ${manifest}"
-    fi
+    commit_if_modified "$lock" "update ${lock} to match ${manifest}"
 done
 
 # We expose additional commands for `x.py` which affects the completions file generation,
@@ -309,22 +317,22 @@ done
 # does not need manual intervention.
 echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
 if ./x.py run generate-completions >/dev/null; then
-    if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
-        git add "${GENERATED_COMPLETIONS_DIR}"
-        git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
-    fi
+    commit_if_modified "${GENERATED_COMPLETIONS_DIR}" "update ${GENERATED_COMPLETIONS_DIR}"
 else
     automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
+fi
+echo "pull-upstream: checking whether ${X_HELP} needs to be updated..."
+if ./x.py run generate-help >/dev/null; then
+    commit_if_modified "${X_HELP}" "update ${X_HELP}"
+else
+    automation_warning "Couldn't regenerate the \`x.py\` help file. Please run \`./x run generate-help\` after fixing the merge conflicts."
 fi
 
 # Some parts of src/stage0 need to be updated when we branch off from main to a release branch.
 # Running the fixup script here ensures the fix is always applied.
 echo "pull-upstream: trying to fix src/stage0"
 ferrocene/ci/scripts/fix-stage0-branch.py || automation_warning "Could not fix src/stage0; will commit with conflict markers"
-if git status --porcelain=v1 | grep "^ M src/stage0$" >/dev/null; then
-    git add src/stage0
-    git commit -m "update src/stage0"
-fi
+commit_if_modified src/stage0 "update src/stage0"
 
 git branch -D "${TEMP_BRANCH}"
 

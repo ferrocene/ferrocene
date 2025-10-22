@@ -436,6 +436,7 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      cache-llvm-uri: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.cache-llvm-uri }}
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}

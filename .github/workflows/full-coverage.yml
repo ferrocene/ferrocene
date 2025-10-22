@@ -24,6 +24,9 @@ on:
       build-artifact:
         type: string
         description: The artifact from the build workflow
+      cache-llvm-uri:
+        type: string
+        description: The LLVM artifact to use
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
@@ -74,19 +77,14 @@ jobs:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       # Note: We do not restore the build cache in this job since `core` needs to be rebuilt and we'll get "multiple candidate" errors
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
+      - name: Get LLVM cache
         if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}
+        shell: bash
+        run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url ${{ inputs.cache-llvm-uri }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -95,14 +93,15 @@ jobs:
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
 
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
+      # Note: We do not restore the build cache in this job since `core` needs to be rebuilt and we'll get "multiple candidate" errors
+      - name: Get LLVM cache
         if: ${{ inputs.use-minio == false }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}
+        shell: bash
+        run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url ${{ inputs.cache-llvm-uri }}
 
       - name: Run
         uses: ./.github/actions/run/

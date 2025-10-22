@@ -208,12 +208,7 @@ jobs:
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        if: ${{ always() }}
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-          name: ${{ env.ARTIFACT }}
+
 
   compiletest:
     runs-on: ${{ inputs.runner }}
@@ -330,12 +325,7 @@ jobs:
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        if: ${{ always() }}
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-          name: ${{ env.ARTIFACT }}
+
 
   library:
     runs-on: ${{ inputs.runner }}
@@ -451,12 +441,7 @@ jobs:
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        if: ${{ always() }}
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-          name: ${{ env.ARTIFACT }}
+
 
   library-std:
     if: ${{ inputs.test-std }}
@@ -573,9 +558,4 @@ jobs:
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        if: ${{ always() }}
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-          name: ${{ env.ARTIFACT }}
+

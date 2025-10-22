@@ -201,9 +201,4 @@ jobs:
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
           uv run ./ferrocene/ci/scripts/cache.py store "s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        if: ${{ always() }}
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-          name: ${{ env.ARTIFACT }}
+

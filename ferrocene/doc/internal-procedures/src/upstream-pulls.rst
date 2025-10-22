@@ -174,3 +174,18 @@ Trigger an upstream pull
 
 When we are delayed, it is recommended to make a manual pull from Github Actions. Choose the job `Automatic upstream pull` > `Run workflow`,
 and set a max number of PRs to be included (upper limit, 150). Please be aware that the more PRs are pulled, the more conflicts; so this is a judgement call.
+
+Reproduce an upstream pull
+--------------------------
+
+If you are changing the automation, or if it encounters an error you need to debug,
+you may need to run it locally.
+
+.. warning::
+
+   These commands destroy all uncommitted state in your working tree, then add dozens to hundreds of commits to your local branch.
+   Ensure you have committed your changes to git before running them.
+
+.. code-block:: bash
+
+   ferrocene/tools/pull-upstream/pull.sh HEAD $(git rev-parse HEAD)

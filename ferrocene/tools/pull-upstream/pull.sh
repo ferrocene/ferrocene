@@ -85,7 +85,7 @@ cd "$(git rev-parse --show-toplevel)"
 #
 # The update-index command ensures diff-index doesn't spuriously fail.
 # https://stackoverflow.com/questions/3878624#comment108071431_3879077
-git submodule update --init
+git submodule update
 git update-index --refresh
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
@@ -242,7 +242,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
 
         # We do a `git submodule update` ahead of time to ensure the wrong
         # submodule commits are not accidentally added.
-        git submodule update --init
+        git submodule update
 
         # The person handling the conflict should decide what to do if a file
         # has been deleted on either side of the merge, but doing a `git add .`

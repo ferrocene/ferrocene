@@ -105,6 +105,14 @@ if [[ "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.wasm32-unknown-unknown.ar=lld-ar
 fi
 
+# We default to the self-contained lld linker on all targets we can,
+# On targets with other settings as well, set that that there.
+add --set 'target.x86_64-unknown-linux-gnu.default-linker-linux-override=self-contained-lld-cc'
+add --set 'target.x86_64-unknown-linux-musl.default-linker-linux-override=self-contained-lld-cc'
+
+add --set 'target.aarch-unknown-linux-gnu.default-linker-linux-override=self-contained-lld-cc'
+add --set 'target.aarch-unknown-linux-musl.default-linker-linux-override=self-contained-lld-cc'
+
 # QNX toolchains aren't automatically inferred, set them explicitly.
 #
 # Assumes `qnxsdp-env.sh` has been sourced or the binaries are otherwise

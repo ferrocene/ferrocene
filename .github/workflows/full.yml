@@ -73,11 +73,15 @@ jobs:
     secrets: inherit
     strategy:
       matrix:
-        script:
-          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
-            uv run x.py --stage 2 dist rust-std
+        include:
+          - usage: dist-aarch64-unknown-linux-gnu
+            script: |
+              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+              uv run x.py --stage 2 dist rust-std
 
-          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+          - usage: dist-tools-aarch64-unknown-linux-gnu
+            script:
+              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
       script: ${{ matrix.script }}
       host-triple: x86_64-unknown-linux-gnu
@@ -90,6 +94,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      usage: ${{ matrix.usage }}
 
   self-test-x86_64-unknown-linux-gnu:
     name: Self-test (x86_64-unknown-linux-gnu)
@@ -255,11 +260,15 @@ jobs:
     secrets: inherit
     strategy:
       matrix:
-        script:
-          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
-            uv run x.py --stage 2 dist rust-std
+        include:
+          - usage: dist-aarch64-unknown-linux-gnu
+            script: |
+              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+              uv run x.py --stage 2 dist rust-std
 
-          - uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+          - usage: dist-tools-aarch64-unknown-linux-gnu
+            script:
+              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
       script: ${{ matrix.script }}
       host-triple: aarch64-unknown-linux-gnu
@@ -272,6 +281,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      usage: ${{ matrix.usage }}
 
   self-test-aarch64-unknown-linux-gnu:
     name: Self-test (aarch64-unknown-linux-gnu)
@@ -460,7 +470,7 @@ jobs:
 
   docs:
     name: Docs
-    uses: ./.github/workflows/full-doc.yml
+    uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -473,6 +483,11 @@ jobs:
       # - test-aarch64-apple-darwin
     secrets: inherit
     with:
+      script: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ferrocene/ci/scripts/fetch-coverage-outcomes.sh
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
@@ -482,16 +497,19 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      usage: ${{ github.job }}
 
   source:
-    name: Source
-    uses: ./.github/workflows/full-source.yml
+    name: Dist (source)
+    uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
+      script: ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
       host-triple: x86_64-unknown-linux-gnu
+      triples: "x86_64-unknown-linux-gnu"
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -500,6 +518,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      usage: ${{ github.job }}
 
   checks:
     name: Checks (x86_64-unknown-linux-gnu)

@@ -115,34 +115,18 @@ jobs:
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
-  test-host-x86_64-unknown-linux:
+  test-x86_64-unknown-linux-gnu:
+    name: Test x86_64-unknown-linux-gnu on ${{ matrix.host }}
     strategy:
       matrix:
-        include:
-          - target: x86_64-unknown-linux-gnu
-            test-triple: x86_64-unknown-linux-gnu
-            test-host-tools: true
-            test-std: true
-            test-variant: "2021"
-          - target: aarch64-unknown-none
-            test-triple: aarch64-unknown-ferrocene.facade
-            test-host-tools: false
-            test-std: false
-            test-variant: "2021-cortex-a53"
-            qemu-arch: qemu-aarch64
-          - target: thumbv7em-none-eabi
-            test-triple: thumbv7em-ferrocene.facade-eabi
-            test-host-tools: false
-            test-std: false
-            test-variant: "2021-cortex-m4"
-            qemu-arch: qemu-arm
-          - target: thumbv7em-none-eabihf
-            test-triple: thumbv7em-ferrocene.facade-eabihf
-            test-host-tools: false
-            test-std: false
-            test-variant: "2021-cortex-m4"
-            qemu-arch: qemu-arm
-    name: Test (${{ matrix.target }} by x86_64-unknown-linux-gnu)
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test
+          - test:compiletest 
+          - test:library
+          - test:library-std
+        host:
+          - x86_64-unknown-linux-gnu
     uses: ./.github/workflows/full-test.yml
     needs:
       - calculate-envs
@@ -150,17 +134,103 @@ jobs:
       - targets
     secrets: inherit
     with:
-      test-host-tools: ${{ matrix.test-host-tools }}
-      test-std: ${{ matrix.test-std }}
-      test-variant: ${{ matrix.test-variant }}
-      triple: ${{ matrix.test-triple }}
-      # In the old CircleCI jobs, we did not pass this...
-      # When this is enabled, we experienced test failures where it was
-      # trying to test the x86_64 artifacts in CI
-      host-triple: "" # x86_64-unknown-linux-gnu
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux --test-variant 2021
+      host-triple: ${{ matrix.host }}
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
-      qemu-arch: ${{ matrix.qemu-arch }}
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  test-aarch64-unknown-none:
+    strategy:
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test
+          - test:compiletest 
+          - test:library
+          - test:library-std
+        host:
+          - x86_64-unknown-linux-gnu
+    name: Test aarch64-unknown-none on ${{ matrix.host }}
+    uses: ./.github/workflows/full-test.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant 2021-cortex-a53
+      host-triple: ${{ matrix.host }}
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      qemu-arch: qemu-aarch64
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  test-thumbv7em-none-eabi:
+    strategy:
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest 
+          - test:library
+        host:
+          - x86_64-unknown-linux-gnu
+    name: Test thumbv7em-none-eabi on ${{ matrix.host }}
+    uses: ./.github/workflows/full-test.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant 2021-cortex-m4
+      host-triple: ${{ matrix.host }}
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      qemu-arch: qemu-arm
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  test-thumbv7em-none-eabihf:
+    strategy:
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest 
+          - test:library
+        host:
+          - x86_64-unknown-linux-gnu
+    name: Test thumbv7em-none-eabihf on ${{ matrix.host }}
+    uses: ./.github/workflows/full-test.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant 2021-cortex-m4
+      host-triple: ${{ matrix.host }}
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      qemu-arch: qemu-arm
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
@@ -169,7 +239,16 @@ jobs:
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   test-x86_64-pc-nto-qnx710:
-    name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
+    name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
+    strategy:
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest 
+          - test:library
+          - test:library-std
+        host:
+          - x86_64-unknown-linux-gnu
     uses: ./.github/workflows/full-test-remote.yml
     needs:
       - calculate-envs
@@ -177,14 +256,9 @@ jobs:
       - targets
     secrets: inherit
     with:
-      test-host-tools: false
-      test-std: true
-      test-variant: "2021"
-      triple: x86_64-pc-nto-qnx710
-      # In the old CircleCI jobs, we did not pass this...
-      # When this is enabled, we experienced test failures where it was
-      # trying to test the x86_64 artifacts in CI
-      host-triple: "" # x86_64-unknown-linux-gnu
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-pc-nto-qnx710 --test-variant 2021
+      host-triple: ${{ matrix.host }}
       runner:  ubuntu24-8core-x86-64-linux-gnu
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -201,7 +275,16 @@ jobs:
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   test-aarch64-unknown-nto-qnx710:
-    name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
+    name: Test aarch64-unknown-nto-qnx710 on ${{ matrix.host }}
+    strategy:
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest 
+          - test:library
+          - test:library-std
+        host:
+          - x86_64-unknown-linux-gnu
     uses: ./.github/workflows/full-test-remote.yml
     needs:
       - calculate-envs
@@ -209,14 +292,9 @@ jobs:
       - targets
     secrets: inherit
     with:
-      test-host-tools: false
-      test-std: true
-      test-variant: "2021-cortex-a53"
-      triple: aarch64-unknown-nto-qnx710
-      # In the old CircleCI jobs, we did not pass this...
-      # When this is enabled, we experienced test failures where it was
-      # trying to test the x86_64 artifacts in CI
-      host-triple: "" # x86_64-unknown-linux-gnu
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call  --target aarch64-unknown-nto-qnx710 --test-variant 2021-cortex-a53
+      host-triple: ${{ matrix.host }}
       runner: ubuntu24-8core-x86-64-linux-gnu
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -476,9 +554,12 @@ jobs:
       - build-x86_64-unknown-linux-gnu
       - checks
       - coverage
-      - test-host-x86_64-unknown-linux
-      # - test-x86_64-pc-nto-qnx710
-      # - test-aarch64-unknown-nto-qnx710
+      - test-x86_64-unknown-linux-gnu
+      - test-aarch64-unknown-none
+      - test-thumbv7em-none-eabi
+      - test-thumbv7em-none-eabihf
+      - test-x86_64-pc-nto-qnx710
+      - test-aarch64-unknown-nto-qnx710
       # - test-x86_64-pc-windows-msvc
       # - test-aarch64-apple-darwin
     secrets: inherit
@@ -567,11 +648,12 @@ jobs:
       - docs
       - source
       - checks
-      - test-host-x86_64-unknown-linux
-      # - test-x86_64-pc-nto-qnx710
-      # - test-aarch64-unknown-nto-qnx710
-      # - test-x86_64-pc-windows-msvc
-      # - test-aarch64-apple-darwin
+      - test-x86_64-unknown-linux-gnu
+      - test-aarch64-unknown-none
+      - test-thumbv7em-none-eabi
+      - test-thumbv7em-none-eabihf
+      - test-x86_64-pc-nto-qnx710
+      - test-aarch64-unknown-nto-qnx710
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu

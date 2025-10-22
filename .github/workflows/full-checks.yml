@@ -108,7 +108,7 @@ jobs:
     
       - name: Run licensing checks
         run: |
-          uvx reuse --include-submodules lint
+          uvx reuse@5.1.1 --include-submodules lint
 
       - name: Run misc-checks
         uses: ./.github/actions/run/

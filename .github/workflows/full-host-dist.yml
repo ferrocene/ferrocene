@@ -8,6 +8,9 @@ defaults:
 on:
   workflow_call:
     inputs:
+      script:
+        type: string
+        description: The script to run.
       host-triple:
         type: string
         description: The Rust triple of the host platform
@@ -48,17 +51,11 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      artifact-dist:
-        description: The name of the dist job artifact
+      artifact:
+        description: The name of the artifact
         value: ${{ jobs.dist.outputs.artifact-name }}
-      artifact-dist-usage:
+      artifact-usage:
         description: The name of the resource usage report artifact for the dist job
-        value: ${{ jobs.dist.outputs.artifact-usage }}
-      artifact-tools:
-        description: The name of the tools job artifact
-        value: ${{ jobs.tools.outputs.artifact-name }}
-      artifact-tools-usage:
-        description: The name of the resource usage report artifact for the tools job
         value: ${{ jobs.dist.outputs.artifact-usage }}
 
 env:
@@ -123,10 +120,7 @@ jobs:
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
-          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-          script: |
-            uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
-            uv run x.py --stage 2 dist rust-std
+          script: ${{ inputs.script }}
 
       - name: Upload artifacts to S3
         env:
@@ -134,71 +128,3 @@ jobs:
           CIRCLE_JOB: ${{ env.ARTIFACT }}
         run: |
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
-      
-
-
-  tools:
-    runs-on: ${{ inputs.runner }}
-    env:
-      ARTIFACT: tools-${{inputs.host-triple}}
-      ARTIFACT_USAGE: usage-tools-${{inputs.host-triple}}
-      FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
-      AWS_REGION: us-east-1
-    outputs:
-      artifact-name: ${{ env.ARTIFACT }}
-      artifact-usage: ${{ env.ARTIFACT_USAGE }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup/
-        with:
-          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
-
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
-
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}
-
-      - name: Run
-        uses: ./.github/actions/run/
-        with:
-          container: ${{ inputs.container }}
-          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-          script: |
-            uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
-
-      - name: Upload artifacts to S3
-        env:
-          CIRCLE_SHA1: ${{ github.sha }}
-          CIRCLE_JOB: ${{ env.ARTIFACT }}
-        run:
-          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
-
-

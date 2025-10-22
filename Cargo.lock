@@ -745,6 +745,7 @@ name = "blanket"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "build_helper",
  "clap",
  "llvm_profparser",
  "maud",
@@ -6509,6 +6510,11 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "symbol-report"
 version = "0.0.0"
+dependencies = [
+ "build_helper",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "syn"

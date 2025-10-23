@@ -1,6 +1,8 @@
 //! Defines utf8 error type.
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 
 /// Errors which can occur when attempting to interpret a sequence of [`u8`]
@@ -42,7 +44,7 @@ use crate::fmt;
 ///     }
 /// }
 /// ```
-#[derive(Copy, Eq, PartialEq, Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Eq, PartialEq, Clone, Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Utf8Error {
     pub(super) valid_up_to: usize,
@@ -109,6 +111,7 @@ impl Utf8Error {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Utf8Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(error_len) = self.error_len {
@@ -124,6 +127,7 @@ impl fmt::Display for Utf8Error {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Error for Utf8Error {}
 
 /// An error returned when parsing a `bool` using [`from_str`] fails
@@ -132,9 +136,11 @@ impl Error for Utf8Error {}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ParseBoolError;
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for ParseBoolError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         "provided string was not `true` or `false`".fmt(f)
@@ -142,4 +148,5 @@ impl fmt::Display for ParseBoolError {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Error for ParseBoolError {}

@@ -1366,7 +1366,6 @@ impl usize {
 impl usize {
     /// Returns an `usize` where every byte is equal to `x`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) const fn repeat_u8(x: u8) -> usize {
         usize::from_ne_bytes([x; size_of::<usize>()])
     }

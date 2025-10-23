@@ -1893,7 +1893,6 @@ pub const fn cttz<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn cttz_nonzero<T: Copy>(x: T) -> u32;
 
 /// Reverses the bytes in an integer type `T`.
@@ -2042,7 +2041,6 @@ pub const fn carrying_mul_add<T: [const] fallback::CarryingMulAdd<Unsigned = U>,
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
 
 /// Performs an unchecked division, resulting in undefined behavior
@@ -2065,7 +2063,6 @@ pub const unsafe fn unchecked_div<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_rem<T: Copy>(x: T, y: T) -> T;
 
 /// Performs an unchecked left shift, resulting in undefined behavior when
@@ -2077,7 +2074,6 @@ pub const unsafe fn unchecked_rem<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_shl<T: Copy, U: Copy>(x: T, y: U) -> T;
 /// Performs an unchecked right shift, resulting in undefined behavior when
 /// `y < 0` or `y >= N`, where N is the width of T in bits.
@@ -2088,7 +2084,6 @@ pub const unsafe fn unchecked_shl<T: Copy, U: Copy>(x: T, y: U) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_shr<T: Copy, U: Copy>(x: T, y: U) -> T;
 
 /// Returns the result of an unchecked addition, resulting in
@@ -2167,7 +2162,6 @@ pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 /// Returns (a - b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -2196,7 +2190,6 @@ pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn wrapping_mul<T: Copy>(a: T, b: T) -> T;
 
 /// Computes `a + b`, saturating at numeric bounds.

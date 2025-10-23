@@ -202,8 +202,6 @@ pub(crate) struct CoverageState {
 pub(crate) struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
-    lcov_file: PathBuf,
-    metadata_file: PathBuf,
     pub(crate) doctests_bins_dir: PathBuf,
 }
 
@@ -218,8 +216,6 @@ impl Paths {
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
-            lcov_file: out_dir.join(format!("lcov-{name}.info")),
-            metadata_file: out_dir.join(format!("metadata-{name}.json")),
             doctests_bins_dir: out_dir.join("doctests-bins"),
         }
     }
@@ -231,15 +227,8 @@ impl Paths {
         if self.profdata_file.exists() {
             builder.remove(&self.profdata_file);
         }
-        if self.lcov_file.exists() {
-            builder.remove(&self.lcov_file);
-        }
-        if self.metadata_file.exists() {
-            builder.remove(&self.metadata_file);
-        }
 
         builder.create_dir(&self.profraw_dir);
-        builder.create_dir(self.lcov_file.parent().unwrap());
     }
 }
 

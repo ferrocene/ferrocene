@@ -213,6 +213,8 @@ pub struct Build {
 
     // Version information
     version: String,
+    // Ferrocene addition
+    ferrocene_version: String,
 
     // Properties derived from the above configuration
     src: PathBuf,
@@ -533,6 +535,11 @@ impl Build {
             .expect("failed to read src/version");
         let version = version.trim();
 
+        // Ferrocene addition
+        let ferrocene_version = std::fs::read_to_string(src.join("ferrocene").join("version"))
+            .expect("failed to read ferrocene/version");
+        let ferrocene_version = ferrocene_version.trim();
+
         let mut bootstrap_out = std::env::current_exe()
             .expect("could not determine path to running process")
             .parent()
@@ -575,6 +582,7 @@ impl Build {
 
             config,
             version: version.to_string(),
+            ferrocene_version: ferrocene_version.to_string(),
             src,
             out,
             bootstrap_out,
@@ -1710,8 +1718,18 @@ impl Build {
             && !s.is_empty()
         {
             version.push_str(" (");
+
+            // Ferrocene addition
+            version.push_str("Ferrocene ");
+            version.push_str(&self.ferrocene_version);
+            version.push(' ');
+
             version.push_str(s);
             version.push(')');
+        } else {
+            // Ferrocene addition
+            use std::fmt::Write;
+            let _ = write!(version, " (Ferrocene {})", self.ferrocene_version);
         }
         version
     }

@@ -35,6 +35,23 @@ request automatically, only requiring sign off of a reviewer to get merged.
 Sometimes merge conflicts may occur in which case automation opens an issue
 describing the conflict and requiring the upstream pull to be done manually.
 
+Reproducing failures
+^^^^^^^^^^^^^^^^^^^^
+
+If CI fails to run, you can imitate its behavior locally by first installing
+`gh <https://cli.github.com/>`_ then running the following comands:
+
+.. warning::
+
+   These commands destroy all uncommitted state in your working tree, then add dozens to hundreds of commits to your local branch.
+   Ensure you have committed your changes to git before running them.
+
+.. code-block:: bash
+
+    gh auth token | read GITHUB_TOKEN
+    export GITHUB_TOKEN
+    GITHUB_REPOSITORY=ferrocene/ferrocene ferrocene/tools/pull-subtrees/pull.py --automation-for-branch main --dry-run
+
 Backtrace subtree pull
 ^^^^^^^^^^^^^^^^^^^^^^
 

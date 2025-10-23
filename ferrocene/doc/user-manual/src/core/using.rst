@@ -19,5 +19,4 @@ Follow the Ferrocene rustc docs on how to :doc:`build an executable </rustc/exec
 Using the certified core library in an existing Rust project
 ------------------------------------------------------------
 
-To use the certified core library in an existing project, make sure you're using only the permitted functions listed
-in the :doc:`core-certification:subset`.
+To use the certified core library in an existing project, make sure you're using only the permitted functions according to :doc:`safety-manual:core/subset`.

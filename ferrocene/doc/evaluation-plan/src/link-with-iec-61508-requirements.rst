@@ -4,7 +4,7 @@
 Link with IEC 61508 Requirements
 ================================
 
-[|iec_ref|] requirements describe two steps for Software Tool Qualification
+[|iec_61508_ref|] requirements describe two steps for Software Tool Qualification
 (Part 3 - 7.4.4):
 
 #. Planning of usage

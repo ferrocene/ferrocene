@@ -6,17 +6,14 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod converts;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod count;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod error;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod traits;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod validations;
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -46,7 +43,6 @@ mod lossy;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use converts::{from_raw_parts, from_raw_parts_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use converts::{from_utf8, from_utf8_unchecked};
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -96,6 +92,11 @@ pub use traits::FromStr;
 #[unstable(feature = "str_internals", issue = "none")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use validations::{next_code_point, utf8_char_width};
+
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+pub use {error::Utf8Error, validations::utf8_char_width};
 
 #[inline(never)]
 #[cold]

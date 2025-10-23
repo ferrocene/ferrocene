@@ -4,7 +4,7 @@
 Link with ISO 26262 Requirements
 ================================
 
-[|iso_ref|] requirements describe three steps for Software Tool Qualification:
+[|iso_26262_ref|] requirements describe three steps for Software Tool Qualification:
 
 #. Planning of usage (Part 8 - Section 11.4.4)
 #. Evaluation of a software tool by analysis (Part 8 - Section 11.4.5)

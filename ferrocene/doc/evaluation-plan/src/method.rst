@@ -4,7 +4,7 @@
 Evaluation Method
 =================
 
-The [|iso_ref|] standard requires that the software Tool Confidence Level (TCL)
+The [|iso_26262_ref|] standard requires that the software Tool Confidence Level (TCL)
 shall be determined at the very beginning of the qualification process. For this
 evaluation, the Tool Impact (TI) and then the Tool error Detection level (TD)
 of each error will be determined. This is done by evaluating the use cases of
@@ -164,7 +164,7 @@ probability for the tool or the use case.
 Compute the Tool Confidence Level
 ---------------------------------
 
-The [|iso_ref|] standard (Part 8 - Section 11.4.5.5) determines the TCL by
+The [|iso_26262_ref|] standard (Part 8 - Section 11.4.5.5) determines the TCL by
 applying the TI and TD values with the following table:
 
 .. list-table::
@@ -210,7 +210,7 @@ Confidence Level is TCL2 or TCL3.
 Remark: we do not need a qualification for tools with a Tool Confidence Level
 TCL1.
 
-The following tables from the [|iso_ref|] standard indicate the appropriate
+The following tables from the [|iso_26262_ref|] standard indicate the appropriate
 qualification method:
 
 TCL2

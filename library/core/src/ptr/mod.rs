@@ -640,7 +640,6 @@ pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: us
 #[inline(always)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {
     // SAFETY: the safety contract for `copy` must be upheld by the caller.
     unsafe {
@@ -1105,7 +1104,6 @@ pub const fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_never_returns_null_ptr]
 #[rustc_diagnostic_item = "ptr_from_ref"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn from_ref<T: PointeeSized>(r: &T) -> *const T {
     r
 }
@@ -2138,7 +2136,6 @@ pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
 #[stable(feature = "volatile", since = "1.9.0")]
 #[track_caller]
 #[rustc_diagnostic_item = "ptr_read_volatile"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn read_volatile<T>(src: *const T) -> T {
     // SAFETY: the caller must uphold the safety contract for `volatile_load`.
     unsafe {
@@ -2226,7 +2223,6 @@ pub unsafe fn read_volatile<T>(src: *const T) -> T {
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_diagnostic_item = "ptr_write_volatile"]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
     // SAFETY: the caller must uphold the safety contract for `volatile_store`.
     unsafe {
@@ -2260,7 +2256,6 @@ pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
 ///
 /// Any questions go to @nagisa.
 #[allow(ptr_to_integer_transmute_in_consts)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
     // FIXME(#75598): Direct use of these intrinsics improves codegen significantly at opt-level <=
     // 1, where the method versions of these operations are not inlined.

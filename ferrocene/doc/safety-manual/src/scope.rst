@@ -64,18 +64,18 @@ projects by users of the Ferrocene compiler.
 User responsibility
 -------------------
 
-According to clause 11.4.2 of [|iso_ref|] part 8, the user shall verify the
+According to clause 11.4.2 of [|iso_26262_ref|] part 8, the user shall verify the
 validity of the predetermined TCL prior to the use of this software tool in a
 safety-related development.
 
-Furthermore, according to clause 11.4.3 of [|iso_ref|] part 8, the user
+Furthermore, according to clause 11.4.3 of [|iso_26262_ref|] part 8, the user
 shall ensure the usage, the environment, and the functional constraints of this
 software tool comply with its evaluation criteria or its qualification.
 
-Additionally, according to [|iec_med_ref|], a manufacturer of medical device software shall
+Additionally, according to [|iec_62304_ref|], a manufacturer of medical device software shall
 consider the used tools in the software development plan (clause 5.1.4) and in their configuration item control (clauses 5.1.10 and 5.1.11).
-Although [|iec_med_ref|] does not come with its own scheme of tool classification and validation, it recommends in Annex C.7
-the usage of techniques, tools and methods as defined in [|iec_ref|].
+Although [|iec_62304_ref|] does not come with its own scheme of tool classification and validation, it recommends in Annex C.7
+the usage of techniques, tools and methods as defined in [|iec_61508_ref|].
 
 
 Ferrocene is accompanied by the appropriate documentation to support this

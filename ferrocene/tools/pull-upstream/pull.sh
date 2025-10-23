@@ -6,8 +6,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
+FERROCENE_REPO=https://github.com/ferrocene/ferrocene
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
+X_HELP=src/etc/xhelp
 
 # We handle some lockfiles separately from upstream:
 # - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
@@ -51,15 +53,27 @@ automation_warning() {
     fi
 }
 
+commit_if_modified() {
+    file="$1"
+    message="$2"
+
+    if git status --porcelain=v1 | grep "^ M ${file}$" >/dev/null; then
+        git add "${file}"
+        git commit -m "${message}"
+    fi
+}
+
 if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then
     echo "usage: $0 <upstream-branch> [base-branch] [upstream-commit]"
     exit 1
 fi
 upstream_branch="$1"
 if [[ $# -ge 2 ]]; then
-    current_branch="$2"
+    # Allow not having the ref fetched locally (can happen from manual workflow_dispatch runs)
+    git fetch "$FERROCENE_REPO" "$2"
+    current_branch="$(git rev-parse FETCH_HEAD)"
 else
-    current_branch="$(git branch --show-current)"
+    current_branch="$(git rev-parse HEAD)"
 fi
 if [[ $# -ge 3 ]]; then
     upstream_commit="$3"
@@ -85,7 +99,7 @@ cd "$(git rev-parse --show-toplevel)"
 #
 # The update-index command ensures diff-index doesn't spuriously fail.
 # https://stackoverflow.com/questions/3878624#comment108071431_3879077
-git submodule update --init
+git submodule update
 git update-index --refresh
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
@@ -170,7 +184,7 @@ else
 fi
 
 git checkout "${current_branch}"
-if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
+if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # Merging failed, but the script might be able to resolve all the conflicts
     # on its own. This tries to resolve known conflicts and finish the merge.
     # If not all conflicts were resolved, control is given back to the user.
@@ -197,11 +211,13 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     #
     # To solve that, when a submodule gets in an unmerged state, the conflict is
     # fixed automatically by resetting the submodule to upstream's commit.
+    # FIXME: if there are any Ferrocene changes to the submodule, those are discarded entirely.
+    # This should open a Github issue saying the repo is invalid state and someone needs to manually fix it.
     all_submodules="$(git config --file .gitmodules --get-regexp 'submodule\..+\.path' | awk '{print($2)}')"
     for changed_file in $(git status --porcelain=v1 | sed -n 's/^UU //p'); do
         if grep -q "^${changed_file}$" <(echo "${all_submodules}"); then
             git reset "${upstream_commit}" -- "${changed_file}"
-            echo "pull-upstream: automatically resolved conflict for submodule ${changed_file}"
+            echo "pull-upstream: discarded all changes for submodule ${changed_file} and reset to upstream's version"
         fi
     done
 
@@ -242,7 +258,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
 
         # We do a `git submodule update` ahead of time to ensure the wrong
         # submodule commits are not accidentally added.
-        git submodule update --init
+        git submodule update
 
         # The person handling the conflict should decide what to do if a file
         # has been deleted on either side of the merge, but doing a `git add .`
@@ -296,18 +312,7 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
         echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
         continue
     fi
-    if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
-        git add "${lock}"
-        git commit -m "update ${lock} to match ${manifest}"
-    fi
-    if [ "${upstream_branch}" == "master" ]; then
-        echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
-        cargo update --manifest-path "${manifest}"
-        if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
-            git add "${lock}"
-            git commit -m "update ${lock} to latest semver-compatible crates"
-        fi
-    fi
+    commit_if_modified "$lock" "update ${lock} to match ${manifest}"
 done
 
 # We expose additional commands for `x.py` which affects the completions file generation,
@@ -315,22 +320,22 @@ done
 # does not need manual intervention.
 echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
 if ./x.py run generate-completions >/dev/null; then
-    if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
-        git add "${GENERATED_COMPLETIONS_DIR}"
-        git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
-    fi
+    commit_if_modified "${GENERATED_COMPLETIONS_DIR}" "update ${GENERATED_COMPLETIONS_DIR}"
 else
     automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
+fi
+echo "pull-upstream: checking whether ${X_HELP} needs to be updated..."
+if ./x.py run generate-help >/dev/null; then
+    commit_if_modified "${X_HELP}" "update ${X_HELP}"
+else
+    automation_warning "Couldn't regenerate the \`x.py\` help file. Please run \`./x run generate-help\` after fixing the merge conflicts."
 fi
 
 # Some parts of src/stage0 need to be updated when we branch off from main to a release branch.
 # Running the fixup script here ensures the fix is always applied.
 echo "pull-upstream: trying to fix src/stage0"
 ferrocene/ci/scripts/fix-stage0-branch.py || automation_warning "Could not fix src/stage0; will commit with conflict markers"
-if git status --porcelain=v1 | grep "^ M src/stage0$" >/dev/null; then
-    git add src/stage0
-    git commit -m "update src/stage0"
-fi
+commit_if_modified src/stage0 "update src/stage0"
 
 git branch -D "${TEMP_BRANCH}"
 

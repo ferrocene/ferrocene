@@ -83,7 +83,7 @@ Testing
 
 Associated requirement ID: :id:`RUSTC_AVD_TEST_007`
 
-The integrated testing objectives of |iso_ref| (Part 8 - Clause 11.4.9) must be
+The integrated testing objectives of |iso_26262_ref| (Part 8 - Clause 11.4.9) must be
 performed on the final application or libraries, or on any parts built,
 using build protocols as close as possible to those used for the final
 build.

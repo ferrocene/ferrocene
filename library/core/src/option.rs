@@ -595,7 +595,7 @@ use crate::{cmp, convert, hint, mem, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{convert, hint, panicking::panic};
+use crate::{convert, hint, mem, panicking::panic};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -818,7 +818,6 @@ impl<T> Option<T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     const fn len(&self) -> usize {
         // Using the intrinsic avoids emitting a branch to get the 0 or 1.
         let discriminant: isize = crate::intrinsics::discriminant_value(self);
@@ -1876,7 +1875,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn take(&mut self) -> Option<T> {
         // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
         mem::replace(self, None)
@@ -2278,7 +2276,6 @@ impl<T> const Default for Option<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> IntoIterator for Option<T> {
     type Item = T;
     type IntoIter = IntoIter<T>;
@@ -2458,7 +2455,6 @@ struct Item<A> {
     opt: Option<A>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A> Iterator for Item<A> {
     type Item = A;
 
@@ -2482,7 +2478,6 @@ impl<A> DoubleEndedIterator for Item<A> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A> ExactSizeIterator for Item<A> {
     #[inline]
     fn len(&self) -> usize {
@@ -2603,15 +2598,13 @@ unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 /// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
 ///
 /// This `struct` is created by the [`Option::into_iter`] function.
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct IntoIter<A> {
     inner: Item<A>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A> Iterator for IntoIter<A> {
     type Item = A;
 

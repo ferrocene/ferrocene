@@ -3098,9 +3098,9 @@ dependencies = [
 
 [[package]]
 name = "llvm_profparser"
-version = "0.8.3"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "709c1026b4902051c7cff758799defada26e18e41eb390648177e2e142c59fd9"
+checksum = "d67ff57e85c4295dcfcc939358e80c885e4f402db650d646c678d51c44e3798f"
 dependencies = [
  "anyhow",
  "flate2",
@@ -3109,7 +3109,7 @@ dependencies = [
  "md5",
  "nom",
  "object 0.26.2",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.1.1",
  "thiserror 1.0.69",
  "tracing",
 ]

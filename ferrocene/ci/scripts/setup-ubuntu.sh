@@ -3,6 +3,10 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeo pipefail
 
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::group::Install dependencies (Ubuntu)"
+fi
+
 # Ensure we never get asked/prompted, always take the new config
 echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 
@@ -26,4 +30,8 @@ if [[ "$GITHUB_ACTIONS" == "true" ]]; then
     sudo rm -rf /usr/local/lib/android
     sudo rm -rf /opt/ghcup
     df --human-readable
+fi
+
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::endgroup::"
 fi

@@ -7,6 +7,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::group::Checkout submodules"
+fi
+
 git submodule init
 submodules=${*:-$(git config --file .gitmodules --get-regexp path | awk '{ print $2 }')}
 current_branch=$(git symbolic-ref --short --quiet HEAD || echo "main")
@@ -20,3 +24,7 @@ for submodule in ${submodules}; do
     git -c "branch.${current_branch}.remote=origin" submodule update --depth 1 "${submodule}" &
 done
 wait
+
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::endgroup::"
+fi

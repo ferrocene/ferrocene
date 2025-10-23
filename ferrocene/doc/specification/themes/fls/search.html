@@ -1,0 +1,16 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+
+{% extends "basic/search.html" %}
+
+{% block body %}
+    <noscript>
+        <p>
+            The search functionality requires JavaScript to be enabled!
+            Please enable it to search in the documentation.
+        </p>
+    </noscript>
+    <section id="search-results">
+        <!-- Will be populated by JavaScript -->
+    </section>
+{% endblock %}

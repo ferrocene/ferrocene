@@ -173,18 +173,20 @@ fn main() {
     if let Some(expected_args) = option_env!("EXPECTED_ARGS") {
         let expected = expected_args.split("\t").collect::<Vec<_>>();
         let mut found = std::env::args().skip(1).collect::<Vec<_>>();
-        if Some("true") == option_env!("EXPECTED_ARGS_STRICT") {
-            assert_eq!(expected, found);
-        } else {
-            // Validate each of the args is present in the order provided,
-            // ignore the rest.
-            for item in expected {
-                let val = found.iter().enumerate().find(|(_, v)| *v == &item.to_string());
-                assert!(val.is_some(), "Did not find argument");
-                // Get rid of all the previous args so that we can validate the expected
-                // args are in-order.
-                found = found.split_off(val.unwrap().0);
-            }
+        match option_env!("EXPECTED_ARGS_STRICT") {
+            Some("true") => assert_eq!(expected, found),
+            Some("false") => {
+                // Validate each of the args is present in the order provided,
+                // ignore the rest.
+                for item in expected {
+                    let val = found.iter().enumerate().find(|(_, v)| *v == &item.to_string());
+                    assert!(val.is_some(), "Did not find argument");
+                    // Get rid of all the previous args so that we can validate the expected
+                    // args are in-order.
+                    found = found.split_off(val.unwrap().0);
+                }
+            },
+            _ => panic!("Invalid env passed to `EXPECTED_ARGS_STRICT`, should be 'true' or 'false'"),
         }
     }
     if let Some(stdout) = option_env!("OVERRIDE_STDOUT") {
@@ -198,3 +200,94 @@ fn main() {
     }
 }
 "#;
+
+#[test]
+fn test_missing_args() {
+    let utils = TestUtils::new();
+    let expected = ["--waffle", "--pancake", "-lefse", "stroopwaffel"];
+    let strict_bin = utils
+        .bin("strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(true)
+        .create();
+
+    let non_strict_bin = utils
+        .bin("non-strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(false)
+        .create();
+
+    assert_eq!(
+        Command::new(strict_bin).args(["--waffle"]).output().unwrap().status.success(),
+        false
+    );
+    assert_eq!(
+        Command::new(non_strict_bin).args(["--waffle"]).output().unwrap().status.success(),
+        false
+    );
+}
+
+#[test]
+fn test_expected_args() {
+    let utils = TestUtils::new();
+    let expected = ["--waffle", "--pancake", "-lefse", "stroopwaffel"];
+    let strict_bin = utils
+        .bin("strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(true)
+        .create();
+
+    let non_strict_bin = utils
+        .bin("non-strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(false)
+        .create();
+
+    assert_eq!(Command::new(strict_bin).args(expected).output().unwrap().status.success(), true);
+    assert_eq!(
+        Command::new(non_strict_bin).args(expected).output().unwrap().status.success(),
+        true
+    );
+}
+
+#[test]
+fn test_args_wrong_order() {
+    let utils = TestUtils::new();
+    let expected = ["--waffle", "--pancake", "-lefse", "stroopwaffel"];
+    let strict_bin = utils
+        .bin("strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(true)
+        .create();
+
+    let non_strict_bin = utils
+        .bin("non-strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(false)
+        .create();
+
+    let passed = ["--waffle", "--pancake", "stroopwaffel", "-lefse"];
+    assert_eq!(Command::new(strict_bin).args(passed).output().unwrap().status.success(), false);
+    assert_eq!(Command::new(non_strict_bin).args(passed).output().unwrap().status.success(), false);
+}
+
+#[test]
+fn test_args_extra_args() {
+    let utils = TestUtils::new();
+    let expected = ["--waffle", "--pancake", "-lefse", "stroopwaffel"];
+    let strict_bin = utils
+        .bin("strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(true)
+        .create();
+
+    let non_strict_bin = utils
+        .bin("non-strict-flapjack-analogs")
+        .expected_args(&expected)
+        .expected_args_strict(false)
+        .create();
+
+    let passed = ["--waffle", "--pancake", "-lefse", "stroopwaffel", "--dogs"];
+    assert_eq!(Command::new(strict_bin).args(passed).output().unwrap().status.success(), false);
+    assert_eq!(Command::new(non_strict_bin).args(passed).output().unwrap().status.success(), true);
+}

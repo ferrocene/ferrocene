@@ -43,7 +43,7 @@ impl Callbacks for LoadCoreSymbols {
             // TODO: skip associated default functions inherited from the trait
             // https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/ty/struct.TyCtxt.html#method.provided_trait_methods
             if kind == DefKind::AssocFn {}
-            let module_path = with_no_visible_paths!(with_resolve_crate_name!(
+            let function_path = with_no_visible_paths!(with_resolve_crate_name!(
                 with_no_trimmed_paths!(tcx.def_path_str(def))
             ));
             let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
@@ -51,7 +51,7 @@ impl Callbacks for LoadCoreSymbols {
             let filename = lines.file.name.display(FileNameDisplayPreference::Local).to_string();
             let start_line = lines.lines.first().unwrap().line_index + 1;
             let end_line = lines.lines.last().unwrap().line_index + 1;
-            symbols.push(Function { module_path, filename, start_line, end_line });
+            symbols.push(Function { function_path, filename, start_line, end_line });
         }
         serde_json::to_writer(out, &Symbols(symbols)).expect("failed to serialize symbols");
         Compilation::Stop

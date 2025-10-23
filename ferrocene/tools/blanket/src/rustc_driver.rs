@@ -12,9 +12,9 @@ pub fn coverage(cmd: &ShowCommand, report: &CoverageReport) -> Result<Vec<Functi
             .context(format!("failed to open symbol file {}", cmd.symbol_report.display()))?,
     )?;
     let mut coverage = vec![];
-    for Function { module_path, filename, start_line, end_line } in symbols.0 {
+    for Function { function_path, filename, start_line, end_line } in symbols.0 {
         let span = Span { filename: filename.into(), start_line, end_line };
-        coverage.push(super::get_coverage(report, span, &cmd.ferrocene, module_path)?);
+        coverage.push(super::get_coverage(report, span, &cmd.ferrocene, function_path)?);
     }
     Ok(coverage)
 }

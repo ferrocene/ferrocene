@@ -8,7 +8,11 @@ pub struct Symbols(pub Vec<Function>);
 #[serde(from = "SerdeFunction")]
 #[serde(into = "SerdeFunction")]
 pub struct Function {
-    pub module_path: String,
+    /// The fully qualified path to the function, for example:
+    /// - `core::ptr::copy`
+    /// - `core::cmp::impls::<impl core::cmp::PartialEq for u8>::eq`
+    /// - `core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u128> for usize>::try_from`
+    pub function_path: String,
     pub filename: String,
     pub start_line: usize,
     pub end_line: usize,
@@ -20,12 +24,12 @@ struct SerdeFunction(String, String, usize, usize);
 
 impl From<SerdeFunction> for Function {
     fn from(value: SerdeFunction) -> Self {
-        Self { module_path: value.0, filename: value.1, start_line: value.2, end_line: value.3 }
+        Self { function_path: value.0, filename: value.1, start_line: value.2, end_line: value.3 }
     }
 }
 
 impl From<Function> for SerdeFunction {
-    fn from(Function { module_path, filename, start_line, end_line }: Function) -> Self {
-        Self(module_path, filename, start_line, end_line)
+    fn from(Function { function_path, filename, start_line, end_line }: Function) -> Self {
+        Self(function_path, filename, start_line, end_line)
     }
 }

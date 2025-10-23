@@ -31,7 +31,6 @@ def setup(app):
     app.add_config_value("rustfmt_version", None, "env", [str])
     app.add_config_value("ferrocene_version", None, "env", [str])
     app.add_config_value("rust_version", None, "env", [str])
-    app.add_config_value("grcov_version", None, "env", [str])
     app.add_config_value("llvm_version", None, "env", [str])
 
     return {

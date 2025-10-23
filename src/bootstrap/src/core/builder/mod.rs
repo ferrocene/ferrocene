@@ -1036,7 +1036,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::tool::flip_link::FlipLink,
                 tool::FerroceneGenerateTarball,
                 tool::FerroceneTraceabilityMatrix,
-                tool::FerroceneGrcov,
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,

@@ -5,7 +5,6 @@ updates:
     directory: /
     allow:
       - dependency-name: ferrocene/tools/flip-link
-      - dependency-name: ferrocene/tools/grcov
     schedule:
       interval: daily
       time: "05:00"

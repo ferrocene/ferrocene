@@ -50,6 +50,3 @@
 	path = src/gcc
 	url = https://github.com/rust-lang/gcc.git
 	shallow = true
-[submodule "ferrocene/tools/grcov"]
-	path = ferrocene/tools/grcov
-	url = https://github.com/mozilla/grcov

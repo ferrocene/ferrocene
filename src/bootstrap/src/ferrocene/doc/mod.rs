@@ -222,12 +222,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 builder.crates.get("rustfmt-nightly").unwrap().version,
             ))
             .arg(format!(
-                "-Dgrcov_version={}",
-                get_submodule_version("ferrocene/tools/grcov", builder)
-                    .as_deref()
-                    .unwrap_or("not found")
-            ))
-            .arg(format!(
                 "-Dllvm_version={}",
                 get_submodule_version("src/llvm-project", builder)
                     .as_deref()

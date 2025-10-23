@@ -238,18 +238,6 @@ SPDX-FileCopyrightText = "Colin Watson"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]
-path = "ferrocene/tools/grcov/**"
-precedence = "override"
-SPDX-FileCopyrightText = "The grcov developers"
-SPDX-License-Identifier = "MPL-2.0"
-
-[[annotations]]
-path = "ferrocene/tools/grcov/src/bulma"
-precedence = "override"
-SPDX-FileCopyrightText = "Jeremy Thomas"
-SPDX-License-Identifier = "MIT"
-
-[[annotations]]
 path = [
     "requirements.txt",
     ".python-version",

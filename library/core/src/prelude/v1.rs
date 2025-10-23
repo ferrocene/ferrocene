@@ -56,7 +56,7 @@ pub use crate::result::Result::{self, Err, Ok};
 #[doc(no_inline)]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use crate::iter::{IntoIterator, Iterator};
+pub use crate::iter::{ExactSizeIterator, Extend, IntoIterator, Iterator};
 
 // Re-exported built-in macros
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]

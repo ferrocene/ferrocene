@@ -393,7 +393,6 @@ impl<I: Iterator> IntoIterator for I {
 /// assert_eq!("MyCollection([5, 6, 7, 1, 2, 3])", format!("{c:?}"));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Extend<A> {
     /// Extends a collection with the contents of an iterator.
     ///

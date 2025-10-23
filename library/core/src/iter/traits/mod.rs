@@ -3,7 +3,6 @@ mod accum;
 mod collect;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod double_ended;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod exact_size;
 mod iterator;
 mod marker;
@@ -34,4 +33,9 @@ pub use self::{
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use self::{collect::IntoIterator, iterator::Iterator, marker::TrustedLen};
+pub use self::{
+    collect::{Extend, IntoIterator},
+    exact_size::ExactSizeIterator,
+    iterator::Iterator,
+    marker::TrustedLen,
+};

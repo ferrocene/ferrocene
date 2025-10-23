@@ -113,6 +113,7 @@ pub trait ExactSizeIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn len(&self) -> usize {
         let (lower, upper) = self.size_hint();
         // Note: This assertion is overly defensive, but it checks the invariant
@@ -122,6 +123,11 @@ pub trait ExactSizeIterator: Iterator {
         assert_eq!(upper, Some(lower));
         lower
     }
+    /// Ferrocene addition: Gate default implementation
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "ferrocene_certified")]
+    fn len(&self) -> usize;
 
     /// Returns `true` if the iterator is empty.
     ///

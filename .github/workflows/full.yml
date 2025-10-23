@@ -152,7 +152,6 @@ jobs:
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
-          - test
           - test:compiletest 
           - test:library
         include:

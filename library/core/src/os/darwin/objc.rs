@@ -67,7 +67,9 @@ pub type SEL = *mut objc_selector;
 ///
 /// # Example
 ///
-/// ```no_run
+// Ferrocene addition: this fails to link. Since it's marked no_run, it doesn't generate coverage
+// anyway. Change it from no_run -> ignore.
+/// ```ignore (fails to link with -C instrument-coverage)
 /// #![feature(darwin_objc)]
 /// use core::os::darwin::objc;
 ///

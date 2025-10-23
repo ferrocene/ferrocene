@@ -62,7 +62,7 @@ pub(crate) fn measure_coverage(
     target: TargetSelection,
     coverage_for: FerroceneCoverageFor,
 ) {
-    // Pre-requisites for the `generate_report()` function are built here, as that function is
+    // Pre-requisites for the `generate_coverage_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
     builder.ensure(Llvm { target });
 

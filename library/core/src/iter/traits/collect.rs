@@ -132,7 +132,6 @@ use super::TrustedLen;
     label = "value of type `{Self}` cannot be built from `std::iter::Iterator<Item={A}>`"
 )]
 #[rustc_diagnostic_item = "FromIterator"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait FromIterator<A>: Sized {
     /// Creates a value from an iterator.
     ///

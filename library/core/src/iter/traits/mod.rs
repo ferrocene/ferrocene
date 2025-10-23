@@ -34,7 +34,7 @@ pub use self::{
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 pub use self::{
-    collect::{Extend, IntoIterator},
+    collect::{Extend, FromIterator, IntoIterator},
     exact_size::ExactSizeIterator,
     iterator::Iterator,
     marker::TrustedLen,

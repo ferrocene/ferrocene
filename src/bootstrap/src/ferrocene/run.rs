@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod update_certified_core_symbols;
+
 use std::path::{Path, PathBuf};
 
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
@@ -161,10 +163,7 @@ impl Step for CertifiedCoreSymbols {
 
         let _guard = builder.msg(
             Kind::Run,
-            format_args!(
-                "symbol-report for certified library subset{}",
-                crate_description(&crates)
-            ),
+            format!("symbol-report for certified library subset{}", crate_description(&crates)),
             Mode::Std,
             build_compiler,
             certified_target,

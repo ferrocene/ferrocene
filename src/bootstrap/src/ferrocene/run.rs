@@ -124,13 +124,15 @@ pub(crate) struct CertifiedCoreSymbols {
     pub(super) target: TargetSelection,
 }
 
+pub(super) const CERTIFIED_CORE_SYMBOLS_ALIAS: &str = "certified-core-symbols";
+
 impl Step for CertifiedCoreSymbols {
     type Output = PathBuf;
     const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(SYMBOL_PATH).alias("certified-core-symbols")
+        run.path(SYMBOL_PATH).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
     }
 
     fn make_run(run: RunConfig<'_>) {

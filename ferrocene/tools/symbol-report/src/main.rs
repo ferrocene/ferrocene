@@ -53,7 +53,7 @@ impl Callbacks for LoadCoreSymbols {
             let end_line = lines.lines.last().unwrap().line_index + 1;
             symbols.push(Function { function_path, filename, start_line, end_line });
         }
-        serde_json::to_writer(out, &Symbols(symbols)).expect("failed to serialize symbols");
+        serde_json::to_writer_pretty(out, &Symbols(symbols)).expect("failed to serialize symbols");
         Compilation::Stop
     }
 }

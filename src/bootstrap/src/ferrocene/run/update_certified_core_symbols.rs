@@ -28,8 +28,7 @@ impl Step for UpdateCertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let build_compiler = builder.compiler(builder.top_stage.max(1), self.host);
-        let path = builder.ensure(CertifiedCoreSymbols { build_compiler, target: self.host });
+        let path = builder.ensure(CertifiedCoreSymbols { host: self.host, target: self.host });
         fs::copy(path, TRACKED_FILE).unwrap();
         eprintln!("Updated {TRACKED_FILE}");
     }

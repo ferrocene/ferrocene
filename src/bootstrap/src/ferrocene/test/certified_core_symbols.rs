@@ -39,9 +39,8 @@ impl Step for CertifiedCoreSymbols {
         }
 
         // generate the actual symbol report
-        let build_compiler = builder.compiler(builder.top_stage.max(1), self.host);
-        let actual_path =
-            builder.ensure(run::CertifiedCoreSymbols { build_compiler, target: self.host });
+        let host = self.host;
+        let actual_path = builder.ensure(run::CertifiedCoreSymbols { host, target: host });
         let actual = builder.read(&actual_path);
 
         // compare the two

@@ -254,9 +254,15 @@
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Debug, Display};
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PhantomData, Unsize};
 #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 96fe3c31c2e
+use crate::marker::{PhantomData, Unsize};
+=======
+use crate::marker::{Destruct, PhantomData, Unsize};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::mem::{self, ManuallyDrop};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
@@ -453,7 +459,11 @@ impl<T> Cell<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn set(&self, val: T) {
+    #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
+    pub const fn set(&self, val: T)
+    where
+        T: [const] Destruct,
+    {
         self.replace(val);
     }
 
@@ -586,7 +596,12 @@ impl<T: Copy> Cell<T> {
     /// ```
     #[inline]
     #[stable(feature = "cell_update", since = "1.88.0")]
-    pub fn update(&self, f: impl FnOnce(T) -> T) {
+    #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
+    pub const fn update(&self, f: impl [const] FnOnce(T) -> T)
+    where
+        // FIXME(const-hack): `Copy` should imply `const Destruct`
+        T: [const] Destruct,
+    {
         let old = self.get();
         self.set(f(old));
     }
@@ -681,7 +696,11 @@ impl<T: Default> Cell<T> {
     /// assert_eq!(c.into_inner(), 0);
     /// ```
     #[stable(feature = "move_cell", since = "1.17.0")]
-    pub fn take(&self) -> T {
+    #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
+    pub const fn take(&self) -> T
+    where
+        T: [const] Default,
+    {
         self.replace(Default::default())
     }
 }

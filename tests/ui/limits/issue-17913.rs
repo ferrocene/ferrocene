@@ -1,5 +1,7 @@
 //@ build-fail
+//@ stderr-per-bitwidth
 //@ normalize-stderr: "\[&usize; \d+\]" -> "[&usize; usize::MAX]"
+//@ normalize-stderr: "\[&n; 0x[0-9A-F]+_usize\]" -> "[&n; SIZE]"
 
 #[cfg(target_pointer_width = "64")]
 fn main() {
@@ -16,6 +18,7 @@ fn main() {
 }
 
 //~? ERROR are too big for the target architecture
+<<<<<<< HEAD
 
 // ferrocene-annotations: fls_xinykul167l
 // Array Expressions
@@ -25,3 +28,7 @@ fn main() {
 //
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg
+||||||| 96fe3c31c2e
+=======
+//~? ERROR are too big for the target architecture
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

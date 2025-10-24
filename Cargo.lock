@@ -4807,6 +4807,8 @@ name = "rustc_errors"
 version = "0.0.0"
 dependencies = [
  "annotate-snippets 0.11.5",
+ "anstream",
+ "anstyle",
  "derive_setters",
  "rustc_abi",
  "rustc_ast",
@@ -4823,7 +4825,6 @@ dependencies = [
  "rustc_span",
  "serde",
  "serde_json",
- "termcolor",
  "termize",
  "tracing",
  "windows",
@@ -5377,7 +5378,6 @@ dependencies = [
  "rustc_macros",
  "rustc_session",
  "rustc_span",
- "termcolor",
  "thin-vec",
  "tracing",
  "unicode-normalization",

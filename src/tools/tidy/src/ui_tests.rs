@@ -7,15 +7,22 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+<<<<<<< HEAD
 use ignore::Walk;
 
 use crate::diagnostics::{CheckId, DiagCtx, RunningCheck};
+||||||| 96fe3c31c2e
+use crate::diagnostics::{CheckId, DiagCtx, RunningCheck};
+=======
+use crate::diagnostics::{CheckId, RunningCheck, TidyCtx};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 const ISSUES_TXT_HEADER: &str = r#"============================================================
     ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
 ============================================================
 "#;
 
+<<<<<<< HEAD
 fn check_stray_ferrocene_files(tests_path: &Path, check: &mut RunningCheck) {
     let mut directories: HashMap<PathBuf, u32> = HashMap::new();
 
@@ -36,9 +43,21 @@ fn check_stray_ferrocene_files(tests_path: &Path, check: &mut RunningCheck) {
 }
 
 pub fn check(root_path: &Path, bless: bool, diag_ctx: DiagCtx) {
+||||||| 96fe3c31c2e
+pub fn check(root_path: &Path, bless: bool, diag_ctx: DiagCtx) {
+=======
+pub fn check(root_path: &Path, tidy_ctx: TidyCtx) {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     let path = &root_path.join("tests");
+<<<<<<< HEAD
     let mut check = diag_ctx.start_check(CheckId::new("ui_tests").path(path));
     check_stray_ferrocene_files(path, &mut check);
+||||||| 96fe3c31c2e
+    let mut check = diag_ctx.start_check(CheckId::new("ui_tests").path(path));
+=======
+    let mut check = tidy_ctx.start_check(CheckId::new("ui_tests").path(path));
+    let bless = tidy_ctx.is_bless_enabled();
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     // the list of files in ui tests that are allowed to start with `issue-XXXX`
     // BTreeSet because we would like a stable ordering so --bless works

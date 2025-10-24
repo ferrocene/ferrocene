@@ -167,8 +167,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     builder.info("Listing symbols for the certified libcore subset");
     let symbol_report = builder.ensure(CertifiedCoreSymbols {
-        // We need at least stage 1 so that our compiler knows about .certified targets.
-        build_compiler: builder.compiler(builder.top_stage.max(1), builder.config.host_target),
+        host: builder.config.host_target,
         target: builder.config.host_target,
     });
 

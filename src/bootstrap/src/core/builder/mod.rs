@@ -1107,6 +1107,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::SelfTest,
                 crate::ferrocene::test::CheckDocumentSignatures,
                 crate::ferrocene::test::GenerateTarball,
+                crate::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
                 test::Bootstrap,

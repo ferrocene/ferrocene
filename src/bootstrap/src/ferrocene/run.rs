@@ -120,7 +120,7 @@ impl Step for TraceabilityMatrix {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols {
-    pub(super) build_compiler: Compiler,
+    pub(super) host: TargetSelection,
     pub(super) target: TargetSelection,
 }
 
@@ -136,15 +136,17 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        let build_compiler = run.builder.compiler(run.builder.top_stage.max(1), run.build_triple());
-        run.builder.ensure(CertifiedCoreSymbols { build_compiler, target: run.target });
+        run.builder.ensure(CertifiedCoreSymbols { host: run.build_triple(), target: run.target });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let CertifiedCoreSymbols { build_compiler, target: _ } = self;
+        let CertifiedCoreSymbols { host, target } = self;
+
+        // We need at least stage 1 so that our compiler knows about .certified targets.
+        let build_compiler = builder.compiler(builder.top_stage.max(1), host);
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
-        let certified_target = self.target.certified_equivalent();
+        let certified_target = target.certified_equivalent();
 
         // c.f. check::std
         let mut cargo = Cargo::new(
@@ -231,8 +233,10 @@ impl Step for CoverageReport {
             CoverageState { compiler: build_compiler, target: run.target, coverage_for: for_ };
         let instrumented_binaries = code_coverage::instrumented_binaries(builder, &paths, &state);
 
-        let symbol_report =
-            builder.ensure(CertifiedCoreSymbols { build_compiler, target: certified_target });
+        let symbol_report = builder.ensure(CertifiedCoreSymbols {
+            host: builder.config.host_target,
+            target: certified_target,
+        });
 
         builder.ensure(CoverageReport {
             certified_target,

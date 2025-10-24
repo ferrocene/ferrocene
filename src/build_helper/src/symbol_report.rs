@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::collections::{BTreeMap, BTreeSet};
 
 pub use serde_json;

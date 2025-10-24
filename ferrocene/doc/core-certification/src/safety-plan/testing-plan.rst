@@ -7,7 +7,9 @@ Testing Plan
 Re-verification scope
 ---------------------
 
-On every pull request, the full Ferrocene test suite is executed, which includes the tests for the core library, and all release artifacts are built. Therefore no impact assessment is necessary, since all tests are run anyways.
+Before a pull request is merged, the full Ferrocene test suite is executed,
+which includes the tests for the core library.
+In addition, all release artifacts are built. As a result, no impact assessment is necessary.
 
 Test workflow
 -------------
@@ -56,14 +58,14 @@ In order to gather code coverage information, an additional test run of the core
 
 It is ensured that both the instrumented and not instrumented coretests run succeeds. This ensures that coverage instrumentation does not introduce any correctness issues.
 
-Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``. This is sufficient because the the code of the core library is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
+Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``. This is sufficient because the code of the core library is largely platform independent, and code coverage is only a measure of the quality of the test suite. Correctness is still tested by running the tests on all qualified targets.
 
 How it works:
 
 1. ``rustc`` is instructed to instrument the binary by passing ``-Cinstrument-coverage``.
 2. The ``coretests`` test suite is executed. Due to the instrumentation, this will create ``.profraw`` files that contain the coverage information.
 3. ``symbol-report`` is used to generate a ``symbol-report.json`` including all symbols in the certified subset and their spans.
-4. ``blanket`` is used to generate a HTML coverage report from the ``.profraw`` files, the ``symbol-report.json`` and the instrumented binaries.
+4. ``blanket`` is used to generate a HTML coverage report from the ``.profraw`` files, the ``symbol-report.json``, and the instrumented binaries.
 
 Manual test coverage
 """"""""""""""""""""

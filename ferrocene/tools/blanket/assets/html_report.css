@@ -50,6 +50,9 @@ code {
     color: var(--var-untested-annotated);
     text-decoration: var(--var-annotated-text);
 }
+.functions .fully-untested .partial-annotation > summary {
+    color: var(--var-untested);
+}
 .functions[data-filter="fully-untested"] section:not([data-status="fully-untested"]) {
     display: none;
 }
@@ -78,6 +81,9 @@ code {
     color: var(--var-partial-annotated);
     text-decoration: var(--var-annotated-text);
 }
+.functions .partially-tested .partial-annotation > summary {
+    color: var(--var-partial);
+}
 .functions[data-filter="partially-tested"] section:not([data-status="partially-tested"]) {
     display: none;
 }
@@ -88,6 +94,10 @@ code {
 
 details.annotation summary::after {
     content: " (Annotated)";
+    color: black;
+}
+details.partial-annotation summary::after {
+    content: " (Partially Annotated)";
     color: black;
 }
 

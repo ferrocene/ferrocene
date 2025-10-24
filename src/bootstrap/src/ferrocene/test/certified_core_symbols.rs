@@ -41,9 +41,8 @@ impl Step for CertifiedCoreSymbols {
         let expected = serde_json::from_str::<QualifiedFnList>(&expected_content).unwrap();
 
         // generate the actual list of qualified functions
-        let build_compiler = builder.compiler(builder.top_stage.max(1), self.host);
         let actual_symbol_report_path =
-            builder.ensure(run::CertifiedCoreSymbols { build_compiler, target: self.host });
+            builder.ensure(run::CertifiedCoreSymbols { host: self.host, target: self.host });
         let actual_symbol_report_content = builder.read(&actual_symbol_report_path);
         let actual_symbol_report =
             serde_json::from_str::<SymbolReport>(&actual_symbol_report_content).unwrap();

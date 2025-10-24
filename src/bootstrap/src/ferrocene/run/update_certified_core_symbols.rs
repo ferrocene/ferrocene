@@ -30,9 +30,8 @@ impl Step for UpdateCertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let build_compiler = builder.compiler(builder.top_stage.max(1), self.host);
         let symbol_report_path =
-            builder.ensure(CertifiedCoreSymbols { build_compiler, target: self.host });
+            builder.ensure(CertifiedCoreSymbols { host: self.host, target: self.host });
         let symbol_report_content = fs::read_to_string(&symbol_report_path).unwrap();
         let symbol_report = serde_json::from_str::<SymbolReport>(&symbol_report_content).unwrap();
 

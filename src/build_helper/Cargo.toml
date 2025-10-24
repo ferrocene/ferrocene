@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 serde = "1"
 serde_derive = "1"
+
+# Ferrocene addition
+similar = "2"

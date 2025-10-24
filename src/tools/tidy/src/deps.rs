@@ -288,12 +288,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cc",
     "cfg-if",
     "cfg_aliases",
-<<<<<<< HEAD
-    "const-oid", // this is a false positive: it's only used by generate-tarball
-||||||| 96fe3c31c2e
-=======
     "colorchoice",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    "const-oid", // this is a false positive: it's only used by generate-tarball
     "constant_time_eq",
     "cpufeatures",
     "crc32fast",
@@ -369,13 +365,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "object",
     "odht",
     "once_cell",
-<<<<<<< HEAD
-||||||| 96fe3c31c2e
-    "overload",
-=======
     "once_cell_polyfill",
-    "overload",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "parking_lot",
     "parking_lot_core",
     "pathdiff",
@@ -474,18 +464,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "wasi",
     "wasm-encoder",
     "wasmparser",
-<<<<<<< HEAD
-    "winapi-util",
-||||||| 96fe3c31c2e
-    "winapi",
-    "winapi-i686-pc-windows-gnu",
-    "winapi-util",
-    "winapi-x86_64-pc-windows-gnu",
-=======
-    "winapi",
-    "winapi-i686-pc-windows-gnu",
-    "winapi-x86_64-pc-windows-gnu",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "windows",
     "windows-collections",
     "windows-core",

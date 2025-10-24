@@ -254,15 +254,9 @@
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Debug, Display};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::{PhantomData, Unsize};
-#[cfg(not(feature = "ferrocene_certified"))]
-||||||| 96fe3c31c2e
-use crate::marker::{PhantomData, Unsize};
-=======
 use crate::marker::{Destruct, PhantomData, Unsize};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, ManuallyDrop};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};

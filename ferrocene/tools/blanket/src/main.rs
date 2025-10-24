@@ -1,5 +1,6 @@
 // Derived from https://github.com/xd009642/llvm-profparser/blob/f12a20d33b371f62a3b63f3a19d2320c25aa48b9/src/bin/cov.rs
 
+use std::collections::BTreeSet;
 use std::fmt;
 use std::path::PathBuf;
 
@@ -149,17 +150,30 @@ impl FunctionCoverageStatus {
 }
 
 #[derive(Debug)]
+enum Annotated {
+    Fully,
+    Partially,
+    Not,
+}
+
+#[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
     relative_path: PathBuf,
     lines: LineCoverage,
     status: FunctionCoverageStatus,
+    annotated: Annotated,
 }
 
 impl FunctionCoverage {
-    fn new(source_name: String, filename: PathBuf, lines: LineCoverage) -> Self {
+    fn new(
+        source_name: String,
+        filename: PathBuf,
+        lines: LineCoverage,
+        annotated: Annotated,
+    ) -> Self {
         let status = FunctionCoverageStatus::new(&lines);
-        Self { source_name, relative_path: filename, lines, status }
+        Self { source_name, relative_path: filename, lines, status, annotated }
     }
 }
 
@@ -169,11 +183,37 @@ struct Span {
     end_line: usize,
 }
 
+fn get_annotation_status(
+    annotations: Option<&BTreeSet<(usize, usize)>>,
+    requires_annotation_count: usize,
+    requires_annotation: impl IntoIterator<Item = usize>,
+) -> Annotated {
+    annotations.map_or(Annotated::Not, |annotations| {
+        // count how many lines that require an annotation actually have one.
+        let has_annotation_count = requires_annotation
+            .into_iter()
+            .filter(|line| annotations.iter().any(|&(start, end)| (start..=end).contains(&line)))
+            .count();
+        if has_annotation_count == 0 && requires_annotation_count != 0 {
+            // If no lines are annotated but some lines require them, the function is not annotated.
+            Annotated::Not
+        } else if has_annotation_count < requires_annotation_count {
+            // If there are less annotated lines than what's required, the function is partially
+            // annotated.
+            Annotated::Partially
+        } else {
+            // Otherwise the function is fully annotated
+            Annotated::Fully
+        }
+    })
+}
+
 fn get_coverage(
     report: &CoverageReport,
     span: Span,
     ferrocene: &std::path::Path,
     source_name: String,
+    annotations: Option<&BTreeSet<(usize, usize)>>,
 ) -> Result<FunctionCoverage> {
     let Span { filename, start_line, end_line } = span;
     let absolute_path = if filename.is_relative() {
@@ -198,21 +238,34 @@ fn get_coverage(
             "warning: couldn't find source file {} in coverage report",
             absolute_path.display()
         );
-        return Ok(FunctionCoverage::new(source_name, filename, no_coverage));
+
+        // All lines require annotations as we didn't get any hits from the tool.
+        let annotated = get_annotation_status(annotations, end_line - start_line + 1, source_lines);
+
+        return Ok(FunctionCoverage::new(source_name, filename, no_coverage, annotated));
     };
 
     let mut covered = vec![];
+    // collect all the lines that require an annotation.
+    let mut untested_lines = vec![];
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
         let status = match func_coverage.hits_for_line(line) {
             None => LineCoverageStatus::Ignored,
-            Some(0) => LineCoverageStatus::Untested,
+            Some(0) => {
+                // If a line is untested, it should have an annotation.
+                untested_lines.push(line);
+                LineCoverageStatus::Untested
+            }
             Some(_) => LineCoverageStatus::Tested,
         };
         covered.push((line, status));
     }
-    Ok(FunctionCoverage::new(source_name, filename, LineCoverage { lines: covered }))
+
+    let annotated = get_annotation_status(annotations, untested_lines.len(), untested_lines);
+
+    Ok(FunctionCoverage::new(source_name, filename, LineCoverage { lines: covered }, annotated))
 }
 
 impl ShowCommand {

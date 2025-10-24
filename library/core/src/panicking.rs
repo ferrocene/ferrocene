@@ -72,8 +72,9 @@ compile_error!(
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 // Ferrocene change: `fmt` is a type alias to accomodate certified core
 pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
-    // Ferrocene annotation: The `immediate-abort` behavior is not certified, we only support
-    // `abort`.
+    #[ferrocene::annotation(
+        "The `immediate-abort` behavior is not certified, we only support `abort`."
+    )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }
@@ -110,9 +111,8 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
 pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) -> ! {
-    // Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
-
     const_eval_select!(
         @capture { fmt: PanicFmt<'_>, _force_no_backtrace: bool } -> !:
         if const #[track_caller] {
@@ -196,11 +196,8 @@ macro_rules! panic_const {
             #[track_caller]
             #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
             #[lang = stringify!($lang)]
+            #[ferrocene::annotation("Cannot be covered as this code cannot be reached during runtime.")]
             pub const fn $lang() -> ! {
-                // Ferrocene annotation: Cannot be covered as this code cannot be reached during
-                // runtime.
-                //
-                // Not part of the annotation:
                 // Use Arguments::new_const instead of format_args!("{expr}") to potentially
                 // reduce size overhead. The format_args! macro uses str's Display trait to
                 // write expr, which calls Formatter::pad, which must accommodate string
@@ -259,8 +256,8 @@ pub mod panic_const {
 #[lang = "panic_nounwind"] // needed by codegen for non-unwinding panics
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
+#[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
 pub const fn panic_nounwind(expr: &'static str) -> ! {
-    // Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
     #[cfg(feature = "ferrocene_certified")]
@@ -314,7 +311,6 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }
-
     panic!("index out of bounds: the len is {len} but the index is {index}")
 }
 
@@ -382,10 +378,8 @@ fn panic_invalid_enum_construction(source: u128) -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[lang = "panic_cannot_unwind"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
+#[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
 fn panic_cannot_unwind() -> ! {
-    // Ferrocene annotation: Cannot be covered as it causes an unwinding panic.
-    //
-    // Not part of annotation:
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind("panic in a function that cannot unwind")
 }

@@ -12,6 +12,7 @@ pub mod util;
 
 // Ferrocene addition
 #[rustfmt::skip]
+pub mod diff;
 pub mod symbol_report;
 
 /// The default set of crates for opt-dist to collect LLVM profiles.

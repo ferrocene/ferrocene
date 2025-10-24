@@ -335,6 +335,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_derive",
+ "similar",
 ]
 
 [[package]]
@@ -695,9 +696,9 @@ name = "collect-license-metadata"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "build_helper",
  "serde",
  "serde_json",
- "similar",
  "spdx-rs",
 ]
 

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 /// List of symbols in the certified subset
 #[derive(serde_derive::Deserialize, serde_derive::Serialize)]
 #[serde(transparent)]

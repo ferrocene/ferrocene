@@ -9,7 +9,7 @@ use build_helper::ci::CiEnv;
 use cargo_metadata::semver::Version;
 use cargo_metadata::{Metadata, Package, PackageId};
 
-use crate::diagnostics::{DiagCtx, RunningCheck};
+use crate::diagnostics::{RunningCheck, TidyCtx};
 
 #[path = "../../../bootstrap/src/utils/proc_macro_deps.rs"]
 mod proc_macro_deps;
@@ -272,7 +272,11 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "aho-corasick",
     "allocator-api2", // FIXME: only appears in Cargo.lock due to https://github.com/rust-lang/cargo/issues/10801
     "annotate-snippets",
+    "anstream",
     "anstyle",
+    "anstyle-parse",
+    "anstyle-query",
+    "anstyle-wincon",
     "ar_archive_writer",
     "arrayref",
     "arrayvec",
@@ -284,6 +288,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cc",
     "cfg-if",
     "cfg_aliases",
+    "colorchoice",
     "const-oid", // this is a false positive: it's only used by generate-tarball
     "constant_time_eq",
     "cpufeatures",
@@ -335,6 +340,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "indexmap",
     "intl-memoizer",
     "intl_pluralrules",
+    "is_terminal_polyfill",
     "itertools",
     "itoa",
     "jiff",
@@ -359,6 +365,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "object",
     "odht",
     "once_cell",
+    "once_cell_polyfill",
     "parking_lot",
     "parking_lot_core",
     "pathdiff",
@@ -420,7 +427,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "syn",
     "synstructure",
     "tempfile",
-    "termcolor",
     "termize",
     "thin-vec",
     "thiserror",
@@ -452,12 +458,12 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "unicode-security",
     "unicode-width",
     "unicode-xid",
+    "utf8parse",
     "valuable",
     "version_check",
     "wasi",
     "wasm-encoder",
     "wasmparser",
-    "winapi-util",
     "windows",
     "windows-collections",
     "windows-core",
@@ -610,8 +616,9 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
 ///
 /// `root` is path to the directory with the root `Cargo.toml` (for the workspace). `cargo` is path
 /// to the cargo executable.
-pub fn check(root: &Path, cargo: &Path, bless: bool, diag_ctx: DiagCtx) {
-    let mut check = diag_ctx.start_check("deps");
+pub fn check(root: &Path, cargo: &Path, tidy_ctx: TidyCtx) {
+    let mut check = tidy_ctx.start_check("deps");
+    let bless = tidy_ctx.is_bless_enabled();
 
     let mut checked_runtime_licenses = false;
 

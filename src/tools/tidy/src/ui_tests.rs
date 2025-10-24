@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 
 use ignore::Walk;
 
-use crate::diagnostics::{CheckId, DiagCtx, RunningCheck};
+use crate::diagnostics::{CheckId, RunningCheck, TidyCtx};
 
 const ISSUES_TXT_HEADER: &str = r#"============================================================
     ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
@@ -35,10 +35,11 @@ fn check_stray_ferrocene_files(tests_path: &Path, check: &mut RunningCheck) {
     }
 }
 
-pub fn check(root_path: &Path, bless: bool, diag_ctx: DiagCtx) {
+pub fn check(root_path: &Path, tidy_ctx: TidyCtx) {
     let path = &root_path.join("tests");
-    let mut check = diag_ctx.start_check(CheckId::new("ui_tests").path(path));
+    let mut check = tidy_ctx.start_check(CheckId::new("ui_tests").path(path));
     check_stray_ferrocene_files(path, &mut check);
+    let bless = tidy_ctx.is_bless_enabled();
 
     // the list of files in ui tests that are allowed to start with `issue-XXXX`
     // BTreeSet because we would like a stable ordering so --bless works

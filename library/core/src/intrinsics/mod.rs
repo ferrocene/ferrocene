@@ -2555,9 +2555,8 @@ pub(crate) macro const_eval_select {
         }
 
         $(#[$compiletime_attr])*
+        #[ferrocene::annotation("Cannot be covered as this only runs during compilation.")]
         const fn compiletime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
-            // Ferrocene annotation: Cannot be covered as this only runs during compilation.
-
             // Don't warn if one of the arguments is unused.
             $(let _ = $arg;)*
 
@@ -2715,9 +2714,10 @@ pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
 #[rustc_intrinsic_const_stable_indirect] // just for UB checks
 #[inline(always)]
 #[rustc_intrinsic]
+#[ferrocene::annotation(
+    "This function is always used in `assert_unsafe_precondition` which produces an unwinding panic, meaning that we cannot cover it."
+)]
 pub const fn ub_checks() -> bool {
-    // Ferrocene annotation: This function is always used in `assert_unsafe_precondition` which produces
-    // an unwinding panic, meaning that we cannot cover it.
     cfg!(ub_checks)
 }
 
@@ -2764,10 +2764,8 @@ pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize)
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::annotation("This function is also a noop in runtime so we can't cover it currently.")]
 pub const unsafe fn const_make_global(ptr: *mut u8) -> *const u8 {
-    // Ferrocene annotation: This function is only used as part of the `ThinBox` inner implementation.
-    // It is also a noop in runtime so we can't cover it currently.
-
     // const eval overrides this function; at runtime, it is a NOP.
     ptr
 }
@@ -2972,9 +2970,8 @@ pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
+#[ferrocene::annotation("Cannot be covered as this code cannot be reached during runtime.")]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
-    // Ferrocene annotation: Cannot be covered as this code cannot be reached during
-    // runtime.
     a.data == b.data
 }
 

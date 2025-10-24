@@ -997,10 +997,6 @@ impl<T, E> Result<T, E> {
         F: [const] FnOnce(&T) + [const] Destruct,
     {
         if let Ok(ref t) = self {
-            // Ferrocene annotation: This function is thoroughly tested inside the `result_methods`
-            // test in `coretests`. Additionally, the `inspect_result` test guarantees that `f` is
-            // being called by panicking inside the `predicate` body and marking the test as
-            // `#[should_panic]`.
             f(t);
         }
 
@@ -1029,10 +1025,6 @@ impl<T, E> Result<T, E> {
         F: [const] FnOnce(&E) + [const] Destruct,
     {
         if let Err(ref e) = self {
-            // Ferrocene annotation: This function is thoroughly tested inside the `result_methods`
-            // test in `coretests`. Additionally, the `inspect_result_err` test guarantees that `f`
-            // is being called by panicking inside the `predicate` body and marking the test as
-            // `#[should_panic]`.
             f(e);
         }
 
@@ -1680,11 +1672,9 @@ impl<T, E> Result<T, E> {
     pub unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
-            // Ferrocene annotation: This line cannot be covered as reaching `unreachable_unchecked`
-            // is undefined behavior. Meaning that if it is reached, the compiler might have put
-            // non-sensical code here. If debug assertions are enabled, this will be an unwinding
-            // panic that cannot be covered either.
-            //
+            #[ferrocene::annotation(
+                "This line cannot be covered as reaching `unreachable_unchecked` is undefined behavior"
+            )]
             // SAFETY: the safety contract must be upheld by the caller.
             Err(_) => unsafe { hint::unreachable_unchecked() },
         }
@@ -1715,11 +1705,9 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     pub unsafe fn unwrap_err_unchecked(self) -> E {
         match self {
-            // Ferrocene annotation: This line cannot be covered as reaching `unreachable_unchecked`
-            // is undefined behavior. Meaning that if it is reached, the compiler might have put
-            // non-sensical code here. If debug assertions are enabled, this will be an unwinding
-            // panic that cannot be covered either.
-            //
+            #[ferrocene::annotation(
+                "This line cannot be covered as reaching `unreachable_unchecked` is undefined behavior"
+            )]
             // SAFETY: the safety contract must be upheld by the caller.
             Ok(_) => unsafe { hint::unreachable_unchecked() },
             Err(e) => e,

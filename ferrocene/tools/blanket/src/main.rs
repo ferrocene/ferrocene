@@ -206,8 +206,8 @@ fn get_annotation_status(
             }
         }
 
-        if annotated_count == 0 && untested_count != 0 {
-            // If no lines are annotated but some are untested, the function is not annotated.
+        if annotated_count == 0 {
+            // If no lines are annotated, the function is not annotated.
             Annotated::Not
         } else if annotated_count < untested_count {
             // If there are less annotated lines than untested lines, the function is partially

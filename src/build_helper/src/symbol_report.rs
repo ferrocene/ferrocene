@@ -17,6 +17,10 @@ impl SymbolReport {
     pub fn new() -> Self {
         Self { symbols: Vec::new(), annotations: BTreeMap::new() }
     }
+
+    pub fn to_qualified_fn_list(&self) -> QualifiedFnList {
+        QualifiedFnList(self.symbols.iter().map(|f| f.qualified_name.clone()).collect())
+    }
 }
 
 /// A single certified function, identified by its span
@@ -31,3 +35,6 @@ pub struct Function {
     pub start_line: usize,
     pub end_line: usize,
 }
+
+#[derive(PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
+pub struct QualifiedFnList(Vec<String>);

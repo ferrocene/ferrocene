@@ -608,9 +608,10 @@ mod impls {
     #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
     impl const Clone for ! {
         #[inline]
+        #[ferrocene::annotation(
+            "This function cannot be executed because it is impossible to create a value of type `!`"
+        )]
         fn clone(&self) -> Self {
-            // Ferrocene annotation: This function cannot be executed because it is impossible to
-            // create a value of type `!`.
             *self
         }
     }
@@ -619,10 +620,10 @@ mod impls {
     #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
     impl<T: PointeeSized> const Clone for *const T {
         #[inline(always)]
+        #[ferrocene::annotation(
+            "This function is thoroughly tested inside the `test_clone` test in `coretests`. The fact that is shown as uncovered is a bug in our coverage tooling."
+        )]
         fn clone(&self) -> Self {
-            // Ferrocene annotation: This function is thoroughly tested inside the `test_clone`
-            // test in `coretests`. The fact that is shown as uncovered is a bug in our coverage
-            // tooling.
             *self
         }
     }
@@ -631,10 +632,10 @@ mod impls {
     #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
     impl<T: PointeeSized> const Clone for *mut T {
         #[inline(always)]
+        #[ferrocene::annotation(
+            "This function is thoroughly tested inside the `test_clone` test in `coretests`. The fact that is shown as uncovered is a bug in our coverage tooling."
+        )]
         fn clone(&self) -> Self {
-            // Ferrocene annotation: This function is thoroughly tested inside the `test_clone`
-            // test in `coretests`. The fact that is shown as uncovered is a bug in our coverage
-            // tooling.
             *self
         }
     }

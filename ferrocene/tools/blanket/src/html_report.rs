@@ -3,7 +3,7 @@ use std::path::Path;
 
 use maud::{DOCTYPE, PreEscaped};
 
-use crate::{FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
+use crate::{Annotated, FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
 
 const CSS: &str = include_str!("../assets/html_report.css");
 const JS: &str = include_str!("../assets/html_report.js");
@@ -35,7 +35,9 @@ pub(crate) fn generate(
         for (_, status) in &function.lines.lines {
             match status {
                 LineCoverageStatus::Tested => num_lines_tested += 1.0,
-                LineCoverageStatus::Untested => num_lines_untested += 1.0,
+                LineCoverageStatus::Untested | LineCoverageStatus::Annotated => {
+                    num_lines_untested += 1.0
+                }
                 LineCoverageStatus::Ignored => (),
             }
         }
@@ -161,10 +163,17 @@ fn generate_function(
             line_coverage.iter().find(|(covered_linenum, _)| linenum == *covered_linenum);
         if let Some((actual_linenum, status)) = maybe_line {
             lines.push((actual_linenum, line, status));
-            if line.contains("// Ferrocene annotation") {
-                class_set.insert("annotation");
-            }
         }
+    }
+
+    match function.annotated {
+        Annotated::Fully => {
+            class_set.insert("annotation");
+        }
+        Annotated::Partially => {
+            class_set.insert("partial-annotation");
+        }
+        _ => (),
     }
 
     let filename = function.relative_path.display();
@@ -187,6 +196,9 @@ fn generate_function(
                                     (line) "\n"
                                 },
                                 LineCoverageStatus::Untested => span class="line line-untested" data-filename=(filename) data-linenum=(linenum) {
+                                    (line) "\n"
+                                },
+                                LineCoverageStatus::Annotated => span class="line line-annotated" data-filename=(filename) data-linenum=(linenum) {
                                     (line) "\n"
                                 },
                                 LineCoverageStatus::Ignored => span class="line line-ignored" data-filename=(filename) data-linenum=(linenum) {

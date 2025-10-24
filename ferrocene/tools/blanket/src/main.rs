@@ -1,5 +1,6 @@
 // Derived from https://github.com/xd009642/llvm-profparser/blob/f12a20d33b371f62a3b63f3a19d2320c25aa48b9/src/bin/cov.rs
 
+use std::collections::BTreeSet;
 use std::fmt;
 use std::path::PathBuf;
 
@@ -60,6 +61,7 @@ pub struct ShowCommand {
 enum LineCoverageStatus {
     Tested,
     Untested,
+    Annotated,
     Ignored,
 }
 
@@ -68,6 +70,7 @@ impl fmt::Display for LineCoverageStatus {
         match self {
             LineCoverageStatus::Tested => write!(f, "Tested"),
             LineCoverageStatus::Untested => write!(f, "Untested"),
+            LineCoverageStatus::Annotated => write!(f, "Annotated"),
             LineCoverageStatus::Ignored => write!(f, "Ignored"),
         }
     }
@@ -119,6 +122,7 @@ impl FunctionCoverageStatus {
             lines
                 if lines.lines.iter().all(|(_, status)| {
                     *status == LineCoverageStatus::Untested
+                        || *status == LineCoverageStatus::Annotated
                         || *status == LineCoverageStatus::Ignored
                 }) =>
             {
@@ -149,17 +153,30 @@ impl FunctionCoverageStatus {
 }
 
 #[derive(Debug)]
+enum Annotated {
+    Fully,
+    Partially,
+    Not,
+}
+
+#[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
     relative_path: PathBuf,
     lines: LineCoverage,
     status: FunctionCoverageStatus,
+    annotated: Annotated,
 }
 
 impl FunctionCoverage {
-    fn new(source_name: String, filename: PathBuf, lines: LineCoverage) -> Self {
+    fn new(
+        source_name: String,
+        filename: PathBuf,
+        lines: LineCoverage,
+        annotated: Annotated,
+    ) -> Self {
         let status = FunctionCoverageStatus::new(&lines);
-        Self { source_name, relative_path: filename, lines, status }
+        Self { source_name, relative_path: filename, lines, status, annotated }
     }
 }
 
@@ -169,11 +186,46 @@ struct Span {
     end_line: usize,
 }
 
+fn get_annotation_status(
+    annotations: Option<&BTreeSet<(usize, usize)>>,
+    lines: &mut Vec<(usize, LineCoverageStatus)>,
+) -> Annotated {
+    annotations.map_or(Annotated::Not, |annotations| {
+        let mut untested_count = 0;
+        let mut annotated_count = 0;
+
+        for (line, status) in lines {
+            if *status != LineCoverageStatus::Untested {
+                continue;
+            }
+            untested_count += 1;
+
+            if annotations.iter().any(|&(start, end)| (start..=end).contains(line)) {
+                *status = LineCoverageStatus::Annotated;
+                annotated_count += 1;
+            }
+        }
+
+        if annotated_count == 0 {
+            // If no lines are annotated, the function is not annotated.
+            Annotated::Not
+        } else if annotated_count < untested_count {
+            // If there are less annotated lines than untested lines, the function is partially
+            // annotated.
+            Annotated::Partially
+        } else {
+            // Otherwise the function is fully annotated
+            Annotated::Fully
+        }
+    })
+}
+
 fn get_coverage(
     report: &CoverageReport,
     span: Span,
     ferrocene: &std::path::Path,
     source_name: String,
+    annotations: Option<&BTreeSet<(usize, usize)>>,
 ) -> Result<FunctionCoverage> {
     let Span { filename, start_line, end_line } = span;
     let absolute_path = if filename.is_relative() {
@@ -191,17 +243,22 @@ fn get_coverage(
     // we didn't get any hits from the tool, so we don't know which lines shouldn't be
     // considered. report them all as considered and missing coverage.
     let Some(func_coverage) = report.files.get(&absolute_path) else {
-        let no_coverage = LineCoverage {
+        let mut no_coverage = LineCoverage {
             lines: source_lines.clone().map(|i| (i, LineCoverageStatus::Untested)).collect(),
         };
         println!(
             "warning: couldn't find source file {} in coverage report",
             absolute_path.display()
         );
-        return Ok(FunctionCoverage::new(source_name, filename, no_coverage));
+
+        // All lines require annotations as we didn't get any hits from the tool.
+        let annotated = get_annotation_status(annotations, &mut no_coverage.lines);
+
+        return Ok(FunctionCoverage::new(source_name, filename, no_coverage, annotated));
     };
 
     let mut covered = vec![];
+
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
@@ -212,7 +269,10 @@ fn get_coverage(
         };
         covered.push((line, status));
     }
-    Ok(FunctionCoverage::new(source_name, filename, LineCoverage { lines: covered }))
+
+    let annotated = get_annotation_status(annotations, &mut covered);
+
+    Ok(FunctionCoverage::new(source_name, filename, LineCoverage { lines: covered }, annotated))
 }
 
 impl ShowCommand {

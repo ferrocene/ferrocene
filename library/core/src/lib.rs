@@ -182,7 +182,7 @@
 #![feature(rustdoc_internals)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
 #![feature(staged_api)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
+#![feature(stmt_expr_attributes)]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
 #![feature(transparent_unions)]
@@ -211,6 +211,8 @@
 // Ferrocene lints/features:
 #![allow(unused_attributes)]
 #![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+#![feature(register_tool)]
+#![register_tool(ferrocene)]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

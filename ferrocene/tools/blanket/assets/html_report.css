@@ -3,6 +3,7 @@
     --var-tested: #006164;
     --var-untested: #DB4325;
     --var-partial: #B3589A;
+    --var-annotated: #BE8239;
     --var-ignored: gray;
     --var-untested-annotated: var(--var-untested);
     --var-partial-annotated: var(--var-partial);
@@ -133,6 +134,17 @@ details.partial-annotation summary::after {
     padding-right: 0.5rem;
     color: white;
     background-color: var(--var-ignored);
+}
+
+.functions .line-annotated {
+    color: var(--var-annotated);
+    cursor: copy;
+}
+.functions .line-annotated::before {
+    content: attr(data-linenum);
+    padding-right: 0.5rem;
+    color: white;
+    background-color: var(--var-annotated);
 }
 
 button.fully-tested {

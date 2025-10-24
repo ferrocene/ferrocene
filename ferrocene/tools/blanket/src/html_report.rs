@@ -35,7 +35,9 @@ pub(crate) fn generate(
         for (_, status) in &function.lines.lines {
             match status {
                 LineCoverageStatus::Tested => num_lines_tested += 1.0,
-                LineCoverageStatus::Untested => num_lines_untested += 1.0,
+                LineCoverageStatus::Untested | LineCoverageStatus::Annotated => {
+                    num_lines_untested += 1.0
+                }
                 LineCoverageStatus::Ignored => (),
             }
         }
@@ -194,6 +196,9 @@ fn generate_function(
                                     (line) "\n"
                                 },
                                 LineCoverageStatus::Untested => span class="line line-untested" data-filename=(filename) data-linenum=(linenum) {
+                                    (line) "\n"
+                                },
+                                LineCoverageStatus::Annotated => span class="line line-annotated" data-filename=(filename) data-linenum=(linenum) {
                                     (line) "\n"
                                 },
                                 LineCoverageStatus::Ignored => span class="line line-ignored" data-filename=(filename) data-linenum=(linenum) {

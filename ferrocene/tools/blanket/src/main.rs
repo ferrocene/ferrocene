@@ -61,6 +61,7 @@ pub struct ShowCommand {
 enum LineCoverageStatus {
     Tested,
     Untested,
+    Annotated,
     Ignored,
 }
 
@@ -69,6 +70,7 @@ impl fmt::Display for LineCoverageStatus {
         match self {
             LineCoverageStatus::Tested => write!(f, "Tested"),
             LineCoverageStatus::Untested => write!(f, "Untested"),
+            LineCoverageStatus::Annotated => write!(f, "Annotated"),
             LineCoverageStatus::Ignored => write!(f, "Ignored"),
         }
     }
@@ -120,6 +122,7 @@ impl FunctionCoverageStatus {
             lines
                 if lines.lines.iter().all(|(_, status)| {
                     *status == LineCoverageStatus::Untested
+                        || *status == LineCoverageStatus::Annotated
                         || *status == LineCoverageStatus::Ignored
                 }) =>
             {
@@ -185,20 +188,29 @@ struct Span {
 
 fn get_annotation_status(
     annotations: Option<&BTreeSet<(usize, usize)>>,
-    requires_annotation_count: usize,
-    requires_annotation: impl IntoIterator<Item = usize>,
+    lines: &mut Vec<(usize, LineCoverageStatus)>,
 ) -> Annotated {
     annotations.map_or(Annotated::Not, |annotations| {
-        // count how many lines that require an annotation actually have one.
-        let has_annotation_count = requires_annotation
-            .into_iter()
-            .filter(|line| annotations.iter().any(|&(start, end)| (start..=end).contains(&line)))
-            .count();
-        if has_annotation_count == 0 && requires_annotation_count != 0 {
-            // If no lines are annotated but some lines require them, the function is not annotated.
+        let mut untested_count = 0;
+        let mut annotated_count = 0;
+
+        for (line, status) in lines {
+            if *status != LineCoverageStatus::Untested {
+                continue;
+            }
+            untested_count += 1;
+
+            if annotations.iter().any(|&(start, end)| (start..=end).contains(line)) {
+                *status = LineCoverageStatus::Annotated;
+                annotated_count += 1;
+            }
+        }
+
+        if annotated_count == 0 && untested_count != 0 {
+            // If no lines are annotated but some are untested, the function is not annotated.
             Annotated::Not
-        } else if has_annotation_count < requires_annotation_count {
-            // If there are less annotated lines than what's required, the function is partially
+        } else if annotated_count < untested_count {
+            // If there are less annotated lines than untested lines, the function is partially
             // annotated.
             Annotated::Partially
         } else {
@@ -231,7 +243,7 @@ fn get_coverage(
     // we didn't get any hits from the tool, so we don't know which lines shouldn't be
     // considered. report them all as considered and missing coverage.
     let Some(func_coverage) = report.files.get(&absolute_path) else {
-        let no_coverage = LineCoverage {
+        let mut no_coverage = LineCoverage {
             lines: source_lines.clone().map(|i| (i, LineCoverageStatus::Untested)).collect(),
         };
         println!(
@@ -240,30 +252,25 @@ fn get_coverage(
         );
 
         // All lines require annotations as we didn't get any hits from the tool.
-        let annotated = get_annotation_status(annotations, end_line - start_line + 1, source_lines);
+        let annotated = get_annotation_status(annotations, &mut no_coverage.lines);
 
         return Ok(FunctionCoverage::new(source_name, filename, no_coverage, annotated));
     };
 
     let mut covered = vec![];
-    // collect all the lines that require an annotation.
-    let mut untested_lines = vec![];
+
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
         let status = match func_coverage.hits_for_line(line) {
             None => LineCoverageStatus::Ignored,
-            Some(0) => {
-                // If a line is untested, it should have an annotation.
-                untested_lines.push(line);
-                LineCoverageStatus::Untested
-            }
+            Some(0) => LineCoverageStatus::Untested,
             Some(_) => LineCoverageStatus::Tested,
         };
         covered.push((line, status));
     }
 
-    let annotated = get_annotation_status(annotations, untested_lines.len(), untested_lines);
+    let annotated = get_annotation_status(annotations, &mut covered);
 
     Ok(FunctionCoverage::new(source_name, filename, LineCoverage { lines: covered }, annotated))
 }

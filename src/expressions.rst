@@ -313,7 +313,7 @@ A :t:`constant context` is a :t:`construct` that requires a
   The :t:`block expression` of a :t:`const block expression`.
 
 * :dp:`fls_zyuxqty09SDO`
-  All forms of :t:`[borrow]s` except those of expressions that would be subject to
+  All forms of :t:`[borrow]s` except those of expressions that are subject to
   :t:`drop scope extension` to the end of the program
   and which are either :t:`[mutable borrow]s`
   or borrows of expressions that result in values with :t:`interior mutability`.

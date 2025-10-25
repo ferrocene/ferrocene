@@ -38,7 +38,7 @@ Attributes
      | $$=$$ Expression
 
    AttributeContentList ::=
-       AttributeContent (, AttributeContent)* ,?
+       AttributeContent ($$,$$ AttributeContent)* $$,$$?
 
 .. rubric:: Legality Rules
 
@@ -476,7 +476,7 @@ Attribute ``target_feature``
        $$target_feature$$ $$($$ $$enable$$ $$=$$ $$"$$ FeatureList $$"$$ $$)$$
 
    FeatureList ::=
-       Feature (, Feature)*
+       Feature ($$,$$ Feature)*
 
    Feature ::=
        $$adx$$
@@ -1221,7 +1221,7 @@ Attribute ``link``
        $$name$$ $$=$$ StringLiteral
 
    NativeLibraryNameWithKind ::=
-       NativeLibraryName , NativeLibrayKind
+       NativeLibraryName $$,$$ NativeLibrayKind
 
    WebAssemblyModuleName ::=
        $$wasm_import_module$$ $$=$$ StringLiteral

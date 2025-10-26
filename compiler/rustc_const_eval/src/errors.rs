@@ -290,31 +290,6 @@ pub(crate) struct UnallowedOpInConstContext {
 }
 
 #[derive(Diagnostic)]
-#[diag(r#"allocations are not allowed in {$kind ->
-    [const] constant
-    [static] static
-    [const_fn] constant function
-    *[other] {""}
-}s"#, code = E0010)]
-pub(crate) struct UnallowedHeapAllocations {
-    #[primary_span]
-    #[label(
-        r#"allocation not allowed in {$kind ->
-            [const] constant
-            [static] static
-            [const_fn] constant function
-            *[other] {""}
-        }s"#
-    )]
-    pub span: Span,
-    pub kind: ConstContext,
-    #[note(
-        "the runtime heap is not yet available at compile-time, so no runtime heap allocations can be created"
-    )]
-    pub teach: bool,
-}
-
-#[derive(Diagnostic)]
 #[diag(r#"inline assembly is not allowed in {$kind ->
     [const] constant
     [static] static

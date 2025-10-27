@@ -1,0 +1,777 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* SPDX-FileCopyrightText: The Ferrocene Developers */
+
+/*************
+ *   Fonts   *
+ *************/
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/raleway-400.ttf') format('truetype'), url('fonts/raleway-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 400;
+    font-style: italic;
+    src: url('fonts/raleway-400-italic.ttf') format('truetype'), url('fonts/raleway-400-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 700;
+    font-style: normal;
+    src: url('fonts/raleway-700.ttf') format('truetype'), url('fonts/raleway-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 700;
+    font-style: italic;
+    src: url('fonts/raleway-700-italic.ttf') format('truetype'), url('fonts/raleway-700-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/roboto-mono-400.ttf') format('truetype'), url('fonts/roboto-mono-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 400;
+    font-style: italic;
+    src: url('fonts/roboto-mono-400-italic.ttf') format('truetype'), url('fonts/roboto-mono-400-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 700;
+    font-style: normal;
+    src: url('fonts/roboto-mono-700.ttf') format('truetype'), url('fonts/roboto-mono-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 700;
+    font-style: italic;
+    src: url('fonts/roboto-mono-700-italic.ttf') format('truetype'), url('fonts/roboto-mono-700-italic.woff2') format('woff2');
+}
+
+/*********************
+ *   Basic styling   *
+ *********************/
+
+:root {
+    --text-fg: #1b1b1b;
+    --link-fg: #3168b0;
+    --inline-code-bg: #fafafa;
+    --inline-code-border: #ebebeb;
+    --code-block-bg: #f7f7f7;
+    --focus-border: #68a4e8;
+    --table-border: #dbdbdb;
+    --problematic-fg: #fff;
+    --problematic-bg: #f00;
+
+    --body-bg: #fff;
+    --header-fg: #194e80;
+
+    --sidebar-width: 21rem;
+    --sidebar-bg: #f7f7f7;
+    --sidebar-inactive-fg: var(--text-fg);
+    --sidebar-active-fg: var(--link-fg);
+
+    --sidebar-search-border: #dbdbdb;
+    --sidebar-search-bg: #fff;
+    --sidebar-search-placeholder-fg: #5f5f5f;
+    --sidebar-search-button-fg: var(--text-fg);
+    --sidebar-search-button-hover-fg: #194e80;
+
+    --footer-fg: #747474;
+
+    --admonition-green-border: #7ddd83;
+    --admonition-blue-border: #88cff0;
+    --admonition-yellow-border: #ffe033;
+    --admonition-red-border: #ee7f68;
+
+    --numbers-width: 5.5rem;
+    --numbers-fg: #747474;
+
+    --blockquote-border: #dbdbdb;
+
+    --content-width: 50rem;
+
+    --badge-yellow-bg: #ffe033;
+
+    --spec-error-fg: #f00;
+    --spec-syntax-literal-bg: #dbdbdb;
+
+    /* Vertical offset for the page. Defaults to 0, but can be set to an higher
+     * value by additional CSS files. */
+    --header-offset: 0rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    /* Ensure we always scroll to the right position, even when there is a
+     * fixed header at the top of the page */
+    scroll-padding-top: var(--header-offset);
+}
+
+body {
+    font-family: 'Raleway', sans-serif;
+    color: var(--text-fg);
+    background: var(--body-bg);
+    margin: 0;
+}
+
+:focus {
+    outline: 2px solid var(--focus-border);
+}
+
+.hidden {
+    display: none;
+}
+
+/************
+ *   Text   *
+ ************/
+
+a {
+    color: var(--link-fg);
+    text-decoration: none;
+}
+
+/* Used by the ferrocene-autoglossary for automatically inserted glossary links */
+a.ferrocene-autoglossary {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 0.25em;
+}
+
+a:hover {
+    text-decoration: underline;
+    text-decoration-style: solid;
+}
+
+p, div.line-block {
+    margin: 1em 0;
+}
+
+p, div.line-block div.line {
+    line-height: 1.5em;
+}
+
+a {
+    color: var(--link-fg);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.align-center {
+    text-align: center;
+}
+
+.align-right {
+    text-align: right;
+}
+
+/****************
+ *   Headings   *
+ ****************/
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 2.5em 0 1em 0;
+}
+
+h1 span.section-number, h2 span.section-number, h3 span.section-number, h4 span.section-number, h5 span.section-number, h6 span.section-number {
+    display: block;
+    position: absolute;
+    left: 0;
+
+    color: var(--numbers-fg);
+    width: var(--numbers-width);
+    padding-right: 1rem;
+    text-align: right;
+}
+
+a.headerlink {
+    display: none;
+}
+
+a.headerlink:hover {
+    text-decoration: none;
+}
+
+h1:hover a.headerlink, h2:hover a.headerlink, h3:hover a.headerlink, h4:hover a.headerlink, h5:hover a.headerlink, h6:hover a.headerlink {
+    display: inline-block;
+    margin-left: 1rem;
+    color: var(--link-fg);
+}
+
+p.rubric {
+    margin: 2em 0 1em 0;
+    font-weight: 700;
+}
+
+h1 + p.rubric, h2 + p.rubric, h3 + p.rubric, h4 + p.rubric, h5 + p.rubric, h6 + p.rubric {
+    margin-top: 1rem;
+}
+
+/* Prevent too much margin with one header after the other */
+/* I am sorry, browser's CSS engine */
+section > h1:first-child + section > h2:first-child,
+section > h2:first-child + section > h3:first-child,
+section > h3:first-child + section > h4:first-child,
+section > h4:first-child + section > h5:first-child,
+section > h5:first-child + section > h6:first-child,
+section > h1:first-child + section > span[id]:first-child + h2,
+section > h2:first-child + section > span[id]:first-child + h3,
+section > h3:first-child + section > span[id]:first-child + h4,
+section > h4:first-child + section > span[id]:first-child + h5,
+section > h5:first-child + section > span[id]:first-child + h6,
+section > span[id]:first-child + h1 + section > h2:first-child,
+section > span[id]:first-child + h2 + section > h3:first-child,
+section > span[id]:first-child + h3 + section > h4:first-child,
+section > span[id]:first-child + h4 + section > h5:first-child,
+section > span[id]:first-child + h5 + section > h6:first-child,
+section > span[id]:first-child + h1 + section > span[id]:first-child + h2,
+section > span[id]:first-child + h2 + section > span[id]:first-child + h3,
+section > span[id]:first-child + h3 + section > span[id]:first-child + h4,
+section > span[id]:first-child + h4 + section > span[id]:first-child + h5,
+section > span[id]:first-child + h5 + section > span[id]:first-child + h6 {
+    margin-top: 0;
+}
+
+/********************************
+ *   Code snippets and blocks   *
+ ********************************/
+
+pre, code {
+    font-family: 'Roboto Mono', monospace;
+}
+
+pre {
+    background: var(--code-block-bg);
+    padding: 1rem;
+    border-radius: 0.3rem;
+    line-height: 1.5em;
+    font-size: 0.9rem;
+    overflow-y: scroll;
+}
+
+code {
+    display: inline-block;
+    background: var(--inline-code-bg);
+    padding: 0 0.2em;
+    border-radius: 0.2em;
+    outline: 0.1em solid var(--inline-code-border);
+    margin: 0 0.1em;
+}
+
+pre code {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    outline: none;
+}
+
+a:hover code {
+    text-decoration: underline;
+}
+
+/*************
+ *   Lists   *
+ *************/
+
+li {
+    margin: 0.5em 0;
+}
+
+/* Sphinx generates a <p> inside each <li>. */
+li > p:first-child {
+    margin-top: 0;
+}
+
+li > p:last-child {
+    margin-bottom: 0;
+}
+
+/* Don't add extra margin before a nested list */
+li > p:has(+ ul) {
+    margin-bottom: 0;
+}
+
+/**************
+ *   Layout   *
+ **************/
+
+div.wrapper {
+    margin-top: var(--header-offset);
+}
+
+@media (max-width: 55rem) {
+
+    div.wrapper div.sidebar div.toctree {
+        display: none;
+    }
+
+    div.wrapper div.sidebar input#toggle-toctree:checked + div.toctree {
+        display: block;
+    }
+}
+
+@media (min-width: 55rem) {
+    div.wrapper {
+        display: flex;
+        min-height: calc(100vh - var(--header-offset));
+    }
+
+    div.wrapper div.sidebar {
+        position: sticky;
+        top: var(--header-offset);
+        width: var(--sidebar-width);
+        max-height: calc(100vh - var(--header-offset));
+        overflow-y: scroll;
+        flex-shrink: 0;
+    }
+
+    div.wrapper div.sidebar label.toggle {
+        display: none;
+    }
+
+    div.wrapper div.content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    div.wrapper div.content div.page {
+        max-width: calc(var(--numbers-width) + var(--content-width));
+    }
+}
+
+div.wrapper div.content {
+    display: flex;
+    flex-direction: column;
+}
+
+div.wrapper div.content div.page {
+    width: 100%;
+    flex: 1;
+}
+
+input#toggle-toctree {
+    display: none;
+}
+
+/**********************
+ *   Header styling   *
+ **********************/
+
+header a {
+    display: block;
+    padding: 1.25rem;
+}
+
+header a:hover {
+    text-decoration: none;
+}
+
+header img {
+    display: block;
+    height: 2.25em;
+    margin: auto;
+}
+
+header h1 {
+    color: var(--header-fg);
+    font-size: 1.25rem;
+    font-weight: 400;
+    text-align: center;
+    margin: 0.4rem 0 0 0;
+}
+
+/**************************
+ *   Search box styling   *
+ **************************/
+
+form.side-search {
+    display: flex;
+    margin: 0 1rem;
+}
+
+form.side-search input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+
+    border: 1px solid var(--sidebar-search-border);
+    border-right: 0;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+    background: var(--sidebar-search-bg);
+}
+
+form.side-search input::placeholder {
+    color: var(--sidebar-search-placeholder-fg);
+    opacity: 1;
+}
+
+form.side-search button {
+    padding: 0.5rem 1rem 0.5rem 0.75rem;
+
+    background: var(--sidebar-search-bg);
+    border: 1px solid var(--sidebar-search-border);
+    border-left: 0;
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+}
+
+form.side-search button svg {
+    height: 1rem;
+    fill: var(--sidebar-search-button-fg);
+}
+
+form.side-search button:hover {
+    cursor: pointer;
+}
+
+form.side-search button:hover svg {
+    fill: var(--sidebar-search-button-hover-fg);
+}
+
+/***********************
+ *   Sidebar styling   *
+ ***********************/
+
+div.sidebar {
+    background: var(--sidebar-bg);
+}
+
+/**************************
+ *   Navigation styling   *
+ **************************/
+
+nav label.toggle {
+    display: block;
+    cursor: pointer;
+    text-align: center;
+    padding: 1rem;
+}
+
+nav label.toggle:hover {
+    color: var(--sidebar-active-fg);
+}
+
+nav div.toctree {
+    padding: 1.25rem 0 1rem 0;
+}
+
+nav div.toctree p.caption {
+    font-weight: 700;
+    margin: 1.25rem 1rem 0.5rem 1rem;
+}
+
+nav div.toctree p.caption:first-child {
+    margin-top: 0;
+}
+
+nav div.toctree ul {
+    margin: 0;
+    padding: 0;
+}
+
+nav div.toctree li {
+    margin: 0;
+    list-style: none;
+}
+
+nav div.toctree a {
+    color: var(--sidebar-inactive-fg);
+    text-decoration: none;
+    padding: 0.35rem 1rem;
+    display: block;
+}
+
+nav div.toctree a:hover,
+nav div.toctree a.current {
+    color: var(--sidebar-active-fg);
+    text-decoration: none;
+}
+
+/********************
+ *   Page styling   *
+ ********************/
+
+div.page {
+    padding: 2rem 1rem 1rem var(--numbers-width);
+    position: relative;
+}
+
+div.page > :first-child, div.page > section:first-child > :first-child {
+    margin-top: 0;
+}
+
+div.page > :last-child, div.page > section:last-child > :last-child {
+    margin-bottom: 0;
+}
+
+/**************
+ *   Footer   *
+ **************/
+
+footer {
+    color: var(--footer-fg);
+    padding: 1rem;
+    text-align: center;
+}
+
+footer p {
+    margin: 0.3em 0;
+}
+
+footer :first-child {
+    margin-top: 0;
+}
+
+footer :last-child {
+    margin-bottom: 0;
+}
+
+/****************
+ *   TocTrees   *
+ ****************/
+
+div.toctree-wrapper p.caption {
+    font-weight: 700;
+}
+
+/**************
+ *   Tables   *
+ **************/
+
+table {
+    margin: 1em 0;
+    border-collapse: collapse;
+
+    /* Let the table overflow on the right */
+    white-space: nowrap;
+    overflow-x: visible;
+}
+
+table .hide-inside-tables {
+    display: none;
+}
+
+table caption {
+    text-align: left;
+    font-weight: bold;
+    padding-left: 0.4em;
+}
+
+table td, table th {
+    padding: 0.4em;
+    border-bottom: 1px solid var(--table-border);
+    text-align: left;
+    vertical-align: top;
+}
+
+table tr:last-child td {
+    border: 0;
+}
+
+td > :first-child, th > :first-child {
+    margin-top: 0 !important;
+}
+
+td > :last-child, th > :last-child {
+    margin-bottom: 0 !important;
+}
+
+td span.spec-paragraph-id, th span.spec-paragraph-id {
+    margin-top: -0.8em;
+}
+
+/*******************
+ *   Admonitions   *
+ *******************/
+
+div.admonition {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 0.2rem solid transparent;
+}
+
+div.admonition.tip, div.admonition.hint {
+    border-color: var(--admonition-green-border);
+}
+
+div.admonition.note {
+    border-color: var(--admonition-blue-border);
+}
+
+div.admonition.warning, div.admonition.caution, div.admonition.important {
+    border-color: var(--admonition-yellow-border);
+}
+
+div.admonition.danger, div.admonition.error {
+    border-color: var(--admonition-red-border);
+}
+
+div.admonition p {
+    margin: 0.5em 0 0 0;
+}
+
+div.admonition p.admonition-title {
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 -0.25em 0;
+}
+
+/* Fix margin when admonitions are added at the top of the page */
+div.page > div.admonition:first-child + section h1 {
+    margin-top: 1.5em;
+}
+
+/*******************
+ *   Definitions   *
+ *******************/
+
+dl dt {
+    margin-top: 1.5em;
+    font-weight: 700;
+}
+
+dl dt + dt {
+    margin-top: 0.3em;
+}
+
+dl dt:first-child {
+    margin-top: 0;
+}
+
+dl dd {
+    margin-left: 0;
+}
+
+dl dd > p:first-child {
+    margin-top: 0.25em;
+}
+
+dl dd > p:last-child {
+    margin-bottom: 0;
+}
+
+/***************
+ *   Figures   *
+ ***************/
+
+figure {
+    margin: 1.5em 0;
+}
+
+figure img {
+    max-width: 100%;
+}
+
+figure figcaption {
+    font-style: italic;
+}
+
+/*******************
+ *   Blockquotes   *
+ *******************/
+
+blockquote {
+    margin: 1em 0;
+    padding-left: 1.5em;
+    border-left: 0.3rem solid var(--blockquote-border);
+    font-style: italic;
+}
+
+blockquote code {
+    font-style: normal;
+}
+
+/*********************
+ *   Inline errors   *
+ *********************/
+
+.problematic {
+    color: var(--problematic-fg);
+    background: var(--problematic-bg);
+}
+
+/****************************
+ *   contents:: directive   *
+ ****************************/
+
+nav.contents > p.topic-title {
+    font-weight: bold;
+}
+
+/**************
+ *   Badges   *
+ **************/
+
+span.badge-yellow {
+    display: inline-block;
+    background: var(--badge-yellow-bg);
+    color: var(--text-fg);
+
+    text-transform: capitalize;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1.75em;
+
+    padding: 0 0.5em;
+    border-radius: 0.3em;
+}
+
+/**************************************************
+ *   FLS extension   *
+ **************************************************/
+
+span.spec-paragraph-id {
+    display: block;
+    position: absolute;
+    left: 0;
+
+    color: var(--numbers-fg);
+    width: var(--numbers-width);
+    padding-right: 1rem;
+    text-align: right;
+}
+
+span.spec-paragraph-id {
+    font-size: 0.8em;
+}
+
+.spec-missing-ref {
+    color: var(--spec-error-fg);
+}
+
+pre.spec-syntax .spec-syntax-literal {
+    font-weight: 700;
+    background: var(--spec-syntax-literal-bg);
+    border-radius: 0.2em;
+}
+
+/********+***********
+ *   sphinx-needs   *
+ ********************/
+
+a.external_link:after {
+    content: "" !important;
+}

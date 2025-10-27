@@ -4,8 +4,8 @@
 .. default-domain:: spec
 .. informational-page::
 
-FLS Changelog
-=============
+Changelog
+=========
 
 This page describes the changes that have been applied to the FLS itself to
 address changes and new features introduced in each Rust release. Every item
@@ -18,6 +18,7 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+<<<<<<< HEAD
 Language changes in Rust 1.90.0
 -------------------------------
 
@@ -33,6 +34,8 @@ Language changes in Rust 1.90.0
 
   - No change: lints are not part of the FLS
 
+=======
+>>>>>>> ffab2d2cb91732b2cd215809e9a45dfec837d3c2
 Language changes in Rust 1.89.0
 -------------------------------
 
@@ -323,7 +326,7 @@ Language changes in Rust 1.84.0
 
 * `Execute drop glue when unwinding in an \`extern "C"\` function <https://github.com/rust-lang/rust/pull/129582>`_
 
-  * No change: This restricted past behavior is specified by the FLS.
+  * No change: This lifted restriction was not specified in the FLS
 
 Language changes in Rust 1.83.0
 -------------------------------

@@ -77,7 +77,7 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
     )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
-    }
+    };
 
     // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call
     // that gets resolved to the `#[panic_handler]` function.

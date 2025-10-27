@@ -182,7 +182,7 @@
 #![feature(rustdoc_internals)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
 #![feature(staged_api)]
-#![feature(stmt_expr_attributes)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
 #![feature(transparent_unions)]

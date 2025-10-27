@@ -9,6 +9,7 @@ extern crate rustc_span;
 
 extern crate serde;
 extern crate serde_json;
+extern crate tracing;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::File;
@@ -17,7 +18,7 @@ use std::sync::LazyLock;
 
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
-use rustc_hir::{AttrId, HirId};
+use rustc_hir::{AttrId, HirId, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
@@ -26,6 +27,7 @@ use rustc_middle::ty::print::{
 use rustc_session::EarlyDiagCtxt;
 use rustc_session::config::ErrorOutputType;
 use rustc_span::{FileNameDisplayPreference, Span, Symbol};
+use tracing::info;
 
 static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =
     LazyLock::new(|| ["ferrocene", "annotation"].map(Symbol::intern));
@@ -125,9 +127,18 @@ impl Callbacks for LoadCoreSymbols {
             if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {
                 continue;
             }
-            // TODO: skip associated default functions inherited from the trait
-            // https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/ty/struct.TyCtxt.html#method.provided_trait_methods
-            if kind == DefKind::AssocFn {}
+            // Skip intrinsics, extern functions, and associated default functions provided by the trait.
+            match tcx.hir_node_by_def_id(def) {
+                Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
+                | Node::TraitItem(TraitItem {
+                    kind: TraitItemKind::Fn(_, TraitFn::Required(_)),
+                    ..
+                }) => {
+                    info!("skipping item {def:?}");
+                    continue;
+                }
+                _ => {}
+            }
             let qualified_name = with_no_visible_paths!(with_resolve_crate_name!(
                 with_no_trimmed_paths!(tcx.def_path_str(def))
             ));

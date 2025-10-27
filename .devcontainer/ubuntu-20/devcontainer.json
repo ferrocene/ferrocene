@@ -7,9 +7,11 @@
 	"name": "Ferrocene CI (Ubuntu 20.04)",
 	"init": true,
 	"containerUser": "ci",
+	"runArgs": ["--name", "ferrocene-ubuntu-20-04"],
 	"build": {
-		"dockerfile": "../ferrocene/ci/docker-images/ubuntu-20/Dockerfile",
-		"context": ".."
+		"dockerfile": "../../ferrocene/ci/docker-images/ubuntu-20/Dockerfile",
+		"context": "../..",
+		"options": ["--tag", "ferrocene/ubuntu:20.04"]
 	},
 
 	"mounts": [
@@ -18,10 +20,7 @@
 
 	"customizations": {
 		"vscode": {
-			"settings": {
-				"chat.agent.enabled": false,
-				"telemetry.feedback.enabled": false
-			},
+			"settings": {},
 			"extensions": [
 				"rust-lang.rust-analyzer",
 				"tamasfe.even-better-toml"

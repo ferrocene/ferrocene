@@ -56,7 +56,7 @@ doc-stage = 2
 #
 # If this configuration is missing or changed the output of `rustc --version` will change
 # accordingly.
-description = "Ferrocene by Ferrous Systems"
+description = "by Ferrous Systems"
 
 
 

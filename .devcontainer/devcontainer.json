@@ -5,7 +5,8 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
 	"name": "Ferrocene CI (Ubuntu 20.04)",
-
+	"init": true,
+	"containerUser": "ci",
 	"build": {
 		"dockerfile": "../ferrocene/ci/docker-images/ubuntu-20/Dockerfile",
 		"context": ".."

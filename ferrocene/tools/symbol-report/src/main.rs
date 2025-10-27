@@ -16,8 +16,8 @@ use std::io::{self, Write};
 use std::sync::LazyLock;
 
 use rustc_driver::{Callbacks, Compilation};
-use rustc_hir::HirId;
 use rustc_hir::def::DefKind;
+use rustc_hir::{AttrId, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
@@ -48,6 +48,7 @@ impl Report {
 struct Vis<'tcx> {
     tcx: TyCtxt<'tcx>,
     report: Report,
+    visited_attrs: BTreeSet<AttrId>,
 }
 
 impl<'tcx> Vis<'tcx> {
@@ -61,20 +62,19 @@ impl<'tcx> Vis<'tcx> {
     }
 
     fn find_hir_id_annotations(&mut self, hir_id: HirId, span: Span) {
-        if self
+        if let Some(attr) = self
             .tcx
             .hir_attrs(hir_id)
             .iter()
-            .any(|attr| attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()))
+            .find(|attr| attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()))
         {
             let (filename, start, end) = self.convert_span(span);
             self.report.add_annotation(filename, start, end);
+            self.visited_attrs.insert(attr.id());
         }
     }
 }
 
-// FIXME(@pvdrz): Note that we only visit specific nodes of the HIR, meaning that some attributes
-// won't be detected silently. We should fix so we at least get a warning about it.
 impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     type NestedFilter = rustc_middle::hir::nested_filter::All;
 
@@ -91,6 +91,14 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
         self.find_hir_id_annotations(expr.hir_id, expr.span);
         rustc_hir::intravisit::walk_expr(self, expr)
     }
+
+    fn visit_attribute(&mut self, attr: &'v rustc_hir::Attribute) -> Self::Result {
+        if attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()) {
+            if !self.visited_attrs.contains(&attr.id()) {
+                eprintln!("Unused annotation at {:?}", attr.span());
+            }
+        }
+    }
 }
 
 struct LoadCoreSymbols;
@@ -104,8 +112,11 @@ impl Callbacks for LoadCoreSymbols {
                 as Box<dyn Write + Send>,
             Err(_) => Box::new(io::stdout()) as _,
         };
-        let mut vis =
-            Vis { tcx, report: Report { symbols: Vec::new(), annotations: BTreeMap::new() } };
+        let mut vis = Vis {
+            tcx,
+            report: Report { symbols: Vec::new(), annotations: BTreeMap::new() },
+            visited_attrs: BTreeSet::new(),
+        };
 
         for def in tcx.hir_crate_items(()).definitions() {
             let kind = tcx.def_kind(def);
@@ -122,14 +133,20 @@ impl Callbacks for LoadCoreSymbols {
             let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
             let (filename, start, end) = vis.convert_span(span);
 
-            if tcx.has_attrs_with_path(def, FERROCENE_ANNOTATION_PATH.as_slice()) {
-                vis.report.add_annotation(filename.clone(), start, end)
+            if let Some(attr) =
+                tcx.get_attrs_by_path(def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
+            {
+                vis.report.add_annotation(filename.clone(), start, end);
+                vis.visited_attrs.insert(attr.id());
             }
 
             vis.report.symbols.push(Function(qualified_name, filename, start, end));
         }
 
         tcx.hir_visit_all_item_likes_in_crate(&mut vis);
+        // It is very important that we walk the attributes *after* we visit the rest of the items.
+        // This allows us to detect unused annotations.
+        tcx.hir_walk_attributes(&mut vis);
 
         serde_json::to_writer(out, &vis.report).expect("failed to serialize report");
         Compilation::Stop

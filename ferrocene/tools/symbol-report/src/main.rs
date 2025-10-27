@@ -75,6 +75,8 @@ impl<'tcx> Vis<'tcx> {
     }
 }
 
+// This doesn't visit function's definitions as those are iterated in the `Callbacks`
+// implementation.
 impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     type NestedFilter = rustc_middle::hir::nested_filter::All;
 
@@ -133,6 +135,8 @@ impl Callbacks for LoadCoreSymbols {
             let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
             let (filename, start, end) = vis.convert_span(span);
 
+            // We don't check for annotations those inside the `Visitor` implementation so we do it
+            // here.
             if let Some(attr) =
                 tcx.get_attrs_by_path(def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
             {

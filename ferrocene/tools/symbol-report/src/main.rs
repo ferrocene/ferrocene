@@ -16,6 +16,7 @@ use std::io::{self, Write};
 use std::sync::LazyLock;
 
 use rustc_driver::{Callbacks, Compilation};
+use rustc_hir::HirId;
 use rustc_hir::def::DefKind;
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
@@ -44,12 +45,12 @@ impl Report {
     }
 }
 
-struct Vis<'v> {
-    tcx: TyCtxt<'v>,
+struct Vis<'tcx> {
+    tcx: TyCtxt<'tcx>,
     report: Report,
 }
 
-impl<'v> Vis<'v> {
+impl<'tcx> Vis<'tcx> {
     fn convert_span(&mut self, span: Span) -> (String, usize, usize) {
         let lines = self.tcx.sess.source_map().span_to_lines(span).expect("failed to look up span");
         let filename = lines.file.name.display(FileNameDisplayPreference::Local).to_string();
@@ -59,7 +60,7 @@ impl<'v> Vis<'v> {
         (filename, start + 1, end + 1)
     }
 
-    fn find_hir_id_annotations(&mut self, hir_id: rustc_hir::HirId, span: Span) {
+    fn find_hir_id_annotations(&mut self, hir_id: HirId, span: Span) {
         if self
             .tcx
             .hir_attrs(hir_id)
@@ -72,6 +73,8 @@ impl<'v> Vis<'v> {
     }
 }
 
+// FIXME(@pvdrz): Note that we only visit specific nodes of the HIR, meaning that some attributes
+// won't be detected silently. We should fix so we at least get a warning about it.
 impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     type NestedFilter = rustc_middle::hir::nested_filter::All;
 

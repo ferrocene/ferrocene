@@ -177,7 +177,8 @@ impl Step for CertifiedCoreSymbols {
         run_cargo(
             builder,
             cargo,
-            builder.config.free_args.clone(),
+            vec![],
+            // builder.config.free_args.clone(),
             &check_stamp,
             vec![],
             true,

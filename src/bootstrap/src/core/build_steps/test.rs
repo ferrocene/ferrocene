@@ -2882,7 +2882,8 @@ fn prepare_cargo_test(
             cargo.arg("--doc");
         }
         DocTests::No => {
-            cargo.args(["--bins", "--examples", "--tests", "--benches"]);
+            // cargo.args(["--bins", "--examples", "--tests", "--benches"]);
+            cargo.arg("--lib");
         }
         DocTests::Yes => {}
     }

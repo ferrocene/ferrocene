@@ -136,13 +136,10 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let CertifiedCoreSymbols { build_compiler, target } = self;
+        let CertifiedCoreSymbols { build_compiler, target: _ } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
-        let certified_target = self
-            .target
-            .certified_equivalent()
-            .expect(&format!("no certified equivalent exists for target \"{target}\""));
+        let certified_target = self.target.certified_equivalent();
 
         // c.f. check::std
         let mut cargo = Cargo::new(

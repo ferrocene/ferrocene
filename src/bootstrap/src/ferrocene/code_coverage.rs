@@ -62,7 +62,7 @@ pub(crate) fn measure_coverage(
     target: TargetSelection,
     coverage_for: FerroceneCoverageFor,
 ) {
-    // Pre-requisites for the `generate_report()` function are built here, as that function is
+    // Pre-requisites for the `generate_coverage_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
     builder.ensure(Llvm { target });
 
@@ -165,7 +165,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     });
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: builder.config.host_target.certified_equivalent().unwrap(),
+        certified_target: builder.config.host_target.certified_equivalent(),
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
@@ -202,8 +202,6 @@ pub(crate) struct CoverageState {
 pub(crate) struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
-    lcov_file: PathBuf,
-    metadata_file: PathBuf,
     pub(crate) doctests_bins_dir: PathBuf,
 }
 
@@ -218,8 +216,6 @@ impl Paths {
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
-            lcov_file: out_dir.join(format!("lcov-{name}.info")),
-            metadata_file: out_dir.join(format!("metadata-{name}.json")),
             doctests_bins_dir: out_dir.join("doctests-bins"),
         }
     }
@@ -231,15 +227,8 @@ impl Paths {
         if self.profdata_file.exists() {
             builder.remove(&self.profdata_file);
         }
-        if self.lcov_file.exists() {
-            builder.remove(&self.lcov_file);
-        }
-        if self.metadata_file.exists() {
-            builder.remove(&self.metadata_file);
-        }
 
         builder.create_dir(&self.profraw_dir);
-        builder.create_dir(self.lcov_file.parent().unwrap());
     }
 }
 
@@ -260,7 +249,7 @@ impl Step for CoverageOutcomesDir {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
             FerroceneCoverageOutcomes::Local => {
-                let certified_target = builder.host_target.certified_equivalent().unwrap();
+                let certified_target = builder.host_target.certified_equivalent();
                 Some(coverage_dir(builder, certified_target))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),

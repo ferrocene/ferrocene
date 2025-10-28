@@ -23,10 +23,7 @@ impl Step for CertifiedApiDocs {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let certified_crates = vec!["core".into()];
-        let certified_target = self
-            .target
-            .certified_equivalent()
-            .expect(&format!("no certified equivalent exists for target \"{}\"", &self.target));
+        let certified_target = self.target.certified_equivalent();
 
         // Build the docs for the certified target
         let certified_target_doc_out = builder.ensure(

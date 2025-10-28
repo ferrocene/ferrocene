@@ -1221,15 +1221,15 @@ Attribute ``link``
        $$name$$ $$=$$ StringLiteral
 
    NativeLibraryNameWithKind ::=
-       NativeLibraryName $$,$$ NativeLibrayKind
+       NativeLibraryName $$,$$ NativeLibraryKind
 
    WebAssemblyModuleName ::=
        $$wasm_import_module$$ $$=$$ StringLiteral
 
-   NativeLibrayKind ::=
-       $$kind$$ $$=$$ " NativeLibrayKindType "
+   NativeLibraryKind ::=
+       $$kind$$ $$=$$ " NativeLibraryKindType "
 
-   NativeLibrayKindType ::=
+   NativeLibraryKindType ::=
        $$dylib$$
      | $$raw-dylib$$
      | $$framework$$

@@ -1227,7 +1227,7 @@ Attribute ``link``
        $$wasm_import_module$$ $$=$$ StringLiteral
 
    NativeLibraryKind ::=
-       $$kind$$ $$=$$ " NativeLibraryKindType "
+       $$kind$$ $$=$$ $$"$$ NativeLibraryKindType $$"$$
 
    NativeLibraryKindType ::=
        $$dylib$$

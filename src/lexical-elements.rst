@@ -574,7 +574,7 @@ Byte Literals
      | ByteEscape
 
    ByteEscape ::=
-     | $$\0$$
+       $$\0$$
      | $$\"$$
      | $$\'$$
      | $$\t$$
@@ -1102,7 +1102,7 @@ Character Literals
      | UnicodeEscape
 
    AsciiEscape ::=
-     | $$\0$$
+       $$\0$$
      | $$\"$$
      | $$\'$$
      | $$\t$$

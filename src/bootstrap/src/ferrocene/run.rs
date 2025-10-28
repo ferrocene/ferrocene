@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod update_certified_core_symbols;
+
 use std::path::{Path, PathBuf};
 
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
@@ -117,9 +119,11 @@ impl Step for TraceabilityMatrix {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols {
-    pub(super) build_compiler: Compiler,
+    pub(super) host: TargetSelection,
     pub(super) target: TargetSelection,
 }
+
+pub(super) const CERTIFIED_CORE_SYMBOLS_ALIAS: &str = "certified-core-symbols";
 
 impl Step for CertifiedCoreSymbols {
     type Output = PathBuf;
@@ -127,22 +131,21 @@ impl Step for CertifiedCoreSymbols {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(SYMBOL_PATH).alias("certified-core-symbols")
+        run.path(SYMBOL_PATH).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
     }
 
     fn make_run(run: RunConfig<'_>) {
-        let build_compiler = run.builder.compiler(run.builder.top_stage.max(1), run.build_triple());
-        run.builder.ensure(CertifiedCoreSymbols { build_compiler, target: run.target });
+        run.builder.ensure(CertifiedCoreSymbols { host: run.build_triple(), target: run.target });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let CertifiedCoreSymbols { build_compiler, target } = self;
+        let CertifiedCoreSymbols { host, target } = self;
+
+        // We need at least stage 1 so that our compiler knows about .certified targets.
+        let build_compiler = builder.compiler(builder.top_stage.max(1), host);
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
-        let certified_target = self
-            .target
-            .certified_equivalent()
-            .expect(&format!("no certified equivalent exists for target \"{target}\""));
+        let certified_target = target.certified_equivalent();
 
         // c.f. check::std
         let mut cargo = Cargo::new(
@@ -163,10 +166,7 @@ impl Step for CertifiedCoreSymbols {
 
         let _guard = builder.msg(
             Kind::Run,
-            format_args!(
-                "symbol-report for certified library subset{}",
-                crate_description(&crates)
-            ),
+            format!("symbol-report for certified library subset{}", crate_description(&crates)),
             Mode::Std,
             build_compiler,
             certified_target,

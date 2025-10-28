@@ -5,20 +5,9 @@ mod reuse;
 use std::path::PathBuf;
 
 use anyhow::{Context, Error};
-use similar::{ChangeTag, TextDiff};
+use build_helper::diff::diff_text;
 
 use crate::licenses::LicensesInterner;
-
-fn diff_text(expected: &str, actual: &str) {
-    for change in TextDiff::from_lines(expected, actual).iter_all_changes() {
-        let sign = match change.tag() {
-            ChangeTag::Delete => "-",
-            ChangeTag::Insert => "+",
-            ChangeTag::Equal => " ",
-        };
-        print!("{}{}", sign, change);
-    }
-}
 
 /// The entry point to the binary.
 ///
@@ -42,29 +31,39 @@ fn main() -> Result<(), Error> {
     });
 
     if only_check {
-        println!("loading existing license information");
-        let existing = std::fs::read_to_string(&dest).with_context(|| {
-            format!("Failed to read existing license JSON at {}", dest.display())
-        })?;
-        let existing_json: serde_json::Value =
-            serde_json::from_str(&existing).with_context(|| {
-                format!("Failed to read existing license JSON at {}", dest.display())
-            })?;
-        if existing_json != output {
-            eprintln!("The existing {} file is out of date.", dest.display());
-            eprintln!("Run ./x run collect-license-metadata to update it.");
-            eprintln!("Diff:");
-            diff_text(&existing, &serde_json::to_string_pretty(&output).unwrap());
-            anyhow::bail!("The existing {} file doesn't match what REUSE reports.", dest.display());
-        }
-        println!("license information matches");
+        check_license_info(&dest, &output)
     } else {
-        if let Some(parent) = dest.parent() {
-            std::fs::create_dir_all(parent)?;
-        }
-        std::fs::write(&dest, &serde_json::to_vec_pretty(&output)?)?;
-        println!("license information written to {}", dest.display());
+        update_license_info(&dest, &output)
     }
+}
 
+/// Check that generated license info (`output`)
+/// matches the one commited to the JSON file at `dest`.
+///
+/// Error if not, including a diff.
+fn check_license_info(dest: &PathBuf, output: &serde_json::Value) -> Result<(), Error> {
+    println!("loading existing license information");
+    let existing = std::fs::read_to_string(&dest)
+        .with_context(|| format!("Failed to read existing license JSON at {}", dest.display()))?;
+    let existing_json: serde_json::Value = serde_json::from_str(&existing)
+        .with_context(|| format!("Failed to read existing license JSON at {}", dest.display()))?;
+    if &existing_json != output {
+        eprintln!("The existing {} file is out of date.", dest.display());
+        eprintln!("Run ./x run collect-license-metadata to update it.");
+        eprintln!("Diff:");
+        diff_text(&existing, &serde_json::to_string_pretty(&output).unwrap());
+        anyhow::bail!("The existing {} file doesn't match what REUSE reports.", dest.display());
+    }
+    println!("license information matches");
+    Ok(())
+}
+
+/// Update the license info JSON file at `dest` to match `output`.
+fn update_license_info(dest: &PathBuf, output: &serde_json::Value) -> Result<(), Error> {
+    if let Some(parent) = dest.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&dest, &serde_json::to_vec_pretty(&output)?)?;
+    println!("license information written to {}", dest.display());
     Ok(())
 }

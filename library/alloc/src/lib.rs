@@ -88,6 +88,10 @@
 //
 // Library features:
 // tidy-alphabetical-start
+#![cfg_attr(
+    not(any(feature = "ferrocene_certified", no_global_oom_handling)),
+    feature(string_replace_in_place)
+)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(alloc_layout_extra))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(allocator_api))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_into_iter_constructors))]
@@ -200,6 +204,8 @@
 //
 // Ferrocene lints/features:
 #![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+#![feature(register_tool)]
+#![register_tool(ferrocene)]
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]

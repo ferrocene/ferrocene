@@ -127,6 +127,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_remainder))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(pattern_type_macro))]
 #![feature(ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_neg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_shifts))]
@@ -174,6 +175,7 @@
 #![feature(never_type)]
 #![feature(no_core)]
 #![feature(optimize_attribute)]
+#![feature(pattern_types)]
 #![feature(prelude_import)]
 #![feature(reborrow)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
@@ -211,6 +213,8 @@
 // Ferrocene lints/features:
 #![allow(unused_attributes)]
 #![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+#![feature(register_tool)]
+#![register_tool(ferrocene)]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

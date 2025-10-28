@@ -41,10 +41,6 @@ class AddCustomSubstitutions(SphinxTransform):
             self.app.config["rust_version"],
         )
         self.add_substitution(
-            "grcov_version",
-            self.app.config["grcov_version"],
-        )
-        self.add_substitution(
             "llvm_version",
             self.app.config["llvm_version"],
         )

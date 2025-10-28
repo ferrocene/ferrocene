@@ -281,17 +281,6 @@
                 },
                 "name": "tools/generate-tarball/Cargo.toml",
                 "type": "file"
-              },
-              {
-                "children": [],
-                "license": {
-                  "copyright": [
-                    "The grcov developers"
-                  ],
-                  "spdx": "MPL-2.0"
-                },
-                "name": "tools/grcov",
-                "type": "directory"
               }
             ],
             "license": {

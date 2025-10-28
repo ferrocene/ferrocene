@@ -612,6 +612,7 @@ Byte String Literals
 .. rubric:: Syntax
 
 .. syntax::
+
    ByteStringLiteral ::=
        RawByteStringLiteral
      | SimpleByteStringLiteral
@@ -712,6 +713,7 @@ C String Literals
 .. rubric:: Syntax
 
 .. syntax::
+
    CStringLiteral ::=
        RawCStringLiteral
      | SimpleCStringLiteral

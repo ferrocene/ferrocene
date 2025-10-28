@@ -56,7 +56,7 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ffi::va_list::{VaArgSafe, VaListImpl};
-use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
+use crate::marker::{ConstParamTy, Destruct, DiscriminantKind, PointeeSized, Tuple};
 use crate::ptr;
 
 mod bounds;
@@ -494,12 +494,22 @@ pub const fn unlikely(b: bool) -> bool {
 /// However unlike the public form, the intrinsic will not drop the value that
 /// is not selected.
 #[unstable(feature = "core_intrinsics", issue = "none")]
+#[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[inline]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
+||||||| 27050c0d15a
+pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
+=======
+pub const fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T
+where
+    T: [const] Destruct,
+{
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if b { true_val } else { false_val }
 }
 
@@ -2871,6 +2881,11 @@ pub unsafe fn vtable_align(ptr: *const ()) -> usize;
 /// More specifically, this is the offset in bytes between successive
 /// items of the same type, including alignment padding.
 ///
+/// Note that, unlike most intrinsics, this can only be called at compile-time
+/// as backends do not have an implementation for it. The only caller (its
+/// stable counterpart) wraps this intrinsic call in a `const` block so that
+/// backends only see an evaluated constant.
+///
 /// The stabilized version of this intrinsic is [`core::mem::size_of`].
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
@@ -2884,6 +2899,11 @@ pub const fn size_of<T>() -> usize;
 /// it does not require an `unsafe` block.
 /// Therefore, implementations must not require the user to uphold
 /// any safety invariants.
+///
+/// Note that, unlike most intrinsics, this can only be called at compile-time
+/// as backends do not have an implementation for it. The only caller (its
+/// stable counterpart) wraps this intrinsic call in a `const` block so that
+/// backends only see an evaluated constant.
 ///
 /// The stabilized version of this intrinsic is [`core::mem::align_of`].
 #[rustc_nounwind]

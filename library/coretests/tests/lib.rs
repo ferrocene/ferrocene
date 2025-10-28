@@ -32,6 +32,7 @@
 #![feature(const_raw_ptr_comparison)]
 #![feature(const_ref_cell)]
 #![feature(const_result_trait_fn)]
+#![feature(const_select_unpredictable)]
 #![feature(const_trait_impl)]
 #![feature(control_flow_into_value)]
 #![feature(control_flow_ok)]

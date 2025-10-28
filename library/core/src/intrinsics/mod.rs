@@ -499,17 +499,11 @@ pub const fn unlikely(b: bool) -> bool {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
-||||||| 27050c0d15a
-pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
-=======
 pub const fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T
 where
     T: [const] Destruct,
 {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if b { true_val } else { false_val }
 }
 

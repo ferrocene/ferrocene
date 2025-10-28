@@ -4,12 +4,8 @@
 //!
 //! Hints may be compile time or runtime.
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-||||||| 27050c0d15a
-=======
 use crate::marker::Destruct;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::MaybeUninit;
 use crate::{intrinsics, ub_checks};
 
@@ -785,18 +781,12 @@ pub const fn cold_path() {
 /// ```
 #[inline(always)]
 #[stable(feature = "select_unpredictable", since = "1.88.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T {
-||||||| 27050c0d15a
-pub fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T {
-=======
 #[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
 pub const fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T
 where
     T: [const] Destruct,
 {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // FIXME(https://github.com/rust-lang/unsafe-code-guidelines/issues/245):
     // Change this to use ManuallyDrop instead.
     let mut true_val = MaybeUninit::new(true_val);

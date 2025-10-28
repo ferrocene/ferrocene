@@ -6,8 +6,9 @@ use std::path::{Path, PathBuf};
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::build_steps::tool::{SourceType, Tool};
+use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
-use crate::ferrocene::code_coverage::coverage_file;
+use crate::ferrocene::code_coverage::{self, CoverageState, Paths, coverage_file};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::tool::{Blanket, SYMBOL_PATH, SymbolReport};
@@ -190,15 +191,6 @@ impl Step for CertifiedCoreSymbols {
     }
 }
 
-// FIXME(@jyn514): this is not a good CLI interface.
-// What I would like is to have it be `x run coverage-report` and have that do everything
-// automatically.
-// That doesn't work right now because there's no way for a Step to imply a `--coverage` flag.
-//
-// Additionally, we would like to let people choose which tests get run when the report is
-// generated, especially since doctests don't work with coverage today but will likely get fixed soon.
-// Rather than trying to make this Step very smart, it's done as part of `generate_coverage_report`
-// after running tests.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CoverageReport {
     pub(super) certified_target: TargetSelection,
@@ -213,7 +205,43 @@ impl Step for CoverageReport {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
+        run.alias("ferrocene-coverage-report")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        let builder = run.builder;
+        let certified_target = run.target.certified_equivalent().unwrap();
+        let for_ = FerroceneCoverageFor::Library;
+        let paths = Paths::find(builder, run.target, for_);
+        // FIXME(@jyn514): this is not a good CLI interface.
+        // I would like to have `x run coverage-report` by itself have a stamp file, and rerun tests
+        // whenever it's out of date.
+        //
+        // Additionally, we would like to let people choose which tests get run when the report is
+        // generated, especially since doctests don't work with coverage today but will likely get fixed soon.
+        // Rather than trying to make this Step very smart, it's done as part of `generate_coverage_report`
+        // after running tests.
+        if !paths.profdata_file.exists() {
+            panic!(
+                "ferrocene-coverage-report requires you to have already run tests. consider running `x test --coverage=library` first."
+            );
+        }
+
+        // We need at least stage 1 so that our compiler knows about .certified targets.
+        let build_compiler = builder.compiler(builder.top_stage.max(1), builder.config.host_target);
+        let state =
+            CoverageState { compiler: build_compiler, target: run.target, coverage_for: for_ };
+        let instrumented_binaries = code_coverage::instrumented_binaries(builder, &paths, &state);
+
+        let symbol_report =
+            builder.ensure(CertifiedCoreSymbols { build_compiler, target: certified_target });
+
+        builder.ensure(CoverageReport {
+            certified_target,
+            profdata: paths.profdata_file,
+            instrumented_binaries,
+            symbol_report,
+        });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {

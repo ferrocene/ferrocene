@@ -4,6 +4,7 @@
 //!
 //! Hints may be compile time or runtime.
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Destruct;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::MaybeUninit;

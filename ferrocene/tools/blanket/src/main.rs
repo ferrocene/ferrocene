@@ -81,18 +81,6 @@ struct LineCoverage {
     lines: Vec<(usize, LineCoverageStatus)>,
 }
 
-impl LineCoverage {
-    fn unconsidered(&self) -> usize {
-        self.lines.iter().filter(|(_, s)| matches!(s, LineCoverageStatus::Ignored)).count()
-    }
-    fn considered(&self) -> usize {
-        self.lines.iter().filter(|(_, s)| !matches!(s, LineCoverageStatus::Ignored)).count()
-    }
-    fn tested(&self) -> usize {
-        self.lines.iter().filter(|(_, s)| matches!(s, LineCoverageStatus::Tested)).count()
-    }
-}
-
 #[derive(Debug, PartialEq, Eq, Hash)]
 enum FunctionCoverageStatus {
     FullyTested,
@@ -297,36 +285,6 @@ impl ShowCommand {
         coverage.sort_by(|f1, f2| f1.source_name.cmp(&f2.source_name));
         let coverage = coverage;
 
-        for func in &coverage {
-            print!("{}: ", func.source_name);
-            if func.lines.considered() == 0 {
-                println!(
-                    "BUG: no lines considered (span: {}:{}-{})",
-                    func.relative_path.display(),
-                    func.lines.lines.first().unwrap().0,
-                    func.lines.lines.last().unwrap().0
-                );
-            } else {
-                let missing = func
-                    .lines
-                    .lines
-                    .iter()
-                    .filter(|(_, status)| *status == LineCoverageStatus::Untested)
-                    .map(|(linenum, _)| format!("{}:{}", func.relative_path.display(), linenum))
-                    .collect::<Vec<_>>();
-                if self.debug || !missing.is_empty() {
-                    println!(
-                        "{} / {} covered ({} lines unconsidered)\n\
-                        \tMissing lines:\n\t\t{}\n\
-                        ",
-                        func.lines.tested(),
-                        func.lines.considered(),
-                        func.lines.unconsidered(),
-                        missing.join("\n\t\t"),
-                    );
-                }
-            }
-        }
         let total = coverage.len();
         let mut count_fully_tested = 0;
         let mut count_partially_tested = 0;

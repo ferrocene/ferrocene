@@ -93,34 +93,18 @@ pub(crate) fn measure_coverage(
     }
 }
 
-pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
-    // Note: this function is called after all bootstrap steps are executed, to ensure the report
-    // includes data from all tests suites measuring coverage. It cannot call `builder.ensure`, so
-    // make sure to call it in `measure_coverage()`.
-
-    if builder.config.cmd.ferrocene_coverage_for().is_none() {
-        return;
-    }
-    let Some(state) = builder.ferrocene_coverage.borrow_mut().take() else {
-        eprintln!("error: --coverage was passed but no steps measured coverage data.");
-        exit!(1);
-    };
-
-    let paths = Paths::find(builder, state.target, state.coverage_for);
-    let llvm_bin_dir = builder.llvm_out(state.target).join("bin");
-
-    builder.info("Merging together code coverage measurements");
-    let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));
-    cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(paths.profraw_dir);
-    cmd.fail_fast().run(builder);
-
-    // FIXME(@pvdrz): `blanket` needs to receive the path to the binaries that were instrumented.
-    // However there is no quick and easy way to fetch those. For now, we just go inside the
-    // dependencies and assume that every executable file is an instrumented binary.
-    //
-    // A possible improvement would be to capture `cargo test` stderr and fetch the path of every
-    // binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
-    let instrumented_binaries = match state.coverage_for {
+// FIXME(@pvdrz): `blanket` needs to receive the path to the binaries that were instrumented.
+// However there is no quick and easy way to fetch those. For now, we just go inside the
+// dependencies and assume that every executable file is an instrumented binary.
+//
+// A possible improvement would be to capture `cargo test` stderr and fetch the path of every
+// binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
+pub(super) fn instrumented_binaries(
+    builder: &Builder<'_>,
+    paths: &Paths,
+    state: &CoverageState,
+) -> Vec<PathBuf> {
+    match state.coverage_for {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
@@ -145,7 +129,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
                 let is_executable = path.extension().is_some_and(|e| e == "exe" || e == "dll");
                 #[cfg(target_family = "unix")]
                 let is_executable = path.is_file() /* directories can have the executable flag set */
-                    && (path.metadata().expect("cannot fetch metadata for deps file").permissions().mode() & 0o111 != 0);
+                        && (path.metadata().expect("cannot fetch metadata for deps file").permissions().mode() & 0o111 != 0);
 
                 if is_executable {
                     instrumented_binaries.push(path);
@@ -155,7 +139,31 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
             instrumented_binaries
         }
+    }
+}
+
+pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
+    // Note: this function is called after all bootstrap steps are executed, to ensure the report
+    // includes data from all tests suites measuring coverage. It cannot call `builder.ensure`, so
+    // make sure to call it in `measure_coverage()`.
+
+    if builder.config.cmd.ferrocene_coverage_for().is_none() {
+        return;
+    }
+    let Some(state) = builder.ferrocene_coverage.borrow_mut().take() else {
+        eprintln!("error: --coverage was passed but no steps measured coverage data.");
+        exit!(1);
     };
+
+    let paths = Paths::find(builder, state.target, state.coverage_for);
+    let llvm_bin_dir = builder.llvm_out(state.target).join("bin");
+
+    builder.info("Merging together code coverage measurements");
+    let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));
+    cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(&paths.profraw_dir);
+    cmd.fail_fast().run(builder);
+
+    let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 
     builder.info("Listing symbols for the certified libcore subset");
     let symbol_report = builder.ensure(CertifiedCoreSymbols {
@@ -195,13 +203,13 @@ pub(super) fn coverage_file(builder: &Builder<'_>, t: TargetSelection) -> PathBu
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct CoverageState {
-    target: TargetSelection,
-    compiler: Compiler,
-    coverage_for: FerroceneCoverageFor,
+    pub(super) target: TargetSelection,
+    pub(super) compiler: Compiler,
+    pub(super) coverage_for: FerroceneCoverageFor,
 }
 pub(crate) struct Paths {
     profraw_dir: PathBuf,
-    profdata_file: PathBuf,
+    pub(super) profdata_file: PathBuf,
     lcov_file: PathBuf,
     metadata_file: PathBuf,
     pub(crate) doctests_bins_dir: PathBuf,

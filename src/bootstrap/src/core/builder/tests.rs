@@ -564,6 +564,7 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         ");
     }
 
@@ -590,6 +591,8 @@ mod snapshot {
         [build] llvm <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustdoc 2 <target1>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         ");
     }
 
@@ -604,6 +607,7 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         "
         );
@@ -758,6 +762,7 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         "
         );
     }
@@ -781,6 +786,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustdoc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
         "
         );
     }
@@ -810,6 +816,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LldWrapper 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
         [build] rustdoc 2 <target1>
+        [build] rustc 2 <host> -> std 2 <target1>
         "
         );
     }
@@ -1127,7 +1134,7 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1240,7 +1247,7 @@ mod snapshot {
                 "--set",
                 "rust.lld=true",
             ])
-            .render_steps(), @r###"
+            .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> LldWrapper 1 <host>
@@ -1313,7 +1320,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target()])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1386,7 +1393,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target()])
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1449,7 +1456,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1531,7 +1538,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[])
                 .targets(&[TEST_TRIPLE_1])
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1541,7 +1548,10 @@ mod snapshot {
         [dist] mingw <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
-        "###);
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
+        ");
     }
 
     #[test]
@@ -1553,7 +1563,7 @@ mod snapshot {
                 .hosts(&[TEST_TRIPLE_1])
                 .targets(&[TEST_TRIPLE_1])
                 .args(&["--set", "rust.channel=nightly", "--set", "build.extended=true"])
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
@@ -1615,7 +1625,8 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        "###);
+        [build] rustc 2 <host> -> std 2 <target1>
+        ");
     }
 
     /// Simulates e.g. the powerpc64 builder, which is fully cross-compiled from x64, but it does
@@ -1694,7 +1705,7 @@ mod snapshot {
             ctx
                 .config("dist")
                 .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
@@ -2101,8 +2112,7 @@ mod snapshot {
         [test] compiletest-incremental 1 <host>
         [test] compiletest-debuginfo 1 <host>
         [test] compiletest-ui-fulldeps 1 <host>
-        [build] rustdoc 1 <host>
-        [test] compiletest-rustdoc-html 1 <host>
+        [test] compiletest-rustdoc 1 <host>
         [test] compiletest-coverage-run-rustdoc 1 <host>
         [test] compiletest-pretty 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
@@ -2282,8 +2292,7 @@ mod snapshot {
         [test] compiletest-debuginfo 2 <host>
         [build] rustc 2 <host> -> rustc 3 <host>
         [test] compiletest-ui-fulldeps 2 <host>
-        [build] rustdoc 2 <host>
-        [test] compiletest-rustdoc-html 2 <host>
+        [test] compiletest-rustdoc 2 <host>
         [test] compiletest-coverage-run-rustdoc 2 <host>
         [test] compiletest-pretty 2 <host>
         [build] rustc 2 <host> -> std 2 <host>

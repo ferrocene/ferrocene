@@ -3137,10 +3137,10 @@ Struct Expressions
      | ShorthandInitializer
 
    IndexedInitializer ::=
-       FieldIndex : Expression
+       FieldIndex $$:$$ Expression
 
    NamedInitializer ::=
-       Identifier : Expression
+       Identifier $$:$$ Expression
 
    ShorthandInitializer ::=
        Identifier

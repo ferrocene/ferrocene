@@ -18,7 +18,7 @@ const PATH: &str = "ferrocene/tools/flip-link";
 impl Step for FlipLink {
     type Output = PathBuf;
     const DEFAULT: bool = true;
-    const IS_HOST: bool = true;
+    const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(PATH)
@@ -29,13 +29,14 @@ impl Step for FlipLink {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let compiler = builder.compiler(builder.top_stage, builder.config.host_target);
+
         builder.info(format!("Building {PATH}").as_str());
 
-        let compiler = builder.compiler(0, builder.config.host_target);
         let cmd = prepare_tool_cargo(
             builder,
             compiler,
-            Mode::ToolBootstrap,
+            Mode::ToolTarget,
             self.target,
             Kind::Build,
             PATH,
@@ -46,7 +47,7 @@ impl Step for FlipLink {
         cmd.into_cmd().run(builder);
 
         builder
-            .cargo_out(compiler, Mode::ToolBootstrap, self.target)
+            .cargo_out(compiler, Mode::ToolTarget, self.target)
             .join(exe("flip-link", self.target))
     }
 }

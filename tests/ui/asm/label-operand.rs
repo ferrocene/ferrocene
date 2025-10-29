@@ -51,3 +51,6 @@ fn main() {
     make_true(&mut value);
     assert!(value);
 }
+
+// ferrocene-annotations: fls_mw7mth5ooeq1
+// Label block

@@ -4,6 +4,7 @@
 use std::path::PathBuf;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
 use crate::core::config::TargetSelection;
 use crate::{Kind, Mode, exe};
@@ -13,7 +14,7 @@ pub(crate) struct FlipLink {
     pub(crate) target: TargetSelection,
 }
 
-const PATH: &str = "ferrocene/tools/flip-link";
+pub(in crate::ferrocene) const PATH: &str = "ferrocene/tools/flip-link";
 
 impl Step for FlipLink {
     type Output = PathBuf;
@@ -30,10 +31,11 @@ impl Step for FlipLink {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let compiler = builder.compiler(builder.top_stage, builder.config.host_target);
+        builder.ensure(Std::new(compiler, self.target));
 
-        builder.info(format!("Building {PATH}").as_str());
         builder.require_submodule("ferrocene/tools/flip-link", None);
 
+        builder.info(format!("Building {PATH}").as_str());
         let cmd = prepare_tool_cargo(
             builder,
             compiler,

@@ -32,6 +32,7 @@ impl Step for FlipLink {
         let compiler = builder.compiler(builder.top_stage, builder.config.host_target);
 
         builder.info(format!("Building {PATH}").as_str());
+        builder.require_submodule("ferrocene/tools/flip-link", None);
 
         let cmd = prepare_tool_cargo(
             builder,

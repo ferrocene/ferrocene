@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::env;
+
 use serde_json::Value;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use super::tool::flip_link::PATH as FLIP_LINK_PATH;
+use crate::builder::{Builder, RunConfig, Rustflags, ShouldRun, Step};
 use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
@@ -163,9 +166,7 @@ impl Step for GenerateTarball {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct FlipLink {
-    host: TargetSelection,
-}
+pub(crate) struct FlipLink {}
 
 impl Step for FlipLink {
     type Output = ();
@@ -173,31 +174,35 @@ impl Step for FlipLink {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("ferrocene/tools/flip-link")
+        run.path(FLIP_LINK_PATH)
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(FlipLink { host: run.target });
+        run.builder.ensure(FlipLink {});
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let compiler = builder.compiler(0, self.host);
-        // The flip link tests require a thumbv7em-none-eabi target to exist
-        builder.ensure(Std::new(compiler, TargetSelection::from_user("thumbv7em-none-eabi")));
+        let host = builder.config.host_target;
+        let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
+        let compiler = builder.compiler(builder.top_stage, host);
+        builder.ensure(Std::new(compiler, host));
+        let flip_link = builder.ensure(super::tool::flip_link::FlipLink { target: host });
 
-        builder.info("Testing ferrocene/tools/flip-link");
-
+        builder.info("Compiling flip-link test binaries");
         let out = tool::prepare_tool_cargo(
             builder,
             compiler,
             Mode::ToolTarget,
-            self.host,
+            host,
             Kind::Test,
-            "ferrocene/tools/flip-link",
+            FLIP_LINK_PATH,
             SourceType::Submodule,
             &[],
         )
         .into_cmd()
+        // Compile these tests separately from running them so that bootstrap's flags don't
+        // interfere. It passes a lot of things that are only valid for `host`, but the tests will
+        // end up running for the thumb target.
         .args(["--no-run", "--message-format", "json"])
         .run_capture_stdout(builder);
 
@@ -245,9 +250,31 @@ impl Step for FlipLink {
             test_artifacts.push(executable.to_string());
         }
 
+        if !builder.config.dry_run() && test_artifacts.is_empty() {
+            panic!("cargo test --no-run {FLIP_LINK_PATH} did not compile any test binaries");
+        }
+
+        // The flip link tests require a thumbv7em-none-eabi target to exist
+        builder.ensure(Std::new(compiler, thumb));
+
+        let old_path = env::var_os("PATH").unwrap_or_default();
+        let flip_link_dir = flip_link.parent().unwrap().to_path_buf();
+        let new_path =
+            env::join_paths(std::iter::once(flip_link_dir).chain(env::split_paths(&old_path)))
+                .expect("could not add flip-link to PATH");
+
         for artifact in test_artifacts {
             builder.info(&format!("Testing flip-link test binary ({artifact})"));
-            BootstrapCommand::new(artifact).current_dir("ferrocene/tools/flip-link").run(builder);
+
+            let mut rustflags = Rustflags::new(thumb);
+            rustflags
+                .arg(&format!("-Clinker={}", flip_link.to_str().unwrap()))
+                .arg("-Clink-arg=-Tlink.x");
+
+            BootstrapCommand::new(artifact)
+                .current_dir(FLIP_LINK_PATH)
+                .env("PATH", &new_path)
+                .run(builder);
         }
     }
 }

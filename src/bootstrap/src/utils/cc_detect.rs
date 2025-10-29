@@ -83,7 +83,10 @@ pub fn fill_compilers(build: &mut Build) {
                 .cloned()
                 .chain(iter::once(build.host_target))
                 // Ferrocene addition: Load the matching certified target
-                .flat_map(|t| std::iter::once(t).chain(t.certified_equivalent()))
+                .flat_map(|t| iter::once(t).chain(t.certified_equivalent()))
+                // Ferrocene addition: If running flip-link, we always need a thumb target.
+                // FIXME: shouldn't require a thumb compiler if we're not actually testing flip-link
+                .chain(iter::once(TargetSelection::from_user("thumbv7em-none-eabi")))
                 .collect()
         }
     };

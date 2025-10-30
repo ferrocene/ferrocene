@@ -55,9 +55,13 @@ pub(crate) fn generate(
     let total_lines = num_lines_tested + num_lines_untested;
     let percentile_lines_tested = (num_lines_tested / (total_lines)) * 100.0;
     let summary = maud::html!(
+        header {
+            h1 { "Core library line coverage report" }
+            a href="./index.html" { "Go back to the documentation index" }
+        }
         div class="coverage-summary" {
             h1 {
-                (format!("{percentile_lines_tested:.2}")) "% (" (num_lines_tested) "/" (total_lines) ")"
+                (format!("{percentile_lines_tested:.2}% ({num_lines_tested}/{total_lines} lines)"))
             }
         }
         div class="instructions" {

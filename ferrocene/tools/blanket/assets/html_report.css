@@ -8,10 +8,36 @@
     --var-untested-annotated: var(--var-untested);
     --var-partial-annotated: var(--var-partial);
     --var-annotated-text: none;
+    --header-color: #fff;
+    --header-height: 3.5em;
 }
 
 body {
     font-family: "Raleway";
+}
+
+header {
+    color: var(--header-color);
+    background: #194e80;
+    margin: -1em -1em 1em -1em;
+    padding: 0 1em;
+    height: var(--header-height);
+
+    position: sticky;
+    top: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 1.5em;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.25em;
+}
+
+header a {
+    color: var(--header-color);
 }
 
 code {

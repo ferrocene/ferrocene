@@ -109,6 +109,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_select_unpredictable))]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(disjoint_bitor))]

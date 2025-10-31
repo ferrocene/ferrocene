@@ -3727,7 +3727,7 @@ impl<T> [T] {
     /// assert_eq!(a, ['a', 'c', 'd', 'e', 'b', 'f']);
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
-    #[rustc_const_stable(feature = "const_slice_rotate", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "const_slice_rotate", since = "1.92.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rotate_left(&mut self, mid: usize) {
         assert!(mid <= self.len());
@@ -3774,7 +3774,7 @@ impl<T> [T] {
     /// assert_eq!(a, ['a', 'e', 'b', 'c', 'd', 'f']);
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
-    #[rustc_const_stable(feature = "const_slice_rotate", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "const_slice_rotate", since = "1.92.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rotate_right(&mut self, k: usize) {
         assert!(k <= self.len());

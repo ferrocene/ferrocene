@@ -3540,8 +3540,9 @@ impl Item {
             ItemKind::Const(i) => Some(&i.generics),
             ItemKind::Fn(i) => Some(&i.generics),
             ItemKind::TyAlias(i) => Some(&i.generics),
-            ItemKind::TraitAlias(_, generics, _)
-            | ItemKind::Enum(_, generics, _)
+            ItemKind::TraitAlias(i) => Some(&i.generics),
+
+            ItemKind::Enum(_, generics, _)
             | ItemKind::Struct(_, generics, _)
             | ItemKind::Union(_, generics, _) => Some(&generics),
             ItemKind::Trait(i) => Some(&i.generics),
@@ -3624,6 +3625,15 @@ impl Default for FnHeader {
 }
 
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct TraitAlias {
+    pub constness: Const,
+    pub ident: Ident,
+    pub generics: Generics,
+    #[visitable(extra = BoundKind::Bound)]
+    pub bounds: GenericBounds,
+}
+
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
 pub struct Trait {
     pub constness: Const,
     pub safety: Safety,
@@ -3680,6 +3690,9 @@ pub struct TraitImplHeader {
 
 #[derive(Clone, Encodable, Decodable, Debug, Default, Walkable)]
 pub struct FnContract {
+    /// Declarations of variables accessible both in the `requires` and
+    /// `ensures` clauses.
+    pub declarations: ThinVec<Stmt>,
     pub requires: Option<Box<Expr>>,
     pub ensures: Option<Box<Expr>>,
 }
@@ -3795,7 +3808,7 @@ pub enum ItemKind {
     /// Trait alias.
     ///
     /// E.g., `trait Foo = Bar + Quux;`.
-    TraitAlias(Ident, Generics, GenericBounds),
+    TraitAlias(Box<TraitAlias>),
     /// An implementation.
     ///
     /// E.g., `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`.
@@ -3828,7 +3841,7 @@ impl ItemKind {
             | ItemKind::Struct(ident, ..)
             | ItemKind::Union(ident, ..)
             | ItemKind::Trait(box Trait { ident, .. })
-            | ItemKind::TraitAlias(ident, ..)
+            | ItemKind::TraitAlias(box TraitAlias { ident, .. })
             | ItemKind::MacroDef(ident, _)
             | ItemKind::Delegation(box Delegation { ident, .. }) => Some(ident),
 
@@ -3885,7 +3898,7 @@ impl ItemKind {
             | Self::Struct(_, generics, _)
             | Self::Union(_, generics, _)
             | Self::Trait(box Trait { generics, .. })
-            | Self::TraitAlias(_, generics, _)
+            | Self::TraitAlias(box TraitAlias { generics, .. })
             | Self::Impl(Impl { generics, .. }) => Some(generics),
             _ => None,
         }
@@ -4047,8 +4060,8 @@ mod size_asserts {
     static_assert_size!(GenericBound, 88);
     static_assert_size!(Generics, 40);
     static_assert_size!(Impl, 64);
-    static_assert_size!(Item, 144);
-    static_assert_size!(ItemKind, 80);
+    static_assert_size!(Item, 136);
+    static_assert_size!(ItemKind, 72);
     static_assert_size!(LitKind, 24);
     static_assert_size!(Local, 96);
     static_assert_size!(MetaItemLit, 40);

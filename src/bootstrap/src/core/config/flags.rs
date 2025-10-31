@@ -444,6 +444,9 @@ pub enum Subcommand {
         #[arg(long)]
         /// Use a different codegen backend when running tests.
         test_codegen_backend: Option<CodegenBackendKind>,
+        #[arg(long)]
+        /// Ignore `//@ ignore-backends` directives.
+        bypass_ignore_backends: bool,
         /// generate coverage for tests
         #[arg(long)]
         coverage: Option<FerroceneCoverageFor>,
@@ -741,6 +744,14 @@ impl Subcommand {
             _ => None,
         }
     }
+
+    pub fn bypass_ignore_backends(&self) -> bool {
+        match self {
+            Subcommand::Test { bypass_ignore_backends, .. } => *bypass_ignore_backends,
+            _ => false,
+        }
+    }
+
     pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
         match *self {
             Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {

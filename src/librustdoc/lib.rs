@@ -568,7 +568,7 @@ fn opts() -> Vec<RustcOptGroup> {
             "",
             "emit",
             "Comma separated list of types of output for rustdoc to emit",
-            "[unversioned-shared-resources,toolchain-shared-resources,invocation-specific,dep-info]",
+            "[toolchain-shared-resources,invocation-specific,dep-info]",
         ),
         opt(Unstable, FlagMulti, "", "no-run", "Compile doctests without running them", ""),
         opt(
@@ -587,7 +587,7 @@ fn opts() -> Vec<RustcOptGroup> {
             "Include the memory layout of types in the docs",
             "",
         ),
-        opt(Unstable, Flag, "", "nocapture", "Don't capture stdout and stderr of tests", ""),
+        opt(Unstable, Flag, "", "no-capture", "Don't capture stdout and stderr of tests", ""),
         opt(
             Unstable,
             Flag,

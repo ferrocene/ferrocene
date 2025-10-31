@@ -250,6 +250,7 @@ fn sample_config() -> Config {
         diff_command: Default::default(),
         minicore_path: Default::default(),
         query_rustc_path: Default::default(),
+        bypass_ignore_backends: Default::default(),
         override_codegen_backend: Default::default(),
     }
 }

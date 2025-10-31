@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: The FLS Team
+# SPDX-FileCopyrightText: The Rust Project Developers
 
 name: Change
 description: File a change for the FLS

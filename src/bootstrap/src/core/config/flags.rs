@@ -444,7 +444,9 @@ pub enum Subcommand {
         #[arg(long)]
         /// Use a different codegen backend when running tests.
         test_codegen_backend: Option<CodegenBackendKind>,
-<<<<<<< HEAD
+        #[arg(long)]
+        /// Ignore `//@ ignore-backends` directives.
+        bypass_ignore_backends: bool,
         /// generate coverage for tests
         #[arg(long)]
         coverage: Option<FerroceneCoverageFor>,
@@ -455,12 +457,6 @@ pub enum Subcommand {
         /// Choose the test variant to use for this execution.
         #[arg(long)]
         test_variant: Option<String>,
-||||||| bc1d7273dfb
-=======
-        #[arg(long)]
-        /// Ignore `//@ ignore-backends` directives.
-        bypass_ignore_backends: bool,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     },
     /// Build and run some test suites *in Miri*
     Miri {
@@ -748,19 +744,19 @@ impl Subcommand {
             _ => None,
         }
     }
-<<<<<<< HEAD
+
+    pub fn bypass_ignore_backends(&self) -> bool {
+        match self {
+            Subcommand::Test { bypass_ignore_backends, .. } => *bypass_ignore_backends,
+            _ => false,
+        }
+    }
+
     pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
         match *self {
             Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
                 ferrocene_test_one_crate_per_cargo_call
             }
-||||||| bc1d7273dfb
-=======
-
-    pub fn bypass_ignore_backends(&self) -> bool {
-        match self {
-            Subcommand::Test { bypass_ignore_backends, .. } => *bypass_ignore_backends,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             _ => false,
         }
     }

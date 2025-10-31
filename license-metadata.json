@@ -447,6 +447,7 @@
           {
             "directories": [
               ".circleci",
+              ".devcontainer",
               "src/bootstrap/src/ferrocene"
             ],
             "files": [

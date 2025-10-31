@@ -84,7 +84,7 @@ body:
         your browser.
 
         **Note**: New content need not fill this in.
-      placeholder: fls_69zyas59o8ff
+      placeholder: fls_deaddeadbeef
     validations:
       required: false
   - type: textarea

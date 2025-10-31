@@ -66,9 +66,9 @@ body:
       options:
         - Bug
         - Formatting
-        - Improvement to Non-Prose Section
-        - Language Cleanup
-        - New Content
+        - Improvement to non-prose section
+        - Language cleanup
+        - New content
         - Other
     validations:
       required: true

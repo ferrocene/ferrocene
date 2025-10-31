@@ -21,34 +21,6 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: chapter
-    attributes:
-      label: Chapter
-      description: Which FLS chapter would this fall under?
-      options:
-        - Associated Items
-        - Attributes
-        - Concurrency
-        - Entities and Resolution
-        - Exceptions and Errors
-        - Expressions
-        - FFI
-        - Functions
-        - Generics
-        - Implementations
-        - Inline Assembly
-        - Macros
-        - Ownership and Destruction
-        - Patterns
-        - Program Structure and Compilation
-        - Statements
-        - Types and Traits
-        - Unsafety
-        - Values
-        - N/A
-    validations:
-      required: true
-  - type: dropdown
     id: area
     attributes:
       label: Area

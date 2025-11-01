@@ -1,5 +1,3 @@
 [package]
 name = "symbol-report"
-edition = "2024"
-
-[dependencies]
+edition.workspace = true

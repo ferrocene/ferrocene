@@ -289,7 +289,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cfg-if",
     "cfg_aliases",
     "colorchoice",
-    "const-oid", // this is a false positive: it's only used by generate-tarball
     "constant_time_eq",
     "cpufeatures",
     "crc32fast",
@@ -423,7 +422,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "stacker",
     "static_assertions",
     "strsim",
-    "subtle", // this is a false positive: it's only used by generate-tarball
     "syn",
     "synstructure",
     "tempfile",
@@ -493,7 +491,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "zerocopy-derive",
     "zerofrom",
     "zerofrom-derive",
-    "zeroize", // this is a false positive: it's only used by generate-tarball
     "zerotrie",
     "zerovec",
     "zerovec-derive",

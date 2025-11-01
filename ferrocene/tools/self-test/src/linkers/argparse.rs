@@ -196,24 +196,37 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+    use std::path::{Path, PathBuf};
+    use std::sync::LazyLock;
+
     use super::*;
+
+    static DIR: LazyLock<PathBuf> =
+        LazyLock::new(|| Path::new(env!("CARGO_MANIFEST_DIR")).join("snapshots"));
 
     #[test]
     fn test_rationalise_linker_args() {
         // these are the ones we saw from gcc
-        let input = include_str!("snapshots/rationalise_linker_args.input");
+        let input = fs::read_to_string(DIR.join("rationalise_linker_args.input")).unwrap();
         let output = rationalise_linker_args(input.lines());
-        insta::with_settings!({ prepend_module_to_snapshot => false }, {
+        let mut settings = insta::Settings::new();
+        settings.set_prepend_module_to_snapshot(false);
+        settings.set_snapshot_path(&*DIR);
+        settings.bind(|| {
             insta::assert_debug_snapshot!(output);
         });
     }
 
     #[test]
     fn test_rationalise_linker_extra_args() {
-        // these are extra ones we added in case we see them
-        let input = include_str!("snapshots/rationalise_linker_extra_args.input");
+        // these are the ones we saw from gcc
+        let input = fs::read_to_string(DIR.join("rationalise_linker_extra_args.input")).unwrap();
         let output = rationalise_linker_args(input.lines());
-        insta::with_settings!({ prepend_module_to_snapshot => false }, {
+        let mut settings = insta::Settings::new();
+        settings.set_prepend_module_to_snapshot(false);
+        settings.set_snapshot_path(&*DIR);
+        settings.bind(|| {
             insta::assert_debug_snapshot!(output);
         });
     }

@@ -3,7 +3,7 @@
 
 [package]
 name = "ferrocene-self-test"
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 tempfile = "3.3"

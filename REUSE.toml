@@ -244,6 +244,8 @@ path = [
     "src/bootstrap/src/ferrocene/**",
     "ferrocene/tools/blanket/**",
     "ferrocene/tools/symbol-report/**",
+    "ferrocene/tools/Cargo.toml",
+    "ferrocene/tools/Cargo.lock",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

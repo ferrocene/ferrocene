@@ -1,6 +1,5 @@
 ---
-source: src/linkers/argparse.rs
-assertion_line: 224
+source: ferrocene/tools/self-test/src/linkers/argparse.rs
 expression: output
 ---
 [

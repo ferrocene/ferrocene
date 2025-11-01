@@ -34,3 +34,6 @@ fn main() {
     let g = some(&temp()); //~ERROR temporary value dropped while borrowed
     println!("{a:?} {b:?} {c:?} {d:?} {e:?} {f:?} {g:?}");
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

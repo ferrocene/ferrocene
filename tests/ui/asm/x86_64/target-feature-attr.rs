@@ -40,3 +40,6 @@ fn main() {
         bar();
     }
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

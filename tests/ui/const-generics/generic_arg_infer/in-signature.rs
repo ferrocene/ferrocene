@@ -67,8 +67,5 @@ impl AssocTy for i32 {
 // ferrocene-annotations: fls_ixjc5jaamx84
 // Constants
 //
-// ferrocene-annotations: fls_vhpwge5123cm
-// Generic parameters
-//
 // ferrocene-annotations: fls_xdvdl2ssnhlo
 // Statics

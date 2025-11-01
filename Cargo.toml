@@ -47,12 +47,6 @@ members = [
   "src/tools/wasm-component-ld",
   "src/tools/x",
 # tidy-alphabetical-end
-  "ferrocene/tools/document-signatures",
-  "ferrocene/tools/generate-tarball",
-  "ferrocene/tools/self-test",
-  "ferrocene/tools/traceability-matrix",
-  "ferrocene/tools/symbol-report",
-  "ferrocene/tools/blanket",
 ]
 
 exclude = [

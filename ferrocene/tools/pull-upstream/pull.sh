@@ -315,6 +315,16 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     commit_if_modified "$lock" "update ${lock} to match ${manifest}"
 done
 
+# We keep lockfile for Ferrocene tools fresh
+if [ "${upstream_branch}" == "master" ]; then
+    prefix="ferrocene/tools"
+    lock="${prefix}/Cargo.lock"
+    manifest="${prefix}/Cargo.toml"
+    echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
+    cargo update --manifest-path "${manifest}"
+    commit_if_modified "${lock}" "update ${lock} to latest semver-compatible crates"
+fi
+
 # We expose additional commands for `x.py` which affects the completions file generation,
 # so we just run the command to regenerate those in case they need updating as this usually
 # does not need manual intervention.

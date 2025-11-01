@@ -145,6 +145,7 @@ impl Step for SourceTarball {
             "src/tools/rustc-perf/site/Cargo.toml",
             "src/tools/rustbook/Cargo.toml",
             "src/doc/book/packages/trpl/Cargo.toml",
+            "ferrocene/tools/Cargo.toml",
         ];
         const UV_PROJECTS: &[&str] = &["ferrocene/doc"];
 

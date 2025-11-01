@@ -1,6 +1,6 @@
 [package]
 name = "blanket"
-edition = "2024"
+edition.workspace = true
 
 [dependencies]
 anyhow = { version = "1.0.100", features = ["backtrace"] }

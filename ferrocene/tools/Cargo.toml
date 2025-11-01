@@ -1,0 +1,13 @@
+[workspace]
+resolver = "3"
+members = [
+  "blanket",
+  "document-signatures",
+  "generate-tarball",
+  "self-test",
+  "symbol-report",
+  "traceability-matrix",
+]
+
+[workspace.package]
+edition = "2024"

@@ -75,7 +75,7 @@ Language changes in Rust 1.89.0
     - :p:`fls_gRf8F9PIGySt`
     - :p:`fls_NNj4H6A9VTR8`
 
-- `Stabilize these target featires for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
+- `Stabilize these target features for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
 
   - Changed syntax: :s:`Feature`
 

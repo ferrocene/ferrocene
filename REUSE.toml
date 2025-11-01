@@ -239,7 +239,6 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]
 path = [
-    "requirements.txt",
     ".python-version",
     "src/bootstrap/src/ferrocene/**",
     "ferrocene/tools/blanket/**",

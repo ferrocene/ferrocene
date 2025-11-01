@@ -10,3 +10,6 @@ pub unsafe fn test(res: *mut f64, p: *const f64) {
     let arg = _mm512_load_pd(p);
     _mm512_store_pd(res, _mm512_fmaddsub_pd(arg, arg, arg));
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

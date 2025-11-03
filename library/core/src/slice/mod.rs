@@ -2832,6 +2832,7 @@ impl<T> [T] {
     /// ```
     #[must_use = "returns the subslice without modifying the original"]
     #[unstable(feature = "strip_circumfix", issue = "147946")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn strip_circumfix<S, P>(&self, prefix: &P, suffix: &S) -> Option<&[T]>
     where
         T: PartialEq,

@@ -2572,6 +2572,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[unstable(feature = "strip_circumfix", issue = "147946")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn strip_circumfix<P: Pattern, S: Pattern>(&self, prefix: P, suffix: S) -> Option<&str>
     where
         for<'a> S::Searcher<'a>: ReverseSearcher<'a>,

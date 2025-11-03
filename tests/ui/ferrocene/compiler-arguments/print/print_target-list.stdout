@@ -17,6 +17,7 @@ aarch64-unknown-ferrocene.certified
 aarch64-unknown-ferrocene.facade
 aarch64-unknown-freebsd
 aarch64-unknown-fuchsia
+aarch64-unknown-helenos
 aarch64-unknown-hermit
 aarch64-unknown-illumos
 aarch64-unknown-linux-gnu
@@ -115,6 +116,7 @@ i686-pc-windows-gnullvm
 i686-pc-windows-msvc
 i686-unknown-freebsd
 i686-unknown-haiku
+i686-unknown-helenos
 i686-unknown-hurd-gnu
 i686-unknown-linux-gnu
 i686-unknown-linux-musl
@@ -159,6 +161,7 @@ mipsisa64r6el-unknown-linux-gnuabi64
 msp430-none-elf
 nvptx64-nvidia-cuda
 powerpc-unknown-freebsd
+powerpc-unknown-helenos
 powerpc-unknown-linux-gnu
 powerpc-unknown-linux-gnuspe
 powerpc-unknown-linux-musl
@@ -216,6 +219,7 @@ s390x-unknown-linux-gnu
 s390x-unknown-linux-musl
 sparc-unknown-linux-gnu
 sparc-unknown-none-elf
+sparc64-unknown-helenos
 sparc64-unknown-linux-gnu
 sparc64-unknown-netbsd
 sparc64-unknown-openbsd
@@ -278,6 +282,7 @@ x86_64-unknown-ferrocene.certified
 x86_64-unknown-freebsd
 x86_64-unknown-fuchsia
 x86_64-unknown-haiku
+x86_64-unknown-helenos
 x86_64-unknown-hermit
 x86_64-unknown-hurd-gnu
 x86_64-unknown-illumos

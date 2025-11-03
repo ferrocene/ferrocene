@@ -12,8 +12,15 @@ use crate::ub_checks;
 ///
 /// (Normal `Range` code needs to handle degenerate ranges like `10..0`,
 ///  which takes extra checks compared to only handling the canonical form.)
+<<<<<<< HEAD
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Clone, PartialEq))]
+||||||| 647f1536d2f
+#[derive(Clone, Debug, PartialEq, Eq)]
+=======
+#[derive(Debug)]
+#[derive_const(Clone, Eq, PartialEq)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,
@@ -59,7 +66,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
-    unsafe fn next_unchecked(&mut self) -> usize {
+    const unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
         let value = self.start;
@@ -71,8 +78,14 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
+<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn next_back_unchecked(&mut self) -> usize {
+||||||| 647f1536d2f
+    unsafe fn next_back_unchecked(&mut self) -> usize {
+=======
+    const unsafe fn next_back_unchecked(&mut self) -> usize {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         debug_assert!(self.start < self.end);
 
         // SAFETY: The range isn't empty, so this cannot overflow
@@ -124,8 +137,14 @@ impl IndexRange {
     }
 
     #[inline]
+<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
     fn assume_range(&self) {
+||||||| 647f1536d2f
+    fn assume_range(&self) {
+=======
+    const fn assume_range(&self) {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
     }

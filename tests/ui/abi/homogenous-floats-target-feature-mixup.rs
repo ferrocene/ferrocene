@@ -179,3 +179,6 @@ mod test {
 mod test {
     pub fn main(level: &str) {}
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

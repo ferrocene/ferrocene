@@ -617,7 +617,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 #[lang = "RangeToInclusive"]
 #[doc(alias = "..=")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq, Eq))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq))]
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)

@@ -1,6 +1,7 @@
 //! Indexing implementations for `[T]`.
 
 use crate::intrinsics::slice_get_unchecked;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Destruct;
 use crate::panic::const_panic;
 use crate::ub_checks::assert_unsafe_precondition;
@@ -920,15 +921,9 @@ unsafe impl<T> const SliceIndex<[T]> for range::RangeToInclusive<usize> {
 #[track_caller]
 #[unstable(feature = "slice_range", issue = "76393")]
 #[must_use]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub fn range<R>(range: R, bounds: ops::RangeTo<usize>) -> ops::Range<usize>
-||||||| 647f1536d2f
-pub fn range<R>(range: R, bounds: ops::RangeTo<usize>) -> ops::Range<usize>
-=======
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn range<R>(range: R, bounds: ops::RangeTo<usize>) -> ops::Range<usize>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 where
     R: [const] ops::RangeBounds<usize> + [const] Destruct,
 {

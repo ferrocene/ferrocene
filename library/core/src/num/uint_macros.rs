@@ -1304,25 +1304,13 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
-        #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn exact_div(self, rhs: Self) -> Self {
-            match self.checked_exact_div(rhs) {
-                Some(x) => x,
-                None => panic!("Failed to divide without remainder"),
-||||||| 647f1536d2f
-        pub const fn exact_div(self, rhs: Self) -> Self {
-            match self.checked_exact_div(rhs) {
-                Some(x) => x,
-                None => panic!("Failed to divide without remainder"),
-=======
         #[rustc_inherit_overflow_checks]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn exact_div(self, rhs: Self) -> Option<Self> {
             if self % rhs != 0 {
                 None
             } else {
                 Some(self / rhs)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
         }
 

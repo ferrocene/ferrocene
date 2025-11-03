@@ -2,6 +2,7 @@
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::Hash;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Destruct;
 /// An unbounded range (`..`).
 ///
@@ -40,14 +41,8 @@ use crate::marker::Destruct;
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeFull"]
 #[doc(alias = "..")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, Default, PartialEq, Eq, Hash))]
-||||||| 647f1536d2f
-#[derive(Copy, Clone, Default, PartialEq, Eq, Hash)]
-=======
-#[derive(Copy, Hash)]
-#[derive_const(Clone, Default, Eq, PartialEq)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Default, PartialEq, Eq))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFull;
 
@@ -85,14 +80,8 @@ impl fmt::Debug for RangeFull {
 /// ```
 #[lang = "Range"]
 #[doc(alias = "..")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Default, PartialEq, Eq, Hash))] // not Copy -- see #27186
-||||||| 647f1536d2f
-#[derive(Clone, Default, PartialEq, Eq, Hash)] // not Copy -- see #27186
-=======
-#[derive(Eq, Hash)]
-#[derive_const(Clone, Default, PartialEq)] // not Copy -- see #27186
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Default, PartialEq))] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
@@ -208,14 +197,8 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 /// ```
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
-||||||| 647f1536d2f
-#[derive(Clone, PartialEq, Eq, Hash)] // not Copy -- see #27186
-=======
-#[derive(Eq, Hash)]
-#[derive_const(Clone, PartialEq)] // not Copy -- see #27186
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq))] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
@@ -300,14 +283,8 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeTo"]
 #[doc(alias = "..")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq, Hash))]
-||||||| 647f1536d2f
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
-=======
-#[derive(Copy, Eq, Hash)]
-#[derive_const(Clone, PartialEq)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Eq, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeTo<Idx> {
     /// The upper bound of the range (exclusive).
@@ -384,14 +361,8 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 /// ```
 #[lang = "RangeInclusive"]
 #[doc(alias = "..=")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
-||||||| 647f1536d2f
-#[derive(Clone, PartialEq, Eq, Hash)] // not Copy -- see #27186
-=======
-#[derive(Clone, Hash)]
-#[derive_const(Eq, PartialEq)] // not Copy -- see #27186
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Eq, PartialEq))] // not Copy -- see #27186
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeInclusive<Idx> {
     // Note that the fields here are not public to allow changing the
@@ -645,14 +616,8 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeToInclusive"]
 #[doc(alias = "..=")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq, Hash))]
-||||||| 647f1536d2f
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
-=======
-#[derive(Copy, Hash)]
-#[derive(Clone, PartialEq, Eq)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq, Eq))]
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)
@@ -736,14 +701,8 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
 ///
 /// [`BTreeMap::range`]: ../../std/collections/btree_map/struct.BTreeMap.html#method.range
 #[stable(feature = "collections_bound", since = "1.17.0")]
-<<<<<<< HEAD
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, Debug, Hash, PartialEq, Eq))]
-||||||| 647f1536d2f
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-=======
-#[derive(Copy, Debug, Hash)]
-#[derive_const(Clone, Eq, PartialEq)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq, PartialEq))]
 pub enum Bound<T> {
     /// An inclusive bound.
     #[stable(feature = "collections_bound", since = "1.17.0")]
@@ -1261,15 +1220,9 @@ impl<T> const IntoBounds<T> for (Bound<T>, Bound<T>) {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<'a, T: ?Sized + 'a> RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
-||||||| 647f1536d2f
-impl<'a, T: ?Sized + 'a> RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
-=======
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: ?Sized + 'a> const RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn start_bound(&self) -> Bound<&T> {
         self.0
     }

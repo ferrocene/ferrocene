@@ -1314,19 +1314,12 @@ impl<'test> TestCx<'test> {
         }
 
         let aux_dir = self.aux_output_dir();
-<<<<<<< HEAD
-        self.build_all_auxiliary(root_testpaths, &aux_dir, &mut rustc);
+        self.build_all_auxiliary(&aux_dir, &mut rustc);
         if self.props.ferrocene_execute_in_temp {
-            let current_dir = output_base_dir(self.config, root_testpaths, self.safe_revision());
+            let current_dir = output_base_dir(self.config, self.testpaths, self.safe_revision());
             rustc.current_dir(current_dir);
         }
-||||||| 647f1536d2f
-        self.build_all_auxiliary(root_testpaths, &aux_dir, &mut rustc);
 
-=======
-        self.build_all_auxiliary(&aux_dir, &mut rustc);
-
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         rustc.envs(self.props.rustc_env.clone());
         self.props.unset_rustc_env.iter().fold(&mut rustc, Command::env_remove);
         self.compose_and_run(

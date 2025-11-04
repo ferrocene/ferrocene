@@ -729,8 +729,8 @@ sphinx_books! [
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
-    target: TargetSelection,
-    compiler: Compiler,
+    pub(in crate::ferrocene) target: TargetSelection,
+    pub(in crate::ferrocene) compiler: Compiler,
 }
 
 impl Step for TraceabilityMatrix {

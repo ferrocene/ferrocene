@@ -20,8 +20,11 @@ jobs:
     continue-on-error: true
     timeout-minutes: 10
     steps:
-      - name: Checkout
+      - name: Checkout (shallow)
         uses: actions/checkout@v4
+
+      - name: Unshallow the clone if on the beta channel
+        run: ferrocene/ci/scripts/unshallow-on-beta.sh
 
       - name: Clone only necessary submodules
         run: ferrocene/ci/scripts/checkout-submodules.sh library/backtrace src/doc/reference src/doc/book src/tools/cargo src/tools/rustc-perf

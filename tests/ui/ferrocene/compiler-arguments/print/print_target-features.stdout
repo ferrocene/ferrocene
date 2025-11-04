@@ -10,7 +10,6 @@ Features supported by rustc for this target:
     amx-movrs                       - Support AMX-MOVRS instructions.
     amx-tf32                        - Support AMX-TF32 instructions.
     amx-tile                        - Support AMX-TILE instructions.
-    amx-transpose                   - Support AMX amx-transpose instructions.
     apxf                            - Support extended general purpose register.
     avx                             - Enable AVX instructions.
     avx10.1                         - Support AVX10.1 up to 512-bit instruction.
@@ -84,6 +83,7 @@ Code-generation features supported by LLVM for this target:
     64bit                           - Support 64-bit instructions.
     64bit-mode                      - 64-bit mode (x86_64).
     allow-light-256-bit             - Enable generation of 256-bit load/stores even if we prefer 128-bit.
+    amx-transpose                   - Support AMX amx-transpose instructions.
     avx10.1-256                     - Support AVX10.1 up to 256-bit instruction.
     avx10.2-256                     - Support AVX10.2 up to 256-bit instruction.
     branch-hint                     - Target has branch hint feature.

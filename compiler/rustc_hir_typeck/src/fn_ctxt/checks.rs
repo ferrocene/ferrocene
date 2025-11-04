@@ -1,5 +1,5 @@
 use std::ops::Deref;
-use std::{fmt, iter, mem};
+use std::{fmt, iter};
 
 use itertools::Itertools;
 use rustc_data_structures::fx::FxIndexSet;
@@ -72,16 +72,13 @@ pub(crate) enum DivergingBlockBehavior {
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(in super::super) fn check_casts(&mut self) {
-        // don't hold the borrow to deferred_cast_checks while checking to avoid borrow checker errors
-        // when writing to `self.param_env`.
-        let mut deferred_cast_checks = mem::take(&mut *self.deferred_cast_checks.borrow_mut());
-
+        let mut deferred_cast_checks = self.root_ctxt.deferred_cast_checks.borrow_mut();
         debug!("FnCtxt::check_casts: {} deferred checks", deferred_cast_checks.len());
         for cast in deferred_cast_checks.drain(..) {
+            let body_id = std::mem::replace(&mut self.body_id, cast.body_id);
             cast.check(self);
+            self.body_id = body_id;
         }
-
-        *self.deferred_cast_checks.borrow_mut() = deferred_cast_checks;
     }
 
     pub(in super::super) fn check_asms(&self) {
@@ -780,10 +777,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 _ => bug!("unexpected type: {:?}", ty.normalized),
             },
-            Res::Def(
-                DefKind::Struct | DefKind::Union | DefKind::TyAlias { .. } | DefKind::AssocTy,
-                _,
-            )
+            Res::Def(DefKind::Struct | DefKind::Union | DefKind::TyAlias | DefKind::AssocTy, _)
             | Res::SelfTyParam { .. }
             | Res::SelfTyAlias { .. } => match ty.normalized.ty_adt_def() {
                 Some(adt) if !adt.is_enum() => {
@@ -871,7 +865,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let decl_ty = self.local_ty(decl.span, decl.hir_id);
 
         // Type check the initializer.
-        if let Some(ref init) = decl.init {
+        if let Some(init) = decl.init {
             let init_ty = self.check_decl_initializer(decl.hir_id, decl.pat, init);
             self.overwrite_local_ty_if_err(decl.hir_id, decl.pat, init_ty);
         }
@@ -935,7 +929,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             // Ignore for now.
             hir::StmtKind::Item(_) => {}
-            hir::StmtKind::Expr(ref expr) => {
+            hir::StmtKind::Expr(expr) => {
                 // Check with expected type of `()`.
                 self.check_expr_has_type_or_error(expr, self.tcx.types.unit, |err| {
                     if self.is_next_stmt_expr_continuation(stmt.hir_id)
@@ -1769,10 +1763,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 let params =
                     params.get(is_method as usize..params.len() - sig.decl.c_variadic as usize)?;
                 debug_assert_eq!(params.len(), fn_inputs.len());
-                Some((
-                    fn_inputs.zip(params.iter().map(|param| FnParam::Param(param))).collect(),
-                    generics,
-                ))
+                Some((fn_inputs.zip(params.iter().map(FnParam::Param)).collect(), generics))
             }
             (None, Some(params)) => {
                 let params =
@@ -2635,7 +2626,7 @@ impl<'a, 'b, 'tcx> FnCallDiagCtxt<'a, 'b, 'tcx> {
         suggestions: Vec<(Span, String)>,
         suggestion_text: SuggestionText,
     ) -> Option<String> {
-        let suggestion_text = match suggestion_text {
+        match suggestion_text {
             SuggestionText::None => None,
             SuggestionText::Provide(plural) => {
                 Some(format!("provide the argument{}", if plural { "s" } else { "" }))
@@ -2651,8 +2642,7 @@ impl<'a, 'b, 'tcx> FnCallDiagCtxt<'a, 'b, 'tcx> {
             SuggestionText::Swap => Some("swap these arguments".to_string()),
             SuggestionText::Reorder => Some("reorder these arguments".to_string()),
             SuggestionText::DidYouMean => Some("did you mean".to_string()),
-        };
-        suggestion_text
+        }
     }
 
     fn arguments_formatting(&self, suggestion_span: Span) -> ArgumentsFormatting {
@@ -2950,7 +2940,7 @@ impl<'a, 'b, 'tcx> ArgsCtxt<'a, 'b, 'tcx> {
                     .fn_ctxt
                     .typeck_results
                     .borrow()
-                    .expr_ty_adjusted_opt(*expr)
+                    .expr_ty_adjusted_opt(expr)
                     .unwrap_or_else(|| Ty::new_misc_error(self.call_ctxt.fn_ctxt.tcx));
                 (
                     self.call_ctxt.fn_ctxt.resolve_vars_if_possible(ty),

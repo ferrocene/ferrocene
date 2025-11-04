@@ -12,8 +12,9 @@ use crate::ub_checks;
 ///
 /// (Normal `Range` code needs to handle degenerate ranges like `10..0`,
 ///  which takes extra checks compared to only handling the canonical form.)
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Clone, PartialEq))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq, PartialEq))]
+#[cfg_attr(feature = "ferrocene_certified", derive_const(Clone, PartialEq))]
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,
@@ -59,7 +60,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
-    unsafe fn next_unchecked(&mut self) -> usize {
+    const unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
         let value = self.start;
@@ -72,7 +73,7 @@ impl IndexRange {
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-    unsafe fn next_back_unchecked(&mut self) -> usize {
+    const unsafe fn next_back_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
         // SAFETY: The range isn't empty, so this cannot overflow
@@ -125,7 +126,7 @@ impl IndexRange {
 
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-    fn assume_range(&self) {
+    const fn assume_range(&self) {
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
     }

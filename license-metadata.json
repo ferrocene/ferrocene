@@ -452,6 +452,7 @@
             "files": [
               ".dockerignore",
               ".python-version",
+              "CODEOWNERS",
               "bors.toml"
             ],
             "license": {

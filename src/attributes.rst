@@ -139,7 +139,7 @@ Built-in Attributes
      | MacroExportContent
      | MacroUseContent
      | NakedContent
-     | NoBinutilsContent
+     | NoBuiltinsContent
      | NoImplicitPreludeContent
      | NoLinkContent
      | NoMainContent
@@ -445,7 +445,7 @@ Attribute ``no_builtins``
 
 .. syntax::
 
-   NoBinutilsContent ::=
+   NoBuiltinsContent ::=
        $$no_builtins$$
 
 .. rubric:: Legality Rules

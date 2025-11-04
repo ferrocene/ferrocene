@@ -164,7 +164,7 @@ action.
 ``ferrocene_domain_cli`` extension
 ----------------------------------
 
-The extension adds a custoom ``cli`` `Sphinx domain`_ that can be used to
+The extension adds a custom ``cli`` `Sphinx domain`_ that can be used to
 document the CLI options of a program. Compared to Sphinx's builtin domain, our
 ``cli`` domain supports options with spaces in their name (like ``-C option``),
 and emits metadata compatible with our traceability matrix tooling.

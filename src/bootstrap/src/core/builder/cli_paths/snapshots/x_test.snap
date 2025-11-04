@@ -11,6 +11,9 @@ expression: test
 [Test] bootstrap::ferrocene::test::GenerateTarball
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::ferrocene/tools/generate-tarball})
+[Test] bootstrap::ferrocene::test::DiffUpstream
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::ferrocene/tools/diff-upstream})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/tidy})

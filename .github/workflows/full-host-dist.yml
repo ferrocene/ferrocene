@@ -47,9 +47,9 @@ on:
         description: The cache prefix
       environment:
         type: string
-      usage:
+      build-metrics-artifact:
         type: string
-        description: The name of the resource usage report artifact
+        description: The name of the build-metrics report artifact
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
@@ -58,11 +58,9 @@ env:
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
-  AWS_REGION: us-east-1
-  AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
         
 jobs:
-
   dist:
     runs-on: ${{ inputs.runner }}
     steps:
@@ -112,6 +110,6 @@ jobs:
       - name: Upload artifacts to S3
         env:
           CIRCLE_SHA1: ${{ github.sha }}
-          CIRCLE_JOB: ${{ inputs.usage }}
+          CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run: |
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh

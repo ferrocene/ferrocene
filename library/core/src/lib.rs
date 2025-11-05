@@ -313,6 +313,7 @@ pub mod convert;
 pub mod default;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod error;
+pub mod index;
 pub mod marker;
 pub mod ops;
 

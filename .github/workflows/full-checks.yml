@@ -104,7 +104,7 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
           bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}s
+          prefix: ${{ inputs.cache-prefix }}
     
       - name: Run licensing checks
         run: |

@@ -48,26 +48,20 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      artifact-coverage:
-        description: The name of the coverage job artifact
-        value: ${{ jobs.coverage.outputs.artifact-name }}
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  FERROCENE_HOST: ${{ inputs.host-triple }}
 
 jobs:
-
   coverage:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: coverage-${{inputs.host-triple}}
       ARTIFACT_USAGE: usage-coverage-${{inputs.host-triple}}
-      FERROCENE_HOST: ${{ inputs.host-triple }}
-    outputs:
-      artifact-name: ${{ env.ARTIFACT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

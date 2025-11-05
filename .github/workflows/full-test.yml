@@ -14,14 +14,6 @@ on:
       triple:
         type: string
         description: The target triple to test
-      test-host-tools:
-        type: boolean
-        default: true
-        description: If the host tools should be tested (enables the 'test' job)
-      test-std:
-        type: boolean
-        default: true
-        description: If the stdlib should be tested (enables the `library-std` job)
       test-variant:
         type: string
         description: The variant to test
@@ -61,6 +53,9 @@ on:
       script:
         type: string
         description: The script to execute
+      build-metrics-artifact:
+        type: string
+        description: The name of the build-metrics report artifact
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
@@ -75,9 +70,6 @@ jobs:
     if: ${{ inputs.test-host-tools }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
-    env:
-      ARTIFACT: test-${{inputs.triple}}
-      ARTIFACT_USAGE: usage-test-${{inputs.triple}}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -124,6 +116,6 @@ jobs:
       - name: Upload artifacts to S3
         env:
           CIRCLE_SHA1: ${{ github.sha }}
-          CIRCLE_JOB: ${{ env.ARTIFACT }}
+          CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh

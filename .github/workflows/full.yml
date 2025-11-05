@@ -74,12 +74,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - usage: dist-aarch64-unknown-linux-gnu
+          - build-metrics-artifact: dist-aarch64-unknown-linux-gnu
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
 
-          - usage: dist-tools-aarch64-unknown-linux-gnu
+          - build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script:
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
@@ -94,7 +94,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      usage: ${{ matrix.usage }}
+      build-metrics-artifact: ${{ matrix.usage }}
 
   self-test-x86_64-unknown-linux-gnu:
     name: Self-test (x86_64-unknown-linux-gnu)
@@ -343,12 +343,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - usage: dist-aarch64-unknown-linux-gnu
+          - build-metrics-artifact: dist-aarch64-unknown-linux-gnu
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
 
-          - usage: dist-tools-aarch64-unknown-linux-gnu
+          - build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script:
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
@@ -363,7 +363,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      usage: ${{ matrix.usage }}
+      build-metrics-artifact: ${{ matrix.usage }}
 
   self-test-aarch64-unknown-linux-gnu:
     name: Self-test (aarch64-unknown-linux-gnu)
@@ -582,7 +582,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      usage: ${{ github.job }}
+      build-metrics-artifact: ${{ github.job }}
 
   source:
     name: Dist (source)
@@ -603,7 +603,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      usage: ${{ github.job }}
+      build-metrics-artifact: ${{ github.job }}
 
   checks:
     name: Checks (x86_64-unknown-linux-gnu)

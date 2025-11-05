@@ -138,7 +138,6 @@ pub const fn from_utf8(v: &[u8]) -> Result<&str, Utf8Error> {
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8", since = "1.87.0")]
 #[rustc_diagnostic_item = "str_from_utf8_mut"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn from_utf8_mut(v: &mut [u8]) -> Result<&mut str, Utf8Error> {
     // FIXME(const-hack): This should use `?` again, once it's `const`
     match run_utf8_validation(v) {
@@ -212,7 +211,6 @@ pub const unsafe fn from_utf8_unchecked(v: &[u8]) -> &str {
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8_unchecked_mut", since = "1.83.0")]
 #[rustc_diagnostic_item = "str_from_utf8_unchecked_mut"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
     // SAFETY: the caller must guarantee that the bytes `v`
     // are valid UTF-8, thus the cast to `*mut str` is safe.

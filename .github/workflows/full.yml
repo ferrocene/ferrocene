@@ -649,9 +649,6 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - docs
-      - source
-      - checks
       - test-x86_64-unknown-linux-gnu
       - test-aarch64-unknown-none
       - test-thumbv7em-none-eabi

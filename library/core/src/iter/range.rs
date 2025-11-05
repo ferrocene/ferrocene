@@ -4,6 +4,7 @@ use super::{
 };
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ascii::Char as AsciiChar;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::net::{Ipv4Addr, Ipv6Addr};
@@ -33,6 +34,7 @@ unsafe_impl_trusted_step![AsciiChar char i8 i16 i32 i64 i128 isize u8 u16 u32 u6
 /// The *predecessor* operation moves towards values that compare lesser.
 #[rustc_diagnostic_item = "range_step"]
 #[unstable(feature = "step_trait", issue = "42168")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Step: Clone + PartialOrd + Sized {
     /// Returns the bounds on the number of *successor* steps required to get from `start` to `end`
     /// like [`Iterator::size_hint()`][Iterator::size_hint()].
@@ -264,6 +266,7 @@ macro_rules! step_identical_methods {
     };
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! step_integer_impls {
     {
         narrower than or same width as usize:
@@ -455,18 +458,21 @@ macro_rules! step_integer_impls {
 }
 
 #[cfg(target_pointer_width = "64")]
+#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [u32 i32], [u64 i64], [usize isize];
     wider than usize: [u128 i128];
 }
 
 #[cfg(target_pointer_width = "32")]
+#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [u32 i32], [usize isize];
     wider than usize: [u64 i64], [u128 i128];
 }
 
 #[cfg(target_pointer_width = "16")]
+#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [usize isize];
     wider than usize: [u32 i32], [u64 i64], [u128 i128];
@@ -703,6 +709,7 @@ macro_rules! range_incl_exact_iter_impl {
 }
 
 /// Specialization implementations for `Range`.
+#[cfg(not(feature = "ferrocene_certified"))]
 trait RangeIteratorImpl {
     type Item;
 
@@ -722,6 +729,7 @@ trait RangeIteratorImpl {
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     type Item = A;
 
@@ -891,6 +899,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Step> Iterator for ops::Range<A> {
     type Item = A;
 

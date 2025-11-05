@@ -598,6 +598,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_derive",
+ "serde_json",
 ]
 
 [[package]]
@@ -1343,9 +1344,9 @@ checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
 
 [[package]]
 name = "llvm_profparser"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d67ff57e85c4295dcfcc939358e80c885e4f402db650d646c678d51c44e3798f"
+checksum = "37ce7370b773658597e348866be103ee10845d5790931056705909c8b460d762"
 dependencies = [
  "anyhow",
  "flate2",

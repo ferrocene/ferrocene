@@ -506,7 +506,6 @@ pub use self::{
 };
 
 mod adapters;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod range;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod sources;

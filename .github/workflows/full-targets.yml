@@ -64,21 +64,14 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  AWS_REGION: us-east-1
+  AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+  FERROCENE_HOST: ${{ inputs.host-triple }}
+  FERROCENE_TARGETS: ${{ inputs.triples }}
 
 jobs:
-
   targets:
     runs-on: ${{ inputs.runner }}
-    env:
-      ARTIFACT: targets-${{inputs.host-triple}}
-      ARTIFACT_USAGE: usage-targets-${{inputs.host-triple}}
-      FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
-      AWS_REGION: us-east-1
-      AWS_ROLE_ARN: ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-    outputs:
-      artifact-name: ${{ env.ARTIFACT }}
-      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -90,8 +83,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         if: ${{ inputs.use-minio == false }}
         with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           role-duration-seconds: 7200
 
       - name: Restore build cache
@@ -138,8 +131,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         if: ${{ inputs.use-minio == true }}
         with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           role-duration-seconds: 7200
 
       - name: Run
@@ -157,14 +150,14 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         if: ${{ inputs.use-minio == true }}
         with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           role-duration-seconds: 7200
 
       - name: Upload artifacts to S3
         env:
           CIRCLE_SHA1: ${{ github.sha }}
-          CIRCLE_JOB: ${{ env.ARTIFACT }}
+          CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run:
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 

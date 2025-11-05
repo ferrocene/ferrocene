@@ -3,7 +3,9 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-#[derive(serde_derive::Deserialize, serde_derive::Serialize)]
+pub use serde_json;
+
+#[derive(Debug, Eq, PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
 pub struct SymbolReport {
     pub symbols: Vec<Function>,
     pub annotations: BTreeMap<String, BTreeSet<(usize, usize)>>,
@@ -25,8 +27,7 @@ impl SymbolReport {
     }
 }
 
-/// A single certified function, identified by its span
-#[derive(Clone, serde_derive::Deserialize, serde_derive::Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
 pub struct Function {
     /// The fully qualified path to the function, for example:
     /// - `core::ptr::copy`

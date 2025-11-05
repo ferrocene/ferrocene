@@ -32,12 +32,6 @@ use crate::fmt;
 use crate::intrinsics::const_eval_select;
 use crate::panic::{Location, PanicInfo};
 
-/// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
-#[cfg(not(feature = "ferrocene_certified"))]
-pub(crate) type PanicFmt<'a> = fmt::Arguments<'a>;
-#[cfg(feature = "ferrocene_certified")]
-pub(crate) type PanicFmt<'a> = &'a &'static str;
-
 #[cfg(feature = "panic_immediate_abort")]
 compile_error!(
     "panic_immediate_abort is now a real panic strategy! \

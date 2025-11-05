@@ -2800,7 +2800,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_add_signed(self, rhs: $SignedT) -> (Self, bool) {
             let (res, overflowed) = self.overflowing_add(rhs as Self);
             (res, overflowed ^ (rhs < 0))

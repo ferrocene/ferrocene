@@ -10,6 +10,10 @@ pub mod stage0_parser;
 pub mod targets;
 pub mod util;
 
+// Ferrocene addition
+#[rustfmt::skip]
+pub mod symbol_report;
+
 /// The default set of crates for opt-dist to collect LLVM profiles.
 pub const LLVM_PGO_CRATES: &[&str] = &[
     "syn-2.0.101",

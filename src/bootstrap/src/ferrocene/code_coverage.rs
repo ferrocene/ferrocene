@@ -62,7 +62,7 @@ pub(crate) fn measure_coverage(
     target: TargetSelection,
     coverage_for: FerroceneCoverageFor,
 ) {
-    // Pre-requisites for the `generate_report()` function are built here, as that function is
+    // Pre-requisites for the `generate_coverage_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
     builder.ensure(Llvm { target });
 
@@ -173,16 +173,14 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     });
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: builder.config.host_target.certified_equivalent().unwrap(),
+        certified_target: builder.config.host_target.certified_equivalent(),
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
     });
 
-    let dist_report = builder
-        .out
-        .join("ferrocene")
-        .join("coverage")
+    let dist_report = paths
+        .ferrocene_coverage_dir
         .join(html_report.file_name().expect("No coverage report filename determined."));
     builder.info(&format!("Saving coverage report to {}", dist_report.display()));
     builder.copy_link(&html_report, &dist_report, crate::FileType::Regular);
@@ -210,9 +208,8 @@ pub(crate) struct CoverageState {
 pub(crate) struct Paths {
     profraw_dir: PathBuf,
     pub(super) profdata_file: PathBuf,
-    lcov_file: PathBuf,
-    metadata_file: PathBuf,
     pub(crate) doctests_bins_dir: PathBuf,
+    ferrocene_coverage_dir: PathBuf,
 }
 
 impl Paths {
@@ -226,28 +223,24 @@ impl Paths {
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
-            lcov_file: out_dir.join(format!("lcov-{name}.info")),
-            metadata_file: out_dir.join(format!("metadata-{name}.json")),
             doctests_bins_dir: out_dir.join("doctests-bins"),
+            ferrocene_coverage_dir: out_dir,
         }
     }
 
     fn ensure_clean(&self, builder: &Builder<'_>) {
-        if self.profraw_dir.exists() {
-            builder.remove_dir(&self.profraw_dir);
+        // directories must be emptied, but still must exist after
+        for dir in [&self.ferrocene_coverage_dir, &self.profraw_dir] {
+            if dir.exists() {
+                builder.remove_dir(dir);
+            }
+            builder.create_dir(dir);
         }
+
+        // files only have to be deleted
         if self.profdata_file.exists() {
             builder.remove(&self.profdata_file);
         }
-        if self.lcov_file.exists() {
-            builder.remove(&self.lcov_file);
-        }
-        if self.metadata_file.exists() {
-            builder.remove(&self.metadata_file);
-        }
-
-        builder.create_dir(&self.profraw_dir);
-        builder.create_dir(self.lcov_file.parent().unwrap());
     }
 }
 
@@ -268,7 +261,7 @@ impl Step for CoverageOutcomesDir {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
             FerroceneCoverageOutcomes::Local => {
-                let certified_target = builder.host_target.certified_equivalent().unwrap();
+                let certified_target = builder.host_target.certified_equivalent();
                 Some(coverage_dir(builder, certified_target))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),

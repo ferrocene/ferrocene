@@ -111,8 +111,20 @@ impl TargetSelection {
     }
 
     // Ferrocene addition
-    /// Map the target to the certified target that is based on it, if there is one
-    pub fn certified_equivalent(&self) -> Option<TargetSelection> {
+    /// Map the target to the certified target that is based on it.
+    ///
+    /// Panics if there is no certified equivalent.
+    /// See [try_certified_equivalent] for a non-panicking version.
+    pub fn certified_equivalent(&self) -> TargetSelection {
+        self.try_certified_equivalent()
+            .expect(&format!("no certified equivalent exists for target \"{self}\""))
+    }
+
+    // Ferrocene addition
+    /// Map the target to the certified target that is based on it.
+    ///
+    /// [`None`] if there is no certified equivalent.
+    pub fn try_certified_equivalent(&self) -> Option<TargetSelection> {
         let target_tuple = match self.triple.as_ref() {
             "x86_64-unknown-linux-gnu" => "x86_64-unknown-ferrocene.certified",
             "aarch64-unknown-none" | "aarch64-apple-darwin" => {

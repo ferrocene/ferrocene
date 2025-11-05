@@ -11,12 +11,6 @@ on:
       host-triple:
         type: string
         description: The Rust triple of the host platform
-      # We cannot specify an array here
-      # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
-      #      https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
-      triples:
-        type: string
-        description: A comma separated list of targets to build
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -39,6 +33,9 @@ on:
       artifacts-prefix:
         type: string
         description: The artifact prefix
+      artifact:
+        type: string
+        description: The name of the artifact (used to be `CIRCLE_JOB`)
       cache-bucket:
         type: string
         description: The cache bucket
@@ -64,10 +61,6 @@ jobs:
     env:
       ARTIFACT: tracability-matrix
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        ./x.py run ferrocene/tools/traceability-matrix
-    outputs:
-      artifact-name: ${{ env.ARTIFACT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

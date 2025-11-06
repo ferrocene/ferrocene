@@ -63,6 +63,7 @@ Treating warnings as errors
 Associated requirement ID: :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
 
 The user shall ensure that, for the final build, no warnings are emitted.
+The user shall also ensure that no build warnings are suppressed.
 
 Source modification while building
 ----------------------------------

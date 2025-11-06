@@ -264,7 +264,6 @@ macro_rules! step_identical_methods {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! step_integer_impls {
     {
         narrower than or same width as usize:
@@ -276,7 +275,9 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $u_narrower {
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_identical_methods!();
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_unsigned_methods!();
 
                 #[inline]
@@ -299,6 +300,7 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
+                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match Self::try_from(n) {
                         Ok(n) => start.checked_sub(n),
@@ -310,7 +312,9 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $i_narrower {
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_identical_methods!();
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_signed_methods!($u_narrower);
 
                 #[inline]
@@ -350,6 +354,7 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
+                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match $u_narrower::try_from(n) {
                         Ok(n) => {
@@ -376,7 +381,9 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $u_wider {
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_identical_methods!();
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_unsigned_methods!();
 
                 #[inline]
@@ -398,6 +405,7 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
+                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
@@ -406,7 +414,9 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $i_wider {
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_identical_methods!();
+                #[cfg(not(feature = "ferrocene_certified"))]
                 step_signed_methods!($u_wider);
 
                 #[inline]
@@ -435,6 +445,7 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
+                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
@@ -444,21 +455,18 @@ macro_rules! step_integer_impls {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [u32 i32], [u64 i64], [usize isize];
     wider than usize: [u128 i128];
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [u32 i32], [usize isize];
     wider than usize: [u64 i64], [u128 i128];
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [usize isize];
     wider than usize: [u32 i32], [u64 i64], [u128 i128];

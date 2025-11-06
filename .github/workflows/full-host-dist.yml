@@ -1,5 +1,5 @@
-name: Dist host
-run-name: Dist (${{inputs.host-triple}})
+name: Ferrocene Job
+run-name: ${{ inputs.run-name }}
 
 defaults:
   run:
@@ -8,6 +8,9 @@ defaults:
 on:
   workflow_call:
     inputs:
+      run-name:
+        type: string
+        description: The `run-name` to use
       script:
         type: string
         description: The script to run.

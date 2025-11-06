@@ -78,11 +78,11 @@ jobs:
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
-
           - build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script:
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
+      run-name: Dist (x86_64-unknown-linux-gnu)
       script: ${{ matrix.script }}
       host-triple: x86_64-unknown-linux-gnu
       triples: "x86_64-unknown-linux-gnu"
@@ -128,7 +128,7 @@ jobs:
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
-    uses: ./.github/workflows/full-test.yml
+    uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -158,7 +158,7 @@ jobs:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
     name: Test aarch64-unknown-none on ${{ matrix.host }}
-    uses: ./.github/workflows/full-test.yml
+    uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -170,7 +170,6 @@ jobs:
       host-triple: ${{ matrix.host }}
       runner:  ${{ matrix.runner }}
       use-minio: true
-      qemu-arch: qemu-aarch64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
@@ -189,7 +188,7 @@ jobs:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
     name: Test thumbv7em-none-eabi on ${{ matrix.host }}
-    uses: ./.github/workflows/full-test.yml
+    uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -201,7 +200,6 @@ jobs:
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
-      qemu-arch: qemu-arm
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
@@ -220,7 +218,7 @@ jobs:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
     name: Test thumbv7em-none-eabihf on ${{ matrix.host }}
-    uses: ./.github/workflows/full-test.yml
+    uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -232,7 +230,6 @@ jobs:
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
-      qemu-arch: qemu-arm
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
@@ -352,6 +349,7 @@ jobs:
             script:
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
+      run-name: Dist (aarch64-unknown-linux-gnu)
       script: ${{ matrix.script }}
       host-triple: aarch64-unknown-linux-gnu
       triples: "aarch64-unknown-linux-gnu"
@@ -551,7 +549,7 @@ jobs:
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   docs:
-    name: Docs
+    name: Dist (Docs)
     uses: ./.github/workflows/full-host-dist.yml
     needs:
       - calculate-envs
@@ -568,6 +566,7 @@ jobs:
       # - test-aarch64-apple-darwin
     secrets: inherit
     with:
+      run-name: Dist (Docs)
       script: |
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ferrocene/ci/scripts/fetch-coverage-outcomes.sh
@@ -592,6 +591,7 @@ jobs:
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
+      run-name: Dist (source)
       script: ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
       host-triple: x86_64-unknown-linux-gnu
       triples: "x86_64-unknown-linux-gnu"

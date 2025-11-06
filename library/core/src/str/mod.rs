@@ -12,7 +12,6 @@ mod count;
 mod error;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod traits;
 mod validations;
 
@@ -86,7 +85,6 @@ pub use iter::{RSplitN, SplitN};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use lossy::{Utf8Chunk, Utf8Chunks};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use traits::FromStr;
 #[unstable(feature = "str_internals", issue = "none")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -2794,7 +2792,6 @@ impl str {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn parse<F: FromStr>(&self) -> Result<F, F::Err> {
         FromStr::from_str(self)
     }

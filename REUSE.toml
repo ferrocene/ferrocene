@@ -243,6 +243,7 @@ path = [
     "src/bootstrap/src/ferrocene/**",
     "ferrocene/tools/blanket/**",
     "ferrocene/tools/symbol-report/**",
+    "CODEOWNERS",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

@@ -398,7 +398,6 @@ macro_rules! impl_try_from_upper_bounded {
 }
 
 // all other cases
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! impl_try_from_both_bounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
@@ -506,7 +505,6 @@ mod ptr_try_from_impls {
     rev!(impl_try_from_upper_bounded, usize => u32, u64, u128);
     #[cfg(not(feature = "ferrocene_certified"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16);
-    #[cfg(not(feature = "ferrocene_certified"))]
     rev!(impl_try_from_both_bounded, usize => i32, i64, i128);
 
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -539,7 +537,6 @@ mod ptr_try_from_impls {
     rev!(impl_try_from_upper_bounded, usize => u64, u128);
     #[cfg(not(feature = "ferrocene_certified"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32);
-    #[cfg(not(feature = "ferrocene_certified"))]
     rev!(impl_try_from_both_bounded, usize => i64, i128);
 
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -576,7 +573,6 @@ mod ptr_try_from_impls {
     rev!(impl_try_from_upper_bounded, usize => u128);
     #[cfg(not(feature = "ferrocene_certified"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32, i64);
-    #[cfg(not(feature = "ferrocene_certified"))]
     rev!(impl_try_from_both_bounded, usize => i128);
 
     #[cfg(not(feature = "ferrocene_certified"))]

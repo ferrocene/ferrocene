@@ -62,9 +62,7 @@ Treating warnings as errors
 
 Associated requirement ID: :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
 
-The user shall ensure that, for the final build, the option to treat all
-warnings as errors is activated as described in
-:ref:`rustc/usage:Warnings and errors`.
+The user shall ensure that, for the final build, no warnings are emitted.
 
 Source modification while building
 ----------------------------------

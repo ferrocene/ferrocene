@@ -122,7 +122,6 @@ pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
 /// ```
 #[inline]
 #[stable(feature = "array_from_fn", since = "1.63.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn from_fn<T, const N: usize, F>(f: F) -> [T; N]
 where
     F: FnMut(usize) -> T,

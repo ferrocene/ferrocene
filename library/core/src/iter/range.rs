@@ -264,7 +264,6 @@ macro_rules! step_identical_methods {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! step_integer_impls {
     {
         narrower than or same width as usize:
@@ -456,21 +455,18 @@ macro_rules! step_integer_impls {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [u32 i32], [u64 i64], [usize isize];
     wider than usize: [u128 i128];
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [u32 i32], [usize isize];
     wider than usize: [u64 i64], [u128 i128];
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_certified"))]
 step_integer_impls! {
     narrower than or same width as usize: [u8 i8], [u16 i16], [usize isize];
     wider than usize: [u32 i32], [u64 i64], [u128 i128];

@@ -1,11 +1,9 @@
-
 #[cfg(not(feature = "ferrocene_certified"))]
 use super::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, TrustedStep,
 };
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ascii::Char as AsciiChar;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::net::{Ipv4Addr, Ipv6Addr};
@@ -13,6 +11,10 @@ use crate::net::{Ipv4Addr, Ipv6Addr};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, Try};
+
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ops;
 
 // Safety: All invariants are upheld.
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -31,7 +33,6 @@ unsafe_impl_trusted_step![AsciiChar char i8 i16 i32 i64 i128 isize u8 u16 u32 u6
 /// The *predecessor* operation moves towards values that compare lesser.
 #[rustc_diagnostic_item = "range_step"]
 #[unstable(feature = "step_trait", issue = "42168")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Step: Clone + PartialOrd + Sized {
     /// Returns the bounds on the number of *successor* steps required to get from `start` to `end`
     /// like [`Iterator::size_hint()`][Iterator::size_hint()].
@@ -90,6 +91,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///   * Corollary: `Step::forward(a, 0) == a`
     /// * `Step::forward(a, n) >= a`
     /// * `Step::backward(Step::forward(a, n), n) == a`
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn forward(start: Self, count: usize) -> Self {
         Step::forward_checked(start, count).expect("overflow in `Step::forward`")
     }
@@ -115,6 +117,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     /// For any `a` and `n`, where no overflow occurs:
     ///
     /// * `Step::forward_unchecked(a, n)` is equivalent to `Step::forward(a, n)`
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn forward_unchecked(start: Self, count: usize) -> Self {
         Step::forward(start, count)
     }
@@ -135,6 +138,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///
     /// * `Step::backward_checked(a, n) == (0..n).try_fold(a, |x, _| Step::backward_checked(x, 1))`
     ///   * Corollary: `Step::backward_checked(a, 0) == Some(a)`
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn backward_checked(start: Self, count: usize) -> Option<Self>;
 
     /// Returns the value that would be obtained by taking the *predecessor*
@@ -160,6 +164,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///   * Corollary: `Step::backward(a, 0) == a`
     /// * `Step::backward(a, n) <= a`
     /// * `Step::forward(Step::backward(a, n), n) == a`
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn backward(start: Self, count: usize) -> Self {
         Step::backward_checked(start, count).expect("overflow in `Step::backward`")
     }
@@ -185,6 +190,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     /// For any `a` and `n`, where no overflow occurs:
     ///
     /// * `Step::backward_unchecked(a, n)` is equivalent to `Step::backward(a, n)`
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn backward_unchecked(start: Self, count: usize) -> Self {
         Step::backward(start, count)
     }
@@ -689,22 +695,25 @@ macro_rules! range_incl_exact_iter_impl {
 }
 
 /// Specialization implementations for `Range`.
-#[cfg(not(feature = "ferrocene_certified"))]
 trait RangeIteratorImpl {
     type Item;
 
     // Iterator
     fn spec_next(&mut self) -> Option<Self::Item>;
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth(&mut self, n: usize) -> Option<Self::Item>;
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 
     // DoubleEndedIterator
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_next_back(&mut self) -> Option<Self::Item>;
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth_back(&mut self, n: usize) -> Option<Self::Item>;
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     type Item = A;
 
@@ -720,6 +729,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_nth(&mut self, n: usize) -> Option<A> {
         if let Some(plus_n) = Step::forward_checked(self.start.clone(), n) {
             if plus_n < self.end {
@@ -734,6 +744,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -747,6 +758,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_next_back(&mut self) -> Option<A> {
         if self.start < self.end {
             self.end =
@@ -758,6 +770,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_nth_back(&mut self, n: usize) -> Option<A> {
         if let Some(minus_n) = Step::backward_checked(self.end.clone(), n) {
             if minus_n > self.start {
@@ -772,6 +785,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -869,7 +883,6 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Step> Iterator for ops::Range<A> {
     type Item = A;
 
@@ -888,6 +901,7 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end).1.expect("count overflowed usize")
@@ -897,16 +911,19 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.spec_nth(n)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn min(mut self) -> Option<A>
     where
         A: Ord,
@@ -915,6 +932,7 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn max(mut self) -> Option<A>
     where
         A: Ord,
@@ -923,16 +941,19 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_sorted(self) -> bool {
         true
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_by(n)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,

@@ -153,8 +153,10 @@ mod private_slice_index {
 
     impl Sealed for ops::IndexRange {}
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[unstable(feature = "sliceindex_wrappers", issue = "146179")]
     impl Sealed for crate::index::Last {}
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[unstable(feature = "sliceindex_wrappers", issue = "146179")]
     impl<T> Sealed for crate::index::Clamp<T> where T: Sealed {}
 }

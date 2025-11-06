@@ -28,19 +28,13 @@ use crate::core::builder::{
     crate_description,
 };
 use crate::core::config::TargetSelection;
-<<<<<<< HEAD
 use crate::core::config::flags::{
     FerroceneCoverageFor, Subcommand, get_completion, top_level_help,
 };
+use crate::core::debuggers;
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
-||||||| c5dabe8cf79
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
-=======
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
-use crate::core::debuggers;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{

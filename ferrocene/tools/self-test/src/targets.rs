@@ -141,7 +141,12 @@ fn check_default_link_args(sysroot: &Path, target: &TargetSpec) -> Result<(), Er
         Linker::HostCc => (),
         Linker::BundledLld | Linker::CrossCc(_) => return Ok(()), // No default link args expected
     }
-    if target.tuple.contains("apple-darwin") || target.tuple.contains("windows-msvc") {
+    // Rust currently only supports using `lld` on GNU Linux
+    if target.tuple.contains("-apple-darwin") || target.tuple.contains("-windows-msvc") {
+        return Ok(());
+    }
+    // `compiler/rustc_target/src/spec/base/linux_musl.rs` specifies `LinkSelfContainedDefault::InferredForMusl`
+    if target.tuple.contains("-musl") {
         return Ok(());
     }
 

@@ -34,3 +34,6 @@ fn main() {
     let g = some(&temp()); //~ERROR temporary value dropped while borrowed
     println!("{a:?} {b:?} {c:?} {d:?} {e:?} {f:?} {g:?}");
 }
+
+// ferrocene-annotations: fls_5eima0pd31c0
+// Drop Scope Extension

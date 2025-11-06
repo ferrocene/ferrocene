@@ -19,9 +19,6 @@ fn main() {
   let v: [u8; 10] = [0; _];
 }
 
-// ferrocene-annotations: fls_vhpwge5123cm
-// Generic parameters
-//
 // ferrocene-annotations: fls_yqcygq3y6m5j
 // Lifetime
 //

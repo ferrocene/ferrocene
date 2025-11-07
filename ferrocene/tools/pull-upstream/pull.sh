@@ -11,14 +11,6 @@ TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 X_HELP=src/etc/xhelp
 
-# We handle some lockfiles separately from upstream:
-# - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
-# - "src/bootstrap/Cargo.lock" because we have custom changes to bootstrap
-#
-# NOTE: consider modifying this array when adding to the list:
-# https://github.com/ferrocene/ferrocene/blob/d3f1e45/src/bootstrap/src/ferrocene/dist.rs#L119-L125
-DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
-
 # Set a default max of merges per PR to 30, if it was not overridden in the
 # environment.
 if [[ -z "${MAX_MERGES_PER_PR+x}" ]]; then
@@ -221,29 +213,6 @@ if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${me
         fi
     done
 
-    # There could be conflicts between our Cargo.lock and upstream's, as we
-    # have our own crates with our own dependencies in the workspace.
-    # Automatically resolve any conflict involving Cargo.lock to prefer our own
-    # copy of the lockfile rather than upstream's.
-    for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}" "library/"; do
-        lock="${prefix}Cargo.lock"
-        if git status --porcelain=v1 | grep "^UU ${lock}$" >/dev/null; then
-            echo "pull-upstream: automatically resolving conflict for ${lock}..."
-            git show "${current_branch}:${lock}" > "${lock}"
-
-            # Invoking any Cargo command touching the lockfile will cause the
-            # lockfile to be updated. "cargo metadata" is one of the fastest ones.
-            # The bootstrap flag is needed as the workspace uses unstable features.
-            if ! cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null; then
-                echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
-                continue
-            fi
-
-            git add "${lock}"
-            echo "pull-upstream: automatically resolved conflict for ${lock}"
-        fi
-    done
-
     if git diff --diff-filter=U --quiet; then
         # Setting the editor to `true` prevents the actual editor from being open,
         # as in this case we don't want to change the default message.
@@ -293,27 +262,6 @@ if git diff --quiet HEAD^..HEAD; then
     git reset HEAD^
     exit 42
 fi
-
-# Occasionally, changes made upstream require the lockfile to be regenerated,
-# otherwise CI with its --locked flag will fail. This is **not** updating the
-# versions of the packages we use, but ensuring the lockfile stays consistent.
-#
-# Whenever the lockfile needs an update (we check that by invoking a Cargo
-# command that regenerates the lockfile if needed but doesn't have any side
-# effects) we include that in a separate commit.
-#
-# Note that this is not related to merge conflicts: lockfile merge conflicts
-# are automatically fixed by another part of this script.
-for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
-    lock="${prefix}Cargo.lock"
-    manifest="${prefix}Cargo.toml"
-    echo "pull-upstream: checking whether ${lock} needs to be updated..."
-    if ! cargo metadata --format-version=1 "--manifest-path=${manifest}" >/dev/null; then
-        echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
-        continue
-    fi
-    commit_if_modified "$lock" "update ${lock} to match ${manifest}"
-done
 
 # We keep lockfile for Ferrocene tools fresh
 if [ "${upstream_branch}" == "master" ]; then

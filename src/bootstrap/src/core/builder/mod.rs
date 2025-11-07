@@ -890,6 +890,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::GenerateTarball,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
+                test::BootstrapPy,
                 test::Bootstrap,
                 test::Ui,
                 test::Crashes,

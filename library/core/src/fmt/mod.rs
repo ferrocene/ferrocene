@@ -54,8 +54,8 @@ pub use num_buffer::{NumBuffer, NumBufferTrait};
 #[stable(feature = "debug_builders", since = "1.2.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
-#[unstable(feature = "debug_closure_helpers", issue = "117729")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[stable(feature = "fmt_from_fn", since = "CURRENT_RUSTC_VERSION")]
 pub use self::builders::{FromFn, from_fn};
 
 /// The type returned by formatter methods.

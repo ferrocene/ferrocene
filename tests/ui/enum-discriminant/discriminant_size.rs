@@ -59,7 +59,12 @@ fn main() {
 
     #[allow(overflowing_literals)]
     {
-        assert_eq!(size_of::<UnsignedIntEnum>(), 4);
+        // Ferrocene addition: This enum's size is 1 byte in ARMv7 and ARMv8 only.
+        if cfg!(target_arch = "arm") {
+            assert_eq!(size_of::<UnsignedIntEnum>(), 1);
+        } else {
+            assert_eq!(size_of::<UnsignedIntEnum>(), 4);
+        }
         let mut target: [isize; 3] = [0, -1, 0];
         target[1] = discriminant_value(&UnsignedIntEnum::A);
         assert_eq!(target, [0, 0, 0]);

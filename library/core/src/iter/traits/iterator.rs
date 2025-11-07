@@ -19,7 +19,7 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use super::super::{Cloned, Map};
+use super::super::{Cloned, Map, Sum};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
@@ -3641,7 +3641,6 @@ pub trait Iterator {
     /// assert_eq!(sum, -0.0_f32);
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn sum<S>(self) -> S
     where
         Self: Sized,

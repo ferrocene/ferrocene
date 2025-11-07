@@ -2251,7 +2251,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[rustc_const_stable(feature = "const_saturating_int_methods", since = "1.47.0")]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn saturating_sub(self, rhs: Self) -> Self {
             intrinsics::saturating_sub(self, rhs)
         }
@@ -2298,7 +2297,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn saturating_mul(self, rhs: Self) -> Self {
             match self.checked_mul(rhs) {
                 Some(x) => x,

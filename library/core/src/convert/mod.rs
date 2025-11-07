@@ -847,7 +847,6 @@ where
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const AsRef<[T]> for [T] {
     #[inline(always)]
     fn as_ref(&self) -> &[T] {

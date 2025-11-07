@@ -7259,8 +7259,9 @@ Unicode
 ^^^^^^^
 
 :dp:`fls_y7gwku7pe1f4`
-:dt:`Unicode` is the colloquial name for the ISO/IEC 10646:2017 Universal Coded
-Character Set standard.
+:dt:`Unicode` is the universal character encoding standard for written
+characters and text described in the Unicode® Standard by the Unicode
+Consortium.
 
 .. _fls_y7m6AentM6Ik:
 

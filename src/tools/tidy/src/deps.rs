@@ -21,7 +21,6 @@ const LICENSES: &[&str] = &[
     // tidy-alphabetical-start
     "0BSD OR MIT OR Apache-2.0",                           // adler2 license
     "Apache-2.0 / MIT",
-    "Apache-2.0 AND ISC",                                  // ring (0.17.11)
     "Apache-2.0 OR ISC OR MIT",
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
@@ -486,7 +485,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
-    "wit-bindgen-rt@0.39.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>",
+    "wit-bindgen-rt@0.39.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
     "writeable",
     "yoke",
     "yoke-derive",
@@ -840,10 +839,6 @@ fn check_license_exceptions(
         let license = match &pkg.license {
             Some(license) => license,
             None => {
-                if pkg.name.to_string() == "ring" {
-                    // *ring* does not define proper licensing metadata.
-                    continue;
-                }
                 check.error(format!(
                     "dependency `{}` in workspace `{workspace}` does not define a license expression",
                     pkg.id

@@ -11,9 +11,7 @@ TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 X_HELP=src/etc/xhelp
 
-# We handle some lockfiles separately from upstream:
-# - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
-# - "src/bootstrap/Cargo.lock" because we have custom changes to bootstrap
+# We handle some lockfiles separately from upstream, to allow for custom dependencies.
 #
 # NOTE: consider modifying this array when adding to the list:
 # https://github.com/ferrocene/ferrocene/blob/d3f1e45/src/bootstrap/src/ferrocene/dist.rs#L119-L125

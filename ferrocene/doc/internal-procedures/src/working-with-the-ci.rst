@@ -76,11 +76,11 @@ You may have to change the "event" type; see `the act manual <https://nektosact.
 
     gh auth token | read GITHUB_TOKEN
     export GITHUB_TOKEN
-    exec act -W .github/workflows/${workflow}.yml $event \
+    exec act --workflows .github/workflows/${workflow}.yml $event \
         --matrix branch:$branch \
-        -a ferrocene/ferrocene --env GITHUB_REF=refs/heads/${branch} \
-        --env GITHUB_REPOSITORY=ferrocene/ferrocene -s GITHUB_TOKEN \
-        -P ubuntu-24.04=catthehacker/ubuntu:act-24.04
+        --actor ferrocene/ferrocene --env GITHUB_REF=refs/heads/${branch} \
+        --env GITHUB_REPOSITORY=ferrocene/ferrocene --secret GITHUB_TOKEN \
+        --platform ubuntu-24.04=catthehacker/ubuntu:act-24.04
 
 If you're running on macOS Silicon, you may need to explicitly set ``--container-architecture=linux/amd64``.
 See `the docker registry <https://github.com/catthehacker/docker_images/pkgs/container/ubuntu>`_ for a list of supported architectures.
@@ -89,8 +89,8 @@ If you want to build a local docker image and use that for running the workflow,
 
 .. code-block:: sh
 
-   docker build -f your-Dockerfile ferrocene/ci -t act-local
-   act --pull=false -P ubuntu-24.04=act-local # ...
+   docker build --file your-Dockerfile ferrocene/ci --tag act-local
+   act --pull=false --platform ubuntu-24.04=act-local # ...
 
 The remaining sections of this document are about reproducing the *configuration* of CI using a local build.
 

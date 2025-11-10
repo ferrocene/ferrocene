@@ -84,24 +84,31 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
 
-      # - name: Configure `aws`
-      #   env:
-      #     AWS_PROFILE: ${{ inputs.use-minio == false && 'minio' || 'amazon'}}
-      #   run: |
-      #     mkdir -p ~/.aws
-      #     cat <<EOF > ~/.aws/config
-      #     [profile amazon]
-      #     region = us-east-1
-      #     role_arn = ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-      #     duration_seconds = 7200
+      - name: Configure `aws`
+        continue-on-error: true # I'm working on this
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == false && 'minio' || 'amazon'}}
+        run: |
+          curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://sts.amazonaws.com" > /tmp/awsjwt
+          chmod 0600 /tmp/awsjwt
 
-      #     [profile minio]
-      #     endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
-      #     access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
-      #     secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-      #     ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
-      #     EOF
-      #     aws sts get-caller-identity > /dev/null
+          mkdir -p ~/.aws
+          
+          cat <<EOF > ~/.aws/config
+          [profile amazon]
+          region = us-east-1
+          role_arn = ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          duration_seconds = 7200
+          web_identity_token_file = /tmp/awsjwt
+
+          [profile minio]
+          endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
+          access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
+          EOF
+          aws sts get-caller-identity > /dev/null
 
 
       - name: Configure AWS Credentials

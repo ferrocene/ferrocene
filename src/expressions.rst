@@ -271,6 +271,12 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_qvofy4wkql0s`
   :t:`[While loop expression]s`.
 
+* :dp:`fls_zyuxqty09SDO`
+  All forms of :t:`[borrow]s` except those of expressions that are subject to
+  :t:`drop scope extension` to the end of the program
+  and which are either :t:`[mutable borrow]s`
+  or borrows of expressions that result in values with :t:`interior mutability`.
+
 :dp:`fls_3i7efddbsmn0`
 An :t:`expression` is not considered a :t:`constant expression` when it
 explicitly invokes an :t:`associated trait function` or uses
@@ -311,12 +317,6 @@ A :t:`constant context` is a :t:`construct` that requires a
 
 * :dp:`fls_ucFupTeCyylb`
   The :t:`block expression` of a :t:`const block expression`.
-
-* :dp:`fls_zyuxqty09SDO`
-  All forms of :t:`[borrow]s` except those of expressions that are subject to
-  :t:`drop scope extension` to the end of the program
-  and which are either :t:`[mutable borrow]s`
-  or borrows of expressions that result in values with :t:`interior mutability`.
 
 :dp:`fls_od0h3v40kjp6`
 An invocation of the :std:`core::ptr::addr_of` :t:`macro` expands to a

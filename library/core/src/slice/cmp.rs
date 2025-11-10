@@ -165,20 +165,18 @@ where
 }
 
 #[doc(hidden)]
-#[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-// intermediate trait for specialization of slice's PartialOrd
 #[cfg(not(feature = "ferrocene_certified"))]
-trait SlicePartialOrd: Sized {
+// intermediate trait for specialization of slice's PartialOrd
+const trait SlicePartialOrd: Sized {
     fn partial_compare(left: &[Self], right: &[Self]) -> Option<Ordering>;
 }
 
 #[doc(hidden)]
-#[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-// intermediate trait for specialization of slice's PartialOrd chaining methods
 #[cfg(not(feature = "ferrocene_certified"))]
-trait SliceChain: Sized {
+// intermediate trait for specialization of slice's PartialOrd chaining methods
+const trait SliceChain: Sized {
     fn chaining_lt(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
     fn chaining_le(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
     fn chaining_gt(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
@@ -261,10 +259,9 @@ impl<A: [const] AlwaysApplicableOrd> const SlicePartialOrd for A {
 }
 
 #[rustc_specialization_trait]
-#[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[cfg(not(feature = "ferrocene_certified"))]
-trait AlwaysApplicableOrd: [const] SliceOrd + [const] Ord {}
+const trait AlwaysApplicableOrd: [const] SliceOrd + [const] Ord {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! always_applicable_ord {
@@ -285,11 +282,10 @@ always_applicable_ord! {
 }
 
 #[doc(hidden)]
-#[const_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-// intermediate trait for specialization of slice's Ord
 #[cfg(not(feature = "ferrocene_certified"))]
-trait SliceOrd: Sized {
+// intermediate trait for specialization of slice's Ord
+const trait SliceOrd: Sized {
     fn compare(left: &[Self], right: &[Self]) -> Ordering;
 }
 
@@ -314,9 +310,8 @@ impl<A: Ord> SliceOrd for A {
 /// * For every `x` and `y` of this type, `Ord(x, y)` must return the same
 ///   value as `Ord::cmp(transmute::<_, u8>(x), transmute::<_, u8>(y))`.
 #[rustc_specialization_trait]
-#[const_trait]
 #[cfg(not(feature = "ferrocene_certified"))]
-unsafe trait UnsignedBytewiseOrd: [const] Ord {}
+const unsafe trait UnsignedBytewiseOrd: [const] Ord {}
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[cfg(not(feature = "ferrocene_certified"))]

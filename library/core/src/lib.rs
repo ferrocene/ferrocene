@@ -123,7 +123,6 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_as_array))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_inclusive_remainder))]
@@ -299,6 +298,8 @@ pub mod num;
 pub mod hint;
 pub mod intrinsics;
 pub mod mem;
+#[unstable(feature = "profiling_marker_api", issue = "148197")]
+pub mod profiling;
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
 pub mod ub_checks;

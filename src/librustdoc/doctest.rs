@@ -600,7 +600,7 @@ fn run_test(
     ]);
     if let ErrorOutputType::HumanReadable { kind, color_config } = rustdoc_options.error_format {
         let short = kind.short();
-        let unicode = kind == HumanReadableErrorType::Unicode;
+        let unicode = kind == HumanReadableErrorType::AnnotateSnippet { unicode: true, short };
 
         if short {
             compiler_args.extend_from_slice(&["--error-format".to_owned(), "short".to_owned()]);
@@ -671,7 +671,13 @@ fn run_test(
 
     debug!("compiler invocation for doctest: {compiler:?}");
 
-    let mut child = compiler.spawn().expect("Failed to spawn rustc process");
+    let mut child = match compiler.spawn() {
+        Ok(child) => child,
+        Err(error) => {
+            eprintln!("Failed to spawn {:?}: {error:?}", compiler.get_program());
+            return (Duration::default(), Err(TestFailure::CompileError));
+        }
+    };
     let output = if let Some(merged_test_code) = &doctest.merged_test_code {
         // compile-fail tests never get merged, so this should always pass
         let status = child.wait().expect("Failed to wait");
@@ -733,7 +739,13 @@ fn run_test(
         let status = if !status.success() {
             status
         } else {
-            let mut child_runner = runner_compiler.spawn().expect("Failed to spawn rustc process");
+            let mut child_runner = match runner_compiler.spawn() {
+                Ok(child) => child,
+                Err(error) => {
+                    eprintln!("Failed to spawn {:?}: {error:?}", runner_compiler.get_program());
+                    return (Duration::default(), Err(TestFailure::CompileError));
+                }
+            };
             child_runner.wait().expect("Failed to wait")
         };
 

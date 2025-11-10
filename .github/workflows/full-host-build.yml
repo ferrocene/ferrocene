@@ -87,7 +87,7 @@ jobs:
       - name: Configure `aws`
         continue-on-error: true # I'm working on this
         env:
-          AWS_PROFILE: ${{ inputs.use-minio == false && 'minio' || 'amazon'}}
+          AWS_PROFILE: ${{ inputs.use-minio && 'minio' || 'amazon'}}
         run: |
           curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL" --fail --silent --show-error > /tmp/awsjwt

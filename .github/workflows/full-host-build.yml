@@ -90,11 +90,11 @@ jobs:
           AWS_PROFILE: ${{ inputs.use-minio == false && 'minio' || 'amazon'}}
         run: |
           curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://sts.amazonaws.com" > /tmp/awsjwt
+            "$ACTIONS_ID_TOKEN_REQUEST_URL" --fail --silent --show-error > /tmp/awsjwt
           chmod 0600 /tmp/awsjwt
 
           mkdir -p ~/.aws
-          
+
           cat <<EOF > ~/.aws/config
           [profile amazon]
           region = us-east-1

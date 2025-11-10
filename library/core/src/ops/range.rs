@@ -78,7 +78,8 @@ impl fmt::Debug for RangeFull {
 /// ```
 #[lang = "Range"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Default, PartialEq, Eq, Hash))] // not Copy -- see #27186
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[derive_const(Clone, Default, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).

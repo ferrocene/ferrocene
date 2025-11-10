@@ -86,8 +86,6 @@ jobs:
 
       - name: Configure `aws`
         continue-on-error: true # I'm working on this
-        env:
-          AWS_PROFILE: ${{ inputs.use-minio && 'minio' || 'amazon'}}
         run: |
           curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL" --fail --silent --show-error > /tmp/awsjwt
@@ -98,7 +96,7 @@ jobs:
           cat <<EOF > ~/.aws/config
           [profile amazon]
           region = us-east-1
-          role_arn = ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role_arn = ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           duration_seconds = 7200
           web_identity_token_file = /tmp/awsjwt
 
@@ -108,7 +106,10 @@ jobs:
           secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
           EOF
-          aws sts get-caller-identity > /dev/null
+          aws sts get-caller-identity --profile minio > /dev/null
+          echo "Can authenticate with minio"
+          aws sts get-caller-identity --profile amazon > /dev/null
+          echo "Can authenticate with minio"
 
 
       - name: Configure AWS Credentials

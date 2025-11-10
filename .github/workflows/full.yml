@@ -136,7 +136,7 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: Test x86_64-unknown-linux-gnu on ${{ matrix.host }}
+      run-name: ${{ matrix.suite }}
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant 2021
       host-triple: ${{ matrix.host }}
@@ -168,7 +168,7 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: Test aarch64-unknown-none on ${{ matrix.host }}
+      run-name: ${{ matrix.suite }}
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant 2021-cortex-a53
       host-triple: ${{ matrix.host }}
@@ -200,7 +200,7 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: Test thumbv7em-none-eabi on ${{ matrix.host }}
+      run-name: ${{ matrix.suite }}
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant 2021-cortex-m4
       runner: ${{ matrix.runner }}
@@ -232,7 +232,7 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: Test thumbv7em-none-eabihf on ${{ matrix.host }}
+      run-name: ${{ matrix.suite }}
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant 2021-cortex-m4
       runner: ${{ matrix.runner }}

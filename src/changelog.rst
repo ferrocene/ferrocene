@@ -31,6 +31,8 @@ Language changes in Rust 1.90.0
   - The restriction on patterns is documented in :p:`fls_wJ9f906BlBvg`
   - New paragraph: :p:`fls_zyuxqty09SDO`
 
+    - Above paragraph replaces :p:`fls_6g7c1kjrmfnr` and :p:`fls_hkbwa8xx2fwx`
+
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 
   - No change: lints are not part of the FLS

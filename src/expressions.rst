@@ -209,9 +209,6 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_b5fraqx07wuo`
   :t:`[If let expression]s`,
 
-* :dp:`fls_6g7c1kjrmfnr`
-  :t:`[Immutable borrow expression]s`.
-
 * :dp:`fls_rpapnm3afan8`
   :t:`[Index expression]s`,
 
@@ -247,9 +244,6 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 * :dp:`fls_3bucpdj828bq`
   :t:`[Range expression]s`,
-
-* :dp:`fls_hkbwa8xx2fwx`
-  :t:`[Borrow]s`,
 
 * :dp:`fls_fobs8ebt7dhc`
   :t:`[Struct expression]s`,

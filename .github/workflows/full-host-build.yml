@@ -84,41 +84,41 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
 
-      - name: Configure `aws`
-        env:
-          AWS_PROFILE: ${{ inputs.use-minio == false && 'minio' || 'amazon'}}
-        run: |
-          mkdir -p ~/.aws
-          cat <<EOF > ~/.aws/config
-          [profile amazon]
-          region = us-east-1
-          role_arn = ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          duration_seconds = 7200
-
-          [profile minio]
-          endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
-          access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
-          EOF
-          aws sts get-caller-identity > /dev/null
-
-
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   if: ${{ inputs.use-minio == false }}
-      #   with:
-      #     aws-region: us-east-1
-      #     role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-      #     role-duration-seconds: 7200
-
-      # - name: Configuire minIO credentials
-      #   if: ${{ inputs.use-minio == true }}
+      # - name: Configure `aws`
+      #   env:
+      #     AWS_PROFILE: ${{ inputs.use-minio == false && 'minio' || 'amazon'}}
       #   run: |
-      #     echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
-      #     echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-      #     echo "AWS_SECRET_ACCESS_KEY=${{ secrets.CACHE_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-      #     echo "AWS_CA_BUNDLE=${{ secrets.CACHE_CA_BUNDLE }}" >> $GITHUB_ENV
+      #     mkdir -p ~/.aws
+      #     cat <<EOF > ~/.aws/config
+      #     [profile amazon]
+      #     region = us-east-1
+      #     role_arn = ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+      #     duration_seconds = 7200
+
+      #     [profile minio]
+      #     endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
+      #     access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
+      #     secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+      #     ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
+      #     EOF
+      #     aws sts get-caller-identity > /dev/null
+
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Configuire minIO credentials
+        if: ${{ inputs.use-minio == true }}
+        run: |
+          echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.CACHE_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_CA_BUNDLE=${{ secrets.CACHE_CA_BUNDLE }}" >> $GITHUB_ENV
 
       - name: Check cache
         id: check

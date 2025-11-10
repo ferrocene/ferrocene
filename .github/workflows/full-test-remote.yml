@@ -144,10 +144,6 @@ jobs:
         with:
           version: ${{ inputs.qnx-version }}
 
-      - name: Install brctl
-        run: |
-          sudo apt install bridge-utils
-
       - name: Start emulator
         id: start-emulator
         uses: ./.github/actions/start-emulator/

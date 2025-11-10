@@ -10,9 +10,11 @@ fi
 # Ensure we never get asked/prompted, always take the new config
 echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 
+sudo apt update
 sudo apt install -y \
     build-essential \
-    ninja-build
+    ninja-build \
+    bridge-utils
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
     sudo apt install -y \

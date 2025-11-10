@@ -2394,7 +2394,6 @@ impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
 impl<T> crate::marker::StructuralPartialEq for Option<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: [const] PartialEq> const PartialEq for Option<T> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {

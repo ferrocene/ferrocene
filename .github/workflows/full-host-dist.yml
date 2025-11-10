@@ -65,6 +65,7 @@ env:
         
 jobs:
   dist:
+    name: ${{ inputs.run-name }}
     runs-on: ${{ inputs.runner }}
     steps:
       - name: Checkout

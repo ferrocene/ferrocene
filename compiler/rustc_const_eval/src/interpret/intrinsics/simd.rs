@@ -1,16 +1,16 @@
 use either::Either;
-use rustc_abi::Endian;
+use rustc_abi::{BackendRepr, Endian};
 use rustc_apfloat::ieee::{Double, Half, Quad, Single};
 use rustc_apfloat::{Float, Round};
-use rustc_middle::mir::interpret::{InterpErrorKind, UndefinedBehaviorInfo};
-use rustc_middle::ty::FloatTy;
+use rustc_middle::mir::interpret::{InterpErrorKind, Pointer, UndefinedBehaviorInfo};
+use rustc_middle::ty::{FloatTy, ScalarInt, SimdAlign};
 use rustc_middle::{bug, err_ub_format, mir, span_bug, throw_unsup_format, ty};
 use rustc_span::{Symbol, sym};
 use tracing::trace;
 
 use super::{
     ImmTy, InterpCx, InterpResult, Machine, MinMax, MulAddType, OpTy, PlaceTy, Provenance, Scalar,
-    Size, interp_ok, throw_ub_format,
+    Size, TyAndLayout, assert_matches, interp_ok, throw_ub_format,
 };
 use crate::interpret::Writeable;
 
@@ -644,6 +644,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 }
             }
             sym::simd_masked_load => {
+                let dest_layout = dest.layout;
+
                 let (mask, mask_len) = self.project_to_simd(&args[0])?;
                 let ptr = self.read_pointer(&args[1])?;
                 let (default, default_len) = self.project_to_simd(&args[2])?;
@@ -651,6 +653,14 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
                 assert_eq!(dest_len, mask_len);
                 assert_eq!(dest_len, default_len);
+
+                self.check_simd_ptr_alignment(
+                    ptr,
+                    dest_layout,
+                    generic_args[3].expect_const().to_value().valtree.unwrap_branch()[0]
+                        .unwrap_leaf()
+                        .to_simd_alignment(),
+                )?;
 
                 for i in 0..dest_len {
                     let mask = self.read_immediate(&self.project_index(&mask, i)?)?;
@@ -660,7 +670,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     let val = if simd_element_to_bool(mask)? {
                         // Size * u64 is implemented as always checked
                         let ptr = ptr.wrapping_offset(dest.layout.size * i, self);
-                        let place = self.ptr_to_mplace(ptr, dest.layout);
+                        // we have already checked the alignment requirements
+                        let place = self.ptr_to_mplace_unaligned(ptr, dest.layout);
                         self.read_immediate(&place)?
                     } else {
                         default
@@ -675,6 +686,14 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
                 assert_eq!(mask_len, vals_len);
 
+                self.check_simd_ptr_alignment(
+                    ptr,
+                    args[2].layout,
+                    generic_args[3].expect_const().to_value().valtree.unwrap_branch()[0]
+                        .unwrap_leaf()
+                        .to_simd_alignment(),
+                )?;
+
                 for i in 0..vals_len {
                     let mask = self.read_immediate(&self.project_index(&mask, i)?)?;
                     let val = self.read_immediate(&self.project_index(&vals, i)?)?;
@@ -682,7 +701,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     if simd_element_to_bool(mask)? {
                         // Size * u64 is implemented as always checked
                         let ptr = ptr.wrapping_offset(val.layout.size * i, self);
-                        let place = self.ptr_to_mplace(ptr, val.layout);
+                        // we have already checked the alignment requirements
+                        let place = self.ptr_to_mplace_unaligned(ptr, val.layout);
                         self.write_immediate(*val, &place)?
                     };
                 }
@@ -724,6 +744,58 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     self.write_scalar(val, &dest)?;
                 }
             }
+            sym::simd_funnel_shl | sym::simd_funnel_shr => {
+                let (left, _) = self.project_to_simd(&args[0])?;
+                let (right, _) = self.project_to_simd(&args[1])?;
+                let (shift, _) = self.project_to_simd(&args[2])?;
+                let (dest, _) = self.project_to_simd(&dest)?;
+
+                let (len, elem_ty) = args[0].layout.ty.simd_size_and_type(*self.tcx);
+                let (elem_size, _signed) = elem_ty.int_size_and_signed(*self.tcx);
+                let elem_size_bits = u128::from(elem_size.bits());
+
+                let is_left = intrinsic_name == sym::simd_funnel_shl;
+
+                for i in 0..len {
+                    let left =
+                        self.read_scalar(&self.project_index(&left, i)?)?.to_bits(elem_size)?;
+                    let right =
+                        self.read_scalar(&self.project_index(&right, i)?)?.to_bits(elem_size)?;
+                    let shift_bits =
+                        self.read_scalar(&self.project_index(&shift, i)?)?.to_bits(elem_size)?;
+
+                    if shift_bits >= elem_size_bits {
+                        throw_ub_format!(
+                            "overflowing shift by {shift_bits} in `{intrinsic_name}` in lane {i}"
+                        );
+                    }
+                    let inv_shift_bits = u32::try_from(elem_size_bits - shift_bits).unwrap();
+
+                    // A funnel shift left by S can be implemented as `(x << S) | y.unbounded_shr(SIZE - S)`.
+                    // The `unbounded_shr` is needed because otherwise if `S = 0`, it would be `x | y`
+                    // when it should be `x`.
+                    //
+                    // This selects the least-significant `SIZE - S` bits of `x`, followed by the `S` most
+                    // significant bits of `y`. As `left` and `right` both occupy the lower `SIZE` bits,
+                    // we can treat the lower `SIZE` bits as an integer of the right width and use
+                    // the same implementation, but on a zero-extended `x` and `y`. This works because
+                    // `x << S` just pushes the `SIZE-S` MSBs out, and `y >> (SIZE - S)` shifts in
+                    // zeros, as it is zero-extended. To the lower `SIZE` bits, this looks just like a
+                    // funnel shift left.
+                    //
+                    // Note that the `unbounded_sh{l,r}`s are needed only in case we are using this on
+                    // `u128xN` and `inv_shift_bits == 128`.
+                    let result_bits = if is_left {
+                        (left << shift_bits) | right.unbounded_shr(inv_shift_bits)
+                    } else {
+                        left.unbounded_shl(inv_shift_bits) | (right >> shift_bits)
+                    };
+                    let (result, _overflow) = ScalarInt::truncate_from_uint(result_bits, elem_size);
+
+                    let dest = self.project_index(&dest, i)?;
+                    self.write_scalar(result, &dest)?;
+                }
+            }
 
             // Unsupported intrinsic: skip the return_to_block below.
             _ => return interp_ok(false),
@@ -752,6 +824,30 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             FloatTy::F64 => self.float_minmax::<Double>(left, right, op)?,
             FloatTy::F128 => self.float_minmax::<Quad>(left, right, op)?,
         })
+    }
+
+    fn check_simd_ptr_alignment(
+        &self,
+        ptr: Pointer<Option<M::Provenance>>,
+        vector_layout: TyAndLayout<'tcx>,
+        alignment: SimdAlign,
+    ) -> InterpResult<'tcx> {
+        assert_matches!(vector_layout.backend_repr, BackendRepr::SimdVector { .. });
+
+        let align = match alignment {
+            ty::SimdAlign::Unaligned => {
+                // The pointer is supposed to be unaligned, so no check is required.
+                return interp_ok(());
+            }
+            ty::SimdAlign::Element => {
+                // Take the alignment of the only field, which is an array and therefore has the same
+                // alignment as the element type.
+                vector_layout.field(self, 0).align.abi
+            }
+            ty::SimdAlign::Vector => vector_layout.align.abi,
+        };
+
+        self.check_ptr_align(ptr, align)
     }
 }
 

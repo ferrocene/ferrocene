@@ -238,7 +238,7 @@ impl dyn Any {
             // SAFETY: just checked whether we are pointing to the correct type, and we can rely on
             // that check for memory safety because we have implemented Any for all types; no other
             // impls can exist as they would conflict with our impl.
-            unsafe { Some(self.downcast_ref_unchecked()) }
+            unsafe { Some(self.downcast_unchecked_ref()) }
         } else {
             None
         }
@@ -274,7 +274,7 @@ impl dyn Any {
             // SAFETY: just checked whether we are pointing to the correct type, and we can rely on
             // that check for memory safety because we have implemented Any for all types; no other
             // impls can exist as they would conflict with our impl.
-            unsafe { Some(self.downcast_mut_unchecked()) }
+            unsafe { Some(self.downcast_unchecked_mut()) }
         } else {
             None
         }
@@ -292,7 +292,7 @@ impl dyn Any {
     /// let x: Box<dyn Any> = Box::new(1_usize);
     ///
     /// unsafe {
-    ///     assert_eq!(*x.downcast_ref_unchecked::<usize>(), 1);
+    ///     assert_eq!(*x.downcast_unchecked_ref::<usize>(), 1);
     /// }
     /// ```
     ///
@@ -302,7 +302,7 @@ impl dyn Any {
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
     #[inline]
-    pub unsafe fn downcast_ref_unchecked<T: Any>(&self) -> &T {
+    pub unsafe fn downcast_unchecked_ref<T: Any>(&self) -> &T {
         debug_assert!(self.is::<T>());
         // SAFETY: caller guarantees that T is the correct type
         unsafe { &*(self as *const dyn Any as *const T) }
@@ -320,7 +320,7 @@ impl dyn Any {
     /// let mut x: Box<dyn Any> = Box::new(1_usize);
     ///
     /// unsafe {
-    ///     *x.downcast_mut_unchecked::<usize>() += 1;
+    ///     *x.downcast_unchecked_mut::<usize>() += 1;
     /// }
     ///
     /// assert_eq!(*x.downcast_ref::<usize>().unwrap(), 2);
@@ -332,7 +332,7 @@ impl dyn Any {
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
     #[inline]
-    pub unsafe fn downcast_mut_unchecked<T: Any>(&mut self) -> &mut T {
+    pub unsafe fn downcast_unchecked_mut<T: Any>(&mut self) -> &mut T {
         debug_assert!(self.is::<T>());
         // SAFETY: caller guarantees that T is the correct type
         unsafe { &mut *(self as *mut dyn Any as *mut T) }
@@ -429,7 +429,7 @@ impl dyn Any + Send {
     /// let x: Box<dyn Any> = Box::new(1_usize);
     ///
     /// unsafe {
-    ///     assert_eq!(*x.downcast_ref_unchecked::<usize>(), 1);
+    ///     assert_eq!(*x.downcast_unchecked_ref::<usize>(), 1);
     /// }
     /// ```
     ///
@@ -439,9 +439,9 @@ impl dyn Any + Send {
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
     #[inline]
-    pub unsafe fn downcast_ref_unchecked<T: Any>(&self) -> &T {
+    pub unsafe fn downcast_unchecked_ref<T: Any>(&self) -> &T {
         // SAFETY: guaranteed by caller
-        unsafe { <dyn Any>::downcast_ref_unchecked::<T>(self) }
+        unsafe { <dyn Any>::downcast_unchecked_ref::<T>(self) }
     }
 
     /// Forwards to the method defined on the type `dyn Any`.
@@ -456,7 +456,7 @@ impl dyn Any + Send {
     /// let mut x: Box<dyn Any> = Box::new(1_usize);
     ///
     /// unsafe {
-    ///     *x.downcast_mut_unchecked::<usize>() += 1;
+    ///     *x.downcast_unchecked_mut::<usize>() += 1;
     /// }
     ///
     /// assert_eq!(*x.downcast_ref::<usize>().unwrap(), 2);
@@ -468,9 +468,9 @@ impl dyn Any + Send {
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
     #[inline]
-    pub unsafe fn downcast_mut_unchecked<T: Any>(&mut self) -> &mut T {
+    pub unsafe fn downcast_unchecked_mut<T: Any>(&mut self) -> &mut T {
         // SAFETY: guaranteed by caller
-        unsafe { <dyn Any>::downcast_mut_unchecked::<T>(self) }
+        unsafe { <dyn Any>::downcast_unchecked_mut::<T>(self) }
     }
 }
 
@@ -564,7 +564,7 @@ impl dyn Any + Send + Sync {
     /// let x: Box<dyn Any> = Box::new(1_usize);
     ///
     /// unsafe {
-    ///     assert_eq!(*x.downcast_ref_unchecked::<usize>(), 1);
+    ///     assert_eq!(*x.downcast_unchecked_ref::<usize>(), 1);
     /// }
     /// ```
     /// # Safety
@@ -573,9 +573,9 @@ impl dyn Any + Send + Sync {
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
     #[inline]
-    pub unsafe fn downcast_ref_unchecked<T: Any>(&self) -> &T {
+    pub unsafe fn downcast_unchecked_ref<T: Any>(&self) -> &T {
         // SAFETY: guaranteed by caller
-        unsafe { <dyn Any>::downcast_ref_unchecked::<T>(self) }
+        unsafe { <dyn Any>::downcast_unchecked_ref::<T>(self) }
     }
 
     /// Forwards to the method defined on the type `Any`.
@@ -590,7 +590,7 @@ impl dyn Any + Send + Sync {
     /// let mut x: Box<dyn Any> = Box::new(1_usize);
     ///
     /// unsafe {
-    ///     *x.downcast_mut_unchecked::<usize>() += 1;
+    ///     *x.downcast_unchecked_mut::<usize>() += 1;
     /// }
     ///
     /// assert_eq!(*x.downcast_ref::<usize>().unwrap(), 2);
@@ -601,9 +601,9 @@ impl dyn Any + Send + Sync {
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
     #[inline]
-    pub unsafe fn downcast_mut_unchecked<T: Any>(&mut self) -> &mut T {
+    pub unsafe fn downcast_unchecked_mut<T: Any>(&mut self) -> &mut T {
         // SAFETY: guaranteed by caller
-        unsafe { <dyn Any>::downcast_mut_unchecked::<T>(self) }
+        unsafe { <dyn Any>::downcast_unchecked_mut::<T>(self) }
     }
 }
 

@@ -120,6 +120,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
 #![feature(panic_internals)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
@@ -129,6 +130,26 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_remainder))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(pattern_type_macro))]
+||||||| 6e41e619773
+#![feature(pattern_type_macro)]
+#![feature(ptr_alignment_type)]
+#![feature(ptr_metadata)]
+#![feature(set_ptr_value)]
+#![feature(slice_as_array)]
+#![feature(slice_ptr_get)]
+#![feature(str_internals)]
+#![feature(str_split_inclusive_remainder)]
+#![feature(str_split_remainder)]
+=======
+#![feature(pattern_type_macro)]
+#![feature(ptr_alignment_type)]
+#![feature(ptr_metadata)]
+#![feature(set_ptr_value)]
+#![feature(slice_ptr_get)]
+#![feature(str_internals)]
+#![feature(str_split_inclusive_remainder)]
+#![feature(str_split_remainder)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_neg))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_shifts))]
@@ -299,6 +320,8 @@ pub mod num;
 pub mod hint;
 pub mod intrinsics;
 pub mod mem;
+#[unstable(feature = "profiling_marker_api", issue = "148197")]
+pub mod profiling;
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
 pub mod ub_checks;

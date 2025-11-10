@@ -1598,6 +1598,8 @@ impl<T> AtomicPtr<T> {
 
     /// Gets atomic access to a pointer.
     ///
+    /// **Note:** This function is only available on targets where `AtomicPtr<T>` has the same alignment as `*const T`
+    ///
     /// # Examples
     ///
     /// ```
@@ -1664,6 +1666,8 @@ impl<T> AtomicPtr<T> {
     }
 
     /// Gets atomic access to a slice of pointers.
+    ///
+    /// **Note:** This function is only available on targets where `AtomicPtr<T>` has the same alignment as `*const T`
     ///
     /// # Examples
     ///
@@ -2846,6 +2850,14 @@ macro_rules! atomic_int {
             }
 
             #[doc = concat!("Get atomic access to a `&mut [", stringify!($int_type), "]` slice.")]
+            ///
+            #[doc = if_8_bit! {
+                $int_type,
+                no = [
+                    "**Note:** This function is only available on targets where `",
+                    stringify!($atomic_type), "` has the same alignment as `", stringify!($int_type), "`."
+                ],
+            }]
             ///
             /// # Examples
             ///

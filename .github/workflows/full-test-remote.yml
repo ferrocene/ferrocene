@@ -73,7 +73,6 @@ env:
 jobs:
 
   test:
-    if: ${{ inputs.test-host-tools }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:

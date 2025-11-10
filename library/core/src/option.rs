@@ -602,6 +602,7 @@ use crate::{convert, hint, mem, panicking::panic};
 #[doc(search_unbox)]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy))]
 #[rustc_diagnostic_item = "Option"]
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]

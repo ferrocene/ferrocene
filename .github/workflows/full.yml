@@ -132,7 +132,7 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - targets
+      # - targets
     secrets: inherit
     with:
       run-name: Test x86_64-unknown-linux-gnu on ${{ matrix.host }}
@@ -163,7 +163,7 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - targets
+      # - targets
     secrets: inherit
     with:
       run-name: Test aarch64-unknown-none on ${{ matrix.host }}
@@ -194,7 +194,7 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - targets
+      # - targets
     secrets: inherit
     with:
       run-name: Test thumbv7em-none-eabi on ${{ matrix.host }}
@@ -225,7 +225,7 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - targets
+      # - targets
     secrets: inherit
     with:
       run-name: Test thumbv7em-none-eabihf on ${{ matrix.host }}
@@ -257,7 +257,7 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - targets
+      # - targets
     secrets: inherit
     with:
       script: |
@@ -294,7 +294,7 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
-      - targets
+      # - targets
     secrets: inherit
     with:
       script: |
@@ -677,6 +677,8 @@ jobs:
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
+      - dist-x86_64-unknown-linux-gnu
+      - dist-aarch64-unknown-linux-gnu
       - targets
       - traceability-matrix
       - self-test-x86_64-unknown-linux-gnu

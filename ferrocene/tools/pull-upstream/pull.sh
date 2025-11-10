@@ -7,7 +7,6 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 FERROCENE_REPO=https://github.com/ferrocene/ferrocene
-TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 X_HELP=src/etc/xhelp
 
@@ -71,15 +70,19 @@ upstream_branch="$1"
 if [[ $# -ge 2 ]]; then
     # Allow not having the ref fetched locally (can happen from manual workflow_dispatch runs)
     git fetch "$FERROCENE_REPO" "$2"
-    current_branch="$(git rev-parse FETCH_HEAD)"
+    current_commit="$(git rev-parse FETCH_HEAD)"
+    branch_name="$2"
 else
-    current_branch="$(git rev-parse HEAD)"
+    current_commit="$(git rev-parse HEAD)"
+    branch_name="$(git branch --show-current)"
+    if [ -n "$branch_name" ]; then branch_name=$current_commit; fi
 fi
 if [[ $# -ge 3 ]]; then
     upstream_commit="$3"
 else
     upstream_commit="FETCH_HEAD"  # Latest commit in the branch we pull.
 fi
+TEMP_BRANCH="rust-lang/rust/${upstream_branch}--generated-by-pull-upstream"
 
 # Ensure we are using an up to date nightly toolchain during the execution of this script. This is
 # because some Cargo invocations might touch `Cargo.toml` files relying on unstable features, which
@@ -153,7 +156,7 @@ get_submodules() {
     git config --file <(git show "${ref}:.gitmodules") --get-regexp path | awk '{print($2)}'
 }
 new_submodules="$(get_submodules "${upstream_commit}")"
-for submodule in $(get_submodules "${current_branch}"); do
+for submodule in $(get_submodules "${current_commit}"); do
     if ! grep --quiet "^${submodule}\$" <(echo "${new_submodules}"); then
         echo "submodule ${submodule} is not present upstream, removing its contents"
         rm -rf "${submodule}"
@@ -164,7 +167,7 @@ git checkout -b "${TEMP_BRANCH}" "${upstream_commit}"
 
 # Delete all the files excluded from the pull. Those files are marked with the
 # `ferrocene-avoid-pulling-from-upstream` in `.gitattributes`.
-git checkout "${current_branch}" -- .gitattributes
+git checkout "${current_commit}" -- .gitattributes
 excluded_files | xargs git rm
 git checkout FETCH_HEAD -- .gitattributes
 
@@ -183,8 +186,8 @@ else
     merge_message="pull new changes from upstream"
 fi
 
-git checkout "${current_branch}"
-if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
+git checkout "${current_commit}"
+if ! git -c merge.conflictstyle=zdiff3 merge --into-name "${branch_name}" "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # Merging failed, but the script might be able to resolve all the conflicts
     # on its own. This tries to resolve known conflicts and finish the merge.
     # If not all conflicts were resolved, control is given back to the user.
@@ -195,7 +198,7 @@ if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${me
     # automatically.
     for file in $(excluded_files); do
         echo "pull-upstream: automatically resolving conflict for ${file}..."
-        git show "${current_branch}:${file}" > "${file}"
+        git show "${current_commit}:${file}" > "${file}"
         git add "${file}"
         echo "pull-upstream: automatically resolved conflict for ${file}"
     done
@@ -229,7 +232,7 @@ if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${me
         lock="${prefix}Cargo.lock"
         if git status --porcelain=v1 | grep "^UU ${lock}$" >/dev/null; then
             echo "pull-upstream: automatically resolving conflict for ${lock}..."
-            git show "${current_branch}:${lock}" > "${lock}"
+            git show "${current_commit}:${lock}" > "${lock}"
 
             # Invoking any Cargo command touching the lockfile will cause the
             # lockfile to be updated. "cargo metadata" is one of the fastest ones.
@@ -271,12 +274,14 @@ if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${me
             marker="$1"
             who="$2"
             for changed_file in $(git status --porcelain=v1 | sed -n "s/^${marker} //p"); do
-                sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
+                sed -i.bak "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
+                rm -f "${changed_file}.bak"
             done
         }
         handle_deleted_files DU "in Ferrocene" # DU means "deleted by us"
         handle_deleted_files UD "upstream"     # UD means "deleted by them"
 
+        git diff --name-only | xargs sed -i=.bak "s#<<<<<<< HEAD#<<<<<<< ferrocene/${branch_name}#"
         git add .
 
         # Setting the editor to `true` prevents the actual editor from being open,

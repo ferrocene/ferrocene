@@ -118,6 +118,7 @@ jobs:
   test-x86_64-unknown-linux-gnu:
     name: Test x86_64-unknown-linux-gnu on ${{ matrix.host }}
     strategy:
+      fail-fast: false
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
@@ -150,6 +151,7 @@ jobs:
 
   test-aarch64-unknown-none:
     strategy:
+      fail-fast: false
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
@@ -181,6 +183,7 @@ jobs:
 
   test-thumbv7em-none-eabi:
     strategy:
+      fail-fast: false
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
@@ -212,6 +215,7 @@ jobs:
 
   test-thumbv7em-none-eabihf:
     strategy:
+      fail-fast: false
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
@@ -244,6 +248,7 @@ jobs:
   test-x86_64-pc-nto-qnx710:
     name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
     strategy:
+      fail-fast: false
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
@@ -281,6 +286,7 @@ jobs:
   test-aarch64-unknown-nto-qnx710:
     name: Test aarch64-unknown-nto-qnx710 on ${{ matrix.host }}
     strategy:
+      fail-fast: false
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:

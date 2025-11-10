@@ -64,6 +64,7 @@ start_vm() {
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0,mac="${vm_mac_addr}" \
         -pidfile "${emulatordir}"/qemu.pid \
+        -accel kvm \
         -nographic \
         -kernel "${emulatordir}"/ifs.bin \
         -object rng-random,filename=/dev/urandom,id=rng0 \

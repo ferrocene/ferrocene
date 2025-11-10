@@ -24,6 +24,17 @@ to instruct the release process to release. The script does little when
 starting a manual release, but it's fully responsible for determining which
 scheduled releases to run.
 
+Steps to a release
+^^^^^^^^^^^^^^^^^^
+
+``publish-release`` performs the following steps when executed:
+
+#. Download artifacts from all previous releases and the current beta release
+#. Generate the `releases.ferrocene.dev <https://releases.ferrocene.dev>`_ website index
+#. Generate a ``criticalup`` manifest
+#. Generate checksums for all artifacts
+#. Upload all artifacts, checksums, and manifests, as well as the generated website index
+
 .. _manual-release:
 
 Publishing a manual release

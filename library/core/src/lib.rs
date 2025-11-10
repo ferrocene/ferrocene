@@ -165,7 +165,7 @@
 #![feature(intrinsics)]
 #![feature(lang_items)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
+#![feature(macro_metavar_expr)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
 #![feature(marker_trait_attr)]
 #![feature(min_specialization)]
@@ -393,7 +393,6 @@ pub mod alloc;
 mod bool;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod escape;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod tuple;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod unit;

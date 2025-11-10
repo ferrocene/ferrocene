@@ -166,29 +166,17 @@ where
 
 #[doc(hidden)]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-// intermediate trait for specialization of slice's PartialOrd
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-trait SlicePartialOrd: Sized {
-||||||| 6e41e619773
-trait SlicePartialOrd: Sized {
-=======
+// intermediate trait for specialization of slice's PartialOrd
 const trait SlicePartialOrd: Sized {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn partial_compare(left: &[Self], right: &[Self]) -> Option<Ordering>;
 }
 
 #[doc(hidden)]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-// intermediate trait for specialization of slice's PartialOrd chaining methods
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-trait SliceChain: Sized {
-||||||| 6e41e619773
-trait SliceChain: Sized {
-=======
+// intermediate trait for specialization of slice's PartialOrd chaining methods
 const trait SliceChain: Sized {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn chaining_lt(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
     fn chaining_le(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
     fn chaining_gt(left: &[Self], right: &[Self]) -> ControlFlow<bool>;
@@ -272,14 +260,8 @@ impl<A: [const] AlwaysApplicableOrd> const SlicePartialOrd for A {
 
 #[rustc_specialization_trait]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-trait AlwaysApplicableOrd: [const] SliceOrd + [const] Ord {}
-||||||| 6e41e619773
-trait AlwaysApplicableOrd: [const] SliceOrd + [const] Ord {}
-=======
 const trait AlwaysApplicableOrd: [const] SliceOrd + [const] Ord {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! always_applicable_ord {
@@ -301,15 +283,9 @@ always_applicable_ord! {
 
 #[doc(hidden)]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-// intermediate trait for specialization of slice's Ord
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-trait SliceOrd: Sized {
-||||||| 6e41e619773
-trait SliceOrd: Sized {
-=======
+// intermediate trait for specialization of slice's Ord
 const trait SliceOrd: Sized {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn compare(left: &[Self], right: &[Self]) -> Ordering;
 }
 
@@ -334,16 +310,8 @@ impl<A: Ord> SliceOrd for A {
 /// * For every `x` and `y` of this type, `Ord(x, y)` must return the same
 ///   value as `Ord::cmp(transmute::<_, u8>(x), transmute::<_, u8>(y))`.
 #[rustc_specialization_trait]
-<<<<<<< HEAD
-#[const_trait]
 #[cfg(not(feature = "ferrocene_certified"))]
-unsafe trait UnsignedBytewiseOrd: [const] Ord {}
-||||||| 6e41e619773
-#[const_trait]
-unsafe trait UnsignedBytewiseOrd: [const] Ord {}
-=======
 const unsafe trait UnsignedBytewiseOrd: [const] Ord {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[cfg(not(feature = "ferrocene_certified"))]

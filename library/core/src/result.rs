@@ -1673,23 +1673,15 @@ impl<T, E> Result<T, E> {
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
-<<<<<<< HEAD
             #[ferrocene::annotation(
                 "This line cannot be covered as reaching `unreachable_unchecked` is undefined behavior"
             )]
-            // SAFETY: the safety contract must be upheld by the caller.
-            Err(_) => unsafe { hint::unreachable_unchecked() },
-||||||| 6e41e619773
-            // SAFETY: the safety contract must be upheld by the caller.
-            Err(_) => unsafe { hint::unreachable_unchecked() },
-=======
             Err(e) => {
                 // FIXME(const-hack): to avoid E: const Destruct bound
                 super::mem::forget(e);
                 // SAFETY: the safety contract must be upheld by the caller.
                 unsafe { hint::unreachable_unchecked() }
             }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 

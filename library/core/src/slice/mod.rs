@@ -6,7 +6,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 8401398e1f1
+=======
+use crate::clone::TrivialClone;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{exact_div, unchecked_sub};
@@ -3994,30 +3999,8 @@ impl<T> [T] {
     where
         T: Copy,
     {
-        // The panic code path was put into a cold function to not bloat the
-        // call site.
-        #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
-        #[cfg_attr(panic = "immediate-abort", inline)]
-        #[track_caller]
-        const fn len_mismatch_fail(dst_len: usize, src_len: usize) -> ! {
-            const_panic!(
-                "copy_from_slice: source slice length does not match destination slice length",
-                "copy_from_slice: source slice length ({src_len}) does not match destination slice length ({dst_len})",
-                src_len: usize,
-                dst_len: usize,
-            )
-        }
-
-        if self.len() != src.len() {
-            len_mismatch_fail(self.len(), src.len());
-        }
-
-        // SAFETY: `self` is valid for `self.len()` elements by definition, and `src` was
-        // checked to have the same length. The slices cannot overlap because
-        // mutable references are exclusive.
-        unsafe {
-            ptr::copy_nonoverlapping(src.as_ptr(), self.as_mut_ptr(), self.len());
-        }
+        // SAFETY: `T` implements `Copy`.
+        unsafe { copy_from_slice_impl(self, src) }
     }
 
     /// Copies elements from one part of the slice to another part of itself,
@@ -5253,7 +5236,43 @@ impl [f64] {
     }
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 8401398e1f1
+=======
+/// Copies `src` to `dest`.
+///
+/// # Safety
+/// `T` must implement one of `Copy` or `TrivialClone`.
+#[track_caller]
+const unsafe fn copy_from_slice_impl<T: Clone>(dest: &mut [T], src: &[T]) {
+    // The panic code path was put into a cold function to not bloat the
+    // call site.
+    #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
+    #[cfg_attr(panic = "immediate-abort", inline)]
+    #[track_caller]
+    const fn len_mismatch_fail(dst_len: usize, src_len: usize) -> ! {
+        const_panic!(
+            "copy_from_slice: source slice length does not match destination slice length",
+            "copy_from_slice: source slice length ({src_len}) does not match destination slice length ({dst_len})",
+            src_len: usize,
+            dst_len: usize,
+        )
+    }
+
+    if dest.len() != src.len() {
+        len_mismatch_fail(dest.len(), src.len());
+    }
+
+    // SAFETY: `self` is valid for `self.len()` elements by definition, and `src` was
+    // checked to have the same length. The slices cannot overlap because
+    // mutable references are exclusive.
+    unsafe {
+        ptr::copy_nonoverlapping(src.as_ptr(), dest.as_mut_ptr(), dest.len());
+    }
+}
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 trait CloneFromSpec<T> {
     fn spec_clone_from(&mut self, src: &[T]);
 }
@@ -5280,11 +5299,14 @@ where
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> CloneFromSpec<T> for [T]
 where
-    T: Copy,
+    T: TrivialClone,
 {
     #[track_caller]
     fn spec_clone_from(&mut self, src: &[T]) {
-        self.copy_from_slice(src);
+        // SAFETY: `T` implements `TrivialClone`.
+        unsafe {
+            copy_from_slice_impl(self, src);
+        }
     }
 }
 

@@ -6,15 +6,25 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::borrow::{Borrow, BorrowMut};
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 8401398e1f1
+=======
+use crate::clone::TrivialClone;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::convert::Infallible;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 8401398e1f1
+use crate::fmt;
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::hash::{self, Hash};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::transmute_unchecked;
@@ -27,6 +37,7 @@ use crate::ops::{
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
+use crate::{fmt, ptr};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
@@ -481,6 +492,10 @@ impl<T: Clone, const N: usize> Clone for [T; N] {
     }
 }
 
+#[doc(hidden)]
+#[unstable(feature = "trivial_clone", issue = "none")]
+unsafe impl<T: TrivialClone, const N: usize> TrivialClone for [T; N] {}
+
 trait SpecArrayClone: Clone {
     fn clone<const N: usize>(array: &[Self; N]) -> [Self; N];
 }
@@ -492,10 +507,12 @@ impl<T: Clone> SpecArrayClone for T {
     }
 }
 
-impl<T: Copy> SpecArrayClone for T {
+impl<T: TrivialClone> SpecArrayClone for T {
     #[inline]
     fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
-        *array
+        // SAFETY: `TrivialClone` implies that this is equivalent to calling
+        // `Clone` on every element.
+        unsafe { ptr::read(array) }
     }
 }
 

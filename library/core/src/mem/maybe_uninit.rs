@@ -1,5 +1,6 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::any::type_name;
+use crate::clone::TrivialClone;
 use crate::marker::Destruct;
 use crate::mem::ManuallyDrop;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -362,6 +363,11 @@ impl<T: Copy> Clone for MaybeUninit<T> {
         *self
     }
 }
+
+// SAFETY: the clone implementation is a copy, see above.
+#[doc(hidden)]
+#[unstable(feature = "trivial_clone", issue = "none")]
+unsafe impl<T> TrivialClone for MaybeUninit<T> where MaybeUninit<T>: Clone {}
 
 #[stable(feature = "maybe_uninit_debug", since = "1.41.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1619,9 +1625,19 @@ impl<T: Clone> SpecFill<T> for [MaybeUninit<T>] {
     }
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> SpecFill<T> for [MaybeUninit<T>] {
+||||||| 8401398e1f1
+impl<T: Copy> SpecFill<T> for [MaybeUninit<T>] {
+=======
+impl<T: TrivialClone> SpecFill<T> for [MaybeUninit<T>] {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn spec_fill(&mut self, value: T) {
-        self.fill(MaybeUninit::new(value));
+        // SAFETY: because `T` is `TrivialClone`, this is equivalent to calling
+        // `T::clone` for every element. Notably, `TrivialClone` also implies
+        // that the `clone` implementation will not panic, so we can avoid
+        // initialization guards and such.
+        self.fill_with(|| MaybeUninit::new(unsafe { ptr::read(&value) }));
     }
 }

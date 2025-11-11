@@ -702,7 +702,6 @@ trait RangeIteratorImpl {
 
     // Iterator
     fn spec_next(&mut self) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth(&mut self, n: usize) -> Option<Self::Item>;
     fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 
@@ -729,7 +728,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_nth(&mut self, n: usize) -> Option<A> {
         if let Some(plus_n) = Step::forward_checked(self.start.clone(), n) {
             if plus_n < self.end {
@@ -909,7 +907,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.spec_nth(n)
     }

@@ -209,7 +209,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn nth(&mut self, n: usize) -> Option<$elem> {
                 if n >= len!(self) {
                     // This iterator is now empty.

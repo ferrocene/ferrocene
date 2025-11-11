@@ -23,8 +23,8 @@ pub struct Zip<A, B> {
     index: usize,
     len: usize,
 }
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator, B: Iterator> Zip<A, B> {
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(in crate::iter) fn new(a: A, b: B) -> Zip<A, B> {
         ZipImpl::new(a, b)
     }
@@ -96,7 +96,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         ZipImpl::nth(self, n)
     }
@@ -142,7 +141,6 @@ trait ZipImpl<A, B> {
     fn new(a: A, b: B) -> Self;
     fn next(&mut self) -> Option<Self::Item>;
     fn size_hint(&self) -> (usize, Option<usize>);
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item>;
     #[cfg(not(feature = "ferrocene_certified"))]
     fn next_back(&mut self) -> Option<Self::Item>
@@ -181,7 +179,6 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         default fn nth(&mut self, n: usize) -> Option<Self::Item> {
             self.super_nth(n)
         }

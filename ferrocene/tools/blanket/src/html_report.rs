@@ -57,7 +57,7 @@ pub(crate) fn generate(
     let summary = maud::html!(
         header {
             h1 { "Core library line coverage report" }
-            a href="./index.html" { "Go back to the documentation index" }
+            a href="../index.html" { "Go back to the documentation index" }
         }
         div class="coverage-summary" {
             h1 {

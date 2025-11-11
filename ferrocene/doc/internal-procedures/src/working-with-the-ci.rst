@@ -61,6 +61,39 @@ WSL2 from an administrator Powershell if you haven't done so already, then setup
 
 From there, follow the Linux instructions above.
 
+Reproducing CI precisely with ``act``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following shell script shows how to invoke `act <https://nektosact.com/introduction.html>`_
+to run CI precisely as Github Actions would.
+You may have to change the "event" type; see `the act manual <https://nektosact.com/usage/index.html#events>`_.
+
+.. code-block:: sh
+
+    branch=${1:-$(git branch --show-current)}
+    workflow=${2:-"automation-pull-subtrees"}
+    event=${3:-"--detect-event"}
+
+    gh auth token | read GITHUB_TOKEN
+    export GITHUB_TOKEN
+    exec act --workflows .github/workflows/${workflow}.yml $event \
+        --matrix branch:$branch \
+        --actor ferrocene/ferrocene --env GITHUB_REF=refs/heads/${branch} \
+        --env GITHUB_REPOSITORY=ferrocene/ferrocene --secret GITHUB_TOKEN \
+        --platform ubuntu-24.04=catthehacker/ubuntu:act-24.04
+
+If you're running on macOS Silicon, you may need to explicitly set ``--container-architecture=linux/amd64``.
+See `the docker registry <https://github.com/catthehacker/docker_images/pkgs/container/ubuntu>`_ for a list of supported architectures.
+
+If you want to build a local docker image and use that for running the workflow, you can do so with the following commands:
+
+.. code-block:: sh
+
+   docker build --file your-Dockerfile ferrocene/ci --tag act-local
+   act --pull=false --platform ubuntu-24.04=act-local # ...
+
+The remaining sections of this document are about reproducing the *configuration* of CI using a local build.
+
 Using Python scripts and tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

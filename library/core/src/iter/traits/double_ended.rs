@@ -1,4 +1,6 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ControlFlow, Try};
 
 /// An iterator able to yield elements from both ends.
@@ -135,6 +137,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// [`Err(k)`]: Err
     #[inline]
     #[unstable(feature = "iter_advance_by", reason = "recently added", issue = "77404")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         for i in 0..n {
             if self.next_back().is_none() {
@@ -188,6 +191,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_nth_back", since = "1.37.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         if self.advance_back_by(n).is_err() {
             return None;
@@ -227,6 +231,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -298,6 +303,7 @@ pub trait DoubleEndedIterator: Iterator {
     #[doc(alias = "foldr")]
     #[inline]
     #[stable(feature = "iter_rfold", since = "1.27.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn rfold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -353,6 +359,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_rfind", since = "1.27.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
@@ -370,6 +377,7 @@ pub trait DoubleEndedIterator: Iterator {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, I: DoubleEndedIterator + ?Sized> DoubleEndedIterator for &'a mut I {
     fn next_back(&mut self) -> Option<I::Item> {
         (**self).next_back()
@@ -396,6 +404,7 @@ impl<'a, I: DoubleEndedIterator + ?Sized> DoubleEndedIterator for &'a mut I {
 }
 
 /// Helper trait to specialize `rfold` and `rtry_fold` for `&mut I where I: Sized`
+#[cfg(not(feature = "ferrocene_certified"))]
 trait DoubleEndedIteratorRefSpec: DoubleEndedIterator {
     fn spec_rfold<B, F>(self, init: B, f: F) -> B
     where
@@ -407,6 +416,7 @@ trait DoubleEndedIteratorRefSpec: DoubleEndedIterator {
         R: Try<Output = B>;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: DoubleEndedIterator + ?Sized> DoubleEndedIteratorRefSpec for &mut I {
     default fn spec_rfold<B, F>(self, init: B, mut f: F) -> B
     where
@@ -432,6 +442,7 @@ impl<I: DoubleEndedIterator + ?Sized> DoubleEndedIteratorRefSpec for &mut I {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: DoubleEndedIterator> DoubleEndedIteratorRefSpec for &mut I {
     impl_fold_via_try_fold! { spec_rfold -> spec_try_rfold }
 

@@ -37,7 +37,6 @@ mod map_while;
 mod map_windows;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod peekable;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod rev;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod scan;
@@ -102,7 +101,7 @@ pub use self::{
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use self::map::Map;
+pub use self::{map::Map, rev::Rev};
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline
 /// under the conditions that

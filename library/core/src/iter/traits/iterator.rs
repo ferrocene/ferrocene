@@ -19,7 +19,7 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use super::super::{Cloned, Map, Sum};
+use super::super::{Cloned, DoubleEndedIterator, Map, Rev, Sum};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
@@ -3411,7 +3411,6 @@ pub trait Iterator {
     #[inline]
     #[doc(alias = "reverse")]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn rev(self) -> Rev<Self>
     where
         Self: Sized + DoubleEndedIterator,

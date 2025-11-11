@@ -194,7 +194,6 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_nth_back", since = "1.37.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         if self.advance_back_by(n).is_err() {
             return None;

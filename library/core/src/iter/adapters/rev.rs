@@ -65,7 +65,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         self.iter.nth_back(n)
     }
@@ -113,7 +112,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth_back(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         self.iter.nth(n)
     }

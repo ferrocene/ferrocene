@@ -89,8 +89,8 @@ def build_linkchecker(root):
             f.write("/src/tools/linkchecker/")
 
         # Avoid fetching the whole history
-        git(["fetch", "--depth=1", "origin", "master"])
-        git(["checkout", "master"])
+        git(["fetch", "--depth=1", "origin", "main"])
+        git(["checkout", "main"])
 
     if not bin.is_file():
         subprocess.run(["cargo", "build", "--release"], cwd=src, check=True)

@@ -328,7 +328,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
             where
                 Self: Sized,

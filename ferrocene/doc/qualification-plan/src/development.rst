@@ -153,7 +153,7 @@ Ferrocene developer is required to ensure that the concerns raised were
 adequately addressed.
 
 During this phase, CI performs quick checks on the pushed code as part of the
-commit workflow and the PR author can opt to run the full test suite by sending
+commit workflow, and the PR author can opt to run the full test suite by sending
 a command to the merge bot before the approval. When the command is sent, CI
 will perform the same checks it would perform before merging the PR but without
 performing the merge.
@@ -162,7 +162,7 @@ This can be done in the event that the Ferrocene developer wants to run the full
 test suite before the PR is approved in order to ensure that the PR will pass
 the test suite ahead of the review.
 
-Once the commit workflow successfully executes and the necessary positive
+Once the commit workflow successfully executes, and the necessary positive
 approval is left by a Ferrocene Reviewer, any Ferrocene developer can send a
 command to the bot to queue the PR for :ref:`dev-phase-queue`.
 

@@ -1,6 +1,5 @@
 mod accum;
 mod collect;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod double_ended;
 mod exact_size;
 mod iterator;
@@ -35,6 +34,7 @@ pub use self::{
 pub use self::{
     accum::Sum,
     collect::{Extend, FromIterator, IntoIterator},
+    double_ended::DoubleEndedIterator,
     exact_size::ExactSizeIterator,
     iterator::Iterator,
     marker::TrustedLen,

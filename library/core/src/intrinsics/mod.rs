@@ -1870,7 +1870,6 @@ pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cttz<T: Copy>(x: T) -> u32;
 
 /// Like `cttz`, but extra-unsafe as it returns `undef` when

@@ -1,18 +1,7 @@
 dist_server=https://static.rust-lang.org
-<<<<<<< HEAD
 artifacts_server=s3://ferrocene-ci-artifacts/ferrocene/dist
 artifacts_with_llvm_assertions_server=s3://ferrocene-ci-artifacts/ferrocene/dist
 git_merge_commit_email=87868125+bors-ferrocene[bot]@users.noreply.github.com
-||||||| 8401398e1f1
-artifacts_server=https://ci-artifacts.rust-lang.org/rustc-builds
-artifacts_with_llvm_assertions_server=https://ci-artifacts.rust-lang.org/rustc-builds-alt
-git_merge_commit_email=bors@rust-lang.org
-nightly_branch=master
-=======
-artifacts_server=https://ci-artifacts.rust-lang.org/rustc-builds
-artifacts_with_llvm_assertions_server=https://ci-artifacts.rust-lang.org/rustc-builds-alt
-git_merge_commit_email=bors@rust-lang.org
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 nightly_branch=main
 
 # The configuration above this comment is editable, and can be changed

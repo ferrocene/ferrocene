@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-||||||| 8401398e1f1
-=======
 use crate::clone::TrivialClone;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Destruct, PointeeSized, Unsize};

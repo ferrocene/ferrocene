@@ -220,7 +220,7 @@ fn sample_config() -> Config {
         adb_path: Default::default(),
         adb_test_dir: Default::default(),
         adb_device_status: Default::default(),
-        lldb_python_dir: Default::default(),
+        lldb: Default::default(),
         verbose: Default::default(),
         remote_test_client: Default::default(),
         compare_mode: Default::default(),

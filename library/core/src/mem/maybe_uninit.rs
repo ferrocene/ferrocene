@@ -1625,14 +1625,8 @@ impl<T: Clone> SpecFill<T> for [MaybeUninit<T>] {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: Copy> SpecFill<T> for [MaybeUninit<T>] {
-||||||| 8401398e1f1
-impl<T: Copy> SpecFill<T> for [MaybeUninit<T>] {
-=======
 impl<T: TrivialClone> SpecFill<T> for [MaybeUninit<T>] {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn spec_fill(&mut self, value: T) {
         // SAFETY: because `T` is `TrivialClone`, this is equivalent to calling
         // `T::clone` for every element. Notably, `TrivialClone` also implies

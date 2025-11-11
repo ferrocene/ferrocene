@@ -581,12 +581,8 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-||||||| 8401398e1f1
-=======
 use crate::clone::TrivialClone;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};

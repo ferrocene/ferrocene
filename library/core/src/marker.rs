@@ -17,12 +17,9 @@ pub use self::variance::{
 };
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cell::UnsafeCell;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 8401398e1f1
-=======
 use crate::clone::TrivialClone;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::Debug;
@@ -878,6 +875,7 @@ impl<T: PointeeSized> Clone for PhantomData<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[doc(hidden)]
 #[unstable(feature = "trivial_clone", issue = "none")]
 unsafe impl<T: ?Sized> TrivialClone for PhantomData<T> {}

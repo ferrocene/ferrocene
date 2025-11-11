@@ -6,12 +6,9 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 8401398e1f1
-=======
 use crate::clone::TrivialClone;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{exact_div, unchecked_sub};
@@ -5236,10 +5233,6 @@ impl [f64] {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-||||||| 8401398e1f1
-=======
 /// Copies `src` to `dest`.
 ///
 /// # Safety
@@ -5272,7 +5265,7 @@ const unsafe fn copy_from_slice_impl<T: Clone>(dest: &mut [T], src: &[T]) {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 trait CloneFromSpec<T> {
     fn spec_clone_from(&mut self, src: &[T]);
 }

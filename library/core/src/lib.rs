@@ -167,7 +167,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
+#![feature(marker_trait_attr)]
 #![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]

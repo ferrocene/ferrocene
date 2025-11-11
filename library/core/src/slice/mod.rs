@@ -55,7 +55,6 @@ pub(crate) mod index;
 mod iter;
 mod raw;
 mod rotate;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod specialize;
 
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
@@ -3795,7 +3794,6 @@ impl<T> [T] {
     /// ```
     #[doc(alias = "memset")]
     #[stable(feature = "slice_fill", since = "1.50.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fill(&mut self, value: T)
     where
         T: Clone,

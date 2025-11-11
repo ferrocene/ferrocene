@@ -402,13 +402,11 @@
 #![allow(clippy::not_unsafe_ptr_arg_deref)]
 
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Destruct, FnPtr, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
@@ -1416,7 +1414,6 @@ pub const unsafe fn swap<T>(x: *mut T, y: *mut T) {
 #[rustc_diagnostic_item = "ptr_swap_nonoverlapping"]
 #[rustc_allow_const_fn_unstable(const_eval_select)] // both implementations behave the same
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {
     ub_checks::assert_unsafe_precondition!(
         check_library_ub,
@@ -1461,7 +1458,6 @@ pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {
 
 /// Same behavior and safety conditions as [`swap_nonoverlapping`]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize) {
     let mut i = 0;
     while i < count {
@@ -1489,7 +1485,6 @@ const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize)
 // Don't let MIR inline this, because we really want it to keep its noalias metadata
 #[rustc_no_mir_inline]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn swap_chunk<const N: usize>(x: &mut MaybeUninit<[u8; N]>, y: &mut MaybeUninit<[u8; N]>) {
     let a = *x;
     let b = *y;
@@ -1498,7 +1493,6 @@ fn swap_chunk<const N: usize>(x: &mut MaybeUninit<[u8; N]>, y: &mut MaybeUninit<
 }
 
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize>) {
     // Same as `swap_nonoverlapping::<[u8; N]>`.
     unsafe fn swap_nonoverlapping_chunks<const N: usize>(
@@ -1536,7 +1530,10 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
             )+};
         }
         swap_prefix!(4 2 1);
+        #[cfg(not(feature = "ferrocene_certified"))]
         debug_assert_eq!(i, bytes);
+        #[cfg(feature = "ferrocene_certified")]
+        debug_assert!(i == bytes);
     }
 
     const CHUNK_SIZE: usize = size_of::<*const ()>();
@@ -1601,7 +1598,6 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
 #[rustc_const_stable(feature = "const_replace", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_replace"]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
     // SAFETY: the caller must guarantee that `dst` is valid to be
     // cast to a mutable reference (valid for writes, aligned, initialized),

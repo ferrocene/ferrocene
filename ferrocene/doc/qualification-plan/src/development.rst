@@ -119,9 +119,9 @@ humans. Technology like auto-complete (eg. Intellisense) or structured
 refactoring (eg. with Rust Analyzer) are permitted. However, bulk
 low-effort changes of questionable copyright or provenance, such as those
 created with generative AI such as LLMs, will be rejected. The Rust compiler
-team pursues a similar policy of rejecting 
+team pursues a similar policy of rejecting
 `low-effort changes <https://github.com/rust-lang/compiler-team/issues/893>`_,
-the Rust project is currently
+and the Rust project is currently
 `evaluating their stance on AI <https://rust-lang.zulipchat.com/#narrow/channel/392734-council/topic/AI.20policy/with/493978958>`_.
 
 Each time a new commit is pushed to the Ferrocene GitHub repository, the

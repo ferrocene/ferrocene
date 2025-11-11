@@ -12,8 +12,7 @@ all changes made to it are properly reviewed, are of adequate quality, and can
 be properly assessed through automated testing.
 
 This section describes the process for merging any change into the Ferrocene
-codebase while accomplishing the aforementioned goals. It applies to both code
-changes and documentation changes.
+codebase while accomplishing the aforementioned goals.
 
 Merge Requirements
 ------------------
@@ -24,7 +23,7 @@ There are four requirements for merging any change into the ``main`` and
 1. All changes must be proposed through a PR on the Ferrocene GitHub repository.
 
 2. At least one independent Ferrocene Reviewer must have approved the latest
-   revision of the code change and there must be no requests for changes.
+   revision of the PR, and there must be no requests for changes.
    Positive reviews for older revisions do not count. The following screenshot
    shows PR approval:
 

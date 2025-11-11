@@ -1,11 +1,5 @@
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ControlFlow, Try};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
-#[rustfmt::skip]
-use crate::ops::Try;
 
 /// An iterator able to yield elements from both ends.
 ///
@@ -360,7 +354,6 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_rfind", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,

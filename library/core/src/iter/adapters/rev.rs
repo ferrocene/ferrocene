@@ -87,7 +87,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -133,7 +132,6 @@ where
         self.iter.fold(init, f)
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,

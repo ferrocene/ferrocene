@@ -828,7 +828,6 @@ pub const fn swap<T>(x: &mut T, y: &mut T) {
 /// ```
 #[inline]
 #[stable(feature = "mem_take", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn take<T: Default>(dest: &mut T) -> T {
     replace(dest, T::default())
 }

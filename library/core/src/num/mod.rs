@@ -65,7 +65,6 @@ mod int_log10;
 mod int_sqrt;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) mod libm;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod nonzero;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod overflow_panic;
@@ -91,7 +90,6 @@ pub use error::ParseIntError;
 #[stable(feature = "try_from", since = "1.34.0")]
 pub use error::TryFromIntError;
 #[stable(feature = "generic_nonzero", since = "1.79.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use nonzero::NonZero;
 #[unstable(
     feature = "nonzero_internals",

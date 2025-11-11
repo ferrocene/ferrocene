@@ -690,7 +690,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_none(&self) -> bool {
         !self.is_some()
     }

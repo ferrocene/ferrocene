@@ -128,7 +128,6 @@ impl const Default for Nanoseconds {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct NonZeroU8Inner(u8 as u8 in 1..=0xff);
     pub struct NonZeroU16Inner(u16 as u16 in 1..=0xff_ff);
@@ -146,21 +145,18 @@ define_valid_range_type! {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff);
 }
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff_ffff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff_ffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff_ffff);
 }
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff_ffff_ffff_ffff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff_ffff_ffff_ffff);

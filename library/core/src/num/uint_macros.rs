@@ -152,7 +152,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn trailing_zeros(self) -> u32 {
             return intrinsics::cttz(self);
         }

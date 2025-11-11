@@ -6,6 +6,11 @@ use crate::num::NonZero;
 use crate::ops::{NeverShortCircuit, Try};
 use crate::ub_checks;
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ops::Try;
+
 /// Like a `Range<usize>`, but with a safety invariant that `start <= end`.
 ///
 /// This means that `end - start` cannot overflow, allowing some μoptimizations.
@@ -125,7 +130,6 @@ impl IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     const fn assume_range(&self) {
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
@@ -165,7 +169,6 @@ impl Iterator for IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,

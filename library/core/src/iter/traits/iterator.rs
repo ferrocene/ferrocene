@@ -19,7 +19,10 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use super::super::{Cloned, DoubleEndedIterator, Map, Rev, Sum};
+use {
+    super::super::{Cloned, DoubleEndedIterator, Map, Rev, Sum},
+    crate::ops::{ControlFlow, Try},
+};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
@@ -2461,7 +2464,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -2926,7 +2928,6 @@ pub trait Iterator {
     /// Note that `iter.find(f)` is equivalent to `iter.filter(f).next()`.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
@@ -4238,7 +4239,6 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
     {
         self.spec_fold(init, f)
     }
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -4249,8 +4249,8 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
 }
 
 /// Helper trait to specialize `fold` and `try_fold` for `&mut I where I: Sized`
-#[cfg(not(feature = "ferrocene_certified"))]
 trait IteratorRefSpec: Iterator {
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B;
@@ -4261,8 +4261,8 @@ trait IteratorRefSpec: Iterator {
         R: Try<Output = B>;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_fold<B, F>(self, init: B, mut f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,

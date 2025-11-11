@@ -50,7 +50,7 @@ following steps:
 
 * Perform licensing checks.
 * Run linters on the codebase.
-* Build the Ferrocene toolchain.
+* Checks the Ferrocene toolchain for errors.
 * Run the subset of tests most likely to fail due to a change.
 
 If this phase is successful, the Ferrocene CI infrastructure reports a pass in

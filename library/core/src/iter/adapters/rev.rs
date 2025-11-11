@@ -1,6 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -61,7 +60,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.iter.advance_back_by(n)
     }
@@ -110,7 +108,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.iter.advance_by(n)
     }

@@ -47,7 +47,6 @@ macro_rules! is_empty {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! len {
     ($self: ident) => {{
         if_zst!($self,
@@ -228,7 +227,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let advance = cmp::min(len!(self), n);
                 // SAFETY: By construction, `advance` does not exceed `self.len()`.

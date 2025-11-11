@@ -8,7 +8,6 @@ use crate::iter::{
     FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, TrustedRandomAccess,
     TrustedRandomAccessNoCoerce,
 };
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ControlFlow, Try};
@@ -147,7 +146,6 @@ where
 
     #[inline]
     #[rustc_inherit_overflow_checks]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         let skip_inner = self.n;
         let skip_and_advance = skip_inner.saturating_add(n);

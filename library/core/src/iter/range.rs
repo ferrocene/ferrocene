@@ -707,7 +707,6 @@ trait RangeIteratorImpl {
 
     // DoubleEndedIterator
     fn spec_next_back(&mut self) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth_back(&mut self, n: usize) -> Option<Self::Item>;
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 }
@@ -765,7 +764,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_nth_back(&mut self, n: usize) -> Option<A> {
         if let Some(minus_n) = Step::backward_checked(self.end.clone(), n) {
             if minus_n > self.start {
@@ -1019,7 +1017,6 @@ impl<A: Step> DoubleEndedIterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.spec_nth_back(n)
     }

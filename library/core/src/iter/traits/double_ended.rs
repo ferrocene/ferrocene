@@ -3,6 +3,11 @@ use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ControlFlow, Try};
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ops::Try;
+
 /// An iterator able to yield elements from both ends.
 ///
 /// Something that implements `DoubleEndedIterator` has one extra capability
@@ -231,7 +236,6 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,

@@ -7,7 +7,6 @@ use crate::iter::adapters::zip::try_get_unchecked;
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen, UncheckedIterator};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Try;
 
 // Ferrocene addition: imports for certified subset
@@ -36,7 +35,6 @@ impl<I> Cloned<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 fn clone_try_fold<T: Clone, Acc, R>(mut f: impl FnMut(Acc, T) -> R) -> impl FnMut(Acc, &T) -> R {
     move |acc, elt| f(acc, elt.clone())
 }
@@ -57,7 +55,6 @@ where
         self.it.size_hint()
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,

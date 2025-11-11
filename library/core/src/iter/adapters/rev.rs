@@ -2,7 +2,6 @@
 use crate::iter::{FusedIterator, TrustedLen};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Try;
 
 /// A double-ended iterator with the direction inverted.
@@ -73,7 +72,6 @@ where
         self.iter.nth_back(n)
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -123,7 +121,6 @@ where
         self.iter.nth(n)
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,

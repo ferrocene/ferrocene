@@ -1,3 +1,4 @@
+use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1706,6 +1707,10 @@ impl<T: PointeeSized> Clone for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> Copy for NonNull<T> {}
+
+#[doc(hidden)]
+#[unstable(feature = "trivial_clone", issue = "none")]
+unsafe impl<T: ?Sized> TrivialClone for NonNull<T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
 #[cfg(not(feature = "ferrocene_certified"))]

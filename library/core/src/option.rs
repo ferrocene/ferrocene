@@ -581,6 +581,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
@@ -2247,6 +2248,11 @@ where
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> crate::clone::UseCloned for Option<T> where T: crate::clone::UseCloned {}
+
+#[doc(hidden)]
+#[unstable(feature = "trivial_clone", issue = "none")]
+#[rustc_const_unstable(feature = "const_clone", issue = "142757")]
+unsafe impl<T> const TrivialClone for Option<T> where T: [const] TrivialClone + [const] Destruct {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]

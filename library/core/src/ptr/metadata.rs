@@ -1,6 +1,8 @@
 #![unstable(feature = "ptr_metadata", issue = "81513")]
 
 #[cfg(not(feature = "ferrocene_certified"))]
+use crate::clone::TrivialClone;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
@@ -245,6 +247,10 @@ impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
         *self
     }
 }
+
+#[cfg(not(feature = "ferrocene_certified"))]
+#[doc(hidden)]
+unsafe impl<Dyn: ?Sized> TrivialClone for DynMetadata<Dyn> {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Eq for DynMetadata<Dyn> {}

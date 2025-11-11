@@ -152,6 +152,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(std_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(temporary_niche_types))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(trivial_clone))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(trusted_fused))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(trusted_len))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(trusted_random_access))]

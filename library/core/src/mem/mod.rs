@@ -6,6 +6,8 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::clone::TrivialClone;
 use crate::marker::Destruct;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
@@ -1095,6 +1097,11 @@ impl<T> clone::Clone for Discriminant<T> {
         *self
     }
 }
+
+#[cfg(not(feature = "ferrocene_certified"))]
+#[doc(hidden)]
+#[unstable(feature = "trivial_clone", issue = "none")]
+unsafe impl<T> TrivialClone for Discriminant<T> {}
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -6,6 +6,7 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::borrow::{Borrow, BorrowMut};
+use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -24,6 +25,7 @@ use crate::mem::{self, MaybeUninit};
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
+use crate::ptr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
@@ -481,6 +483,10 @@ impl<T: Clone, const N: usize> Clone for [T; N] {
     }
 }
 
+#[doc(hidden)]
+#[unstable(feature = "trivial_clone", issue = "none")]
+unsafe impl<T: TrivialClone, const N: usize> TrivialClone for [T; N] {}
+
 trait SpecArrayClone: Clone {
     fn clone<const N: usize>(array: &[Self; N]) -> [Self; N];
 }
@@ -492,10 +498,12 @@ impl<T: Clone> SpecArrayClone for T {
     }
 }
 
-impl<T: Copy> SpecArrayClone for T {
+impl<T: TrivialClone> SpecArrayClone for T {
     #[inline]
     fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
-        *array
+        // SAFETY: `TrivialClone` implies that this is equivalent to calling
+        // `Clone` on every element.
+        unsafe { ptr::read(array) }
     }
 }
 

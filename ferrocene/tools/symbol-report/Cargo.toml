@@ -1,6 +1,6 @@
 [package]
 name = "symbol-report"
-edition = "2024"
+edition.workspace = true
 
 [dependencies]
 build_helper = { path = "../../../src/build_helper" }

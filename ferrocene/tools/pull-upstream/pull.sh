@@ -11,9 +11,7 @@ TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 X_HELP=src/etc/xhelp
 
-# We handle some lockfiles separately from upstream:
-# - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
-# - "src/bootstrap/Cargo.lock" because we have custom changes to bootstrap
+# We handle some lockfiles separately from upstream, to allow for custom dependencies.
 #
 # NOTE: consider modifying this array when adding to the list:
 # https://github.com/ferrocene/ferrocene/blob/d3f1e45/src/bootstrap/src/ferrocene/dist.rs#L119-L125
@@ -314,6 +312,16 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
     commit_if_modified "$lock" "update ${lock} to match ${manifest}"
 done
+
+# We keep lockfile for Ferrocene tools fresh
+if [ "${upstream_branch}" == "master" ]; then
+    prefix="ferrocene/tools"
+    lock="${prefix}/Cargo.lock"
+    manifest="${prefix}/Cargo.toml"
+    echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
+    cargo update --manifest-path "${manifest}"
+    commit_if_modified "${lock}" "update ${lock} to latest semver-compatible crates"
+fi
 
 # We expose additional commands for `x.py` which affects the completions file generation,
 # so we just run the command to regenerate those in case they need updating as this usually

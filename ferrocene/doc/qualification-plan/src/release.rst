@@ -126,6 +126,15 @@ scheduled, to restart a scheduled release that failed, or for testing (only for
 **dev** environment). Only the initiation of the release process is manual in
 this case; all the other steps are fully automated.
 
+To manually start a release, go to
+`this page <https://github.com/ferrocene/ferrocene/actions/workflows/release.yml>`_
+and click the "Run workflow" button.
+You will need to choose which git ref you want to release
+(a branch name, a tag name, a short commit hash, a long commit hash, etc...)
+and which environment in which to run the release.
+You will also be able to tweak how the release is run with the available options.
+Once you click the green "Run workflow" button, a new job will be queued.
+
 If the release targets the **prod** environment, an approval from a Release
 Manager is required. A :ref:`release manager <organization:Release Managers>`
 needs to approve the release in the GitHub UI before the release can proceed.

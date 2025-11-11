@@ -13,7 +13,7 @@ use crate::{fmt, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::ops::{Deref as _, DerefMut as _, IndexRange};
+use crate::ops::{Deref as _, DerefMut as _, IndexRange, Try};
 
 mod iter_inner;
 
@@ -265,7 +265,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,

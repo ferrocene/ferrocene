@@ -11,7 +11,6 @@ use super::TrustedLen;
 use crate::array;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::{self, Ordering};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
@@ -20,7 +19,7 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use {
-    super::super::{Cloned, DoubleEndedIterator, Map, Rev, Sum},
+    super::super::{Cloned, DoubleEndedIterator, Map, Rev, Skip, Sum},
     crate::ops::{ControlFlow, Try},
 };
 
@@ -312,7 +311,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_advance_by", reason = "recently added", issue = "77404")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         /// Helper trait to specialize `advance_by` via `try_fold` for `Sized` iterators.
         trait SpecAdvanceBy {
@@ -390,7 +388,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.advance_by(n).ok()?;
         self.next()
@@ -1346,7 +1343,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn skip(self, n: usize) -> Skip<Self>
     where
         Self: Sized,

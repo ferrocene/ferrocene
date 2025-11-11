@@ -101,7 +101,6 @@ impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -150,6 +149,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// ```
     #[inline]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_empty(&self) -> bool {
         !(self.start < self.end)
     }
@@ -853,7 +853,6 @@ pub trait RangeBounds<T: ?Sized> {
     /// ```
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,

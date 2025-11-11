@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # From the root of this repository, build with
-# `docker build --tag ubuntu-20 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
+# `docker build --tag ferrocene/ubuntu:20.04 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
 
 # This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
 # container is below (FROM ubuntu:20.04). This is needed because the version of
@@ -45,6 +45,10 @@ RUN <<-EOF
     apt-get update
     # Update all the dependencies
     apt-get upgrade -y
+
+    # Update Git to support ssh signing
+    apt install software-properties-common --yes
+    add-apt-repository ppa:git-core/ppa --yes
 
     # Install required packages
     apt-install \

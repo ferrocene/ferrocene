@@ -45,7 +45,7 @@ a convenience for developers, and doesn't perform any check not performed in
 :ref:`ci-phase-full`.
 
 This phase is triggered whenever a new PR is created, or a new commit is pushed
-under a PR. Github Actions starts the ``commit`` workflow. This workflow performs the
+under a PR. Github Actions starts the ``commit`` workflow. This workflow performs at least the
 following steps:
 
 * Perform licensing checks.

@@ -14,7 +14,6 @@ use crate::iter::{
 use crate::marker::PhantomData;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -24,7 +23,9 @@ use crate::{cmp, fmt};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use crate::{
+    cmp,
     iter::{TrustedLen, UncheckedIterator},
+    mem,
     mem::SizedTypeProperties,
 };
 

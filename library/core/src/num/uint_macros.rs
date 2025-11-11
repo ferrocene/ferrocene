@@ -2206,7 +2206,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[rustc_const_stable(feature = "const_saturating_int_methods", since = "1.47.0")]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn saturating_add(self, rhs: Self) -> Self {
             intrinsics::saturating_add(self, rhs)
         }

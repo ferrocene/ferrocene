@@ -4,7 +4,6 @@ use crate::intrinsics::transmute_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccessNoCoerce};
 use crate::mem::{ManuallyDrop, MaybeUninit};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
@@ -289,7 +288,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_by(n)
     }

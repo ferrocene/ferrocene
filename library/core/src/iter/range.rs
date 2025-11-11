@@ -7,7 +7,6 @@ use crate::ascii::Char as AsciiChar;
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::net::{Ipv4Addr, Ipv6Addr};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, Try};
@@ -705,7 +704,6 @@ trait RangeIteratorImpl {
     fn spec_next(&mut self) -> Option<Self::Item>;
     #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth(&mut self, n: usize) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 
     // DoubleEndedIterator
@@ -746,7 +744,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -948,7 +945,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_by(n)
     }

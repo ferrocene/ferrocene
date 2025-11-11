@@ -3089,7 +3089,6 @@ pub const fn minnumf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minnumf32(x: f32, y: f32) -> f32;
 
 /// Returns the minimum (IEEE 754-2008 minNum) of two `f64` values.
@@ -3235,7 +3234,6 @@ pub const fn maxnumf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn maxnumf32(x: f32, y: f32) -> f32;
 
 /// Returns the maximum (IEEE 754-2008 maxNum) of two `f64` values.

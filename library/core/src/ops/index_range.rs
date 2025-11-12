@@ -1,14 +1,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{NeverShortCircuit, Try};
 use crate::ub_checks;
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
-#[rustfmt::skip]
-use crate::ops::Try;
 
 /// Like a `Range<usize>`, but with a safety invariant that `start <= end`.
 ///
@@ -159,7 +153,6 @@ impl Iterator for IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }

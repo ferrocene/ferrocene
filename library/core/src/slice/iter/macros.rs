@@ -37,7 +37,6 @@ macro_rules! if_zst {
 }
 
 // Inlining is_empty and len makes a huge performance difference
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! is_empty {
     ($self: ident) => {
         if_zst!($self,
@@ -240,7 +239,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn fold<B, F>(self, init: B, mut f: F) -> B
                 where
                     F: FnMut(B, Self::Item) -> B,

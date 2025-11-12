@@ -78,7 +78,6 @@ where
         self.iter.try_rfold(init, f)
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,

@@ -93,7 +93,6 @@ impl<I: fmt::Debug, F> fmt::Debug for Map<I, F> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 fn map_fold<T, B, Acc>(
     mut f: impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> Acc,
@@ -134,7 +133,6 @@ where
         self.iter.try_fold(init, map_try_fold(&mut self.f, g))
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,

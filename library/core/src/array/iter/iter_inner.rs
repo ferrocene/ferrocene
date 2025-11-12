@@ -2,7 +2,6 @@
 
 use crate::mem::MaybeUninit;
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{IndexRange, NeverShortCircuit, Try};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, iter};
@@ -10,10 +9,7 @@ use crate::{fmt, iter};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{
-    iter,
-    ops::{IndexRange, Try},
-};
+use crate::iter;
 
 #[allow(private_bounds)]
 trait PartialDrop {
@@ -210,7 +206,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn fold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }

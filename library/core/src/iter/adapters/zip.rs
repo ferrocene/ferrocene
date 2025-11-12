@@ -100,7 +100,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -146,7 +145,6 @@ trait ZipImpl<A, B> {
     where
         A: DoubleEndedIterator + ExactSizeIterator,
         B: DoubleEndedIterator + ExactSizeIterator;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc;
@@ -253,7 +251,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -667,7 +664,6 @@ unsafe impl<I: Iterator + TrustedRandomAccessNoCoerce> SpecTrustedRandomAccess f
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecFold: Iterator {
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
@@ -675,7 +671,6 @@ trait SpecFold: Iterator {
         F: FnMut(B, Self::Item) -> B;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     // Adapted from default impl from the Iterator trait
     #[inline]

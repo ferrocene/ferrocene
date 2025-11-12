@@ -19,7 +19,7 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use {
-    super::super::{Cloned, DoubleEndedIterator, Map, Rev, Skip, Sum},
+    super::super::{Cloned, DoubleEndedIterator, Map, Rev, Skip, Sum, Zip},
     crate::ops::{ControlFlow, Try},
 };
 
@@ -629,7 +629,6 @@ pub trait Iterator {
     /// [`zip`]: crate::iter::zip
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,

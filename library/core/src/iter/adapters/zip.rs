@@ -24,7 +24,6 @@ pub struct Zip<A, B> {
     len: usize,
 }
 impl<A: Iterator, B: Iterator> Zip<A, B> {
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(in crate::iter) fn new(a: A, b: B) -> Zip<A, B> {
         ZipImpl::new(a, b)
     }

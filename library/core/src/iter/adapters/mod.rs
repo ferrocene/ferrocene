@@ -100,7 +100,7 @@ pub use self::{
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use self::{map::Map, rev::Rev, skip::Skip};
+pub use self::{map::Map, rev::Rev, skip::Skip, zip::Zip};
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline
 /// under the conditions that

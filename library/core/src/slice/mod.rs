@@ -20,7 +20,6 @@ use crate::ops::{OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeInc
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::simd::{self, Simd};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hint, ptr, range, slice};
@@ -28,7 +27,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::ptr;
+use crate::{intrinsics::unchecked_sub, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -108,7 +107,7 @@ pub use raw::{from_raw_parts, from_raw_parts_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use iter::Windows;
+pub use iter::{Chunks, Windows};
 
 /// Calculates the direction and split point of a one-sided range.
 ///
@@ -1197,7 +1196,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks(&self, chunk_size: usize) -> Chunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         Chunks::new(self, chunk_size)
@@ -2009,7 +2007,6 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at(&self, mid: usize) -> (&[T], &[T]) {
         match self.split_at_checked(mid) {
             Some(pair) => pair,
@@ -2097,7 +2094,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T]) {
         // FIXME(const-hack): the const function `from_raw_parts` is used to make this
         // function const; previously the implementation used
@@ -2214,7 +2210,6 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "split_at_checked", since = "1.80.0")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_checked(&self, mid: usize) -> Option<(&[T], &[T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which

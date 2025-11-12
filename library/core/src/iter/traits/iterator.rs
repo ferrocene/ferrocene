@@ -2635,7 +2635,6 @@ pub trait Iterator {
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,

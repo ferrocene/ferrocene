@@ -158,7 +158,6 @@ macro_rules! saturating_integer_sum_product {
     );
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! float_sum_product {
     ($($a:ident)*) => ($(
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
@@ -173,6 +172,7 @@ macro_rules! float_sum_product {
         }
 
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl Product for $a {
             fn product<I: Iterator<Item=Self>>(iter: I) -> Self {
                 iter.fold(
@@ -195,6 +195,7 @@ macro_rules! float_sum_product {
         }
 
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<'a> Product<&'a $a> for $a {
             fn product<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
                 iter.fold(
@@ -211,7 +212,6 @@ macro_rules! float_sum_product {
 integer_sum_product! { i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize }
 #[cfg(not(feature = "ferrocene_certified"))]
 saturating_integer_sum_product! { u8 u16 u32 u64 u128 usize }
-#[cfg(not(feature = "ferrocene_certified"))]
 float_sum_product! { f16 f32 f64 f128 }
 
 #[stable(feature = "iter_arith_traits_result", since = "1.16.0")]

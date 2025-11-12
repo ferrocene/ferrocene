@@ -298,7 +298,6 @@ pub trait DoubleEndedIterator: Iterator {
     #[doc(alias = "foldr")]
     #[inline]
     #[stable(feature = "iter_rfold", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn rfold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,

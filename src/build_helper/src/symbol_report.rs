@@ -19,7 +19,9 @@ impl SymbolReport {
     }
 
     pub fn to_qualified_fn_list(&self) -> QualifiedFnList {
-        QualifiedFnList(self.symbols.iter().map(|f| f.qualified_name.clone()).collect())
+        let mut a = self.symbols.iter().map(|f| f.qualified_name.clone()).collect::<Vec<_>>();
+        a.sort_unstable();
+        QualifiedFnList(a)
     }
 }
 

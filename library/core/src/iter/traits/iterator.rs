@@ -2048,7 +2048,6 @@ pub trait Iterator {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "if you really need to exhaust the iterator, consider `.for_each(drop)` instead"]
     #[rustc_diagnostic_item = "iterator_collect_fn"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn collect<B: FromIterator<Self::Item>>(self) -> B
     where
         Self: Sized,

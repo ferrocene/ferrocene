@@ -12,10 +12,10 @@ This page contains the information relevant to Ferrous Systems employees
 working on Ferrocene.
 
 .. note::
-    
+
     QNX only supports :target:`x86_64-unknown-linux-gnu` and
     :target:`x86_64-pc-windows-msvc` as host platforms.
-    
+
     QNX does not support :ref:`aarch64-apple-darwin` as a host platform.
 
 
@@ -35,7 +35,7 @@ An InstallShield installer will run as administrator. Choose a location
 to install QNX, we use ``D:\qnx`` for the rest of this guide.
 
 .. note::
-    
+
     If you are uncomfortable with the Windows GUI, you may instead
     follow the Linux instructions (with minor modifications) below using the
     ``D:\qnx\QNX Software Center\qnxsoftwarecenter_clt.bat`` in place of
@@ -97,7 +97,7 @@ below example, the downloaded ``.run`` file has been saved as
 
 
 .. note::
-    
+
     If you are uncomfortable with the Linux command line, a GUI is available.
     You may instead run `./qnx/qnxsoftwarecenter/qnxsoftwarecenter` and
     follow the Windows instructions above, starting from "Log in, if
@@ -106,7 +106,7 @@ below example, the downloaded ``.run`` file has been saved as
 Then, install QNX 7.1.0 BuildID 472:
 
 .. code-block::
-    
+
     LICENSE_KEY="FILL_ME_IN"
     QNX_USER="FILL_ME_IN"
     QNX_PASSWORD="FILL_ME_IN"
@@ -141,7 +141,7 @@ If everything is working, the output of ``qcc`` should be:
     cc: no files to process
 
 .. note::
-    
+
     You need to source this in any shell you wish to use QNX in. You may wish
     to add ``source $HOME/qnx/qnx710/qnxsdp-env.sh`` to your ``~/.bashrc``
 
@@ -158,7 +158,7 @@ provided by QNX for our CI/CD.
 
 .. warning::
     This license may not be used for individual development. Ferrocene also
-    has several individual licenses available for internally for developers, to
+    has several individual licenses available for developers. To
     obtain one, ask your manager.
 
 To create the deployment, first, ensure you have a `myQNX
@@ -181,7 +181,7 @@ Install the QNX Software Center:
 Create a deployment containing Linux and Windows toolchains:
 
 .. code-block::
-    
+
     LICENSE_KEY="FILL_ME_IN"
     QNX_USER="FILL_ME_IN"
     QNX_PASSWORD="FILL_ME_IN"

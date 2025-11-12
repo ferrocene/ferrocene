@@ -29,7 +29,7 @@ impl Step for UpdateCertifiedCoreSymbols {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
-        let symbol_report_path = builder.ensure(CertifiedCoreSymbols { host: target, target });
+        let symbol_report_path = builder.ensure(CertifiedCoreSymbols::new(builder, target));
 
         if builder.config.dry_run() {
             return;

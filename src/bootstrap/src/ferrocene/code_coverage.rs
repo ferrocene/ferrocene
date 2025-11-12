@@ -166,10 +166,8 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 
     builder.info("Listing symbols for the certified libcore subset");
-    let symbol_report = builder.ensure(CertifiedCoreSymbols {
-        host: builder.config.host_target,
-        target: builder.config.host_target,
-    });
+    let symbol_report =
+        builder.ensure(CertifiedCoreSymbols::new(builder, builder.config.host_target));
 
     let html_report = builder.ensure(CoverageReport {
         certified_target: builder.config.host_target.certified_equivalent(),

@@ -10,9 +10,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct UpdateCertifiedCoreSymbols {
-    host: TargetSelection,
-}
+pub(crate) struct UpdateCertifiedCoreSymbols;
 
 pub(crate) const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.json";
 
@@ -22,16 +20,21 @@ impl Step for UpdateCertifiedCoreSymbols {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.alias("update-certified-core-symbols")
+        run.path(TRACKED_FILE).alias("update-certified-core-symbols")
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(UpdateCertifiedCoreSymbols { host: run.build_triple() });
+        run.builder.ensure(UpdateCertifiedCoreSymbols);
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let symbol_report_path =
-            builder.ensure(CertifiedCoreSymbols { host: self.host, target: self.host });
+        let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
+        let symbol_report_path = builder.ensure(CertifiedCoreSymbols { host: target, target });
+
+        if builder.config.dry_run() {
+            return;
+        }
+
         let symbol_report_content = fs::read_to_string(&symbol_report_path).unwrap();
         let symbol_report = serde_json::from_str::<SymbolReport>(&symbol_report_content).unwrap();
 

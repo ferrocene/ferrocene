@@ -206,7 +206,6 @@ impl_nonzero_auto_trait!(Unpin);
 impl_nonzero_auto_trait!(UnwindSafe);
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Clone for NonZero<T>
 where
     T: ZeroablePrimitive,
@@ -222,7 +221,6 @@ where
 impl<T> UseCloned for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Copy for NonZero<T> where T: ZeroablePrimitive {}
 
 #[doc(hidden)]

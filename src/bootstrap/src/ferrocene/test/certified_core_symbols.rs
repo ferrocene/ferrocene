@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::path::Path;
-use std::process;
 
 use build_helper::diff::diff_text;
 use build_helper::symbol_report::{QualifiedFnList, SymbolReport};
@@ -13,9 +12,7 @@ use crate::ferrocene::run::{self, CERTIFIED_CORE_SYMBOLS_ALIAS, update_certified
 use crate::ferrocene::tool::SYMBOL_PATH;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct CertifiedCoreSymbols {
-    host: TargetSelection,
-}
+pub(crate) struct CertifiedCoreSymbols;
 
 impl Step for CertifiedCoreSymbols {
     type Output = ();
@@ -27,10 +24,14 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CertifiedCoreSymbols { host: run.target });
+        run.builder.ensure(CertifiedCoreSymbols);
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
+        let actual_symbol_report_path =
+            builder.ensure(run::CertifiedCoreSymbols { host: target, target });
+
         if builder.config.dry_run() {
             return;
         }
@@ -41,8 +42,6 @@ impl Step for CertifiedCoreSymbols {
         let expected = serde_json::from_str::<QualifiedFnList>(&expected_content).unwrap();
 
         // generate the actual list of qualified functions
-        let actual_symbol_report_path =
-            builder.ensure(run::CertifiedCoreSymbols { host: self.host, target: self.host });
         let actual_symbol_report_content = builder.read(&actual_symbol_report_path);
         let actual_symbol_report =
             serde_json::from_str::<SymbolReport>(&actual_symbol_report_content).unwrap();
@@ -50,22 +49,22 @@ impl Step for CertifiedCoreSymbols {
 
         // compare the two
         if actual == expected {
-            eprintln!("The certified core symbol report is up to date.")
+            builder.info(&format!("The certified core symbol report is up to date."));
         } else {
-            eprintln!(
+            builder.info(&format!(
                 "Diff of {} and {}:",
                 expected_path.display(),
                 actual_symbol_report_path.display()
-            );
+            ));
 
             let actual_content = serde_json::to_string_pretty(&actual).unwrap();
             diff_text(&expected_content, &actual_content);
 
-            eprintln!(
+            builder.info(&format!(
                 "The certified core symbol report is out of date. \
                 Run `./x run update-certified-core-symbols` to update it."
-            );
-            process::exit(-1);
+            ));
+            crate::exit!(1);
         }
     }
 }

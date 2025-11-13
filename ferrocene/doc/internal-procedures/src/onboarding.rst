@@ -75,7 +75,7 @@ CircleCI access
 To authenticate with CircleCI, navigate to
 `Login with GitHub <https://circleci.com/authentication/login?f=gho>`_.
 
-Once you have done so, you can access the Ferrocene project on CircleCI `here
+Once you have done so, you can access `the Ferrocene project on CircleCI
 <https://app.circleci.com/pipelines/github/ferrocene/ferrocene>`_.
 
 If you cannot access the page above, make sure you have **write** access to the

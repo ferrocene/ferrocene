@@ -862,7 +862,7 @@ impl<T: CloneFromCell> Cell<T> {
 /// See the [module-level documentation](self) for more.
 #[rustc_diagnostic_item = "RefCell"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 pub struct RefCell<T: ?Sized> {
     borrow: Cell<BorrowCounter>,
     // Stores the location of the earliest currently active borrow.
@@ -965,9 +965,7 @@ const fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
 // explicitly check for overflow and underflow in order to avoid unsafety, or at
 // least behave correctly in the event that overflow or underflow happens (e.g.,
 // see BorrowRef::new).
-#[cfg(not(feature = "ferrocene_certified"))]
 type BorrowCounter = isize;
-#[cfg(not(feature = "ferrocene_certified"))]
 const UNUSED: BorrowCounter = 0;
 
 #[inline(always)]
@@ -982,7 +980,6 @@ const fn is_reading(x: BorrowCounter) -> bool {
     x > UNUSED
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> RefCell<T> {
     /// Creates a new `RefCell` containing `value`.
     ///
@@ -1020,6 +1017,7 @@ impl<T> RefCell<T> {
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_inner(self) -> T {
         // Since this function takes `self` (the `RefCell`) by value, the
         // compiler statically verifies that it is not currently borrowed.
@@ -1049,6 +1047,7 @@ impl<T> RefCell<T> {
     #[track_caller]
     #[rustc_confusables("swap")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn replace(&self, t: T) -> T {
         mem::replace(&mut self.borrow_mut(), t)
     }
@@ -1072,6 +1071,7 @@ impl<T> RefCell<T> {
     #[inline]
     #[stable(feature = "refcell_replace_swap", since = "1.35.0")]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
         let mut_borrow = &mut *self.borrow_mut();
         let replacement = f(mut_borrow);
@@ -1101,6 +1101,7 @@ impl<T> RefCell<T> {
     #[inline]
     #[stable(feature = "refcell_swap", since = "1.24.0")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn swap(&self, other: &Self) {
         mem::swap(&mut *self.borrow_mut(), &mut *other.borrow_mut())
     }

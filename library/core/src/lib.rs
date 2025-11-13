@@ -211,8 +211,11 @@
 // not-alphabetical-end
 //
 // Ferrocene lints/features:
-#![allow(unused_attributes)]
-#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+#![cfg_attr(
+    feature = "ferrocene_certified",
+    expect(rustdoc::broken_intra_doc_links),
+    expect(unused_attributes)
+)]
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
 

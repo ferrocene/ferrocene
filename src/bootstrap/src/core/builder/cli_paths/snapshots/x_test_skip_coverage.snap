@@ -1,7 +1,17 @@
 ---
 source: src/bootstrap/src/core/builder/cli_paths/tests.rs
+assertion_line: 68
 expression: test --skip=coverage
 ---
+[Test] bootstrap::ferrocene::test::TraceabilityMatrixTool
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::ferrocene/tools/traceability-matrix})
+[Test] bootstrap::ferrocene::test::SelfTest
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::ferrocene/tools/self-test})
+[Test] bootstrap::ferrocene::test::GenerateTarball
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::ferrocene/tools/generate-tarball})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/tidy})

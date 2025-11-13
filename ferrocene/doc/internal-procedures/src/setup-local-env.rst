@@ -23,6 +23,9 @@ Rust, as well as the following:
 :target-with-tuple:`x86_64-unknown-linux-gnu`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Ubuntu
+++++++
+
 On Ubuntu 24.10, install the software requirements by running:
 
 .. code-block:: bash
@@ -35,7 +38,13 @@ On Ubuntu 24.10, install the software requirements by running:
    On versions earlier than Ubuntu 24.10 the ``awscli`` package is not newer than
    2.9.0, and should not be used.
 
+Other linux distribution
+++++++++++++++++++++++++
+
 To install the requirements on other distributions, adapt the command for the relevant package manager and any modified package names.
+
+Arch
+''''
 
 For example, on Arch Linux ``awscli`` can be obtained from the
 `AUR <https://aur.archlinux.org/packages/aws-cli-v2>`_, and the remaining packages
@@ -44,6 +53,13 @@ from the official repositories:
 .. code-block:: bash
 
    sudo pacman -S ninja bzip2 cmake gcc uv
+
+Fedora
+''''''
+
+.. code-block:: bash
+
+   sudo dnf install awscli cmake g++ gcc ninja-build zlib-devel
 
 :target-with-tuple:`aarch64-apple-darwin`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

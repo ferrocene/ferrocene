@@ -49,7 +49,6 @@ impl_float_to_int!(f128 => u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i1
 // Conversion traits for primitive integer and float types
 // Conversions T -> T are covered by a blanket impl and therefore excluded
 // Some conversions from and to usize/isize are not implemented due to portability concerns
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! impl_from {
     (bool => $Int:ty $(,)?) => {
         impl_from!(
@@ -91,17 +90,11 @@ macro_rules! impl_from {
 }
 
 // boolean -> integer
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => u8);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => u16);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => u32);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => u64);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => u128);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => usize);
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(bool => i8);

@@ -299,7 +299,6 @@ macro impl_atomic_primitive(
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicBool(bool), size("8"), align(1));
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicI8(i8), size("8"), align(1));
@@ -395,7 +394,6 @@ const EMULATE_ATOMIC_BOOL: bool = cfg!(any(
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AtomicBool"]
 #[repr(C, align(1))]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct AtomicBool {
     v: UnsafeCell<u8>,
 }
@@ -414,7 +412,6 @@ impl Default for AtomicBool {
 // Send is implicitly implemented for AtomicBool.
 #[cfg(target_has_atomic_load_store = "8")]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl Sync for AtomicBool {}
 
 /// A raw pointer type which can be safely shared between threads.
@@ -547,7 +544,6 @@ pub enum Ordering {
 pub const ATOMIC_BOOL_INIT: AtomicBool = AtomicBool::new(false);
 
 #[cfg(target_has_atomic_load_store = "8")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl AtomicBool {
     /// Creates a new `AtomicBool`.
     ///
@@ -609,6 +605,7 @@ impl AtomicBool {
     #[inline]
     #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn from_ptr<'a>(ptr: *mut bool) -> &'a AtomicBool {
         // SAFETY: guaranteed by the caller
         unsafe { &*ptr.cast() }
@@ -631,6 +628,7 @@ impl AtomicBool {
     /// ```
     #[inline]
     #[stable(feature = "atomic_access", since = "1.15.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_mut(&mut self) -> &mut bool {
         // SAFETY: the mutable reference guarantees unique ownership.
         unsafe { &mut *(self.v.get() as *mut bool) }
@@ -652,6 +650,7 @@ impl AtomicBool {
     #[inline]
     #[cfg(target_has_atomic_equal_alignment = "8")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn from_mut(v: &mut bool) -> &mut Self {
         // SAFETY: the mutable reference guarantees unique ownership, and
         // alignment of both `bool` and `Self` is 1.
@@ -687,6 +686,7 @@ impl AtomicBool {
     /// ```
     #[inline]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_mut_slice(this: &mut [Self]) -> &mut [bool] {
         // SAFETY: the mutable reference guarantees unique ownership.
         unsafe { &mut *(this as *mut [Self] as *mut [bool]) }
@@ -712,6 +712,7 @@ impl AtomicBool {
     #[inline]
     #[cfg(target_has_atomic_equal_alignment = "8")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn from_mut_slice(v: &mut [bool]) -> &mut [Self] {
         // SAFETY: the mutable reference guarantees unique ownership, and
         // alignment of both `bool` and `Self` is 1.
@@ -734,6 +735,7 @@ impl AtomicBool {
     #[inline]
     #[stable(feature = "atomic_access", since = "1.15.0")]
     #[rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_inner(self) -> bool {
         self.v.into_inner() != 0
     }
@@ -819,6 +821,7 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn swap(&self, val: bool, order: Ordering) -> bool {
         if EMULATE_ATOMIC_BOOL {
             if val { self.fetch_or(true, order) } else { self.fetch_and(false, order) }
@@ -887,6 +890,7 @@ impl AtomicBool {
     )]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn compare_and_swap(&self, current: bool, new: bool, order: Ordering) -> bool {
         match self.compare_exchange(current, new, order, strongest_failure_ordering(order)) {
             Ok(x) => x,
@@ -948,6 +952,7 @@ impl AtomicBool {
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn compare_exchange(
         &self,
         current: bool,
@@ -1043,6 +1048,7 @@ impl AtomicBool {
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn compare_exchange_weak(
         &self,
         current: bool,
@@ -1099,6 +1105,7 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fetch_and(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_and(self.v.get(), val as u8, order) != 0 }
@@ -1141,6 +1148,7 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fetch_nand(&self, val: bool, order: Ordering) -> bool {
         // We can't use atomic_nand here because it can result in a bool with
         // an invalid value. This happens because the atomic operation is done
@@ -1193,6 +1201,7 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fetch_or(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_or(self.v.get(), val as u8, order) != 0 }
@@ -1234,6 +1243,7 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fetch_xor(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_xor(self.v.get(), val as u8, order) != 0 }
@@ -1271,6 +1281,7 @@ impl AtomicBool {
     #[stable(feature = "atomic_bool_fetch_not", since = "1.81.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fetch_not(&self, order: Ordering) -> bool {
         self.fetch_xor(true, order)
     }
@@ -1309,6 +1320,7 @@ impl AtomicBool {
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_never_returns_null_ptr]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_ptr(&self) -> *mut bool {
         self.v.get().cast()
     }
@@ -1362,6 +1374,7 @@ impl AtomicBool {
     #[stable(feature = "atomic_fetch_update", since = "1.53.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fetch_update<F>(
         &self,
         set_order: Ordering,
@@ -1433,6 +1446,7 @@ impl AtomicBool {
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn try_update(
         &self,
         set_order: Ordering,
@@ -1491,6 +1505,7 @@ impl AtomicBool {
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn update(
         &self,
         set_order: Ordering,

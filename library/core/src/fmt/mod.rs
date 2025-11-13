@@ -6,26 +6,18 @@
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 0b329f801a0
-=======
 use crate::hint::assert_unchecked;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PhantomData, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::fmt as numfmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Deref;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::{iter, result, str};
-||||||| 0b329f801a0
-use crate::{iter, result, str};
-=======
 use crate::ptr::NonNull;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{iter, mem, result, str};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod builders;
@@ -761,6 +753,7 @@ pub struct Arguments<'a> {
 #[doc(hidden)]
 #[rustc_diagnostic_item = "FmtArgumentsNew"]
 #[unstable(feature = "fmt_internals", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Arguments<'a> {
     // SAFETY: The caller must ensure that the provided template and args encode a valid
     // fmt::Arguments, as documented above.
@@ -1678,22 +1671,12 @@ pub trait UpperExp: PointeeSized {
 /// ```
 ///
 /// [`write!`]: crate::write!
-#[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn write(output: &mut dyn Write, args: Arguments<'_>) -> Result {
-    let mut formatter = Formatter::new(output, FormattingOptions::new());
-    let mut idx = 0;
-||||||| 0b329f801a0
-pub fn write(output: &mut dyn Write, args: Arguments<'_>) -> Result {
-    let mut formatter = Formatter::new(output, FormattingOptions::new());
-    let mut idx = 0;
-=======
+#[stable(feature = "rust1", since = "1.0.0")]
 pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
     if let Some(s) = fmt.as_str() {
         return output.write_str(s);
     }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     let mut template = fmt.template;
     let args = fmt.args;
@@ -1792,95 +1775,11 @@ pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
                 }
             }
 
-<<<<<<< HEAD
-    // There can be only one trailing string piece left.
-    if let Some(piece) = args.pieces.get(idx) {
-        formatter.buf.write_str(*piece)?;
-    }
-
-    Ok(())
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-unsafe fn run(fmt: &mut Formatter<'_>, arg: &rt::Placeholder, args: &[rt::Argument<'_>]) -> Result {
-    let (width, precision) =
-        // SAFETY: arg and args come from the same Arguments,
-        // which guarantees the indexes are always within bounds.
-        unsafe { (getcount(args, &arg.width), getcount(args, &arg.precision)) };
-
-    let options = FormattingOptions { flags: arg.flags, width, precision };
-
-    // Extract the correct argument
-    debug_assert!(arg.position < args.len());
-    // SAFETY: arg and args come from the same Arguments,
-    // which guarantees its index is always within bounds.
-    let value = unsafe { args.get_unchecked(arg.position) };
-
-    // Set all the formatting options.
-    fmt.options = options;
-
-    // Then actually do some printing
-    // SAFETY: this is a placeholder argument.
-    unsafe { value.fmt(fmt) }
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-unsafe fn getcount(args: &[rt::Argument<'_>], cnt: &rt::Count) -> u16 {
-    match *cnt {
-        rt::Count::Is(n) => n,
-        rt::Count::Implied => 0,
-        rt::Count::Param(i) => {
-            debug_assert!(i < args.len());
-            // SAFETY: cnt and args come from the same Arguments,
-            // which guarantees this index is always within bounds.
-            unsafe { args.get_unchecked(i).as_u16().unwrap_unchecked() }
-||||||| 0b329f801a0
-    // There can be only one trailing string piece left.
-    if let Some(piece) = args.pieces.get(idx) {
-        formatter.buf.write_str(*piece)?;
-    }
-
-    Ok(())
-}
-
-unsafe fn run(fmt: &mut Formatter<'_>, arg: &rt::Placeholder, args: &[rt::Argument<'_>]) -> Result {
-    let (width, precision) =
-        // SAFETY: arg and args come from the same Arguments,
-        // which guarantees the indexes are always within bounds.
-        unsafe { (getcount(args, &arg.width), getcount(args, &arg.precision)) };
-
-    let options = FormattingOptions { flags: arg.flags, width, precision };
-
-    // Extract the correct argument
-    debug_assert!(arg.position < args.len());
-    // SAFETY: arg and args come from the same Arguments,
-    // which guarantees its index is always within bounds.
-    let value = unsafe { args.get_unchecked(arg.position) };
-
-    // Set all the formatting options.
-    fmt.options = options;
-
-    // Then actually do some printing
-    // SAFETY: this is a placeholder argument.
-    unsafe { value.fmt(fmt) }
-}
-
-unsafe fn getcount(args: &[rt::Argument<'_>], cnt: &rt::Count) -> u16 {
-    match *cnt {
-        rt::Count::Is(n) => n,
-        rt::Count::Implied => 0,
-        rt::Count::Param(i) => {
-            debug_assert!(i < args.len());
-            // SAFETY: cnt and args come from the same Arguments,
-            // which guarantees this index is always within bounds.
-            unsafe { args.get_unchecked(i).as_u16().unwrap_unchecked() }
-=======
             // SAFETY: We can assume the template only refers to arguments that exist.
             unsafe {
                 args.add(arg_index).as_ref().fmt(&mut Formatter::new(output, opt))?;
             }
             arg_index += 1;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 }

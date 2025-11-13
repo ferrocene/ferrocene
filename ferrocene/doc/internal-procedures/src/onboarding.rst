@@ -72,8 +72,8 @@ recurring meetings.
 CircleCI access
 ^^^^^^^^^^^^^^^
 
-To authenticate with CircleCI, navigate to `CircleCI <https://app.circleci.com>`_,
-then select "Login with GitHub".
+To authenticate with CircleCI, navigate to
+`Login with GitHub <https://circleci.com/authentication/login?f=gho>`_.
 
 Once you have done so, you can access the Ferrocene project on CircleCI `here
 <https://app.circleci.com/pipelines/github/ferrocene/ferrocene>`_.

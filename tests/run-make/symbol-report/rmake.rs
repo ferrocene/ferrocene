@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 /// Tests the symbol-report binary, which makes part of the coverage pipeline.
 ///
 /// We have several testcases that run symbol-report over an input file and compare its output
@@ -15,8 +17,22 @@ use run_make_support::path_helpers::{build_root, source_root};
 use run_make_support::symbol_report::{SymbolReport, serde_json};
 
 fn main() {
+    let build_path = build_root();
+    let rustc_path: PathBuf = std::env::var_os("RUSTC").expect("RUSTC env var is not set").into();
+
+    let rel_rustc_path = rustc_path.strip_prefix(&build_path).unwrap().to_str().unwrap();
+
+    let stage = if rel_rustc_path.contains("stage1") {
+        1
+    } else if rel_rustc_path.contains("stage2") {
+        2
+    } else {
+        panic!("Invalid RUSTC path");
+    };
+
     // The path to the symbol-report binary.
-    let symbol_report_path = build_root().join("stage1-tools-bin/symbol-report");
+    let symbol_report_path = build_root().join(format!("stage{stage}-tools-bin/symbol-report"));
+
     // The path to the testcases folder.
     let testcases_path = source_root().join("tests/run-make/symbol-report/testcases/");
 

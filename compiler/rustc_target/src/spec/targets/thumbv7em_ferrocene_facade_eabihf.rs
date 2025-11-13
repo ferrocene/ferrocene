@@ -1,4 +1,4 @@
-use crate::spec::{LinkSelfContainedDefault, Target, TargetMetadata, crt_objects, cvs};
+use crate::spec::{Env, LinkSelfContainedDefault, Os, Target, TargetMetadata, crt_objects, cvs};
 
 pub(crate) fn target() -> Target {
     let mut target = super::thumbv7em_none_eabihf::target();
@@ -7,8 +7,8 @@ pub(crate) fn target() -> Target {
 
     // libstd port
     target.families = cvs!["unix"];
-    target.os = "linux".into();
-    target.env = "musl".into();
+    target.os = Os::Linux;
+    target.env = Env::Musl;
     target.has_thread_local = true;
 
     // crt and libc are self-contained

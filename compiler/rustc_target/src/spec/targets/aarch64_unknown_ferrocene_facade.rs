@@ -7,7 +7,7 @@
 //! THIS IS TEMPORARY. We implemented this solution as we needed to run bare-metal tests for
 //! qualification, but we're planning a cleaner implementation to upstream.
 
-use crate::spec::{LinkSelfContainedDefault, Target, TargetMetadata, crt_objects, cvs};
+use crate::spec::{Env, LinkSelfContainedDefault, Os, Target, TargetMetadata, crt_objects, cvs};
 
 pub(crate) fn target() -> Target {
     let mut target = super::aarch64_unknown_none::target();
@@ -16,8 +16,8 @@ pub(crate) fn target() -> Target {
 
     // libstd port
     target.families = cvs!["unix"];
-    target.os = "linux".into();
-    target.env = "musl".into();
+    target.os = Os::Linux;
+    target.env = Env::Musl;
     target.has_thread_local = true;
 
     // crt and libc are self-contained

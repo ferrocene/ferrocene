@@ -269,6 +269,11 @@ use crate::ptr::{self, NonNull};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::range;
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::{marker::Destruct, mem};
+
 #[cfg(not(feature = "ferrocene_certified"))]
 mod lazy;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -323,13 +328,11 @@ pub use once::OnceCell;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[repr(transparent)]
 #[rustc_pub_transparent]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Cell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> Send for Cell<T> where T: Send {}
 
 // Note that this negative impl isn't strictly necessary for correctness,
@@ -338,7 +341,6 @@ unsafe impl<T: ?Sized> Send for Cell<T> where T: Send {}
 // having an explicit negative impl is nice for documentation purposes
 // and results in nicer error messages.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Sync for Cell<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -422,7 +424,6 @@ impl<T> const From<T> for Cell<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Cell<T> {
     /// Creates a new `Cell` containing the given value.
     ///
@@ -485,6 +486,7 @@ impl<T> Cell<T> {
     /// ```
     #[inline]
     #[stable(feature = "move_cell", since = "1.17.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn swap(&self, other: &Self) {
         // This function documents that it *will* panic, and intrinsics::is_nonoverlapping doesn't
         // do the check in const, so trying to use it here would be inviting unnecessary fragility.
@@ -550,12 +552,12 @@ impl<T> Cell<T> {
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn into_inner(self) -> T {
         self.value.into_inner()
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> Cell<T> {
     /// Returns a copy of the contained value.
     ///
@@ -591,6 +593,7 @@ impl<T: Copy> Cell<T> {
     #[inline]
     #[stable(feature = "cell_update", since = "1.88.0")]
     #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn update(&self, f: impl [const] FnOnce(T) -> T)
     where
         // FIXME(const-hack): `Copy` should imply `const Destruct`

@@ -310,6 +310,13 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
         handler(REMAP_SRC_BASE, |config, ln, props| {
             config.set_name_directive(ln, REMAP_SRC_BASE, &mut props.remap_src_base);
         }),
+        handler(COMPARE_OUTPUT_LINES_BY_SUBSET, |config, ln, props| {
+            config.set_name_directive(
+                ln,
+                COMPARE_OUTPUT_LINES_BY_SUBSET,
+                &mut props.compare_output_lines_by_subset,
+            )
+        }),
         handler(LLVM_COV_FLAGS, |config, ln, props| {
             if let Some(flags) = config.parse_name_value_directive(ln, LLVM_COV_FLAGS) {
                 props.llvm_cov_flags.extend(split_flags(&flags));
@@ -359,6 +366,13 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 ln,
                 COMPARE_OUTPUT_BY_LINES,
                 &mut props.compare_output_by_lines,
+            );
+        }),
+        handler(FERROCENE_EXECUTE_IN_TEMP, |config, ln, props| {
+            config.set_name_directive(
+                ln,
+                FERROCENE_EXECUTE_IN_TEMP,
+                &mut props.ferrocene_execute_in_temp,
             );
         }),
     ];

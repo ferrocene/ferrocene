@@ -3448,17 +3448,15 @@ impl Target {
         }
     }
 
-<<<<<<< HEAD
+    pub fn vendor_symbol(&self) -> Symbol {
+        Symbol::intern(&self.vendor)
+    }
+
     /// Modify the target to be certified
     pub fn ferrocene_certified(&mut self) {
         self.metadata.description =
             self.metadata.description.as_ref().map(|v| format!("{v} (certified)").into());
         self.metadata.tier = None;
-||||||| 29a69716f2c
-=======
-    pub fn vendor_symbol(&self) -> Symbol {
-        Symbol::intern(&self.vendor)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 

@@ -1267,14 +1267,8 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn checked_exact_div(self, rhs: Self) -> Option<Self> {
-||||||| 29a69716f2c
-        pub const fn checked_exact_div(self, rhs: Self) -> Option<Self> {
-=======
         pub const fn checked_div_exact(self, rhs: Self) -> Option<Self> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             if intrinsics::unlikely(rhs == 0) {
                 None
             } else {
@@ -1311,14 +1305,8 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn exact_div(self, rhs: Self) -> Option<Self> {
-||||||| 29a69716f2c
-        pub const fn exact_div(self, rhs: Self) -> Option<Self> {
-=======
         pub const fn div_exact(self, rhs: Self) -> Option<Self> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             if self % rhs != 0 {
                 None
             } else {
@@ -1339,14 +1327,8 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const unsafe fn unchecked_exact_div(self, rhs: Self) -> Self {
-||||||| 29a69716f2c
-        pub const unsafe fn unchecked_exact_div(self, rhs: Self) -> Self {
-=======
         pub const unsafe fn unchecked_div_exact(self, rhs: Self) -> Self {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             assert_unsafe_precondition!(
                 check_language_ub,
                 concat!(stringify!($SelfT), "::unchecked_div_exact divide by zero or leave a remainder"),
@@ -1908,14 +1890,8 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn exact_shl(self, rhs: u32) -> Option<$SelfT> {
-||||||| 29a69716f2c
-        pub const fn exact_shl(self, rhs: u32) -> Option<$SelfT> {
-=======
         pub const fn shl_exact(self, rhs: u32) -> Option<$SelfT> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             if rhs <= self.leading_zeros() && rhs < <$SelfT>::BITS {
                 // SAFETY: rhs is checked above
                 Some(unsafe { self.unchecked_shl(rhs) })
@@ -1939,14 +1915,8 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const unsafe fn unchecked_exact_shl(self, rhs: u32) -> $SelfT {
-||||||| 29a69716f2c
-        pub const unsafe fn unchecked_exact_shl(self, rhs: u32) -> $SelfT {
-=======
         pub const unsafe fn unchecked_shl_exact(self, rhs: u32) -> $SelfT {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             assert_unsafe_precondition!(
                 check_library_ub,
                 concat!(stringify!($SelfT), "::unchecked_shl_exact cannot shift out non-zero bits"),
@@ -2098,14 +2068,8 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn exact_shr(self, rhs: u32) -> Option<$SelfT> {
-||||||| 29a69716f2c
-        pub const fn exact_shr(self, rhs: u32) -> Option<$SelfT> {
-=======
         pub const fn shr_exact(self, rhs: u32) -> Option<$SelfT> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             if rhs <= self.trailing_zeros() && rhs < <$SelfT>::BITS {
                 // SAFETY: rhs is checked above
                 Some(unsafe { self.unchecked_shr(rhs) })
@@ -2129,14 +2093,8 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const unsafe fn unchecked_exact_shr(self, rhs: u32) -> $SelfT {
-||||||| 29a69716f2c
-        pub const unsafe fn unchecked_exact_shr(self, rhs: u32) -> $SelfT {
-=======
         pub const unsafe fn unchecked_shr_exact(self, rhs: u32) -> $SelfT {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             assert_unsafe_precondition!(
                 check_library_ub,
                 concat!(stringify!($SelfT), "::unchecked_shr_exact cannot shift out non-zero bits"),

@@ -1,5 +1,6 @@
 use crate::spec::{Arch, Cc, LinkerFlavor, Lld, RelocModel, StackProbeType, Target, base};
 
+#[allow(rustc::bad_opt_access)]
 pub(crate) fn target() -> Target {
     let mut base = base::lynxos178::opts();
     base.cpu = "i386".into();

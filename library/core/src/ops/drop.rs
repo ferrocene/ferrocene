@@ -237,8 +237,5 @@ pub const trait Drop {
     /// [`mem::drop`]: drop
     /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[ferrocene::annotation(
-        "This method declaration has no code to be covered, the fact that this shows up as uncovered is a bug in our coverage tooling"
-    )]
     fn drop(&mut self);
 }

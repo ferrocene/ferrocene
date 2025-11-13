@@ -331,13 +331,10 @@ impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(4));
 impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(8));
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicUsize(usize), size("ptr"), align(2));
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicUsize(usize), size("ptr"), align(4));
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicUsize(usize), size("ptr"), align(8));
 
 #[cfg(target_pointer_width = "16")]
@@ -3924,10 +3921,10 @@ atomic_int! {
 }
 
 #[cfg(target_has_atomic_load_store = "ptr")]
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! atomic_int_ptr_sized {
     ( $($target_pointer_width:literal $align:literal)* ) => { $(
         #[cfg(target_pointer_width = $target_pointer_width)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         atomic_int! {
             cfg(target_has_atomic = "ptr"),
             cfg(target_has_atomic_equal_alignment = "ptr"),
@@ -3974,6 +3971,7 @@ macro_rules! atomic_int_ptr_sized {
             note = "the `new` function is now preferred",
             suggestion = "AtomicIsize::new(0)",
         )]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const ATOMIC_ISIZE_INIT: AtomicIsize = AtomicIsize::new(0);
 
         /// An [`AtomicUsize`] initialized to `0`.
@@ -3989,7 +3987,6 @@ macro_rules! atomic_int_ptr_sized {
 }
 
 #[cfg(target_has_atomic_load_store = "ptr")]
-#[cfg(not(feature = "ferrocene_certified"))]
 atomic_int_ptr_sized! {
     "16" 2
     "32" 4

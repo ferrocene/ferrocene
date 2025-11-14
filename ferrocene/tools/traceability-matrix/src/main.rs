@@ -35,8 +35,8 @@ fn main() -> anyhow::Result<()> {
     annotations.load_directory(&annotations_path, &src_base, test_outcomes.as_ref())?;
 
     let matrix = matrix::prepare(&documentations, &annotations)?;
-    cli_summary(&matrix);
 
+    let incomplete = cli_summary(&matrix);
     let report = report::generate(&annotations, &matrix, urls)?;
     std::fs::write(&html_out, report.as_bytes())?;
 
@@ -48,10 +48,16 @@ fn main() -> anyhow::Result<()> {
         anyhow::bail!("some tests have unknown annotations");
     }
 
+    if incomplete {
+        anyhow::bail!("some analyses are incomplete");
+    }
+
     Ok(())
 }
 
-fn cli_summary(matrix: &TraceabilityMatrix) {
+fn cli_summary(matrix: &TraceabilityMatrix) -> bool {
+    let mut incomplete = false;
+
     eprintln!("=====================================");
     eprintln!("==   Traceability matrix summary   ==");
     eprintln!("=====================================");
@@ -61,6 +67,9 @@ fn cli_summary(matrix: &TraceabilityMatrix) {
         let partially_linked_count = analysis.partially_linked.len();
         let unlinked_count = analysis.unlinked.len();
         let total_items = linked_count + unlinked_count + partially_linked_count;
+        if linked_count != total_items {
+            incomplete = true;
+        }
         let percent = linked_count as f32 * 100.0 / total_items as f32;
         eprintln!(
             "{} linked with a test: {linked_count} ({percent:.2}%)",
@@ -76,6 +85,8 @@ fn cli_summary(matrix: &TraceabilityMatrix) {
         }
         eprintln!();
     }
+
+    incomplete
 }
 
 /// Fetch a [`String`] environment varible.

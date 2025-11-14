@@ -33,6 +33,18 @@ Language changes in Rust 1.90.0
 
     - Above paragraph replaces :p:`fls_6g7c1kjrmfnr` and :p:`fls_hkbwa8xx2fwx`
 
+  * New paragraphs:
+
+    - :p:`fls_ooOYxhVh8hZo`
+
+    - :p:`fls_zkNFeBLy80UA`
+
+    - :p:`fls_VhzGfnWg7YrG`
+
+    - :p:`fls_ibYKKQdB2tDn`
+
+    - :p:`fls_dQdSxf8kOgbi`
+
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 
   - No change: lints are not part of the FLS
@@ -335,8 +347,6 @@ Language changes in Rust 1.83.0
 * `Stabilize \`&mut\`, \`*mut\`, \`&Cell\`, and \`*const Cell\` in const. <https://github.com/rust-lang/rust/pull/129195>`_
 
   * Changed paragraphs: :p:`fls_to4e7imq2c0w`, :p:`fls_6g7c1kjrmfnr`, :p:`fls_hkbwa8xx2fwx`
-
-  * New paragraph: :p:`fls_ooOYxhVh8hZo`
 
   * Removed paragraph: :p:`fls_ox6sgl9n43g2`
 

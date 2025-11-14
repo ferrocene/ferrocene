@@ -95,9 +95,6 @@ The :t:`type specification` of a :t:`constant` shall have ``'static``
 The :t:`type` of a :t:`constant` shall implement the :std:`core::marker::Sized`
 :t:`trait`.
 
-:dp:`fls_ooOYxhVh8hZo`
-The type of a :t:`constant` cannot be a :t:`mutable reference type`.
-
 :dp:`fls_ndmfqxjpvsqy`
 A :t:`constant initializer` is a :t:`construct` that provides the :t:`value` of
 its related :t:`constant`.
@@ -113,6 +110,23 @@ The :t:`expression` of a :t:`constant initializer` shall be a
 :dp:`fls_deuo1pn8cjd6`
 The value of a :t:`constant` is determined by evaluating its
 :t:`constant initializer`.
+
+:dp:`fls_ooOYxhVh8hZo`
+After a :t:`constant initializer` is evaluated to a value of the declared type,
+the value of the constant, after :t:`type coercion`,
+cannot contain any :t:`[mutable reference]s`, except when
+
+- :dp:`fls_zkNFeBLy80UA`
+  The :t:`mutable reference` is contained within an :t:`external static`, or
+
+- :dp:`fls_VhzGfnWg7YrG`
+  The :t:`mutable reference` is contained within a :t:`mutable static`, or
+
+- :dp:`fls_ibYKKQdB2tDn`
+  The :t:`mutable reference` is contained within an :t:`union`, or
+
+- :dp:`fls_dQdSxf8kOgbi`
+  The :t:`referent` is a value of a :t:`zero-sized type`.
 
 .. rubric:: Dynamic Semantics
 

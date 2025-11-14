@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-#[derive(serde_derive::Deserialize, serde_derive::Serialize)]
+pub use serde_json;
+
+#[derive(Debug, Eq, PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
 pub struct SymbolReport {
     pub symbols: Vec<Function>,
     pub annotations: BTreeMap<String, BTreeSet<(usize, usize)>>,
@@ -16,8 +18,7 @@ impl SymbolReport {
     }
 }
 
-/// A single certified function, identified by its span
-#[derive(Clone, serde_derive::Deserialize, serde_derive::Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
 pub struct Function {
     /// The fully qualified path to the function, for example:
     /// - `core::ptr::copy`
@@ -27,4 +28,21 @@ pub struct Function {
     pub filename: String,
     pub start_line: usize,
     pub end_line: usize,
+}
+
+impl From<SerdeFunction> for Function {
+    fn from(SerdeFunction(qualified_name, filename, start_line, end_line): SerdeFunction) -> Self {
+        Self { qualified_name, filename, start_line, end_line }
+    }
+}
+
+/// A single certified function, identified by its span
+#[derive(Clone, serde_derive::Deserialize, serde_derive::Serialize)]
+#[serde(from = "Function")]
+pub struct SerdeFunction(String, String, usize, usize);
+
+impl From<Function> for SerdeFunction {
+    fn from(func: Function) -> Self {
+        Self(func.qualified_name, func.filename, func.start_line, func.end_line)
+    }
 }

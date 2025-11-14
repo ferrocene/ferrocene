@@ -8,8 +8,8 @@ use build_helper::symbol_report::{QualifiedFnList, SymbolReport};
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
+use crate::ferrocene::run::update_certified_core_symbols::TRACKED_FILE;
 use crate::ferrocene::run::{self, CERTIFIED_CORE_SYMBOLS_ALIAS, update_certified_core_symbols};
-use crate::ferrocene::tool::SYMBOL_PATH;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols;
@@ -20,7 +20,7 @@ impl Step for CertifiedCoreSymbols {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(SYMBOL_PATH).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
+        run.path(TRACKED_FILE).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -28,6 +28,7 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.info(&format!("Testing {TRACKED_FILE}"));
         let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
         let actual_symbol_report_path =
             builder.ensure(run::CertifiedCoreSymbols::new(builder, target));

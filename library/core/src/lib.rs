@@ -214,6 +214,7 @@
 #![cfg_attr(
     feature = "ferrocene_certified",
     expect(rustdoc::broken_intra_doc_links),
+    expect(rustdoc::private_intra_doc_links),
     expect(unused_attributes)
 )]
 #![feature(register_tool)]

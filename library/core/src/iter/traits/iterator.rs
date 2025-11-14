@@ -11,7 +11,6 @@ use super::TrustedLen;
 use crate::array;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::{self, Ordering};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
@@ -19,7 +18,10 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use super::super::{Cloned, Map, Sum};
+use {
+    super::super::{Cloned, DoubleEndedIterator, Enumerate, Map, Rev, Skip, Sum, Zip},
+    crate::ops::{ControlFlow, Try},
+};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
@@ -309,7 +311,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_advance_by", reason = "recently added", issue = "77404")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         /// Helper trait to specialize `advance_by` via `try_fold` for `Sized` iterators.
         trait SpecAdvanceBy {
@@ -387,7 +388,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.advance_by(n).ok()?;
         self.next()
@@ -629,7 +629,6 @@ pub trait Iterator {
     /// [`zip`]: crate::iter::zip
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,
@@ -1007,7 +1006,6 @@ pub trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "enumerate_method"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn enumerate(self) -> Enumerate<Self>
     where
         Self: Sized,
@@ -1343,7 +1341,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn skip(self, n: usize) -> Skip<Self>
     where
         Self: Sized,
@@ -2051,7 +2048,6 @@ pub trait Iterator {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "if you really need to exhaust the iterator, consider `.for_each(drop)` instead"]
     #[rustc_diagnostic_item = "iterator_collect_fn"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn collect<B: FromIterator<Self::Item>>(self) -> B
     where
         Self: Sized,
@@ -2461,7 +2457,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -2640,7 +2635,6 @@ pub trait Iterator {
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -2926,7 +2920,6 @@ pub trait Iterator {
     /// Note that `iter.find(f)` is equivalent to `iter.filter(f).next()`.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
@@ -3411,7 +3404,6 @@ pub trait Iterator {
     #[inline]
     #[doc(alias = "reverse")]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn rev(self) -> Rev<Self>
     where
         Self: Sized + DoubleEndedIterator,
@@ -4224,11 +4216,9 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
     fn size_hint(&self) -> (usize, Option<usize>) {
         (**self).size_hint()
     }
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         (**self).advance_by(n)
     }
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         (**self).nth(n)
     }
@@ -4239,7 +4229,6 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
     {
         self.spec_fold(init, f)
     }
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -4250,8 +4239,8 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
 }
 
 /// Helper trait to specialize `fold` and `try_fold` for `&mut I where I: Sized`
-#[cfg(not(feature = "ferrocene_certified"))]
 trait IteratorRefSpec: Iterator {
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B;
@@ -4262,8 +4251,8 @@ trait IteratorRefSpec: Iterator {
         R: Try<Output = B>;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_fold<B, F>(self, init: B, mut f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,

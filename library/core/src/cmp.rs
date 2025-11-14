@@ -2117,7 +2117,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialOrd<&B> for &A
     where
         A: [const] PartialOrd<B>,

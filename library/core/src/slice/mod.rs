@@ -14,14 +14,12 @@ use crate::cmp::Ordering::{self, Equal, Greater, Less};
 use crate::intrinsics::{exact_div, unchecked_sub};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeInclusive};
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::simd::{self, Simd};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hint, ptr, range, slice};
@@ -29,7 +27,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::ptr;
+use crate::{intrinsics::unchecked_sub, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -56,9 +54,7 @@ mod cmp;
 pub(crate) mod index;
 mod iter;
 mod raw;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod rotate;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod specialize;
 
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
@@ -106,6 +102,12 @@ pub use raw::{from_mut, from_ref};
 pub use raw::{from_mut_ptr_range, from_ptr_range};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use raw::{from_raw_parts, from_raw_parts_mut};
+
+// Ferrocene addition: imports for certified subset
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+pub use iter::{Chunks, Windows};
 
 /// Calculates the direction and split point of a one-sided range.
 ///
@@ -942,7 +944,6 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn swap(&mut self, a: usize, b: usize) {
         // FIXME: use swap_unchecked here (https://github.com/rust-lang/rust/pull/88540#issuecomment-944344343)
         // Can't take two mutable loans from one vector, so instead use raw pointers.
@@ -1155,7 +1156,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn windows(&self, size: usize) -> Windows<'_, T> {
         let size = NonZero::new(size).expect("window size must be non-zero");
         Windows::new(self, size)
@@ -1196,7 +1196,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks(&self, chunk_size: usize) -> Chunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         Chunks::new(self, chunk_size)
@@ -2008,7 +2007,6 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at(&self, mid: usize) -> (&[T], &[T]) {
         match self.split_at_checked(mid) {
             Some(pair) => pair,
@@ -2096,7 +2094,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T]) {
         // FIXME(const-hack): the const function `from_raw_parts` is used to make this
         // function const; previously the implementation used
@@ -2213,7 +2210,6 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "split_at_checked", since = "1.80.0")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_checked(&self, mid: usize) -> Option<(&[T], &[T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which
@@ -3765,7 +3761,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_slice_rotate", since = "1.92.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rotate_left(&mut self, mid: usize) {
         assert!(mid <= self.len());
         let k = self.len() - mid;
@@ -3812,7 +3807,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_slice_rotate", since = "1.92.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rotate_right(&mut self, k: usize) {
         assert!(k <= self.len());
         let mid = self.len() - k;
@@ -3836,7 +3830,6 @@ impl<T> [T] {
     /// ```
     #[doc(alias = "memset")]
     #[stable(feature = "slice_fill", since = "1.50.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fill(&mut self, value: T)
     where
         T: Clone,

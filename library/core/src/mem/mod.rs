@@ -431,7 +431,6 @@ pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
 #[inline]
 #[must_use]
 #[unstable(feature = "layout_for_ptr", issue = "69835")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
     // SAFETY: the caller must provide a valid raw pointer
     unsafe { intrinsics::size_of_val(val) }
@@ -830,7 +829,6 @@ pub const fn swap<T>(x: &mut T, y: &mut T) {
 /// ```
 #[inline]
 #[stable(feature = "mem_take", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn take<T: Default>(dest: &mut T) -> T {
     replace(dest, T::default())
 }

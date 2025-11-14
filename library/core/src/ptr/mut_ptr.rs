@@ -909,7 +909,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -1063,7 +1062,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1456,7 +1454,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1536,7 +1533,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "1.88.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn replace(self, src: T) -> T
     where
         T: Sized,

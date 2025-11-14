@@ -1,9 +1,7 @@
 //! Defines the `IntoIter` owned iterator for arrays.
 
 use crate::mem::MaybeUninit;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{IndexRange, NeverShortCircuit, Try};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, iter};
@@ -11,7 +9,7 @@ use crate::{fmt, iter};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{iter, ops::IndexRange};
+use crate::iter;
 
 #[allow(private_bounds)]
 trait PartialDrop {
@@ -192,7 +190,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // This also moves the start, which marks them as conceptually "dropped",
         // so if anything goes bad then our drop impl won't double-free them.
@@ -209,13 +206,11 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn fold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, T) -> R,

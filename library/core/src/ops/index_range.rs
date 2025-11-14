@@ -1,8 +1,6 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{NeverShortCircuit, Try};
 use crate::ub_checks;
 
@@ -88,7 +86,6 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_by`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn take_prefix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -125,7 +122,6 @@ impl IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     const fn assume_range(&self) {
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
@@ -152,20 +148,17 @@ impl Iterator for IndexRange {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let taken = self.take_prefix(n);
         NonZero::new(n - taken.len()).map_or(Ok(()), Err)
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,

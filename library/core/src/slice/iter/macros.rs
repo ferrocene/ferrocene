@@ -37,7 +37,6 @@ macro_rules! if_zst {
 }
 
 // Inlining is_empty and len makes a huge performance difference
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! is_empty {
     ($self: ident) => {
         if_zst!($self,
@@ -47,7 +46,6 @@ macro_rules! is_empty {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! len {
     ($self: ident) => {{
         if_zst!($self,
@@ -210,7 +208,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn nth(&mut self, n: usize) -> Option<$elem> {
                 if n >= len!(self) {
                     // This iterator is now empty.
@@ -228,7 +225,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let advance = cmp::min(len!(self), n);
                 // SAFETY: By construction, `advance` does not exceed `self.len()`.
@@ -243,7 +239,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn fold<B, F>(self, init: B, mut f: F) -> B
                 where
                     F: FnMut(B, Self::Item) -> B,
@@ -331,7 +326,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
             where
                 Self: Sized,

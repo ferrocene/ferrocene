@@ -81,7 +81,7 @@ impl fmt::Debug for RangeFull {
 #[lang = "Range"]
 #[doc(alias = "..")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Default, PartialEq))] // not Copy -- see #27186
+#[derive_const(Clone, Default, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
@@ -103,7 +103,6 @@ impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -154,6 +153,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     #[inline]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_empty(&self) -> bool
     where
         Idx: [const] PartialOrd<Idx>,
@@ -879,7 +879,6 @@ pub const trait RangeBounds<T: ?Sized> {
     /// ```
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: [const] PartialOrd<U>,

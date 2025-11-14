@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(serde_derive::Deserialize, serde_derive::Serialize)]
@@ -14,6 +17,12 @@ impl SymbolReport {
     pub fn new() -> Self {
         Self { symbols: Vec::new(), annotations: BTreeMap::new() }
     }
+
+    pub fn to_qualified_fn_list(&self) -> QualifiedFnList {
+        let mut a = self.symbols.iter().map(|f| f.qualified_name.clone()).collect::<Vec<_>>();
+        a.sort_unstable();
+        QualifiedFnList(a)
+    }
 }
 
 /// A single certified function, identified by its span
@@ -28,3 +37,6 @@ pub struct Function {
     pub start_line: usize,
     pub end_line: usize,
 }
+
+#[derive(PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
+pub struct QualifiedFnList(Vec<String>);

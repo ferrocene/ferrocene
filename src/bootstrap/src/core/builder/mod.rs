@@ -75,6 +75,12 @@ pub struct Builder<'a> {
 
     /// Cached list of submodules from self.build.src.
     submodule_paths_cache: OnceLock<Vec<String>>,
+
+    /// When enabled by tests, this causes the top-level steps that _would_ be
+    /// executed to be logged instead. Used by snapshot tests of command-line
+    /// paths-to-steps handling.
+    #[expect(clippy::type_complexity)]
+    log_cli_step_for_tests: Option<Box<dyn Fn(&StepDescription, &[PathSet], &[TargetSelection])>>,
 }
 
 impl Deref for Builder<'_> {
@@ -455,6 +461,13 @@ impl StepDescription {
 
         // Determine the targets participating in this rule.
         let targets = if self.is_host { &builder.hosts } else { &builder.targets };
+
+        // Log the step that's about to run, for snapshot tests.
+        if let Some(ref log_cli_step) = builder.log_cli_step_for_tests {
+            log_cli_step(self, &pathsets, targets);
+            // Return so that the step won't actually run in snapshot tests.
+            return;
+        }
 
         for target in targets {
             let run = RunConfig { builder, paths: pathsets.clone(), target: *target };
@@ -1161,6 +1174,7 @@ impl<'a> Builder<'a> {
             should_serve_called: atomic::AtomicU64::new(0),
             paths,
             submodule_paths_cache: Default::default(),
+            log_cli_step_for_tests: None,
         }
     }
 

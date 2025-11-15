@@ -2078,14 +2078,15 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] rustdoc 0 <host>
-        [build] rustc 0 <host> -> Tidy 1 <host>
-        [test] tidy <>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> Tidy 1 <host>
+        [test] tidy <>
+        [build] rustc 1 <host> -> std 1 <host>
         [test] compiletest-ui 1 <host>
         [test] compiletest-crashes 1 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
@@ -2133,7 +2134,6 @@ mod snapshot {
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 0 <host> -> Linkchecker 1 <host>
         [test] link-check <host>
         [test] tier-check <host>
@@ -2151,7 +2151,7 @@ mod snapshot {
         [test] compiletest-run-make 1 <host>
         [build] rustc 0 <host> -> cargo 1 <host>
         [test] compiletest-run-make-cargo 1 <host>
-        "###);
+        ");
     }
 
     #[test]
@@ -2259,16 +2259,17 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .stage(2)
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] rustdoc 0 <host>
-        [build] rustc 0 <host> -> Tidy 1 <host>
-        [test] tidy <>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> Tidy 1 <host>
+        [test] tidy <>
+        [build] rustc 2 <host> -> std 2 <host>
         [test] compiletest-ui 2 <host>
         [test] compiletest-crashes 2 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
@@ -2317,7 +2318,6 @@ mod snapshot {
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 0 <host> -> Linkchecker 1 <host>
         [test] link-check <host>
         [test] tier-check <host>
@@ -2337,7 +2337,7 @@ mod snapshot {
         [test] compiletest-run-make 2 <host>
         [build] rustc 1 <host> -> cargo 2 <host>
         [test] compiletest-run-make-cargo 2 <host>
-        "###);
+        ");
     }
 
     #[test]

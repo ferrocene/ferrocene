@@ -8,4 +8,4 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_s45k21yn4qur
-// Inferred Type
+// Inferred Types

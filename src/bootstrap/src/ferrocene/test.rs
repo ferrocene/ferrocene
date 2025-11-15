@@ -5,6 +5,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
+use crate::utils::exec::BootstrapCommand;
 use crate::{Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -155,5 +156,33 @@ impl Step for GenerateTarball {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Self { target: run.target });
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct DiffUpstream {}
+impl Step for DiffUpstream {
+    type Output = ();
+    const IS_HOST: bool = true;
+    const DEFAULT: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("ferrocene/tools/diff-upstream")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Self {});
+    }
+    fn run(self, builder: &Builder<'_>) {
+        let host = builder.host_target;
+        builder.ensure(crate::ferrocene::doc::TraceabilityMatrix {
+            target: host,
+            compiler: builder.compiler(builder.top_stage, host),
+        });
+
+        builder.info("test diff-upstream");
+        let mut cmd = BootstrapCommand::new("ferrocene/tools/diff-upstream/diff.py");
+        cmd.arg("--hide-diff");
+        cmd.run(builder);
     }
 }

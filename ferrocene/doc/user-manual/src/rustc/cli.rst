@@ -325,12 +325,7 @@
       the command line, where precedence increases from left to right.
 
    .. cli:option:: -C opt-level=<level>
-      :category: wide
-
-      .. caution::
-
-         Only level ``2`` is within the scope of the Ferrocene
-         qualification.
+      :category: unqualified
 
       Code generation option ``opt-level`` indicates the optimization level in
       effect.
@@ -344,7 +339,7 @@
       =========== ==========================================================
       ``0``       No optimizations.
       ``1``       Basic optimizations.
-      ``2``       Some optimizations. Same as compiler argument ``-O``.
+      ``2``       Some optimizations.
       ``3``       All optimizations.
       ``s``       Optimize for binary size.
       ``z``       Optimize for binary size with disabled loop vectorization.
@@ -1059,8 +1054,7 @@
    .. cli:option:: -O
       :category: wide
 
-      Compiler argument ``-O`` is identical to compiler argument
-      ``-C opt-level=2``.
+      Enable optimizations.
 
    .. cli:option:: -o <name>
       :category: narrow

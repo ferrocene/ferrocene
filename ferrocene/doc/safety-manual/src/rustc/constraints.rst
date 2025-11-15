@@ -63,8 +63,14 @@ Treating warnings as errors
 Associated requirement ID: :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
 
 The user shall ensure that, for the final build, no warnings are emitted.
+
 The user shall also ensure that no build warnings are suppressed,
-not only in their code, but also in their dependencies.
+not only in their code, but also in their dependencies:
+
+- Ensure that there are no ``allow(warnings)`` in the code
+- Ensure that there are no ``expect(warnings)`` in the code
+- Ensure that there are no ``-D warnings`` in the build commands
+- Ensure that there are no ``--deny warnings`` in the build commands
 
 Source modification while building
 ----------------------------------

@@ -112,11 +112,14 @@ Language changes in Rust 1.89.0
 
 - `Extend temporary lifetime extension to also go through tuple struct and tuple variant constructors <https://github.com/rust-lang/rust/pull/140593>`_
 
-  - Changed paragraph: :p:`fls_DQaCUkskfXzk`
+  - Changed paragraphs:
+
+    - :p:`fls_DQaCUkskfXzk`
+    - :p:`fls_wyzau8hhq74d`
+
   - New paragraphs:
 
     - :p:`fls_YeeZWqTdMivX`
-    - :p:`fls_wyzau8hhq74d`
     - :p:`fls_eeaJtK4w5gVK`
 
 - `extern "C" functions on the wasm32-unknown-unknown target now have a standards compliant ABI <https://blog.rust-lang.org/2025/04/04/c-abi-changes-for-wasm32-unknown-unknown/>`_

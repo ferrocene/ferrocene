@@ -5,20 +5,9 @@ mod reuse;
 use std::path::PathBuf;
 
 use anyhow::{Context, Error};
-use similar::{ChangeTag, TextDiff};
+use build_helper::diff::diff_text;
 
 use crate::licenses::LicensesInterner;
-
-fn diff_text(expected: &str, actual: &str) {
-    for change in TextDiff::from_lines(expected, actual).iter_all_changes() {
-        let sign = match change.tag() {
-            ChangeTag::Delete => "-",
-            ChangeTag::Insert => "+",
-            ChangeTag::Equal => " ",
-        };
-        print!("{}{}", sign, change);
-    }
-}
 
 /// The entry point to the binary.
 ///

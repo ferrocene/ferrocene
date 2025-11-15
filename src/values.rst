@@ -112,9 +112,8 @@ The value of a :t:`constant` is determined by evaluating its
 :t:`constant initializer`.
 
 :dp:`fls_ooOYxhVh8hZo`
-After a :t:`constant initializer` is evaluated to a value of the declared type,
-the value of the constant, after :t:`type coercion`,
-cannot contain any :t:`[mutable reference]s`, except when
+After :t:`type coercion`, the value of the constant cannot contain any
+:t:`[mutable reference]s`, except when
 
 - :dp:`fls_zkNFeBLy80UA`
   The :t:`mutable reference` is contained within an :t:`external static`, or

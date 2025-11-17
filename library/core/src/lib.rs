@@ -215,6 +215,7 @@
 #![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
+#![doc(auto_cfg(hide(feature = "ferrocene_certified")))]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

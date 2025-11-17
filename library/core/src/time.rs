@@ -337,12 +337,8 @@ impl Duration {
     #[must_use]
     #[inline]
     #[track_caller]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d682af88a57
-=======
     #[rustc_allow_const_fn_unstable(const_trait_impl, const_convert)] // for `u64::try_from`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn from_nanos_u128(nanos: u128) -> Duration {
         const NANOS_PER_SEC: u128 = self::NANOS_PER_SEC as u128;
         let Ok(secs) = u64::try_from(nanos / NANOS_PER_SEC) else {

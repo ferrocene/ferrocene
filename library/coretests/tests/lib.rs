@@ -48,13 +48,7 @@
 #![feature(drop_guard)]
 #![feature(duration_constants)]
 #![feature(duration_constructors)]
-<<<<<<< HEAD
-#![feature(duration_from_nanos_u128)]
 #![feature(duration_millis_float)]
-||||||| d682af88a57
-#![feature(duration_from_nanos_u128)]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(error_generic_member_access)]
 #![feature(exact_div)]
 #![feature(exact_size_is_empty)]

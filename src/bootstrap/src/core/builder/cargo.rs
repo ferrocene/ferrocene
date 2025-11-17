@@ -1407,7 +1407,7 @@ impl Builder<'_> {
             hostflags,
             allow_features,
             release_build,
-<<<<<<< HEAD
+            build_compiler_stage,
         };
 
         if mode == Mode::Std
@@ -1416,10 +1416,6 @@ impl Builder<'_> {
         {
             let paths = Paths::find(self, target, FerroceneCoverageFor::Library);
             cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
-||||||| d682af88a57
-=======
-            build_compiler_stage,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
 
         cargo

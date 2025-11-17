@@ -170,7 +170,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            script: ${{ inputs.script }}
+            ${{ inputs.script }}
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}

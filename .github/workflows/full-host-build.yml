@@ -104,7 +104,7 @@ jobs:
           region = eu-central-1
           endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
           aws_access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          aws_secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          aws_secret_access_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
           EOF
           aws s3 ls ferrocene-ci-caches --profile minio > /dev/null

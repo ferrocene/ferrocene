@@ -112,10 +112,11 @@ jobs:
           s3 =
             endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
           EOF
-          aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
-          echo "Can authenticate with minio"
+          echo "Testing authentication..."
+          AWS_ENDPOINT_URL="${{ secrets.CACHE_ENDPOINT_URL }}" aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
+          echo "Can authenticate with minio!"
           aws sts get-caller-identity --profile amazon > /dev/null
-          echo "Can authenticate with amazon"
+          echo "Can authenticate with amazon!"
 
 
       - name: Configure AWS Credentials

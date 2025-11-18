@@ -119,7 +119,8 @@ After :t:`type coercion`, the value of the constant cannot contain any
   The :t:`mutable reference` is contained within an :t:`external static`, or
 
 - :dp:`fls_VhzGfnWg7YrG`
-  The :t:`mutable reference` is contained within a :t:`mutable static`, or
+  The :t:`mutable reference` is contained within a :t:`mutable static`
+  or a :t:`static` whose type is subject to :t:`interior mutability`, or
 
 - :dp:`fls_ibYKKQdB2tDn`
   The :t:`mutable reference` is contained within an :t:`union`, or

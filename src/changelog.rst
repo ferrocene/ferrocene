@@ -45,6 +45,8 @@ Language changes in Rust 1.90.0
 
     - :p:`fls_dQdSxf8kOgbi`
 
+    - :p:`fls_qC6L0km0ZMFI`
+
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 
   - No change: lints are not part of the FLS

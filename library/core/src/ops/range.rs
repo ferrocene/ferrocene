@@ -198,7 +198,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq))] // not Copy -- see #27186
+#[derive_const(Clone, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).

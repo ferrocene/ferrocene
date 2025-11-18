@@ -1767,10 +1767,9 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Chunks<'a, T> {
 ///
 /// [`chunks_mut`]: slice::chunks_mut
 /// [slices]: slice
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ChunksMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -1783,7 +1782,6 @@ pub struct ChunksMut<'a, T: 'a> {
     _marker: PhantomData<&'a mut T>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: 'a> ChunksMut<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a mut [T], size: usize) -> Self {
@@ -1792,7 +1790,6 @@ impl<'a, T: 'a> ChunksMut<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Iterator for ChunksMut<'a, T> {
     type Item = &'a mut [T];
 
@@ -1823,6 +1820,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1849,6 +1847,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1859,6 +1858,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: see comments for `Chunks::__iterator_get_unchecked` and `self.v`.

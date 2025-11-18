@@ -25,7 +25,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{intrinsics::unchecked_sub, ptr};
+use crate::{intrinsics::unchecked_sub, mem::SizedTypeProperties, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -4082,7 +4082,6 @@ impl<T> [T] {
 
     /// Function to calculate lengths of the middle and trailing slice for `align_to{,_mut}`.
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn align_to_offsets<U>(&self) -> (usize, usize) {
         // What we gonna do about `rest` is figure out what multiple of `U`s we can put in a
         // lowest number of `T`s. And how many `T`s we need for each such "multiple".
@@ -4215,7 +4214,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn align_to_mut<U>(&mut self) -> (&mut [T], &mut [U], &mut [T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {

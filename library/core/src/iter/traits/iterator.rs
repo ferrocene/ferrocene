@@ -836,7 +836,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn for_each<F>(self, f: F)
     where
         Self: Sized,

@@ -1016,7 +1016,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
     pub fn from_secs_f32(secs: f32) -> Duration {
         match Duration::try_from_secs_f32(secs) {
             Ok(v) => v,
@@ -1510,9 +1510,8 @@ impl fmt::Debug for Duration {
 ///     println!("Failed conversion to Duration: {e}");
 /// }
 /// ```
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct TryFromFloatSecsError {
     kind: TryFromFloatSecsErrorKind,
 }
@@ -1533,8 +1532,7 @@ impl fmt::Display for TryFromFloatSecsError {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
 enum TryFromFloatSecsErrorKind {
     // Value is negative.
     Negative,
@@ -1542,7 +1540,6 @@ enum TryFromFloatSecsErrorKind {
     OverflowOrNan,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! try_from_secs {
     (
         secs = $secs: expr,
@@ -1623,7 +1620,6 @@ macro_rules! try_from_secs {
     }};
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Duration {
     /// The checked version of [`from_secs_f32`].
     ///
@@ -1758,6 +1754,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn try_from_secs_f64(secs: f64) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,

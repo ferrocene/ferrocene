@@ -3877,7 +3877,6 @@ impl<T> [T] {
     /// [`split_at_mut`]: slice::split_at_mut
     #[stable(feature = "clone_from_slice", since = "1.7.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn clone_from_slice(&mut self, src: &[T])
     where
         T: Clone,
@@ -5205,12 +5204,10 @@ impl [f64] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 trait CloneFromSpec<T> {
     fn spec_clone_from(&mut self, src: &[T]);
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> CloneFromSpec<T> for [T]
 where
     T: Clone,

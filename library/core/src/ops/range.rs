@@ -485,7 +485,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -554,6 +553,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// ```
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_empty(&self) -> bool {
         self.exhausted || !(self.start <= self.end)
     }

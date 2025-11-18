@@ -11,7 +11,7 @@ dependencies = [
 
 # Increase the version number to publish a new release to PyPI.
 # Note that you'll also have to run `uv lock` in `ferrocene/doc`, otherwise CI will fail.
-version = "0.0.3"
+version = "0.0.4"
 
 description = "Internal resources used for Ferrocene's Sphinx documentation"
 license = "MIT OR Apache-2.0"

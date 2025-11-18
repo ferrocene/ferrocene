@@ -257,7 +257,7 @@ jobs:
           - test:library-std
         include:
           - host: x86_64-unknown-linux-gnu
-            runner: ferrocene-arc-runners-ubuntu-20-amd64
+            runner: ubuntu24-8core-x86-64-linux-gnu
     uses: ./.github/workflows/full-test-remote.yml
     needs:
       - calculate-envs
@@ -295,7 +295,7 @@ jobs:
           - test:library-std
         include:
           - host: x86_64-unknown-linux-gnu
-            runner: ferrocene-arc-runners-ubuntu-20-amd64
+            runner: ubuntu24-8core-x86-64-linux-gnu
     uses: ./.github/workflows/full-test-remote.yml
     needs:
       - calculate-envs

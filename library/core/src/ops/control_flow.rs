@@ -404,7 +404,6 @@ impl<T> ControlFlow<T, T> {
 /// These are used only as part of implementing the iterator adapters.
 /// They have mediocre names and non-obvious semantics, so aren't
 /// currently on a path to potential stabilization.
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<R: ops::Try> ControlFlow<R, R::Output> {
     /// Creates a `ControlFlow` from any type implementing `Try`.
     #[inline]

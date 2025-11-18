@@ -112,6 +112,7 @@ jobs:
           s3 =
             endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
           EOF
+          echo "aws --version: $(aws --version)"
           echo "Testing authentication..."
           AWS_ENDPOINT_URL="${{ secrets.CACHE_ENDPOINT_URL }}" aws s3 ls ferrocene-ci-caches --endpoint-url ${{ secrets.CACHE_ENDPOINT_URL }} --profile minio > /dev/null
           echo "Can authenticate with minio!"

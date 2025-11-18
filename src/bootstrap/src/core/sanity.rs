@@ -19,7 +19,7 @@ use crate::builder::Builder;
 use crate::builder::Kind;
 #[cfg(not(test))]
 use crate::core::build_steps::tool;
-use crate::core::config::{CompilerBuiltins, Target};
+use crate::core::config::{CompilerBuiltins, Target, TargetSelection};
 use crate::utils::exec::command;
 use crate::{Build, Subcommand};
 
@@ -362,6 +362,13 @@ than building it.
                 .entry(certified_target)
                 .or_insert_with(|| Target::from_triple(&certified_target.triple));
         }
+        // Ferrocene addition: set `no_std` for thumb
+        let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
+        build
+            .config
+            .target_config
+            .entry(thumb)
+            .or_insert_with(|| Target::from_triple(&thumb.triple));
 
         // compiler-rt c fallbacks for wasm cannot be built with gcc
         if target.contains("wasm")

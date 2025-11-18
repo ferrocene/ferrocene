@@ -272,6 +272,7 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container-prepare: ferrocene-images/ci:ubuntu-20-main
       # container: ferrocene-images/ci:ubuntu-20-main
       test-device-addr: "172.31.1.11:12345"
       # emulator-container: ferrocene-images/ci:ubuntu-24-main
@@ -310,6 +311,7 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container-prepare: ferrocene-images/ci:ubuntu-20-main
       # container: ferrocene-images/ci:ubuntu-20-main
       test-device-addr: "172.31.1.105:12345"
       # emulator-container: ferrocene-images/ci:ubuntu-24-main

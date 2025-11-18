@@ -106,6 +106,10 @@ jobs:
           aws_access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
           aws_secret_access_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
+
+          [services ferrous-minio]
+          s3 =
+            endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
           EOF
           aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
           echo "Can authenticate with minio"

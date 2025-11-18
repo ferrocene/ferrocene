@@ -28,7 +28,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_is_null"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_null(self) -> bool {
         self.cast_const().is_null()
     }
@@ -602,7 +601,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_mut<'a>(self) -> Option<&'a mut T> {
         // SAFETY: the caller must guarantee that `self` is be valid for
         // a mutable reference if it isn't null.

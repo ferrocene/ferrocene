@@ -11,7 +11,6 @@ pub mod targets;
 pub mod util;
 
 // Ferrocene addition
-#[rustfmt::skip]
 pub mod diff;
 pub mod symbol_report;
 

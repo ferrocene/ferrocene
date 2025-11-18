@@ -12,7 +12,8 @@ Ferrocene is qualified exclusively for the following command line options:
 - Users shall pass command line option ``--edition 2021`` to each invocation of
   rustc.
 
-- Users shall pass command line option ``-O`` to each invocation of rustc.
+- Users shall pass command line option ``-C opt-level=2`` to each invocation of
+  rustc.
 
 - When building certified software with the certified core library, users
   shall pass command line option ``-C panic=abort`` to each invocation of rustc.

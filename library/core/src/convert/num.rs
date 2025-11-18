@@ -126,11 +126,8 @@ impl_from!(u16 => u32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]
 impl_from!(u16 => u64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(u16 => u128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(u32 => u64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(u32 => u128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_from!(u64 => u128, #[stable(feature = "i128", since = "1.26.0")]);
 
 // signed integer -> signed integer

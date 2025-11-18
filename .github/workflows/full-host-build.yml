@@ -101,15 +101,16 @@ jobs:
           web_identity_token_file = /tmp/awsjwt
 
           [profile minio]
+          region = eu-central-1
           endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
-          access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          aws_access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          aws_secret_acess_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
           EOF
-          aws sts get-caller-identity --profile minio > /dev/null
+          aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
           echo "Can authenticate with minio"
           aws sts get-caller-identity --profile amazon > /dev/null
-          echo "Can authenticate with minio"
+          echo "Can authenticate with amazon"
 
 
       - name: Configure AWS Credentials

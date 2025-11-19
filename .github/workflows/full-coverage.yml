@@ -1,5 +1,5 @@
-name: Doc host
-run-name: Doc
+name: Coverage
+run-name: Coverage
 
 defaults:
   run:
@@ -55,6 +55,7 @@ env:
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
+  AWS_DEFAULT_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
   coverage:
@@ -69,32 +70,16 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
-      
-      # Note: We do not restore the build cache in this job since `core` needs to be rebuilt and we'll get "multiple candidate" errors
-      - name: Get LLVM cache
-        if: ${{ inputs.use-minio == true }}
-        shell: bash
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        run: |
-          if [ -z "${AWS_CA_BUNDLE}" ]; then
-            unset AWS_CA_BUNDLE
-          fi
-          uv run ferrocene/ci/scripts/llvm_cache.py download --url ${{ inputs.cache-llvm-uri }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
         with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
 
       # Note: We do not restore the build cache in this job since `core` needs to be rebuilt and we'll get "multiple candidate" errors
       - name: Get LLVM cache
-        if: ${{ inputs.use-minio == false }}
         shell: bash
         run: |
           if [ -z "${AWS_CA_BUNDLE}" ]; then
@@ -114,6 +99,7 @@ jobs:
 
       - name: Upload artifacts to S3
         env:
+          AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ env.ARTIFACT }}
         run:

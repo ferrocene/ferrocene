@@ -66,10 +66,9 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
-  AWS_REGION: us-east-1
-  AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
+  AWS_DEFAULT_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
   targets:
@@ -81,17 +80,8 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == false }}
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          role-duration-seconds: 7200
-
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == false }}
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
@@ -100,42 +90,8 @@ jobs:
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
-        if: ${{ inputs.use-minio == false }}
         with:
           version: ${{ inputs.qnx-version }}
-
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}
-
-      - name: Download QNX
-        uses: ./.github/actions/qnx/
-        if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        with:
-          version: ${{ inputs.qnx-version }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == true }}
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          role-duration-seconds: 7200
 
       - name: Run
         uses: ./.github/actions/run/
@@ -148,16 +104,9 @@ jobs:
             
             ./x.py --stage 2 dist rust-std
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == true }}
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          role-duration-seconds: 7200
-
       - name: Upload artifacts to S3
         env:
+          AWS_PROFILE: amazon # Dist artifacts always go to AWS
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run:

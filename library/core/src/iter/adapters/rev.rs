@@ -10,7 +10,7 @@ use crate::ops::Try;
 ///
 /// [`rev`]: Iterator::rev
 /// [`Iterator`]: trait.Iterator.html
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
+#[cfg_attr(true, derive(Clone, Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Rev<T> {

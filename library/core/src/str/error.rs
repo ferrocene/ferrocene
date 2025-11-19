@@ -44,7 +44,7 @@ use crate::fmt;
 ///     }
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Eq, PartialEq, Clone, Debug))]
+#[cfg_attr(true, derive(Copy, Eq, PartialEq, Clone, Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Utf8Error {
     pub(super) valid_up_to: usize,

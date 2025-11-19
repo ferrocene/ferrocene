@@ -9,7 +9,7 @@ use crate::fmt;
 
 /// The error type returned when a checked integral type conversion fails.
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Copy, Clone, PartialEq, Eq))]
+#[cfg_attr(true, derive(Debug, Copy, Clone, PartialEq, Eq))]
 pub struct TryFromIntError(pub(crate) ());
 
 #[stable(feature = "try_from", since = "1.34.0")]

@@ -41,8 +41,8 @@ use crate::marker::Destruct;
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeFull"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Default, PartialEq, Eq))]
+#[cfg_attr(true, derive(Copy, Hash))]
+#[cfg_attr(true, derive_const(Clone, Default, PartialEq, Eq))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFull;
 
@@ -80,7 +80,7 @@ impl fmt::Debug for RangeFull {
 /// ```
 #[lang = "Range"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[cfg_attr(true, derive(Eq, Hash))]
 #[derive_const(Clone, Default, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
@@ -197,7 +197,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 /// ```
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[cfg_attr(true, derive(Eq, Hash))]
 #[derive_const(Clone, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
@@ -283,8 +283,8 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeTo"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Eq, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq))]
+#[cfg_attr(true, derive(Copy, Eq, Hash))]
+#[cfg_attr(true, derive_const(Clone, PartialEq))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeTo<Idx> {
     /// The upper bound of the range (exclusive).
@@ -361,8 +361,8 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 /// ```
 #[lang = "RangeInclusive"]
 #[doc(alias = "..=")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Eq, PartialEq))] // not Copy -- see #27186
+#[cfg_attr(true, derive(Clone, Hash))]
+#[cfg_attr(true, derive_const(Eq, PartialEq))] // not Copy -- see #27186
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeInclusive<Idx> {
     // Note that the fields here are not public to allow changing the
@@ -616,8 +616,8 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeToInclusive"]
 #[doc(alias = "..=")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq))]
+#[cfg_attr(true, derive(Copy, Hash))]
+#[cfg_attr(true, derive(Clone, PartialEq, Eq))]
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)
@@ -701,8 +701,8 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
 ///
 /// [`BTreeMap::range`]: ../../std/collections/btree_map/struct.BTreeMap.html#method.range
 #[stable(feature = "collections_bound", since = "1.17.0")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq, PartialEq))]
+#[cfg_attr(true, derive(Copy, Debug, Hash))]
+#[cfg_attr(true, derive_const(Clone, Eq, PartialEq))]
 pub enum Bound<T> {
     /// An inclusive bound.
     #[stable(feature = "collections_bound", since = "1.17.0")]

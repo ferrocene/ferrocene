@@ -13,7 +13,7 @@ use crate::panicking::PanicFmt;
 /// [`std::panic::PanicHookInfo`]: ../../std/panic/struct.PanicHookInfo.html
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(true, derive(Debug))]
 pub struct PanicInfo<'a> {
     #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     message: &'a PanicFmt<'a>,

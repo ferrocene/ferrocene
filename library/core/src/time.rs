@@ -86,7 +86,7 @@ const DAYS_PER_WEEK: u64 = 7;
 /// crate to do so.
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default))]
+#[cfg_attr(true, derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy, PartialEq, PartialOrd))]
 #[rustc_diagnostic_item = "Duration"]
 pub struct Duration {
@@ -1510,7 +1510,7 @@ impl fmt::Debug for Duration {
 ///     println!("Failed conversion to Duration: {e}");
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(true, derive(Debug, Clone, PartialEq, Eq))]
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
 pub struct TryFromFloatSecsError {
     kind: TryFromFloatSecsErrorKind,
@@ -1532,7 +1532,7 @@ impl fmt::Display for TryFromFloatSecsError {
     }
 }
 
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(true, derive(Debug, Clone, PartialEq, Eq))]
 enum TryFromFloatSecsErrorKind {
     // Value is negative.
     Negative,

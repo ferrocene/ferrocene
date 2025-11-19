@@ -1412,7 +1412,7 @@ forward_iterator! { RSplitNMut: T, &'a mut [T] }
 ///
 /// [`windows`]: slice::windows
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(true, derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Windows<'a, T: 'a> {
@@ -1576,7 +1576,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Windows<'a, T> {
 ///
 /// [`chunks`]: slice::chunks
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(true, derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Chunks<'a, T: 'a> {
@@ -1767,7 +1767,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Chunks<'a, T> {
 ///
 /// [`chunks_mut`]: slice::chunks_mut
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(true, derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct ChunksMut<'a, T: 'a> {

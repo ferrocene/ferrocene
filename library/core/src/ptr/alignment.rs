@@ -17,7 +17,7 @@ use crate::mem;
 /// Note that particularly large alignments, while representable in this type,
 /// are likely not to be supported by actual allocators and linkers.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
+#[cfg_attr(true, derive(Copy, Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(transparent)]
 pub struct Alignment(AlignmentEnum);
@@ -270,7 +270,7 @@ impl const Default for Alignment {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
+#[cfg_attr(true, derive(PartialEq, Eq))]
 #[derive(Copy, Clone)]
 #[repr(usize)]
 enum AlignmentEnum {
@@ -293,7 +293,7 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
+#[cfg_attr(true, derive(PartialEq, Eq))]
 #[derive(Copy, Clone)]
 #[repr(usize)]
 enum AlignmentEnum {
@@ -332,7 +332,7 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
+#[cfg_attr(true, derive(PartialEq, Eq))]
 #[derive(Copy, Clone)]
 #[repr(usize)]
 enum AlignmentEnum {

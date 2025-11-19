@@ -23,7 +23,7 @@ use crate::iter::{TrustedLen, UncheckedIterator};
 /// [`Iterator`]: trait.Iterator.html
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
+#[cfg_attr(true, derive(Clone, Debug))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Clone))]
 pub struct Cloned<I> {
     it: I,

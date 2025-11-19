@@ -47,7 +47,7 @@ fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
     label = "`{Self}` is not an iterator",
     message = "`{Self}` is not an iterator"
 )]
-#[cfg_attr(not(feature = "ferrocene_certified"), doc(notable_trait))]
+#[cfg_attr(true, doc(notable_trait))]
 #[lang = "iterator"]
 #[rustc_diagnostic_item = "Iterator"]
 #[must_use = "iterators are lazy and do nothing unless consumed"]

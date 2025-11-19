@@ -666,7 +666,7 @@ jobs:
 
   traceability-matrix:
     name: Tracability Matrix
-    uses: ./.github/workflows/full-traceability-matrix.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -678,8 +678,17 @@ jobs:
       # - test-aarch64-unknown-nto-qnx710
     secrets: inherit
     with:
+      run-name: Traceability Matrix
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
+      script: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ./x.py run ferrocene/tools/traceability-matrix
+      configure: |
+        --set
+        ferrocene.test-outcomes=custom
+        --set
+        ferrocene.test-outcomes-dir=/tmp/test-outcomes
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -687,6 +696,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: ${{ github.job }}
 
   finish-build:
     name: Finish build

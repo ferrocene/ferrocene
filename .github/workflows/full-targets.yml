@@ -1,4 +1,4 @@
-# 
+# FIXME: This could instead be `full-job.yml`, but it doesn't know how to do QNX.
 
 name: Dist targets
 run-name: Dist (${{inputs.host-triple}})

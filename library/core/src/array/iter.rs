@@ -11,7 +11,7 @@ use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
 use crate::{fmt, ptr};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Try};
 

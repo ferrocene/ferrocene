@@ -21,7 +21,7 @@ use crate::panic::const_assert;
 use crate::{cfg_select, intrinsics, mem};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{intrinsics, mem};
 

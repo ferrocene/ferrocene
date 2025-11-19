@@ -6,7 +6,7 @@ use super::validations::run_utf8_validation;
 use crate::{mem, ptr};
 
 // Ferrocene addition: Imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::mem;
 

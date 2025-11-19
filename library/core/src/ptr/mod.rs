@@ -412,7 +412,7 @@ use crate::num::NonZero;
 use crate::{fmt, hash, intrinsics, ub_checks};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{
     intrinsics,
@@ -1496,7 +1496,7 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
         swap_prefix!(4 2 1);
         #[cfg(not(feature = "ferrocene_certified"))]
         debug_assert_eq!(i, bytes);
-        #[cfg(feature = "ferrocene_certified")]
+        #[cfg(false)]
         debug_assert!(i == bytes);
     }
 

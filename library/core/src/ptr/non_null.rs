@@ -21,7 +21,7 @@ use crate::ub_checks::assert_unsafe_precondition;
 use crate::{fmt, hash, intrinsics, mem, ptr};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{intrinsics, marker::PointeeSized, mem};
 

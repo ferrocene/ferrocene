@@ -71,7 +71,7 @@ pub trait Pointee: PointeeSized {
     type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
     /// The type for metadata in pointers and references to `Self`.
     #[lang = "metadata_type"]
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     #[rustfmt::skip]
     type Metadata: /* fmt::Debug */ Copy + Send + Sync + Ord /* Hash */ + Unpin + Freeze;
 }

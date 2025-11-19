@@ -20,7 +20,7 @@ use crate::str::FromStr;
 use crate::{fmt, intrinsics, ptr, ub_checks};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{intrinsics, ub_checks};
 

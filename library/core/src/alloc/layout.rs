@@ -16,7 +16,7 @@ use crate::ptr::{Alignment, NonNull};
 use crate::{assert_unsafe_precondition, fmt, mem};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, ptr::Alignment};
 

@@ -9,7 +9,7 @@ use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ops, range};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::ops;
 
@@ -114,7 +114,7 @@ mod private_slice_index {
     use super::{ops, range};
 
     // Ferrocene addition: imports for certified subset
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     #[rustfmt::skip]
     use super::ops;
 

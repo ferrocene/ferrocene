@@ -16,7 +16,7 @@ use crate::num::NonZero;
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use {
     super::super::{Cloned, DoubleEndedIterator, Enumerate, Map, Rev, Skip, Sum, Take, Zip},

@@ -11,7 +11,7 @@ use crate::num::NonZero;
 use crate::ops::Try;
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::iter::{TrustedLen, UncheckedIterator};
 

@@ -29,7 +29,7 @@ use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ascii, mem};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::mem;
 
@@ -91,7 +91,7 @@ pub use traits::FromStr;
 pub use validations::{next_code_point, utf8_char_width};
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 pub use {error::Utf8Error, validations::utf8_char_width};
 

@@ -7,7 +7,7 @@ use crate::mem::{self, SizedTypeProperties};
 use crate::slice::{self, SliceIndex};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::mem;
 

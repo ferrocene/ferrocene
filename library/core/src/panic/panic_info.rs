@@ -39,7 +39,7 @@ pub struct PanicMessage<'a> {
 
 // Ferrocene addition: When `ferrocene_certified` is enabled, `PanicInfo` only holds a reference to
 // a static string with the panic message. This `impl` adds a new builder to reflect that.
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 impl<'a> PanicInfo<'a> {
     #[inline]
     pub(crate) fn new(message: &'a PanicFmt<'a>) -> Self {

@@ -90,7 +90,7 @@
 use crate::{fmt, hash, intrinsics};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::intrinsics;
 

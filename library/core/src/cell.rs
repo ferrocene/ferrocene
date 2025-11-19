@@ -270,7 +270,7 @@ use crate::ptr::{self, NonNull};
 use crate::range;
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{marker::Destruct, mem};
 

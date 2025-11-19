@@ -7,7 +7,7 @@ use crate::mem::ManuallyDrop;
 use crate::{fmt, intrinsics, ptr, slice};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{intrinsics, ptr, slice};
 

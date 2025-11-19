@@ -548,7 +548,7 @@ use crate::ops::{self, ControlFlow, Deref, DerefMut};
 use crate::{convert, fmt, hint};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{convert, hint};
 

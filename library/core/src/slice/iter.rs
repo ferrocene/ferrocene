@@ -20,7 +20,7 @@ use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 use crate::{cmp, fmt};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{
     cmp,

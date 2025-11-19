@@ -31,7 +31,7 @@ use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::iter::UncheckedIterator;
 

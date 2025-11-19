@@ -35,6 +35,6 @@ pub(crate) trait UncheckedIterator: TrustedLen {
         unsafe { opt.unwrap_unchecked() }
     }
     // Ferrocene addition: gate the default implementation
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     unsafe fn next_unchecked(&mut self) -> Self::Item;
 }

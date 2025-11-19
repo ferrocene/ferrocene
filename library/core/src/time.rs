@@ -29,7 +29,7 @@ use crate::num::niche_types::Nanoseconds;
 use crate::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::ops::{Add, Div};
 

@@ -126,7 +126,7 @@ pub trait ExactSizeIterator: Iterator {
     /// Ferrocene addition: Gate default implementation
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     fn len(&self) -> usize;
 
     /// Returns `true` if the iterator is empty.

@@ -13,7 +13,7 @@ use crate::num::NonZero;
 use crate::ops::{ControlFlow, Try};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::ops::Try;
 

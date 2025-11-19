@@ -25,7 +25,7 @@ use crate::ub_checks::assert_unsafe_precondition;
 use crate::{fmt, hint, ptr, range, slice};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{intrinsics::unchecked_sub, mem::SizedTypeProperties, ptr};
 
@@ -105,7 +105,7 @@ pub use raw::{from_raw_parts, from_raw_parts_mut};
 
 // Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 pub use iter::{Chunks, ChunksMut, Windows};
 

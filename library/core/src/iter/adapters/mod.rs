@@ -96,7 +96,7 @@ pub use self::{
 
 // Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 pub use self::{enumerate::Enumerate, map::Map, rev::Rev, skip::Skip, take::Take, zip::Zip};
 

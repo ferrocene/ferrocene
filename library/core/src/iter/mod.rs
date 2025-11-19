@@ -498,7 +498,7 @@ pub use self::traits::{
 
 // Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 pub use self::{
     adapters::{Enumerate, Map, Rev, Skip, Take, Zip},

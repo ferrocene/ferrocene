@@ -594,7 +594,7 @@ use crate::pin::Pin;
 use crate::{cmp, convert, hint, mem, slice};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{convert, hint, mem, panicking::panic};
 
@@ -982,13 +982,13 @@ impl<T> Option<T> {
     pub const fn expect(
         self,
         #[cfg(not(feature = "ferrocene_certified"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified")] msg: &'static str,
+        #[cfg(false)] msg: &'static str,
     ) -> T {
         match self {
             Some(val) => val,
             #[cfg(not(feature = "ferrocene_certified"))]
             None => expect_failed(msg),
-            #[cfg(feature = "ferrocene_certified")]
+            #[cfg(false)]
             None => panic(msg),
         }
     }

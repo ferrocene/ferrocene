@@ -35,14 +35,14 @@ use crate::intrinsics::const_eval_select;
 use crate::panic::{Location, PanicInfo};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::panic::PanicInfo;
 
 /// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) type PanicFmt<'a> = fmt::Arguments<'a>;
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(false)]
 pub(crate) type PanicFmt<'a> = &'a &'static str;
 
 #[cfg(feature = "panic_immediate_abort")]
@@ -93,7 +93,7 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
         /* can_unwind */ true,
         /* force_no_backtrace */ false,
     );
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     let pi = PanicInfo::new(&fmt);
     // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
     unsafe { panic_impl(&pi) }
@@ -138,7 +138,7 @@ pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) ->
                 /* can_unwind */ false,
                 _force_no_backtrace,
             );
-            #[cfg(feature = "ferrocene_certified")]
+            #[cfg(false)]
             let pi = PanicInfo::new(&fmt);
 
             // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
@@ -172,7 +172,7 @@ pub const fn panic(expr: &'static str) -> ! {
     // payload.
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_fmt(fmt::Arguments::from_str(expr));
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     panic_fmt(&expr)
 }
 
@@ -201,7 +201,7 @@ macro_rules! panic_const {
                 // See the comment in `panic(&'static str)` for why we use `Arguments::from_str` here.
                 #[cfg(not(feature = "ferrocene_certified"))]
                 panic_fmt(fmt::Arguments::from_str($message));
-                #[cfg(feature = "ferrocene_certified")]
+                #[cfg(false)]
                 panic_fmt(&$message);
             }
         )+
@@ -255,7 +255,7 @@ pub mod panic_const {
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::from_str(expr), /* force_no_backtrace */ false);
-    #[cfg(feature = "ferrocene_certified")]
+    #[cfg(false)]
     panic_nounwind_fmt(&expr, /* force_no_backtrace */ false);
 }
 

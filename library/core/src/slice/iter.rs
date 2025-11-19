@@ -3046,7 +3046,7 @@ pub struct ChunkBy<'a, T: 'a, P> {
     predicate: P,
 }
 
-#[stable(feature = "slice_group_by", since = "1.77.0")]
+// #[stable(feature = "slice_group_by", since = "1.77.0")]
 impl<'a, T: 'a, P> ChunkBy<'a, T, P> {
     pub(super) const fn new(slice: &'a [T], predicate: P) -> Self {
         ChunkBy { slice, predicate }
@@ -3140,7 +3140,7 @@ pub struct ChunkByMut<'a, T: 'a, P> {
     predicate: P,
 }
 
-#[stable(feature = "slice_group_by", since = "1.77.0")]
+// #[stable(feature = "slice_group_by", since = "1.77.0")]
 impl<'a, T: 'a, P> ChunkByMut<'a, T, P> {
     pub(super) const fn new(slice: &'a mut [T], predicate: P) -> Self {
         ChunkByMut { slice, predicate }

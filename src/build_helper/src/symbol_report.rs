@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::collections::{BTreeMap, BTreeSet};
 
 pub use serde_json;
@@ -15,6 +18,12 @@ impl SymbolReport {
 
     pub fn new() -> Self {
         Self { symbols: Vec::new(), annotations: BTreeMap::new() }
+    }
+
+    pub fn to_qualified_fn_list(&self) -> QualifiedFnList {
+        let mut a = self.symbols.iter().map(|f| f.qualified_name.clone()).collect::<Vec<_>>();
+        a.sort_unstable();
+        QualifiedFnList(a)
     }
 }
 
@@ -46,3 +55,6 @@ impl From<Function> for SerdeFunction {
         Self(func.qualified_name, func.filename, func.start_line, func.end_line)
     }
 }
+
+#[derive(PartialEq, serde_derive::Deserialize, serde_derive::Serialize)]
+pub struct QualifiedFnList(Vec<String>);

@@ -862,7 +862,7 @@ impl<T: CloneFromCell> Cell<T> {
 /// See the [module-level documentation](self) for more.
 #[rustc_diagnostic_item = "RefCell"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
+#[cfg_attr(false, expect(dead_code))]
 pub struct RefCell<T: ?Sized> {
     borrow: Cell<BorrowCounter>,
     // Stores the location of the earliest currently active borrow.

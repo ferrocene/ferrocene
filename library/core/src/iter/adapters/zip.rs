@@ -15,7 +15,7 @@ use crate::num::NonZero;
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
+#[cfg_attr(false, expect(dead_code))]
 pub struct Zip<A, B> {
     a: A,
     b: B,

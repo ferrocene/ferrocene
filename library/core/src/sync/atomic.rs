@@ -462,7 +462,7 @@ unsafe impl<T> Sync for AtomicPtr<T> {}
 /// [nomicon]: ../../../nomicon/atomics.html
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(true, derive(Copy, Clone, Debug, Eq, PartialEq, Hash))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
+#[cfg_attr(false, derive(Copy, Clone))]
 #[non_exhaustive]
 #[rustc_diagnostic_item = "Ordering"]
 pub enum Ordering {

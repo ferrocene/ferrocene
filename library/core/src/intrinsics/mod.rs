@@ -79,7 +79,7 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 /// `atomic::Ordering` so that we can make it `ConstParamTy` and fix the values used here without a
 /// risk of leaking that to stable code.
 #[cfg_attr(true, derive(Debug, ConstParamTy, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(ConstParamTy, PartialEq, Eq))]
+#[cfg_attr(false, derive(ConstParamTy, PartialEq, Eq))]
 pub enum AtomicOrdering {
     // These values must match the compiler's `AtomicOrdering` defined in
     // `rustc_middle/src/ty/consts/int.rs`!

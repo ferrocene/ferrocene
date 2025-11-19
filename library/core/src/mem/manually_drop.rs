@@ -154,7 +154,7 @@ use crate::ptr;
 #[lang = "manually_drop"]
 #[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
 #[cfg_attr(true, derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone, PartialEq))]
+#[cfg_attr(false, derive(Copy, Clone, PartialEq))]
 #[repr(transparent)]
 #[rustc_pub_transparent]
 pub struct ManuallyDrop<T: ?Sized> {

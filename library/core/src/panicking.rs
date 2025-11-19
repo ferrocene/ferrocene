@@ -301,7 +301,7 @@ pub const fn panic_display<T: fmt::Display>(x: &T) -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
 #[lang = "panic_bounds_check"] // needed by codegen for panic on OOB array/slice access
-#[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
+#[cfg_attr(false, expect(unused_variables))]
 fn panic_bounds_check(index: usize, len: usize) -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()

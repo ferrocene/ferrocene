@@ -1,5 +1,5 @@
 #![stable(feature = "duration_core", since = "1.25.0")]
-#![cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
+#![cfg_attr(false, allow(dead_code))]
 
 //! Temporal quantification.
 //!
@@ -87,7 +87,7 @@ const DAYS_PER_WEEK: u64 = 7;
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
 #[cfg_attr(true, derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy, PartialEq, PartialOrd))]
+#[cfg_attr(false, derive(Clone, Copy, PartialEq, PartialOrd))]
 #[rustc_diagnostic_item = "Duration"]
 pub struct Duration {
     secs: u64,
@@ -1016,7 +1016,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
+    #[cfg_attr(false, expect(unused_variables))]
     pub fn from_secs_f32(secs: f32) -> Duration {
         match Duration::try_from_secs_f32(secs) {
             Ok(v) => v,

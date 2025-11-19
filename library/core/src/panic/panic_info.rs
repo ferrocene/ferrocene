@@ -15,7 +15,7 @@ use crate::panicking::PanicFmt;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg_attr(true, derive(Debug))]
 pub struct PanicInfo<'a> {
-    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
+    #[cfg_attr(false, expect(dead_code))]
     message: &'a PanicFmt<'a>,
     #[cfg(not(feature = "ferrocene_certified"))]
     location: &'a Location<'a>,

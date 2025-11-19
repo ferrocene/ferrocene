@@ -18,7 +18,7 @@ use crate::mem;
 /// are likely not to be supported by actual allocators and linkers.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[cfg_attr(true, derive(Copy, Clone, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
+#[cfg_attr(false, derive(Copy, Clone))]
 #[repr(transparent)]
 pub struct Alignment(AlignmentEnum);
 

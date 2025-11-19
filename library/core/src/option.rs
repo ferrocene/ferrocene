@@ -602,7 +602,7 @@ use crate::{convert, hint, mem, panicking::panic};
 #[doc(search_unbox)]
 #[cfg_attr(true, derive(Copy, Debug, Hash))]
 #[cfg_attr(true, derive_const(Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Copy))]
+#[cfg_attr(false, derive(Copy))]
 #[rustc_diagnostic_item = "Option"]
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -2492,7 +2492,7 @@ unsafe impl<A> TrustedLen for Item<A> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(true, derive(Debug))]
 pub struct Iter<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
+    #[cfg_attr(false, expect(dead_code))]
     inner: Item<&'a A>,
 }
 
@@ -2549,7 +2549,7 @@ impl<A> Clone for Iter<'_, A> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(true, derive(Debug))]
 pub struct IterMut<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
+    #[cfg_attr(false, expect(dead_code))]
     inner: Item<&'a mut A>,
 }
 

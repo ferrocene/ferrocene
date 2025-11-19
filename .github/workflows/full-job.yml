@@ -1,3 +1,5 @@
+# A generic Ferrocene job, when in doubt, start with this workflow for any new jobs.
+
 name: Ferrocene Job
 run-name: ${{ inputs.run-name }}
 
@@ -64,7 +66,7 @@ env:
 
         
 jobs:
-  dist:
+  job:
     name: ${{ inputs.run-name }}
     runs-on: ${{ inputs.runner }}
     steps:

@@ -1486,7 +1486,6 @@ impl f32 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn abs(self) -> f32 {
         intrinsics::fabsf32(self)
     }

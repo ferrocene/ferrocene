@@ -75,8 +75,7 @@ macro_rules! assert_unsafe_precondition {
                         "\n\nThis indicates a bug in the program. \
                         This Undefined Behavior check is optional, and cannot be relied on for safety.");
                     // blocked on fmt::Arguments
-                    #[cfg(not(feature = "ferrocene_certified"))]
-                    ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::from_str(msg), false);
+                                        ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::from_str(msg), false);
                     #[cfg(false)]
                     ::core::panicking::panic_nounwind(msg);
                 }

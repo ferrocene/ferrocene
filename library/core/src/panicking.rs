@@ -28,10 +28,8 @@
     issue = "none"
 )]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
 
 // Ferrocene addition: imports for certified subset
@@ -40,7 +38,6 @@ use crate::panic::{Location, PanicInfo};
 use crate::panic::PanicInfo;
 
 /// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) type PanicFmt<'a> = fmt::Arguments<'a>;
 #[cfg(false)]
 pub(crate) type PanicFmt<'a> = &'a &'static str;
@@ -86,8 +83,7 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
         fn panic_impl(pi: &PanicInfo<'_>) -> !;
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
-    let pi = PanicInfo::new(
+        let pi = PanicInfo::new(
         &fmt,
         Location::caller(),
         /* can_unwind */ true,
@@ -131,8 +127,7 @@ pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) ->
             }
 
             // PanicInfo with the `can_unwind` flag set to false forces an abort.
-            #[cfg(not(feature = "ferrocene_certified"))]
-            let pi = PanicInfo::new(
+                        let pi = PanicInfo::new(
                 &fmt,
                 Location::caller(),
                 /* can_unwind */ false,
@@ -170,8 +165,7 @@ pub const fn panic(expr: &'static str) -> ! {
     // payload without any allocation or copying. Shorter-lived strings would become invalid as
     // stack frames get popped during unwinding, and couldn't be directly referenced from the
     // payload.
-    #[cfg(not(feature = "ferrocene_certified"))]
-    panic_fmt(fmt::Arguments::from_str(expr));
+        panic_fmt(fmt::Arguments::from_str(expr));
     #[cfg(false)]
     panic_fmt(&expr)
 }
@@ -199,8 +193,7 @@ macro_rules! panic_const {
             #[ferrocene::annotation("Cannot be covered as this code cannot be reached during runtime.")]
             pub const fn $lang() -> ! {
                 // See the comment in `panic(&'static str)` for why we use `Arguments::from_str` here.
-                #[cfg(not(feature = "ferrocene_certified"))]
-                panic_fmt(fmt::Arguments::from_str($message));
+                                panic_fmt(fmt::Arguments::from_str($message));
                 #[cfg(false)]
                 panic_fmt(&$message);
             }
@@ -253,8 +246,7 @@ pub mod panic_const {
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
 pub const fn panic_nounwind(expr: &'static str) -> ! {
-    #[cfg(not(feature = "ferrocene_certified"))]
-    panic_nounwind_fmt(fmt::Arguments::from_str(expr), /* force_no_backtrace */ false);
+        panic_nounwind_fmt(fmt::Arguments::from_str(expr), /* force_no_backtrace */ false);
     #[cfg(false)]
     panic_nounwind_fmt(&expr, /* force_no_backtrace */ false);
 }
@@ -263,7 +255,6 @@ pub const fn panic_nounwind(expr: &'static str) -> ! {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
     panic_nounwind_fmt(fmt::Arguments::from_str(expr), /* force_no_backtrace */ true);
 }
@@ -271,7 +262,6 @@ pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
 #[inline]
 #[track_caller]
 #[rustc_diagnostic_item = "unreachable_display"] // needed for `non-fmt-panics` lint
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn unreachable_display<T: fmt::Display>(x: &T) -> ! {
     panic_fmt(format_args!("internal error: entered unreachable code: {}", *x));
 }
@@ -282,7 +272,6 @@ pub fn unreachable_display<T: fmt::Display>(x: &T) -> ! {
 #[track_caller]
 #[rustc_diagnostic_item = "panic_str_2015"]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn panic_str_2015(expr: &str) -> ! {
     panic_display(&expr);
 }
@@ -292,7 +281,6 @@ pub const fn panic_str_2015(expr: &str) -> ! {
 #[lang = "panic_display"] // needed for const-evaluated panics
 #[rustc_do_not_const_check] // hooked by const-eval
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn panic_display<T: fmt::Display>(x: &T) -> ! {
     panic_fmt(format_args!("{}", *x));
 }
@@ -314,7 +302,6 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
 #[track_caller]
 #[lang = "panic_misaligned_pointer_dereference"] // needed by codegen for panic on misaligned pointer deref
 #[rustc_nounwind] // `CheckAlignment` MIR pass requires this function to never unwind
-#[cfg(not(feature = "ferrocene_certified"))]
 fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
@@ -333,7 +320,6 @@ fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
 #[track_caller]
 #[lang = "panic_null_pointer_dereference"] // needed by codegen for panic on null pointer deref
 #[rustc_nounwind] // `CheckNull` MIR pass requires this function to never unwind
-#[cfg(not(feature = "ferrocene_certified"))]
 fn panic_null_pointer_dereference() -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
@@ -350,7 +336,6 @@ fn panic_null_pointer_dereference() -> ! {
 #[track_caller]
 #[lang = "panic_invalid_enum_construction"] // needed by codegen for panic on invalid enum construction.
 #[rustc_nounwind] // `CheckEnums` MIR pass requires this function to never unwind
-#[cfg(not(feature = "ferrocene_certified"))]
 fn panic_invalid_enum_construction(source: u128) -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
@@ -390,7 +375,6 @@ fn panic_cannot_unwind() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[lang = "panic_in_cleanup"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn panic_in_cleanup() -> ! {
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind_nobacktrace("panic in a destructor during cleanup")
@@ -399,7 +383,6 @@ fn panic_in_cleanup() -> ! {
 /// This function is used instead of panic_fmt in const eval.
 #[lang = "const_panic_fmt"] // needed by const-eval machine to replace calls to `panic_fmt` lang item
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn const_panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
     if let Some(msg) = fmt.as_str() {
         // The panic_display function is hooked by const eval.
@@ -414,7 +397,6 @@ pub const fn const_panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
 
 #[derive(Debug)]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub enum AssertKind {
     Eq,
     Ne,
@@ -426,7 +408,6 @@ pub enum AssertKind {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn assert_failed<T, U>(
     kind: AssertKind,
     left: &T,
@@ -445,7 +426,6 @@ where
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn assert_matches_failed<T: fmt::Debug + ?Sized>(
     left: &T,
     right: &str,
@@ -465,7 +445,6 @@ pub fn assert_matches_failed<T: fmt::Debug + ?Sized>(
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn assert_failed_inner(
     kind: AssertKind,
     left: &dyn fmt::Debug,

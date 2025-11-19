@@ -1,9 +1,7 @@
 use super::*;
 use crate::cmp::Ordering::{Equal, Greater, Less};
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
 
 // Ferrocene addition: imports for certified subset
@@ -134,8 +132,7 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
+        pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: PointeeSized,
     {
@@ -150,8 +147,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_mut"]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn cast_mut(self) -> *mut T {
+        pub const fn cast_mut(self) -> *mut T {
         self as _
     }
 
@@ -192,8 +188,7 @@ impl<T: PointeeSized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn expose_provenance(self) -> usize {
+        pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
 
@@ -211,8 +206,7 @@ impl<T: PointeeSized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn with_addr(self, addr: usize) -> Self {
+        pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
         // meanwhile, we can implement it with `wrapping_offset`, which preserves the pointer's
         // provenance.
@@ -231,8 +225,7 @@ impl<T: PointeeSized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
+        pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
     }
 
@@ -241,8 +234,7 @@ impl<T: PointeeSized> *const T {
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
+        pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }
 
@@ -275,8 +267,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
+        pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid
         // for a reference if it isn't null.
         if self.is_null() { None } else { unsafe { Some(&*self) } }
@@ -308,8 +299,7 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
+        pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
         unsafe { &*self }
     }
@@ -334,8 +324,7 @@ impl<T: PointeeSized> *const T {
     /// ```
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
+        pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
         T: Sized,
     {
@@ -362,8 +351,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn offset(self, count: isize) -> *const T
+        pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,
     {
@@ -416,8 +404,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn byte_offset(self, count: isize) -> Self {
+        pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset`.
         unsafe { self.cast::<u8>().offset(count).with_metadata_of(self) }
     }
@@ -478,8 +465,7 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn wrapping_offset(self, count: isize) -> *const T
+        pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
     {
@@ -501,8 +487,7 @@ impl<T: PointeeSized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn wrapping_byte_offset(self, count: isize) -> Self {
+        pub const fn wrapping_byte_offset(self, count: isize) -> Self {
         self.cast::<u8>().wrapping_offset(count).with_metadata_of(self)
     }
 
@@ -540,8 +525,7 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "ptr_mask", issue = "98290")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn mask(self, mask: usize) -> *const T {
+        pub fn mask(self, mask: usize) -> *const T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)
     }
 
@@ -630,8 +614,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset_from", since = "1.65.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn offset_from(self, origin: *const T) -> isize
+        pub const unsafe fn offset_from(self, origin: *const T) -> isize
     where
         T: Sized,
     {
@@ -654,8 +637,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: *const U) -> isize {
+        pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: *const U) -> isize {
         // SAFETY: the caller must uphold the safety contract for `offset_from`.
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
     }
@@ -766,8 +748,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {
+        pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {
         // SAFETY: the caller must uphold the safety contract for `offset_from_unsigned`.
         unsafe { self.cast::<u8>().offset_from_unsigned(origin.cast::<u8>()) }
     }
@@ -825,8 +806,7 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn guaranteed_ne(self, other: *const T) -> Option<bool>
+        pub const fn guaranteed_ne(self, other: *const T) -> Option<bool>
     where
         T: Sized,
     {
@@ -906,8 +886,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn byte_add(self, count: usize) -> Self {
+        pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
     }
@@ -961,8 +940,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn sub(self, count: usize) -> Self
+        pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
     {
@@ -1020,8 +998,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn byte_sub(self, count: usize) -> Self {
+        pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub`.
         unsafe { self.cast::<u8>().sub(count).with_metadata_of(self) }
     }
@@ -1081,8 +1058,7 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn wrapping_add(self, count: usize) -> Self
+        pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
     {
@@ -1102,8 +1078,7 @@ impl<T: PointeeSized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn wrapping_byte_add(self, count: usize) -> Self {
+        pub const fn wrapping_byte_add(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_add(count).with_metadata_of(self)
     }
 
@@ -1162,8 +1137,7 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn wrapping_sub(self, count: usize) -> Self
+        pub const fn wrapping_sub(self, count: usize) -> Self
     where
         T: Sized,
     {
@@ -1183,8 +1157,7 @@ impl<T: PointeeSized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn wrapping_byte_sub(self, count: usize) -> Self {
+        pub const fn wrapping_byte_sub(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_sub(count).with_metadata_of(self)
     }
 
@@ -1219,8 +1192,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub unsafe fn read_volatile(self) -> T
+        pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
     {
@@ -1240,8 +1212,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn read_unaligned(self) -> T
+        pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
     {
@@ -1261,8 +1232,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
+        pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
     where
         T: Sized,
     {
@@ -1282,8 +1252,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
+        pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
     where
         T: Sized,
     {
@@ -1368,8 +1337,7 @@ impl<T: PointeeSized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn is_aligned(self) -> bool
+        pub fn is_aligned(self) -> bool
     where
         T: Sized,
     {
@@ -1423,12 +1391,10 @@ impl<T> *const T {
     #[must_use]
     #[inline(always)]
     #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn cast_uninit(self) -> *const MaybeUninit<T> {
+        pub const fn cast_uninit(self) -> *const MaybeUninit<T> {
         self as _
     }
 }
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *const MaybeUninit<T> {
     /// Casts from a maybe-uninitialized type to its initialized version.
     ///
@@ -1539,8 +1505,7 @@ impl<T> *const [T] {
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
+        pub const unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
     where
         I: [const] SliceIndex<[T]>,
     {
@@ -1551,8 +1516,7 @@ impl<T> *const [T] {
     #[doc = include_str!("docs/as_uninit_slice.md")]
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn as_uninit_slice<'a>(self) -> Option<&'a [MaybeUninit<T>]> {
+        pub const unsafe fn as_uninit_slice<'a>(self) -> Option<&'a [MaybeUninit<T>]> {
         if self.is_null() {
             None
         } else {
@@ -1571,7 +1535,6 @@ impl<T> *const T {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> *const [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///
@@ -1675,7 +1638,6 @@ impl<T: PointeeSized> PartialOrd for *const T {
 }
 
 #[stable(feature = "raw_ptr_default", since = "1.88.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Thin> Default for *const T {
     /// Returns the default value of [`null()`][crate::ptr::null].
     fn default() -> Self {

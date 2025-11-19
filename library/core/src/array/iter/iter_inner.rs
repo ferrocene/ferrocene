@@ -3,7 +3,6 @@
 use crate::mem::MaybeUninit;
 use crate::num::NonZero;
 use crate::ops::{IndexRange, NeverShortCircuit, Try};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, iter};
 
 // Ferrocene addition: imports for certified subset
@@ -140,8 +139,7 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub(super) fn as_mut_slice(&mut self) -> &mut [T] {
+        pub(super) fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: We know that all elements within `alive` are properly initialized.
         unsafe {
             let slice = self.data.get_unchecked_mut(self.alive.clone());
@@ -150,7 +148,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: fmt::Debug> fmt::Debug for PolymorphicIter<[MaybeUninit<T>]> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -230,8 +227,7 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub(super) fn next_back(&mut self) -> Option<T> {
+        pub(super) fn next_back(&mut self) -> Option<T> {
         // Get the next index from the back.
         //
         // Decreasing `alive.end` by 1 maintains the invariant regarding
@@ -249,8 +245,7 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub(super) fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
+        pub(super) fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // This also moves the end, which marks them as conceptually "dropped",
         // so if anything goes bad then our drop impl won't double-free them.
         let range_to_drop = self.alive.take_suffix(n);
@@ -266,14 +261,12 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub(super) fn rfold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
+        pub(super) fn rfold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
         self.try_rfold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub(super) fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
+        pub(super) fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, T) -> R,
         R: Try<Output = B>,

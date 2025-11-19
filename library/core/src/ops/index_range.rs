@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::{NeverShortCircuit, Try};
@@ -70,8 +69,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    const unsafe fn next_back_unchecked(&mut self) -> usize {
+        const unsafe fn next_back_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
         // SAFETY: The range isn't empty, so this cannot overflow
@@ -106,8 +104,7 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_back_by`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub(crate) fn take_suffix(&mut self, n: usize) -> Self {
+        pub(crate) fn take_suffix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
             // and thus the subtraction cannot overflow.
@@ -178,7 +175,6 @@ impl Iterator for IndexRange {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl DoubleEndedIterator for IndexRange {
     #[inline]
     fn next_back(&mut self) -> Option<usize> {
@@ -221,7 +217,6 @@ impl DoubleEndedIterator for IndexRange {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl ExactSizeIterator for IndexRange {
     #[inline]
     fn len(&self) -> usize {
@@ -230,8 +225,6 @@ impl ExactSizeIterator for IndexRange {
 }
 
 // SAFETY: Because we only deal in `usize`, our `len` is always perfect.
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl TrustedLen for IndexRange {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl FusedIterator for IndexRange {}

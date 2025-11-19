@@ -1,10 +1,7 @@
 #![unstable(feature = "ptr_metadata", issue = "81513")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 use crate::marker::{Freeze, PointeeSized};
@@ -67,8 +64,7 @@ pub trait Pointee: PointeeSized {
     // in sync with those here:
     // NOTE: The metadata of `dyn Trait + 'a` is `DynMetadata<dyn Trait + 'a>`
     // so a `'static` bound must not be added.
-    #[cfg(not(feature = "ferrocene_certified"))]
-    type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
+        type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
     /// The type for metadata in pointers and references to `Self`.
     #[lang = "metadata_type"]
     #[cfg(false)]
@@ -178,7 +174,6 @@ unsafe extern "C" {
     type VTable;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     /// When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout
     /// computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead
@@ -220,12 +215,9 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<Dyn: PointeeSized> Send for DynMetadata<Dyn> {}
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<Dyn: PointeeSized> Sync for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata").field(&self.vtable_ptr()).finish()
@@ -234,13 +226,10 @@ impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
 
 // Manual impls needed to avoid `Dyn: $Trait` bounds.
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Unpin for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Copy for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
     #[inline]
     fn clone(&self) -> Self {
@@ -248,14 +237,11 @@ impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 #[doc(hidden)]
 unsafe impl<Dyn: ?Sized> TrivialClone for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Eq for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> PartialEq for DynMetadata<Dyn> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -263,7 +249,6 @@ impl<Dyn: PointeeSized> PartialEq for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Ord for DynMetadata<Dyn> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -272,7 +257,6 @@ impl<Dyn: PointeeSized> Ord for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> PartialOrd for DynMetadata<Dyn> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<crate::cmp::Ordering> {
@@ -280,7 +264,6 @@ impl<Dyn: PointeeSized> PartialOrd for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Hash for DynMetadata<Dyn> {
     #[inline]
     fn hash<H: Hasher>(&self, hasher: &mut H) {

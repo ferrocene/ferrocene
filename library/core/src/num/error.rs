@@ -1,10 +1,7 @@
 //! Error types for conversion to integral types.
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::convert::Infallible;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 
 /// The error type returned when a checked integral type conversion fails.
@@ -13,7 +10,6 @@ use crate::fmt;
 pub struct TryFromIntError(pub(crate) ());
 
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for TryFromIntError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         "out of range integral type conversion attempted".fmt(f)
@@ -21,12 +17,10 @@ impl fmt::Display for TryFromIntError {
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Error for TryFromIntError {}
 
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<Infallible> for TryFromIntError {
     fn from(x: Infallible) -> TryFromIntError {
         match x {}
@@ -35,7 +29,6 @@ impl const From<Infallible> for TryFromIntError {
 
 #[unstable(feature = "never_type", issue = "35121")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<!> for TryFromIntError {
     #[inline]
     fn from(never: !) -> TryFromIntError {
@@ -69,7 +62,6 @@ impl const From<!> for TryFromIntError {
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ParseIntError {
     pub(super) kind: IntErrorKind,
 }
@@ -88,7 +80,6 @@ pub struct ParseIntError {
 #[stable(feature = "int_error_matching", since = "1.55.0")]
 #[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
 #[non_exhaustive]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub enum IntErrorKind {
     /// Value being parsed is empty.
     ///
@@ -118,7 +109,6 @@ pub enum IntErrorKind {
     Zero,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl ParseIntError {
     /// Outputs the detailed cause of parsing an integer failing.
     #[must_use]
@@ -130,7 +120,6 @@ impl ParseIntError {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for ParseIntError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
@@ -145,5 +134,4 @@ impl fmt::Display for ParseIntError {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Error for ParseIntError {}

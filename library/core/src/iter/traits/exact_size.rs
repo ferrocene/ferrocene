@@ -113,8 +113,7 @@ pub trait ExactSizeIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    fn len(&self) -> usize {
+        fn len(&self) -> usize {
         let (lower, upper) = self.size_hint();
         // Note: This assertion is overly defensive, but it checks the invariant
         // guaranteed by the trait. If this trait were rust-internal,

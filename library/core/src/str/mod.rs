@@ -7,25 +7,17 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 mod converts;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod count;
 mod error;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
 mod traits;
 mod validations;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use self::pattern::{DoubleEndedSearcher, Pattern, ReverseSearcher, Searcher};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::{self, EscapeDebugExtArgs};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Range;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ascii, mem};
 
 // Ferrocene addition: imports for certified subset
@@ -33,61 +25,44 @@ use crate::{ascii, mem};
 #[rustfmt::skip]
 use crate::mem;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod pattern;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod lossy;
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use converts::{from_raw_parts, from_raw_parts_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use converts::{from_utf8, from_utf8_unchecked};
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 pub use converts::{from_utf8_mut, from_utf8_unchecked_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use error::{ParseBoolError, Utf8Error};
 #[stable(feature = "encode_utf16", since = "1.8.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::EncodeUtf16;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::LinesAny;
 #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::SplitAsciiWhitespace;
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::SplitInclusive;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{Bytes, CharIndices, Chars, Lines, SplitWhitespace};
 #[stable(feature = "str_escape", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{EscapeDebug, EscapeDefault, EscapeUnicode};
 #[stable(feature = "str_match_indices", since = "1.5.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{MatchIndices, RMatchIndices};
-#[cfg(not(feature = "ferrocene_certified"))]
 use iter::{MatchIndicesInternal, MatchesInternal, SplitInternal, SplitNInternal};
 #[stable(feature = "str_matches", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{Matches, RMatches};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{RSplit, RSplitTerminator, Split, SplitTerminator};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{RSplitN, SplitN};
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use lossy::{Utf8Chunk, Utf8Chunks};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use traits::FromStr;
 #[unstable(feature = "str_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use validations::{next_code_point, utf8_char_width};
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -100,25 +75,21 @@ pub use {error::Utf8Error, validations::utf8_char_width};
 #[track_caller]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 #[cfg(not(panic = "immediate-abort"))]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
     crate::intrinsics::const_eval_select((s, begin, end), slice_error_fail_ct, slice_error_fail_rt)
 }
 
 #[cfg(panic = "immediate-abort")]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
     slice_error_fail_ct(s, begin, end)
 }
 
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn slice_error_fail_ct(_: &str, _: usize, _: usize) -> ! {
     panic!("failed to slice string");
 }
 
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn slice_error_fail_rt(s: &str, begin: usize, end: usize) -> ! {
     const MAX_DISPLAY_LENGTH: usize = 256;
     let trunc_len = s.floor_char_boundary(MAX_DISPLAY_LENGTH);
@@ -397,8 +368,7 @@ impl str {
     #[stable(feature = "is_char_boundary", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_is_char_boundary", since = "1.86.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn is_char_boundary(&self, index: usize) -> bool {
+        pub const fn is_char_boundary(&self, index: usize) -> bool {
         // 0 is always ok.
         // Test for 0 explicitly so that it can optimize out the check
         // easily and skip reading string data for that case.
@@ -447,8 +417,7 @@ impl str {
     #[stable(feature = "round_char_boundary", since = "1.91.0")]
     #[rustc_const_stable(feature = "round_char_boundary", since = "1.91.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn floor_char_boundary(&self, index: usize) -> usize {
+        pub const fn floor_char_boundary(&self, index: usize) -> usize {
         if index >= self.len() {
             self.len()
         } else {
@@ -491,8 +460,7 @@ impl str {
     #[stable(feature = "round_char_boundary", since = "1.91.0")]
     #[rustc_const_stable(feature = "round_char_boundary", since = "1.91.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn ceil_char_boundary(&self, index: usize) -> usize {
+        pub const fn ceil_char_boundary(&self, index: usize) -> usize {
         if index >= self.len() {
             self.len()
         } else {
@@ -645,8 +613,7 @@ impl str {
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn get<I: [const] SliceIndex<str>>(&self, i: I) -> Option<&I::Output> {
+        pub const fn get<I: [const] SliceIndex<str>>(&self, i: I) -> Option<&I::Output> {
         i.get(self)
     }
 
@@ -679,8 +646,7 @@ impl str {
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn get_mut<I: [const] SliceIndex<str>>(&mut self, i: I) -> Option<&mut I::Output> {
+        pub const fn get_mut<I: [const] SliceIndex<str>>(&mut self, i: I) -> Option<&mut I::Output> {
         i.get_mut(self)
     }
 
@@ -712,8 +678,7 @@ impl str {
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub unsafe fn get_unchecked<I: SliceIndex<str>>(&self, i: I) -> &I::Output {
+        pub unsafe fn get_unchecked<I: SliceIndex<str>>(&self, i: I) -> &I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
         // The returned pointer is safe because impls of `SliceIndex` have to guarantee that it is.
@@ -748,8 +713,7 @@ impl str {
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub unsafe fn get_unchecked_mut<I: SliceIndex<str>>(&mut self, i: I) -> &mut I::Output {
+        pub unsafe fn get_unchecked_mut<I: SliceIndex<str>>(&mut self, i: I) -> &mut I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked_mut`;
         // the slice is dereferenceable because `self` is a safe reference.
         // The returned pointer is safe because impls of `SliceIndex` have to guarantee that it is.
@@ -800,8 +764,7 @@ impl str {
     #[deprecated(since = "1.29.0", note = "use `get_unchecked(begin..end)` instead")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub unsafe fn slice_unchecked(&self, begin: usize, end: usize) -> &str {
+        pub unsafe fn slice_unchecked(&self, begin: usize, end: usize) -> &str {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
         // The returned pointer is safe because impls of `SliceIndex` have to guarantee that it is.
@@ -835,8 +798,7 @@ impl str {
     #[stable(feature = "str_slice_mut", since = "1.5.0")]
     #[deprecated(since = "1.29.0", note = "use `get_unchecked_mut(begin..end)` instead")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub unsafe fn slice_mut_unchecked(&mut self, begin: usize, end: usize) -> &mut str {
+        pub unsafe fn slice_mut_unchecked(&mut self, begin: usize, end: usize) -> &mut str {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked_mut`;
         // the slice is dereferenceable because `self` is a safe reference.
         // The returned pointer is safe because impls of `SliceIndex` have to guarantee that it is.
@@ -876,8 +838,7 @@ impl str {
     #[must_use]
     #[stable(feature = "str_split_at", since = "1.4.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn split_at(&self, mid: usize) -> (&str, &str) {
+        pub const fn split_at(&self, mid: usize) -> (&str, &str) {
         match self.split_at_checked(mid) {
             None => slice_error_fail(self, 0, mid),
             Some(pair) => pair,
@@ -918,8 +879,7 @@ impl str {
     #[must_use]
     #[stable(feature = "str_split_at", since = "1.4.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn split_at_mut(&mut self, mid: usize) -> (&mut str, &mut str) {
+        pub const fn split_at_mut(&mut self, mid: usize) -> (&mut str, &mut str) {
         // is_char_boundary checks that the index is in [0, .len()]
         if self.is_char_boundary(mid) {
             // SAFETY: just checked that `mid` is on a char boundary.
@@ -959,8 +919,7 @@ impl str {
     #[must_use]
     #[stable(feature = "split_at_checked", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)> {
+        pub const fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)> {
         // is_char_boundary checks that the index is in [0, .len()]
         if self.is_char_boundary(mid) {
             // SAFETY: just checked that `mid` is on a char boundary.
@@ -1001,8 +960,7 @@ impl str {
     #[must_use]
     #[stable(feature = "split_at_checked", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn split_at_mut_checked(&mut self, mid: usize) -> Option<(&mut str, &mut str)> {
+        pub const fn split_at_mut_checked(&mut self, mid: usize) -> Option<(&mut str, &mut str)> {
         // is_char_boundary checks that the index is in [0, .len()]
         if self.is_char_boundary(mid) {
             // SAFETY: just checked that `mid` is on a char boundary.
@@ -1019,8 +977,7 @@ impl str {
     /// The caller must ensure that `mid` is a valid byte offset from the start
     /// of the string and falls on the boundary of a UTF-8 code point.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    const unsafe fn split_at_unchecked(&self, mid: usize) -> (&str, &str) {
+        const unsafe fn split_at_unchecked(&self, mid: usize) -> (&str, &str) {
         let len = self.len();
         let ptr = self.as_ptr();
         // SAFETY: caller guarantees `mid` is on a char boundary.
@@ -1038,8 +995,7 @@ impl str {
     ///
     /// The caller must ensure that `mid` is a valid byte offset from the start
     /// of the string and falls on the boundary of a UTF-8 code point.
-    #[cfg(not(feature = "ferrocene_certified"))]
-    const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut str, &mut str) {
+        const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut str, &mut str) {
         let len = self.len();
         let ptr = self.as_mut_ptr();
         // SAFETY: caller guarantees `mid` is on a char boundary.
@@ -1101,8 +1057,7 @@ impl str {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[rustc_diagnostic_item = "str_chars"]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn chars(&self) -> Chars<'_> {
+        pub fn chars(&self) -> Chars<'_> {
         Chars { iter: self.as_bytes().iter() }
     }
 
@@ -1159,8 +1114,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn char_indices(&self) -> CharIndices<'_> {
+        pub fn char_indices(&self) -> CharIndices<'_> {
         CharIndices { front_offset: 0, iter: self.chars() }
     }
 
@@ -1183,8 +1137,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn bytes(&self) -> Bytes<'_> {
+        pub fn bytes(&self) -> Bytes<'_> {
         Bytes(self.as_bytes().iter().copied())
     }
 
@@ -1236,8 +1189,7 @@ impl str {
     #[stable(feature = "split_whitespace", since = "1.1.0")]
     #[rustc_diagnostic_item = "str_split_whitespace"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn split_whitespace(&self) -> SplitWhitespace<'_> {
+        pub fn split_whitespace(&self) -> SplitWhitespace<'_> {
         SplitWhitespace { inner: self.split(IsWhitespace).filter(IsNotEmpty) }
     }
 
@@ -1288,8 +1240,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn split_ascii_whitespace(&self) -> SplitAsciiWhitespace<'_> {
+        pub fn split_ascii_whitespace(&self) -> SplitAsciiWhitespace<'_> {
         let inner =
             self.as_bytes().split(IsAsciiWhitespace).filter(BytesIsNotEmpty).map(UnsafeBytesToStr);
         SplitAsciiWhitespace { inner }
@@ -1342,8 +1293,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn lines(&self) -> Lines<'_> {
+        pub fn lines(&self) -> Lines<'_> {
         Lines(self.split_inclusive('\n').map(LinesMap))
     }
 
@@ -1352,8 +1302,7 @@ impl str {
     #[deprecated(since = "1.4.0", note = "use lines() instead now", suggestion = "lines")]
     #[inline]
     #[allow(deprecated)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn lines_any(&self) -> LinesAny<'_> {
+        pub fn lines_any(&self) -> LinesAny<'_> {
         LinesAny(self.lines())
     }
 
@@ -1373,8 +1322,7 @@ impl str {
     #[must_use = "this returns the encoded string as an iterator, \
                   without modifying the original"]
     #[stable(feature = "encode_utf16", since = "1.8.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn encode_utf16(&self) -> EncodeUtf16<'_> {
+        pub fn encode_utf16(&self) -> EncodeUtf16<'_> {
         EncodeUtf16 { chars: self.chars(), extra: 0 }
     }
 
@@ -1399,8 +1347,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn contains<P: Pattern>(&self, pat: P) -> bool {
+        pub fn contains<P: Pattern>(&self, pat: P) -> bool {
         pat.is_contained_in(self)
     }
 
@@ -1438,8 +1385,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_starts_with"]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn starts_with<P: Pattern>(&self, pat: P) -> bool {
+        pub fn starts_with<P: Pattern>(&self, pat: P) -> bool {
         pat.is_prefix_of(self)
     }
 
@@ -1464,8 +1410,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_ends_with"]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn ends_with<P: Pattern>(&self, pat: P) -> bool
+        pub fn ends_with<P: Pattern>(&self, pat: P) -> bool
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -1516,8 +1461,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
+        pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
         pat.into_searcher(self).next_match().map(|(i, _)| i)
     }
 
@@ -1563,8 +1507,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rfind<P: Pattern>(&self, pat: P) -> Option<usize>
+        pub fn rfind<P: Pattern>(&self, pat: P) -> Option<usize>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -1692,8 +1635,7 @@ impl str {
     /// [`split_whitespace`]: str::split_whitespace
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn split<P: Pattern>(&self, pat: P) -> Split<'_, P> {
+        pub fn split<P: Pattern>(&self, pat: P) -> Split<'_, P> {
         Split(SplitInternal {
             start: 0,
             end: self.len(),
@@ -1734,8 +1676,7 @@ impl str {
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn split_inclusive<P: Pattern>(&self, pat: P) -> SplitInclusive<'_, P> {
+        pub fn split_inclusive<P: Pattern>(&self, pat: P) -> SplitInclusive<'_, P> {
         SplitInclusive(SplitInternal {
             start: 0,
             end: self.len(),
@@ -1790,8 +1731,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rsplit<P: Pattern>(&self, pat: P) -> RSplit<'_, P>
+        pub fn rsplit<P: Pattern>(&self, pat: P) -> RSplit<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -1840,8 +1780,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn split_terminator<P: Pattern>(&self, pat: P) -> SplitTerminator<'_, P> {
+        pub fn split_terminator<P: Pattern>(&self, pat: P) -> SplitTerminator<'_, P> {
         SplitTerminator(SplitInternal { allow_trailing_empty: false, ..self.split(pat).0 })
     }
 
@@ -1887,8 +1826,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rsplit_terminator<P: Pattern>(&self, pat: P) -> RSplitTerminator<'_, P>
+        pub fn rsplit_terminator<P: Pattern>(&self, pat: P) -> RSplitTerminator<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -1943,8 +1881,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn splitn<P: Pattern>(&self, n: usize, pat: P) -> SplitN<'_, P> {
+        pub fn splitn<P: Pattern>(&self, n: usize, pat: P) -> SplitN<'_, P> {
         SplitN(SplitNInternal { iter: self.split(pat).0, count: n })
     }
 
@@ -1993,8 +1930,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rsplitn<P: Pattern>(&self, n: usize, pat: P) -> RSplitN<'_, P>
+        pub fn rsplitn<P: Pattern>(&self, n: usize, pat: P) -> RSplitN<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2014,8 +1950,7 @@ impl str {
     /// ```
     #[stable(feature = "str_split_once", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn split_once<P: Pattern>(&self, delimiter: P) -> Option<(&'_ str, &'_ str)> {
+        pub fn split_once<P: Pattern>(&self, delimiter: P) -> Option<(&'_ str, &'_ str)> {
         let (start, end) = delimiter.into_searcher(self).next_match()?;
         // SAFETY: `Searcher` is known to return valid indices.
         unsafe { Some((self.get_unchecked(..start), self.get_unchecked(end..))) }
@@ -2034,8 +1969,7 @@ impl str {
     /// ```
     #[stable(feature = "str_split_once", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rsplit_once<P: Pattern>(&self, delimiter: P) -> Option<(&'_ str, &'_ str)>
+        pub fn rsplit_once<P: Pattern>(&self, delimiter: P) -> Option<(&'_ str, &'_ str)>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2075,8 +2009,7 @@ impl str {
     /// ```
     #[stable(feature = "str_matches", since = "1.2.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn matches<P: Pattern>(&self, pat: P) -> Matches<'_, P> {
+        pub fn matches<P: Pattern>(&self, pat: P) -> Matches<'_, P> {
         Matches(MatchesInternal(pat.into_searcher(self)))
     }
 
@@ -2110,8 +2043,7 @@ impl str {
     /// ```
     #[stable(feature = "str_matches", since = "1.2.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rmatches<P: Pattern>(&self, pat: P) -> RMatches<'_, P>
+        pub fn rmatches<P: Pattern>(&self, pat: P) -> RMatches<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2155,8 +2087,7 @@ impl str {
     /// ```
     #[stable(feature = "str_match_indices", since = "1.5.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn match_indices<P: Pattern>(&self, pat: P) -> MatchIndices<'_, P> {
+        pub fn match_indices<P: Pattern>(&self, pat: P) -> MatchIndices<'_, P> {
         MatchIndices(MatchIndicesInternal(pat.into_searcher(self)))
     }
 
@@ -2196,8 +2127,7 @@ impl str {
     /// ```
     #[stable(feature = "str_match_indices", since = "1.5.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn rmatch_indices<P: Pattern>(&self, pat: P) -> RMatchIndices<'_, P>
+        pub fn rmatch_indices<P: Pattern>(&self, pat: P) -> RMatchIndices<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2221,8 +2151,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_trim"]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim(&self) -> &str {
+        pub fn trim(&self) -> &str {
         self.trim_matches(char::is_whitespace)
     }
 
@@ -2261,8 +2190,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "trim_direction", since = "1.30.0")]
     #[rustc_diagnostic_item = "str_trim_start"]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_start(&self) -> &str {
+        pub fn trim_start(&self) -> &str {
         self.trim_start_matches(char::is_whitespace)
     }
 
@@ -2301,8 +2229,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "trim_direction", since = "1.30.0")]
     #[rustc_diagnostic_item = "str_trim_end"]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_end(&self) -> &str {
+        pub fn trim_end(&self) -> &str {
         self.trim_end_matches(char::is_whitespace)
     }
 
@@ -2342,8 +2269,7 @@ impl str {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.33.0", note = "superseded by `trim_start`", suggestion = "trim_start")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_left(&self) -> &str {
+        pub fn trim_left(&self) -> &str {
         self.trim_start()
     }
 
@@ -2383,8 +2309,7 @@ impl str {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.33.0", note = "superseded by `trim_end`", suggestion = "trim_end")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_right(&self) -> &str {
+        pub fn trim_right(&self) -> &str {
         self.trim_end()
     }
 
@@ -2417,8 +2342,7 @@ impl str {
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_matches<P: Pattern>(&self, pat: P) -> &str
+        pub fn trim_matches<P: Pattern>(&self, pat: P) -> &str
     where
         for<'a> P::Searcher<'a>: DoubleEndedSearcher<'a>,
     {
@@ -2465,8 +2389,7 @@ impl str {
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
     #[stable(feature = "trim_direction", since = "1.30.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_start_matches<P: Pattern>(&self, pat: P) -> &str {
+        pub fn trim_start_matches<P: Pattern>(&self, pat: P) -> &str {
         let mut i = self.len();
         let mut matcher = pat.into_searcher(self);
         if let Some((a, _)) = matcher.next_reject() {
@@ -2500,8 +2423,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[stable(feature = "str_strip", since = "1.45.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn strip_prefix<P: Pattern>(&self, prefix: P) -> Option<&str> {
+        pub fn strip_prefix<P: Pattern>(&self, prefix: P) -> Option<&str> {
         prefix.strip_prefix_of(self)
     }
 
@@ -2529,8 +2451,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[stable(feature = "str_strip", since = "1.45.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn strip_suffix<P: Pattern>(&self, suffix: P) -> Option<&str>
+        pub fn strip_suffix<P: Pattern>(&self, suffix: P) -> Option<&str>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2566,8 +2487,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[unstable(feature = "strip_circumfix", issue = "147946")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn strip_circumfix<P: Pattern, S: Pattern>(&self, prefix: P, suffix: S) -> Option<&str>
+        pub fn strip_circumfix<P: Pattern, S: Pattern>(&self, prefix: P, suffix: S) -> Option<&str>
     where
         for<'a> S::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2607,8 +2527,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[unstable(feature = "trim_prefix_suffix", issue = "142312")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_prefix<P: Pattern>(&self, prefix: P) -> &str {
+        pub fn trim_prefix<P: Pattern>(&self, prefix: P) -> &str {
         prefix.strip_prefix_of(self).unwrap_or(self)
     }
 
@@ -2645,8 +2564,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[unstable(feature = "trim_prefix_suffix", issue = "142312")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_suffix<P: Pattern>(&self, suffix: P) -> &str
+        pub fn trim_suffix<P: Pattern>(&self, suffix: P) -> &str
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2689,8 +2607,7 @@ impl str {
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
     #[stable(feature = "trim_direction", since = "1.30.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_end_matches<P: Pattern>(&self, pat: P) -> &str
+        pub fn trim_end_matches<P: Pattern>(&self, pat: P) -> &str
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2734,8 +2651,7 @@ impl str {
         note = "superseded by `trim_start_matches`",
         suggestion = "trim_start_matches"
     )]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_left_matches<P: Pattern>(&self, pat: P) -> &str {
+        pub fn trim_left_matches<P: Pattern>(&self, pat: P) -> &str {
         self.trim_start_matches(pat)
     }
 
@@ -2778,8 +2694,7 @@ impl str {
         note = "superseded by `trim_end_matches`",
         suggestion = "trim_end_matches"
     )]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn trim_right_matches<P: Pattern>(&self, pat: P) -> &str
+        pub fn trim_right_matches<P: Pattern>(&self, pat: P) -> &str
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
     {
@@ -2851,8 +2766,7 @@ impl str {
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn is_ascii(&self) -> bool {
+        pub const fn is_ascii(&self) -> bool {
         // We can treat each byte as character here: all multibyte characters
         // start with a byte that is not in the ASCII range, so we will stop
         // there already.
@@ -2864,8 +2778,7 @@ impl str {
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn as_ascii(&self) -> Option<&[ascii::Char]> {
+        pub const fn as_ascii(&self) -> Option<&[ascii::Char]> {
         // Like in `is_ascii`, we can work on the bytes directly.
         self.as_bytes().as_ascii()
     }
@@ -2879,8 +2792,7 @@ impl str {
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const unsafe fn as_ascii_unchecked(&self) -> &[ascii::Char] {
+        pub const unsafe fn as_ascii_unchecked(&self) -> &[ascii::Char] {
         assert_unsafe_precondition!(
             check_library_ub,
             "as_ascii_unchecked requires that the string is valid ASCII",
@@ -2908,8 +2820,7 @@ impl str {
     #[rustc_const_stable(feature = "const_eq_ignore_ascii_case", since = "1.89.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn eq_ignore_ascii_case(&self, other: &str) -> bool {
+        pub const fn eq_ignore_ascii_case(&self, other: &str) -> bool {
         self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
     }
 
@@ -2935,8 +2846,7 @@ impl str {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn make_ascii_uppercase(&mut self) {
+        pub const fn make_ascii_uppercase(&mut self) {
         // SAFETY: changing ASCII letters only does not invalidate UTF-8.
         let me = unsafe { self.as_bytes_mut() };
         me.make_ascii_uppercase()
@@ -2964,8 +2874,7 @@ impl str {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn make_ascii_lowercase(&mut self) {
+        pub const fn make_ascii_lowercase(&mut self) {
         // SAFETY: changing ASCII letters only does not invalidate UTF-8.
         let me = unsafe { self.as_bytes_mut() };
         me.make_ascii_lowercase()
@@ -2990,8 +2899,7 @@ impl str {
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn trim_ascii_start(&self) -> &str {
+        pub const fn trim_ascii_start(&self) -> &str {
         // SAFETY: Removing ASCII characters from a `&str` does not invalidate
         // UTF-8.
         unsafe { core::str::from_utf8_unchecked(self.as_bytes().trim_ascii_start()) }
@@ -3016,8 +2924,7 @@ impl str {
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn trim_ascii_end(&self) -> &str {
+        pub const fn trim_ascii_end(&self) -> &str {
         // SAFETY: Removing ASCII characters from a `&str` does not invalidate
         // UTF-8.
         unsafe { core::str::from_utf8_unchecked(self.as_bytes().trim_ascii_end()) }
@@ -3043,8 +2950,7 @@ impl str {
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn trim_ascii(&self) -> &str {
+        pub const fn trim_ascii(&self) -> &str {
         // SAFETY: Removing ASCII characters from a `&str` does not invalidate
         // UTF-8.
         unsafe { core::str::from_utf8_unchecked(self.as_bytes().trim_ascii()) }
@@ -3087,8 +2993,7 @@ impl str {
     #[must_use = "this returns the escaped string as an iterator, \
                   without modifying the original"]
     #[stable(feature = "str_escape", since = "1.34.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn escape_debug(&self) -> EscapeDebug<'_> {
+        pub fn escape_debug(&self) -> EscapeDebug<'_> {
         let mut chars = self.chars();
         EscapeDebug {
             inner: chars
@@ -3134,8 +3039,7 @@ impl str {
     #[must_use = "this returns the escaped string as an iterator, \
                   without modifying the original"]
     #[stable(feature = "str_escape", since = "1.34.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn escape_default(&self) -> EscapeDefault<'_> {
+        pub fn escape_default(&self) -> EscapeDefault<'_> {
         EscapeDefault { inner: self.chars().flat_map(CharEscapeDefault) }
     }
 
@@ -3173,8 +3077,7 @@ impl str {
     #[must_use = "this returns the escaped string as an iterator, \
                   without modifying the original"]
     #[stable(feature = "str_escape", since = "1.34.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn escape_unicode(&self) -> EscapeUnicode<'_> {
+        pub fn escape_unicode(&self) -> EscapeUnicode<'_> {
         EscapeUnicode { inner: self.chars().flat_map(CharEscapeUnicode) }
     }
 
@@ -3207,8 +3110,7 @@ impl str {
     /// ```
     #[must_use]
     #[unstable(feature = "substr_range", issue = "126769")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn substr_range(&self, substr: &str) -> Option<Range<usize>> {
+        pub fn substr_range(&self, substr: &str) -> Option<Range<usize>> {
         self.as_bytes().subslice_range(substr.as_bytes())
     }
 
@@ -3245,7 +3147,6 @@ impl const Default for &str {
 
 #[stable(feature = "default_mut_str", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Default for &mut str {
     /// Creates an empty mutable str
     #[inline]
@@ -3255,7 +3156,6 @@ impl const Default for &mut str {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_fn_for_zst! {
     /// A nameable, cloneable fn type
     #[derive(Clone)]
@@ -3312,5 +3212,4 @@ impl_fn_for_zst! {
 
 // This is required to make `impl From<&str> for Box<dyn Error>` and `impl<E> From<E> for Box<dyn Error>` not overlap.
 #[stable(feature = "error_in_core_neg_impl", since = "1.65.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl !crate::error::Error for &str {}

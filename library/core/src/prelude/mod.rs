@@ -68,8 +68,7 @@ pub mod rust_2024 {
 
     #[stable(feature = "prelude_2024", since = "1.85.0")]
     #[doc(no_inline)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub use crate::future::{Future, IntoFuture};
+        pub use crate::future::{Future, IntoFuture};
 }
 
 /// The Future version of the core prelude.
@@ -77,7 +76,6 @@ pub mod rust_2024 {
 /// See the [module-level documentation](self) for more.
 #[doc(hidden)]
 #[unstable(feature = "prelude_future", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod rust_future {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[doc(no_inline)]

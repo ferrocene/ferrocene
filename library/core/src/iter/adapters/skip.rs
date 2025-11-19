@@ -1,15 +1,11 @@
 use crate::intrinsics::unlikely;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{
     FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, TrustedRandomAccess,
     TrustedRandomAccessNoCoerce,
 };
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{ControlFlow, Try};
 
 // Ferrocene addition: imports for certified subset
@@ -77,8 +73,7 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    fn count(mut self) -> usize {
+        fn count(mut self) -> usize {
         if self.n > 0 {
             // nth(n) skips n+1
             if self.iter.nth(self.n - 1).is_none() {
@@ -89,8 +84,7 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    fn last(mut self) -> Option<I::Item> {
+        fn last(mut self) -> Option<I::Item> {
         if self.n > 0 {
             // nth(n) skips n+1
             self.iter.nth(self.n - 1)?;
@@ -169,8 +163,7 @@ where
     }
 
     #[doc(hidden)]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
+        unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
     {
@@ -197,11 +190,9 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I> ExactSizeIterator for Skip<I> where I: ExactSizeIterator {}
 
 #[stable(feature = "double_ended_skip_iterator", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I> DoubleEndedIterator for Skip<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
@@ -257,15 +248,12 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I> FusedIterator for Skip<I> where I: FusedIterator {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I: TrustedFused> TrustedFused for Skip<I> {}
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> SourceIter for Skip<I>
 where
     I: SourceIter,
@@ -280,7 +268,6 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Skip<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
@@ -288,12 +275,10 @@ unsafe impl<I: InPlaceIterable> InPlaceIterable for Skip<I> {
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> TrustedRandomAccess for Skip<I> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Skip<I>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -306,5 +291,4 @@ where
 // bound is never `None`. I: TrustedRandomAccess happens to provide this guarantee while
 // I: TrustedLen would not.
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I> TrustedLen for Skip<I> where I: Iterator + TrustedRandomAccess {}

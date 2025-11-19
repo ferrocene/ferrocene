@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::TrustedLen;
 
 /// Conversion from an [`Iterator`].
@@ -449,7 +448,6 @@ pub trait Extend<A> {
 }
 
 #[stable(feature = "extend_for_unit", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Extend<()> for () {
     fn extend<T: IntoIterator<Item = ()>>(&mut self, iter: T) {
         iter.into_iter().for_each(drop)
@@ -461,7 +459,6 @@ impl Extend<()> for () {
 /// 1- and 3- through 12-ary tuples were stabilized after 2-tuples, in 1.85.0.
 #[doc(fake_variadic)] // the other implementations are below.
 #[stable(feature = "extend_for_tuple", since = "1.56.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, ExtendT> Extend<(T,)> for (ExtendT,)
 where
     ExtendT: Extend<T>,
@@ -527,7 +524,6 @@ where
 /// ```
 #[doc(fake_variadic)] // the other implementations are below.
 #[stable(feature = "from_iterator_for_tuple", since = "1.79.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, ExtendT> FromIterator<(T,)> for (ExtendT,)
 where
     ExtendT: Default + Extend<T>,
@@ -541,7 +537,6 @@ where
 
 /// An implementation of [`extend`](Extend::extend) that calls `extend_one` or
 /// `extend_one_unchecked` for each element of the iterator.
-#[cfg(not(feature = "ferrocene_certified"))]
 fn default_extend<ExtendT, I, T>(collection: &mut ExtendT, iter: I)
 where
     ExtendT: Extend<T>,
@@ -618,8 +613,7 @@ macro_rules! impl_extend_tuple {
     ($(($ty:tt, $extend_ty:tt, $index:tt)),+) => {
         #[doc(hidden)]
         #[stable(feature = "extend_for_tuple", since = "1.56.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
-        impl<$($ty,)+ $($extend_ty,)+> Extend<($($ty,)+)> for ($($extend_ty,)+)
+                impl<$($ty,)+ $($extend_ty,)+> Extend<($($ty,)+)> for ($($extend_ty,)+)
         where
             $($extend_ty: Extend<$ty>,)+
         {
@@ -645,8 +639,7 @@ macro_rules! impl_extend_tuple {
 
         #[doc(hidden)]
         #[stable(feature = "from_iterator_for_tuple", since = "1.79.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
-        impl<$($ty,)+ $($extend_ty,)+> FromIterator<($($ty,)+)> for ($($extend_ty,)+)
+                impl<$($ty,)+ $($extend_ty,)+> FromIterator<($($ty,)+)> for ($($extend_ty,)+)
         where
             $($extend_ty: Default + Extend<$ty>,)+
         {

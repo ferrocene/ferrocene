@@ -20,12 +20,9 @@
 //! assert_eq!(total, Duration::new(10, 7));
 //! ```
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::Sum;
 use crate::num::niche_types::Nanoseconds;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 // Ferrocene addition: imports for certified subset
@@ -178,8 +175,7 @@ impl Duration {
     /// [`Instant`]: ../../std/time/struct.Instant.html
     /// [`SystemTime`]: ../../std/time/struct.SystemTime.html
     #[stable(feature = "duration_saturating_ops", since = "1.53.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const MAX: Duration = Duration::new(u64::MAX, NANOS_PER_SEC - 1);
+        pub const MAX: Duration = Duration::new(u64::MAX, NANOS_PER_SEC - 1);
 
     /// Creates a new `Duration` from the specified number of whole seconds and
     /// additional nanoseconds.
@@ -342,8 +338,7 @@ impl Duration {
     #[must_use]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    #[rustc_allow_const_fn_unstable(const_trait_impl, const_convert)] // for `u64::try_from`
+        #[rustc_allow_const_fn_unstable(const_trait_impl, const_convert)] // for `u64::try_from`
     pub const fn from_nanos_u128(nanos: u128) -> Duration {
         const NANOS_PER_SEC: u128 = self::NANOS_PER_SEC as u128;
         let Ok(secs) = u64::try_from(nanos / NANOS_PER_SEC) else {
@@ -660,8 +655,7 @@ impl Duration {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn abs_diff(self, other: Duration) -> Duration {
+        pub const fn abs_diff(self, other: Duration) -> Duration {
         if let Some(res) = self.checked_sub(other) { res } else { other.checked_sub(self).unwrap() }
     }
 
@@ -716,8 +710,7 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn saturating_add(self, rhs: Duration) -> Duration {
+        pub const fn saturating_add(self, rhs: Duration) -> Duration {
         match self.checked_add(rhs) {
             Some(res) => res,
             None => Duration::MAX,
@@ -740,8 +733,7 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn checked_sub(self, rhs: Duration) -> Option<Duration> {
+        pub const fn checked_sub(self, rhs: Duration) -> Option<Duration> {
         if let Some(mut secs) = self.secs.checked_sub(rhs.secs) {
             let nanos = if self.nanos.as_inner() >= rhs.nanos.as_inner() {
                 self.nanos.as_inner() - rhs.nanos.as_inner()
@@ -774,8 +766,7 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn saturating_sub(self, rhs: Duration) -> Duration {
+        pub const fn saturating_sub(self, rhs: Duration) -> Duration {
         match self.checked_sub(rhs) {
             Some(res) => res,
             None => Duration::ZERO,
@@ -798,8 +789,7 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn checked_mul(self, rhs: u32) -> Option<Duration> {
+        pub const fn checked_mul(self, rhs: u32) -> Option<Duration> {
         // Multiply nanoseconds as u64, because it cannot overflow that way.
         let total_nanos = self.nanos.as_inner() as u64 * rhs as u64;
         let extra_secs = total_nanos / (NANOS_PER_SEC as u64);
@@ -831,8 +821,7 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn saturating_mul(self, rhs: u32) -> Duration {
+        pub const fn saturating_mul(self, rhs: u32) -> Duration {
         match self.checked_mul(rhs) {
             Some(res) => res,
             None => Duration::MAX,
@@ -978,8 +967,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn from_secs_f64(secs: f64) -> Duration {
+        pub fn from_secs_f64(secs: f64) -> Duration {
         match Duration::try_from_secs_f64(secs) {
             Ok(v) => v,
             Err(e) => panic!("{e}"),
@@ -1041,8 +1029,7 @@ impl Duration {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn mul_f64(self, rhs: f64) -> Duration {
+        pub fn mul_f64(self, rhs: f64) -> Duration {
         Duration::from_secs_f64(rhs * self.as_secs_f64())
     }
 
@@ -1063,8 +1050,7 @@ impl Duration {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn mul_f32(self, rhs: f32) -> Duration {
+        pub fn mul_f32(self, rhs: f32) -> Duration {
         Duration::from_secs_f32(rhs * self.as_secs_f32())
     }
 
@@ -1085,8 +1071,7 @@ impl Duration {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn div_f64(self, rhs: f64) -> Duration {
+        pub fn div_f64(self, rhs: f64) -> Duration {
         Duration::from_secs_f64(self.as_secs_f64() / rhs)
     }
 
@@ -1109,8 +1094,7 @@ impl Duration {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn div_f32(self, rhs: f32) -> Duration {
+        pub fn div_f32(self, rhs: f32) -> Duration {
         Duration::from_secs_f32(self.as_secs_f32() / rhs)
     }
 
@@ -1172,7 +1156,6 @@ impl const Add for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const AddAssign for Duration {
     #[inline]
     fn add_assign(&mut self, rhs: Duration) {
@@ -1182,7 +1165,6 @@ impl const AddAssign for Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Sub for Duration {
     type Output = Duration;
 
@@ -1194,7 +1176,6 @@ impl const Sub for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const SubAssign for Duration {
     #[inline]
     fn sub_assign(&mut self, rhs: Duration) {
@@ -1204,7 +1185,6 @@ impl const SubAssign for Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Mul<u32> for Duration {
     type Output = Duration;
 
@@ -1216,7 +1196,6 @@ impl const Mul<u32> for Duration {
 
 #[stable(feature = "symmetric_u32_duration_mul", since = "1.31.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Mul<Duration> for u32 {
     type Output = Duration;
 
@@ -1228,7 +1207,6 @@ impl const Mul<Duration> for u32 {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const MulAssign<u32> for Duration {
     #[inline]
     fn mul_assign(&mut self, rhs: u32) {
@@ -1250,7 +1228,6 @@ impl const Div<u32> for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const DivAssign<u32> for Duration {
     #[inline]
     #[track_caller]
@@ -1259,7 +1236,6 @@ impl const DivAssign<u32> for Duration {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! sum_durations {
     ($iter:expr) => {{
         let mut total_secs: u64 = 0;
@@ -1287,7 +1263,6 @@ macro_rules! sum_durations {
 }
 
 #[stable(feature = "duration_sum", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Sum for Duration {
     fn sum<I: Iterator<Item = Duration>>(iter: I) -> Duration {
         sum_durations!(iter)
@@ -1295,7 +1270,6 @@ impl Sum for Duration {
 }
 
 #[stable(feature = "duration_sum", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Sum<&'a Duration> for Duration {
     fn sum<I: Iterator<Item = &'a Duration>>(iter: I) -> Duration {
         sum_durations!(iter)
@@ -1303,7 +1277,6 @@ impl<'a> Sum<&'a Duration> for Duration {
 }
 
 #[stable(feature = "duration_debug_impl", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Debug for Duration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         /// Formats a floating point number in decimal notation.
@@ -1517,7 +1490,6 @@ pub struct TryFromFloatSecsError {
 }
 
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for TryFromFloatSecsError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
@@ -1754,8 +1726,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn try_from_secs_f64(secs: f64) -> Result<Duration, TryFromFloatSecsError> {
+        pub fn try_from_secs_f64(secs: f64) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,
             mantissa_bits = 52,

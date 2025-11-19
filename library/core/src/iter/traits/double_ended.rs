@@ -370,7 +370,6 @@ pub trait DoubleEndedIterator: Iterator {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, I: DoubleEndedIterator + ?Sized> DoubleEndedIterator for &'a mut I {
     fn next_back(&mut self) -> Option<I::Item> {
         (**self).next_back()
@@ -397,7 +396,6 @@ impl<'a, I: DoubleEndedIterator + ?Sized> DoubleEndedIterator for &'a mut I {
 }
 
 /// Helper trait to specialize `rfold` and `rtry_fold` for `&mut I where I: Sized`
-#[cfg(not(feature = "ferrocene_certified"))]
 trait DoubleEndedIteratorRefSpec: DoubleEndedIterator {
     fn spec_rfold<B, F>(self, init: B, f: F) -> B
     where
@@ -409,7 +407,6 @@ trait DoubleEndedIteratorRefSpec: DoubleEndedIterator {
         R: Try<Output = B>;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: DoubleEndedIterator + ?Sized> DoubleEndedIteratorRefSpec for &mut I {
     default fn spec_rfold<B, F>(self, init: B, mut f: F) -> B
     where
@@ -435,7 +432,6 @@ impl<I: DoubleEndedIterator + ?Sized> DoubleEndedIteratorRefSpec for &mut I {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: DoubleEndedIterator> DoubleEndedIteratorRefSpec for &mut I {
     impl_fold_via_try_fold! { spec_rfold -> spec_try_rfold }
 

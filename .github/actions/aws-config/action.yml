@@ -1,0 +1,43 @@
+name: "Setup"
+description: "Setup the runner and prepare the git repo"
+inputs: {}
+
+
+runs:
+  using: "composite"
+  steps:
+  - name: Configure `aws`
+    shell: bash
+    continue-on-error: true # I'm working on this
+    run: |
+      curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+        "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" --fail --silent --show-error | jq -r '.value' > /tmp/awsjwt
+      chmod 0600 /tmp/awsjwt
+
+      mkdir -p ~/.aws
+
+      cat <<EOF > ~/.aws/config
+      [profile amazon]
+      region = us-east-1
+      role_arn = ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+      duration_seconds = 7200
+      web_identity_token_file = /tmp/awsjwt
+
+      [profile minio]
+      region = eu-central-1
+      endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
+      aws_access_key_id = ${{ secrets.CACHE_ACCESS_KEY_ID }}
+      aws_secret_access_key = ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+      ca_bundle = ${{ secrets.CACHE_CA_BUNDLE }}
+      services = ferrous-minio
+
+      [services ferrous-minio]
+      s3 =
+        endpoint_url = ${{ secrets.CACHE_ENDPOINT_URL }}
+      EOF
+      echo "aws --version: $(aws --version)"
+      echo "Testing authentication..."
+      aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
+      echo "Can authenticate with minio!"
+      aws sts get-caller-identity --profile amazon > /dev/null
+      echo "Can authenticate with amazon!"

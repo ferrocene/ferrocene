@@ -7,6 +7,8 @@ inputs:
     description: The `aws_access_key` for the MinIO profile
   minio-secret-access_key:
     description: The `aws_secret_access_key` for the MinIO profile
+  aws-role-arn:
+
 
 runs:
   using: "composite"
@@ -24,7 +26,7 @@ runs:
       cat <<EOF > ~/.aws/config
       [profile amazon]
       region = us-east-1
-      role_arn = ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+      role_arn = ${{ inputs.aws-role-arn }}
       duration_seconds = 7200
       web_identity_token_file = /tmp/awsjwt
 

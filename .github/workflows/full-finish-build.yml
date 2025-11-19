@@ -43,6 +43,7 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  AWS_DEFAULT_PROFILE: amazon # This is *always* amazon, that's where releases go!
 
 jobs:
 
@@ -61,12 +62,13 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
         with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
 
       - name: Run
         uses: ./.github/actions/run/

@@ -16,7 +16,6 @@ runs:
   steps:
   - name: Configure `aws`
     shell: bash
-    continue-on-error: true # I'm working on this
     run: |
       curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
         "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" --fail --silent --show-error | jq -r '.value' > /tmp/awsjwt

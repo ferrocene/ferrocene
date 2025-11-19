@@ -60,7 +60,8 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
-  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+  AWS_DEFAULT_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+
 jobs:
 
   # A job to build LLVM.

@@ -66,7 +66,7 @@ env:
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
-
+  AWS_DEFAULT_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
         
 jobs:
   job:
@@ -80,30 +80,16 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
         with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          bucket: ${{ inputs.cache-bucket }}
-          prefix: ${{ inputs.cache-prefix }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == false }}
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
@@ -119,6 +105,7 @@ jobs:
 
       - name: Upload artifacts to S3
         env:
+          AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run: |

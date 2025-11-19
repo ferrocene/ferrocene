@@ -39,7 +39,7 @@ macro_rules! panic {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "assert_eq_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! assert_eq {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -96,7 +96,7 @@ macro_rules! assert_eq {
 #[stable(feature = "assert_ne", since = "1.13.0")]
 #[rustc_diagnostic_item = "assert_ne_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! assert_ne {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -171,7 +171,7 @@ macro_rules! assert_ne {
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         match $left {
@@ -240,7 +240,7 @@ pub macro assert_matches {
 #[unstable(feature = "cfg_select", issue = "115585")]
 #[rustc_diagnostic_item = "cfg_select"]
 #[rustc_builtin_macro]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub macro cfg_select($($tt:tt)*) {
     /* compiler built-in */
 }
@@ -323,7 +323,7 @@ macro_rules! debug_assert {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "debug_assert_eq_macro"]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! debug_assert_eq {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -354,7 +354,7 @@ macro_rules! debug_assert_eq {
 #[macro_export]
 #[stable(feature = "assert_ne", since = "1.13.0")]
 #[rustc_diagnostic_item = "debug_assert_ne_macro"]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! debug_assert_ne {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -408,7 +408,7 @@ macro_rules! debug_assert_ne {
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(assert_matches)]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub macro debug_assert_matches($($arg:tt)*) {
     if $crate::cfg!(debug_assertions) {
         $crate::assert_matches::assert_matches!($($arg)*);
@@ -614,7 +614,7 @@ macro_rules! r#try {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "write_macro"]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! write {
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args!($($arg)*))
@@ -650,7 +650,7 @@ macro_rules! write {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "writeln_macro"]
 #[allow_internal_unstable(format_args_nl)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! writeln {
     ($dst:expr $(,)?) => {
         $crate::write!($dst, "\n")
@@ -803,7 +803,7 @@ macro_rules! unreachable {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "unimplemented_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! unimplemented {
     () => {
         $crate::panicking::panic("not implemented")
@@ -884,7 +884,7 @@ macro_rules! unimplemented {
 #[stable(feature = "todo_macro", since = "1.40.0")]
 #[rustc_diagnostic_item = "todo_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! todo {
     () => {
         $crate::panicking::panic("not yet implemented")

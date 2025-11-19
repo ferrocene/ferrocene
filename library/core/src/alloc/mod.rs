@@ -2,12 +2,12 @@
 
 #![stable(feature = "alloc_module", since = "1.28.0")]
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 mod global;
 mod layout;
 
 #[stable(feature = "global_alloc", since = "1.28.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use self::global::GlobalAlloc;
 #[stable(feature = "alloc_layout", since = "1.28.0")]
 pub use self::layout::Layout;
@@ -20,13 +20,13 @@ pub use self::layout::Layout;
 #[allow(deprecated, deprecated_in_future)]
 pub use self::layout::LayoutErr;
 #[stable(feature = "alloc_layout_error", since = "1.50.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use self::layout::LayoutError;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::error::Error;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::fmt;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::ptr::{self, NonNull};
 
 /// The `AllocError` error indicates an allocation failure
@@ -35,7 +35,7 @@ use crate::ptr::{self, NonNull};
 /// allocator.
 #[unstable(feature = "allocator_api", issue = "32838")]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub struct AllocError;
 
 #[unstable(
@@ -43,12 +43,12 @@ pub struct AllocError;
     reason = "the precise API and guarantees it provides may be tweaked.",
     issue = "32838"
 )]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl Error for AllocError {}
 
 // (we need this for downstream impl of trait Error)
 #[unstable(feature = "allocator_api", issue = "32838")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl fmt::Display for AllocError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("memory allocation failed")
@@ -111,7 +111,7 @@ impl fmt::Display for AllocError {
 ///
 /// [*currently allocated*]: #currently-allocated-memory
 #[unstable(feature = "allocator_api", issue = "32838")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub unsafe trait Allocator {
     /// Attempts to allocate a block of memory.
     ///
@@ -378,7 +378,7 @@ pub unsafe trait Allocator {
 }
 
 #[unstable(feature = "allocator_api", issue = "32838")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<A> Allocator for &A
 where
     A: Allocator + ?Sized,

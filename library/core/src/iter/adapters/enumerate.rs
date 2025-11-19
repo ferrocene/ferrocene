@@ -1,8 +1,8 @@
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
@@ -56,7 +56,7 @@ impl<I> Enumerate<I> {
     /// ```
     #[inline]
     #[unstable(feature = "next_index", issue = "130711")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub fn next_index(&self) -> usize {
         self.count
     }
@@ -102,7 +102,7 @@ where
     }
 
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     fn count(self) -> usize {
         self.iter.count()
     }
@@ -165,7 +165,7 @@ where
 
     #[rustc_inherit_overflow_checks]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> <Self as Iterator>::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -178,7 +178,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<I> DoubleEndedIterator for Enumerate<I>
 where
     I: ExactSizeIterator + DoubleEndedIterator,
@@ -254,7 +254,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<I> ExactSizeIterator for Enumerate<I>
 where
     I: ExactSizeIterator,
@@ -270,12 +270,12 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I> TrustedRandomAccess for Enumerate<I> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Enumerate<I>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -284,19 +284,19 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<I> FusedIterator for Enumerate<I> where I: FusedIterator {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I: TrustedFused> TrustedFused for Enumerate<I> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I> TrustedLen for Enumerate<I> where I: TrustedLen {}
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I> SourceIter for Enumerate<I>
 where
     I: SourceIter,
@@ -311,14 +311,14 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Enumerate<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }
 
 #[stable(feature = "default_iters", since = "1.70.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<I: Default> Default for Enumerate<I> {
     /// Creates an `Enumerate` iterator from the default value of `I`
     /// ```

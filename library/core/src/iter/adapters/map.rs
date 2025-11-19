@@ -1,12 +1,12 @@
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::fmt;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, UncheckedIterator};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -79,14 +79,14 @@ impl<I, F> Map<I, F> {
         Map { iter, f }
     }
 
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub(crate) fn into_inner(self) -> I {
         self.iter
     }
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<I: fmt::Debug, F> fmt::Debug for Map<I, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Map").field("iter", &self.iter).finish()
@@ -141,7 +141,7 @@ where
     }
 
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> B
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -153,7 +153,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<B, I: DoubleEndedIterator, F> DoubleEndedIterator for Map<I, F>
 where
     F: FnMut(I::Item) -> B,
@@ -181,7 +181,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<B, I: ExactSizeIterator, F> ExactSizeIterator for Map<I, F>
 where
     F: FnMut(I::Item) -> B,
@@ -196,11 +196,11 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<B, I: FusedIterator, F> FusedIterator for Map<I, F> where F: FnMut(I::Item) -> B {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I: TrustedFused, F> TrustedFused for Map<I, F> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
@@ -226,12 +226,12 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I, F> TrustedRandomAccess for Map<I, F> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I, F> TrustedRandomAccessNoCoerce for Map<I, F>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -240,7 +240,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I, F> SourceIter for Map<I, F>
 where
     I: SourceIter,
@@ -255,7 +255,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<I: InPlaceIterable, F> InPlaceIterable for Map<I, F> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;

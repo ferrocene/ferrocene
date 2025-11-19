@@ -73,7 +73,7 @@ not_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 #[stable(feature = "not_never", since = "1.60.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl const Not for ! {
     type Output = !;
 

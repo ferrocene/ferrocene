@@ -7,17 +7,17 @@ mod marker;
 mod unchecked_iterator;
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use self::marker::InPlaceIterable;
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use self::marker::TrustedFused;
 #[unstable(feature = "trusted_step", issue = "85731")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use self::marker::TrustedStep;
 pub(crate) use self::unchecked_iterator::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use self::{
     accum::{Product, Sum},
     collect::{Extend, FromIterator, IntoIterator},

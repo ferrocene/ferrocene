@@ -1,22 +1,22 @@
 //! Definitions of integer that is known not to equal zero.
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use super::{IntErrorKind, ParseIntError};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::clone::{TrivialClone, UseCloned};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::cmp::Ordering;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::hash::{Hash, Hasher};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::marker::{Destruct, Freeze, StructuralPartialEq};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::ops::{BitOr, BitOrAssign, Div, DivAssign, Neg, Rem, RemAssign};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::panic::{RefUnwindSafe, UnwindSafe};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::str::FromStr;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::{fmt, intrinsics, ptr, ub_checks};
 
 // Ferrocene addition: imports for certified subset
@@ -140,7 +140,7 @@ impl_zeroable_primitive!(
 #[rustc_diagnostic_item = "NonZero"]
 pub struct NonZero<T: ZeroablePrimitive>(T::NonZeroInner);
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! impl_nonzero_fmt {
     ($(#[$Attribute:meta] $Trait:ident)*) => {
         $(
@@ -158,7 +158,7 @@ macro_rules! impl_nonzero_fmt {
     };
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_fmt! {
     #[stable(feature = "nonzero", since = "1.28.0")]
     Debug
@@ -178,7 +178,7 @@ impl_nonzero_fmt! {
     UpperExp
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! impl_nonzero_auto_trait {
     (unsafe $Trait:ident) => {
         #[stable(feature = "nonzero", since = "1.28.0")]
@@ -192,17 +192,17 @@ macro_rules! impl_nonzero_auto_trait {
 
 // Implement auto-traits manually based on `T` to avoid docs exposing
 // the `ZeroablePrimitive::NonZeroInner` implementation detail.
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_auto_trait!(unsafe Freeze);
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_auto_trait!(RefUnwindSafe);
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_auto_trait!(unsafe Send);
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_auto_trait!(unsafe Sync);
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_auto_trait!(Unpin);
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl_nonzero_auto_trait!(UnwindSafe);
 
 #[stable(feature = "nonzero", since = "1.28.0")]
@@ -217,7 +217,7 @@ where
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> UseCloned for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
@@ -225,11 +225,11 @@ impl<T> Copy for NonZero<T> where T: ZeroablePrimitive {}
 
 #[doc(hidden)]
 #[unstable(feature = "trivial_clone", issue = "none")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<T> TrivialClone for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T> const PartialEq for NonZero<T>
 where
@@ -247,17 +247,17 @@ where
 }
 
 #[unstable(feature = "structural_match", issue = "31434")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> StructuralPartialEq for NonZero<T> where T: ZeroablePrimitive + StructuralPartialEq {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const Eq for NonZero<T> where T: ZeroablePrimitive + [const] Eq {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const PartialOrd for NonZero<T>
 where
     T: ZeroablePrimitive + [const] PartialOrd,
@@ -290,7 +290,7 @@ where
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const Ord for NonZero<T>
 where
     // FIXME(const_hack): the T: ~const Destruct should be inferred from the Self: ~const Destruct.
@@ -322,7 +322,7 @@ where
 }
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> Hash for NonZero<T>
 where
     T: ZeroablePrimitive + Hash,
@@ -338,7 +338,7 @@ where
 
 #[stable(feature = "from_nonzero", since = "1.31.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const From<NonZero<T>> for T
 where
     T: ZeroablePrimitive,
@@ -352,7 +352,7 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const BitOr for NonZero<T>
 where
     T: ZeroablePrimitive + [const] BitOr<Output = T>,
@@ -368,7 +368,7 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const BitOr<T> for NonZero<T>
 where
     T: ZeroablePrimitive + [const] BitOr<Output = T>,
@@ -384,7 +384,7 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const BitOr<NonZero<T>> for T
 where
     T: ZeroablePrimitive + [const] BitOr<Output = T>,
@@ -400,7 +400,7 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const BitOrAssign for NonZero<T>
 where
     T: ZeroablePrimitive,
@@ -414,7 +414,7 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const BitOrAssign<T> for NonZero<T>
 where
     T: ZeroablePrimitive,
@@ -474,7 +474,7 @@ where
     #[unstable(feature = "nonzero_from_mut", issue = "106290")]
     #[must_use]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub fn from_mut(n: &mut T) -> Option<&mut Self> {
         // SAFETY: Memory layout optimization guarantees that `Option<NonZero<T>>` has
         //         the same layout and size as `T`, with `0` representing `None`.
@@ -494,7 +494,7 @@ where
     #[must_use]
     #[inline]
     #[track_caller]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub unsafe fn from_mut_unchecked(n: &mut T) -> &mut Self {
         match Self::from_mut(n) {
             Some(n) => n,
@@ -539,7 +539,7 @@ where
     }
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! nonzero_integer {
     (
         #[$stability:meta]
@@ -1352,7 +1352,7 @@ macro_rules! nonzero_integer {
     };
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! nonzero_integer_signedness_dependent_impls {
     // Impls for unsigned nonzero types only.
     (unsigned $Int:ty) => {
@@ -1463,7 +1463,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
 }
 
 #[rustfmt::skip] // https://github.com/rust-lang/rustfmt/issues/5974
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 macro_rules! nonzero_integer_signedness_dependent_methods {
     // Associated items for unsigned nonzero types only.
     (
@@ -2264,7 +2264,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
     };
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroU8,
     Primitive = unsigned u8,
@@ -2277,7 +2277,7 @@ nonzero_integer! {
     reversed = "0x48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroU16,
     Primitive = unsigned u16,
@@ -2290,7 +2290,7 @@ nonzero_integer! {
     reversed = "0x2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroU32,
     Primitive = unsigned u32,
@@ -2303,7 +2303,7 @@ nonzero_integer! {
     reversed = "0x1e6a2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroU64,
     Primitive = unsigned u64,
@@ -2316,7 +2316,7 @@ nonzero_integer! {
     reversed = "0x6a2c48091e6a2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroU128,
     Primitive = unsigned u128,
@@ -2330,7 +2330,7 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroUsize,
     Primitive = unsigned usize,
@@ -2344,7 +2344,7 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroUsize,
     Primitive = unsigned usize,
@@ -2358,7 +2358,7 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroUsize,
     Primitive = unsigned usize,
@@ -2371,7 +2371,7 @@ nonzero_integer! {
     reversed = "0x6a2c48091e6a2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroI8,
     Primitive = signed i8,
@@ -2384,7 +2384,7 @@ nonzero_integer! {
     reversed = "0x48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroI16,
     Primitive = signed i16,
@@ -2397,7 +2397,7 @@ nonzero_integer! {
     reversed = "0x2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroI32,
     Primitive = signed i32,
@@ -2410,7 +2410,7 @@ nonzero_integer! {
     reversed = "0x1e6a2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroI64,
     Primitive = signed i64,
@@ -2423,7 +2423,7 @@ nonzero_integer! {
     reversed = "0x6a2c48091e6a2c48",
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroI128,
     Primitive = signed i128,
@@ -2437,7 +2437,7 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroIsize,
     Primitive = signed isize,
@@ -2451,7 +2451,7 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroIsize,
     Primitive = signed isize,
@@ -2465,7 +2465,7 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 nonzero_integer! {
     Self = NonZeroIsize,
     Primitive = signed isize,

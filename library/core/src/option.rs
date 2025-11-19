@@ -582,15 +582,15 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::clone::TrivialClone;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::panicking::{panic, panic_display};
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::pin::Pin;
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 use crate::{cmp, convert, hint, mem, slice};
 
 // Ferrocene addition: imports for certified subset
@@ -787,7 +787,7 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "pin", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
         // FIXME(const-hack): use `map` once that is possible
         match Pin::get_ref(self).as_ref() {
@@ -805,7 +805,7 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "pin", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
         // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
         // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
@@ -853,7 +853,7 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "option_as_slice", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
         // to the payload, with a length of 1, so this is equivalent to
@@ -909,7 +909,7 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "option_as_slice", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
         // to the payload, with a length of 1, so this is equivalent to
@@ -1736,7 +1736,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn insert(&mut self, value: T) -> &mut T
     where
         T: [const] Destruct,
@@ -1769,7 +1769,7 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub fn get_or_insert(&mut self, value: T) -> &mut T {
         self.get_or_insert_with(|| value)
     }
@@ -1794,7 +1794,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn get_or_insert_default(&mut self) -> &mut T
     where
         T: [const] Default + [const] Destruct,
@@ -1822,7 +1822,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
     where
         F: [const] FnOnce() -> T + [const] Destruct,
@@ -1891,7 +1891,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_take_if", since = "1.80.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn take_if<P>(&mut self, predicate: P) -> Option<T>
     where
         P: [const] FnOnce(&mut T) -> bool + [const] Destruct,
@@ -1919,7 +1919,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_replace", since = "1.31.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn replace(&mut self, value: T) -> Option<T> {
         mem::replace(self, Some(value))
     }
@@ -1982,7 +1982,7 @@ impl<T> Option<T> {
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
     pub const fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
     where
         F: [const] FnOnce(T, U) -> R + [const] Destruct,
@@ -2204,7 +2204,7 @@ const fn unwrap_failed() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 const fn expect_failed(msg: &str) -> ! {
     panic_display(&msg)
 }
@@ -2239,7 +2239,7 @@ where
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> crate::clone::UseCloned for Option<T> where T: crate::clone::UseCloned {}
 
 #[doc(hidden)]
@@ -2289,7 +2289,7 @@ impl<T> IntoIterator for Option<T> {
 }
 
 #[stable(since = "1.4.0", feature = "option_iter")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<'a, T> IntoIterator for &'a Option<T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
@@ -2300,7 +2300,7 @@ impl<'a, T> IntoIterator for &'a Option<T> {
 }
 
 #[stable(since = "1.4.0", feature = "option_iter")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<'a, T> IntoIterator for &'a mut Option<T> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
@@ -2382,7 +2382,7 @@ impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
 // Once https://github.com/llvm/llvm-project/issues/52622 is fixed, we can
 // go back to deriving `PartialEq`.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> crate::marker::StructuralPartialEq for Option<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
@@ -2405,7 +2405,7 @@ impl<T: [const] PartialEq> const PartialEq for Option<T> {
 // not optimal.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T: [const] PartialOrd> const PartialOrd for Option<T> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
@@ -2420,7 +2420,7 @@ impl<T: [const] PartialOrd> const PartialOrd for Option<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T: [const] Ord> const Ord for Option<T> {
     #[inline]
     fn cmp(&self, other: &Self) -> cmp::Ordering {
@@ -2458,7 +2458,7 @@ impl<A> Iterator for Item<A> {
     }
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> DoubleEndedIterator for Item<A> {
     #[inline]
     fn next_back(&mut self) -> Option<A> {
@@ -2472,9 +2472,9 @@ impl<A> ExactSizeIterator for Item<A> {
         self.opt.len()
     }
 }
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> FusedIterator for Item<A> {}
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<A> TrustedLen for Item<A> {}
 
 /// An iterator over a reference to the [`Some`] variant of an [`Option`].
@@ -2490,7 +2490,7 @@ pub struct Iter<'a, A: 'a> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<'a, A> Iterator for Iter<'a, A> {
     type Item = &'a A;
 
@@ -2505,7 +2505,7 @@ impl<'a, A> Iterator for Iter<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<'a, A> DoubleEndedIterator for Iter<'a, A> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a A> {
@@ -2514,19 +2514,19 @@ impl<'a, A> DoubleEndedIterator for Iter<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> ExactSizeIterator for Iter<'_, A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> FusedIterator for Iter<'_, A> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<A> TrustedLen for Iter<'_, A> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> Clone for Iter<'_, A> {
     #[inline]
     fn clone(&self) -> Self {
@@ -2547,7 +2547,7 @@ pub struct IterMut<'a, A: 'a> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<'a, A> Iterator for IterMut<'a, A> {
     type Item = &'a mut A;
 
@@ -2562,7 +2562,7 @@ impl<'a, A> Iterator for IterMut<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<'a, A> DoubleEndedIterator for IterMut<'a, A> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut A> {
@@ -2571,14 +2571,14 @@ impl<'a, A> DoubleEndedIterator for IterMut<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> ExactSizeIterator for IterMut<'_, A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> FusedIterator for IterMut<'_, A> {}
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 
 /// An iterator over the value in [`Some`] variant of an [`Option`].
@@ -2607,7 +2607,7 @@ impl<A> Iterator for IntoIter<A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> DoubleEndedIterator for IntoIter<A> {
     #[inline]
     fn next_back(&mut self) -> Option<A> {
@@ -2616,15 +2616,15 @@ impl<A> DoubleEndedIterator for IntoIter<A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> ExactSizeIterator for IntoIter<A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A> FusedIterator for IntoIter<A> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 unsafe impl<A> TrustedLen for IntoIter<A> {}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2632,7 +2632,7 @@ unsafe impl<A> TrustedLen for IntoIter<A> {}
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
     /// Takes each element in the [`Iterator`]: if it is [`None`][Option::None],
     /// no further elements are taken, and the [`None`][Option::None] is
@@ -2739,7 +2739,7 @@ impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
     #[inline]
     fn from_residual(ops::Yeet(()): ops::Yeet<()>) -> Self {
@@ -2791,7 +2791,7 @@ impl<T> Option<Option<T>> {
     }
 }
 
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 impl<T, const N: usize> [Option<T>; N] {
     /// Transposes a `[Option<T>; N]` into a `Option<[T; N]>`.
     ///

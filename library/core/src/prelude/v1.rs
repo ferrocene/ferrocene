@@ -16,7 +16,7 @@ pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
 #[stable(feature = "async_closure", since = "1.85.0")]
 #[doc(no_inline)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 
 // Re-exported functions
@@ -53,11 +53,11 @@ pub use crate::result::Result::{self, Err, Ok};
 // Re-exported built-in macros
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use crate::fmt::macros::Debug;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use crate::hash::macros::Hash;
 
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
@@ -74,7 +74,7 @@ pub use crate::{
     reason = "`concat_bytes` is not stable enough for use and is subject to change"
 )]
 #[doc(no_inline)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "TBD", note = "This is not certified"))]
 pub use crate::concat_bytes;
 
 // Do not `doc(no_inline)` so that they become doc items on their own

@@ -419,7 +419,7 @@ use crate::{
     marker::{Destruct, PointeeSized},
     mem::{self, MaybeUninit},
 };
-#[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
+#[cfg(false)]
 #[rustfmt::skip]
 use crate::{mem::SizedTypeProperties, ub_checks};
 

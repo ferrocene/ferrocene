@@ -4,7 +4,6 @@
     reason = "for core, alloc, and std internals until pattern types are further along"
 )]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
@@ -17,8 +16,7 @@ macro_rules! define_valid_range_type {
         $(#[$m:meta])*
         $vis:vis struct $name:ident($int:ident as $uint:ident in $low:literal..=$high:literal);
     )+) => {$(
-        #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, Eq))]
-        #[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy))]
+        #[derive(Clone, Copy, Eq)]
         #[repr(transparent)]
         #[rustc_layout_scalar_valid_range_start($low)]
         #[rustc_layout_scalar_valid_range_end($high)]
@@ -78,7 +76,6 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl Ord for $name {
             #[inline]
             fn cmp(&self, other: &Self) -> Ordering {
@@ -86,7 +83,6 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl PartialOrd for $name {
             #[inline]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

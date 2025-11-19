@@ -213,6 +213,8 @@
 // Ferrocene lints/features:
 #![cfg_attr(
     feature = "ferrocene_certified",
+    expect(deprecated_in_future),
+    deprecated(since = "TBD", note = "Uncertified"),
     expect(rustdoc::broken_intra_doc_links),
     expect(rustdoc::private_intra_doc_links),
     expect(unused_attributes)

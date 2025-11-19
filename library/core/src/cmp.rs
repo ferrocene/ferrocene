@@ -366,7 +366,6 @@ pub macro Eq($item:item) {
 #[doc(hidden)]
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct AssertParamIsEq<T: Eq + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -1528,7 +1527,6 @@ where
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro PartialOrd($item:item) {
     /* compiler built-in */
 }

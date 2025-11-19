@@ -87,7 +87,7 @@ const DAYS_PER_WEEK: u64 = 7;
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy, PartialEq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy, PartialEq, PartialOrd))]
 #[rustc_diagnostic_item = "Duration"]
 pub struct Duration {
     secs: u64,

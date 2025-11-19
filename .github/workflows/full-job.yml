@@ -16,6 +16,9 @@ on:
       script:
         type: string
         description: The script to run.
+      configure:
+        type: string
+        description: Any extra configure args to pass to the `ferrocene/ci/configure.sh` script.
       host-triple:
         type: string
         description: The Rust triple of the host platform
@@ -110,6 +113,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          configure: ${{ inputs.configure }}
           container: ${{ inputs.container }}
           script: ${{ inputs.script }}
 

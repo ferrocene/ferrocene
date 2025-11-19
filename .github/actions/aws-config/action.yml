@@ -8,6 +8,7 @@ inputs:
   minio-secret-access_key:
     description: The `aws_secret_access_key` for the MinIO profile
   aws-role-arn:
+    description: The `role_arn` for the AWS profile
 
 
 runs:

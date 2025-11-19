@@ -324,7 +324,6 @@ impl Duration {
     /// # Examples
     ///
     /// ```
-    /// #![feature(duration_from_nanos_u128)]
     /// use std::time::Duration;
     ///
     /// let nanos = 10_u128.pow(24) + 321;
@@ -333,13 +332,13 @@ impl Duration {
     /// assert_eq!(10_u64.pow(15), duration.as_secs());
     /// assert_eq!(321, duration.subsec_nanos());
     /// ```
-    #[unstable(feature = "duration_from_nanos_u128", issue = "139201")]
-    // This is necessary because of const `try_from`, but can be removed if a trait-free impl is used instead
-    #[rustc_const_unstable(feature = "duration_from_nanos_u128", issue = "139201")]
+    #[stable(feature = "duration_from_nanos_u128", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "duration_from_nanos_u128", since = "CURRENT_RUSTC_VERSION")]
     #[must_use]
     #[inline]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
+    #[rustc_allow_const_fn_unstable(const_trait_impl, const_convert)] // for `u64::try_from`
     pub const fn from_nanos_u128(nanos: u128) -> Duration {
         const NANOS_PER_SEC: u128 = self::NANOS_PER_SEC as u128;
         let Ok(secs) = u64::try_from(nanos / NANOS_PER_SEC) else {

@@ -536,7 +536,6 @@ pub enum Ordering {
     note = "the `new` function is now preferred",
     suggestion = "AtomicBool::new(false)"
 )]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub const ATOMIC_BOOL_INIT: AtomicBool = AtomicBool::new(false);
 
 #[cfg(target_has_atomic_load_store = "8")]
@@ -876,7 +875,6 @@ impl AtomicBool {
     /// assert_eq!(some_bool.compare_and_swap(true, true, Ordering::Relaxed), false);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(
@@ -885,7 +883,6 @@ impl AtomicBool {
     )]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn compare_and_swap(&self, current: bool, new: bool, order: Ordering) -> bool {
         match self.compare_exchange(current, new, order, strongest_failure_ordering(order)) {
             Ok(x) => x,
@@ -3047,7 +3044,6 @@ macro_rules! atomic_int {
             /// assert_eq!(some_var.compare_and_swap(6, 12, Ordering::Relaxed), 10);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
-            #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
             #[inline]
             #[$stable]
             #[deprecated(
@@ -3919,7 +3915,6 @@ atomic_int! {
 macro_rules! atomic_int_ptr_sized {
     ( $($target_pointer_width:literal $align:literal)* ) => { $(
         #[cfg(target_pointer_width = $target_pointer_width)]
-        #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
         atomic_int! {
             cfg(target_has_atomic = "ptr"),
             cfg(target_has_atomic_equal_alignment = "ptr"),
@@ -3966,7 +3961,6 @@ macro_rules! atomic_int_ptr_sized {
             note = "the `new` function is now preferred",
             suggestion = "AtomicIsize::new(0)",
         )]
-        #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
         pub const ATOMIC_ISIZE_INIT: AtomicIsize = AtomicIsize::new(0);
 
         /// An [`AtomicUsize`] initialized to `0`.
@@ -4559,7 +4553,6 @@ impl<T> fmt::Pointer for AtomicPtr<T> {
 #[inline]
 #[stable(feature = "spin_loop_hint", since = "1.24.0")]
 #[deprecated(since = "1.51.0", note = "use hint::spin_loop instead")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub fn spin_loop_hint() {
     spin_loop()
 }

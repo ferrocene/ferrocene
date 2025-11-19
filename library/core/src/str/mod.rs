@@ -800,7 +800,6 @@ impl str {
     #[deprecated(since = "1.29.0", note = "use `get_unchecked(begin..end)` instead")]
     #[must_use]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub unsafe fn slice_unchecked(&self, begin: usize, end: usize) -> &str {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -835,7 +834,6 @@ impl str {
     #[stable(feature = "str_slice_mut", since = "1.5.0")]
     #[deprecated(since = "1.29.0", note = "use `get_unchecked_mut(begin..end)` instead")]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub unsafe fn slice_mut_unchecked(&mut self, begin: usize, end: usize) -> &mut str {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked_mut`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -1352,7 +1350,6 @@ impl str {
     #[deprecated(since = "1.4.0", note = "use lines() instead now", suggestion = "lines")]
     #[inline]
     #[allow(deprecated)]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn lines_any(&self) -> LinesAny<'_> {
         LinesAny(self.lines())
     }
@@ -2342,7 +2339,6 @@ impl str {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.33.0", note = "superseded by `trim_start`", suggestion = "trim_start")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn trim_left(&self) -> &str {
         self.trim_start()
     }
@@ -2383,7 +2379,6 @@ impl str {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.33.0", note = "superseded by `trim_end`", suggestion = "trim_end")]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn trim_right(&self) -> &str {
         self.trim_end()
     }
@@ -2734,7 +2729,6 @@ impl str {
         note = "superseded by `trim_start_matches`",
         suggestion = "trim_start_matches"
     )]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn trim_left_matches<P: Pattern>(&self, pat: P) -> &str {
         self.trim_start_matches(pat)
     }
@@ -2778,7 +2772,6 @@ impl str {
         note = "superseded by `trim_end_matches`",
         suggestion = "trim_end_matches"
     )]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn trim_right_matches<P: Pattern>(&self, pat: P) -> &str
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,

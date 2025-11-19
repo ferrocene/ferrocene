@@ -718,7 +718,6 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
     #[inline]
     #[doc(hidden)]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn is_positive(self) -> bool {
         self.is_sign_positive()
     }
@@ -756,7 +755,6 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
     #[inline]
     #[doc(hidden)]
-    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub fn is_negative(self) -> bool {
         self.is_sign_negative()
     }

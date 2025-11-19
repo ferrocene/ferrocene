@@ -561,7 +561,6 @@ impl Layout {
     note = "Name does not follow std convention, use LayoutError",
     suggestion = "LayoutError"
 )]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub type LayoutErr = LayoutError;
 
 /// The `LayoutError` is returned when the parameters given

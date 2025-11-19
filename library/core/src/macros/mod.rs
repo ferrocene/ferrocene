@@ -514,7 +514,6 @@ macro_rules! matches {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(since = "1.39.0", note = "use the `?` operator instead")]
 #[doc(alias = "?")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 macro_rules! r#try {
     ($expr:expr $(,)?) => {
         match $expr {

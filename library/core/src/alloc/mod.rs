@@ -18,7 +18,6 @@ pub use self::layout::Layout;
     suggestion = "LayoutError"
 )]
 #[allow(deprecated, deprecated_in_future)]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub use self::layout::LayoutErr;
 #[stable(feature = "alloc_layout_error", since = "1.50.0")]
 #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]

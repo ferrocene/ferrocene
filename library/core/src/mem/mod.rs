@@ -456,7 +456,6 @@ pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of` instead", since = "1.2.0", suggestion = "align_of")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub fn min_align_of<T>() -> usize {
     <T as SizedTypeProperties>::ALIGN
 }
@@ -480,7 +479,6 @@ pub fn min_align_of<T>() -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of_val` instead", since = "1.2.0", suggestion = "align_of_val")]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub fn min_align_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: val is a reference, so it's a valid raw pointer
     unsafe { intrinsics::align_of_val(val) }
@@ -726,7 +724,6 @@ pub const unsafe fn zeroed<T>() -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_uninitialized"]
 #[track_caller]
-#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub unsafe fn uninitialized<T>() -> T {
     // SAFETY: the caller must guarantee that an uninitialized value is valid for `T`.
     unsafe {

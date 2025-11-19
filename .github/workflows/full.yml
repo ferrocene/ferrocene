@@ -66,7 +66,7 @@ jobs:
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -74,15 +74,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - build-metrics-artifact: dist-aarch64-unknown-linux-gnu
+          - run-name: dist
+            build-metrics-artifact: dist-aarch64-unknown-linux-gnu
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
-          - build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
+          - run-name: tools
+            build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script:
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
-      run-name: Dist (x86_64-unknown-linux-gnu)
+      run-name: ${{ matrix.run-name }}
       script: ${{ matrix.script }}
       host-triple: x86_64-unknown-linux-gnu
       triples: "x86_64-unknown-linux-gnu"
@@ -129,7 +131,7 @@ jobs:
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -161,7 +163,7 @@ jobs:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
     name: Test aarch64-unknown-none on ${{ matrix.host }}
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -193,7 +195,7 @@ jobs:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
     name: Test thumbv7em-none-eabi on ${{ matrix.host }}
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -225,7 +227,7 @@ jobs:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
     name: Test thumbv7em-none-eabihf on ${{ matrix.host }}
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -344,7 +346,7 @@ jobs:
 
   dist-aarch64-unknown-linux-gnu:
     name: Dist (aarch64-unknown-linux-gnu)
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-aarch64-unknown-linux-gnu
@@ -352,16 +354,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - build-metrics-artifact: dist-aarch64-unknown-linux-gnu
+          - run-name: Dist
+            build-metrics-artifact: dist-aarch64-unknown-linux-gnu
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
 
-          - build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
+          - run-name: Tools
+            build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script:
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
-      run-name: Dist (aarch64-unknown-linux-gnu)
+      run-name: ${{ matrix.run-name }}
       script: ${{ matrix.script }}
       host-triple: aarch64-unknown-linux-gnu
       triples: "aarch64-unknown-linux-gnu"
@@ -412,7 +416,7 @@ jobs:
 
   # dist-x86_64-pc-windows-msvc:
   #   name: Dist (x86_64-pc-windows-msvc)
-  #   uses: ./.github/workflows/full-host-dist.yml
+  #   uses: ./.github/workflows/full-job.yml
   #   needs:
   #     - build-x86_64-pc-windows-msvc
   #   secrets: inherit
@@ -484,7 +488,7 @@ jobs:
 
   # dist-aarch64-apple-darwin:
   #   name: Dist (aarch64-apple-darwin)
-  #   uses: ./.github/workflows/full-host-dist.yml
+  #   uses: ./.github/workflows/full-job.yml
   #   needs:
   #     - calculate-envs
   #     - build-aarch64-apple-darwin
@@ -562,7 +566,7 @@ jobs:
 
   docs:
     name: Dist (Docs)
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -597,7 +601,7 @@ jobs:
 
   source:
     name: Dist (source)
-    uses: ./.github/workflows/full-host-dist.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu

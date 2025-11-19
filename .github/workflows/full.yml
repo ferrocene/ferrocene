@@ -623,12 +623,16 @@ jobs:
 
   checks:
     name: Checks (x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/full-checks.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
+      run-name: Checks (x86_64-unknown-linux-gnu)
+      script: |
+        uvx reuse@5.1.1 --include-submodules lint
+        ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
@@ -638,6 +642,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: ${{ github.job }}
 
   targets:
     name: Build additional targets

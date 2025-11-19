@@ -1,4 +1,6 @@
-name: Dist host
+# 
+
+name: Dist targets
 run-name: Dist (${{inputs.host-triple}})
 
 defaults:

@@ -333,8 +333,8 @@ impl Duration {
     /// assert_eq!(10_u64.pow(15), duration.as_secs());
     /// assert_eq!(321, duration.subsec_nanos());
     /// ```
-    #[stable(feature = "duration_from_nanos_u128", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "duration_from_nanos_u128", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "duration_from_nanos_u128", since = "1.90")]
+    #[rustc_const_stable(feature = "duration_from_nanos_u128", since = "1.90")]
     #[must_use]
     #[inline]
     #[track_caller]

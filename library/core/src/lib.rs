@@ -213,8 +213,8 @@
 // Ferrocene lints/features:
 #![cfg_attr(
     feature = "ferrocene_certified",
-    expect(deprecated_in_future),
-    deprecated(since = "TBD", note = "Uncertified")
+    deprecated(since = "1.92", note = "Uncertified"),
+    allow(deprecated)
 )]
 #![feature(register_tool)]
 #![register_tool(ferrocene)]

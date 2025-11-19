@@ -5,9 +5,9 @@
 )]
 
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::StructuralPartialEq;
 
@@ -90,7 +90,7 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
         impl Hash for $name {
             // Required method
             fn hash<H: Hasher>(&self, state: &mut H) {
@@ -98,7 +98,7 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
         impl fmt::Debug for $name {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 <$int as fmt::Debug>::fmt(&self.as_inner(), f)
@@ -159,7 +159,7 @@ define_valid_range_type! {
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff_ffff_ffff_ffff);
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 define_valid_range_type! {
     pub struct U32NotAllOnes(u32 as u32 in 0..=0xffff_fffe);
     pub struct I32NotAllOnes(i32 as u32 in 0..=0xffff_fffe);
@@ -168,40 +168,40 @@ define_valid_range_type! {
     pub struct I64NotAllOnes(i64 as u64 in 0..=0xffff_ffff_ffff_fffe);
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub trait NotAllOnesHelper {
     type Type;
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 pub type NotAllOnes<T> = <T as NotAllOnesHelper>::Type;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl NotAllOnesHelper for u32 {
     type Type = U32NotAllOnes;
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl NotAllOnesHelper for i32 {
     type Type = I32NotAllOnes;
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl NotAllOnesHelper for u64 {
     type Type = U64NotAllOnes;
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl NotAllOnesHelper for i64 {
     type Type = I64NotAllOnes;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 define_valid_range_type! {
     pub struct CodePointInner(u32 as u32 in 0..=0x10ffff);
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl CodePointInner {
     pub const ZERO: Self = CodePointInner::new(0).unwrap();
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl Default for CodePointInner {
     #[inline]
     fn default() -> Self {

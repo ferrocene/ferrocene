@@ -1,10 +1,10 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 use crate::ffi::CStr;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::PhantomData;
 use crate::ptr::NonNull;
@@ -52,7 +52,7 @@ pub struct Location<'a> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl PartialEq for Location<'_> {
     fn eq(&self, other: &Self) -> bool {
         // Compare col / line first as they're cheaper to compare and more likely to differ,
@@ -62,11 +62,11 @@ impl PartialEq for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl Eq for Location<'_> {}
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl Ord for Location<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.file()
@@ -77,7 +77,7 @@ impl Ord for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl PartialOrd for Location<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -85,7 +85,7 @@ impl PartialOrd for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl Hash for Location<'_> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.file().hash(state);
@@ -95,7 +95,7 @@ impl Hash for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl fmt::Debug for Location<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Location")
@@ -154,7 +154,7 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -195,7 +195,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub const fn file(&self) -> &'a str {
         // SAFETY: The filename is valid.
         unsafe { self.filename.as_ref() }
@@ -209,7 +209,7 @@ impl<'a> Location<'a> {
     #[inline]
     #[stable(feature = "file_with_nul", since = "1.92.0")]
     #[rustc_const_stable(feature = "file_with_nul", since = "1.92.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
     pub const fn file_as_c_str(&self) -> &'a CStr {
         let filename = self.filename.as_ptr();
 
@@ -276,7 +276,7 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

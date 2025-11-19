@@ -69,7 +69,7 @@ macro_rules! forward_ref_op_assign {
 }
 
 /// Creates a zero-size type similar to a closure type, but named.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", deprecated(since = "1.0.0", note = "This is not certified"))]
 macro_rules! impl_fn_for_zst {
     ($(
         $( #[$attr: meta] )*

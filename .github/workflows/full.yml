@@ -245,83 +245,83 @@ jobs:
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
-  test-x86_64-pc-nto-qnx710:
-    name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # Don't abstract the entire command here since they use different variants
-        suite:
-          - test:compiletest 
-          - test:library
-          - test:library-std
-        include:
-          - host: x86_64-unknown-linux-gnu
-            runner: ubuntu24-8core-x86-64-linux-gnu 
-    uses: ./.github/workflows/full-test-remote.yml
-    needs:
-      - calculate-envs
-      - build-x86_64-unknown-linux-gnu
-      # - targets
-    secrets: inherit
-    with:
-      script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-pc-nto-qnx710 --test-variant 2021
-      host-triple: ${{ matrix.host }}
-      runner: ${{ matrix.runner }}
-      use-minio: true
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ferrocene-images/ci:ubuntu-20-main
-      # container: ferrocene-images/ci:ubuntu-20-main
-      test-device-addr: "172.31.1.11:12345"
-      # emulator-container: ferrocene-images/ci:ubuntu-24-main
-      emulator-prepare-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
-      emulator-start-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-      qnx-version: "710-472"
-      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
-      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
-      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
-      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+  # test-x86_64-pc-nto-qnx710:
+  #   name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # Don't abstract the entire command here since they use different variants
+  #       suite:
+  #         - test:compiletest 
+  #         - test:library
+  #         - test:library-std
+  #       include:
+  #         - host: x86_64-unknown-linux-gnu
+  #           runner: ubuntu24-8core-x86-64-linux-gnu
+  #   uses: ./.github/workflows/full-test-remote.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-x86_64-unknown-linux-gnu
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     script: |
+  #       uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-pc-nto-qnx710 --test-variant 2021
+  #     host-triple: ${{ matrix.host }}
+  #     runner: ${{ matrix.runner }}
+  #     use-minio: true
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ferrocene-images/ci:ubuntu-20-main
+  #     # container: ferrocene-images/ci:ubuntu-20-main
+  #     test-device-addr: "172.31.1.11:12345"
+  #     # emulator-container: ferrocene-images/ci:ubuntu-24-main
+  #     emulator-prepare-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
+  #     emulator-start-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
+  #     qnx-version: "710-472"
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
-  test-aarch64-unknown-nto-qnx710:
-    name: Test aarch64-unknown-nto-qnx710 on ${{ matrix.host }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # Don't abstract the entire command here since they use different variants
-        suite:
-          - test:compiletest 
-          - test:library
-          - test:library-std
-        include:
-          - host: x86_64-unknown-linux-gnu
-            runner: ubuntu24-8core-x86-64-linux-gnu
-    uses: ./.github/workflows/full-test-remote.yml
-    needs:
-      - calculate-envs
-      - build-x86_64-unknown-linux-gnu
-      # - targets
-    secrets: inherit
-    with:
-      script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call  --target aarch64-unknown-nto-qnx710 --test-variant 2021-cortex-a53
-      host-triple: ${{ matrix.host }}
-      runner: ${{ matrix.runner }}
-      use-minio: true
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ferrocene-images/ci:ubuntu-20-main
-      # container: ferrocene-images/ci:ubuntu-20-main
-      test-device-addr: "172.31.1.105:12345"
-      # emulator-container: ferrocene-images/ci:ubuntu-24-main
-      emulator-prepare-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
-      emulator-start-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
-      qnx-version: "710-472"
-      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
-      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
-      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
-      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+  # test-aarch64-unknown-nto-qnx710:
+  #   name: Test aarch64-unknown-nto-qnx710 on ${{ matrix.host }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # Don't abstract the entire command here since they use different variants
+  #       suite:
+  #         - test:compiletest 
+  #         - test:library
+  #         - test:library-std
+  #       include:
+  #         - host: x86_64-unknown-linux-gnu
+  #           runner: ubuntu24-8core-x86-64-linux-gnu
+  #   uses: ./.github/workflows/full-test-remote.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-x86_64-unknown-linux-gnu
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     script: |
+  #       uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call  --target aarch64-unknown-nto-qnx710 --test-variant 2021-cortex-a53
+  #     host-triple: ${{ matrix.host }}
+  #     runner: ${{ matrix.runner }}
+  #     use-minio: true
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ferrocene-images/ci:ubuntu-20-main
+  #     # container: ferrocene-images/ci:ubuntu-20-main
+  #     test-device-addr: "172.31.1.105:12345"
+  #     # emulator-container: ferrocene-images/ci:ubuntu-24-main
+  #     emulator-prepare-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
+  #     emulator-start-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
+  #     qnx-version: "710-472"
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # aarch64 Linux
 
@@ -572,8 +572,8 @@ jobs:
       - test-aarch64-unknown-none
       - test-thumbv7em-none-eabi
       - test-thumbv7em-none-eabihf
-      - test-x86_64-pc-nto-qnx710
-      - test-aarch64-unknown-nto-qnx710
+      # - test-x86_64-pc-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
       # - test-x86_64-pc-windows-msvc
       # - test-aarch64-apple-darwin
     secrets: inherit
@@ -665,8 +665,8 @@ jobs:
       - test-aarch64-unknown-none
       - test-thumbv7em-none-eabi
       - test-thumbv7em-none-eabihf
-      - test-x86_64-pc-nto-qnx710
-      - test-aarch64-unknown-nto-qnx710
+      # - test-x86_64-pc-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu

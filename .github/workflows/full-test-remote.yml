@@ -88,7 +88,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup/
         with:
-          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}      
+          build-dependencies: false
 
       - name: Log into registry
         if: ${{ inputs.emulator-container != '' || inputs.container != '' }}

@@ -481,7 +481,6 @@ impl<T: PointeeSized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_offset(self, count: isize) -> *mut T
     where
         T: Sized,
@@ -1176,7 +1175,6 @@ impl<T: PointeeSized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,

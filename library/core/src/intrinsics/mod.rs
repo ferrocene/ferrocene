@@ -930,7 +930,6 @@ pub const unsafe fn offset<Ptr: bounds::BuiltinDeref, Delta>(dst: Ptr, offset: D
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 
 /// Projects to the `index`-th element of `slice_ptr`, as the same kind of pointer

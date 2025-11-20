@@ -184,7 +184,7 @@ dependencies = [
  "aws-credential-types",
  "aws-http",
  "aws-sdk-sso",
- "aws-sdk-sts",
+ "aws-sdk-sts 0.30.0",
  "aws-smithy-async",
  "aws-smithy-client",
  "aws-smithy-http",
@@ -304,6 +304,30 @@ dependencies = [
  "http 0.2.12",
  "regex",
  "tokio-stream",
+ "tracing",
+]
+
+[[package]]
+name = "aws-sdk-sts"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79e21aa1a5b0853969a1ef96ccfaa8ff5d57c761549786a4d5f86c1902b2586a"
+dependencies = [
+ "aws-credential-types",
+ "aws-http",
+ "aws-runtime",
+ "aws-smithy-async",
+ "aws-smithy-client",
+ "aws-smithy-http",
+ "aws-smithy-json",
+ "aws-smithy-query",
+ "aws-smithy-runtime",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "aws-smithy-xml",
+ "aws-types",
+ "http 0.2.12",
+ "regex",
  "tracing",
 ]
 
@@ -1093,6 +1117,7 @@ dependencies = [
  "anyhow",
  "aws-config",
  "aws-sdk-kms",
+ "aws-sdk-sts 0.29.0",
  "clap",
  "criticaltrust",
  "insta",
@@ -1962,7 +1987,7 @@ dependencies = [
  "quinn-udp",
  "rustc-hash",
  "rustls 0.23.35",
- "socket2 0.5.10",
+ "socket2 0.6.1",
  "thiserror 2.0.17",
  "tokio",
  "tracing",
@@ -1999,9 +2024,9 @@ dependencies = [
  "cfg_aliases",
  "libc",
  "once_cell",
- "socket2 0.5.10",
+ "socket2 0.6.1",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]

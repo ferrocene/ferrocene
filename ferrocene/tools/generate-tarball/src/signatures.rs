@@ -31,9 +31,10 @@ pub(crate) async fn maybe_refresh_gha_token() {
     let Ok(token) = var("ACTIONS_ID_TOKEN_REQUEST_TOKEN") else {
         panic!("Got $ACTIONS_ID_TOKEN_REQUEST_URL but not $ACTIONS_ID_TOKEN_REQUEST_TOKEN");
     };
-    info!("Refreshing GHA OIDC token for AWS KMS");
 
     let client = reqwest::Client::new();
+
+    println!("Refreshing GHA OIDC token for AWS KMS");
 
     let res = client
         .get(format!("{url}&audience=sts.amazonaws.com"))
@@ -52,10 +53,19 @@ pub(crate) fn sign_manifest_with_aws_kms(
     key_arn: &str,
 ) -> Result<(), Error> {
     let tokio = Runtime::new()?;
-    let aws_config = tokio.block_on(aws_config::load_from_env());
-    let kms_client = aws_sdk_kms::Client::new(&aws_config);
-
     tokio.block_on(maybe_refresh_gha_token());
+
+    let aws_config = tokio.block_on(aws_config::load_from_env());
+    let sts_client = aws_sdk_sts::Client::new(&aws_config);
+    tokio.block_on(async {
+        let res = sts_client.get_caller_identity().send().await;
+        match res {
+            Ok(_) => println!("Got AWS STS caller identity"),
+            Err(e) => panic!("Getting AWS STS caller identity: {e}")
+        }  
+    });
+
+    let kms_client = aws_sdk_kms::Client::new(&aws_config);
 
     let key = AwsKmsKeyPair::new(key_arn, tokio.handle().clone(), kms_client, KeyRole::Packages)?;
     sign_manifest(ctx, &key)

@@ -522,7 +522,6 @@ pub const fn assert_inhabited<T>();
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn assert_zero_valid<T>();
 
 /// A guard for `std::mem::uninitialized`. This will statically either panic, or do nothing. It does

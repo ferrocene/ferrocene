@@ -139,7 +139,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "rust1", since = "1.0.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl<T> ExactSizeIterator for $name<'_, T> {
             #[inline(always)]
             fn len(&self) -> usize {
@@ -147,6 +146,7 @@ macro_rules! iterator {
             }
 
             #[inline(always)]
+            #[cfg(not(feature = "ferrocene_certified"))]
             fn is_empty(&self) -> bool {
                 is_empty!(self)
             }

@@ -28,7 +28,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_is_null"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_null(self) -> bool {
         self.cast_const().is_null()
     }
@@ -602,7 +601,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_mut<'a>(self) -> Option<&'a mut T> {
         // SAFETY: the caller must guarantee that `self` is be valid for
         // a mutable reference if it isn't null.
@@ -1820,7 +1818,6 @@ impl<T> *mut [T] {
     #[inline(always)]
     #[track_caller]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn split_at_mut(self, mid: usize) -> (*mut [T], *mut [T]) {
         assert!(mid <= self.len());
         // SAFETY: The assert above is only a safety-net as long as `self.len()` is correct
@@ -1865,7 +1862,6 @@ impl<T> *mut [T] {
     /// ```
     #[inline(always)]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn split_at_mut_unchecked(self, mid: usize) -> (*mut [T], *mut [T]) {
         let len = self.len();
         let ptr = self.as_mut_ptr();

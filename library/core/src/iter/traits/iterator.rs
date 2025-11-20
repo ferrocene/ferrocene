@@ -19,7 +19,7 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use {
-    super::super::{Cloned, DoubleEndedIterator, Enumerate, Map, Rev, Skip, Sum, Zip},
+    super::super::{Cloned, DoubleEndedIterator, Enumerate, Map, Rev, Skip, Sum, Take, Zip},
     crate::ops::{ControlFlow, Try},
 };
 
@@ -836,7 +836,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn for_each<F>(self, f: F)
     where
         Self: Sized,
@@ -1413,7 +1412,6 @@ pub trait Iterator {
     #[doc(alias = "limit")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn take(self, n: usize) -> Take<Self>
     where
         Self: Sized,

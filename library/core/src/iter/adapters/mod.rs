@@ -44,7 +44,6 @@ mod skip;
 mod skip_while;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod step_by;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod take;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod take_while;
@@ -99,7 +98,7 @@ pub use self::{
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use self::{enumerate::Enumerate, map::Map, rev::Rev, skip::Skip, zip::Zip};
+pub use self::{enumerate::Enumerate, map::Map, rev::Rev, skip::Skip, take::Take, zip::Zip};
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline
 /// under the conditions that

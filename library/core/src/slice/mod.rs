@@ -27,7 +27,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{intrinsics::unchecked_sub, ptr};
+use crate::{intrinsics::unchecked_sub, mem::SizedTypeProperties, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -107,7 +107,7 @@ pub use raw::{from_raw_parts, from_raw_parts_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use iter::{Chunks, Windows};
+pub use iter::{Chunks, ChunksMut, Windows};
 
 /// Calculates the direction and split point of a one-sided range.
 ///
@@ -1240,7 +1240,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_mut(&mut self, chunk_size: usize) -> ChunksMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksMut::new(self, chunk_size)
@@ -2041,7 +2040,6 @@ impl<T> [T] {
     #[track_caller]
     #[must_use]
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_mut(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         match self.split_at_mut_checked(mid) {
             Some(pair) => pair,
@@ -2148,7 +2146,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         let len = self.len();
         let ptr = self.as_mut_ptr();
@@ -2249,7 +2246,6 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_mut_checked(&mut self, mid: usize) -> Option<(&mut [T], &mut [T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which
@@ -3918,7 +3914,6 @@ impl<T> [T] {
     /// [`split_at_mut`]: slice::split_at_mut
     #[stable(feature = "clone_from_slice", since = "1.7.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn clone_from_slice(&mut self, src: &[T])
     where
         T: Clone,
@@ -4101,7 +4096,6 @@ impl<T> [T] {
 
     /// Function to calculate lengths of the middle and trailing slice for `align_to{,_mut}`.
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn align_to_offsets<U>(&self) -> (usize, usize) {
         // What we gonna do about `rest` is figure out what multiple of `U`s we can put in a
         // lowest number of `T`s. And how many `T`s we need for each such "multiple".
@@ -4234,7 +4228,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn align_to_mut<U>(&mut self) -> (&mut [T], &mut [U], &mut [T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {
@@ -5258,12 +5251,10 @@ const unsafe fn copy_from_slice_impl<T: Clone>(dest: &mut [T], src: &[T]) {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 trait CloneFromSpec<T> {
     fn spec_clone_from(&mut self, src: &[T]);
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> CloneFromSpec<T> for [T]
 where
     T: Clone,

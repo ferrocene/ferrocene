@@ -198,7 +198,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, PartialEq))] // not Copy -- see #27186
+#[derive_const(Clone, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
@@ -497,7 +497,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -568,6 +567,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_empty(&self) -> bool
     where
         Idx: [const] PartialOrd,

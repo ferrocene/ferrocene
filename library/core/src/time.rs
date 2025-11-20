@@ -28,6 +28,11 @@ use crate::num::niche_types::Nanoseconds;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::ops::{Add, Div};
+
 const NANOS_PER_SEC: u32 = 1_000_000_000;
 const NANOS_PER_MILLI: u32 = 1_000_000;
 const NANOS_PER_MICRO: u32 = 1_000;
@@ -82,7 +87,7 @@ const DAYS_PER_WEEK: u64 = 7;
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy, PartialEq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy, PartialEq, PartialOrd))]
 #[rustc_diagnostic_item = "Duration"]
 pub struct Duration {
     secs: u64,
@@ -676,7 +681,6 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn checked_add(self, rhs: Duration) -> Option<Duration> {
         if let Some(mut secs) = self.secs.checked_add(rhs.secs) {
             let mut nanos = self.nanos.as_inner() + rhs.nanos.as_inner();
@@ -852,7 +856,6 @@ impl Duration {
                   without modifying the original"]
     #[inline]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn checked_div(self, rhs: u32) -> Option<Duration> {
         if rhs != 0 {
             let (secs, extra_secs) = (self.secs / (rhs as u64), self.secs % (rhs as u64));
@@ -1013,7 +1016,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
     pub fn from_secs_f32(secs: f32) -> Duration {
         match Duration::try_from_secs_f32(secs) {
             Ok(v) => v,
@@ -1158,7 +1161,6 @@ impl Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Add for Duration {
     type Output = Duration;
 
@@ -1236,7 +1238,6 @@ impl const MulAssign<u32> for Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Div<u32> for Duration {
     type Output = Duration;
 
@@ -1509,9 +1510,8 @@ impl fmt::Debug for Duration {
 ///     println!("Failed conversion to Duration: {e}");
 /// }
 /// ```
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct TryFromFloatSecsError {
     kind: TryFromFloatSecsErrorKind,
 }
@@ -1532,8 +1532,7 @@ impl fmt::Display for TryFromFloatSecsError {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
 enum TryFromFloatSecsErrorKind {
     // Value is negative.
     Negative,
@@ -1541,7 +1540,6 @@ enum TryFromFloatSecsErrorKind {
     OverflowOrNan,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! try_from_secs {
     (
         secs = $secs: expr,
@@ -1622,7 +1620,6 @@ macro_rules! try_from_secs {
     }};
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl Duration {
     /// The checked version of [`from_secs_f32`].
     ///
@@ -1757,6 +1754,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn try_from_secs_f64(secs: f64) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,

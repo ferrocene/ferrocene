@@ -906,8 +906,7 @@ impl Display for BorrowError {
 /// An error returned by [`RefCell::try_borrow_mut`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-#[derive(Debug)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 pub struct BorrowMutError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
@@ -931,7 +930,6 @@ impl Display for BorrowMutError {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn panic_already_borrowed(err: BorrowMutError) -> ! {
     const_panic!(
         "RefCell already borrowed",
@@ -1239,7 +1237,6 @@ impl<T: ?Sized> RefCell<T> {
     #[inline]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn borrow_mut(&self) -> RefMut<'_, T> {
         match self.try_borrow_mut() {
             Ok(b) => b,
@@ -1273,7 +1270,6 @@ impl<T: ?Sized> RefCell<T> {
     #[inline]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
         match BorrowRefMut::new(&self.borrow) {
             Some(b) => {
@@ -2101,7 +2097,6 @@ impl const Drop for BorrowRefMut<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'b> BorrowRefMut<'b> {
     #[inline]
     const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRefMut<'b>> {
@@ -2124,6 +2119,7 @@ impl<'b> BorrowRefMut<'b> {
     // reference to a distinct, nonoverlapping range of the original object.
     // This isn't in a Clone impl so that code doesn't call this implicitly.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn clone(&self) -> BorrowRefMut<'b> {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));

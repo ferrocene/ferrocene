@@ -4,15 +4,9 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
-#[cfg(not(feature = "ferrocene_certified"))]
-||||||| 69d4d5fc0e4
-use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
-=======
 use crate::char::EscapeDebugExtArgs;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::assert_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PhantomData, PointeeSized};

@@ -39,11 +39,7 @@ profiler = ["dep:profiler_builtins"]
 std_detect_file_io = ["std/std_detect_file_io"]
 std_detect_dlsym_getauxval = ["std/std_detect_dlsym_getauxval"]
 windows_raw_dylib = ["std/windows_raw_dylib"]
-<<<<<<< HEAD
+llvm_enzyme = ["std/llvm_enzyme"]
 
 # Ferrocene addition: enable "ferrocene_certified" feature in the core library
 ferrocene_certified = ["std/ferrocene_certified"]
-||||||| 69d4d5fc0e4
-=======
-llvm_enzyme = ["std/llvm_enzyme"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

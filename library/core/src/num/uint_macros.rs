@@ -362,17 +362,13 @@ macro_rules! uint_impl {
         #[doc = concat!("assert_eq!(n.rotate_left(", $rot, "), m);")]
         #[doc = concat!("assert_eq!(n.rotate_left(1024), n);")]
         /// ```
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_math", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-<<<<<<< HEAD
-        #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 69d4d5fc0e4
-=======
         #[rustc_allow_const_fn_unstable(const_trait_impl)] // for the intrinsic fallback
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         pub const fn rotate_left(self, n: u32) -> Self {
             return intrinsics::rotate_left(self, n);
         }
@@ -396,17 +392,13 @@ macro_rules! uint_impl {
         #[doc = concat!("assert_eq!(n.rotate_right(", $rot, "), m);")]
         #[doc = concat!("assert_eq!(n.rotate_right(1024), n);")]
         /// ```
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_math", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-<<<<<<< HEAD
-        #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 69d4d5fc0e4
-=======
         #[rustc_allow_const_fn_unstable(const_trait_impl)] // for the intrinsic fallback
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         pub const fn rotate_right(self, n: u32) -> Self {
             return intrinsics::rotate_right(self, n);
         }

@@ -56,18 +56,12 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ffi::va_list::{VaArgSafe, VaListImpl};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Destruct;
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::mem;
 use crate::ptr;
-||||||| 69d4d5fc0e4
-use crate::marker::{ConstParamTy, Destruct, DiscriminantKind, PointeeSized, Tuple};
-use crate::ptr;
-=======
-use crate::marker::{ConstParamTy, Destruct, DiscriminantKind, PointeeSized, Tuple};
-use crate::{mem, ptr};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 mod bounds;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -2136,15 +2130,10 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 /// The stabilized versions of this intrinsic are available on the integer
 /// primitives via the `rotate_left` method. For example,
 /// [`u32::rotate_left`]
+#[cfg(not(feature = "ferrocene_certified"))]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
-||||||| 69d4d5fc0e4
-pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
-=======
 #[rustc_allow_const_fn_unstable(const_trait_impl, funnel_shifts)]
 #[miri::intrinsic_fallback_is_spec]
 pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
@@ -2153,7 +2142,6 @@ pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> 
     // `T` in bits.
     unsafe { unchecked_funnel_shl(x, x, shift % (mem::size_of::<T>() as u32 * 8)) }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Performs rotate right.
 ///
@@ -2165,15 +2153,10 @@ pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> 
 /// The stabilized versions of this intrinsic are available on the integer
 /// primitives via the `rotate_right` method. For example,
 /// [`u32::rotate_right`]
+#[cfg(not(feature = "ferrocene_certified"))]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
-||||||| 69d4d5fc0e4
-pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
-=======
 #[rustc_allow_const_fn_unstable(const_trait_impl, funnel_shifts)]
 #[miri::intrinsic_fallback_is_spec]
 pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
@@ -2182,7 +2165,6 @@ pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) ->
     // `T` in bits.
     unsafe { unchecked_funnel_shr(x, x, shift % (mem::size_of::<T>() as u32 * 8)) }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns (a + b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///

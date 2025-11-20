@@ -140,14 +140,11 @@ const fn swizzle() {
     }
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: fls_g59pinqkvunq
-// Const Blocks
-||||||| 69d4d5fc0e4
-=======
 fn main() {
     extract_insert_dyn();
     const { swizzle() };
     swizzle();
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

@@ -272,7 +272,7 @@ use crate::range;
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{marker::Destruct, mem};
+use crate::{marker::Destruct, mem, ptr::NonNull};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod lazy;
@@ -1583,7 +1583,6 @@ impl<T> const From<T> for RefCell<T> {
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<RefCell<U>> for RefCell<T> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 struct BorrowRef<'b> {
     borrow: &'b Cell<BorrowCounter>,
 }
@@ -1649,7 +1648,7 @@ impl const Clone for BorrowRef<'_> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_not_suspend = "holding a Ref across suspend points can cause BorrowErrors"]
 #[rustc_diagnostic_item = "RefCellRef"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 pub struct Ref<'b, T: ?Sized + 'b> {
     // NB: we use a pointer instead of `&'b T` to avoid `noalias` violations, because a
     // `Ref` argument doesn't hold immutability for its whole scope, only until it drops.

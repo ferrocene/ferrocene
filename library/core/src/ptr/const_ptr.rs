@@ -134,7 +134,6 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: PointeeSized,
@@ -906,7 +905,6 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }

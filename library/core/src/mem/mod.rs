@@ -7,7 +7,6 @@
 
 use crate::alloc::Layout;
 use crate::marker::Destruct;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
@@ -1077,7 +1076,6 @@ pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
 ///
 /// See the [`discriminant`] function in this module for more information.
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Discriminant<T>(<T as DiscriminantKind>::Discriminant);
 
 // N.B. These trait implementations cannot be derived because we don't want any bounds on T.
@@ -1216,7 +1214,6 @@ impl<T> fmt::Debug for Discriminant<T> {
 #[rustc_const_stable(feature = "const_discriminant", since = "1.75.0")]
 #[rustc_diagnostic_item = "mem_discriminant"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn discriminant<T>(v: &T) -> Discriminant<T> {
     Discriminant(intrinsics::discriminant_value(v))
 }

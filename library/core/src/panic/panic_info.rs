@@ -1,6 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Display};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::Location;
 use crate::panicking::PanicFmt;
 
@@ -17,7 +16,6 @@ use crate::panicking::PanicFmt;
 pub struct PanicInfo<'a> {
     #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     message: &'a PanicFmt<'a>,
-    #[cfg(not(feature = "ferrocene_certified"))]
     location: &'a Location<'a>,
     #[cfg(not(feature = "ferrocene_certified"))]
     can_unwind: bool,
@@ -42,14 +40,14 @@ pub struct PanicMessage<'a> {
 #[cfg(feature = "ferrocene_certified")]
 impl<'a> PanicInfo<'a> {
     #[inline]
-    pub(crate) fn new(message: &'a PanicFmt<'a>) -> Self {
-        PanicInfo { message }
+    pub(crate) fn new(message: &'a PanicFmt<'a>, location: &'a Location<'a>) -> Self {
+        PanicInfo { message, location }
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> PanicInfo<'a> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn new(
         // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicFmt` alias.
         message: &'a PanicFmt<'a>,
@@ -78,6 +76,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_info_message", since = "1.81.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn message(&self) -> PanicMessage<'_> {
         PanicMessage { message: self.message }
     }
@@ -127,6 +126,7 @@ impl<'a> PanicInfo<'a> {
     #[deprecated(since = "1.81.0", note = "this never returns anything useful")]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[allow(deprecated, deprecated_in_future)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn payload(&self) -> &(dyn crate::any::Any + Send) {
         struct NoPayload;
         &NoPayload
@@ -144,6 +144,7 @@ impl<'a> PanicInfo<'a> {
     /// again.
     #[must_use]
     #[unstable(feature = "panic_can_unwind", issue = "92988")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn can_unwind(&self) -> bool {
         self.can_unwind
     }
@@ -155,6 +156,7 @@ impl<'a> PanicInfo<'a> {
     )]
     #[doc(hidden)]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn force_no_backtrace(&self) -> bool {
         self.force_no_backtrace
     }

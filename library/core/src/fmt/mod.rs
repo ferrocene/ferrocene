@@ -4,9 +4,15 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
 #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 69d4d5fc0e4
+use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
+=======
+use crate::char::EscapeDebugExtArgs;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::hint::assert_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PhantomData, PointeeSized};
@@ -202,7 +208,7 @@ pub trait Write {
     /// ```
     #[stable(feature = "fmt_write_char", since = "1.1.0")]
     fn write_char(&mut self, c: char) -> Result {
-        self.write_str(c.encode_utf8(&mut [0; MAX_LEN_UTF8]))
+        self.write_str(c.encode_utf8(&mut [0; char::MAX_LEN_UTF8]))
     }
 
     /// Glue for usage of the [`write!`] macro with implementors of this trait.
@@ -3046,7 +3052,7 @@ impl Display for char {
         if f.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
             f.write_char(*self)
         } else {
-            f.pad(self.encode_utf8(&mut [0; MAX_LEN_UTF8]))
+            f.pad(self.encode_utf8(&mut [0; char::MAX_LEN_UTF8]))
         }
     }
 }

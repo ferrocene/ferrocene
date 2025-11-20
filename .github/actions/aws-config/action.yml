@@ -25,6 +25,7 @@ runs:
         --duration-seconds 7200 \
         --region us-east-1 \
         --role-arn ${{ inputs.aws-role-arn }} \
+        --role-session-name github-actions \
         --web-identity-token $(cat /tmp/awsjwt) > /tmp/awscreds
 
       mkdir -p ~/.aws

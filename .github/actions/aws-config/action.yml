@@ -21,21 +21,14 @@ runs:
         "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" --fail --silent --show-error | jq -r '.value' > /tmp/awsjwt
       chmod 0600 /tmp/awsjwt
 
-      unset AWS_PROFILE
-      aws sts assume-role-with-web-identity \
-        --duration-seconds 7200 \
-        --region us-east-1 \
-        --role-arn ${{ inputs.aws-role-arn }} \
-        --role-session-name github-actions \
-        --web-identity-token $(cat /tmp/awsjwt) > /tmp/awscreds
-
       mkdir -p ~/.aws
 
       cat <<EOF > ~/.aws/config
       [profile amazon]
       region = us-east-1
+      duration-seconds = 7200
       role_arn = ${{ inputs.aws-role-arn }}
-      web_identity_token_file = /tmp/awscreds
+      web_identity_token_file = /tmp/awsjwt
 
       [profile minio]
       region = eu-central-1

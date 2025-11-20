@@ -3663,7 +3663,6 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn abs(self) -> Self {
             // Note that the #[rustc_inherit_overflow_checks] and #[inline]
             // above mean that the overflow semantics of the subtraction

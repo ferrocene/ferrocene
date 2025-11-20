@@ -8,7 +8,9 @@ if [[ "$GITHUB_ACTIONS" == "true" ]]; then
     echo "::group::Setup uv"
 fi
 
-curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+if ! command -v uv >/dev/null 2>&1; then
+    curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+fi
 
 export PATH="$HOME/.local/bin:$PATH"
 

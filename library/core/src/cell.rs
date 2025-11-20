@@ -271,7 +271,11 @@ use crate::range;
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{marker::Destruct, mem, ptr::NonNull};
+use crate::{
+    marker::{Destruct, PhantomData},
+    mem,
+    ptr::NonNull,
+};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod lazy;
@@ -965,7 +969,6 @@ type BorrowCounter = isize;
 const UNUSED: BorrowCounter = 0;
 
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn is_writing(x: BorrowCounter) -> bool {
     x < UNUSED
 }
@@ -2084,13 +2087,11 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 struct BorrowRefMut<'b> {
     borrow: &'b Cell<BorrowCounter>,
 }
 
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl const Drop for BorrowRefMut<'_> {
     #[inline]
     fn drop(&mut self) {
@@ -2139,7 +2140,7 @@ impl<'b> BorrowRefMut<'b> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_not_suspend = "holding a RefMut across suspend points can cause BorrowErrors"]
 #[rustc_diagnostic_item = "RefCellRefMut"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 pub struct RefMut<'b, T: ?Sized + 'b> {
     // NB: we use a pointer instead of `&'b mut T` to avoid `noalias` violations, because a
     // `RefMut` argument doesn't hold exclusivity for its whole scope, only until it drops.

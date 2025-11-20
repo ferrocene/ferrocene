@@ -67,10 +67,10 @@ impl const From<!> for TryFromIntError {
 ///     println!("Failed conversion to i32: {e}");
 /// }
 /// ```
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq))]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ParseIntError {
+    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
     pub(super) kind: IntErrorKind,
 }
 
@@ -86,9 +86,8 @@ pub struct ParseIntError {
 /// # }
 /// ```
 #[stable(feature = "int_error_matching", since = "1.55.0")]
-#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, PartialEq, Eq, Copy, Hash))]
 #[non_exhaustive]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub enum IntErrorKind {
     /// Value being parsed is empty.
     ///

@@ -2,7 +2,6 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::str::FromStr;
@@ -27,7 +26,6 @@ macro_rules! try_opt {
 }
 
 // Use this when the generated code should differ between signed and unsigned types.
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! sign_dependent_expr {
     (signed ? if signed { $signed_case:expr } if unsigned { $unsigned_case:expr } ) => {
         $signed_case
@@ -82,10 +80,8 @@ pub mod niche_types;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use dec2flt::ParseFloatError;
 #[stable(feature = "int_error_matching", since = "1.55.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use error::IntErrorKind;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use error::ParseIntError;
 #[stable(feature = "try_from", since = "1.34.0")]
 pub use error::TryFromIntError;
@@ -1455,7 +1451,6 @@ pub enum FpCategory {
 #[doc(hidden)]
 #[inline(always)]
 #[unstable(issue = "none", feature = "std_internals")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) -> bool {
     radix <= 16 && digits.len() <= size_of::<T>() * 2 - is_signed_ty as usize
 }
@@ -1464,7 +1459,6 @@ pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) 
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn from_ascii_radix_panic(radix: u32) -> ! {
     const_panic!(
         "from_ascii_radix: radix must lie in the range `[2, 36]`",
@@ -1473,11 +1467,11 @@ const fn from_ascii_radix_panic(radix: u32) -> ! {
     )
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! from_str_int_impl {
     ($signedness:ident $($int_ty:ty)+) => {$(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl const FromStr for $int_ty {
             type Err = ParseIntError;
 
@@ -1601,6 +1595,7 @@ macro_rules! from_str_int_impl {
             /// ```
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
+            #[cfg(not(feature = "ferrocene_certified"))]
             pub const fn from_ascii(src: &[u8]) -> Result<$int_ty, ParseIntError> {
                 <$int_ty>::from_ascii_radix(src, 10)
             }
@@ -1740,5 +1735,4 @@ macro_rules! from_str_int_impl {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 from_str_int_impl! { signed isize i8 i16 i32 i64 i128 }
-#[cfg(not(feature = "ferrocene_certified"))]
 from_str_int_impl! { unsigned usize u8 u16 u32 u64 u128 }

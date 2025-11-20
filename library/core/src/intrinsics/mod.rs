@@ -545,7 +545,6 @@ pub const fn assert_mem_uninitialized_valid<T>();
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn caller_location() -> &'static crate::panic::Location<'static>;
 
 /// Moves a value out of scope without running drop glue.

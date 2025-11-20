@@ -3403,7 +3403,6 @@ pub const fn fabsf32(x: f32) -> f32;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn fabsf64(x: f64) -> f64;
 
 /// Returns the absolute value of an `f128`.

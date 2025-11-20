@@ -21,14 +21,19 @@ runs:
         "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" --fail --silent --show-error | jq -r '.value' > /tmp/awsjwt
       chmod 0600 /tmp/awsjwt
 
+      aws sts assume-role-with-web-identity \
+        --duration-seconds 7200 \
+        --region us-east-1 \
+        --role-arn ${{ inputs.aws-role-arn }} \
+        --web-identity-token $(cat /tmp/awsjwt) > /tmp/awscreds
+
       mkdir -p ~/.aws
 
       cat <<EOF > ~/.aws/config
       [profile amazon]
       region = us-east-1
       role_arn = ${{ inputs.aws-role-arn }}
-      duration_seconds = 7200
-      web_identity_token_file = /tmp/awsjwt
+      web_identity_token_file = /tmp/awscreds
 
       [profile minio]
       region = eu-central-1
@@ -46,6 +51,6 @@ runs:
       echo "Testing authentication..."
       aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
       echo "Can authenticate with minio!"
-      aws sts get-session-token --duration-seconds 7200 --profile amazon
+      aws sts assume-role --duration-seconds 7200 --profile amazon
       aws sts get-caller-identity --profile amazon > /dev/null
       echo "Can authenticate with amazon!"

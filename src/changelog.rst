@@ -18,6 +18,39 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.90.0
+-------------------------------
+
+- `Split up the unknown_or_malformed_diagnostic_attributes lint <https://github.com/rust-lang/rust/pull/140717>`_
+
+  - No change: lints are not part of the FLS
+
+- `Allow constants whose final value has references to mutable/external memory, but reject such constants as patterns <https://github.com/rust-lang/rust/pull/140942>`_
+
+  - This lifted restriction was not specified in the FLS
+  - The restriction on patterns is documented in :p:`fls_wJ9f906BlBvg`
+  - New paragraph: :p:`fls_zyuxqty09SDO`
+
+    - Above paragraph replaces :p:`fls_6g7c1kjrmfnr` and :p:`fls_hkbwa8xx2fwx`
+
+  * New paragraphs:
+
+    - :p:`fls_ooOYxhVh8hZo`
+
+    - :p:`fls_zkNFeBLy80UA`
+
+    - :p:`fls_VhzGfnWg7YrG`
+
+    - :p:`fls_ibYKKQdB2tDn`
+
+    - :p:`fls_dQdSxf8kOgbi`
+
+    - :p:`fls_qC6L0km0ZMFI`
+
+- `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
+
+  - No change: lints are not part of the FLS
+
 Language changes in Rust 1.89.0
 -------------------------------
 
@@ -319,6 +352,8 @@ Language changes in Rust 1.83.0
 * `Stabilize \`&mut\`, \`*mut\`, \`&Cell\`, and \`*const Cell\` in const. <https://github.com/rust-lang/rust/pull/129195>`_
 
   * Changed paragraphs: :p:`fls_to4e7imq2c0w`, :p:`fls_6g7c1kjrmfnr`, :p:`fls_hkbwa8xx2fwx`
+
+  * Removed paragraph: :p:`fls_ox6sgl9n43g2`
 
 * `Allow creating references to statics in \`const\` initializers. <https://github.com/rust-lang/rust/pull/129759>`_
 

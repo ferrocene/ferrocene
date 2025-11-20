@@ -370,6 +370,12 @@ When a :t:`path pattern` refers to an :t:`associated constant` or a
 :t:`constant`, the :t:`type` of the :t:`associated constant` or :t:`constant`
 shall be :t:`structurally equal`.
 
+:dp:`fls_wJ9f906BlBvg`
+When a :t:`path pattern` refers to an :t:`associated constant` or a
+:t:`constant`, the :t:`constant` must not contain any references to
+:t:`[mutable static]s`, :t:`[static]s` with :t:`interior mutability`,
+or :t:`[external static]s`.
+
 :dp:`fls_hF19K8sWU8FF`
 When the type of the :t:`path pattern` is of an :t:`enum type` or
 :t:`struct type`, then the :t:`enum type` or :t:`struct type` shall be subject

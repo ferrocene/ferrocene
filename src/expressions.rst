@@ -209,9 +209,6 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_b5fraqx07wuo`
   :t:`[If let expression]s`,
 
-* :dp:`fls_6g7c1kjrmfnr`
-  :t:`[Immutable borrow expression]s`.
-
 * :dp:`fls_rpapnm3afan8`
   :t:`[Index expression]s`,
 
@@ -248,9 +245,6 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_3bucpdj828bq`
   :t:`[Range expression]s`,
 
-* :dp:`fls_hkbwa8xx2fwx`
-  :t:`[Borrow]s`,
-
 * :dp:`fls_fobs8ebt7dhc`
   :t:`[Struct expression]s`,
 
@@ -270,6 +264,12 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 * :dp:`fls_qvofy4wkql0s`
   :t:`[While loop expression]s`.
+
+* :dp:`fls_zyuxqty09SDO`
+  All forms of :t:`[borrow]s` except those of expressions that are subject to
+  :t:`drop scope extension` to the end of the program
+  and which are either :t:`[mutable borrow]s`
+  or borrows of expressions that result in values with :t:`interior mutability`.
 
 :dp:`fls_3i7efddbsmn0`
 An :t:`expression` is not considered a :t:`constant expression` when it
@@ -311,10 +311,6 @@ A :t:`constant context` is a :t:`construct` that requires a
 
 * :dp:`fls_ucFupTeCyylb`
   The :t:`block expression` of a :t:`const block expression`.
-
-:dp:`fls_ox6sgl9n43g2`
-It is a static error to create a :t:`mutable reference` in a
-:t:`constant context`.
 
 :dp:`fls_od0h3v40kjp6`
 An invocation of the :std:`core::ptr::addr_of` :t:`macro` expands to a

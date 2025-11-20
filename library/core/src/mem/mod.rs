@@ -687,7 +687,6 @@ pub const fn needs_drop<T: ?Sized>() -> bool {
 #[rustc_diagnostic_item = "mem_zeroed"]
 #[track_caller]
 #[rustc_const_stable(feature = "const_mem_zeroed", since = "1.75.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn zeroed<T>() -> T {
     // SAFETY: the caller must guarantee that an all-zero value is valid for `T`.
     unsafe {

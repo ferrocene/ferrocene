@@ -31,13 +31,16 @@ pub(crate) async fn maybe_refresh_gha_token() {
     let Ok(token) = var("ACTIONS_ID_TOKEN_REQUEST_TOKEN") else {
         panic!("Got $ACTIONS_ID_TOKEN_REQUEST_URL but not $ACTIONS_ID_TOKEN_REQUEST_TOKEN");
     };
+    info!("Refreshing GHA OIDC token for AWS KMS");
 
     let client = reqwest::Client::new();
-    
-    let res = client.get(format!("{url}&audience=sts.amazonaws.com"))
+
+    let res = client
+        .get(format!("{url}&audience=sts.amazonaws.com"))
         .bearer_auth(token)
         .send()
-        .await.unwrap();
+        .await
+        .unwrap();
     let res_json: serde_json::Value = res.json().await.unwrap();
     let jwt = res_json.get("value").unwrap();
     let jwt_str = serde_json::to_string_pretty(jwt).unwrap();
@@ -51,7 +54,7 @@ pub(crate) fn sign_manifest_with_aws_kms(
     let tokio = Runtime::new()?;
     let aws_config = tokio.block_on(aws_config::load_from_env());
     let kms_client = aws_sdk_kms::Client::new(&aws_config);
-    
+
     tokio.block_on(maybe_refresh_gha_token());
 
     let key = AwsKmsKeyPair::new(key_arn, tokio.handle().clone(), kms_client, KeyRole::Packages)?;

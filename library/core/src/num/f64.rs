@@ -17,13 +17,7 @@ use crate::convert::FloatToInt;
 use crate::num::FpCategory;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{intrinsics, mem};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
-#[rustfmt::skip]
-use crate::mem;
 
 /// The radix or base of the internal representation of `f64`.
 /// Use [`f64::RADIX`] instead.
@@ -1489,7 +1483,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn abs(self) -> f64 {
         intrinsics::fabsf64(self)
     }

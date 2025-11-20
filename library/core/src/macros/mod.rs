@@ -240,7 +240,6 @@ pub macro assert_matches {
 #[unstable(feature = "cfg_select", issue = "115585")]
 #[rustc_diagnostic_item = "cfg_select"]
 #[rustc_builtin_macro]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro cfg_select($($tt:tt)*) {
     /* compiler built-in */
 }

@@ -76,6 +76,8 @@ runs:
           --env ACTIONS_ID_TOKEN_REQUEST_TOKEN \
           --env ACTIONS_ID_TOKEN_REQUEST_URL \
           --env AWS_ROLE_ARN \
+          --env AWS_PROFILE \
+          --env AWS_DEFAULT_PROFILE \
           --env AWS_REGION \
           --env AWS_ACCESS_KEY_ID \
           --env AWS_SESSION_TOKEN \

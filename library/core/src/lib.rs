@@ -170,7 +170,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
 #![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
+#![feature(must_not_suspend)]
 #![feature(negative_impls)]
 #![feature(never_type)]
 #![feature(no_core)]

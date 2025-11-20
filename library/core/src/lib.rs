@@ -103,7 +103,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bigint_helper_methods))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr_internals))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_select))]
+#![feature(cfg_select)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_reliable_f16_f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_cmp))]
@@ -264,7 +264,6 @@ pub mod autodiff {
 pub mod contracts;
 
 #[unstable(feature = "cfg_select", issue = "115585")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::macros::cfg_select;
 
 #[macro_use]
@@ -337,7 +336,6 @@ pub mod bstr;
 pub mod cell;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod char;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -2376,7 +2376,6 @@ pub struct UnsafeCell<T: ?Sized> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Sync for UnsafeCell<T> {}
 
 impl<T> UnsafeCell<T> {

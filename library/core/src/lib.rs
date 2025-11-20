@@ -334,7 +334,6 @@ pub mod async_iter;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod bstr;
 pub mod cell;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod char;
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]

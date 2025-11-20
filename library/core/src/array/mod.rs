@@ -37,12 +37,10 @@ use crate::iter::UncheckedIterator;
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod ascii;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod drain;
 mod equality;
 mod iter;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use drain::drain_array_with;
 #[stable(feature = "array_value_iter", since = "1.51.0")]
 pub use iter::IntoIter;
@@ -582,7 +580,6 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[must_use]
     #[stable(feature = "array_map", since = "1.55.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn map<F, U>(self, f: F) -> [U; N]
     where
         F: FnMut(T) -> U,
@@ -621,7 +618,6 @@ impl<T, const N: usize> [T; N] {
     /// assert_eq!(c, Some(a));
     /// ```
     #[unstable(feature = "array_try_map", issue = "79711")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn try_map<R>(self, f: impl FnMut(T) -> R) -> ChangeOutputType<R, [R::Output; N]>
     where
         R: Try<Residual: Residual<[R::Output; N]>>,

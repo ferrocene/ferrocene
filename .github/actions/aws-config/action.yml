@@ -46,5 +46,6 @@ runs:
       echo "Testing authentication..."
       aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
       echo "Can authenticate with minio!"
+      aws sts get-session-token --duration-seconds 7200 --profile amazon
       aws sts get-caller-identity --profile amazon > /dev/null
       echo "Can authenticate with amazon!"

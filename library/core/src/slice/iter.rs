@@ -22,11 +22,14 @@ use crate::{cmp, fmt};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{
-    cmp,
-    iter::{TrustedLen, UncheckedIterator},
-    mem,
-    mem::SizedTypeProperties,
+use {
+    super::from_raw_parts_mut,
+    crate::{
+        cmp,
+        iter::{TrustedLen, UncheckedIterator},
+        mem,
+        mem::SizedTypeProperties,
+    },
 };
 
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
@@ -368,7 +371,6 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     // FIXME: Uncomment the `AsMut<[T]>` impl when this gets stabilized.
     #[unstable(feature = "slice_iter_mut_as_mut_slice", issue = "93079")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites

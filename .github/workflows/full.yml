@@ -44,13 +44,6 @@ jobs:
       cache-bucket: ${{ env.CACHE_BUCKET }}
       cache-prefix: ${{ env.CACHE_PREFIX }}
     steps:
-      - name: Configure AWS & MinIO (if applicable)
-        uses: ./.github/actions/aws-config/
-        with:
-          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
-          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
       - run: exit 0
 
   # x86_64 Linux

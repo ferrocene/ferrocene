@@ -82,28 +82,33 @@ if [[ -x "${FERROCENE_BUILD_HOST+x}" ]]; then
     add "--build=${FERROCENE_BUILD_HOST}"
 fi
 
-# The Rust build system defaults to calling `cc` on Windows, which does not exist
-if [[ "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
-    add --set target.aarch64-unknown-none.cc=clang
-    add --set target.aarch64-unknown-none.cxx=clang
-    add --set target.aarch64-unknown-none.ar=llvm-ar
-
-    add --set target.thumbv6m-none-eabi.cc=clang
-    add --set target.thumbv6m-none-eabi.cxx=clang
-    add --set target.thumbv6m-none-eabi.ar=llvm-ar
-
-    add --set target.thumbv7em-none-eabi.cc=clang
-    add --set target.thumbv7em-none-eabi.cxx=clang
-    add --set target.thumbv7em-none-eabi.ar=llvm-ar
-
-    add --set target.thumbv7em-none-eabihf.cc=clang
-    add --set target.thumbv7em-none-eabihf.cxx=clang
-    add --set target.thumbv7em-none-eabihf.ar=llvm-ar
-
-    add --set target.wasm32-unknown-unknown.cc=clang
-    add --set target.wasm32-unknown-unknown.cxx=clang
-    add --set target.wasm32-unknown-unknown.ar=lld-ar
+CLANG_POSTFIX=""
+if echo "${FERROCENE_HOST:-}" | grep -q linux; then
+    CLANG_POSTFIX="-20"
 fi
+
+declare -a TARGETS=(
+    "x86_64-unknown-linux-gnu"
+    "x86_64-unknown-linux-musl"
+    "aarch64-unknown-linux-gnu"
+    "aarch64-unknown-linux-musl"
+    "riscv64gc-unknown-linux-gnu"
+    "aarch64-unknown-none"
+    "aarch64-unknown-ferrocene.facade"
+    "thumbv6m-none-eabi"
+    "thumbv7em-none-eabi"
+    "thumbv7em-ferrocene.facade-eabi"
+    "thumbv7em-none-eabihf"
+    "thumbv7em-ferrocene.facade-eabihf"
+    "wasm32-unknown-unknown"
+)
+for target in "${TARGETS[@]}"; do
+    add --set "target.\"${target}\".cc=clang${CLANG_POSTFIX}"
+    add --set "target.\"${target}\".cxx=clang++${CLANG_POSTFIX}"
+    add --set "target.\"${target}\".ar=llvm-ar${CLANG_POSTFIX}"
+    add --set "target.\"${target}\".linker=clang${CLANG_POSTFIX}"
+    add --set "target.\"${target}\".ranlib=llvm-ranlib${CLANG_POSTFIX}"
+done
 
 # QNX toolchains aren't automatically inferred, set them explicitly.
 #
@@ -117,26 +122,16 @@ add --set target.x86_64-pc-nto-qnx710.cxx=q++
 add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 
-# these default to `cc` but require cross compilation
-add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
-add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
-add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
-add --set 'target."aarch64-unknown-ferrocene.certified".cc=aarch64-linux-gnu-gcc'
-add --set 'target."thumbv7em-ferrocene.certified-eabi".cc=arm-none-eabi-gcc'
-add --set 'target."thumbv7em-ferrocene.certified-eabihf".cc=arm-none-eabi-gcc'
-
 # musl toolchains use the architecture, also we need to set the `musl-root`
 add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/
-add --set target.x86_64-unknown-linux-musl.cc=x86_64-linux-musl-gcc
 add --set target.aarch64-unknown-linux-musl.musl-root=/usr/local/aarch64-linux-musl/
-add --set target.aarch64-unknown-linux-musl.cc=aarch64-linux-musl-gcc
 
 # disable sanitizers (defaults to true in ferrocene-dist profile) on MUSL as
 # LLVM does not support MUSL
 add --set target.aarch64-unknown-linux-musl.sanitizers=false
 add --set target.x86_64-unknown-linux-musl.sanitizers=false
 
-# experiment to enable code coverage
+# Enable coverage
 add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'

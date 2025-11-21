@@ -23,6 +23,7 @@ based on software engineering best practices.
    backports
    release-notes
    bors
+   licensing
    external-contributions
 
 .. toctree::

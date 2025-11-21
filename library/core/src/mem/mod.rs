@@ -829,7 +829,8 @@ pub const fn swap<T>(x: &mut T, y: &mut T) {
 /// ```
 #[inline]
 #[stable(feature = "mem_take", since = "1.40.0")]
-pub fn take<T: Default>(dest: &mut T) -> T {
+#[rustc_const_unstable(feature = "const_default", issue = "143894")]
+pub const fn take<T: [const] Default>(dest: &mut T) -> T {
     replace(dest, T::default())
 }
 
@@ -1454,12 +1455,12 @@ impl<T> SizedTypeProperties for T {}
 /// [dynamically sized]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [`offset_of_enum`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-enum.html
 /// [`offset_of_slice`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-slice.html
-#[stable(feature = "offset_of", since = "1.77.0")]
-#[allow_internal_unstable(builtin_syntax)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[stable(feature = "offset_of", since = "1.77.0")]
+#[allow_internal_unstable(builtin_syntax, core_intrinsics)]
 pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
     // The `{}` is for better error messages
-    {builtin # offset_of($Container, $($fields)+)}
+    const {builtin # offset_of($Container, $($fields)+)}
 }
 
 /// Create a fresh instance of the inhabited ZST type `T`.

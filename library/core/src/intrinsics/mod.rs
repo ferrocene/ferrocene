@@ -59,6 +59,8 @@ use crate::ffi::va_list::{VaArgSafe, VaListImpl};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Destruct;
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::mem;
 use crate::ptr;
 
 mod bounds;
@@ -2128,11 +2130,18 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 /// The stabilized versions of this intrinsic are available on the integer
 /// primitives via the `rotate_left` method. For example,
 /// [`u32::rotate_left`]
+#[cfg(not(feature = "ferrocene_certified"))]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
+#[rustc_allow_const_fn_unstable(const_trait_impl, funnel_shifts)]
+#[miri::intrinsic_fallback_is_spec]
+pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
+    // Make sure to call the intrinsic for `funnel_shl`, not the fallback impl.
+    // SAFETY: we modulo `shift` so that the result is definitely less than the size of
+    // `T` in bits.
+    unsafe { unchecked_funnel_shl(x, x, shift % (mem::size_of::<T>() as u32 * 8)) }
+}
 
 /// Performs rotate right.
 ///
@@ -2144,11 +2153,18 @@ pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 /// The stabilized versions of this intrinsic are available on the integer
 /// primitives via the `rotate_right` method. For example,
 /// [`u32::rotate_right`]
+#[cfg(not(feature = "ferrocene_certified"))]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
+#[rustc_allow_const_fn_unstable(const_trait_impl, funnel_shifts)]
+#[miri::intrinsic_fallback_is_spec]
+pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
+    // Make sure to call the intrinsic for `funnel_shr`, not the fallback impl.
+    // SAFETY: we modulo `shift` so that the result is definitely less than the size of
+    // `T` in bits.
+    unsafe { unchecked_funnel_shr(x, x, shift % (mem::size_of::<T>() as u32 * 8)) }
+}
 
 /// Returns (a + b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -2917,6 +2933,26 @@ pub const fn size_of<T>() -> usize;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 pub const fn align_of<T>() -> usize;
+
+/// The offset of a field inside a type.
+///
+/// Note that, unlike most intrinsics, this is safe to call;
+/// it does not require an `unsafe` block.
+/// Therefore, implementations must not require the user to uphold
+/// any safety invariants.
+///
+/// This intrinsic can only be evaluated at compile-time, and should only appear in
+/// constants or inline const blocks.
+///
+/// The stabilized version of this intrinsic is [`core::mem::offset_of`].
+/// This intrinsic is also a lang item so `offset_of!` can desugar to calls to it.
+#[rustc_nounwind]
+#[unstable(feature = "core_intrinsics", issue = "none")]
+#[rustc_const_unstable(feature = "core_intrinsics", issue = "none")]
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_intrinsic]
+#[lang = "offset_of"]
+pub const fn offset_of<T: PointeeSized>(variant: u32, field: u32) -> usize;
 
 /// Returns the number of variants of the type `T` cast to a `usize`;
 /// if `T` has no variants, returns `0`. Uninhabited variants will be counted.

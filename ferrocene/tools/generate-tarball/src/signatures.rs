@@ -25,12 +25,27 @@ pub(crate) struct SignatureContext<'a> {
 
 pub(crate) async fn maybe_refresh_gha_token() {
     use std::env::var;
+    use std::time::{Duration, SystemTime};
+
+    const TOKEN_FILE: &str = "/tmp/awsjwt";
     let Ok(url) = var("ACTIONS_ID_TOKEN_REQUEST_URL") else {
         return;
     };
     let Ok(token) = var("ACTIONS_ID_TOKEN_REQUEST_TOKEN") else {
         panic!("Got $ACTIONS_ID_TOKEN_REQUEST_URL but not $ACTIONS_ID_TOKEN_REQUEST_TOKEN");
     };
+
+    if let Ok(contents) = std::fs::read_to_string(TOKEN_FILE) {
+        let cur_jwt: serde_json::Value = serde_json::from_str(&contents).unwrap();
+        
+        let exp_time = Duration::from_millis(cur_jwt.get("exp").unwrap().as_u64().unwrap());
+        let now = SystemTime::now();
+        let soon = now + Duration::from_secs(20);
+        if soon.duration_since(SystemTime::UNIX_EPOCH).unwrap() < exp_time {
+            println!("No need to refresh token, expires at {exp_time:?}, is {now:?}");
+            return;
+        }
+    }
 
     let client = reqwest::Client::new();
 
@@ -43,9 +58,10 @@ pub(crate) async fn maybe_refresh_gha_token() {
         .await
         .unwrap();
     let res_json: serde_json::Value = res.json().await.unwrap();
-    let jwt = res_json.get("value").unwrap();
+    let jwt = res_json.get("value").unwrap().as_object().unwrap();
+
     let jwt_str = serde_json::to_string_pretty(jwt).unwrap();
-    std::fs::write("/tmp/awsjst", jwt_str).unwrap();
+    std::fs::write(TOKEN_FILE, jwt_str).unwrap();
 }
 
 pub(crate) fn sign_manifest_with_aws_kms(

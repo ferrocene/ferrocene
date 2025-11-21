@@ -32,9 +32,9 @@ jobs:
       # FIXME: Do this better somehow
       - name: Install llvm 20
         run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 20
+          wget https://apt.llvm.org/llvm.sh -O /tmp/llvm.sh
+          chmod +x /tmp/llvm.sh
+          sudo /tmp/llvm.sh 20
 
       - name: Run tidy
         run: ferrocene/ci/run.sh

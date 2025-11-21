@@ -201,16 +201,16 @@ RUN <<-EOF
     echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 EOF
 
-# Build MUSL toolchains
-#
-# A MUSL-aware C++ compiler is required to build the libunwind.a artifact shipped with the libstd of
-# these targets. Here we build said compiler as well as the MUSL libc.a
-WORKDIR /build/
-COPY ferrocene/ci/docker-images/ubuntu-20/musl-toolchain.sh /build/
-RUN bash musl-toolchain.sh aarch64 && rm -rf /build
-COPY ferrocene/ci/docker-images/ubuntu-20/musl-toolchain.sh /build/
-RUN bash musl-toolchain.sh x86_64 && rm -rf /build
-WORKDIR /
+# # Build MUSL toolchains
+# #
+# # A MUSL-aware C++ compiler is required to build the libunwind.a artifact shipped with the libstd of
+# # these targets. Here we build said compiler as well as the MUSL libc.a
+# WORKDIR /build/
+# COPY ferrocene/ci/docker-images/ubuntu-20/musl-toolchain.sh /build/
+# RUN bash musl-toolchain.sh aarch64 && rm -rf /build
+# COPY ferrocene/ci/docker-images/ubuntu-20/musl-toolchain.sh /build/
+# RUN bash musl-toolchain.sh x86_64 && rm -rf /build
+# WORKDIR /
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.

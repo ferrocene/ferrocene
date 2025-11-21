@@ -682,6 +682,8 @@ jobs:
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       script: |
+        export CIRCLE_SHA1="${{ github.sha }}"
+        export CIRCLE_JOB="${{ github.job }}"
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ./x.py run ferrocene/tools/traceability-matrix
       configure: |

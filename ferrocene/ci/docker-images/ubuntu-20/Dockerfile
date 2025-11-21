@@ -61,33 +61,21 @@ RUN <<-EOF
         zlib1g-dev \
         moreutils \
         zstd \
+        lsb-release \
+        software-properties-common \
+        gnupg \
+        wget \
         sudo
 
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
     apt-install binfmt-support
     
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        # Needed for aarch64-unknown-linux-gnu cross-compilation
-        apt-install \
-            g++-aarch64-linux-gnu \
-            gcc-aarch64-linux-gnu \
-            binutils-aarch64-linux-gnu \
-            libc6-dev-arm64-cross
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        # Needed for x86_64-unknown-linux-gnu cross-compilation
-        apt-install \
-            g++-x86-64-linux-gnu \
-            gcc-x86-64-linux-gnu \
-            binutils-x86-64-linux-gnu \
-            libc6-dev-amd64-cross
-    fi
-    
-    # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
-    apt-install gcc-arm-none-eabi
+    # Use llvm, not gcc
+    wget https://apt.llvm.org/llvm.sh
+    chmod +x llvm.sh
+    ./llvm.sh 20
 
-    # Needed for the wasm32-unknown-unknown target
-    apt-install clang
     # Needed to install AWS CLI during the build:
     apt-install unzip
     

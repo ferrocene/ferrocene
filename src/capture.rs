@@ -256,7 +256,7 @@ impl Backtrace {
     /// enabled, and the `std` feature is enabled by default.
     #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new() -> Backtrace {
-        let mut bt = Self::create(Self::new as usize);
+        let mut bt = Self::create(Self::new as *const () as usize);
         bt.resolve();
         bt
     }
@@ -286,7 +286,7 @@ impl Backtrace {
     /// enabled, and the `std` feature is enabled by default.
     #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new_unresolved() -> Backtrace {
-        Self::create(Self::new_unresolved as usize)
+        Self::create(Self::new_unresolved as *const () as usize)
     }
 
     fn create(ip: usize) -> Backtrace {

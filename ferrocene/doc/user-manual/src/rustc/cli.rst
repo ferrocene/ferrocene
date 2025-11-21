@@ -344,8 +344,8 @@
       =========== ==========================================================
       ``0``       No optimizations.
       ``1``       Basic optimizations.
-      ``2``       Some optimizations. Same as compiler argument ``-O``.
-      ``3``       All optimizations.
+      ``2``       Some optimizations.
+      ``3``       All optimizations. Same as compiler argument ``-O``.
       ``s``       Optimize for binary size.
       ``z``       Optimize for binary size with disabled loop vectorization.
       =========== ==========================================================
@@ -1060,7 +1060,7 @@
       :category: wide
 
       Compiler argument ``-O`` is identical to compiler argument
-      ``-C opt-level=2``.
+      ``-C opt-level=3``.
 
    .. cli:option:: -o <name>
       :category: narrow

@@ -11,9 +11,9 @@ sudo apt install -y \
     ninja-build
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
-    wget https://apt.llvm.org/llvm.sh
-    chmod +x llvm.sh
-    sudo ./llvm.sh 20
+    wget https://apt.llvm.org/llvm.sh -O /tmp/llvm.sh
+    chmod +x /tmp/llvm.sh
+    sudo /tmp/llvm.sh 20
 else
     echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
 fi

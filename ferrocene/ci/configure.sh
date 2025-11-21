@@ -82,8 +82,8 @@ if [[ -x "${FERROCENE_BUILD_HOST+x}" ]]; then
     add "--build=${FERROCENE_BUILD_HOST}"
 fi
 
-CLANG_POSTFIX=""
-if echo "${FERROCENE_HOST:-}" | grep -q linux; then
+CLANG_POSTFIX="${CLANG_POSTFIX:-}"
+if command -v clang-20; then
     CLANG_POSTFIX="-20"
 fi
 

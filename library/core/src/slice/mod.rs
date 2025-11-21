@@ -77,7 +77,6 @@ pub use iter::{ChunkBy, ChunkByMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{Chunks, ChunksMut, Windows};
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunksExact, ChunksExactMut};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use iter::{Iter, IterMut};
@@ -1279,7 +1278,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_exact(&self, chunk_size: usize) -> ChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExact::new(self, chunk_size)
@@ -1328,7 +1326,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_exact_mut(&mut self, chunk_size: usize) -> ChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExactMut::new(self, chunk_size)

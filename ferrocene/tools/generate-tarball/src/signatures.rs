@@ -25,8 +25,8 @@ pub(crate) struct SignatureContext<'a> {
 
 pub(crate) async fn maybe_refresh_gha_token() {
     use std::env::var;
-
     const TOKEN_FILE: &str = "/tmp/awsjwt";
+
     let Ok(url) = var("ACTIONS_ID_TOKEN_REQUEST_URL") else {
         return;
     };
@@ -44,8 +44,11 @@ pub(crate) async fn maybe_refresh_gha_token() {
         .send()
         .await
         .unwrap();
+    if res.status() != reqwest::StatusCode::OK {
+        panic!("Did not get an OK status from refreshing GHA OIDC token")
+    }
     let res_json: serde_json::Value = res.json().await.unwrap();
-    let jwt = res_json.get("value").unwrap().as_object().unwrap();
+    let jwt = res_json.get("value").unwrap();
 
     let jwt_str = serde_json::to_string_pretty(jwt).unwrap();
     std::fs::write(TOKEN_FILE, jwt_str).unwrap();

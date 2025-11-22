@@ -181,15 +181,14 @@ impl Step for CertifiedCoreSymbols {
 
         let check_stamp = build_stamp::libstd_stamp(builder, build_compiler, certified_target)
             .with_prefix("symbol-report");
-        run_cargo(
-            builder,
-            cargo,
-            builder.config.free_args.clone(),
-            &check_stamp,
-            vec![],
-            true,
-            false,
-        );
+
+        let tail_args = if builder.was_invoked_explicitly::<Self>(Kind::Run) {
+            builder.config.free_args.clone()
+        } else {
+            Vec::new()
+        };
+
+        run_cargo(builder, cargo, tail_args, &check_stamp, vec![], true, false);
         drop(_guard);
 
         println!("Generated report at {}", report.display());

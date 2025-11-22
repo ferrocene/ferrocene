@@ -276,7 +276,7 @@ impl ShowCommand {
             panic!("Must provide an instrumentation profile");
         };
         let mapping = CoverageMapping::new(&self.objects, &instr_prof, false)?;
-        let mut report = mapping.generate_report();
+        let mut report = mapping.generate_report()?;
         if let Some(remapping) = self.path_remapping.as_ref() {
             report.apply_remapping(remapping);
         }

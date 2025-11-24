@@ -3,7 +3,6 @@
 #[macro_use] // import iterator! and forward_iterator!
 mod macros;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::{from_raw_parts, from_raw_parts_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::assert_unchecked;
@@ -22,14 +21,11 @@ use crate::{cmp, fmt};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use {
-    super::from_raw_parts_mut,
-    crate::{
-        cmp,
-        iter::{TrustedLen, UncheckedIterator},
-        mem,
-        mem::SizedTypeProperties,
-    },
+use crate::{
+    cmp,
+    iter::{TrustedLen, UncheckedIterator},
+    mem,
+    mem::SizedTypeProperties,
 };
 
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
@@ -153,7 +149,6 @@ impl<'a, T> Iter<'a, T> {
     #[must_use]
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_slice(&self) -> &'a [T] {
         self.make_slice()
     }

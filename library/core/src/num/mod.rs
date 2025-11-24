@@ -1131,7 +1131,6 @@ impl u8 {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) const fn is_utf8_char_boundary(self) -> bool {
         // This is bit magic equivalent to: b < 128 || b >= 192
         (self as i8) >= -0x40

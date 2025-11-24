@@ -45,7 +45,6 @@ pub trait Product<A = Self>: Sized {
     fn product<I: Iterator<Item = A>>(iter: I) -> Self;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! integer_sum_product {
     (@impls $zero:expr, $one:expr, #[$attr:meta], $($a:ty)*) => ($(
         #[$attr]
@@ -60,6 +59,7 @@ macro_rules! integer_sum_product {
         }
 
         #[$attr]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl Product for $a {
             fn product<I: Iterator<Item=Self>>(iter: I) -> Self {
                 iter.fold(
@@ -82,6 +82,7 @@ macro_rules! integer_sum_product {
         }
 
         #[$attr]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<'a> Product<&'a $a> for $a {
             fn product<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
                 iter.fold(
@@ -96,6 +97,7 @@ macro_rules! integer_sum_product {
         integer_sum_product!(@impls 0, 1,
                 #[stable(feature = "iter_arith_traits", since = "1.12.0")],
                 $($a)*);
+        #[cfg(not(feature = "ferrocene_certified"))]
         integer_sum_product!(@impls Wrapping(0), Wrapping(1),
                 #[stable(feature = "wrapping_iter_arith", since = "1.14.0")],
                 $(Wrapping<$a>)*);
@@ -208,7 +210,6 @@ macro_rules! float_sum_product {
     )*)
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 integer_sum_product! { i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize }
 #[cfg(not(feature = "ferrocene_certified"))]
 saturating_integer_sum_product! { u8 u16 u32 u64 u128 usize }

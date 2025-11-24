@@ -38,11 +38,21 @@
     issue = "27721"
 )]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::MAX_LEN_UTF8;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::convert::TryInto as _;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::memchr;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{cmp, fmt};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::cmp;
 
 // Pattern
 
@@ -107,6 +117,7 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches anywhere in the haystack
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_contained_in(self, haystack: &str) -> bool {
         self.into_searcher(haystack).next_match().is_some()
     }
@@ -119,6 +130,7 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the back of the haystack
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -128,6 +140,7 @@ pub trait Pattern: Sized {
 
     /// Removes the pattern from the front of haystack, if it matches.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn strip_prefix_of(self, haystack: &str) -> Option<&str> {
         if let SearchStep::Match(start, len) = self.into_searcher(haystack).next() {
             debug_assert_eq!(
@@ -144,6 +157,7 @@ pub trait Pattern: Sized {
 
     /// Removes the pattern from the back of haystack, if it matches.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -163,6 +177,7 @@ pub trait Pattern: Sized {
     }
 
     /// Returns the pattern as utf-8 bytes if possible.
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn as_utf8_pattern(&self) -> Option<Utf8Pattern<'_>> {
         None
     }
@@ -171,6 +186,7 @@ pub trait Pattern: Sized {
 /// Can be used for inspecting the contents of a [`Pattern`] in cases
 /// where the underlying representation can be represented as UTF-8.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub enum Utf8Pattern<'a> {
     /// Type returned by String and str types.
     StringPattern(&'a [u8]),
@@ -181,7 +197,7 @@ pub enum Utf8Pattern<'a> {
 // Searcher
 
 /// Result of calling [`Searcher::next()`] or [`ReverseSearcher::next_back()`].
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, Eq, PartialEq, Debug))]
 pub enum SearchStep {
     /// Expresses that a match of the pattern has been found at
     /// `haystack[a..b]`.
@@ -213,6 +229,7 @@ pub unsafe trait Searcher<'a> {
     /// Getter for the underlying string to be searched in
     ///
     /// Will always return the same [`&str`][str].
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn haystack(&self) -> &'a str;
 
     /// Performs the next search step starting from the front.
@@ -245,6 +262,7 @@ pub unsafe trait Searcher<'a> {
     /// `(start_match, end_match)`, where start_match is the index of where
     /// the match begins, and end_match is the index after the end of the match.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         loop {
             match self.next() {
@@ -261,6 +279,7 @@ pub unsafe trait Searcher<'a> {
     /// Unlike [`next()`][Searcher::next], there is no guarantee that the returned ranges
     /// of this and [`next_match`][Searcher::next_match] will overlap.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn next_reject(&mut self) -> Option<(usize, usize)> {
         loop {
             match self.next() {
@@ -286,6 +305,7 @@ pub unsafe trait Searcher<'a> {
 ///
 /// For the reason why this trait is marked unsafe, see the
 /// parent trait [`Searcher`].
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait ReverseSearcher<'a>: Searcher<'a> {
     /// Performs the next search step starting from the back.
     ///
@@ -358,6 +378,7 @@ pub unsafe trait ReverseSearcher<'a>: Searcher<'a> {
 /// `(&str)::Searcher` is not a `DoubleEndedSearcher` because
 /// the pattern `"aa"` in the haystack `"aaa"` matches as either
 /// `"[aa]a"` or `"a[aa]"`, depending on which side it is searched.
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait DoubleEndedSearcher<'a>: ReverseSearcher<'a> {}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -366,6 +387,7 @@ pub trait DoubleEndedSearcher<'a>: ReverseSearcher<'a> {}
 
 /// Associated type for `<char as Pattern>::Searcher<'a>`.
 #[derive(Clone, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct CharSearcher<'a> {
     haystack: &'a str,
     // safety invariant: `finger`/`finger_back` must be a valid utf8 byte index of `haystack`
@@ -391,12 +413,14 @@ pub struct CharSearcher<'a> {
     utf8_encoded: [u8; 4],
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl CharSearcher<'_> {
     fn utf8_size(&self) -> usize {
         self.utf8_size.into()
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
     #[inline]
     fn haystack(&self) -> &'a str {
@@ -475,6 +499,7 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
     // let next_reject use the default implementation from the Searcher trait
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a> ReverseSearcher<'a> for CharSearcher<'a> {
     #[inline]
     fn next_back(&mut self) -> SearchStep {
@@ -549,6 +574,7 @@ unsafe impl<'a> ReverseSearcher<'a> for CharSearcher<'a> {
     // let next_reject_back use the default implementation from the Searcher trait
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> DoubleEndedSearcher<'a> for CharSearcher<'a> {}
 
 /// Searches for chars that are equal to a given [`char`].
@@ -558,6 +584,7 @@ impl<'a> DoubleEndedSearcher<'a> for CharSearcher<'a> {}
 /// ```
 /// assert_eq!("Hello world".find('o'), Some(4));
 /// ```
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Pattern for char {
     type Searcher<'a> = CharSearcher<'a>;
 
@@ -627,10 +654,12 @@ impl Pattern for char {
 /////////////////////////////////////////////////////////////////////////////
 
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_certified"))]
 trait MultiCharEq {
     fn matches(&mut self, c: char) -> bool;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F> MultiCharEq for F
 where
     F: FnMut(char) -> bool,
@@ -641,6 +670,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<const N: usize> MultiCharEq for [char; N] {
     #[inline]
     fn matches(&mut self, c: char) -> bool {
@@ -648,6 +678,7 @@ impl<const N: usize> MultiCharEq for [char; N] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<const N: usize> MultiCharEq for &[char; N] {
     #[inline]
     fn matches(&mut self, c: char) -> bool {
@@ -655,6 +686,7 @@ impl<const N: usize> MultiCharEq for &[char; N] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl MultiCharEq for &[char] {
     #[inline]
     fn matches(&mut self, c: char) -> bool {
@@ -662,15 +694,18 @@ impl MultiCharEq for &[char] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 struct MultiCharEqPattern<C: MultiCharEq>(C);
 
 #[derive(Clone, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 struct MultiCharEqSearcher<'a, C: MultiCharEq> {
     char_eq: C,
     haystack: &'a str,
     char_indices: super::CharIndices<'a>,
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<C: MultiCharEq> Pattern for MultiCharEqPattern<C> {
     type Searcher<'a> = MultiCharEqSearcher<'a, C>;
 
@@ -680,6 +715,7 @@ impl<C: MultiCharEq> Pattern for MultiCharEqPattern<C> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, C: MultiCharEq> Searcher<'a> for MultiCharEqSearcher<'a, C> {
     #[inline]
     fn haystack(&self) -> &'a str {
@@ -705,6 +741,7 @@ unsafe impl<'a, C: MultiCharEq> Searcher<'a> for MultiCharEqSearcher<'a, C> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, C: MultiCharEq> ReverseSearcher<'a> for MultiCharEqSearcher<'a, C> {
     #[inline]
     fn next_back(&mut self) -> SearchStep {
@@ -725,10 +762,12 @@ unsafe impl<'a, C: MultiCharEq> ReverseSearcher<'a> for MultiCharEqSearcher<'a, 
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, C: MultiCharEq> DoubleEndedSearcher<'a> for MultiCharEqSearcher<'a, C> {}
 
 /////////////////////////////////////////////////////////////////////////////
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! pattern_methods {
     ($a:lifetime, $t:ty, $pmap:expr, $smap:expr) => {
         type Searcher<$a> = $t;
@@ -771,6 +810,7 @@ macro_rules! pattern_methods {
     };
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! searcher_methods {
     (forward) => {
         #[inline]
@@ -808,12 +848,14 @@ macro_rules! searcher_methods {
 
 /// Associated type for `<[char; N] as Pattern>::Searcher<'a>`.
 #[derive(Clone, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct CharArraySearcher<'a, const N: usize>(
     <MultiCharEqPattern<[char; N]> as Pattern>::Searcher<'a>,
 );
 
 /// Associated type for `<&[char; N] as Pattern>::Searcher<'a>`.
 #[derive(Clone, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct CharArrayRefSearcher<'a, 'b, const N: usize>(
     <MultiCharEqPattern<&'b [char; N]> as Pattern>::Searcher<'a>,
 );
@@ -826,18 +868,22 @@ pub struct CharArrayRefSearcher<'a, 'b, const N: usize>(
 /// assert_eq!("Hello world".find(['o', 'l']), Some(2));
 /// assert_eq!("Hello world".find(['h', 'w']), Some(6));
 /// ```
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<const N: usize> Pattern for [char; N] {
     pattern_methods!('a, CharArraySearcher<'a, N>, MultiCharEqPattern, CharArraySearcher);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, const N: usize> Searcher<'a> for CharArraySearcher<'a, N> {
     searcher_methods!(forward);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, const N: usize> ReverseSearcher<'a> for CharArraySearcher<'a, N> {
     searcher_methods!(reverse);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, const N: usize> DoubleEndedSearcher<'a> for CharArraySearcher<'a, N> {}
 
 /// Searches for chars that are equal to any of the [`char`]s in the array.
@@ -848,18 +894,22 @@ impl<'a, const N: usize> DoubleEndedSearcher<'a> for CharArraySearcher<'a, N> {}
 /// assert_eq!("Hello world".find(&['o', 'l']), Some(2));
 /// assert_eq!("Hello world".find(&['h', 'w']), Some(6));
 /// ```
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'b, const N: usize> Pattern for &'b [char; N] {
     pattern_methods!('a, CharArrayRefSearcher<'a, 'b, N>, MultiCharEqPattern, CharArrayRefSearcher);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, 'b, const N: usize> Searcher<'a> for CharArrayRefSearcher<'a, 'b, N> {
     searcher_methods!(forward);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, 'b, const N: usize> ReverseSearcher<'a> for CharArrayRefSearcher<'a, 'b, N> {
     searcher_methods!(reverse);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, 'b, const N: usize> DoubleEndedSearcher<'a> for CharArrayRefSearcher<'a, 'b, N> {}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -870,16 +920,20 @@ impl<'a, 'b, const N: usize> DoubleEndedSearcher<'a> for CharArrayRefSearcher<'a
 
 /// Associated type for `<&[char] as Pattern>::Searcher<'a>`.
 #[derive(Clone, Debug)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct CharSliceSearcher<'a, 'b>(<MultiCharEqPattern<&'b [char]> as Pattern>::Searcher<'a>);
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, 'b> Searcher<'a> for CharSliceSearcher<'a, 'b> {
     searcher_methods!(forward);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, 'b> ReverseSearcher<'a> for CharSliceSearcher<'a, 'b> {
     searcher_methods!(reverse);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, 'b> DoubleEndedSearcher<'a> for CharSliceSearcher<'a, 'b> {}
 
 /// Searches for chars that are equal to any of the [`char`]s in the slice.
@@ -890,6 +944,7 @@ impl<'a, 'b> DoubleEndedSearcher<'a> for CharSliceSearcher<'a, 'b> {}
 /// assert_eq!("Hello world".find(&['o', 'l'][..]), Some(2));
 /// assert_eq!("Hello world".find(&['h', 'w'][..]), Some(6));
 /// ```
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'b> Pattern for &'b [char] {
     pattern_methods!('a, CharSliceSearcher<'a, 'b>, MultiCharEqPattern, CharSliceSearcher);
 }
@@ -900,10 +955,12 @@ impl<'b> Pattern for &'b [char] {
 
 /// Associated type for `<F as Pattern>::Searcher<'a>`.
 #[derive(Clone)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct CharPredicateSearcher<'a, F>(<MultiCharEqPattern<F> as Pattern>::Searcher<'a>)
 where
     F: FnMut(char) -> bool;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F> fmt::Debug for CharPredicateSearcher<'_, F>
 where
     F: FnMut(char) -> bool,
@@ -915,6 +972,7 @@ where
             .finish()
     }
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, F> Searcher<'a> for CharPredicateSearcher<'a, F>
 where
     F: FnMut(char) -> bool,
@@ -922,6 +980,7 @@ where
     searcher_methods!(forward);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, F> ReverseSearcher<'a> for CharPredicateSearcher<'a, F>
 where
     F: FnMut(char) -> bool,
@@ -929,6 +988,7 @@ where
     searcher_methods!(reverse);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, F> DoubleEndedSearcher<'a> for CharPredicateSearcher<'a, F> where F: FnMut(char) -> bool {}
 
 /// Searches for [`char`]s that match the given predicate.
@@ -939,6 +999,7 @@ impl<'a, F> DoubleEndedSearcher<'a> for CharPredicateSearcher<'a, F> where F: Fn
 /// assert_eq!("Hello world".find(char::is_uppercase), Some(0));
 /// assert_eq!("Hello world".find(|c| "aeiou".contains(c)), Some(1));
 /// ```
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F> Pattern for F
 where
     F: FnMut(char) -> bool,
@@ -951,6 +1012,7 @@ where
 /////////////////////////////////////////////////////////////////////////////
 
 /// Delegates to the `&str` impl.
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'b, 'c> Pattern for &'c &'b str {
     pattern_methods!('a, StrSearcher<'a, 'b>, |&s| s, |s| s);
 }
@@ -985,6 +1047,7 @@ impl<'b> Pattern for &'b str {
 
     /// Checks whether the pattern matches anywhere in the haystack
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_contained_in(self, haystack: &str) -> bool {
         if self.len() == 0 {
             return true;
@@ -1014,6 +1077,7 @@ impl<'b> Pattern for &'b str {
 
     /// Removes the pattern from the front of haystack, if it matches.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn strip_prefix_of(self, haystack: &str) -> Option<&str> {
         if self.is_prefix_of(haystack) {
             // SAFETY: prefix was just verified to exist.
@@ -1025,6 +1089,7 @@ impl<'b> Pattern for &'b str {
 
     /// Checks whether the pattern matches at the back of the haystack.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -1034,6 +1099,7 @@ impl<'b> Pattern for &'b str {
 
     /// Removes the pattern from the back of haystack, if it matches.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -1048,6 +1114,7 @@ impl<'b> Pattern for &'b str {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn as_utf8_pattern(&self) -> Option<Utf8Pattern<'_>> {
         Some(Utf8Pattern::StringPattern(self.as_bytes()))
     }
@@ -1057,7 +1124,7 @@ impl<'b> Pattern for &'b str {
 // Two Way substring searcher
 /////////////////////////////////////////////////////////////////////////////
 
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 /// Associated type for `<&str as Pattern>::Searcher<'a>`.
 pub struct StrSearcher<'a, 'b> {
     haystack: &'a str,
@@ -1066,13 +1133,13 @@ pub struct StrSearcher<'a, 'b> {
     searcher: StrSearcherImpl,
 }
 
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 enum StrSearcherImpl {
     Empty(EmptyNeedle),
     TwoWay(TwoWaySearcher),
 }
-
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 struct EmptyNeedle {
     position: usize,
     end: usize,
@@ -1111,6 +1178,7 @@ impl<'a, 'b> StrSearcher<'a, 'b> {
 
 unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn haystack(&self) -> &'a str {
         self.haystack
     }
@@ -1168,6 +1236,7 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         match self.searcher {
             StrSearcherImpl::Empty(..) => loop {
@@ -1199,6 +1268,7 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
     #[inline]
     fn next_back(&mut self) -> SearchStep {
@@ -1278,7 +1348,8 @@ unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
 }
 
 /// The internal state of the two-way substring search algorithm.
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
+#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 struct TwoWaySearcher {
     // constants
     /// critical factorization index
@@ -1541,6 +1612,7 @@ impl TwoWaySearcher {
     // To search in reverse through the haystack, we search forward through
     // a reversed haystack with a reversed needle, matching first u' and then v'.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn next_back<S>(&mut self, haystack: &[u8], needle: &[u8], long_period: bool) -> S::Output
     where
         S: TwoWayStrategy,
@@ -1723,8 +1795,10 @@ trait TwoWayStrategy {
 }
 
 /// Skip to match intervals as quickly as possible
+#[cfg(not(feature = "ferrocene_certified"))]
 enum MatchOnly {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl TwoWayStrategy for MatchOnly {
     type Output = Option<(usize, usize)>;
 
@@ -1786,6 +1860,7 @@ impl TwoWayStrategy for RejectAndMatch {
     all(target_arch = "loongarch64", target_feature = "lsx")
 ))]
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 fn simd_contains(needle: &str, haystack: &str) -> Option<bool> {
     let needle = needle.as_bytes();
     let haystack = haystack.as_bytes();
@@ -1921,6 +1996,7 @@ fn simd_contains(needle: &str, haystack: &str) -> Option<bool> {
     all(target_arch = "loongarch64", target_feature = "lsx")
 ))]
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe fn small_slice_eq(x: &[u8], y: &[u8]) -> bool {
     debug_assert_eq!(x.len(), y.len());
     // This function is adapted from

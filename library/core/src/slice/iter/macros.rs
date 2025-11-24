@@ -86,7 +86,8 @@ macro_rules! iterator {
 
             // Helper function for creating a slice from the iterator.
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            // NOTE(dead_code): Method is used by Iter, but not IterMut
+            #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
             fn make_slice(&self) -> &'a [T] {
                 // SAFETY: the iterator was created from a slice with pointer
                 // `self.ptr` and length `len!(self)`. This guarantees that all

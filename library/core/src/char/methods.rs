@@ -1,6 +1,5 @@
 //! impl char {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::*;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
@@ -244,7 +243,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_from_u32_unchecked", since = "1.81.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn from_u32_unchecked(i: u32) -> char {
         // SAFETY: the safety contract must be upheld by the caller.
         unsafe { super::convert::from_u32_unchecked(i) }
@@ -659,7 +657,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_len_utf", since = "1.52.0")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn len_utf8(self) -> usize {
         len_utf8(self as u32)
     }
@@ -1893,7 +1890,6 @@ impl EscapeDebugExtArgs {
 
 #[inline]
 #[must_use]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn len_utf8(code: u32) -> usize {
     match code {
         ..MAX_ONE_B => 1,

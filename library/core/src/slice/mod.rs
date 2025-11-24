@@ -8,7 +8,6 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{exact_div, unchecked_sub};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
@@ -25,7 +24,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{intrinsics::unchecked_sub, mem::SizedTypeProperties, ptr};
+use crate::{mem::SizedTypeProperties, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -1374,7 +1373,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_chunks_unchecked<const N: usize>(&self) -> &[[T; N]] {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -1433,7 +1431,6 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_chunks<const N: usize>(&self) -> (&[[T; N]], &[T]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len_rounded_down = self.len() / N * N;
@@ -2679,7 +2676,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn starts_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,

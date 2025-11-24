@@ -4,14 +4,16 @@
 use super::ParseBoolError;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::unchecked_sub;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::SliceIndex;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ops, ptr, range};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::{ops, ptr};
 
 /// Implements ordering of strings.
 ///
@@ -62,7 +64,6 @@ impl PartialOrd for str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I> const ops::Index<I> for str
 where
     I: [const] SliceIndex<str>,
@@ -176,7 +177,6 @@ unsafe impl const SliceIndex<str> for ops::RangeFull {
 /// ```
 #[stable(feature = "str_checked_slicing", since = "1.20.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const SliceIndex<str> for ops::Range<usize> {
     type Output = str;
     #[inline]
@@ -456,7 +456,6 @@ unsafe impl SliceIndex<str> for (ops::Bound<usize>, ops::Bound<usize>) {
 /// character (as defined by `is_char_boundary`), or if `end > len`.
 #[stable(feature = "str_checked_slicing", since = "1.20.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const SliceIndex<str> for ops::RangeTo<usize> {
     type Output = str;
     #[inline]
@@ -526,7 +525,6 @@ unsafe impl const SliceIndex<str> for ops::RangeTo<usize> {
 /// a character (as defined by `is_char_boundary`), or if `begin > len`.
 #[stable(feature = "str_checked_slicing", since = "1.20.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl const SliceIndex<str> for ops::RangeFrom<usize> {
     type Output = str;
     #[inline]

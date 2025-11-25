@@ -887,12 +887,8 @@ impl AtomicBool {
     )]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn compare_and_swap(&self, current: bool, new: bool, order: Ordering) -> bool {
         match self.compare_exchange(current, new, order, strongest_failure_ordering(order)) {
             Ok(x) => x,
@@ -1050,12 +1046,8 @@ impl AtomicBool {
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn compare_exchange_weak(
         &self,
         current: bool,
@@ -1155,12 +1147,8 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn fetch_nand(&self, val: bool, order: Ordering) -> bool {
         // We can't use atomic_nand here because it can result in a bool with
         // an invalid value. This happens because the atomic operation is done
@@ -1255,12 +1243,8 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn fetch_xor(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_xor(self.v.get(), val as u8, order) != 0 }
@@ -1298,12 +1282,8 @@ impl AtomicBool {
     #[stable(feature = "atomic_bool_fetch_not", since = "1.81.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn fetch_not(&self, order: Ordering) -> bool {
         self.fetch_xor(true, order)
     }
@@ -1342,12 +1322,8 @@ impl AtomicBool {
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_never_returns_null_ptr]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn as_ptr(&self) -> *mut bool {
         self.v.get().cast()
     }
@@ -1401,12 +1377,8 @@ impl AtomicBool {
     #[stable(feature = "atomic_fetch_update", since = "1.53.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn fetch_update<F>(
         &self,
         set_order: Ordering,
@@ -1478,12 +1450,8 @@ impl AtomicBool {
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn try_update(
         &self,
         set_order: Ordering,
@@ -1542,12 +1510,8 @@ impl AtomicBool {
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| d2f887349fe
-=======
     #[rustc_should_not_be_called_on_const_items]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn update(
         &self,
         set_order: Ordering,

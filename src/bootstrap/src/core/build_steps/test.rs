@@ -1,3 +1,6 @@
+// Ferrocene addition
+// ignore-tidy-filelength
+
 //! Build-and-run steps for `./x.py test` test fixtures
 //!
 //! `./x.py test` (aka [`Kind::Test`]) is currently allowed to reach build steps in other modules.

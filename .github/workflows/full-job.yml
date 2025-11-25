@@ -103,11 +103,18 @@ jobs:
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
           minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Run
         uses: ./.github/actions/run/
-        env:
-          AWS_PROFILE: amazon # For signing dist tarballs, we always use AWS.
+        # env:
+        #   AWS_PROFILE: amazon # For signing dist tarballs, we always use AWS.
         with:
           configure: ${{ inputs.configure }}
           container: ${{ inputs.container }}
@@ -115,7 +122,7 @@ jobs:
 
       - name: Upload artifacts to S3
         env:
-          AWS_PROFILE: amazon
+          # AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run: |

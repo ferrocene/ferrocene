@@ -97,8 +97,7 @@ class ConflictMarker:
 
     def repr(self):
         return (
-            f"{self.file}: conflict between lines {self.start_line} "
-            f"and {self.end_line}"
+            f"conflict: {self.file}:{self.start_line}-{self.end_line}"
         )
 
 

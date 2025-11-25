@@ -369,7 +369,7 @@ jobs:
       script: ${{ matrix.script }}
       host-triple: aarch64-unknown-linux-gnu
       triples: "aarch64-unknown-linux-gnu"
-      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      runner: ferrocene-arc-runners-ubuntu-20-arm64
       use-minio: true
       build-run-id: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.artifact-build }}
@@ -390,7 +390,7 @@ jobs:
     with:
       host-triple: aarch64-unknown-linux-gnu
       triples: ${{ format('{0},{1},{2}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets) }}
-      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      runner: ferrocene-arc-runners-ubuntu-20-arm64
       use-minio: true
       qnx-version: "710-472"
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}

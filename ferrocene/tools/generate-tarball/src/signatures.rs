@@ -50,7 +50,7 @@ pub(crate) async fn maybe_refresh_gha_token() {
     let res_json: serde_json::Value = res.json().await.unwrap();
     let jwt = res_json.get("value").unwrap();
 
-    let jwt_str = serde_json::to_string_pretty(jwt).unwrap();
+    let jwt_str = serde_json::to_string(jwt).unwrap();
     std::fs::write(TOKEN_FILE, jwt_str).unwrap();
 }
 
@@ -62,14 +62,14 @@ pub(crate) fn sign_manifest_with_aws_kms(
     tokio.block_on(maybe_refresh_gha_token());
 
     let aws_config = tokio.block_on(aws_config::load_from_env());
-    let sts_client = aws_sdk_sts::Client::new(&aws_config);
-    tokio.block_on(async {
-        let res = sts_client.get_caller_identity().send().await;
-        match res {
-            Ok(_) => println!("Got AWS STS caller identity"),
-            Err(e) => panic!("Getting AWS STS caller identity: {e}")
-        }  
-    });
+    // let sts_client = aws_sdk_sts::Client::new(&aws_config);
+    // tokio.block_on(async {
+    //     let res = sts_client.get_caller_identity().send().await;
+    //     match res {
+    //         Ok(_) => println!("Got AWS STS caller identity"),
+    //         Err(e) => panic!("Getting AWS STS caller identity: {e}")
+    //     }  
+    // });
 
     let kms_client = aws_sdk_kms::Client::new(&aws_config);
 

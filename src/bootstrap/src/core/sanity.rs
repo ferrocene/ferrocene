@@ -41,7 +41,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "sparc64-unknown-helenos",
     // just a dummy comment so the list doesn't get onelined
     "riscv64gc-unknown-redox",
-<<<<<<< HEAD
+    "hexagon-unknown-qurt",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -50,10 +50,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-unknown-ferrocene.certified",
     "thumbv7em-ferrocene.certified-eabi",
     "thumbv7em-ferrocene.certified-eabihf",
-||||||| d2f887349fe
-=======
-    "hexagon-unknown-qurt",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

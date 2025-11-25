@@ -18,6 +18,39 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.91.1
+-------------------------------
+
+This release has no language changes.
+
+Language changes in Rust 1.91.0
+-------------------------------
+
+- `Lower pattern bindings in the order they're written and base drop order on primary bindings' order <https://github.com/rust-lang/rust/pull/143764>`_
+
+- `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
+  This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
+
+- `Add dangling_pointers_from_locals lint to warn against dangling pointers from local variables <https://github.com/rust-lang/rust/pull/144322>`_
+
+  - No change: lints are not part of the FLS
+
+- `Upgrade semicolon_in_expressions_from_macros from warn to deny <https://github.com/rust-lang/rust/pull/144369>`_
+
+  - No change: lints are not part of the FLS
+
+- `Stabilize LoongArch32 inline assembly <https://github.com/rust-lang/rust/pull/144402>`_
+
+  - No change: the target is outside the scope of the FLS
+
+- `Add warn-by-default integer_to_ptr_transmutes lint against integer-to-pointer transmutes <https://github.com/rust-lang/rust/pull/144531>`_
+
+  - No change: lints are not part of the FLS
+
+- `Stabilize 'sse4a' and 'tbm' target features <https://github.com/rust-lang/rust/pull/144542>`_
+
+- `Add 'target_env = "macabi"' and 'target_env = "sim"' cfgs <https://github.com/rust-lang/rust/pull/139451>`_ as replacements for the `target_abi` cfgs with the same values.
+
 Language changes in Rust 1.90.0
 -------------------------------
 

@@ -100,6 +100,8 @@ jobs:
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
         with:
           version: ${{ inputs.qnx-version }}
 

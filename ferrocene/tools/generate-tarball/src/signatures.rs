@@ -23,54 +23,12 @@ pub(crate) struct SignatureContext<'a> {
     pub(crate) managed_prefixes: &'a [String],
 }
 
-pub(crate) async fn maybe_refresh_gha_token() {
-    use std::env::var;
-    const TOKEN_FILE: &str = "/tmp/awsjwt";
-
-    let Ok(url) = var("ACTIONS_ID_TOKEN_REQUEST_URL") else {
-        return;
-    };
-    let Ok(token) = var("ACTIONS_ID_TOKEN_REQUEST_TOKEN") else {
-        panic!("Got $ACTIONS_ID_TOKEN_REQUEST_URL but not $ACTIONS_ID_TOKEN_REQUEST_TOKEN");
-    };
-
-    let client = reqwest::Client::new();
-
-    println!("Refreshing GHA OIDC token for AWS KMS");
-
-    let res = client
-        .get(format!("{url}&audience=sts.amazonaws.com"))
-        .bearer_auth(token)
-        .send()
-        .await
-        .unwrap();
-    if res.status() != reqwest::StatusCode::OK {
-        panic!("Did not get an OK status from refreshing GHA OIDC token")
-    }
-    let res_json: serde_json::Value = res.json().await.unwrap();
-    let jwt = res_json.get("value").unwrap();
-
-    let jwt_str = serde_json::to_string(jwt).unwrap();
-    std::fs::write(TOKEN_FILE, jwt_str).unwrap();
-}
-
 pub(crate) fn sign_manifest_with_aws_kms(
     ctx: &SignatureContext<'_>,
     key_arn: &str,
 ) -> Result<(), Error> {
     let tokio = Runtime::new()?;
-    tokio.block_on(maybe_refresh_gha_token());
-
     let aws_config = tokio.block_on(aws_config::load_from_env());
-    // let sts_client = aws_sdk_sts::Client::new(&aws_config);
-    // tokio.block_on(async {
-    //     let res = sts_client.get_caller_identity().send().await;
-    //     match res {
-    //         Ok(_) => println!("Got AWS STS caller identity"),
-    //         Err(e) => panic!("Getting AWS STS caller identity: {e}")
-    //     }  
-    // });
-
     let kms_client = aws_sdk_kms::Client::new(&aws_config);
 
     let key = AwsKmsKeyPair::new(key_arn, tokio.handle().clone(), kms_client, KeyRole::Packages)?;

@@ -66,7 +66,7 @@ env:
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
-  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+  # AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
         
 jobs:
   job:
@@ -90,20 +90,14 @@ jobs:
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
           bucket: ${{ inputs.cache-bucket }}
           prefix: ${{ inputs.cache-prefix }}
-  
-      - name: Configure AWS & MinIO (if applicable)
-        uses: ./.github/actions/aws-config/
-        with:
-          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
-          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

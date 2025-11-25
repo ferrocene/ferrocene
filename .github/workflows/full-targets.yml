@@ -68,7 +68,7 @@ env:
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
-  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+  # AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
   targets:
@@ -90,6 +90,8 @@ jobs:
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}

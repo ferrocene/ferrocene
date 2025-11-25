@@ -107,8 +107,9 @@ jobs:
 
       - name: Run
         uses: ./.github/actions/run/
-        # env:
-        #   AWS_PROFILE: amazon # For signing dist tarballs, we always use AWS.
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         with:
           configure: ${{ inputs.configure }}
           container: ${{ inputs.container }}

@@ -101,10 +101,17 @@ jobs:
         with:
           version: ${{ inputs.qnx-version }}
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
       - name: Run
         uses: ./.github/actions/run/
-        env:
-          AWS_PROFILE: amazon # The self test artifacts are always on AWS
+        # env:
+          # AWS_PROFILE: amazon # The self test artifacts are always on AWS
         with:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.

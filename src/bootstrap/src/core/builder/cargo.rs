@@ -106,6 +106,7 @@ pub struct Cargo {
     allow_features: String,
     release_build: bool,
     build_compiler_stage: u32,
+    extra_rustflags: Vec<String>,
 }
 
 // Ferrocene addition
@@ -409,6 +410,11 @@ impl From<Cargo> for BootstrapCommand {
     fn from(mut cargo: Cargo) -> BootstrapCommand {
         if cargo.release_build {
             cargo.args.insert(0, "--release".into());
+        }
+
+        for arg in &cargo.extra_rustflags {
+            cargo.rustflags.arg(arg);
+            cargo.rustdocflags.arg(arg);
         }
 
         // Propagate the envs here at the very end to make sure they override any previously set flags.
@@ -1399,9 +1405,21 @@ impl Builder<'_> {
             rustflags.arg("-Zmir_strip_debuginfo=locals-in-tiny-functions");
         }
 
+<<<<<<< HEAD
         if target.contains("ferrocene.facade") {
             rustflags.arg("-Zpanic-abort-tests");
         }
+||||||| d2f887349fe
+=======
+        // take target-specific extra rustflags if any otherwise take `rust.rustflags`
+        let extra_rustflags = self
+            .config
+            .target_config
+            .get(&target)
+            .map(|t| &t.rustflags)
+            .unwrap_or(&self.config.rust_rustflags)
+            .clone();
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         let release_build = self.config.rust_optimize.is_release() &&
             // cargo bench/install do not accept `--release` and miri doesn't want it
@@ -1418,6 +1436,7 @@ impl Builder<'_> {
             allow_features,
             release_build,
             build_compiler_stage,
+<<<<<<< HEAD
         };
 
         if mode == Mode::Std
@@ -1426,6 +1445,10 @@ impl Builder<'_> {
         {
             let paths = Paths::find(self, target, FerroceneCoverageFor::Library);
             cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
+||||||| d2f887349fe
+=======
+            extra_rustflags,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
 
         cargo

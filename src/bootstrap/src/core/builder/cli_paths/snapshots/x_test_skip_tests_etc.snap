@@ -114,6 +114,9 @@ expression: test --skip=tests --skip=coverage-map --skip=coverage-run --skip=lib
     - Set({test::src/tools/coverage-dump})
     - Set({test::src/tools/jsondoclint})
     - Set({test::src/tools/replace-version-placeholder})
+[Test] test::RemoteTestClientTests
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::src/tools/remote-test-client})
 [Test] test::Linkcheck
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/linkchecker})

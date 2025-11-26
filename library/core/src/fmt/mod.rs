@@ -743,10 +743,15 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Arguments<'a> {
+    #[cfg(not(feature = "ferrocene_certified"))]
     template: NonNull<u8>,
+    #[cfg(not(feature = "ferrocene_certified"))]
     args: NonNull<rt::Argument<'a>>,
+
+    #[cfg(feature = "ferrocene_certified")]
+    #[expect(dead_code)]
+    s: &'a str,
 }
 
 /// Used by the format_args!() macro to create a fmt::Arguments object.
@@ -839,7 +844,6 @@ impl<'a> Arguments<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Arguments<'a> {
     /// Create a `fmt::Arguments` object for a single static string.
     ///
@@ -848,12 +852,16 @@ impl<'a> Arguments<'a> {
     #[unstable(feature = "fmt_arguments_from_str", issue = "148905")]
     pub const fn from_str(s: &'static str) -> Arguments<'a> {
         // SAFETY: This is the "static str" representation of fmt::Arguments; see above.
+        #[cfg(not(feature = "ferrocene_certified"))]
         unsafe {
             Arguments {
                 template: mem::transmute(s.as_ptr()),
                 args: mem::transmute(s.len() << 1 | 1),
             }
         }
+
+        #[cfg(feature = "ferrocene_certified")]
+        Arguments { s }
     }
 
     /// Gets the formatted string, if it has no arguments to be formatted at runtime.
@@ -898,6 +906,7 @@ impl<'a> Arguments<'a> {
     /// assert_eq!(format_args!("").as_str(), Some(""));
     /// assert_eq!(format_args!("{:?}", std::env::current_dir()).as_str(), None);
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[stable(feature = "fmt_as_str", since = "1.52.0")]
     #[rustc_const_stable(feature = "const_arguments_as_str", since = "1.84.0")]
     #[must_use]
@@ -923,6 +932,7 @@ impl<'a> Arguments<'a> {
     }
 
     /// Same as [`Arguments::as_str`], but will only return `Some(s)` if it can be determined at compile time.
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[unstable(feature = "fmt_internals", reason = "internal to standard library", issue = "none")]
     #[must_use]
     #[inline]

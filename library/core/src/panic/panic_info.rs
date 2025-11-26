@@ -1,7 +1,11 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Display};
 use crate::panic::Location;
-use crate::panicking::PanicFmt;
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::fmt;
 
 /// A struct providing information about a panic.
 ///
@@ -15,7 +19,7 @@ use crate::panicking::PanicFmt;
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
 pub struct PanicInfo<'a> {
-    message: &'a PanicFmt<'a>,
+    message: &'a fmt::Arguments<'a>,
     location: &'a Location<'a>,
     can_unwind: bool,
     force_no_backtrace: bool,
@@ -36,8 +40,7 @@ pub struct PanicMessage<'a> {
 impl<'a> PanicInfo<'a> {
     #[inline]
     pub(crate) fn new(
-        // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicFmt` alias.
-        message: &'a PanicFmt<'a>,
+        message: &'a fmt::Arguments<'a>,
         location: &'a Location<'a>,
         can_unwind: bool,
         force_no_backtrace: bool,

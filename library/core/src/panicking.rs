@@ -28,16 +28,9 @@
     issue = "none"
 )]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
 use crate::panic::{Location, PanicInfo};
-
-/// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
-#[cfg(not(feature = "ferrocene_certified"))]
-pub(crate) type PanicFmt<'a> = fmt::Arguments<'a>;
-#[cfg(feature = "ferrocene_certified")]
-pub(crate) type PanicFmt<'a> = &'a &'static str;
 
 #[cfg(feature = "panic_immediate_abort")]
 compile_error!(
@@ -65,7 +58,7 @@ compile_error!(
 #[rustc_do_not_const_check] // hooked by const-eval
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 // Ferrocene change: `fmt` is a type alias to accomodate certified core
-pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
+pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
     #[ferrocene::annotation(
         "The `immediate-abort` behavior is not certified, we only support `abort`."
     )]
@@ -103,9 +96,9 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 #[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
-pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) -> ! {
+pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, _force_no_backtrace: bool) -> ! {
     const_eval_select!(
-        @capture { fmt: PanicFmt<'_>, _force_no_backtrace: bool } -> !:
+        @capture { fmt: fmt::Arguments<'_>, _force_no_backtrace: bool } -> !:
         if const #[track_caller] {
             // We don't unwind anyway at compile-time so we can call the regular `panic_fmt`.
             panic_fmt(fmt)
@@ -158,10 +151,7 @@ pub const fn panic(expr: &'static str) -> ! {
     // payload without any allocation or copying. Shorter-lived strings would become invalid as
     // stack frames get popped during unwinding, and couldn't be directly referenced from the
     // payload.
-    #[cfg(not(feature = "ferrocene_certified"))]
     panic_fmt(fmt::Arguments::from_str(expr));
-    #[cfg(feature = "ferrocene_certified")]
-    panic_fmt(&expr)
 }
 
 // We generate functions for usage by compiler-generated assertions.
@@ -187,10 +177,7 @@ macro_rules! panic_const {
             #[ferrocene::annotation("Cannot be covered as this code cannot be reached during runtime.")]
             pub const fn $lang() -> ! {
                 // See the comment in `panic(&'static str)` for why we use `Arguments::from_str` here.
-                #[cfg(not(feature = "ferrocene_certified"))]
                 panic_fmt(fmt::Arguments::from_str($message));
-                #[cfg(feature = "ferrocene_certified")]
-                panic_fmt(&$message);
             }
         )+
     }
@@ -241,10 +228,7 @@ pub mod panic_const {
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
 pub const fn panic_nounwind(expr: &'static str) -> ! {
-    #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::from_str(expr), /* force_no_backtrace */ false);
-    #[cfg(feature = "ferrocene_certified")]
-    panic_nounwind_fmt(&expr, /* force_no_backtrace */ false);
 }
 
 /// Like `panic_nounwind`, but also inhibits showing a backtrace.

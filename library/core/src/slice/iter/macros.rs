@@ -307,7 +307,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn any<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,

@@ -583,6 +583,15 @@ jobs:
     secrets: inherit
     with:
       run-name: Dist (Docs)
+      configure: |
+        --set
+        ferrocene.test-outcomes=custom
+        --set
+        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+        --set
+        ferrocene.coverage-outcomes=custom
+        --set
+        ferrocene.coverage-outcomes=/tmp/coverage-outcomes
       script: |
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ferrocene/ci/scripts/fetch-coverage-outcomes.sh
@@ -690,10 +699,6 @@ jobs:
         ferrocene.test-outcomes=custom
         --set
         ferrocene.test-outcomes-dir=/tmp/test-outcomes
-        --set
-        ferrocene.coverage-outcomes=custom
-        --set
-        ferrocene.coverage-outcomes=/tmp/coverage-outcomes
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}

@@ -2854,7 +2854,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn any<F>(&mut self, f: F) -> bool
     where
         Self: Sized,

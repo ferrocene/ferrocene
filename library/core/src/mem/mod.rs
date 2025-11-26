@@ -761,7 +761,6 @@ pub unsafe fn uninitialized<T>() -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_swap"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn swap<T>(x: &mut T, y: &mut T) {
     // SAFETY: `&mut` guarantees these are typed readable and writable
     // as well as non-overlapping.

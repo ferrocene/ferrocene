@@ -124,10 +124,6 @@ pub(crate) const fn check_language_ub() -> bool {
 /// check is anyway not executed in `const`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-#[cfg(any(
-    not(feature = "ferrocene_certified"),
-    all(feature = "ferrocene_certified", debug_assertions)
-))]
 pub(crate) const fn maybe_is_aligned_and_not_null(
     ptr: *const (),
     align: usize,

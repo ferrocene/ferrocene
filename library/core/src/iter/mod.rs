@@ -452,7 +452,6 @@ pub use self::sources::{Empty, empty};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::sources::{FromCoroutine, from_coroutine};
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::sources::{FromFn, from_fn};
 #[stable(feature = "iter_once", since = "1.2.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -501,7 +500,7 @@ pub use self::traits::{
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 pub use self::{
-    adapters::{Enumerate, Filter, Map, Rev, Skip, Take, Zip},
+    adapters::{Enumerate, Filter, Map, Rev, Skip, StepBy, Take, Zip},
     traits::{
         DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator, Sum,
     },
@@ -509,6 +508,5 @@ pub use self::{
 
 mod adapters;
 mod range;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod sources;
 mod traits;

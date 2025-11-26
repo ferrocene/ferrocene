@@ -1,7 +1,13 @@
 use crate::intrinsics;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{TrustedLen, TrustedRandomAccess, from_fn};
 use crate::num::NonZero;
 use crate::ops::{Range, Try};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::iter::from_fn;
 
 /// An iterator for stepping iterators by a custom amount.
 ///
@@ -12,7 +18,7 @@ use crate::ops::{Range, Try};
 /// [`Iterator`]: trait.Iterator.html
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 pub struct StepBy<I> {
     /// This field is guaranteed to be preprocessed by the specialized `SpecRangeSetup::setup`
     /// in the constructor.
@@ -86,6 +92,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<I> StepBy<I>
 where
     I: ExactSizeIterator,
@@ -98,6 +105,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "double_ended_step_by_iterator", since = "1.38.0")]
 impl<I> DoubleEndedIterator for StepBy<I>
 where
@@ -132,6 +140,7 @@ where
 }
 
 // StepBy can only make the iterator shorter, so the len will still fit.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
 impl<I> ExactSizeIterator for StepBy<I> where I: ExactSizeIterator {}
 
@@ -140,6 +149,7 @@ impl<I> ExactSizeIterator for StepBy<I> where I: ExactSizeIterator {}
 // bound is never `None`. I: TrustedRandomAccess happens to provide this guarantee while
 // I: TrustedLen would not.
 // This also covers the Range specializations since the ranges also implement TRA
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<I> TrustedLen for StepBy<I> where I: Iterator + TrustedRandomAccess {}
 
@@ -193,6 +203,7 @@ unsafe trait StepByImpl<I> {
 /// where applicable. I.e. if `StepBy` does support backwards iteration
 /// for a given iterator and that is specialized for forward iteration then
 /// it must also be specialized for backwards iteration.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe trait StepByBackImpl<I> {
     type Item;
 
@@ -339,6 +350,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for StepBy<I> {
     type Item = I::Item;
 
@@ -506,6 +518,7 @@ macro_rules! spec_int_ranges {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! spec_int_ranges_r {
     ($($t:ty)*) => ($(
         const _: () = assert!(usize::BITS >= <$t>::BITS);
@@ -567,15 +580,18 @@ macro_rules! spec_int_ranges_r {
 #[cfg(target_pointer_width = "64")]
 spec_int_ranges!(u8 u16 u32 u64 usize);
 // DoubleEndedIterator requires ExactSizeIterator, which isn't implemented for Range<u64>
+#[cfg(not(feature = "ferrocene_certified"))]
 #[cfg(target_pointer_width = "64")]
 spec_int_ranges_r!(u8 u16 u32 usize);
 
 #[cfg(target_pointer_width = "32")]
 spec_int_ranges!(u8 u16 u32 usize);
+#[cfg(not(feature = "ferrocene_certified"))]
 #[cfg(target_pointer_width = "32")]
 spec_int_ranges_r!(u8 u16 u32 usize);
 
 #[cfg(target_pointer_width = "16")]
 spec_int_ranges!(u8 u16 usize);
+#[cfg(not(feature = "ferrocene_certified"))]
 #[cfg(target_pointer_width = "16")]
 spec_int_ranges_r!(u8 u16 usize);

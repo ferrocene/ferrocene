@@ -1,3 +1,4 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 
 /// Creates an iterator with the provided closure
@@ -72,6 +73,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
 impl<F> fmt::Debug for FromFn<F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

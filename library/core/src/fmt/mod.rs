@@ -34,6 +34,11 @@ mod num_buffer;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod rt;
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::{marker::PointeeSized, result};
+
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
 #[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
@@ -87,7 +92,6 @@ pub use self::builders::{FromFn, from_fn};
 /// assert_eq!(format!("{pythagorean_triple}"), "(3, 4, 5)");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub type Result = result::Result<(), Error>;
 
 /// The error type which is returned from formatting a message into a stream.
@@ -124,8 +128,8 @@ pub type Result = result::Result<(), Error>;
 /// }
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[rustfmt::skip]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd))]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -586,11 +590,15 @@ impl Default for FormattingOptions {
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Formatter<'a> {
+    #[cfg(not(feature = "ferrocene_certified"))]
     options: FormattingOptions,
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     buf: &'a mut (dyn Write + 'a),
+
+    #[cfg(feature = "ferrocene_certified")]
+    _use_lifetime: &'a (),
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1097,7 +1105,6 @@ impl Display for Arguments<'_> {
 #[doc(alias = "{:?}")]
 #[rustc_diagnostic_item = "Debug"]
 #[rustc_trivial_field_reads]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Debug: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1234,7 +1241,6 @@ pub use macros::Debug;
 #[doc(alias = "{}")]
 #[rustc_diagnostic_item = "Display"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Display: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///

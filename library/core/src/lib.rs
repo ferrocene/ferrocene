@@ -213,6 +213,7 @@
 // Ferrocene lints/features:
 #![cfg_attr(
     feature = "ferrocene_certified",
+    expect(missing_debug_implementations),
     expect(rustdoc::broken_intra_doc_links),
     expect(rustdoc::private_intra_doc_links),
     expect(unused_attributes)

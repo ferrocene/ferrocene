@@ -9,7 +9,6 @@ use super::super::{
 use super::TrustedLen;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::array;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::{self, Ordering};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -2671,7 +2670,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
     where
         Self: Sized,
@@ -3301,7 +3299,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_max_by", since = "1.15.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn max_by<F>(self, compare: F) -> Option<Self::Item>
     where
         Self: Sized,

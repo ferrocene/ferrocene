@@ -1708,7 +1708,6 @@ pub const fn max<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn max_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
     v1: T,
     v2: T,

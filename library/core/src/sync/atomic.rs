@@ -4493,7 +4493,6 @@ pub fn fence(order: Ordering) {
 #[stable(feature = "compiler_fences", since = "1.21.0")]
 #[rustc_diagnostic_item = "compiler_fence"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn compiler_fence(order: Ordering) {
     // SAFETY: using an atomic fence is safe.
     unsafe {

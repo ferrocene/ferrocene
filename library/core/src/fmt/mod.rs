@@ -142,7 +142,6 @@ pub struct Error;
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "FmtWrite"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.
@@ -204,6 +203,7 @@ pub trait Write {
     /// assert_eq!(&buf, "ab");
     /// # std::fmt::Result::Ok(())
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[stable(feature = "fmt_write_char", since = "1.1.0")]
     fn write_char(&mut self, c: char) -> Result {
         self.write_str(c.encode_utf8(&mut [0; char::MAX_LEN_UTF8]))
@@ -233,6 +233,7 @@ pub trait Write {
     /// assert_eq!(&buf, "world");
     /// # std::fmt::Result::Ok(())
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         // We use a specialization for `Sized` types to avoid an indirection

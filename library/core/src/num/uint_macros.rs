@@ -533,7 +533,6 @@ macro_rules! uint_impl {
         #[rustc_const_stable(feature = "const_math", since = "1.32.0")]
         #[must_use]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_be(x: Self) -> Self {
             #[cfg(target_endian = "big")]
             {
@@ -3878,7 +3877,6 @@ macro_rules! uint_impl {
         #[rustc_const_stable(feature = "const_int_conversion", since = "1.44.0")]
         #[must_use]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn from_be_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             Self::from_be(Self::from_ne_bytes(bytes))
         }

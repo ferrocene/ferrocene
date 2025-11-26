@@ -6,8 +6,7 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
-use crate::marker::Destruct;
-use crate::marker::DiscriminantKind;
+use crate::marker::{Destruct, DiscriminantKind};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]

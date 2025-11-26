@@ -10,6 +10,11 @@ IFS=$'\n\t'
 
 ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
 ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist/}"
+SRC="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}/${CIRCLE_SHA1}/coverage/"
 DEST="/tmp/coverage-outcomes"
 
-aws s3 cp --recursive "s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/coverage/" "${DEST}"
+echo "Getting coverage outcomes from ${SRC}"
+
+aws s3 cp --recursive "${SRC}" "${DEST}"
+
+echo "Got coverage outcomes in ${DEST}"

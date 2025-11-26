@@ -274,6 +274,7 @@ use crate::range;
 use crate::{
     marker::{Destruct, PhantomData},
     mem,
+    ops::{Deref, DerefMut},
     ptr::NonNull,
 };
 
@@ -1043,7 +1044,6 @@ impl<T> RefCell<T> {
     #[track_caller]
     #[rustc_confusables("swap")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn replace(&self, t: T) -> T {
         mem::replace(&mut self.borrow_mut(), t)
     }
@@ -2148,7 +2148,6 @@ pub struct RefMut<'b, T: ?Sized + 'b> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const Deref for RefMut<'_, T> {
     type Target = T;
 
@@ -2161,7 +2160,6 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut T {

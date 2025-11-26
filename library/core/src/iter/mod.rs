@@ -501,7 +501,7 @@ pub use self::traits::{
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 pub use self::{
-    adapters::{Enumerate, Map, Rev, Skip, Take, Zip},
+    adapters::{Enumerate, Filter, Map, Rev, Skip, Take, Zip},
     traits::{
         DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator, Sum,
     },

@@ -361,7 +361,6 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,

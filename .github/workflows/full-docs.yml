@@ -110,6 +110,8 @@ jobs:
         env:
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
+          FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
+          FERROCENE_COVERAGE_OUTCOMES_DIR: /tmp/coverage-outcomes
         with:
           configure: ${{ inputs.configure }}
           container: ${{ inputs.container }}

@@ -8,8 +8,7 @@
 use crate::alloc::Layout;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::clone::TrivialClone;
-use crate::marker::Destruct;
-use crate::marker::DiscriminantKind;
+use crate::marker::{Destruct, DiscriminantKind};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]

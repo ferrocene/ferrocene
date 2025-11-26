@@ -59,8 +59,7 @@ use crate::ffi::va_list::{VaArgSafe, VaListImpl};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Destruct;
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
-use crate::mem;
-use crate::ptr;
+use crate::{mem, ptr};
 
 mod bounds;
 pub mod fallback;

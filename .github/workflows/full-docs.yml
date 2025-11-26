@@ -1,4 +1,5 @@
-# A generic Ferrocene job, when in doubt, start with this workflow for any new jobs.
+# Nearly the generic job, but with some envs set
+# TODO: Merge this into `full-job.yml`, but `configure` seems to be not working
 
 name: Ferrocene Job
 run-name: ${{ inputs.run-name }}

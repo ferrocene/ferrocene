@@ -302,7 +302,6 @@ macro impl_atomic_primitive(
 impl_atomic_primitive!(AtomicBool(bool), size("8"), align(1));
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicI8(i8), size("8"), align(1));
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicU8(u8), size("8"), align(1));
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicI16(i16), size("16"), align(2));
@@ -313,7 +312,6 @@ impl_atomic_primitive!(AtomicI32(i32), size("32"), align(4));
 impl_atomic_primitive!(AtomicU32(u32), size("32"), align(4));
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicI64(i64), size("64"), align(8));
-#[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicU64(u64), size("64"), align(8));
 #[cfg(not(feature = "ferrocene_certified"))]
 impl_atomic_primitive!(AtomicI128(i128), size("128"), align(16));
@@ -3736,7 +3734,6 @@ atomic_int! {
     i8 AtomicI8
 }
 #[cfg(target_has_atomic_load_store = "8")]
-#[cfg(not(feature = "ferrocene_certified"))]
 atomic_int! {
     cfg(target_has_atomic = "8"),
     cfg(target_has_atomic_equal_alignment = "8"),
@@ -3855,7 +3852,6 @@ atomic_int! {
     i64 AtomicI64
 }
 #[cfg(target_has_atomic_load_store = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 atomic_int! {
     cfg(target_has_atomic = "64"),
     cfg(target_has_atomic_equal_alignment = "64"),

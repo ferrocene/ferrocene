@@ -19,7 +19,9 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use {
-    super::super::{Cloned, DoubleEndedIterator, Enumerate, Map, Rev, Skip, Sum, Take, Zip},
+    super::super::{
+        Cloned, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, Sum, Take, Zip,
+    },
     crate::ops::{ControlFlow, Try},
 };
 
@@ -911,7 +913,6 @@ pub trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_filter"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn filter<P>(self, predicate: P) -> Filter<Self, P>
     where
         Self: Sized,

@@ -4,7 +4,6 @@
 mod macros;
 
 use super::{from_raw_parts, from_raw_parts_mut};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::assert_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{

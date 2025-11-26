@@ -360,7 +360,6 @@ macro_rules! iterator {
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
             #[rustc_inherit_overflow_checks]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn position<P>(&mut self, mut predicate: P) -> Option<usize> where
                 Self: Sized,
                 P: FnMut(Self::Item) -> bool,

@@ -20,7 +20,8 @@ runs:
         TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
         SCRIPT: |
           ${{ inputs.script }}
-        RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
+        RUST_CONFIGURE_ARGS: |
+          ${{ inputs.configure }}
       run: |
         if [ -z "${TEST_DEVICE_ADDR}" ]; then
           unset TEST_DEVICE_ADDR
@@ -29,6 +30,7 @@ runs:
           unset AWS_CA_BUNDLE
         fi
         
+        echo "Got configure args $RUST_CONFIGURE_ARGS"
         ferrocene/ci/run.sh
 
     - name: Pull container

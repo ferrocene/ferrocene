@@ -4503,7 +4503,6 @@ unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "fence"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn fence(order: Ordering) {
     // SAFETY: using an atomic fence is safe.
     unsafe {

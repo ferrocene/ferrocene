@@ -24,7 +24,9 @@ use crate::slice::{self, Split as SliceSplit};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{char as char_mod, option};
 
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
 use {super::validations::next_code_point, crate::slice};
 
 /// An iterator over the [`char`]s of a string slice.

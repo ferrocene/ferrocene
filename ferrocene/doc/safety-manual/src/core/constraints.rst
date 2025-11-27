@@ -55,6 +55,4 @@ Use matching version of the core library and rustc
 
 .. id::  CORE_CSTR_0040_MATCHING_VERSION
 
-Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
-
 The user shall verify that the version of the core library and the version of rustc used to compile code match. This is ensured by following the :doc:`Installation Procedures <../procedures>`.

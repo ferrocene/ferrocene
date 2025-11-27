@@ -63,9 +63,12 @@ Add version to Known Problems
 -----------------------------
 
 Add the new version to the `Known Problems repository <https://github.com/ferrocene/problems/>`_
-by adding the version and branch to the ``src/config.yml`` file then running the tool.
+by adding the version and branch to the ``src/config.yml`` file then running the tool following
+the ``README.rst``.
 
-Validate that the site now has the version and known problems are tracked for it.
+Validate that the locally built site now has the version and known problems are tracked for it.
+Make a pull request, ensure it gets merged, then validate the new version shows up on the
+`Known Problems page <https://problems.ferrocene.dev/>`_.
 
 Version Bump Release Notes
 --------------------------
@@ -75,7 +78,7 @@ Rename ``ferrocene/doc/release-notes/src/next.rst`` to
 Backport this PR according to :ref:`handling-backports`. Then, on the
 ``release/1.NN`` branch, remove the ``:upcoming-release:`` from the version.
 
-Create a new ``ferrocene/doc/release-notes/src/next.rst`` with the following content:
+Create a new ``ferrocene/doc/release-notes/src/next.rst`` on the `main` branch with the following content: 
 
 .. code-block::
 

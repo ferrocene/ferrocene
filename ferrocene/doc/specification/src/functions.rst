@@ -13,7 +13,7 @@ Functions
 .. syntax::
 
    FunctionDeclaration ::=
-       FunctionQualifierList $$fn$$ Name GenericParameterList? $$($$ FunctionParameterList? $$)$$ ReturnType? WhereClause? (FunctionBody | ;)
+       FunctionQualifierList $$fn$$ Name GenericParameterList? $$($$ FunctionParameterList? $$)$$ ReturnType? WhereClause? (FunctionBody | $$;$$)
 
    FunctionQualifierList ::=
        $$const$$? $$async$$? ItemSafety? AbiSpecification?

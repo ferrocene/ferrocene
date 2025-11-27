@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Rust Project Developers
+
+name: Change
+description: File a change for the FLS
+title: "[Change]: "
+labels: ["change intake"]
+assignees:
+  - PLeVasseur
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for contributing a change!
+  - type: input
+    id: title
+    attributes:
+      label: Change description
+      description: Description of what is intended to be changed
+      placeholder: Fix description of lexing due to xx
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the language does this fall under?
+      options:
+        - ABI
+        - async / await
+        - attributes
+        - closures
+        - conditional compilation
+        - const evaluation
+        - conventions
+        - destructors
+        - diagnostics
+        - "edition: 2015"
+        - "edition: 2018"
+        - "edition: 2021"
+        - "edition: 2024"
+        - editions
+        - generics
+        - glossary
+        - grammar
+        - inline assembly
+        - linkage
+        - macros
+        - method call
+        - panic
+        - patterns
+        - proc macros
+        - resolution (names, paths, namespaces, preludes, ...)
+        - types
+        - type inference
+        - type layout
+        - undefined behavior
+        - N/A
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What kind of change is this?
+      options:
+        - Bug
+        - Formatting
+        - Improvement to non-prose section
+        - Language cleanup
+        - New content
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: fls-id
+    attributes:
+      label: FLS Paragraph ID
+      description: |
+        The Paragraph ID from the FLS corresponding to what this Guideline covers.
+        Easiest way to obtain this is to navigate to the
+        [FLS](https://rust-lang.github.io/fls), right click a section ID
+        (e.g. `4.2:2`), inspect, and then find it in the pane which opens in
+        your browser.
+
+        **Note**: New content need not fill this in.
+      placeholder: fls_deaddeadbeef
+    validations:
+      required: false
+  - type: textarea
+    id: change-description
+    attributes:
+      label: Change description (extended)
+      description: |
+        A longer description of the intended change, including background and
+        details on in what way the FLS is improved by the change.
+      placeholder: Fix description of lexing due to xx, since under conditions yy it's possible for zz to occur.
+    validations:
+      required: true

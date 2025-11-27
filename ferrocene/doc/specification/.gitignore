@@ -11,3 +11,6 @@ __pycache__
 
 # Linkchecker ignored files
 /.linkchecker
+
+# Mac OS ignored files
+.DS_Store

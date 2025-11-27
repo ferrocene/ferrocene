@@ -15,9 +15,7 @@ xz2 = "0.1.4"
 criticaltrust = { version = "0.2.0", features = ["aws-kms"] }
 sha2 = "0.10.7"
 aws-sdk-kms = "0.29.0"
-aws-sdk-sts = "0.29.0"
 aws-config = "0.56.0"
-reqwest = { version = "0.12.15", default-features = false, features = ["json", "rustls-tls", "rustls-tls-native-roots"] }
 tokio = { version = "1.29.1", features = ["rt-multi-thread", "rt"] }
 serde_json = "1.0.99"
 

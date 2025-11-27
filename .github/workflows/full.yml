@@ -564,6 +564,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
   certified-subsets:
     name: Certified target subset
     uses: ./.github/workflows/full-job.yml

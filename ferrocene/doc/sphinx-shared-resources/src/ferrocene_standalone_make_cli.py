@@ -10,6 +10,7 @@ from pathlib import Path
 import argparse
 import subprocess
 import shutil
+import os
 
 # Automatically watch the following extra directories when --serve is used.
 EXTRA_WATCH_DIRS = ["exts", "themes"]
@@ -70,7 +71,7 @@ def build_docs(root, builder, clear, serve, debug):
 def build_linkchecker(root):
     repo = root / ".linkchecker"
     src = repo / "src" / "tools" / "linkchecker"
-    bin = src / "target" / "release" / "linkchecker"
+    bin = src / (os.getenv("CARGO_TARGET_DIR") or "target") / "release" / "linkchecker"
 
     if not src.is_dir():
         subprocess.run(["git", "init", repo], check=True)
@@ -89,8 +90,8 @@ def build_linkchecker(root):
             f.write("/src/tools/linkchecker/")
 
         # Avoid fetching the whole history
-        git(["fetch", "--depth=1", "origin", "main"])
-        git(["checkout", "main"])
+        git(["fetch", "--depth=1", "origin", "HEAD"])
+        git(["checkout", "FETCH_HEAD"])
 
     if not bin.is_file():
         subprocess.run(["cargo", "build", "--release"], cwd=src, check=True)

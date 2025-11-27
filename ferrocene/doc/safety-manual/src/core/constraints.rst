@@ -14,6 +14,7 @@ Only use certified subset
 Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
 
 The user shall only use the certified subset of the core library.
+The list of the certified subset is documented in the `Certified core library API docs <../../certification/api-docs/core/index.html>`_.
 
 Compile with panic abort
 ------------------------

@@ -9,6 +9,7 @@ The `Certified core library API docs <../../certification/api-docs/core/index.ht
 Compliance with subset
 ----------------------
 
+<<<<<<< HEAD
 To prove compliance with the subset, follow these steps:
 
 1. Ensure that your code successfully compiles with your compilation target.
@@ -19,6 +20,17 @@ To prove compliance with the subset, follow these steps:
     1. Remove the non-compliant function(s) and rewrite the code to maintain the semantics.
     2. Contact Ferrous Systems to discuss the option of adding your desired function(s) to the certified subset.
     3. Keep using the function(s), but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
+=======
+To prove compliance with the subset, follow following steps:
+
+1. Ensure that your code successfully compiles with your compilation target.
+2. Ensure that it also compiles with the certified equivalent listed below.
+3. If it succeeds, your code is compliant with the subset.
+4. If it fails, either
+
+    1. Remove the non-compliant function(s) and rewrite the code to maintain the semantics.
+    2. Contact Ferrous Systems to discuss the option of adding your desired function(s) the certified subset.
+>>>>>>> 9f6139857e0 (Document how to prove compliance with subset)
 
 .. list-table::
    :align: left
@@ -28,6 +40,7 @@ To prove compliance with the subset, follow these steps:
      - Certified equivalent
    * - | ``aarch64-unknown-none``
        | ``aarch64-unknown-nto-qnx710``
+<<<<<<< HEAD
      - ``aarch64-unknown-ferrocene.subset``
    * - ``thumbv7em-none-eabi``
      - ``thumbv7em-ferrocene.subset-eabi``
@@ -46,3 +59,13 @@ For functions outside of the certified subset, this safety is not proven by Ferr
 
 Nevertheless, using those functions is still possible for customers if they prove the safety themselves.
 Often this is even more feasible because only the exact usage of the function has to be proven safe and not all possible uses.
+=======
+     - ``aarch64-unknown-ferrocene.certified``
+   * - ``thumbv7em-none-eabi``
+     - ``thumbv7em-ferrocene.certified-eabi``
+   * - ``thumbv7em-none-eabihf``
+     - ``thumbv7em-ferrocene.certified-eabihf``
+   * - | ``x86_64-unknown-linux-gnu``
+       | ``x86_64-pc-nto-qnx710``
+     - ``x86_64-unknown-ferrocene.certified``
+>>>>>>> 9f6139857e0 (Document how to prove compliance with subset)

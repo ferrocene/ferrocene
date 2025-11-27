@@ -9,7 +9,6 @@ use super::super::{
 use super::TrustedLen;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::array;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::{self, Ordering};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -19,7 +18,9 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use {
-    super::super::{Cloned, DoubleEndedIterator, Enumerate, Map, Rev, Skip, Sum, Take, Zip},
+    super::super::{
+        Cloned, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum, Take, Zip,
+    },
     crate::ops::{ControlFlow, Try},
 };
 
@@ -438,7 +439,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn step_by(self, step: usize) -> StepBy<Self>
     where
         Self: Sized,
@@ -911,7 +911,6 @@ pub trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_filter"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn filter<P>(self, predicate: P) -> Filter<Self, P>
     where
         Self: Sized,
@@ -2670,7 +2669,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
     where
         Self: Sized,
@@ -2801,7 +2799,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn all<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
@@ -2855,7 +2852,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn any<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
@@ -3092,7 +3088,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
     where
         Self: Sized,
@@ -3302,7 +3297,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_max_by", since = "1.15.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn max_by<F>(self, compare: F) -> Option<Self::Item>
     where
         Self: Sized,

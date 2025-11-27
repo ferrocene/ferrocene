@@ -89,8 +89,8 @@ If you want to build a local docker image and use that for running the workflow,
 
 .. code-block:: sh
 
-   docker build --file your-Dockerfile ferrocene/ci --tag act-local
-   act --pull=false --platform ubuntu-24.04=act-local # ...
+   docker build --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile . --tag ferrocene-images/ci:ubuntu-20-main
+   act --pull=false --platform ubuntu-24.04=localhost/ferrocene-images/ci:ubuntu-20-main # ...
 
 The remaining sections of this document are about reproducing the *configuration* of CI using a local build.
 

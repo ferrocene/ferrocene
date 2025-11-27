@@ -10,7 +10,6 @@
 use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{exact_div, unchecked_sub};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
@@ -27,7 +26,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{intrinsics::unchecked_sub, mem::SizedTypeProperties, ptr};
+use crate::{mem::SizedTypeProperties, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -79,7 +78,6 @@ pub use iter::{ChunkBy, ChunkByMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{Chunks, ChunksMut, Windows};
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunksExact, ChunksExactMut};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use iter::{Iter, IterMut};
@@ -1283,7 +1281,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_exact(&self, chunk_size: usize) -> ChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExact::new(self, chunk_size)
@@ -1332,7 +1329,6 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_exact_mut(&mut self, chunk_size: usize) -> ChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExactMut::new(self, chunk_size)
@@ -1381,7 +1377,6 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_chunks_unchecked<const N: usize>(&self) -> &[[T; N]] {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -1440,7 +1435,6 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_chunks<const N: usize>(&self) -> (&[[T; N]], &[T]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len_rounded_down = self.len() / N * N;
@@ -2686,7 +2680,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn starts_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,
@@ -4162,7 +4155,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn align_to<U>(&self) -> (&[T], &[U], &[T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {

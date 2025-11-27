@@ -7,14 +7,12 @@ use crate::intrinsics::const_eval_select;
 /// The first byte is special, only want bottom 5 bits for width 2, 4 bits
 /// for width 3, and 3 bits for width 4.
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn utf8_first_byte(byte: u8, width: u32) -> u32 {
     (byte & (0x7F >> width)) as u32
 }
 
 /// Returns the value of `ch` updated with continuation byte `byte`.
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn utf8_acc_cont_byte(ch: u32, byte: u8) -> u32 {
     (ch << 6) | (byte & CONT_MASK) as u32
 }
@@ -22,7 +20,6 @@ const fn utf8_acc_cont_byte(ch: u32, byte: u8) -> u32 {
 /// Checks whether the byte is a UTF-8 continuation byte (i.e., starts with the
 /// bits `10`).
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(super) const fn utf8_is_cont_byte(byte: u8) -> bool {
     (byte as i8) < -64
 }
@@ -35,7 +32,6 @@ pub(super) const fn utf8_is_cont_byte(byte: u8) -> bool {
 /// `bytes` must produce a valid UTF-8-like (UTF-8 or WTF-8) string
 #[unstable(feature = "str_internals", issue = "none")]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn next_code_point<'a, I: Iterator<Item = &'a u8>>(bytes: &mut I) -> Option<u32> {
     // Decode UTF-8
     let x = *bytes.next()?;
@@ -285,5 +281,4 @@ pub const fn utf8_char_width(b: u8) -> usize {
 }
 
 /// Mask of the value bits of a continuation byte.
-#[cfg(not(feature = "ferrocene_certified"))]
 const CONT_MASK: u8 = 0b0011_1111;

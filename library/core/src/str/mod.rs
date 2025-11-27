@@ -10,7 +10,6 @@ mod converts;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod count;
 mod error;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod iter;
 mod traits;
 mod validations;
@@ -31,9 +30,8 @@ use crate::{ascii, mem};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::mem;
+use {self::pattern::Pattern, crate::mem};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod pattern;
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -87,20 +85,18 @@ pub use lossy::{Utf8Chunk, Utf8Chunks};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use traits::FromStr;
 #[unstable(feature = "str_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use validations::{next_code_point, utf8_char_width};
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use {error::Utf8Error, validations::utf8_char_width};
+pub use {error::Utf8Error, iter::Chars};
 
 #[inline(never)]
 #[cold]
 #[track_caller]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 #[cfg(not(panic = "immediate-abort"))]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
     crate::intrinsics::const_eval_select((s, begin, end), slice_error_fail_ct, slice_error_fail_rt)
 }
@@ -112,13 +108,12 @@ const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
 }
 
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
 const fn slice_error_fail_ct(_: &str, _: usize, _: usize) -> ! {
     panic!("failed to slice string");
 }
 
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified", expect(unused_variables))]
 fn slice_error_fail_rt(s: &str, begin: usize, end: usize) -> ! {
     const MAX_DISPLAY_LENGTH: usize = 256;
     let trunc_len = s.floor_char_boundary(MAX_DISPLAY_LENGTH);
@@ -397,7 +392,6 @@ impl str {
     #[stable(feature = "is_char_boundary", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_is_char_boundary", since = "1.86.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_char_boundary(&self, index: usize) -> bool {
         // 0 is always ok.
         // Test for 0 explicitly so that it can optimize out the check
@@ -447,7 +441,6 @@ impl str {
     #[stable(feature = "round_char_boundary", since = "1.91.0")]
     #[rustc_const_stable(feature = "round_char_boundary", since = "1.91.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn floor_char_boundary(&self, index: usize) -> usize {
         if index >= self.len() {
             self.len()
@@ -1101,7 +1094,6 @@ impl str {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[rustc_diagnostic_item = "str_chars"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn chars(&self) -> Chars<'_> {
         Chars { iter: self.as_bytes().iter() }
     }
@@ -1449,7 +1441,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_starts_with"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn starts_with<P: Pattern>(&self, pat: P) -> bool {
         pat.is_prefix_of(self)
     }

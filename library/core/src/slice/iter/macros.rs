@@ -86,7 +86,8 @@ macro_rules! iterator {
 
             // Helper function for creating a slice from the iterator.
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            // NOTE(dead_code): Method is used by Iter, but not IterMut
+            #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
             fn make_slice(&self) -> &'a [T] {
                 // SAFETY: the iterator was created from a slice with pointer
                 // `self.ptr` and length `len!(self)`. This guarantees that all
@@ -139,7 +140,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "rust1", since = "1.0.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl<T> ExactSizeIterator for $name<'_, T> {
             #[inline(always)]
             fn len(&self) -> usize {
@@ -147,6 +147,7 @@ macro_rules! iterator {
             }
 
             #[inline(always)]
+            #[cfg(not(feature = "ferrocene_certified"))]
             fn is_empty(&self) -> bool {
                 is_empty!(self)
             }
@@ -289,7 +290,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn all<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,
@@ -307,7 +307,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn any<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,
@@ -360,7 +359,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn position<P>(&mut self, mut predicate: P) -> Option<usize> where
                 Self: Sized,
                 P: FnMut(Self::Item) -> bool,

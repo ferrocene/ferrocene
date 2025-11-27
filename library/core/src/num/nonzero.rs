@@ -22,7 +22,7 @@ use crate::{fmt, intrinsics, ptr, ub_checks};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{intrinsics, ub_checks};
+use crate::{intrinsics, ops::Div, ub_checks};
 
 /// A marker trait for primitive types which can be zero.
 ///
@@ -539,7 +539,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! nonzero_integer {
     (
         #[$stability:meta]
@@ -606,8 +605,10 @@ macro_rules! nonzero_integer {
         ///
         /// [null pointer optimization]: crate::option#representation
         #[$stability]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub type $Ty = NonZero<$Int>;
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl NonZero<$Int> {
             /// The size of this non-zero integer type in bits.
             ///
@@ -1282,6 +1283,7 @@ macro_rules! nonzero_integer {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "nonzero_parse", since = "1.35.0")]
         impl FromStr for NonZero<$Int> {
             type Err = ParseIntError;
@@ -1352,7 +1354,6 @@ macro_rules! nonzero_integer {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! nonzero_integer_signedness_dependent_impls {
     // Impls for unsigned nonzero types only.
     (unsigned $Int:ty) => {
@@ -1375,6 +1376,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "nonzero_div_assign", since = "1.79.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const DivAssign<NonZero<$Int>> for $Int {
@@ -1389,6 +1391,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "nonzero_div", since = "1.51.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const Rem<NonZero<$Int>> for $Int {
@@ -1403,6 +1406,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "nonzero_div_assign", since = "1.79.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const RemAssign<NonZero<$Int>> for $Int {
@@ -1413,6 +1417,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl NonZero<$Int> {
             /// Calculates the quotient of `self` and `rhs`, rounding the result towards positive infinity.
             ///
@@ -1444,6 +1449,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
     };
     // Impls for signed nonzero types only.
     (signed $Int:ty) => {
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[stable(feature = "signed_nonzero_neg", since = "1.71.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const Neg for NonZero<$Int> {
@@ -1456,6 +1462,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         forward_ref_unop! { impl Neg, neg for NonZero<$Int>,
         #[stable(feature = "signed_nonzero_neg", since = "1.71.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")] }
@@ -2357,7 +2364,6 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_certified"))]
 nonzero_integer! {
     Self = NonZeroUsize,
     Primitive = unsigned usize,
@@ -2371,7 +2377,6 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_certified"))]
 nonzero_integer! {
     Self = NonZeroUsize,
     Primitive = unsigned usize,
@@ -2385,7 +2390,6 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 nonzero_integer! {
     Self = NonZeroUsize,
     Primitive = unsigned usize,

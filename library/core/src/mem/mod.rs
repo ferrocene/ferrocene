@@ -8,9 +8,7 @@
 use crate::alloc::Layout;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::clone::TrivialClone;
-use crate::marker::Destruct;
-#[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::DiscriminantKind;
+use crate::marker::{Destruct, DiscriminantKind};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -688,7 +686,6 @@ pub const fn needs_drop<T: ?Sized>() -> bool {
 #[rustc_diagnostic_item = "mem_zeroed"]
 #[track_caller]
 #[rustc_const_stable(feature = "const_mem_zeroed", since = "1.75.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn zeroed<T>() -> T {
     // SAFETY: the caller must guarantee that an all-zero value is valid for `T`.
     unsafe {
@@ -765,7 +762,6 @@ pub unsafe fn uninitialized<T>() -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_swap"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn swap<T>(x: &mut T, y: &mut T) {
     // SAFETY: `&mut` guarantees these are typed readable and writable
     // as well as non-overlapping.
@@ -1080,7 +1076,6 @@ pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
 ///
 /// See the [`discriminant`] function in this module for more information.
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Discriminant<T>(<T as DiscriminantKind>::Discriminant);
 
 // N.B. These trait implementations cannot be derived because we don't want any bounds on T.
@@ -1224,7 +1219,6 @@ impl<T> fmt::Debug for Discriminant<T> {
 #[rustc_const_stable(feature = "const_discriminant", since = "1.75.0")]
 #[rustc_diagnostic_item = "mem_discriminant"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn discriminant<T>(v: &T) -> Discriminant<T> {
     Discriminant(intrinsics::discriminant_value(v))
 }

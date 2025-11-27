@@ -18,8 +18,8 @@ be stored in a memory location, and interpreted based on some :t:`type`.
 An :dt:`allocated object` is a :t:`value` stored at some memory address.
 
 :dp:`fls_kaomYy0Ml4Nh`
-An :t:`[allocated object]s` :dt:`base address` is the the memory address the
-object is stored.
+The :dt:`base address` of an :t:`allocated object` is the memory address where
+the object is stored.
 
 :dp:`fls_B5cmkWfD5GNt`
 An :t:`[allocated object]s` :dt:`memory size` is the number of bytes the object
@@ -80,7 +80,7 @@ Constants
 .. rubric:: Legality Rules
 
 :dp:`fls_5o5iu4j8in4l`
-A :t:`constant` is an :t:`immutable` :t:`value` whose uses are substituted by
+A :t:`constant` is an :t:`immutable` :t:`value expression` whose uses are substituted by
 the :t:`value`.
 
 :dp:`fls_3mhj0kkupwuz`
@@ -111,9 +111,25 @@ The :t:`expression` of a :t:`constant initializer` shall be a
 The value of a :t:`constant` is determined by evaluating its
 :t:`constant initializer`.
 
-:dp:`fls_5x0jv4cgbolx`
-A use of a :t:`constant` is a :t:`value expression` and creates a copy of the
-constant's value.
+:dp:`fls_ooOYxhVh8hZo`
+After :t:`type coercion`, the value of the constant cannot contain any
+:t:`[mutable reference]s`, except when
+
+- :dp:`fls_zkNFeBLy80UA`
+  The :t:`mutable reference` is contained within an :t:`external static`, or
+
+- :dp:`fls_VhzGfnWg7YrG`
+  The :t:`mutable reference` is contained within a :t:`mutable static`, or
+
+- :dp:`fls_qC6L0km0ZMFI`
+  The :t:`mutable reference` is contained within a :t:`static`
+  whose type is subject to :t:`interior mutability`, or
+
+- :dp:`fls_ibYKKQdB2tDn`
+  The :t:`mutable reference` is contained within an :t:`union`, or
+
+- :dp:`fls_dQdSxf8kOgbi`
+  The :t:`referent` is a value of a :t:`zero-sized type`.
 
 .. rubric:: Dynamic Semantics
 

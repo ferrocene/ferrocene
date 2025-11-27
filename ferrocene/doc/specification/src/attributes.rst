@@ -38,7 +38,7 @@ Attributes
      | $$=$$ Expression
 
    AttributeContentList ::=
-       AttributeContent (, AttributeContent)* ,?
+       AttributeContent ($$,$$ AttributeContent)* $$,$$?
 
 .. rubric:: Legality Rules
 
@@ -476,7 +476,7 @@ Attribute ``target_feature``
        $$target_feature$$ $$($$ $$enable$$ $$=$$ $$"$$ FeatureList $$"$$ $$)$$
 
    FeatureList ::=
-       Feature (, Feature)*
+       Feature ($$,$$ Feature)*
 
    Feature ::=
        $$adx$$
@@ -1221,15 +1221,15 @@ Attribute ``link``
        $$name$$ $$=$$ StringLiteral
 
    NativeLibraryNameWithKind ::=
-       NativeLibraryName , NativeLibrayKind
+       NativeLibraryName $$,$$ NativeLibraryKind
 
    WebAssemblyModuleName ::=
        $$wasm_import_module$$ $$=$$ StringLiteral
 
-   NativeLibrayKind ::=
-       $$kind$$ $$=$$ " NativeLibrayKindType "
+   NativeLibraryKind ::=
+       $$kind$$ $$=$$ $$"$$ NativeLibraryKindType $$"$$
 
-   NativeLibrayKindType ::=
+   NativeLibraryKindType ::=
        $$dylib$$
      | $$raw-dylib$$
      | $$framework$$
@@ -1704,6 +1704,7 @@ Attribute ``collapse_debuginfo``
 
    CollapseDebuginfoContent ::=
        $$collapse_debuginfo$$  $$($$ CollapseDebuginfoKind $$)$$
+
    CollapseDebuginfoKind ::=
        $$no$$
      | $$external$$

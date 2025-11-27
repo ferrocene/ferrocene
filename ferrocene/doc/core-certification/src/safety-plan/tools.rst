@@ -16,10 +16,20 @@ Code coverage
 Version
 ~~~~~~~
 
-- blanket: |ferrocene_version| (in-tree)
-- llvm-profdata: |llvm_version|
-- rustc: |rust_version|
-- symbol-report: |ferrocene_version| (in-tree)
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``blanket``
+     - |ferrocene_version| (in-tree)
+   * - ``llvm-profdata``
+     - |llvm_version|
+   * - ``rustc``
+     - |rust_version|
+   * - ``symbol-report``
+     - |ferrocene_version| (in-tree)
 
 Usage
 ~~~~~
@@ -70,7 +80,14 @@ Compiler
 Version
 ~~~~~~~
 
-- rustc: |rust_version|
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``rustc``
+     - |rust_version|
 
 Usage
 ~~~~~
@@ -134,9 +151,18 @@ Linting
 Version
 ~~~~~~~
 
-- clippy: |ferrocene_version|
-- rustc: |rust_version|
-- rustfmt: |ferrocene_version|
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``clippy``
+     - |ferrocene_version|
+   * - ``llvm-rustc``
+     - |rust_version|
+   * - ``rustfmt``
+     - |ferrocene_version|
 
 Usage
 ~~~~~
@@ -171,7 +197,14 @@ Test runner
 Version
 ~~~~~~~
 
-- libtest: |ferrocene_version|
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``libtest``
+     - |ferrocene_version|
 
 Usage
 ~~~~~
@@ -202,8 +235,16 @@ Version control system
 Version
 ~~~~~~~
 
-- git: version 2
-- GitHub: GitHub Enterprise version 3
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``git``
+     - Version 2
+   * - GitHub
+     - GitHub Enterprise version 3
 
 Usage
 ~~~~~
@@ -234,7 +275,14 @@ Failure modes
 Version
 ~~~~~~~
 
-- rustdoc: |ferrocene_version|
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``rustdoc``
+     - |ferrocene_version|
 
 Usage
 ~~~~~

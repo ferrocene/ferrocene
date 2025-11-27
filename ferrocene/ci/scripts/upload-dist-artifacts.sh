@@ -27,7 +27,7 @@ fi
 DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}/${CIRCLE_SHA1}/"
 aws s3 cp --recursive "${DIST_DIR}/" "$DEST"
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     for file in ${DIST_DIR}/*.tar.xz; do
         # If the dist dir is empty, we'll see "*.tar.xz" instead of a file
         if [[ "$(basename $file)" != "*.tar.xz" ]]; then

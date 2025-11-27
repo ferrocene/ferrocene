@@ -7,7 +7,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Checkout submodules"
 fi
 
@@ -25,6 +25,6 @@ for submodule in ${submodules}; do
 done
 wait
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

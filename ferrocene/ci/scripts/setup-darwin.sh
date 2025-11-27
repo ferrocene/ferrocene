@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeuo pipefail
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Install dependencies (macOS)"
 fi
 
@@ -32,7 +32,7 @@ sudo sysctl net.inet.tcp.tso=0
 
 # Free up some disk space
 # Mac runners have a paltry 14gb of storage, see: https://github.com/actions/runner-images/issues/2840
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "Freeing up disk space on the Github Actions runner, current space:"
     df -h
     # Remove random cruft
@@ -61,6 +61,6 @@ else
     echo "Not freeing up space, this is not a Github Actions runner."
 fi
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

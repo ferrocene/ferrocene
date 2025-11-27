@@ -4,7 +4,7 @@
 
 set -xeuo pipefail
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Setup uv"
 fi
 
@@ -29,6 +29,6 @@ set -e
 uv python install 3.12
 uv python pin 3.12
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

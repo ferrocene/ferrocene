@@ -18,8 +18,6 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
-<<<<<<< HEAD
-=======
 Language changes in Rust 1.91.1
 -------------------------------
 
@@ -53,7 +51,6 @@ Language changes in Rust 1.91.0
 
 - `Add 'target_env = "macabi"' and 'target_env = "sim"' cfgs <https://github.com/rust-lang/rust/pull/139451>`_ as replacements for the `target_abi` cfgs with the same values.
 
->>>>>>> 2a7ed48a9e4653f7abbeae096633bba0486f7bb1
 Language changes in Rust 1.90.0
 -------------------------------
 
@@ -63,9 +60,6 @@ Language changes in Rust 1.90.0
 
 - `Allow constants whose final value has references to mutable/external memory, but reject such constants as patterns <https://github.com/rust-lang/rust/pull/140942>`_
 
-<<<<<<< HEAD
-  - New paragraph: :p:`fls_wJ9f906BlBvg`
-=======
   - This lifted restriction was not specified in the FLS
   - The restriction on patterns is documented in :p:`fls_wJ9f906BlBvg`
   - New paragraph: :p:`fls_zyuxqty09SDO`
@@ -85,7 +79,6 @@ Language changes in Rust 1.90.0
     - :p:`fls_dQdSxf8kOgbi`
 
     - :p:`fls_qC6L0km0ZMFI`
->>>>>>> 2a7ed48a9e4653f7abbeae096633bba0486f7bb1
 
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 
@@ -148,11 +141,7 @@ Language changes in Rust 1.89.0
     - :p:`fls_gRf8F9PIGySt`
     - :p:`fls_NNj4H6A9VTR8`
 
-<<<<<<< HEAD
-- `Stabilize these target featires for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
-=======
 - `Stabilize these target features for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
->>>>>>> 2a7ed48a9e4653f7abbeae096633bba0486f7bb1
 
   - Changed syntax: :s:`Feature`
 
@@ -189,13 +178,6 @@ Language changes in Rust 1.89.0
 
 - `Extend temporary lifetime extension to also go through tuple struct and tuple variant constructors <https://github.com/rust-lang/rust/pull/140593>`_
 
-<<<<<<< HEAD
-  - Changed paragraph: :p:`fls_DQaCUkskfXzk`
-  - New paragraphs:
-
-    - :p:`fls_YeeZWqTdMivX`
-    - :p:`fls_wyzau8hhq74d`
-=======
   - Changed paragraphs:
 
     - :p:`fls_DQaCUkskfXzk`
@@ -204,7 +186,6 @@ Language changes in Rust 1.89.0
   - New paragraphs:
 
     - :p:`fls_YeeZWqTdMivX`
->>>>>>> 2a7ed48a9e4653f7abbeae096633bba0486f7bb1
     - :p:`fls_eeaJtK4w5gVK`
 
 - `extern "C" functions on the wasm32-unknown-unknown target now have a standards compliant ABI <https://blog.rust-lang.org/2025/04/04/c-abi-changes-for-wasm32-unknown-unknown/>`_

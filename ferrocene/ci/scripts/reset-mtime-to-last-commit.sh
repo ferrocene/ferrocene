@@ -20,7 +20,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Change file modification time to be consistent"
 fi
 
@@ -57,6 +57,6 @@ done
 
 echo "finished resetting the mtime of all tracked files to ${last_commit_date}"
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

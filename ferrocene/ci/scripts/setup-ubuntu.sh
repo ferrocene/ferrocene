@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeo pipefail
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Install dependencies (Ubuntu)"
 fi
 
@@ -26,7 +26,7 @@ else
 fi
 
 # Removing unused files to free some disk space (to avoid disk getting full)
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     df --human-readable
     sudo rm -rf /usr/local/.ghcup
     sudo rm -rf /opt/hostedtoolcache/CodeQL
@@ -35,6 +35,6 @@ if [[ "$GITHUB_ACTIONS" == "true" ]]; then
     df --human-readable
 fi
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

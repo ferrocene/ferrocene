@@ -5,7 +5,7 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Install dependencies (Windows)"
 fi
 
@@ -44,6 +44,6 @@ fi
 choco install --quiet --yes cmake.portable ninja gcc-arm-embedded llvm
 choco install --quiet --yes zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

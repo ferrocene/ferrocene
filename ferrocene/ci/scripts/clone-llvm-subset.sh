@@ -20,7 +20,7 @@
 # of the monorepo to be present, and at that point it's faster to just do a
 # shallow clone of the whole monorepo rather than using partial clones.
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::group::Clone llvm subset"
 fi
 
@@ -70,6 +70,6 @@ git_llvm checkout "${llvm_commit}"
 # Load the git repository we created in src/llvm-project as the submodule.
 git submodule absorbgitdirs
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     echo "::endgroup::"
 fi

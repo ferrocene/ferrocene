@@ -29,7 +29,7 @@ fi
 
 echo "Configuring"
 # Generate `bootstrap.toml`.
-ferrocene/ci/configure.sh ${RUST_CONFIGURE_ARGS:-}
+ferrocene/ci/configure.sh
 
 # Use a Cargo home inside the build directory instead of the default ~/.cargo,
 # including it in the CircleCI workspace. This has multiple advantages:

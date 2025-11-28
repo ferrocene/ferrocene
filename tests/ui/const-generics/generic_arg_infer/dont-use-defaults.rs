@@ -10,6 +10,3 @@ impl<const N: usize> Foo<N> {
 fn main() {
     let [(), (), ()] = Foo::<_>::make_arr();
 }
-
-// ferrocene-annotations: fls_vhpwge5123cm
-// Generic parameters

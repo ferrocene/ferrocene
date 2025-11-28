@@ -7,15 +7,14 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 
-extern crate serde;
-extern crate serde_json;
 extern crate tracing;
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{self, Write};
 use std::sync::LazyLock;
 
+use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
 use rustc_hir::{AttrId, HirId, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind};
@@ -32,24 +31,9 @@ use tracing::info;
 static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =
     LazyLock::new(|| ["ferrocene", "annotation"].map(Symbol::intern));
 
-#[derive(serde::Serialize)]
-struct Function(String, String, usize, usize);
-
-#[derive(serde::Serialize)]
-struct Report {
-    symbols: Vec<Function>,
-    annotations: BTreeMap<String, BTreeSet<(usize, usize)>>,
-}
-
-impl Report {
-    fn add_annotation(&mut self, filename: String, start: usize, end: usize) {
-        self.annotations.entry(filename).or_default().insert((start, end));
-    }
-}
-
 struct Vis<'tcx> {
     tcx: TyCtxt<'tcx>,
-    report: Report,
+    report: SymbolReport,
     visited_attrs: BTreeSet<AttrId>,
 }
 
@@ -116,11 +100,7 @@ impl Callbacks for LoadCoreSymbols {
                 as Box<dyn Write + Send>,
             Err(_) => Box::new(io::stdout()) as _,
         };
-        let mut vis = Vis {
-            tcx,
-            report: Report { symbols: Vec::new(), annotations: BTreeMap::new() },
-            visited_attrs: BTreeSet::new(),
-        };
+        let mut vis = Vis { tcx, report: SymbolReport::new(), visited_attrs: BTreeSet::new() };
 
         for def in tcx.hir_crate_items(()).definitions() {
             let kind = tcx.def_kind(def);
@@ -144,18 +124,18 @@ impl Callbacks for LoadCoreSymbols {
             ));
 
             let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
-            let (filename, start, end) = vis.convert_span(span);
+            let (filename, start_line, end_line) = vis.convert_span(span);
 
             // We don't check for annotations those inside the `Visitor` implementation so we do it
             // here.
             if let Some(attr) =
                 tcx.get_attrs_by_path(def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
             {
-                vis.report.add_annotation(filename.clone(), start, end);
+                vis.report.add_annotation(filename.clone(), start_line, end_line);
                 vis.visited_attrs.insert(attr.id());
             }
 
-            vis.report.symbols.push(Function(qualified_name, filename, start, end));
+            vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });
         }
 
         tcx.hir_visit_all_item_likes_in_crate(&mut vis);

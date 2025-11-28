@@ -3,3 +3,6 @@ name = "symbol-report"
 edition = "2024"
 
 [dependencies]
+build_helper = { path = "../../../src/build_helper" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

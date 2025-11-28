@@ -407,7 +407,6 @@ use crate::cmp::Ordering;
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Destruct, FnPtr, PointeeSized};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
@@ -420,11 +419,8 @@ use crate::{fmt, hash, intrinsics, ub_checks};
 use crate::{
     intrinsics,
     marker::{Destruct, PointeeSized},
-    mem::{self, MaybeUninit},
+    ub_checks,
 };
-#[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
-#[rustfmt::skip]
-use crate::{mem::SizedTypeProperties, ub_checks};
 
 mod alignment;
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]

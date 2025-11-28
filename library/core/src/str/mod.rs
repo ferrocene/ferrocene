@@ -45,7 +45,6 @@ pub use converts::{from_raw_parts, from_raw_parts_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use converts::{from_utf8, from_utf8_unchecked};
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use converts::{from_utf8_mut, from_utf8_unchecked_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -278,7 +277,6 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_utf8(v: &[u8]) -> Result<&str, Utf8Error> {
         converts::from_utf8(v)
     }
@@ -312,7 +310,6 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_str_from_utf8", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8_mut"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_utf8_mut(v: &mut [u8]) -> Result<&mut str, Utf8Error> {
         converts::from_utf8_mut(v)
     }
@@ -345,7 +342,6 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8_unchecked"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn from_utf8_unchecked(v: &[u8]) -> &str {
         // SAFETY: converts::from_utf8_unchecked has the same safety requirements as this function.
         unsafe { converts::from_utf8_unchecked(v) }
@@ -371,7 +367,6 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8_unchecked_mut"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
         // SAFETY: converts::from_utf8_unchecked_mut has the same safety requirements as this function.
         unsafe { converts::from_utf8_unchecked_mut(v) }

@@ -723,7 +723,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: targets
 
   traceability-matrix:
     name: Tracability Matrix

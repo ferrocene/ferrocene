@@ -9,7 +9,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
-ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist/}"
+ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist}"
 SRC="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}/${CIRCLE_SHA1}/coverage/"
 DEST="/tmp/coverage-outcomes"
 

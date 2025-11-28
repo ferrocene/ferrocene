@@ -97,7 +97,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ matrix.usage }}
+      build-metrics-artifact: dist-x86_64-unknown-linux-gnu
 
   self-test-x86_64-unknown-linux-gnu:
     name: Self-test (x86_64-unknown-linux-gnu)
@@ -151,6 +151,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-x86_64-unknown-linux-gnu-on-${{ matrix.host }}
 
   test-aarch64-unknown-none:
     strategy:
@@ -183,7 +184,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-
+      build-metrics-artifact: test-aarch64-unknown-none-on-${{ matrix.host }}
   test-thumbv7em-none-eabi:
     strategy:
       fail-fast: false
@@ -215,6 +216,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabi-on-${{ matrix.host }}
 
   test-thumbv7em-none-eabihf:
     strategy:
@@ -247,6 +249,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabihf-on-${{ matrix.host }}
 
   # test-x86_64-pc-nto-qnx710:
   #   name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
@@ -344,7 +347,6 @@ jobs:
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
-
   dist-aarch64-unknown-linux-gnu:
     name: Dist (aarch64-unknown-linux-gnu)
     uses: ./.github/workflows/full-job.yml
@@ -378,7 +380,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ matrix.usage }}
+      build-metrics-artifact: ${{ matrix.build-metrics-artifact }}
 
   self-test-aarch64-unknown-linux-gnu:
     name: Self-test (aarch64-unknown-linux-gnu)
@@ -398,7 +400,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-
 
   # x86_64 Windows
 
@@ -588,6 +589,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: certified-subsets
 
   docs:
     name: Dist (Docs)
@@ -622,7 +624,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ github.job }}
+      build-metrics-artifact: docs
 
   source:
     name: Dist (source)
@@ -644,7 +646,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ github.job }}
+      build-metrics-artifact: source
 
   checks:
     name: Checks (x86_64-unknown-linux-gnu)
@@ -667,7 +669,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ github.job }}
+      build-metrics-artifact: checks
 
   targets:
     name: Build additional targets
@@ -688,6 +690,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: targets
 
   traceability-matrix:
     name: Tracability Matrix
@@ -722,7 +725,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ github.job }}
+      build-metrics-artifact: tracability-matrix
 
   finish-build:
     name: Finish build

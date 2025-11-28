@@ -91,6 +91,8 @@ runs:
           --env ARTIFACTS_PREFIX \
           --env CACHE_BUCKET \
           --env CACHE_PREFIX \
+          --env CIRCLE_SHA1 \
+          --env CIRCLE_JOB \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
           --user $(id -u):$(id -g) \

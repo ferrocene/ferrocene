@@ -675,6 +675,10 @@ pub fn std_cargo(
 
     let mut features = String::new();
 
+    // Ferrocene annotation: Our certified targets require this.
+    #[cfg(not(test))]
+    assert!(builder.no_std(target).is_some());
+
     if builder.no_std(target) == Some(true) {
         features += " compiler-builtins-mem";
         if !target.starts_with("bpf") {

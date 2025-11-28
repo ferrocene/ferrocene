@@ -3498,7 +3498,13 @@ pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize
 
 /// Copies the current location of arglist `src` to the arglist `dst`.
 ///
-/// FIXME: document safety requirements
+/// # Safety
+///
+/// You must check the following invariants before you call this function:
+///
+/// - `dest` must be non-null and point to valid, writable memory.
+/// - `dest` must not alias `src`.
+///
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -3507,7 +3513,17 @@ pub unsafe fn va_copy<'f>(dest: *mut VaListImpl<'f>, src: &VaListImpl<'f>);
 /// Loads an argument of type `T` from the `va_list` `ap` and increment the
 /// argument `ap` points to.
 ///
-/// FIXME: document safety requirements
+/// # Safety
+///
+/// This function is only sound to call when:
+///
+/// - there is a next variable argument available.
+/// - the next argument's type must be ABI-compatible with the type `T`.
+/// - the next argument must have a properly initialized value of type `T`.
+///
+/// Calling this function with an incompatible type, an invalid value, or when there
+/// are no more variable arguments, is unsound.
+///
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -3515,7 +3531,10 @@ pub unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaListImpl<'_>) -> T;
 
 /// Destroy the arglist `ap` after initialization with `va_start` or `va_copy`.
 ///
-/// FIXME: document safety requirements
+/// # Safety
+///
+/// `ap` must not be used to access variable arguments after this call.
+///
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]

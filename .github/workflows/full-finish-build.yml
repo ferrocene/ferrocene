@@ -44,7 +44,7 @@ env:
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   AWS_PROFILE: amazon # This is *always* amazon, that's where releases go!
-
+  BUILD_METRICS_ARTIFACT: finish-build
 jobs:
 
   finish-build:
@@ -54,7 +54,6 @@ jobs:
       FERROCENE_HOST: ${{ inputs.triple }}
       FERROCENE_BUILD_HOST: ${{ inputs.triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
-      ARTIFACT: finish-build
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -72,11 +71,12 @@ jobs:
 
       - name: Run
         uses: ./.github/actions/run/
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.BUILD_METRICS_ARTIFACT }}
         with:
           container: ${{ inputs.container }}
           script: |
-            export CIRCLE_SHA1="${{ github.sha }}"
-            export CIRCLE_JOB="${{ env.ARTIFACT }}"
             uv run x.py dist ferrocene-build-metadata
             ./ferrocene/ci/scripts/upload-dist-artifacts.sh
           # This should be re-enabled once GHA builds all platforms.

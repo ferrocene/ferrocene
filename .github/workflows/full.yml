@@ -614,7 +614,6 @@ jobs:
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ferrocene/ci/scripts/fetch-coverage-outcomes.sh
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
@@ -625,6 +624,40 @@ jobs:
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
       build-metrics-artifact: docs
+
+  docs-test:
+    name: Test (Docs)
+    uses: ./.github/workflows/full-docs.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - checks
+      - coverage
+      - test-x86_64-unknown-linux-gnu
+      - test-aarch64-unknown-none
+      - test-thumbv7em-none-eabi
+      - test-thumbv7em-none-eabihf
+      # - test-x86_64-pc-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
+      # - test-x86_64-pc-windows-msvc
+      # - test-aarch64-apple-darwin
+    secrets: inherit
+    with:
+      run-name: Dist (Docs)
+      script: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ferrocene/ci/scripts/fetch-coverage-outcomes.sh
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: docs-test
 
   source:
     name: Dist (source)
@@ -736,6 +769,8 @@ jobs:
       - dist-x86_64-unknown-linux-gnu
       - dist-aarch64-unknown-linux-gnu
       - targets
+      - docs
+      - docs-test
       - traceability-matrix
       - self-test-x86_64-unknown-linux-gnu
       - self-test-aarch64-unknown-linux-gnu

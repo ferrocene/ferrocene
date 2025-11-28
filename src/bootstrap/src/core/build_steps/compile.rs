@@ -675,7 +675,7 @@ pub fn std_cargo(
 
     let mut features = String::new();
 
-    if builder.no_std(target).unwrap() {
+    if builder.no_std(target) == Some(true) {
         features += " compiler-builtins-mem";
         if !target.starts_with("bpf") {
             features.push_str(compiler_builtins_c_feature);

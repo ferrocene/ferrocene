@@ -61,6 +61,8 @@ add() {
 # rust.lld = true, so don't enable the `ferrocene-dist` profile
 if [[ -n "${FERROCENE_UNPRIVILEGED_CI+x}" ]]; then
     echo "Using unprivileged CI, not setting profile to \`ferrocene-dist\`"
+    # Force debug assertions on for symbol-report.
+    add --enable-debug-assertions
 else
     # Load the generic configuration from our dist profile.
     add --set profile=ferrocene-dist

@@ -672,9 +672,6 @@ pub fn std_cargo(
             features.push_str(compiler_builtins_c_feature);
         }
 
-        if target.contains("ferrocene.certified") {
-            features += " ferrocene_certified";
-        }
         // for no-std targets we only compile a few no_std crates
         if crates.is_empty() {
             cargo.args(["-p", "alloc"]);
@@ -709,6 +706,10 @@ pub fn std_cargo(
             let root = format!("native={}", dir.to_str().unwrap());
             cargo.rustflag("-L").rustflag(&root);
         }
+    }
+
+    if target.contains("ferrocene.certified") {
+        cargo.arg("--features=ferrocene_certified");
     }
 
     // By default, rustc uses `-Cembed-bitcode=yes`, and Cargo overrides that

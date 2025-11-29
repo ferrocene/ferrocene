@@ -114,7 +114,7 @@ impl TargetSelection {
     /// Map the target to the certified target that is based on it.
     ///
     /// Panics if there is no certified equivalent.
-    /// See [try_certified_equivalent] for a non-panicking version.
+    /// See [`TargetSelection::try_certified_equivalent`] for a non-panicking version.
     pub fn certified_equivalent(&self) -> TargetSelection {
         self.try_certified_equivalent()
             .expect(&format!("no certified equivalent exists for target \"{self}\""))

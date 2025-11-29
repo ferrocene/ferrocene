@@ -3070,7 +3070,6 @@
   "core::alloc::layout::Layout::max_size_for_align",
   "core::alloc::layout::Layout::new",
   "core::alloc::layout::Layout::size",
-  "core::alloc::layout::size_align",
   "core::any::TypeId::of",
   "core::any::type_name",
   "core::any::type_name_of_val",

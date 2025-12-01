@@ -49,6 +49,14 @@ Language changes in Rust 1.91.0
 
 - `Stabilize 'sse4a' and 'tbm' target features <https://github.com/rust-lang/rust/pull/144542>`_
 
+  - Changed syntax: :s:`Feature`
+
+  * New paragraphs:
+
+    - :p:`fls_pGHKFrgGlFtg`
+
+    - :p:`fls_K6TM6oTLL1BA`
+
 - `Add 'target_env = "macabi"' and 'target_env = "sim"' cfgs <https://github.com/rust-lang/rust/pull/139451>`_ as replacements for the `target_abi` cfgs with the same values.
 
 Language changes in Rust 1.90.0

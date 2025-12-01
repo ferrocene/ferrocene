@@ -522,7 +522,9 @@ Attribute ``target_feature``
      | $$sse3$$
      | $$sse4.1$$
      | $$sse4.2$$
+     | $$sse4a$$
      | $$ssse3$$
+     | $$tbm$$
      | $$vaes$$
      | $$vpclmulqdq$$
      | $$widekl$$
@@ -723,10 +725,18 @@ The target architecture features are as follows:
      - sse4.2.
      - sse4.1
      - Streaming SIMD Extensions 4.2
+   * - :dp:`fls_pGHKFrgGlFtg`
+     - sse4a
+     - sse3
+     - Streaming SIMD Extensions 4a
    * - :dp:`fls_9x2on8w44k4f`
      - ssse3
      - sse3
      - Supplemental Streaming SIMD Extensions 3
+   * - :dp:`fls_K6TM6oTLL1BA`
+     - tbm
+     -
+     - Trailing Bit Manipulation
    * - :dp:`fls_gRf8F9PIGySt`
      - vaes
      - avx2, aes

@@ -12,7 +12,7 @@ use crate::core::config::TargetSelection;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct UpdateCertifiedCoreSymbols;
 
-pub(crate) const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.json";
+pub(crate) const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.csv";
 
 impl Step for UpdateCertifiedCoreSymbols {
     type Output = ();
@@ -39,8 +39,7 @@ impl Step for UpdateCertifiedCoreSymbols {
         let symbol_report = serde_json::from_str::<SymbolReport>(&symbol_report_content).unwrap();
 
         let qualified_name_list = symbol_report.to_qualified_fn_list();
-        let s = serde_json::to_string_pretty(&qualified_name_list).unwrap();
-        fs::write(TRACKED_FILE, s).unwrap();
+        std::fs::write(TRACKED_FILE, qualified_name_list.join("\n")).unwrap();
 
         eprintln!("Updated {TRACKED_FILE}");
     }

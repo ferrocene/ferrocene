@@ -41,6 +41,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "sparc64-unknown-helenos",
     // just a dummy comment so the list doesn't get onelined
     "riscv64gc-unknown-redox",
+    "hexagon-unknown-qurt",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",

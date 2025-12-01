@@ -198,6 +198,7 @@
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(avx10_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(hexagon_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(loongarch_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(mips_target_feature))]

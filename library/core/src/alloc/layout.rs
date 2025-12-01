@@ -18,17 +18,7 @@ use crate::{assert_unsafe_precondition, fmt, mem};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, ptr::Alignment};
-
-// While this function is used in one place and its implementation
-// could be inlined, the previous attempts to do so made rustc
-// slower:
-//
-// * https://github.com/rust-lang/rust/pull/72189
-// * https://github.com/rust-lang/rust/pull/79827
-const fn size_align<T>() -> (usize, usize) {
-    (size_of::<T>(), align_of::<T>())
-}
+use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, mem::SizedTypeProperties, ptr::Alignment};
 
 /// Layout of a block of memory.
 ///
@@ -180,11 +170,7 @@ impl Layout {
     #[must_use]
     #[inline]
     pub const fn new<T>() -> Self {
-        let (size, align) = size_align::<T>();
-        // SAFETY: if the type is instantiated, rustc already ensures that its
-        // layout is valid. Use the unchecked constructor to avoid inserting a
-        // panicking codepath that needs to be optimized out.
-        unsafe { Layout::from_size_align_unchecked(size, align) }
+        <T as SizedTypeProperties>::LAYOUT
     }
 
     /// Produces layout describing a record that could be used to

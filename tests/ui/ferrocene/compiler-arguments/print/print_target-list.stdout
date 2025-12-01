@@ -102,6 +102,7 @@ csky-unknown-linux-gnuabiv2
 csky-unknown-linux-gnuabiv2hf
 hexagon-unknown-linux-musl
 hexagon-unknown-none-elf
+hexagon-unknown-qurt
 i386-apple-ios
 i386-lynx-lynxos178
 i586-unknown-linux-gnu

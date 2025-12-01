@@ -3,6 +3,6 @@
 //@ compile-flags: --cfg a"
 
 //~? RAW unterminated double quote string
-//~? RAW this error occurred on the command line
+//~? RAW this occurred on the command line
 
 // ferrocene-annotations: um_rustc_cfg

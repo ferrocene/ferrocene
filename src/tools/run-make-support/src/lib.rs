@@ -36,7 +36,7 @@ pub mod rfs {
 // Ferrocene addition: This module is used inside the run-make tests for symbol-report.
 pub use build_helper::symbol_report;
 // Re-exports of third-party library crates.
-pub use {bstr, gimli, libc, object, regex, serde_json, similar, wasmparser};
+pub use {bstr, gimli, libc, object, regex, rustdoc_json_types, serde_json, similar, wasmparser};
 
 // Helpers for building names of output artifacts that are potentially target-specific.
 pub use crate::artifact_names::{

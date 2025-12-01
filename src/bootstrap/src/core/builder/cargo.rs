@@ -106,6 +106,7 @@ pub struct Cargo {
     allow_features: String,
     release_build: bool,
     build_compiler_stage: u32,
+    extra_rustflags: Vec<String>,
 }
 
 // Ferrocene addition
@@ -411,6 +412,11 @@ impl From<Cargo> for BootstrapCommand {
             cargo.args.insert(0, "--release".into());
         }
 
+        for arg in &cargo.extra_rustflags {
+            cargo.rustflags.arg(arg);
+            cargo.rustdocflags.arg(arg);
+        }
+
         // Propagate the envs here at the very end to make sure they override any previously set flags.
         cargo.rustflags.propagate_rustflag_envs(cargo.build_compiler_stage);
         cargo.rustdocflags.propagate_rustflag_envs(cargo.build_compiler_stage);
@@ -657,6 +663,8 @@ impl Builder<'_> {
                 // If an explicit setting is given, use that
                 setting
             }
+            // Per compiler-team#938, v0 mangling is used on nightly
+            None if self.config.channel == "dev" || self.config.channel == "nightly" => true,
             None => {
                 // Second condition is specific to Ferrocene
                 if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() {
@@ -1403,6 +1411,15 @@ impl Builder<'_> {
             rustflags.arg("-Zpanic-abort-tests");
         }
 
+        // take target-specific extra rustflags if any otherwise take `rust.rustflags`
+        let extra_rustflags = self
+            .config
+            .target_config
+            .get(&target)
+            .map(|t| &t.rustflags)
+            .unwrap_or(&self.config.rust_rustflags)
+            .clone();
+
         let release_build = self.config.rust_optimize.is_release() &&
             // cargo bench/install do not accept `--release` and miri doesn't want it
             !matches!(cmd_kind, Kind::Bench | Kind::Install | Kind::Miri | Kind::MiriSetup | Kind::MiriTest);
@@ -1418,6 +1435,7 @@ impl Builder<'_> {
             allow_features,
             release_build,
             build_compiler_stage,
+            extra_rustflags,
         };
 
         if mode == Mode::Std

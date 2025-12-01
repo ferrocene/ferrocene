@@ -47,7 +47,7 @@ jobs:
   checks:
     name: "Checks"
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,11 +93,16 @@ jobs:
         env:
           FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-20
           FERROCENE_HOST: x86_64-unknown-linux-gnu
+          # Run cheap things before expensive ones.
+          # Note that `x test symbol-report` also verifies that core builds with `ferrocene_certified` set.
           SCRIPT: |
             set -e
-            ./x check rustc
+            ./x test src/bootstrap
             ./x run ferrocene/tools/traceability-matrix
-            ./x test collect-license-metadata
+            ./x test src/tools/collect-license-metadata
+            # First test that builds the compiler.
+            ./x test ferrocene/doc/symbol-report.json
+            ./x test tests/ui/ferrocene
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).
           FERROCENE_UNPRIVILEGED_CI: 1

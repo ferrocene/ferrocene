@@ -47,7 +47,7 @@ jobs:
   checks:
     name: "Checks"
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,13 +94,48 @@ jobs:
           FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-20
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           # Run cheap things before expensive ones.
-          # Note that `x test symbol-report` also verifies that core builds with `ferrocene_certified` set.
           SCRIPT: |
             set -e
             ./x test src/bootstrap
             ./x run ferrocene/tools/traceability-matrix
             ./x test src/tools/collect-license-metadata
-            # First test that builds the compiler.
+            ./x check compiler
+          # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
+          # rely on that (for example including document signatures).
+          FERROCENE_UNPRIVILEGED_CI: 1
+
+  # Optional job that builds the compiler from source.
+  # This takes a while to run, so it's informational only to avoid delaying bors merges.
+  tests:
+    name: "Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unshallow the clone if on the beta channel
+        run: ferrocene/ci/scripts/unshallow-on-beta.sh
+
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          llvm-subset: 'true'
+          build-dependencies: 'true'
+
+      - name: Setup Ubuntu
+        run: ferrocene/ci/scripts/setup-ubuntu.sh
+        env:
+          INSTALL_LLVM: 1
+
+      - name: Execute the build
+        run: ferrocene/ci/run.sh
+        env:
+          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-20
+          FERROCENE_HOST: x86_64-unknown-linux-gnu
+          SCRIPT: |
+            set -e
+            # Note that `x test symbol-report` also verifies that core builds with `ferrocene_certified` set.
             ./x test ferrocene/doc/symbol-report.csv
             ./x test tests/ui/ferrocene
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that

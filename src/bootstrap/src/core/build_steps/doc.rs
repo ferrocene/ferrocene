@@ -32,11 +32,13 @@ macro_rules! book {
 
         impl Step for $name {
             type Output = ();
-            const DEFAULT: bool = true;
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-                let builder = run.builder;
-                run.path($path).default_condition(builder.config.docs)
+                run.path($path)
+            }
+
+            fn is_default_step(builder: &Builder<'_>) -> bool {
+                builder.config.docs
             }
 
             fn make_run(run: RunConfig<'_>) {
@@ -85,11 +87,13 @@ pub struct UnstableBook {
 
 impl Step for UnstableBook {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/doc/unstable-book").default_condition(builder.config.docs)
+        run.path("src/doc/unstable-book")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -213,11 +217,13 @@ pub struct TheBook {
 
 impl Step for TheBook {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/doc/book").default_condition(builder.config.docs)
+        run.path("src/doc/book")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -337,11 +343,27 @@ pub struct Standalone {
 
 impl Step for Standalone {
     type Output = ();
+<<<<<<< HEAD
     const DEFAULT: bool = false;
+||||||| 6840234806e
+    const DEFAULT: bool = true;
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+<<<<<<< HEAD
         // Ferrocene has its own documentation index.
         run.never()
+||||||| 6840234806e
+        let builder = run.builder;
+        run.path("src/doc").alias("standalone").default_condition(builder.config.docs)
+=======
+        run.path("src/doc").alias("standalone")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -450,11 +472,27 @@ pub struct Releases {
 
 impl Step for Releases {
     type Output = ();
+<<<<<<< HEAD
     const DEFAULT: bool = false;
+||||||| 6840234806e
+    const DEFAULT: bool = true;
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+<<<<<<< HEAD
         // Ferrocene has its own release notes.
         run.never()
+||||||| 6840234806e
+        let builder = run.builder;
+        run.path("RELEASES.md").alias("releases").default_condition(builder.config.docs)
+=======
+        run.path("RELEASES.md").alias("releases")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -555,11 +593,14 @@ pub struct SharedAssets {
 
 impl Step for SharedAssets {
     type Output = SharedAssetsPaths;
-    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Other tasks depend on this, no need to execute it on its own
         run.never()
+    }
+
+    fn is_default_step(_builder: &Builder<'_>) -> bool {
+        false
     }
 
     /// Generate shared resources used by other pieces of documentation.
@@ -645,11 +686,12 @@ impl Step for Std {
     /// Path to a directory with the built documentation.
     type Output = PathBuf;
 
-    const DEFAULT: bool = true;
-
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.crate_or_deps("sysroot").path("library").default_condition(builder.config.docs)
+        run.crate_or_deps("sysroot").path("library")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -891,14 +933,14 @@ impl Rustc {
 
 impl Step for Rustc {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.crate_or_deps("rustc-main")
-            .path("compiler")
-            .default_condition(builder.config.compiler_docs)
+        run.crate_or_deps("rustc-main").path("compiler")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.compiler_docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1038,12 +1080,14 @@ macro_rules! tool_doc {
 
         impl Step for $tool {
             type Output = ();
-            const DEFAULT: bool = true;
             const IS_HOST: bool = true;
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-                let builder = run.builder;
-                run.path($path).default_condition(builder.config.compiler_docs)
+                run.path($path)
+            }
+
+            fn is_default_step(builder: &Builder<'_>) -> bool {
+                builder.config.compiler_docs
             }
 
             fn make_run(run: RunConfig<'_>) {
@@ -1239,12 +1283,14 @@ pub struct ErrorIndex {
 
 impl Step for ErrorIndex {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/tools/error_index_generator").default_condition(builder.config.docs)
+        run.path("src/tools/error_index_generator")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1284,12 +1330,14 @@ pub struct UnstableBookGen {
 
 impl Step for UnstableBookGen {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/tools/unstable-book-gen").default_condition(builder.config.docs)
+        run.path("src/tools/unstable-book-gen")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1351,12 +1399,14 @@ impl RustcBook {
 
 impl Step for RustcBook {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/doc/rustc").default_condition(builder.config.docs)
+        run.path("src/doc/rustc")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1448,11 +1498,13 @@ pub struct Reference {
 
 impl Step for Reference {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/doc/reference").default_condition(builder.config.docs)
+        run.path("src/doc/reference")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {

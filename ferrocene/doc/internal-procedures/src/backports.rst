@@ -1,6 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
+.. _handling-backports:
+
 Handling Backports
 ==================
 

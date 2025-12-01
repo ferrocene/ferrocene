@@ -875,7 +875,7 @@ impl Step for CoreTechnicalReport {
             .join("cache")
             .join("ferrocene")
             .join(url.rsplit_once('/').map(|(_, name)| name).unwrap_or(url));
-        let output_dir = builder.doc_out(self.target).join("certification").join("core");
+        let output_dir = builder.doc_out(self.target).join("certification");
 
         if builder.config.dry_run() {
             return;
@@ -888,7 +888,7 @@ impl Step for CoreTechnicalReport {
             builder.config.download_file(url, &cache_path, "");
         }
 
-        let mut output_file = output_dir.join("technical-report.pdf");
+        let mut output_file = output_dir.join("core-technical-report.pdf");
 
         builder.create_dir(&output_dir);
         builder.copy_link(&cache_path, &output_file, FileType::Regular);

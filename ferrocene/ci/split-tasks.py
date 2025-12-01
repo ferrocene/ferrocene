@@ -107,7 +107,7 @@ JOBS_DEFINITION: JobsDefinition = {
             # Following two names refer to the same bootstrap step, but both
             # have to be added for it to be properly excluded.
             "certified-core-symbols",
-            "ferrocene/doc/symbol-report.json",
+            "ferrocene/doc/symbol-report.csv",
         ],
 
         # Compiletests require custom tooling to be built (compiletest itself),

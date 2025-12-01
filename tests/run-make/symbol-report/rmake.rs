@@ -14,7 +14,8 @@ use std::path::PathBuf;
 /// output of the symbol-report command coincides with the expected symbol report.
 use run_make_support::cmd;
 use run_make_support::path_helpers::{build_root, source_root};
-use run_make_support::symbol_report::{SymbolReport, serde_json};
+use run_make_support::serde_json;
+use run_make_support::symbol_report::SymbolReport;
 
 fn main() {
     let build_path = build_root();

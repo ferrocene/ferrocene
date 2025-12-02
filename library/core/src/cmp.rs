@@ -1111,7 +1111,6 @@ pub const trait Ord: [const] Eq + [const] PartialOrd<Self> + PointeeSized {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro Ord($item:item) {
     /* compiler built-in */
 }

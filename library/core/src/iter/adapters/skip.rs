@@ -89,7 +89,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<I::Item> {
         if self.n > 0 {
             // nth(n) skips n+1

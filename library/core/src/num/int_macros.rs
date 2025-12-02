@@ -1292,7 +1292,6 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_neg(self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
@@ -2966,7 +2965,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[allow(unused_attributes)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_neg(self) -> (Self, bool) {
             if intrinsics::unlikely(self == Self::MIN) {
                 (Self::MIN, true)

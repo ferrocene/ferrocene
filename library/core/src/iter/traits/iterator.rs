@@ -264,7 +264,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized,

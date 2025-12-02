@@ -230,7 +230,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn next_back(&mut self) -> Option<T> {
         // Get the next index from the back.
         //
@@ -249,7 +248,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // This also moves the end, which marks them as conceptually "dropped",
         // so if anything goes bad then our drop impl won't double-free them.
@@ -266,13 +264,11 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn rfold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
         self.try_rfold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(super) fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, T) -> R,

@@ -80,15 +80,12 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
         fn panic_impl(pi: &PanicInfo<'_>) -> !;
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     let pi = PanicInfo::new(
         &fmt,
         Location::caller(),
         /* can_unwind */ true,
         /* force_no_backtrace */ false,
     );
-    #[cfg(feature = "ferrocene_subset")]
-    let pi = PanicInfo::new(&fmt, Location::caller());
     // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
     unsafe { panic_impl(&pi) }
 }
@@ -125,15 +122,12 @@ pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) ->
             }
 
             // PanicInfo with the `can_unwind` flag set to false forces an abort.
-            #[cfg(not(feature = "ferrocene_subset"))]
             let pi = PanicInfo::new(
                 &fmt,
                 Location::caller(),
                 /* can_unwind */ false,
                 _force_no_backtrace,
             );
-            #[cfg(feature = "ferrocene_subset")]
-            let pi = PanicInfo::new(&fmt, Location::caller());
 
             // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
             unsafe { panic_impl(&pi) }

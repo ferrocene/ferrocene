@@ -5,13 +5,9 @@ use std::fmt::{Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-<<<<<<< HEAD
-use std::sync::{LazyLock, OnceLock, atomic};
-||||||| 6840234806e
-use std::sync::{LazyLock, OnceLock};
-=======
 use std::sync::OnceLock;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+// Ferrocene addition
+use std::sync::atomic;
 use std::time::{Duration, Instant};
 use std::{env, fs};
 

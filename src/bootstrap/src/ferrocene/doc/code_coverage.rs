@@ -13,14 +13,13 @@ pub(crate) struct AllCoverageReports {
 
 impl Step for AllCoverageReports {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let default = !matches!(
-            run.builder.config.ferrocene_coverage_outcomes,
-            FerroceneCoverageOutcomes::Disabled
-        );
-        run.alias("ferrocene-coverage").default_condition(default)
+        run.alias("ferrocene-coverage")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        !matches!(builder.config.ferrocene_coverage_outcomes, FerroceneCoverageOutcomes::Disabled)
     }
 
     fn make_run(run: RunConfig<'_>) {

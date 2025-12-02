@@ -26,7 +26,6 @@ struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
 
 impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
     type Output = ();
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -68,11 +67,14 @@ macro_rules! documents {
 
             impl Step for $name {
                 type Output = ();
-                const DEFAULT: bool = true;
                 const IS_HOST: bool = true;
 
                 fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
                     run.path(crate::ferrocene::doc::$name::SOURCE)
+                }
+
+                fn is_default_step(_: &Builder<'_>) -> bool {
+                    true
                 }
 
                 fn make_run(run: RunConfig<'_>) {

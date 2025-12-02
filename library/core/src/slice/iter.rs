@@ -153,14 +153,8 @@ impl<'a, T> Iter<'a, T> {
     }
 }
 
-<<<<<<< HEAD
-iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, {
-    #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 6840234806e
-iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, {
-=======
 iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, each_ref, {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_sorted_by<F>(self, mut compare: F) -> bool
     where
         Self: Sized,

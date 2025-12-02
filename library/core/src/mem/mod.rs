@@ -9,7 +9,6 @@ use crate::alloc::Layout;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::clone::TrivialClone;
 use crate::marker::{Destruct, DiscriminantKind};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
@@ -1502,7 +1501,6 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 ///
 /// [inhabited]: https://doc.rust-lang.org/reference/glossary.html#inhabited
 #[unstable(feature = "mem_conjure_zst", issue = "95383")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn conjure_zst<T>() -> T {
     const_assert!(
         size_of::<T>() == 0,

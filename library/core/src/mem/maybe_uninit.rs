@@ -1148,15 +1148,9 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_clone_of_slice`]: slice::write_clone_of_slice
-<<<<<<< HEAD
-    #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 6840234806e
-    #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
-=======
     #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Copy,
@@ -1216,14 +1210,8 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_copy_of_slice`]: slice::write_copy_of_slice
-<<<<<<< HEAD
-    #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
     #[cfg(not(feature = "ferrocene_certified"))]
-||||||| 6840234806e
-    #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
-=======
     #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Clone,

@@ -756,6 +756,13 @@ fn chunks_as_iter_nth() {
 }
 
 #[test]
+fn take_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let nth = vals.iter().take(2).nth(10);
+    assert!(nth.is_none());
+}
+
+#[test]
 fn skip_as_iter_fold() {
     let vals = [0, 1, 2, 3, 4, 5];
     let folded = vals.iter().skip(10).fold(0, |x, y| x + y);

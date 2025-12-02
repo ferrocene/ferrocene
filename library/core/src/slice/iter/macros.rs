@@ -196,6 +196,7 @@ macro_rules! iterator {
                 }
             }
 
+            #[cfg(not(feature = "ferrocene_certified"))]
             fn next_chunk<const N:usize>(&mut self) -> Result<[$elem; N], crate::array::IntoIter<$elem, N>> {
                 if T::IS_ZST {
                     return crate::array::iter_next_chunk(self);

@@ -16,7 +16,6 @@ pub(crate) const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.json";
 
 impl Step for UpdateCertifiedCoreSymbols {
     type Output = ();
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

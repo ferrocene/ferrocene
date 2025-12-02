@@ -63,27 +63,10 @@ pub struct Docs {
 
 impl Step for Docs {
     type Output = Option<GeneratedTarball>;
-<<<<<<< HEAD
-    const DEFAULT: bool = false;
-||||||| 6840234806e
-    const DEFAULT: bool = true;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-<<<<<<< HEAD
         // Disabled by Ferrocene, as we have our own documentation tarball.
         run.never()
-||||||| 6840234806e
-        let default = run.builder.config.docs;
-        run.alias("rust-docs").default_condition(default)
-=======
-        run.alias("rust-docs")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.docs
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -174,30 +157,11 @@ pub struct RustcDocs {
 
 impl Step for RustcDocs {
     type Output = GeneratedTarball;
-<<<<<<< HEAD
-
-    const DEFAULT: bool = false;
-||||||| 6840234806e
-
-    const DEFAULT: bool = true;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-<<<<<<< HEAD
         // Disabled by Ferrocene, as we don't ship the compiler documentation.
         run.never()
-||||||| 6840234806e
-        let builder = run.builder;
-        run.alias("rustc-docs").default_condition(builder.config.compiler_docs)
-=======
-        run.alias("rustc-docs")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.compiler_docs
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1261,28 +1225,11 @@ pub struct PlainSourceTarball;
 impl Step for PlainSourceTarball {
     /// Produces the location of the tarball generated
     type Output = GeneratedTarball;
-<<<<<<< HEAD
-    const DEFAULT: bool = false;
-||||||| 6840234806e
-    const DEFAULT: bool = true;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-<<<<<<< HEAD
         // Disabled by Ferrocene, as we have our own alternative for it.
         run.never()
-||||||| 6840234806e
-        let builder = run.builder;
-        run.alias("rustc-src").default_condition(builder.config.rust_dist_src)
-=======
-        run.alias("rustc-src")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.rust_dist_src
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1768,28 +1715,11 @@ pub struct Extended {
 
 impl Step for Extended {
     type Output = ();
-<<<<<<< HEAD
-    const DEFAULT: bool = false;
-||||||| 6840234806e
-    const DEFAULT: bool = true;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-<<<<<<< HEAD
         // Disabled by Ferrocene, as we don't support the extended tarball.
         run.never()
-||||||| 6840234806e
-        let builder = run.builder;
-        run.alias("extended").default_condition(builder.config.extended)
-=======
-        run.alias("extended")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.extended
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {

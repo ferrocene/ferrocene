@@ -343,27 +343,10 @@ pub struct Standalone {
 
 impl Step for Standalone {
     type Output = ();
-<<<<<<< HEAD
-    const DEFAULT: bool = false;
-||||||| 6840234806e
-    const DEFAULT: bool = true;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-<<<<<<< HEAD
         // Ferrocene has its own documentation index.
         run.never()
-||||||| 6840234806e
-        let builder = run.builder;
-        run.path("src/doc").alias("standalone").default_condition(builder.config.docs)
-=======
-        run.path("src/doc").alias("standalone")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.docs
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -472,27 +455,10 @@ pub struct Releases {
 
 impl Step for Releases {
     type Output = ();
-<<<<<<< HEAD
-    const DEFAULT: bool = false;
-||||||| 6840234806e
-    const DEFAULT: bool = true;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-<<<<<<< HEAD
         // Ferrocene has its own release notes.
         run.never()
-||||||| 6840234806e
-        let builder = run.builder;
-        run.path("RELEASES.md").alias("releases").default_condition(builder.config.docs)
-=======
-        run.path("RELEASES.md").alias("releases")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.docs
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     fn make_run(run: RunConfig<'_>) {

@@ -311,7 +311,6 @@ pub mod ub_checks;
 
 /* Core language traits */
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod borrow;
 pub mod clone;
 pub mod cmp;

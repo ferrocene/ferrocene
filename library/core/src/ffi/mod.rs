@@ -11,7 +11,6 @@
 
 #[doc(inline)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::c_str::CStr;
 #[doc(inline)]
 #[stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
@@ -25,7 +24,6 @@ pub use self::c_str::FromBytesWithNulError;
 use crate::fmt;
 
 #[stable(feature = "c_str_module", since = "1.88.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod c_str;
 
 #[unstable(

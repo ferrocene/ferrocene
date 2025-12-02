@@ -216,7 +216,19 @@ impl Step for Std {
         // Stage of the stdlib that we're building
         let stage = build_compiler.stage;
 
-        if Self::should_be_uplifted_from_stage_1(builder, build_compiler.stage) {
+        let should_instrument_coverage = builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
+            // If we instrument any stage other than the top stage, it will be linked into rustc,
+            // which will spam a bunch of `default_XXXXX.profraw` files in the top of the repo.
+            && build_compiler.stage == builder.top_stage
+            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
+            // likely to break.
+            && target == build_compiler.host;
+
+        // Ferrocene addition: We can't reuse stage1 std if we are instrumenting stage2 but not
+        // stage1.
+        if !should_instrument_coverage
+            && Self::should_be_uplifted_from_stage_1(builder, build_compiler.stage)
+        {
             let build_compiler_for_std_to_uplift = builder.compiler(1, builder.host_target);
             let stage_1_stamp = builder.std(build_compiler_for_std_to_uplift, target);
 
@@ -274,11 +286,7 @@ impl Step for Std {
             cargo
         };
 
-        if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
-            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
-            // likely to break.
-            && target == build_compiler.host
-        {
+        if should_instrument_coverage {
             instrument_coverage(builder, &mut cargo, build_compiler);
         }
 

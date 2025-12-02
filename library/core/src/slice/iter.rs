@@ -1479,7 +1479,6 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.size.get() > self.v.len() {
             None
@@ -1646,7 +1645,6 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1843,7 +1841,6 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -2059,7 +2056,6 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
@@ -2073,7 +2069,6 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a [T]> {
@@ -2103,7 +2098,6 @@ impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> ExactSizeIterator for ChunksExact<'_, T> {
     fn is_empty(&self) -> bool {
         self.v.is_empty()
@@ -2229,7 +2223,6 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
@@ -2243,7 +2236,6 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut [T]> {
@@ -2279,7 +2271,6 @@ impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> ExactSizeIterator for ChunksExactMut<'_, T> {
     fn is_empty(&self) -> bool {
         self.v.is_empty()

@@ -2,7 +2,6 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use super::pattern::{DoubleEndedSearcher, Pattern, ReverseSearcher, Searcher};
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::validations::{next_code_point, next_code_point_reverse};
 #[cfg(not(feature = "ferrocene_certified"))]
 use super::{
@@ -27,7 +26,7 @@ use crate::{char as char_mod, option};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use {super::validations::next_code_point, crate::slice};
+use crate::slice;
 
 /// An iterator over the [`char`]s of a string slice.
 ///
@@ -119,7 +118,6 @@ impl<'a> Iterator for Chars<'a> {
         (len.div_ceil(4), Some(len))
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     fn last(mut self) -> Option<char> {
         // No need to go through the entire string.
@@ -138,7 +136,6 @@ impl fmt::Debug for Chars<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Chars<'a> {
     #[inline]

@@ -909,7 +909,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }

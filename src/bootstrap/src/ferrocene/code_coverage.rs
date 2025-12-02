@@ -91,6 +91,11 @@ pub(crate) fn measure_coverage(
 // However there is no quick and easy way to fetch those. For now, we just go inside the
 // dependencies and assume that every executable file is an instrumented binary.
 //
+// FIXME(@jyn514): This has already caused issues in practice. Running
+// `x test --coverage --stage 2 && x test --coverage --stage 1` will error with
+// "missing section: CoverageFunctions" because there will be  two libstds in the target folder.
+// The workaround is to delete `build/host/stage1-std`.
+//
 // A possible improvement would be to capture `cargo test` stderr and fetch the path of every
 // binary that cargo ran or get the build plan and fetch the paths of the binaries from there.
 pub(super) fn instrumented_binaries(

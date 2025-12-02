@@ -17,11 +17,14 @@ const PATH: &str = "ferrocene/tools/flip-link";
 
 impl Step for FlipLink {
     type Output = PathBuf;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(PATH)
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {

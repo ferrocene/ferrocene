@@ -136,8 +136,8 @@ jobs:
           SCRIPT: |
             set -e
             # Note that `x test symbol-report` also verifies that core builds with `ferrocene_certified` set.
-            ./x test ferrocene/doc/symbol-report.csv
-            ./x test tests/ui/ferrocene
+            ./x test --stage 1 ferrocene/doc/symbol-report.csv
+            ./x test --stage 1 tests/ui/ferrocene
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).
           FERROCENE_UNPRIVILEGED_CI: 1

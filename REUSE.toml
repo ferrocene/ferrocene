@@ -241,7 +241,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = [
     ".python-version",
     "src/bootstrap/src/ferrocene/**",
-    "ferrocene/doc/symbol-report.json",
+    "ferrocene/doc/symbol-report.csv",
     "ferrocene/tools/blanket/**",
     "ferrocene/tools/symbol-report/**",
     "CODEOWNERS",

@@ -4,7 +4,7 @@
 use std::path::Path;
 
 use build_helper::diff::diff_text;
-use build_helper::symbol_report::{QualifiedFnList, SymbolReport};
+use build_helper::symbol_report::SymbolReport;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
@@ -39,14 +39,17 @@ impl Step for CertifiedCoreSymbols {
 
         // load the expected list of qualified functions
         let expected_path = Path::new(update_certified_core_symbols::TRACKED_FILE);
-        let expected_content = builder.read(expected_path);
-        let expected = serde_json::from_str::<QualifiedFnList>(&expected_content).unwrap();
+        let mut expected: Vec<String> = Default::default();
+        let reader = builder.read(expected_path);
+        for qualified_name in reader.lines() {
+            expected.push(qualified_name.to_string());
+        }
 
         // generate the actual list of qualified functions
         let actual_symbol_report_content = builder.read(&actual_symbol_report_path);
         let actual_symbol_report =
             serde_json::from_str::<SymbolReport>(&actual_symbol_report_content).unwrap();
-        let actual = actual_symbol_report.to_qualified_fn_list();
+        let actual: Vec<String> = actual_symbol_report.to_qualified_fn_list();
 
         // compare the two
         if actual == expected {
@@ -55,10 +58,11 @@ impl Step for CertifiedCoreSymbols {
             builder.info(&format!(
                 "Diff of {} and {}:",
                 expected_path.display(),
-                actual_symbol_report_path.display()
+                actual_symbol_report_path.display(),
             ));
 
-            let actual_content = serde_json::to_string_pretty(&actual).unwrap();
+            let actual_content = actual.join("\n");
+            let expected_content = builder.read(expected_path);
             diff_text(&expected_content, &actual_content);
 
             builder.info(&format!(

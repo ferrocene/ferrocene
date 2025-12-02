@@ -1,6 +1,5 @@
 // Derived from https://github.com/xd009642/llvm-profparser/blob/f12a20d33b371f62a3b63f3a19d2320c25aa48b9/src/bin/cov.rs
 
-use std::collections::BTreeSet;
 use std::fmt;
 use std::path::PathBuf;
 
@@ -174,8 +173,15 @@ struct Span {
     end_line: usize,
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+struct Annotation {
+    start: usize,
+    end: usize,
+    unused: bool,
+}
+
 fn get_annotation_status(
-    annotations: Option<&BTreeSet<(usize, usize)>>,
+    annotations: Option<&mut Vec<Annotation>>,
     lines: &mut Vec<(usize, LineCoverageStatus)>,
 ) -> Annotated {
     annotations.map_or(Annotated::Not, |annotations| {
@@ -188,9 +194,14 @@ fn get_annotation_status(
             }
             untested_count += 1;
 
-            if annotations.iter().any(|&(start, end)| (start..=end).contains(line)) {
-                *status = LineCoverageStatus::Annotated;
-                annotated_count += 1;
+            for Annotation { start, end, unused } in annotations.iter_mut() {
+                if (*start..=*end).contains(line) {
+                    *unused = false;
+                    *status = LineCoverageStatus::Annotated;
+                    annotated_count += 1;
+
+                    break;
+                }
             }
         }
 
@@ -213,7 +224,7 @@ fn get_coverage(
     span: Span,
     ferrocene: &std::path::Path,
     source_name: String,
-    annotations: Option<&BTreeSet<(usize, usize)>>,
+    annotations: Option<&mut Vec<Annotation>>,
 ) -> Result<FunctionCoverage> {
     let Span { filename, start_line, end_line } = span;
     let absolute_path = if filename.is_relative() {

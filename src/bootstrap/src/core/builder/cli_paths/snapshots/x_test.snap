@@ -1,6 +1,5 @@
 ---
 source: src/bootstrap/src/core/builder/cli_paths/tests.rs
-assertion_line: 68
 expression: test
 ---
 [Test] bootstrap::ferrocene::test::TraceabilityMatrixTool
@@ -15,7 +14,7 @@ expression: test
 [Test] bootstrap::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::certified-core-symbols})
-    - Set({test::ferrocene/doc/symbol-report.json})
+    - Set({test::ferrocene/doc/symbol-report.csv})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/tidy})

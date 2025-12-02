@@ -35,7 +35,6 @@ use crate::{mem::SizedTypeProperties, ptr};
 )]
 #[doc(hidden)]
 /// Pure Rust memchr implementation, taken from rust-memchr
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod memchr;
 
 #[unstable(

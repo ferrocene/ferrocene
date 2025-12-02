@@ -107,6 +107,7 @@ const fn memchr_aligned(x: u8, text: &[u8]) -> Option<usize> {
 }
 
 /// Returns the last index matching the byte `x` in `text`.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[must_use]
 pub fn memrchr(x: u8, text: &[u8]) -> Option<usize> {
     // Scan for a single byte value by reading two `usize` words at a time.

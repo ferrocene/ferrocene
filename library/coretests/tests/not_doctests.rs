@@ -457,3 +457,10 @@ fn as_mut_array() {
     assert!(slice.as_mut_array::<2>().is_none());
     assert!(slice.as_mut_array::<1>().is_some());
 }
+
+#[test]
+fn chunks_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let chunk = vals.chunks(2).nth(10);
+    assert!(chunk.is_none());
+}

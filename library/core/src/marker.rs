@@ -866,11 +866,9 @@ impl<T: PointeeSized> cmp::Ord for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Copy for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Clone for PhantomData<T> {
     fn clone(&self) -> Self {
         Self

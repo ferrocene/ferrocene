@@ -17,9 +17,9 @@ pub struct PanicInfo<'a> {
     #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     message: &'a PanicFmt<'a>,
     location: &'a Location<'a>,
-    #[cfg(not(feature = "ferrocene_subset"))]
+    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     can_unwind: bool,
-    #[cfg(not(feature = "ferrocene_subset"))]
+    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     force_no_backtrace: bool,
 }
 
@@ -35,19 +35,8 @@ pub struct PanicMessage<'a> {
     message: &'a fmt::Arguments<'a>,
 }
 
-// Ferrocene addition: When `ferrocene_subset` is enabled, `PanicInfo` only holds a reference to
-// a static string with the panic message. This `impl` adds a new builder to reflect that.
-#[cfg(feature = "ferrocene_subset")]
 impl<'a> PanicInfo<'a> {
     #[inline]
-    pub(crate) fn new(message: &'a PanicFmt<'a>, location: &'a Location<'a>) -> Self {
-        PanicInfo { message, location }
-    }
-}
-
-impl<'a> PanicInfo<'a> {
-    #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn new(
         // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicFmt` alias.
         message: &'a PanicFmt<'a>,

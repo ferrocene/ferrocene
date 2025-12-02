@@ -101,7 +101,7 @@ jobs:
             ./x run ferrocene/tools/traceability-matrix
             ./x test src/tools/collect-license-metadata
             # First test that builds the compiler.
-            ./x test ferrocene/doc/symbol-report.json
+            ./x test ferrocene/doc/symbol-report.csv
             ./x test tests/ui/ferrocene
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).

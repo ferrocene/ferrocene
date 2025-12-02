@@ -392,7 +392,6 @@ pub use self::adapters::ByRefSized;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 pub use self::adapters::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -1,9 +1,14 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::zip::try_get_unchecked;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 use crate::ops::Try;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{array, ptr};
 
 /// An iterator that copies the elements of an underlying iterator.
@@ -15,7 +20,7 @@ use crate::{array, ptr};
 /// [`Iterator`]: trait.Iterator.html
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 pub struct Copied<I> {
     it: I,
 }
@@ -46,6 +51,7 @@ where
         self.it.next().copied()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -83,6 +89,7 @@ where
         self.it.last().copied()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.it.count()
     }
@@ -92,6 +99,7 @@ where
         self.it.advance_by(n)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> T
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -102,6 +110,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> DoubleEndedIterator for Copied<I>
 where
@@ -134,6 +143,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> ExactSizeIterator for Copied<I>
 where
@@ -149,6 +159,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> FusedIterator for Copied<I>
 where
@@ -157,10 +168,12 @@ where
 {
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccess for Copied<I> where I: TrustedRandomAccess {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Copied<I>
@@ -170,6 +183,7 @@ where
     const MAY_HAVE_SIDE_EFFECT: bool = I::MAY_HAVE_SIDE_EFFECT;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 unsafe impl<'a, I, T: 'a> TrustedLen for Copied<I>
 where
@@ -178,6 +192,7 @@ where
 {
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecNextChunk<'a, const N: usize, T: 'a>: Iterator<Item = &'a T>
 where
     T: Copy,
@@ -185,6 +200,7 @@ where
     fn spec_next_chunk(&mut self) -> Result<[T; N], array::IntoIter<T, N>>;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, const N: usize, I, T: 'a> SpecNextChunk<'a, N, T> for I
 where
     I: Iterator<Item = &'a T>,
@@ -195,6 +211,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, const N: usize, T: 'a> SpecNextChunk<'a, N, T> for crate::slice::Iter<'a, T>
 where
     T: Copy,
@@ -240,6 +257,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<I: Default> Default for Copied<I> {
     /// Creates a `Copied` iterator from the default value of `I`
@@ -254,6 +272,7 @@ impl<I: Default> Default for Copied<I> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I> SourceIter for Copied<I>
 where
@@ -268,6 +287,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Copied<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;

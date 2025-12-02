@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf, absolute};
 use self::certified_api_docs::CertifiedApiDocs;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
+use crate::core::builder::Kind;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
@@ -360,7 +361,9 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             }
         }
 
-        if should_serve && builder.config.cmd.open() {
+        let should_open =
+            builder.config.cmd.open() && builder.was_invoked_explicitly::<Self>(Kind::Doc);
+        if should_serve && should_open {
             cmd.arg("--open-browser");
         }
 
@@ -580,7 +583,8 @@ macro_rules! sphinx_books {
 
                 // Also regenerate the index file, so that the "Ferrocene documentation" link in
                 // the breadcrumbs doesn't break.
-                builder.ensure(Index { target: self.target });
+                let index = builder.ensure(Index { target: self.target });
+                builder.open_in_browser(index);
             }
         }
 
@@ -899,7 +903,7 @@ pub(crate) struct Index {
 }
 
 impl Step for Index {
-    type Output = ();
+    type Output = PathBuf;
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -919,9 +923,10 @@ impl Step for Index {
         let pdw_dir = doc.join("public-docs-warning");
         let out = builder.doc_out(self.target);
         let assets_out = out.join("index-assets");
+        let index = out.join("index.html");
 
         if builder.config.dry_run() {
-            return;
+            return index;
         }
         builder.create_dir(&out);
 
@@ -939,11 +944,14 @@ impl Step for Index {
         }
         template = template.replace(PDW_PLACEHOLDER, &pdw_template);
 
-        std::fs::write(out.join("index.html"), &template).expect("failed to write index.html");
+        std::fs::write(&index, &template).expect("failed to write index.html");
+        builder.maybe_open_in_browser::<Self>(&index);
 
         copy_breadcrumbs_assets(builder, &out);
         builder.create_dir(&assets_out);
         builder.cp_link_r(&index_dir.join("index-assets"), &assets_out);
+
+        index
     }
 }
 

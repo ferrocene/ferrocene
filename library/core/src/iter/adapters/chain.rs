@@ -1,3 +1,4 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
@@ -17,7 +18,7 @@ use crate::ops::Try;
 /// let a2 = [4, 5, 6];
 /// let iter: Chain<Iter<'_, _>, Iter<'_, _>> = a1.iter().chain(a2.iter());
 /// ```
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Chain<A, B> {
@@ -60,6 +61,7 @@ impl<A, B> Chain<A, B> {
 /// assert_eq!(iter.next(), Some(6));
 /// assert_eq!(iter.next(), None);
 /// ```
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "iter_chain", since = "1.91.0")]
 pub fn chain<A, B>(a: A, b: B) -> Chain<A::IntoIter, B::IntoIter>
 where
@@ -82,6 +84,7 @@ where
         and_then_or_clear(&mut self.a, Iterator::next).or_else(|| self.b.as_mut()?.next())
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[rustc_inherit_overflow_checks]
     fn count(self) -> usize {
@@ -201,6 +204,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A, B> DoubleEndedIterator for Chain<A, B>
 where
@@ -288,6 +292,7 @@ where
 }
 
 // Note: *both* must be fused to handle double-ended iterators.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<A, B> FusedIterator for Chain<A, B>
 where
@@ -296,6 +301,7 @@ where
 {
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<A, B> TrustedLen for Chain<A, B>
 where
@@ -304,6 +310,7 @@ where
 {
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<A: Default, B: Default> Default for Chain<A, B> {
     /// Creates a `Chain` from the default values for `A` and `B`.

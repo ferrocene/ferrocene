@@ -1,5 +1,6 @@
 #![doc = include_str!("../../stdarch/crates/core_arch/src/core_arch_docs.md")]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[allow(
     // some targets don't have anything to reexport, which
     // makes the `pub use` unused and unreachable, allow
@@ -71,6 +72,7 @@ pub macro global_asm("assembly template", $(operands,)* $(options($(option),*))?
 /// - On x86 targets, this produces an `int3` instruction.
 /// - On aarch64 targets, this produces a `brk #0xf000` instruction.
 // When stabilizing this, update the comment on `core::intrinsics::breakpoint`.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "breakpoint", issue = "133724")]
 #[inline(always)]
 pub fn breakpoint() {

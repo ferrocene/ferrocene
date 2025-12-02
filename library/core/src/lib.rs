@@ -421,7 +421,6 @@ pub mod primitive;
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod arch;
 
 // Pull in the `core_simd` crate directly into core. The contents of

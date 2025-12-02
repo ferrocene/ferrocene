@@ -1533,7 +1533,6 @@ impl<T> [MaybeUninit<T>] {
     /// be used to initialize a `MaybeUninit` slice.
     #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn assume_init_mut(&mut self) -> &mut [T] {
         // SAFETY: similar to safety notes for `slice_get_ref`, but we have a
         // mutable reference which is also guaranteed to be valid for writes.

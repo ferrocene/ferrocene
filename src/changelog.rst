@@ -59,6 +59,8 @@ Language changes in Rust 1.91.0
 
 - `Add 'target_env = "macabi"' and 'target_env = "sim"' cfgs <https://github.com/rust-lang/rust/pull/139451>`_ as replacements for the `target_abi` cfgs with the same values.
 
+  - No change: configuration options are environment-specific and not exhaustive
+
 Language changes in Rust 1.90.0
 -------------------------------
 

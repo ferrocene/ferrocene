@@ -39,3 +39,9 @@ impl<'a> Bar<'a> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

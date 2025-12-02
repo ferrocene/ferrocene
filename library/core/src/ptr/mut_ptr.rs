@@ -234,7 +234,6 @@ impl<T: PointeeSized> *mut T {
     /// The pointer can be later reconstructed with [`from_raw_parts_mut`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_raw_parts(self) -> (*mut (), <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self))
     }

@@ -364,7 +364,6 @@ pub mod sync;
 pub mod unsafe_binder;
 
 pub mod fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
 pub mod slice;
 pub mod str;

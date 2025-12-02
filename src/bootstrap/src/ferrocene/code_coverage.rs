@@ -16,7 +16,7 @@ use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::{BootstrapCommand, Compiler, DocTests, Mode, t};
 
-pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
+pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
     if !builder.config.profiler {
         eprintln!();
         eprintln!("Error: the profiler needs to be enabled to measure coverage.");
@@ -43,12 +43,6 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     //
     // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins without the `dependency=` prefix.
-    let compiler = builder.compiler(
-        // Note that for the standard library, stage 1 is tested when either --stage 1 or
-        // --stage 2 are passed.
-        1,
-        builder.host_target,
-    );
     let target_dir =
         builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
 

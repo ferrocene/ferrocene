@@ -275,14 +275,11 @@ impl Step for Std {
         };
 
         if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
-            // Note that for the standard library, stage 1 is tested when either --stage 1 or
-            // --stage 2 are passed.
-            && build_compiler.stage == 1
             // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
             // likely to break.
             && target == build_compiler.host
         {
-            instrument_coverage(builder, &mut cargo);
+            instrument_coverage(builder, &mut cargo, build_compiler);
         }
 
         // See src/bootstrap/synthetic_targets.rs

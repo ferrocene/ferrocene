@@ -777,3 +777,10 @@ fn chunks_as_iter_nth() {
     let chunk = vals.chunks(2).nth(10);
     assert!(chunk.is_none());
 }
+
+#[test]
+fn skip_as_iter_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).fold(0, |x, y| x + y);
+    assert_eq!(folded, 0);
+}

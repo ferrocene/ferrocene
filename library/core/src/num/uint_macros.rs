@@ -500,6 +500,7 @@ macro_rules! uint_impl {
         /// assert_eq!(n.gather_bits(0b0010_0100), 0b0000_0011);
         /// assert_eq!(n.gather_bits(0xF0), 0b0000_1011);
         /// ```
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[unstable(feature = "uint_gather_scatter_bits", issue = "149069")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
@@ -536,6 +537,7 @@ macro_rules! uint_impl {
         /// assert_eq!(n.scatter_bits(0b0101_0101), 0b0101_0001);
         /// assert_eq!(n.scatter_bits(0xF0), 0b1101_0000);
         /// ```
+        #[cfg(not(feature = "ferrocene_certified"))]
         #[unstable(feature = "uint_gather_scatter_bits", issue = "149069")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]

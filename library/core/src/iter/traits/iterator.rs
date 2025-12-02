@@ -19,7 +19,8 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[rustfmt::skip]
 use {
     super::super::{
-        Cloned, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum, Take, Zip,
+        Chain, Cloned, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum, Take,
+        Zip,
     },
     crate::ops::{ControlFlow, Try},
 };
@@ -509,7 +510,6 @@ pub trait Iterator {
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,

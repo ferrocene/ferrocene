@@ -36,11 +36,14 @@ impl SelfTest {
 
 impl Step for SelfTest {
     type Output = PathBuf;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/self-test")
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -80,11 +83,14 @@ pub(super) const SYMBOL_PATH: &str = "ferrocene/tools/symbol-report";
 
 impl Step for SymbolReport {
     type Output = PathBuf;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(SYMBOL_PATH)
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -118,11 +124,14 @@ pub(super) const BLANKET_PATH: &str = "ferrocene/tools/blanket";
 
 impl Step for Blanket {
     type Output = PathBuf;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(BLANKET_PATH)
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {

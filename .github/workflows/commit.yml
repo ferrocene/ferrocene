@@ -138,6 +138,9 @@ jobs:
             # Note that `x test symbol-report` also verifies that core builds with `ferrocene_certified` set.
             ./x test --stage 1 ferrocene/doc/symbol-report.csv
             ./x test --stage 1 tests/ui/ferrocene
+            # HACK: work around incorrect caching for profiler_builtins.
+            rm -rf build/host/stage1-std
+            ./x test --stage 1 --coverage=library --no-doc library/core
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).
           FERROCENE_UNPRIVILEGED_CI: 1

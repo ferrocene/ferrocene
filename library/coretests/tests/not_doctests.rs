@@ -784,3 +784,11 @@ fn skip_as_iter_fold() {
     let folded = vals.iter().skip(10).fold(0, |x, y| x + y);
     assert_eq!(folded, 0);
 }
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold
+#[test]
+fn skip_as_iter_try_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).try_fold(0, |x, y| std::io::Result::Ok(x + y)).unwrap();
+    assert_eq!(folded, 0);
+}

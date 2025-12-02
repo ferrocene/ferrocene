@@ -471,7 +471,6 @@ pub use self::sources::{RepeatWith, repeat_with};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::sources::{Successors, successors};
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::FusedIterator;
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[cfg(not(feature = "ferrocene_certified"))]

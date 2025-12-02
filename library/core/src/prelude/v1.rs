@@ -57,7 +57,6 @@ pub use crate::result::Result::{self, Err, Ok};
 pub use crate::fmt::macros::Debug;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::hash::macros::Hash;
 
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]

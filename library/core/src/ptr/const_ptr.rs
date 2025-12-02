@@ -240,7 +240,6 @@ impl<T: PointeeSized> *const T {
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }

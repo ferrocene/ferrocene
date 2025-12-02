@@ -11,10 +11,6 @@ expression: doc
 [Doc] doc::TheBook
     targets: [aarch64-unknown-linux-gnu]
     - Set({doc::src/doc/book})
-[Doc] doc::Standalone
-    targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc})
-    - Set({doc::standalone})
 [Doc] doc::Std
     targets: [aarch64-unknown-linux-gnu]
     - Set({doc::library})
@@ -63,7 +59,45 @@ expression: doc
 [Doc] doc::StyleGuide
     targets: [aarch64-unknown-linux-gnu]
     - Set({doc::src/doc/style-guide})
-[Doc] doc::Releases
+[Doc] bootstrap::ferrocene::doc::CopyrightFiles
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::RELEASES.md})
-    - Set({doc::releases})
+    - Set({doc::copyright-files})
+[Doc] bootstrap::ferrocene::doc::Index
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/index})
+[Doc] bootstrap::ferrocene::doc::Specification
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/specification})
+[Doc] bootstrap::ferrocene::doc::UserManual
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/user-manual})
+[Doc] bootstrap::ferrocene::doc::ReleaseNotes
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/release-notes})
+[Doc] bootstrap::ferrocene::doc::DocumentList
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/document-list})
+[Doc] bootstrap::ferrocene::doc::EvaluationPlan
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/evaluation-plan})
+[Doc] bootstrap::ferrocene::doc::EvaluationReport
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/evaluation-report})
+[Doc] bootstrap::ferrocene::doc::CoreCertification
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/core-certification})
+[Doc] bootstrap::ferrocene::doc::QualificationPlan
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/qualification-plan})
+[Doc] bootstrap::ferrocene::doc::QualificationReport
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/qualification-report})
+[Doc] bootstrap::ferrocene::doc::SafetyManual
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/safety-manual})
+[Doc] bootstrap::ferrocene::doc::TraceabilityMatrix
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/tools/traceability-matrix})
+[Doc] bootstrap::ferrocene::doc::InternalProcedures
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/internal-procedures})

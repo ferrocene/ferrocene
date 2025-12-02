@@ -11,7 +11,6 @@ mod array_chunks;
 mod by_ref_sized;
 mod chain;
 mod cloned;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod copied;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod cycle;
@@ -58,7 +57,6 @@ pub use self::chain::chain;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 pub use self::cloned::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::copied::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 #[cfg(not(feature = "ferrocene_certified"))]

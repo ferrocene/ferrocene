@@ -19,8 +19,8 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[rustfmt::skip]
 use {
     super::super::{
-        Chain, Cloned, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum, Take,
-        Zip,
+        Chain, Cloned, Copied, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum,
+        Take, Zip,
     },
     crate::ops::{ControlFlow, Try},
 };
@@ -3463,7 +3463,6 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "iter_copied", since = "1.36.0")]
     #[rustc_diagnostic_item = "iter_copied"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn copied<'a, T>(self) -> Copied<Self>
     where
         T: Copy + 'a,

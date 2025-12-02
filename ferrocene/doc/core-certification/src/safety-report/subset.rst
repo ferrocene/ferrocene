@@ -6,6 +6,4 @@ Subset
 
 Below is a listing of which symbols are certified.
 
-.. csv-table:: Core Subset Certified Function List
-   :header: "Qualified name"
-   :file: ../../../symbol-report.csv
+.. literalinclude:: ../../../symbol-report.csv

@@ -502,7 +502,7 @@ pub use self::traits::{
 #[rustfmt::skip]
 pub use self::{
     adapters::Map,
-    traits::{ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator},
+    traits::{ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator, Sum},
 };
 
 mod adapters;

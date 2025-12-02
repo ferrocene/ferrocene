@@ -382,7 +382,6 @@ pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
 #[repr(transparent)]
 pub(crate) struct NeverShortCircuit<T>(pub T);
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> NeverShortCircuit<T> {
     /// Wraps a unary function to produce one that wraps the output into a `NeverShortCircuit`.
     ///
@@ -396,6 +395,7 @@ impl<T> NeverShortCircuit<T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn wrap_mut_2<A, B>(mut f: impl FnMut(A, B) -> T) -> impl FnMut(A, B) -> Self {
         move |a, b| NeverShortCircuit(f(a, b))
     }

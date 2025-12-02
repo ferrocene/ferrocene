@@ -122,7 +122,6 @@ pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
 /// ```
 #[inline]
 #[stable(feature = "array_from_fn", since = "1.63.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn from_fn<T, const N: usize, F>(f: F) -> [T; N]
 where
     F: FnMut(usize) -> T,
@@ -222,7 +221,6 @@ impl const From<Infallible> for TryFromSliceError {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> const AsRef<[T]> for [T; N] {
     #[inline]
     fn as_ref(&self) -> &[T] {

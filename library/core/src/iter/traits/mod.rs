@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_certified"))]
 mod accum;
 mod collect;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -34,6 +33,7 @@ pub use self::{
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 pub use self::{
+    accum::Sum,
     collect::{Extend, FromIterator, IntoIterator},
     exact_size::ExactSizeIterator,
     iterator::Iterator,

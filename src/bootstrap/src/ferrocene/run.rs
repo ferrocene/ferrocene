@@ -28,7 +28,6 @@ pub(crate) struct TraceabilityMatrix {
 impl Step for TraceabilityMatrix {
     type Output = PathBuf;
     const IS_HOST: bool = true;
-    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/traceability-matrix")
@@ -137,7 +136,6 @@ pub(super) const CERTIFIED_CORE_SYMBOLS_ALIAS: &str = "certified-core-symbols";
 
 impl Step for CertifiedCoreSymbols {
     type Output = PathBuf;
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -206,7 +204,6 @@ pub(crate) struct CoverageReport {
 
 impl Step for CoverageReport {
     type Output = PathBuf;
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

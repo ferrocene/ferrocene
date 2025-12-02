@@ -16,11 +16,14 @@ pub(crate) struct CertifiedCoreSymbols;
 
 impl Step for CertifiedCoreSymbols {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(TRACKED_FILE).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {

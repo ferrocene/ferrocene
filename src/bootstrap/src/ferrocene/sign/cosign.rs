@@ -35,7 +35,6 @@ pub(super) struct CosignBinary;
 
 impl Step for CosignBinary {
     type Output = PathBuf;
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

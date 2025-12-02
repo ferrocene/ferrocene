@@ -67,7 +67,6 @@ struct SphinxVirtualEnv {
 
 impl Step for SphinxVirtualEnv {
     type Output = VirtualEnv;
-    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.never()
@@ -118,10 +117,13 @@ struct SphinxBook<P: Step + IsSphinxBook> {
 
 impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
     type Output = PathBuf;
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.never()
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
@@ -486,11 +488,13 @@ macro_rules! sphinx_books {
 
             impl Step for $ty {
                 type Output = PathBuf;
-                const DEFAULT: bool = true;
 
                 fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-                    let builder = run.builder;
-                    run.path($src).default_condition(builder.config.docs)
+                    run.path($src)
+                }
+
+                fn is_default_step(builder: &Builder<'_>) -> bool {
+                    builder.config.docs
                 }
 
                 fn make_run(run: RunConfig<'_>) {
@@ -554,7 +558,6 @@ macro_rules! sphinx_books {
 
         impl Step for AllSphinxDocuments {
             type Output = ();
-            const DEFAULT: bool = false;
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
                 run.path("ferrocene/doc")
@@ -729,11 +732,13 @@ pub(crate) struct TraceabilityMatrix {
 
 impl Step for TraceabilityMatrix {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("ferrocene/tools/traceability-matrix").default_condition(builder.config.docs)
+        run.path("ferrocene/tools/traceability-matrix")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -756,11 +761,14 @@ pub(crate) struct CopyrightFiles {
 
 impl Step for CopyrightFiles {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("copyright-files")
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -790,13 +798,13 @@ pub(crate) struct CompilerTechnicalReport {
 
 impl Step for CompilerTechnicalReport {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.alias("ferrocene-compiler-technical-report").default_condition(
-            builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some(),
-        )
+        run.alias("ferrocene-compiler-technical-report")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -845,13 +853,13 @@ pub(crate) struct CoreTechnicalReport {
 
 impl Step for CoreTechnicalReport {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.alias("ferrocene-core-technical-report").default_condition(
-            builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some(),
-        )
+        run.alias("ferrocene-core-technical-report")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -900,11 +908,13 @@ pub(crate) struct Index {
 
 impl Step for Index {
     type Output = ();
-    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("ferrocene/doc/index").default_condition(builder.config.docs)
+        run.path("ferrocene/doc/index")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {

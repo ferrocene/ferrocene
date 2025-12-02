@@ -747,3 +747,10 @@ fn volatile_ops() {
         assert_eq!(std::ptr::read_volatile(y), 12);
     }
 }
+
+#[test]
+fn chunks_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let chunk = vals.chunks(2).nth(10);
+    assert!(chunk.is_none());
+}

@@ -1786,7 +1786,6 @@ impl<T: PointeeSized> const From<Unique<T>> for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> const From<&mut T> for NonNull<T> {
     /// Converts a `&mut T` to a `NonNull<T>`.
     ///

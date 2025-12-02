@@ -1067,7 +1067,6 @@ impl<T> RefCell<T> {
     #[inline]
     #[stable(feature = "refcell_replace_swap", since = "1.35.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
         let mut_borrow = &mut *self.borrow_mut();
         let replacement = f(mut_borrow);
@@ -1430,7 +1429,6 @@ impl<T: ?Sized> RefCell<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Default> RefCell<T> {
     /// Takes the wrapped value, leaving `Default::default()` in its place.
     ///
@@ -1456,11 +1454,9 @@ impl<T: Default> RefCell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> Send for RefCell<T> where T: Send {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Sync for RefCell<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]

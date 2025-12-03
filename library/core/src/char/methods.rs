@@ -1,11 +1,8 @@
 //! impl char {}
 
 use super::*;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::str::from_utf8_unchecked_mut;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
@@ -726,7 +723,6 @@ impl char {
     #[stable(feature = "unicode_encode_char", since = "1.15.0")]
     #[rustc_const_stable(feature = "const_char_encode_utf8", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn encode_utf8(self, dst: &mut [u8]) -> &mut str {
         // SAFETY: `char` is not a surrogate, so this is valid UTF-8.
         unsafe { from_utf8_unchecked_mut(encode_utf8_raw(self as u32, dst)) }
@@ -1921,7 +1917,6 @@ const fn len_utf16(code: u32) -> usize {
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
 #[doc(hidden)]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn encode_utf8_raw(code: u32, dst: &mut [u8]) -> &mut [u8] {
     let len = len_utf8(code);
     if dst.len() < len {
@@ -1959,7 +1954,6 @@ pub const fn encode_utf8_raw(code: u32, dst: &mut [u8]) -> &mut [u8] {
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
 #[doc(hidden)]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8) {
     let len = len_utf8(code);
     // SAFETY: The caller must guarantee that the buffer pointed to by `dst`

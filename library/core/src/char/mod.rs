@@ -40,7 +40,6 @@ pub use self::decode::{DecodeUtf16, DecodeUtf16Error};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::methods::encode_utf16_raw; // perma-unstable
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::methods::{encode_utf8_raw, encode_utf8_raw_unchecked}; // perma-unstable
 
 #[rustfmt::skip]
@@ -60,13 +59,9 @@ use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomA
 use crate::num::NonZero;
 
 // UTF-8 ranges and tags for encoding characters
-#[cfg(not(feature = "ferrocene_certified"))]
 const TAG_CONT: u8 = 0b1000_0000;
-#[cfg(not(feature = "ferrocene_certified"))]
 const TAG_TWO_B: u8 = 0b1100_0000;
-#[cfg(not(feature = "ferrocene_certified"))]
 const TAG_THREE_B: u8 = 0b1110_0000;
-#[cfg(not(feature = "ferrocene_certified"))]
 const TAG_FOUR_B: u8 = 0b1111_0000;
 const MAX_ONE_B: u32 = 0x80;
 const MAX_TWO_B: u32 = 0x800;

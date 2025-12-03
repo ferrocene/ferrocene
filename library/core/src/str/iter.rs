@@ -26,7 +26,7 @@ use crate::{char as char_mod, option};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::slice;
+use crate::{iter::Copied, slice};
 
 /// An iterator over the [`char`]s of a string slice.
 ///
@@ -302,13 +302,11 @@ impl<'a> CharIndices<'a> {
 /// See its documentation for more.
 ///
 /// [`bytes`]: str::bytes
-#[cfg(not(feature = "ferrocene_certified"))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 pub struct Bytes<'a>(pub(super) Copied<slice::Iter<'a, u8>>);
 
-#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Iterator for Bytes<'_> {
     type Item = u8;
@@ -323,6 +321,7 @@ impl Iterator for Bytes<'_> {
         self.0.size_hint()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     fn count(self) -> usize {
         self.0.count()
@@ -370,6 +369,7 @@ impl Iterator for Bytes<'_> {
         self.0.position(predicate)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where
@@ -378,6 +378,7 @@ impl Iterator for Bytes<'_> {
         self.0.rposition(predicate)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> u8 {
         // SAFETY: the caller must uphold the safety contract

@@ -90,7 +90,10 @@ pub use validations::{next_code_point, utf8_char_width};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use {error::Utf8Error, iter::Chars};
+pub use {
+    error::Utf8Error,
+    iter::{Bytes, Chars},
+};
 
 #[inline(never)]
 #[cold]
@@ -1175,7 +1178,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn bytes(&self) -> Bytes<'_> {
         Bytes(self.as_bytes().iter().copied())
     }

@@ -26,7 +26,10 @@ use crate::{char as char_mod, option};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{iter::Copied, slice};
+use {
+    super::from_utf8_unchecked,
+    crate::{iter::Copied, slice},
+};
 
 /// An iterator over the [`char`]s of a string slice.
 ///
@@ -150,7 +153,6 @@ impl<'a> DoubleEndedIterator for Chars<'a> {
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for Chars<'_> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Chars<'a> {
     /// Views the underlying data as a subslice of the original data.
     ///

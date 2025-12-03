@@ -1178,7 +1178,6 @@ impl u16 {
     #[must_use]
     #[unstable(feature = "utf16_extra", issue = "94919")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_utf16_surrogate(self) -> bool {
         matches!(self, 0xD800..=0xDFFF)
     }

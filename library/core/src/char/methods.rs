@@ -154,7 +154,6 @@ impl char {
     /// ```
     #[stable(feature = "assoc_char_funcs", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
         super::decode::decode_utf16(iter)
     }

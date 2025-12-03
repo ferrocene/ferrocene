@@ -418,7 +418,6 @@ pub mod primitive;
     unreachable_pub
 )]
 #[allow(rustdoc::bare_urls)]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]

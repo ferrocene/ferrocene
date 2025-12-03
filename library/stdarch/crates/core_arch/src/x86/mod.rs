@@ -448,7 +448,7 @@ types! {
 
 /// The BFloat16 type used in AVX-512 intrinsics.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, Debug))]
 #[allow(non_camel_case_types)]
 #[unstable(feature = "stdarch_x86_avx512_bf16", issue = "127356")]
 pub struct bf16(u16);

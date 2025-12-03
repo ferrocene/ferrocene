@@ -3,7 +3,6 @@
 #![allow(unknown_lints, unnecessary_transmutes)]
 
 #[macro_use]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod macros;
 
 #[cfg(any(target_arch = "riscv32", target_arch = "riscv64", doc))]
@@ -23,7 +22,6 @@ mod arm_shared;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod loongarch_shared;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod simd;
 
 #[doc = include_str!("core_arch_docs.md")]
@@ -47,7 +45,6 @@ pub mod arch {
     #[cfg(any(target_arch = "x86_64", doc))]
     #[doc(cfg(target_arch = "x86_64"))]
     #[stable(feature = "simd_x86", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
     pub mod x86_64 {
         #[stable(feature = "simd_x86", since = "1.27.0")]
         pub use crate::core_arch::x86::*;
@@ -330,11 +327,9 @@ pub mod arch {
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64", doc))]
 #[doc(cfg(any(target_arch = "x86", target_arch = "x86_64")))]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod x86;
 #[cfg(any(target_arch = "x86_64", doc))]
 #[doc(cfg(target_arch = "x86_64"))]
-#[cfg(not(feature = "ferrocene_certified"))]
 mod x86_64;
 
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec", doc))]

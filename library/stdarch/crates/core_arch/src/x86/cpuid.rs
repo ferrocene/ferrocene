@@ -8,7 +8,10 @@ use stdarch_test::assert_instr;
 /// Result of the `cpuid` instruction.
 #[allow(clippy::missing_inline_in_public_items)]
 // ^^ the derived impl of Debug for CpuidResult is not #[inline] and that's OK.
-#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified"),
+    derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)
+)]
 #[stable(feature = "simd_x86", since = "1.27.0")]
 pub struct CpuidResult {
     /// EAX register.

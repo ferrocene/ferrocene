@@ -65,7 +65,6 @@ mod bounds;
 pub mod fallback;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod mir;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod simd;
 
 // These imports are used for simplifying intra-doc links
@@ -1054,7 +1053,6 @@ pub fn sqrtf16(x: f16) -> f16;
 /// [`f32::sqrt`](../../std/primitive.f32.html#method.sqrt)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sqrtf32(x: f32) -> f32;
 /// Returns the square root of an `f64`
 ///
@@ -1062,7 +1060,6 @@ pub fn sqrtf32(x: f32) -> f32;
 /// [`f64::sqrt`](../../std/primitive.f64.html#method.sqrt)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sqrtf64(x: f64) -> f64;
 /// Returns the square root of an `f128`
 ///
@@ -1376,7 +1373,6 @@ pub fn log2f128(x: f128) -> f128;
 /// [`f16::mul_add`](../../std/primitive.f16.html#method.mul_add)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values.
 ///
@@ -1384,7 +1380,6 @@ pub const fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 /// [`f32::mul_add`](../../std/primitive.f32.html#method.mul_add)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values.
 ///
@@ -1392,7 +1387,6 @@ pub const fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 /// [`f64::mul_add`](../../std/primitive.f64.html#method.mul_add)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values.
 ///

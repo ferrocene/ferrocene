@@ -133,6 +133,7 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+#![cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {

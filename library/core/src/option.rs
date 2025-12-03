@@ -586,8 +586,9 @@ use crate::clone::TrivialClone;
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(not(feature = "ferrocene_subset"))]
-use crate::panicking::{panic, panic_display};
+use crate::panicking::panic;
+#[cfg(not(feature = "ferrocene_certified_panic"))]
+use crate::panicking::panic_display;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::Pin;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -596,7 +597,7 @@ use crate::{cmp, convert, hint, mem, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{convert, hint, mem, panicking::panic};
+use crate::{convert, hint, mem};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -981,14 +982,14 @@ impl<T> Option<T> {
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     pub const fn expect(
         self,
-        #[cfg(not(feature = "ferrocene_subset"))] msg: &str,
-        #[cfg(feature = "ferrocene_subset")] msg: &'static str,
+        #[cfg(not(feature = "ferrocene_certified_panic"))] msg: &str,
+        #[cfg(feature = "ferrocene_certified_panic")] msg: &'static str,
     ) -> T {
         match self {
             Some(val) => val,
-            #[cfg(not(feature = "ferrocene_subset"))]
+            #[cfg(not(feature = "ferrocene_certified_panic"))]
             None => expect_failed(msg),
-            #[cfg(feature = "ferrocene_subset")]
+            #[cfg(feature = "ferrocene_certified_panic")]
             None => panic(msg),
         }
     }
@@ -2210,7 +2211,7 @@ const fn unwrap_failed() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_panic"))]
 const fn expect_failed(msg: &str) -> ! {
     panic_display(&msg)
 }

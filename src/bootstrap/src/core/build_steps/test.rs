@@ -3071,6 +3071,9 @@ impl Step for Crate {
         // alloc themself for doctests
         if crates.iter().any(|crate_| crate_ == "core") {
             crates.push("coretests".to_owned());
+            if builder.config.rust_std_features.contains("ferrocene_certified_panic") {
+                cargo.arg("--features=coretests/ferrocene_certified_panic");
+            }
         }
         if crates.iter().any(|crate_| crate_ == "alloc") {
             crates.push("alloctests".to_owned());

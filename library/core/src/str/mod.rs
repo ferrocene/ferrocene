@@ -119,7 +119,7 @@ const fn slice_error_fail_ct(_: &str, _: usize, _: usize) -> ! {
 }
 
 #[track_caller]
-#[cfg_attr(feature = "ferrocene_subset", expect(unused_variables))]
+#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
 fn slice_error_fail_rt(s: &str, begin: usize, end: usize) -> ! {
     const MAX_DISPLAY_LENGTH: usize = 256;
     let trunc_len = s.floor_char_boundary(MAX_DISPLAY_LENGTH);

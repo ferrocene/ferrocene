@@ -115,7 +115,11 @@ fn lazy_type_inference() {
 
 #[test]
 #[cfg(panic = "unwind")]
-#[should_panic = "LazyCell instance has previously been poisoned"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic = "LazyCell instance has previously been poisoned"
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn lazy_force_mut_panic() {
     let mut lazy = LazyCell::<String>::new(|| panic!());
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
@@ -145,7 +149,8 @@ fn aliasing_in_get() {
 }
 
 #[test]
-#[should_panic(expected = "reentrant init")]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic(expected = "reentrant init"))]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn reentrant_init() {
     let x: OnceCell<Box<i32>> = OnceCell::new();
     let dangling_ref: Cell<Option<&i32>> = Cell::new(None);

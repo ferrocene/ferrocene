@@ -21,7 +21,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 mod convert;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod decode;
 mod methods;
 
@@ -33,7 +32,6 @@ pub use self::convert::CharTryFromError;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::convert::ParseCharError;
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::decode::{DecodeUtf16, DecodeUtf16Error};
 
 // perma-unstable re-exports

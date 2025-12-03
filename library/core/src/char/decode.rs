@@ -1,7 +1,10 @@
 //! UTF-8 and UTF-16 decoding iterators
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::FusedIterator;
 
 /// An iterator that decodes UTF-16 encoded code points from an iterator of `u16`s.
@@ -11,7 +14,7 @@ use crate::iter::FusedIterator;
 ///
 /// [`decode_utf16`]: char::decode_utf16
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 pub struct DecodeUtf16<I>
 where
     I: Iterator<Item = u16>,
@@ -24,7 +27,7 @@ where
 ///
 /// This `struct` is created when using the [`DecodeUtf16`] type.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, Eq, PartialEq))]
 pub struct DecodeUtf16Error {
     code: u16,
 }
@@ -106,6 +109,7 @@ impl<I: Iterator<Item = u16>> Iterator for DecodeUtf16<I> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "decode_utf16_fused_iterator", since = "1.75.0")]
 impl<I: Iterator<Item = u16> + FusedIterator> FusedIterator for DecodeUtf16<I> {}
 
@@ -118,6 +122,7 @@ impl DecodeUtf16Error {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 impl fmt::Display for DecodeUtf16Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -125,5 +130,6 @@ impl fmt::Display for DecodeUtf16Error {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 impl Error for DecodeUtf16Error {}

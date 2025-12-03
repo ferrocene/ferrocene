@@ -1502,6 +1502,7 @@ impl f32 {
     /// assert_eq!(2.0f32.clamp_magnitude(3.0), 2.0);
     /// assert_eq!((-2.0f32).clamp_magnitude(3.0), -2.0);
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[must_use = "this returns the clamped value and does not modify the original"]
     #[unstable(feature = "clamp_magnitude", issue = "148519")]
     #[inline]

@@ -1,6 +1,5 @@
 #![doc = include_str!("../../stdarch/crates/core_arch/src/core_arch_docs.md")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[allow(
     // some targets don't have anything to reexport, which
     // makes the `pub use` unused and unreachable, allow

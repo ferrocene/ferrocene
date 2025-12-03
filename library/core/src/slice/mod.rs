@@ -44,7 +44,6 @@ pub mod memchr;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod sort;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod ascii;
 mod cmp;
 pub(crate) mod index;

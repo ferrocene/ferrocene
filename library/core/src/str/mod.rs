@@ -2863,7 +2863,6 @@ impl str {
     #[rustc_const_stable(feature = "const_eq_ignore_ascii_case", since = "1.89.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn eq_ignore_ascii_case(&self, other: &str) -> bool {
         self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
     }

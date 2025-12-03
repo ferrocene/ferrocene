@@ -477,13 +477,13 @@ pub fn callable_sig_from_fn_trait<'db>(
     trait_env: Arc<TraitEnvironment<'db>>,
     db: &'db dyn HirDatabase,
 ) -> Option<(FnTrait, PolyFnSig<'db>)> {
-    let krate = trait_env.krate;
-    let fn_once_trait = FnTrait::FnOnce.get_id(db, krate)?;
+    let mut table = InferenceTable::new(db, trait_env.clone(), None);
+    let lang_items = table.interner().lang_items();
+
+    let fn_once_trait = FnTrait::FnOnce.get_id(lang_items)?;
     let output_assoc_type = fn_once_trait
         .trait_items(db)
         .associated_type_by_name(&Name::new_symbol_root(sym::Output))?;
-
-    let mut table = InferenceTable::new(db, trait_env.clone(), None);
 
     // Register two obligations:
     // - Self: FnOnce<?args_ty>
@@ -502,7 +502,7 @@ pub fn callable_sig_from_fn_trait<'db>(
         table.register_obligation(pred);
         let return_ty = table.normalize_alias_ty(projection);
         for fn_x in [FnTrait::Fn, FnTrait::FnMut, FnTrait::FnOnce] {
-            let fn_x_trait = fn_x.get_id(db, krate)?;
+            let fn_x_trait = fn_x.get_id(lang_items)?;
             let trait_ref = TraitRef::new(table.interner(), fn_x_trait.into(), args);
             if !table
                 .try_obligation(Predicate::upcast_from(trait_ref, table.interner()))
@@ -567,6 +567,35 @@ where
     let mut collector = ParamCollector { params: FxHashSet::default() };
     value.visit_with(&mut collector);
     Vec::from_iter(collector.params)
+}
+
+struct TypeInferenceVarCollector<'db> {
+    type_inference_vars: Vec<Ty<'db>>,
+}
+
+impl<'db> rustc_type_ir::TypeVisitor<DbInterner<'db>> for TypeInferenceVarCollector<'db> {
+    type Result = ();
+
+    fn visit_ty(&mut self, ty: Ty<'db>) -> Self::Result {
+        use crate::rustc_type_ir::Flags;
+        if ty.is_ty_var() {
+            self.type_inference_vars.push(ty);
+        } else if ty.flags().intersects(rustc_type_ir::TypeFlags::HAS_TY_INFER) {
+            ty.super_visit_with(self);
+        } else {
+            // Fast path: don't visit inner types (e.g. generic arguments) when `flags` indicate
+            // that there are no placeholders.
+        }
+    }
+}
+
+pub fn collect_type_inference_vars<'db, T>(value: &T) -> Vec<Ty<'db>>
+where
+    T: ?Sized + rustc_type_ir::TypeVisitable<DbInterner<'db>>,
+{
+    let mut collector = TypeInferenceVarCollector { type_inference_vars: vec![] };
+    value.visit_with(&mut collector);
+    collector.type_inference_vars
 }
 
 pub fn known_const_to_ast<'db>(

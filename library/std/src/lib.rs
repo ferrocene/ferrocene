@@ -265,8 +265,6 @@
 //
 // Language features:
 // tidy-alphabetical-start
-
-// stabilization was reverted after it hit beta
 #![feature(alloc_error_handler)]
 #![feature(allocator_internals)]
 #![feature(allow_internal_unsafe)]
@@ -348,8 +346,6 @@
 #![feature(ip)]
 #![feature(lazy_get)]
 #![feature(maybe_uninit_array_assume_init)]
-#![feature(maybe_uninit_slice)]
-#![feature(maybe_uninit_write_slice)]
 #![feature(panic_can_unwind)]
 #![feature(panic_internals)]
 #![feature(pin_coerce_unsized_trait)]
@@ -374,6 +370,7 @@
 // tidy-alphabetical-start
 #![feature(alloc_layout_extra)]
 #![feature(allocator_api)]
+#![feature(clone_from_ref)]
 #![feature(get_mut_unchecked)]
 #![feature(map_try_insert)]
 #![feature(slice_concat_trait)]
@@ -424,7 +421,7 @@
 #![default_lib_allocator]
 
 // The Rust prelude
-// The compiler expects the prelude definition to be defined before it's use statement.
+// The compiler expects the prelude definition to be defined before its use statement.
 pub mod prelude;
 
 // Explicitly import the prelude. The compiler uses this same unstable attribute

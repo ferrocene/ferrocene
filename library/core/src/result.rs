@@ -1885,6 +1885,7 @@ impl<T, E> Result<Result<T, E>, E> {
 }
 
 // This is a separate function to reduce the code size of the methods
+#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
 #[cfg(not(panic = "immediate-abort"))]
 #[inline(never)]
 #[cold]

@@ -1526,9 +1526,9 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
             )+};
         }
         swap_prefix!(4 2 1);
-        #[cfg(not(feature = "ferrocene_subset"))]
+        #[cfg(not(feature = "ferrocene_certified_panic"))]
         debug_assert_eq!(i, bytes);
-        #[cfg(feature = "ferrocene_subset")]
+        #[cfg(feature = "ferrocene_certified_panic")]
         debug_assert!(i == bytes);
     }
 

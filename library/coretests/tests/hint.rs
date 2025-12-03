@@ -23,7 +23,8 @@ fn select_unpredictable_drop() {
 }
 
 #[test]
-#[should_panic = "message canary"]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic = "message canary")]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn select_unpredictable_drop_on_panic() {
     use core::cell::Cell;
 

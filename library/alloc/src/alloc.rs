@@ -424,6 +424,7 @@ pub const fn handle_alloc_error(layout: Layout) -> ! {
 pub mod __alloc_error_handler {
     // called via generated `__rust_alloc_error_handler` if there is no
     // `#[alloc_error_handler]`.
+    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
     #[rustc_std_internal_symbol]
     pub unsafe fn __rdl_alloc_error_handler(size: usize, _align: usize) -> ! {
         unsafe extern "Rust" {
@@ -436,10 +437,16 @@ pub mod __alloc_error_handler {
         if unsafe { __rust_alloc_error_handler_should_panic_v2() != 0 } {
             panic!("memory allocation of {size} bytes failed")
         } else {
+            #[cfg(not(feature = "ferrocene_certified_panic"))]
             core::panicking::panic_nounwind_fmt(
                 format_args!("memory allocation of {size} bytes failed"),
                 /* force_no_backtrace */ false,
-            )
+            );
+            #[cfg(feature = "ferrocene_certified_panic")]
+            core::panicking::panic_nounwind_fmt(
+                core::panicking::PanicArguments::new_const(&["memory allocation failed"]),
+                /* force_no_backtrace */ false,
+            );
         }
     }
 }

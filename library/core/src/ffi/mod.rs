@@ -96,5 +96,5 @@ impl fmt::Debug for c_void {
     cfg(not(target_feature = "crt-static"))
 )]
 #[link(name = "/defaultlib:libcmt", modifiers = "+verbatim", cfg(target_feature = "crt-static"))]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_panic"))]
 unsafe extern "C" {}

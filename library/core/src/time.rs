@@ -976,6 +976,7 @@ impl Duration {
     /// let res = Duration::from_secs_f64(0.999e-9);
     /// assert_eq!(res, Duration::new(0, 1));
     /// ```
+    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
@@ -1014,10 +1015,10 @@ impl Duration {
     /// let res = Duration::from_secs_f32(0.999e-9);
     /// assert_eq!(res, Duration::new(0, 1));
     /// ```
+    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_subset", expect(unused_variables))]
     pub fn from_secs_f32(secs: f32) -> Duration {
         match Duration::try_from_secs_f32(secs) {
             Ok(v) => v,

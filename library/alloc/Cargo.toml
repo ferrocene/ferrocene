@@ -26,6 +26,7 @@ compiler-builtins-no-f16-f128 = ["compiler_builtins/no-f16-f128"]
 optimize_for_size = ["core/optimize_for_size"]
 # Ferrocene addition
 ferrocene_subset = ["compiler_builtins/ferrocene_subset", "core/ferrocene_subset"]
+ferrocene_certified_panic = ["compiler_builtins/ferrocene_certified_panic", "core/ferrocene_certified_panic"]
 
 [lints.rust.unexpected_cfgs]
 level = "warn"

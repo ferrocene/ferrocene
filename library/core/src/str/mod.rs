@@ -30,7 +30,10 @@ use crate::{ascii, mem};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use {self::pattern::Pattern, crate::mem};
+use {
+    self::pattern::Pattern,
+    crate::{mem, slice::SliceIndex},
+};
 
 pub mod pattern;
 
@@ -708,7 +711,6 @@ impl str {
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn get_unchecked<I: SliceIndex<str>>(&self, i: I) -> &I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.

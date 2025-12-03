@@ -57,7 +57,6 @@ mod int_macros; // import int_impl!
 mod uint_macros; // import uint_impl!
 
 mod error;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod int_log10;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod int_sqrt;

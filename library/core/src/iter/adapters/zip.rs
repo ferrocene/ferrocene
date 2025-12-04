@@ -23,7 +23,6 @@ pub struct Zip<A, B> {
     index: usize,
     len: usize,
 }
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator, B: Iterator> Zip<A, B> {
     pub(in crate::iter) fn new(a: A, b: B) -> Zip<A, B> {
         ZipImpl::new(a, b)
@@ -96,13 +95,11 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         ZipImpl::nth(self, n)
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -142,14 +139,12 @@ trait ZipImpl<A, B> {
     fn new(a: A, b: B) -> Self;
     fn next(&mut self) -> Option<Self::Item>;
     fn size_hint(&self) -> (usize, Option<usize>);
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item>;
     #[cfg(not(feature = "ferrocene_certified"))]
     fn next_back(&mut self) -> Option<Self::Item>
     where
         A: DoubleEndedIterator + ExactSizeIterator,
         B: DoubleEndedIterator + ExactSizeIterator;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc;
@@ -181,7 +176,6 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         default fn nth(&mut self, n: usize) -> Option<Self::Item> {
             self.super_nth(n)
         }
@@ -257,7 +251,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -671,7 +664,6 @@ unsafe impl<I: Iterator + TrustedRandomAccessNoCoerce> SpecTrustedRandomAccess f
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecFold: Iterator {
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
@@ -679,7 +671,6 @@ trait SpecFold: Iterator {
         F: FnMut(B, Self::Item) -> B;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     // Adapted from default impl from the Iterator trait
     #[inline]

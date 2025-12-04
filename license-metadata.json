@@ -147,30 +147,6 @@
                 "type": "directory"
               },
               {
-                "children": [
-                  {
-                    "children": [],
-                    "license": {
-                      "copyright": [
-                        "The Ferrocene Developers"
-                      ],
-                      "spdx": "Apache-2.0 OR MIT"
-                    },
-                    "name": "snapshots",
-                    "type": "directory"
-                  }
-                ],
-                "license": {
-                  "copyright": [
-                    "The Ferrocene Developers",
-                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
-                  ],
-                  "spdx": "Apache-2.0 OR MIT"
-                },
-                "name": "tools/generate-tarball/src",
-                "type": "directory"
-              },
-              {
                 "directories": [],
                 "files": [
                   "ci/docker-images/ubuntu-20/binfmt-qemu-aarch64",
@@ -272,6 +248,12 @@
                 "type": "directory"
               },
               {
+                "directories": [
+                  "tools/generate-tarball/src"
+                ],
+                "files": [
+                  "tools/generate-tarball/Cargo.toml"
+                ],
                 "license": {
                   "copyright": [
                     "The Ferrocene Developers",
@@ -279,8 +261,7 @@
                   ],
                   "spdx": "Apache-2.0 OR MIT"
                 },
-                "name": "tools/generate-tarball/Cargo.toml",
-                "type": "file"
+                "type": "group"
               }
             ],
             "license": {

@@ -60,7 +60,6 @@ use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
 use crate::ptr;
 
 mod bounds;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod fallback;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod mir;
@@ -258,7 +257,6 @@ pub unsafe fn atomic_umax<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: 
 /// [`atomic::fence`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_fence<const ORD: AtomicOrdering>();
 
 /// An atomic fence for synchronization within a single thread.
@@ -267,7 +265,6 @@ pub unsafe fn atomic_fence<const ORD: AtomicOrdering>();
 /// [`atomic::compiler_fence`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_singlethreadfence<const ORD: AtomicOrdering>();
 
 /// The `prefetch` intrinsic is a hint to the code generator to insert a prefetch instruction
@@ -446,7 +443,6 @@ pub const fn cold_path() {}
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn likely(b: bool) -> bool {
     if b {
         true
@@ -522,7 +518,6 @@ pub const fn assert_inhabited<T>();
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn assert_zero_valid<T>();
 
 /// A guard for `std::mem::uninitialized`. This will statically either panic, or do nothing. It does
@@ -547,7 +542,6 @@ pub const fn assert_mem_uninitialized_valid<T>();
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn caller_location() -> &'static crate::panic::Location<'static>;
 
 /// Moves a value out of scope without running drop glue.
@@ -930,7 +924,6 @@ pub const unsafe fn offset<Ptr: bounds::BuiltinDeref, Delta>(dst: Ptr, offset: D
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 
 /// Projects to the `index`-th element of `slice_ptr`, as the same kind of pointer
@@ -1870,7 +1863,6 @@ pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cttz<T: Copy>(x: T) -> u32;
 
 /// Like `cttz`, but extra-unsafe as it returns `undef` when
@@ -1908,7 +1900,6 @@ pub const unsafe fn cttz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn bswap<T: Copy>(x: T) -> T;
 
 /// Reverses the bits in an integer type `T`.
@@ -1954,7 +1945,6 @@ pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering
 #[rustc_intrinsic]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec] // the fallbacks all `assume` to tell Miri
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: T) -> T {
     // SAFETY: same preconditions as this function.
     unsafe { fallback::DisjointBitOr::disjoint_bitor(a, b) }
@@ -2052,7 +2042,6 @@ pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_div<T: Copy>(x: T, y: T) -> T;
 /// Returns the remainder of an unchecked division, resulting in
 /// undefined behavior when `y == 0` or `x == T::MIN && y == -1`
@@ -2205,7 +2194,6 @@ pub const fn wrapping_mul<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn saturating_add<T: Copy>(a: T, b: T) -> T;
 /// Computes `a - b`, saturating at numeric bounds.
 ///
@@ -2240,7 +2228,6 @@ pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 #[unstable(feature = "funnel_shifts", issue = "145686")]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
     a: T,
     b: T,
@@ -2269,7 +2256,6 @@ pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
 #[unstable(feature = "funnel_shifts", issue = "145686")]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
     a: T,
     b: T,
@@ -2363,7 +2349,6 @@ pub const unsafe fn ptr_offset_from<T>(ptr: *const T, base: *const T) -> isize;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn ptr_offset_from_unsigned<T>(ptr: *const T, base: *const T) -> usize;
 
 /// See documentation of `<*const T>::guaranteed_eq` for details.
@@ -2690,7 +2675,6 @@ pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
 #[inline]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
     // SAFETY: The caller provided single non-overlapping items behind
     // pointers, so swapping them with `count: 1` is fine.
@@ -3055,7 +3039,6 @@ pub const fn minnumf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minnumf32(x: f32, y: f32) -> f32;
 
 /// Returns the minimum (IEEE 754-2008 minNum) of two `f64` values.
@@ -3201,7 +3184,6 @@ pub const fn maxnumf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn maxnumf32(x: f32, y: f32) -> f32;
 
 /// Returns the maximum (IEEE 754-2008 maxNum) of two `f64` values.
@@ -3333,7 +3315,6 @@ pub const fn fabsf16(x: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn fabsf32(x: f32) -> f32;
 
 /// Returns the absolute value of an `f64`.
@@ -3343,7 +3324,6 @@ pub const fn fabsf32(x: f32) -> f32;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn fabsf64(x: f64) -> f64;
 
 /// Returns the absolute value of an `f128`.
@@ -3371,7 +3351,6 @@ pub const fn copysignf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn copysignf32(x: f32, y: f32) -> f32;
 /// Copies the sign from `y` to `x` for `f64` values.
 ///

@@ -3,9 +3,7 @@
 #[macro_use] // import iterator! and forward_iterator!
 mod macros;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::{from_raw_parts, from_raw_parts_mut};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::assert_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{
@@ -14,7 +12,6 @@ use crate::iter::{
 use crate::marker::PhantomData;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -24,7 +21,9 @@ use crate::{cmp, fmt};
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use crate::{
+    cmp,
     iter::{TrustedLen, UncheckedIterator},
+    mem,
     mem::SizedTypeProperties,
 };
 
@@ -149,7 +148,6 @@ impl<'a, T> Iter<'a, T> {
     #[must_use]
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_slice(&self) -> &'a [T] {
         self.make_slice()
     }
@@ -367,7 +365,6 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     // FIXME: Uncomment the `AsMut<[T]>` impl when this gets stabilized.
     #[unstable(feature = "slice_iter_mut_as_mut_slice", issue = "93079")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites
@@ -1411,16 +1408,14 @@ forward_iterator! { RSplitNMut: T, &'a mut [T] }
 ///
 /// [`windows`]: slice::windows
 /// [slices]: slice
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Windows<'a, T: 'a> {
     v: &'a [T],
     size: NonZero<usize>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: 'a> Windows<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a [T], size: NonZero<usize>) -> Self {
@@ -1438,7 +1433,6 @@ impl<T> Clone for Windows<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Iterator for Windows<'a, T> {
     type Item = &'a [T];
 
@@ -1464,6 +1458,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1484,6 +1479,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.size.get() > self.v.len() {
             None
@@ -1493,6 +1489,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         // SAFETY: since the caller guarantees that `i` is in bounds,
         // which means that `i` cannot overflow an `isize`, and the
@@ -1575,16 +1572,14 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Windows<'a, T> {
 ///
 /// [`chunks`]: slice::chunks
 /// [slices]: slice
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Chunks<'a, T: 'a> {
     v: &'a [T],
     chunk_size: usize,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: 'a> Chunks<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a [T], size: usize) -> Self {
@@ -1602,7 +1597,6 @@ impl<T> Clone for Chunks<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Iterator for Chunks<'a, T> {
     type Item = &'a [T];
 
@@ -1631,6 +1625,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1651,6 +1646,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1660,6 +1656,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: the caller guarantees that `i` is in bounds,
@@ -1766,10 +1763,9 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Chunks<'a, T> {
 ///
 /// [`chunks_mut`]: slice::chunks_mut
 /// [slices]: slice
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ChunksMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -1782,7 +1778,6 @@ pub struct ChunksMut<'a, T: 'a> {
     _marker: PhantomData<&'a mut T>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: 'a> ChunksMut<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a mut [T], size: usize) -> Self {
@@ -1791,7 +1786,6 @@ impl<'a, T: 'a> ChunksMut<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Iterator for ChunksMut<'a, T> {
     type Item = &'a mut [T];
 
@@ -1822,6 +1816,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1848,6 +1843,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1858,6 +1854,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: see comments for `Chunks::__iterator_get_unchecked` and `self.v`.
@@ -1969,17 +1966,15 @@ unsafe impl<T> Sync for ChunksMut<'_, T> where T: Sync {}
 /// [`chunks_exact`]: slice::chunks_exact
 /// [`remainder`]: ChunksExact::remainder
 /// [slices]: slice
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ChunksExact<'a, T: 'a> {
     v: &'a [T],
     rem: &'a [T],
     chunk_size: usize,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> ChunksExact<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a [T], chunk_size: usize) -> Self {
@@ -2024,7 +2019,6 @@ impl<T> Clone for ChunksExact<'_, T> {
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Iterator for ChunksExact<'a, T> {
     type Item = &'a [T];
 
@@ -2046,6 +2040,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -2064,10 +2059,12 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: mostly identical to `Chunks::__iterator_get_unchecked`.
@@ -2152,10 +2149,9 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for ChunksExact<'a, T> {
 /// [`chunks_exact_mut`]: slice::chunks_exact_mut
 /// [`into_remainder`]: ChunksExactMut::into_remainder
 /// [slices]: slice
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct ChunksExactMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -2169,7 +2165,6 @@ pub struct ChunksExactMut<'a, T: 'a> {
     _marker: PhantomData<&'a mut T>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> ChunksExactMut<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a mut [T], chunk_size: usize) -> Self {
@@ -2191,7 +2186,6 @@ impl<'a, T> ChunksExactMut<'a, T> {
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     type Item = &'a mut [T];
 
@@ -2215,6 +2209,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -2234,10 +2229,12 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: see comments for `Chunks::__iterator_get_unchecked` and `self.v`.

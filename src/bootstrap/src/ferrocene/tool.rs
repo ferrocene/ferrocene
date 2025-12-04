@@ -74,7 +74,7 @@ impl Step for SelfTest {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SymbolReport {
-    pub(super) target_compiler: Compiler,
+    pub(crate) target_compiler: Compiler,
 }
 pub(super) const SYMBOL_PATH: &str = "ferrocene/tools/symbol-report";
 

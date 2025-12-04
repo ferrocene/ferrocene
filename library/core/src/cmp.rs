@@ -366,7 +366,6 @@ pub macro Eq($item:item) {
 #[doc(hidden)]
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct AssertParamIsEq<T: Eq + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -1528,7 +1527,6 @@ where
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro PartialOrd($item:item) {
     /* compiler built-in */
 }
@@ -1710,7 +1708,6 @@ pub const fn max<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn max_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
     v1: T,
     v2: T,
@@ -2117,7 +2114,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialOrd<&B> for &A
     where
         A: [const] PartialOrd<B>,

@@ -23,7 +23,7 @@ use crate::{cfg_select, intrinsics, mem};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::mem;
+use crate::{intrinsics, mem};
 
 /// The radix or base of the internal representation of `f32`.
 /// Use [`f32::RADIX`] instead.
@@ -544,7 +544,6 @@ impl f32 {
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_nan(self) -> bool {
         self != self
     }
@@ -940,7 +939,6 @@ impl f32 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn max(self, other: f32) -> f32 {
         intrinsics::maxnumf32(self, other)
     }
@@ -963,7 +961,6 @@ impl f32 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn min(self, other: f32) -> f32 {
         intrinsics::minnumf32(self, other)
     }
@@ -1489,7 +1486,6 @@ impl f32 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn abs(self) -> f32 {
         intrinsics::fabsf32(self)
     }
@@ -1514,7 +1510,6 @@ impl f32 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn signum(self) -> f32 {
         if self.is_nan() { Self::NAN } else { 1.0_f32.copysign(self) }
     }
@@ -1549,7 +1544,6 @@ impl f32 {
     #[inline]
     #[stable(feature = "copysign", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn copysign(self, sign: f32) -> f32 {
         intrinsics::copysignf32(self, sign)
     }

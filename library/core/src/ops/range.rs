@@ -78,7 +78,8 @@ impl fmt::Debug for RangeFull {
 /// ```
 #[lang = "Range"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Default, PartialEq, Eq, Hash))] // not Copy -- see #27186
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[derive_const(Clone, Default, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
@@ -100,7 +101,6 @@ impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -149,6 +149,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// ```
     #[inline]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_empty(&self) -> bool {
         !(self.start < self.end)
     }
@@ -189,7 +190,8 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 /// ```
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Eq, Hash))]
+#[derive(Clone, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
@@ -484,7 +486,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -553,6 +554,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// ```
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_empty(&self) -> bool {
         self.exhausted || !(self.start <= self.end)
     }
@@ -852,7 +854,6 @@ pub trait RangeBounds<T: ?Sized> {
     /// ```
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,

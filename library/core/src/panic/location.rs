@@ -154,7 +154,6 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }

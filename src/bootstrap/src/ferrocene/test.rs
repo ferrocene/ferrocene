@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod certified_core_symbols;
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;

@@ -8,7 +8,6 @@ use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccess
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, UncheckedIterator};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Try;
 
 // Ferrocene addition: imports for certified subset
@@ -94,7 +93,6 @@ impl<I: fmt::Debug, F> fmt::Debug for Map<I, F> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 fn map_fold<T, B, Acc>(
     mut f: impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> Acc,
@@ -102,7 +100,6 @@ fn map_fold<T, B, Acc>(
     move |acc, elt| g(acc, f(elt))
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 fn map_try_fold<'a, T, B, Acc, R>(
     f: &'a mut impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> R + 'a,
@@ -127,7 +124,6 @@ where
         self.iter.size_hint()
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -137,7 +133,6 @@ where
         self.iter.try_fold(init, map_try_fold(&mut self.f, g))
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,

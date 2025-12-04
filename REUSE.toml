@@ -242,8 +242,12 @@ path = [
     "requirements.txt",
     ".python-version",
     "src/bootstrap/src/ferrocene/**",
+    "ferrocene/doc/symbol-report.json",
     "ferrocene/tools/blanket/**",
     "ferrocene/tools/symbol-report/**",
+    "CODEOWNERS",
+    "ferrocene/tools/Cargo.toml",
+    "ferrocene/tools/Cargo.lock",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

@@ -162,9 +162,17 @@ mod tests {
         let deserialized: PackageManifest = serde_json::from_slice(&std::fs::read(
             package_dir.path().join("share/criticaltrust/ferrocene/demo-package.json"),
         )?)?;
-        insta::assert_snapshot!(serde_json::to_string_pretty(
-            &deserialized.signed.into_verified(&keychain)?
-        )?);
+        let mut settings = insta::Settings::new();
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("snapshots");
+        settings.set_snapshot_path(path);
+        settings.bind(|| {
+            insta::assert_snapshot!(
+                serde_json::to_string_pretty(
+                    &deserialized.signed.into_verified(&keychain).unwrap()
+                )
+                .unwrap()
+            );
+        });
 
         Ok(())
     }

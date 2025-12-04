@@ -16,9 +16,7 @@ mod cloned;
 mod copied;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod cycle;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod enumerate;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod filter;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod filter_map;
@@ -37,17 +35,13 @@ mod map_while;
 mod map_windows;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod peekable;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod rev;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod scan;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod skip;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod skip_while;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod step_by;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod take;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod take_while;
@@ -102,7 +96,10 @@ pub use self::{
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use self::map::Map;
+pub use self::{
+    enumerate::Enumerate, filter::Filter, map::Map, rev::Rev, skip::Skip, step_by::StepBy,
+    take::Take, zip::Zip,
+};
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline
 /// under the conditions that

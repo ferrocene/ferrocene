@@ -7,11 +7,11 @@ use crate::ascii::Char as AsciiChar;
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::net::{Ipv4Addr, Ipv6Addr};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, Try};
 
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 use crate::ops;
@@ -138,7 +138,6 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///
     /// * `Step::backward_checked(a, n) == (0..n).try_fold(a, |x, _| Step::backward_checked(x, 1))`
     ///   * Corollary: `Step::backward_checked(a, 0) == Some(a)`
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn backward_checked(start: Self, count: usize) -> Option<Self>;
 
     /// Returns the value that would be obtained by taking the *predecessor*
@@ -300,7 +299,6 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match Self::try_from(n) {
                         Ok(n) => start.checked_sub(n),
@@ -354,7 +352,6 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match $u_narrower::try_from(n) {
                         Ok(n) => {
@@ -405,7 +402,6 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
@@ -445,7 +441,6 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                #[cfg(not(feature = "ferrocene_certified"))]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
@@ -708,17 +703,12 @@ trait RangeIteratorImpl {
 
     // Iterator
     fn spec_next(&mut self) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth(&mut self, n: usize) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 
     // DoubleEndedIterator
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_next_back(&mut self) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_nth_back(&mut self, n: usize) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 }
 
@@ -737,7 +727,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_nth(&mut self, n: usize) -> Option<A> {
         if let Some(plus_n) = Step::forward_checked(self.start.clone(), n) {
             if plus_n < self.end {
@@ -752,7 +741,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -766,7 +754,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_next_back(&mut self) -> Option<A> {
         if self.start < self.end {
             self.end =
@@ -778,7 +765,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_nth_back(&mut self, n: usize) -> Option<A> {
         if let Some(minus_n) = Step::backward_checked(self.end.clone(), n) {
             if minus_n > self.start {
@@ -793,7 +779,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -919,7 +904,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.spec_nth(n)
     }
@@ -955,7 +939,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_by(n)
     }
@@ -1028,7 +1011,6 @@ range_incl_exact_iter_impl! {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Step> DoubleEndedIterator for ops::Range<A> {
     #[inline]
     fn next_back(&mut self) -> Option<A> {

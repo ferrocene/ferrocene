@@ -34,6 +34,7 @@ use crate::core::config::flags::{
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
+use crate::ferrocene::tool::SymbolReport;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
@@ -1813,6 +1814,9 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         }
         if mode == "run-make" {
             builder.tool_exe(Tool::RunMakeSupport);
+            // Ferrocene addition: ensure that `symbol-report` is available when running the
+            // `run-make` tests.
+            builder.ensure(SymbolReport { target_compiler: test_compiler });
         }
 
         // ensure that `libproc_macro` is available on the host.

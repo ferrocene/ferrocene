@@ -28,7 +28,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_is_null"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_null(self) -> bool {
         self.cast_const().is_null()
     }
@@ -482,7 +481,6 @@ impl<T: PointeeSized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_offset(self, count: isize) -> *mut T
     where
         T: Sized,
@@ -602,7 +600,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_mut<'a>(self) -> Option<&'a mut T> {
         // SAFETY: the caller must guarantee that `self` is be valid for
         // a mutable reference if it isn't null.
@@ -909,7 +906,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -1063,7 +1059,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1180,7 +1175,6 @@ impl<T: PointeeSized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1456,7 +1450,6 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1536,7 +1529,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "1.88.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn replace(self, src: T) -> T
     where
         T: Sized,
@@ -1823,7 +1815,6 @@ impl<T> *mut [T] {
     #[inline(always)]
     #[track_caller]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn split_at_mut(self, mid: usize) -> (*mut [T], *mut [T]) {
         assert!(mid <= self.len());
         // SAFETY: The assert above is only a safety-net as long as `self.len()` is correct
@@ -1868,7 +1859,6 @@ impl<T> *mut [T] {
     /// ```
     #[inline(always)]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn split_at_mut_unchecked(self, mid: usize) -> (*mut [T], *mut [T]) {
         let len = self.len();
         let ptr = self.as_mut_ptr();

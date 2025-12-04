@@ -4,7 +4,6 @@ use crate::intrinsics::transmute_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccessNoCoerce};
 use crate::mem::{ManuallyDrop, MaybeUninit};
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
@@ -14,7 +13,7 @@ use crate::{fmt, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::ops::{Deref as _, DerefMut as _, IndexRange};
+use crate::ops::{Deref as _, DerefMut as _, IndexRange, Try};
 
 mod iter_inner;
 
@@ -257,7 +256,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -266,7 +264,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -289,7 +286,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_by(n)
     }

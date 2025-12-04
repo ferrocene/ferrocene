@@ -4,7 +4,6 @@
     reason = "for core, alloc, and std internals until pattern types are further along"
 )]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
@@ -17,8 +16,7 @@ macro_rules! define_valid_range_type {
         $(#[$m:meta])*
         $vis:vis struct $name:ident($int:ident as $uint:ident in $low:literal..=$high:literal);
     )+) => {$(
-        #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, Eq))]
-        #[cfg_attr(feature = "ferrocene_certified", derive(Clone, Copy))]
+        #[derive(Clone, Copy, Eq)]
         #[repr(transparent)]
         #[rustc_layout_scalar_valid_range_start($low)]
         #[rustc_layout_scalar_valid_range_end($high)]
@@ -78,7 +76,6 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl Ord for $name {
             #[inline]
             fn cmp(&self, other: &Self) -> Ordering {
@@ -86,7 +83,6 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl PartialOrd for $name {
             #[inline]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -128,7 +124,6 @@ impl const Default for Nanoseconds {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct NonZeroU8Inner(u8 as u8 in 1..=0xff);
     pub struct NonZeroU16Inner(u16 as u16 in 1..=0xff_ff);
@@ -146,21 +141,18 @@ define_valid_range_type! {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff);
 }
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff_ffff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff_ffff);
     pub struct NonZeroIsizeInner(isize as usize in 1..=0xffff_ffff);
 }
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_certified"))]
 define_valid_range_type! {
     pub struct UsizeNoHighBit(usize as usize in 0..=0x7fff_ffff_ffff_ffff);
     pub struct NonZeroUsizeInner(usize as usize in 1..=0xffff_ffff_ffff_ffff);

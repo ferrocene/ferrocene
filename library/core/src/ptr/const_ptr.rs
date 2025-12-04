@@ -1,5 +1,4 @@
 use super::*;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -135,7 +134,6 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: PointeeSized,
@@ -363,7 +361,6 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -722,7 +719,6 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -908,7 +904,6 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
@@ -1627,7 +1622,6 @@ impl<T: PointeeSized> Eq for *const T {}
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Ord for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1644,7 +1638,6 @@ impl<T: PointeeSized> Ord for *const T {
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> PartialOrd for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]

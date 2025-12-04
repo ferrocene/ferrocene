@@ -601,6 +601,7 @@ use crate::{convert, hint, mem, panicking::panic};
 #[doc(search_unbox)]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy))]
 #[rustc_diagnostic_item = "Option"]
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -689,7 +690,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_none(&self) -> bool {
         !self.is_some()
     }
@@ -1925,7 +1925,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_replace", since = "1.31.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn replace(&mut self, value: T) -> Option<T> {
         mem::replace(self, Some(value))
     }
@@ -2387,7 +2386,6 @@ impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
 impl<T> crate::marker::StructuralPartialEq for Option<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: [const] PartialEq> const PartialEq for Option<T> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {

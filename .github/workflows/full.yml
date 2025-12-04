@@ -733,7 +733,6 @@ jobs:
       - dist-aarch64-unknown-linux-gnu
       - targets
       - docs
-      - docs-test
       - traceability-matrix
       - self-test-x86_64-unknown-linux-gnu
       - self-test-aarch64-unknown-linux-gnu

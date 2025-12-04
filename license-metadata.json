@@ -311,6 +311,23 @@
                 "type": "file"
               },
               {
+                "directories": [
+                  "tools/generate-tarball/src"
+                ],
+                "files": [
+                  "doc/internal-procedures/src/licensing.rst",
+                  "tools/generate-tarball/Cargo.toml"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              },
+              {
                 "license": {
                   "copyright": [
                     "The Rust Project Developers"
@@ -411,22 +428,6 @@
                 },
                 "name": "tools/flip-link",
                 "type": "directory"
-              },
-              {
-                "directories": [
-                  "tools/generate-tarball/src"
-                ],
-                "files": [
-                  "tools/generate-tarball/Cargo.toml"
-                ],
-                "license": {
-                  "copyright": [
-                    "The Ferrocene Developers",
-                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
-                  ],
-                  "spdx": "Apache-2.0 OR MIT"
-                },
-                "type": "group"
               }
             ],
             "license": {

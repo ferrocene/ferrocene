@@ -60,7 +60,9 @@ RUN <<-EOF
         zlib1g-dev \
         moreutils \
         zstd \
-        sudo
+        sudo \
+        gcc-10 \
+        g++-10
 
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
@@ -71,6 +73,8 @@ RUN <<-EOF
         apt-install \
             g++-aarch64-linux-gnu \
             gcc-aarch64-linux-gnu \
+            g++-10-aarch64-linux-gnu \
+            gcc-10-aarch64-linux-gnu \
             binutils-aarch64-linux-gnu \
             libc6-dev-arm64-cross
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
@@ -78,11 +82,22 @@ RUN <<-EOF
         apt-install \
             g++-x86-64-linux-gnu \
             gcc-x86-64-linux-gnu \
+            g++-10-x86-64-linux-gnu \
+            gcc-10-x86-64-linux-gnu \
             binutils-x86-64-linux-gnu \
             libc6-dev-amd64-cross
     fi
 
+    # make gcc 10 default
+    sudo update-alternatives \
+      --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
+      --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
+      --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
+      --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
+      --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
+    
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
+    # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
     apt-install gcc-arm-none-eabi
 
     # Needed for the wasm32-unknown-unknown target

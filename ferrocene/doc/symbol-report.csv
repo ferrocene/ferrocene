@@ -3810,7 +3810,6 @@ core::num::<impl i128>::overflowing_add
 core::num::<impl i128>::overflowing_mul
 core::num::<impl i128>::overflowing_neg
 core::num::<impl i128>::overflowing_sub
-core::num::<impl i128>::rotate_left
 core::num::<impl i128>::to_le
 core::num::<impl i128>::to_le_bytes
 core::num::<impl i128>::to_ne_bytes
@@ -3846,7 +3845,6 @@ core::num::<impl i16>::overflowing_add
 core::num::<impl i16>::overflowing_mul
 core::num::<impl i16>::overflowing_neg
 core::num::<impl i16>::overflowing_sub
-core::num::<impl i16>::rotate_left
 core::num::<impl i16>::to_le
 core::num::<impl i16>::to_le_bytes
 core::num::<impl i16>::to_ne_bytes
@@ -3882,7 +3880,6 @@ core::num::<impl i32>::overflowing_add
 core::num::<impl i32>::overflowing_mul
 core::num::<impl i32>::overflowing_neg
 core::num::<impl i32>::overflowing_sub
-core::num::<impl i32>::rotate_left
 core::num::<impl i32>::to_le
 core::num::<impl i32>::to_le_bytes
 core::num::<impl i32>::to_ne_bytes
@@ -3918,7 +3915,6 @@ core::num::<impl i64>::overflowing_add
 core::num::<impl i64>::overflowing_mul
 core::num::<impl i64>::overflowing_neg
 core::num::<impl i64>::overflowing_sub
-core::num::<impl i64>::rotate_left
 core::num::<impl i64>::to_le
 core::num::<impl i64>::to_le_bytes
 core::num::<impl i64>::to_ne_bytes
@@ -3954,7 +3950,6 @@ core::num::<impl i8>::overflowing_add
 core::num::<impl i8>::overflowing_mul
 core::num::<impl i8>::overflowing_neg
 core::num::<impl i8>::overflowing_sub
-core::num::<impl i8>::rotate_left
 core::num::<impl i8>::to_le
 core::num::<impl i8>::to_le_bytes
 core::num::<impl i8>::to_ne_bytes
@@ -3990,7 +3985,6 @@ core::num::<impl isize>::overflowing_add
 core::num::<impl isize>::overflowing_mul
 core::num::<impl isize>::overflowing_neg
 core::num::<impl isize>::overflowing_sub
-core::num::<impl isize>::rotate_left
 core::num::<impl isize>::to_le
 core::num::<impl isize>::to_le_bytes
 core::num::<impl isize>::to_ne_bytes
@@ -4492,11 +4486,13 @@ core::panicking::panic_const::panic_const_shr_overflow
 core::panicking::panic_const::panic_const_sub_overflow
 core::panicking::panic_fmt
 core::panicking::panic_fmt::panic_impl
+core::panicking::panic_in_cleanup
 core::panicking::panic_nounwind
 core::panicking::panic_nounwind_fmt
 core::panicking::panic_nounwind_fmt::compiletime
 core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime::panic_impl
+core::panicking::panic_nounwind_nobacktrace
 core::ptr::align_offset
 core::ptr::align_offset::mod_inv
 core::ptr::alignment::Alignment::as_usize
@@ -4504,10 +4500,6 @@ core::ptr::alignment::Alignment::new
 core::ptr::alignment::Alignment::new_unchecked
 core::ptr::alignment::Alignment::new_unchecked::precondition_check
 core::ptr::const_ptr::<impl *const T>::add
-core::ptr::const_ptr::<impl *const T>::add::precondition_check
-core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap
-core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap::compiletime
-core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap::runtime
 core::ptr::const_ptr::<impl *const T>::addr
 core::ptr::const_ptr::<impl *const T>::align_offset
 core::ptr::const_ptr::<impl *const T>::byte_add
@@ -4553,10 +4545,6 @@ core::ptr::metadata::from_raw_parts
 core::ptr::metadata::from_raw_parts_mut
 core::ptr::metadata::metadata
 core::ptr::mut_ptr::<impl *mut T>::add
-core::ptr::mut_ptr::<impl *mut T>::add::precondition_check
-core::ptr::mut_ptr::<impl *mut T>::add::runtime_add_nowrap
-core::ptr::mut_ptr::<impl *mut T>::add::runtime_add_nowrap::compiletime
-core::ptr::mut_ptr::<impl *mut T>::add::runtime_add_nowrap::runtime
 core::ptr::mut_ptr::<impl *mut T>::addr
 core::ptr::mut_ptr::<impl *mut T>::as_mut
 core::ptr::mut_ptr::<impl *mut T>::cast
@@ -4572,10 +4560,6 @@ core::ptr::mut_ptr::<impl *mut T>::offset_from_unsigned
 core::ptr::mut_ptr::<impl *mut T>::read
 core::ptr::mut_ptr::<impl *mut T>::replace
 core::ptr::mut_ptr::<impl *mut T>::sub
-core::ptr::mut_ptr::<impl *mut T>::sub::precondition_check
-core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap
-core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::compiletime
-core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::runtime
 core::ptr::mut_ptr::<impl *mut T>::to_raw_parts
 core::ptr::mut_ptr::<impl *mut T>::wrapping_add
 core::ptr::mut_ptr::<impl *mut T>::wrapping_offset
@@ -4604,7 +4588,6 @@ core::ptr::non_null::NonNull::<T>::sub
 core::ptr::null
 core::ptr::null_mut
 core::ptr::read
-core::ptr::read::precondition_check
 core::ptr::read_unaligned
 core::ptr::read_volatile
 core::ptr::read_volatile::precondition_check
@@ -4625,7 +4608,6 @@ core::ptr::swap_nonoverlapping_const
 core::ptr::without_provenance
 core::ptr::without_provenance_mut
 core::ptr::write
-core::ptr::write::precondition_check
 core::ptr::write_bytes
 core::ptr::write_bytes::precondition_check
 core::ptr::write_volatile

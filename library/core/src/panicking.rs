@@ -262,9 +262,11 @@ pub const fn panic_nounwind(expr: &'static str) -> ! {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
+    #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ true);
+    #[cfg(feature = "ferrocene_certified")]
+    panic_nounwind_fmt(&expr, /* force_no_backtrace */ true);
 }
 
 #[inline]
@@ -389,7 +391,6 @@ fn panic_cannot_unwind() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[lang = "panic_in_cleanup"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn panic_in_cleanup() -> ! {
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind_nobacktrace("panic in a destructor during cleanup")

@@ -392,7 +392,6 @@ pub use self::adapters::ByRefSized;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 pub use self::adapters::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -472,7 +471,6 @@ pub use self::sources::{RepeatWith, repeat_with};
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::sources::{Successors, successors};
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::FusedIterator;
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -500,7 +498,7 @@ pub use self::traits::{
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 pub use self::{
-    adapters::{Enumerate, Filter, Map, Rev, Skip, StepBy, Take, Zip},
+    adapters::{Chain, Enumerate, Filter, Map, Rev, Skip, StepBy, Take, Zip},
     traits::{
         DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator, Sum,
     },

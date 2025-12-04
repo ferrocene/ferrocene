@@ -30,7 +30,10 @@ use crate::{ascii, mem};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use {self::pattern::Pattern, crate::mem};
+use {
+    self::pattern::Pattern,
+    crate::{mem, slice::SliceIndex},
+};
 
 pub mod pattern;
 
@@ -90,7 +93,10 @@ pub use validations::{next_code_point, utf8_char_width};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-pub use {error::Utf8Error, iter::Chars};
+pub use {
+    error::Utf8Error,
+    iter::{Bytes, Chars},
+};
 
 #[inline(never)]
 #[cold]
@@ -705,7 +711,6 @@ impl str {
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn get_unchecked<I: SliceIndex<str>>(&self, i: I) -> &I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -1175,7 +1180,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn bytes(&self) -> Bytes<'_> {
         Bytes(self.as_bytes().iter().copied())
     }
@@ -2910,7 +2914,6 @@ impl str {
     #[rustc_const_stable(feature = "const_eq_ignore_ascii_case", since = "1.89.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn eq_ignore_ascii_case(&self, other: &str) -> bool {
         self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
     }

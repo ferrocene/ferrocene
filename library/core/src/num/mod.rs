@@ -57,7 +57,6 @@ mod int_macros; // import int_impl!
 mod uint_macros; // import uint_impl!
 
 mod error;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod int_log10;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod int_sqrt;
@@ -475,7 +474,6 @@ impl isize {
 }
 
 /// If the bit selected by this mask is set, ascii is lower case.
-#[cfg(not(feature = "ferrocene_certified"))]
 const ASCII_CASE_MASK: u8 = 0b0010_0000;
 
 impl u8 {
@@ -601,7 +599,6 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_ascii_lowercase(&self) -> u8 {
         // Set the 6th bit if this is an uppercase letter
         *self | (self.is_ascii_uppercase() as u8 * ASCII_CASE_MASK)
@@ -629,7 +626,6 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn eq_ignore_ascii_case(&self, other: &u8) -> bool {
         self.to_ascii_lowercase() == other.to_ascii_lowercase()
     }
@@ -755,7 +751,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_ascii_uppercase(&self) -> bool {
         matches!(*self, b'A'..=b'Z')
     }
@@ -1183,7 +1178,6 @@ impl u16 {
     #[must_use]
     #[unstable(feature = "utf16_extra", issue = "94919")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_utf16_surrogate(self) -> bool {
         matches!(self, 0xD800..=0xDFFF)
     }

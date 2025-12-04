@@ -215,8 +215,7 @@
 #![cfg_attr(
     feature = "ferrocene_certified",
     expect(rustdoc::broken_intra_doc_links),
-    expect(rustdoc::private_intra_doc_links),
-    expect(unused_attributes)
+    expect(rustdoc::private_intra_doc_links)
 )]
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
@@ -311,7 +310,6 @@ pub mod ub_checks;
 
 /* Core language traits */
 
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod borrow;
 pub mod clone;
 pub mod cmp;
@@ -370,7 +368,6 @@ pub mod sync;
 pub mod unsafe_binder;
 
 pub mod fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
 pub mod slice;
 pub mod str;
@@ -426,7 +423,6 @@ pub mod primitive;
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod arch;
 
 // Pull in the `core_simd` crate directly into core. The contents of

@@ -5,7 +5,6 @@ use super::super::{
     Product, Rev, Scan, Skip, SkipWhile, StepBy, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce,
     Zip, try_process,
 };
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::TrustedLen;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::array;
@@ -19,7 +18,8 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[rustfmt::skip]
 use {
     super::super::{
-        Cloned, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum, Take, Zip,
+        Chain, Cloned, Copied, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum,
+        Take, Zip,
     },
     crate::ops::{ControlFlow, Try},
 };
@@ -264,7 +264,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized,
@@ -510,7 +509,6 @@ pub trait Iterator {
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,
@@ -2512,7 +2510,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn try_for_each<F, R>(&mut self, f: F) -> R
     where
         Self: Sized,
@@ -3464,7 +3461,6 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "iter_copied", since = "1.36.0")]
     #[rustc_diagnostic_item = "iter_copied"]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn copied<'a, T>(self) -> Copied<Self>
     where
         T: Copy + 'a,
@@ -3835,7 +3831,6 @@ pub trait Iterator {
     /// assert_eq!([1].iter().eq([1, 2].iter()), false);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn eq<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3859,7 +3854,6 @@ pub trait Iterator {
     /// assert!(xs.iter().eq_by(ys, |x, y| x * x == y));
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     fn eq_by<I, F>(self, other: I, eq: F) -> bool
     where
         Self: Sized,
@@ -4104,14 +4098,12 @@ pub trait Iterator {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 trait SpecIterEq<B: Iterator>: Iterator {
     fn spec_iter_eq<F>(self, b: B, f: F) -> bool
     where
         F: FnMut(Self::Item, <B as Iterator>::Item) -> ControlFlow<()>;
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator, B: Iterator> SpecIterEq<B> for A {
     #[inline]
     default fn spec_iter_eq<F>(self, b: B, f: F) -> bool
@@ -4122,7 +4114,6 @@ impl<A: Iterator, B: Iterator> SpecIterEq<B> for A {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<A: Iterator + TrustedLen, B: Iterator + TrustedLen> SpecIterEq<B> for A {
     #[inline]
     fn spec_iter_eq<F>(self, b: B, f: F) -> bool
@@ -4154,7 +4145,6 @@ impl<A: Iterator + TrustedLen, B: Iterator + TrustedLen> SpecIterEq<B> for A {
 /// Isolates the logic shared by ['cmp_by'](Iterator::cmp_by),
 /// ['partial_cmp_by'](Iterator::partial_cmp_by), and ['eq_by'](Iterator::eq_by).
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>
 where
     A: Iterator,
@@ -4185,7 +4175,6 @@ where
 }
 
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 fn iter_eq<A, B, F>(a: A, b: B, f: F) -> bool
 where
     A: Iterator,

@@ -70,7 +70,6 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     const unsafe fn next_back_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -106,7 +105,6 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_back_by`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn take_suffix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -178,7 +176,6 @@ impl Iterator for IndexRange {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl DoubleEndedIterator for IndexRange {
     #[inline]
     fn next_back(&mut self) -> Option<usize> {

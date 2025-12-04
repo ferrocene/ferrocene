@@ -37,5 +37,5 @@ pub use self::{
     double_ended::DoubleEndedIterator,
     exact_size::ExactSizeIterator,
     iterator::Iterator,
-    marker::TrustedLen,
+    marker::{FusedIterator, TrustedLen},
 };

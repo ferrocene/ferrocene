@@ -10,6 +10,11 @@ use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 use crate::marker::{Freeze, PointeeSized};
 use crate::ptr::NonNull;
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::hash::Hash;
+
 /// Provides the pointer metadata type of any pointed-to type.
 ///
 /// # Pointer metadata
@@ -73,7 +78,7 @@ pub trait Pointee: PointeeSized {
     #[lang = "metadata_type"]
     #[cfg(feature = "ferrocene_certified")]
     #[rustfmt::skip]
-    type Metadata: /* fmt::Debug */ Copy + Send + Sync + Ord /* Hash */ + Unpin + Freeze;
+    type Metadata: /* fmt::Debug */ Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.

@@ -32,11 +32,9 @@ pub unsafe trait TrustedFused {}
 // FIXME: this should be a #[marker] and have another blanket impl for T: TrustedFused
 // but that ICEs iter::Fuse specializations.
 #[lang = "fused_iterator"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait FusedIterator: Iterator {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<I: FusedIterator + ?Sized> FusedIterator for &mut I {}
 
 /// An iterator that reports an accurate length using size_hint.

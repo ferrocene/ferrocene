@@ -12,7 +12,7 @@ use crate::slice::{self, SliceIndex};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::marker::PointeeSized;
+use crate::{marker::PointeeSized, slice::SliceIndex};
 
 impl<T: PointeeSized> *mut T {
     #[doc = include_str!("docs/is_null.md")]
@@ -234,7 +234,6 @@ impl<T: PointeeSized> *mut T {
     /// The pointer can be later reconstructed with [`from_raw_parts_mut`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_raw_parts(self) -> (*mut (), <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self))
     }
@@ -1914,7 +1913,6 @@ impl<T> *mut [T] {
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn get_unchecked_mut<I>(self, index: I) -> *mut I::Output
     where
         I: [const] SliceIndex<[T]>,

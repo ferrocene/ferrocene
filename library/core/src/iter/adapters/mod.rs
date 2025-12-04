@@ -9,10 +9,8 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 mod array_chunks;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod by_ref_sized;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod chain;
 mod cloned;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod copied;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod cycle;
@@ -59,7 +57,6 @@ pub use self::chain::chain;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 pub use self::cloned::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::copied::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -97,8 +94,8 @@ pub use self::{
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
 pub use self::{
-    enumerate::Enumerate, filter::Filter, map::Map, rev::Rev, skip::Skip, step_by::StepBy,
-    take::Take, zip::Zip,
+    chain::Chain, enumerate::Enumerate, filter::Filter, map::Map, rev::Rev, skip::Skip,
+    step_by::StepBy, take::Take, zip::Zip,
 };
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline

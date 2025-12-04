@@ -2,7 +2,6 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use super::pattern::{DoubleEndedSearcher, Pattern, ReverseSearcher, Searcher};
-#[cfg(not(feature = "ferrocene_certified"))]
 use super::validations::{next_code_point, next_code_point_reverse};
 #[cfg(not(feature = "ferrocene_certified"))]
 use super::{
@@ -27,7 +26,10 @@ use crate::{char as char_mod, option};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use {super::validations::next_code_point, crate::slice};
+use {
+    super::from_utf8_unchecked,
+    crate::{iter::Copied, slice},
+};
 
 /// An iterator over the [`char`]s of a string slice.
 ///
@@ -119,7 +121,6 @@ impl<'a> Iterator for Chars<'a> {
         (len.div_ceil(4), Some(len))
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     fn last(mut self) -> Option<char> {
         // No need to go through the entire string.
@@ -138,7 +139,6 @@ impl fmt::Debug for Chars<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Chars<'a> {
     #[inline]
@@ -153,7 +153,6 @@ impl<'a> DoubleEndedIterator for Chars<'a> {
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for Chars<'_> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Chars<'a> {
     /// Views the underlying data as a subslice of the original data.
     ///
@@ -305,13 +304,11 @@ impl<'a> CharIndices<'a> {
 /// See its documentation for more.
 ///
 /// [`bytes`]: str::bytes
-#[cfg(not(feature = "ferrocene_certified"))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
 pub struct Bytes<'a>(pub(super) Copied<slice::Iter<'a, u8>>);
 
-#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Iterator for Bytes<'_> {
     type Item = u8;
@@ -326,6 +323,7 @@ impl Iterator for Bytes<'_> {
         self.0.size_hint()
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     fn count(self) -> usize {
         self.0.count()
@@ -373,6 +371,7 @@ impl Iterator for Bytes<'_> {
         self.0.position(predicate)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where
@@ -381,6 +380,7 @@ impl Iterator for Bytes<'_> {
         self.0.rposition(predicate)
     }
 
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> u8 {
         // SAFETY: the caller must uphold the safety contract

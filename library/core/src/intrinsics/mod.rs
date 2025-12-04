@@ -1800,7 +1800,6 @@ pub const fn ctpop<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn ctlz<T: Copy>(x: T) -> u32;
 
 /// Like `ctlz`, but extra-unsafe as it returns `undef` when
@@ -1823,7 +1822,6 @@ pub const fn ctlz<T: Copy>(x: T) -> u32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 
 /// Returns the number of trailing unset bits (zeroes) in an integer type `T`.
@@ -3421,7 +3419,6 @@ pub const fn copysignf32(x: f32, y: f32) -> f32;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn copysignf64(x: f64, y: f64) -> f64;
 
 /// Copies the sign from `y` to `x` for `f128` values.

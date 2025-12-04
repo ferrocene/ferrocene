@@ -384,8 +384,7 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
-#[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq, PartialOrd, Ord, PartialEq))]
+#[derive_const(Clone, Eq, PartialOrd, Ord, PartialEq)]
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.
 // It has no special behavior, but does require that the three variants
@@ -1111,7 +1110,6 @@ pub const trait Ord: [const] Eq + [const] PartialOrd<Self> + PointeeSized {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro Ord($item:item) {
     /* compiler built-in */
 }

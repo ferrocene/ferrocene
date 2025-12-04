@@ -1,14 +1,25 @@
 //! [`CStr`] and its related types.
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
 use crate::ffi::c_char;
 use crate::intrinsics::const_eval_select;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::FusedIterator;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::PhantomData;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
 use crate::slice::memchr;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, ops, slice, str};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_certified")]
+#[rustfmt::skip]
+use crate::slice;
 
 // FIXME: because this is doc(inline)d, we *have* to use intra-doc links because the actual link
 //   depends on where the item is being documented. however, since this is libcore, we can't
@@ -88,7 +99,7 @@ use crate::{fmt, ops, slice, str};
 /// ```
 ///
 /// [str]: prim@str "str"
-#[derive(PartialEq, Eq, Hash)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq, Hash))]
 #[stable(feature = "core_c_str", since = "1.64.0")]
 #[rustc_diagnostic_item = "cstr_type"]
 #[rustc_has_incoherent_inherent_impls]
@@ -122,7 +133,7 @@ pub struct CStr {
 ///
 /// let _: FromBytesWithNulError = CStr::from_bytes_with_nul(b"f\0oo").unwrap_err();
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Copy, PartialEq, Eq, Debug))]
 #[stable(feature = "core_c_str", since = "1.64.0")]
 pub enum FromBytesWithNulError {
     /// Data provided contains an interior nul byte at byte `position`.
@@ -134,6 +145,7 @@ pub enum FromBytesWithNulError {
     NotNulTerminated,
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "frombyteswithnulerror_impls", since = "1.17.0")]
 impl fmt::Display for FromBytesWithNulError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -146,6 +158,7 @@ impl fmt::Display for FromBytesWithNulError {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "frombyteswithnulerror_impls", since = "1.17.0")]
 impl Error for FromBytesWithNulError {}
 
@@ -155,10 +168,12 @@ impl Error for FromBytesWithNulError {}
 /// within the slice.
 ///
 /// This error is created by the [`CStr::from_bytes_until_nul`] method.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[derive(Clone, PartialEq, Eq, Debug)]
 #[stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
 pub struct FromBytesUntilNulError(());
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
 impl fmt::Display for FromBytesUntilNulError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -168,6 +183,7 @@ impl fmt::Display for FromBytesUntilNulError {
 
 /// Shows the underlying bytes as a normal string, with invalid UTF-8
 /// presented as hex escape sequences.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "cstr_debug", since = "1.3.0")]
 impl fmt::Debug for CStr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -175,6 +191,7 @@ impl fmt::Debug for CStr {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "cstr_default", since = "1.10.0")]
 impl Default for &CStr {
     #[inline]
@@ -293,6 +310,7 @@ impl CStr {
     /// assert_eq!(c_str.to_str().unwrap(), "AAAAAAAA");
     /// ```
     ///
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
     #[rustc_const_stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
     pub const fn from_bytes_until_nul(bytes: &[u8]) -> Result<&CStr, FromBytesUntilNulError> {
@@ -474,6 +492,7 @@ impl CStr {
     ///
     /// assert_eq!(unsafe { CStr::from_ptr(ptr) }, c"HI!");
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -485,6 +504,7 @@ impl CStr {
     }
 
     /// We could eventually expose this publicly, if we wanted.
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[must_use]
     const fn as_non_null_ptr(&self) -> NonNull<c_char> {
@@ -506,6 +526,7 @@ impl CStr {
     /// assert_eq!(c"foo".count_bytes(), 3);
     /// assert_eq!(c"".count_bytes(), 0);
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[must_use]
     #[doc(alias("len", "strlen"))]
@@ -523,6 +544,7 @@ impl CStr {
     /// assert!(!c"foo".is_empty());
     /// assert!(c"".is_empty());
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[stable(feature = "cstr_is_empty", since = "1.71.0")]
     #[rustc_const_stable(feature = "cstr_is_empty", since = "1.71.0")]
@@ -547,6 +569,7 @@ impl CStr {
     /// ```
     /// assert_eq!(c"foo".to_bytes(), b"foo");
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
@@ -596,6 +619,7 @@ impl CStr {
     ///
     /// assert!(c"foo".bytes().eq(*b"foo"));
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[inline]
     #[unstable(feature = "cstr_bytes", issue = "112115")]
     pub fn bytes(&self) -> Bytes<'_> {
@@ -615,6 +639,7 @@ impl CStr {
     /// ```
     /// assert_eq!(c"foo".to_str(), Ok("foo"));
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[stable(feature = "cstr_to_str", since = "1.4.0")]
     #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
     pub const fn to_str(&self) -> Result<&str, str::Utf8Error> {
@@ -641,6 +666,7 @@ impl CStr {
     /// let cstr = c"Hello, world!";
     /// println!("{}", cstr.display());
     /// ```
+    #[cfg(not(feature = "ferrocene_certified"))]
     #[unstable(feature = "cstr_display", issue = "139984")]
     #[must_use = "this does not display the `CStr`; \
                   it returns an object that can be displayed"]
@@ -650,6 +676,7 @@ impl CStr {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "c_string_eq_c_str", since = "1.90.0")]
 impl PartialEq<&Self> for CStr {
     #[inline]
@@ -666,6 +693,7 @@ impl PartialEq<&Self> for CStr {
 // `.to_bytes()` representations are compared instead of the inner `[c_char]`s,
 // because `c_char` is `i8` (not `u8`) on some platforms.
 // That is why this is implemented manually and not derived.
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl PartialOrd for CStr {
     #[inline]
@@ -674,6 +702,7 @@ impl PartialOrd for CStr {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Ord for CStr {
     #[inline]
@@ -682,6 +711,7 @@ impl Ord for CStr {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "cstr_range_from", since = "1.47.0")]
 impl ops::Index<ops::RangeFrom<usize>> for CStr {
     type Output = CStr;
@@ -705,6 +735,7 @@ impl ops::Index<ops::RangeFrom<usize>> for CStr {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[stable(feature = "cstring_asref", since = "1.7.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsRef<CStr> for CStr {
@@ -753,6 +784,7 @@ const unsafe fn strlen(ptr: *const c_char) -> usize {
 /// See its documentation for more.
 ///
 /// [`bytes`]: CStr::bytes
+#[cfg(not(feature = "ferrocene_certified"))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[unstable(feature = "cstr_bytes", issue = "112115")]
 #[derive(Clone, Debug)]
@@ -762,12 +794,15 @@ pub struct Bytes<'a> {
     phantom: PhantomData<&'a [c_char]>,
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "cstr_bytes", issue = "112115")]
 unsafe impl Send for Bytes<'_> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "cstr_bytes", issue = "112115")]
 unsafe impl Sync for Bytes<'_> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Bytes<'a> {
     #[inline]
     fn new(s: &'a CStr) -> Self {
@@ -783,6 +818,7 @@ impl<'a> Bytes<'a> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "cstr_bytes", issue = "112115")]
 impl Iterator for Bytes<'_> {
     type Item = u8;
@@ -818,5 +854,6 @@ impl Iterator for Bytes<'_> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 #[unstable(feature = "cstr_bytes", issue = "112115")]
 impl FusedIterator for Bytes<'_> {}

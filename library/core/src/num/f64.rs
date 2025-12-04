@@ -504,7 +504,6 @@ impl f64 {
     pub const NEG_INFINITY: f64 = -1.0_f64 / 0.0_f64;
 
     /// Sign bit
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) const SIGN_MASK: u64 = 0x8000_0000_0000_0000;
 
     /// Exponent mask
@@ -537,7 +536,6 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_nan(self) -> bool {
         self != self
     }
@@ -561,7 +559,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_infinite(self) -> bool {
         // Getting clever with transmutation can result in incorrect answers on some FPUs
         // FIXME: alter the Rust <-> Rust calling convention to prevent this problem.
@@ -702,7 +699,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_sign_positive(self) -> bool {
         !self.is_sign_negative()
     }
@@ -712,7 +708,6 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
     #[inline]
     #[doc(hidden)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_positive(self) -> bool {
         self.is_sign_positive()
     }
@@ -738,7 +733,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_sign_negative(self) -> bool {
         // IEEE754 says: isSignMinus(x) is true if and only if x has negative sign. isSignMinus
         // applies to zeros and NaNs as well.
@@ -750,7 +744,6 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
     #[inline]
     #[doc(hidden)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_negative(self) -> bool {
         self.is_sign_negative()
     }
@@ -1542,7 +1535,6 @@ impl f64 {
     #[stable(feature = "copysign", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn copysign(self, sign: f64) -> f64 {
         intrinsics::copysignf64(self, sign)
     }

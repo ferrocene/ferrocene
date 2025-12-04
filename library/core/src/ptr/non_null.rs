@@ -22,7 +22,11 @@ use crate::{fmt, hash, intrinsics, mem, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_certified")]
 #[rustfmt::skip]
-use crate::{intrinsics, marker::PointeeSized, mem};
+use crate::{
+    intrinsics,
+    marker::PointeeSized,
+    mem::{self, SizedTypeProperties},
+};
 
 /// `*mut T` but non-zero and [covariant].
 ///
@@ -596,7 +600,6 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset(self, count: isize) -> Self
     where
         T: Sized,
@@ -752,7 +755,6 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1791,7 +1793,6 @@ impl<T: PointeeSized> const From<Unique<T>> for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> const From<&mut T> for NonNull<T> {
     /// Converts a `&mut T` to a `NonNull<T>`.
     ///

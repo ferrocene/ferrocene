@@ -77,7 +77,6 @@ macro_rules! iterator {
             ///
             /// The iterator must not be empty
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             unsafe fn next_back_unchecked(&mut self) -> $elem {
                 // SAFETY: the caller promised it's not empty, so
                 // the offsetting is in-bounds and there's an element to return.
@@ -118,7 +117,6 @@ macro_rules! iterator {
             // returning the new end.
             // Unsafe because the offset must not exceed `self.len()`.
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_certified"))]
             unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {
                 if_zst!(mut self,
                     // SAFETY: By our precondition, `offset` can be at most the
@@ -234,7 +232,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn last(mut self) -> Option<$elem> {
                 self.next_back()
             }
@@ -420,7 +417,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "rust1", since = "1.0.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl<'a, T> DoubleEndedIterator for $name<'a, T> {
             #[inline]
             fn next_back(&mut self) -> Option<$elem> {

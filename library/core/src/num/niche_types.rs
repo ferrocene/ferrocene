@@ -7,7 +7,6 @@
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::StructuralPartialEq;
 
@@ -90,7 +89,6 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl Hash for $name {
             // Required method
             fn hash<H: Hasher>(&self, state: &mut H) {

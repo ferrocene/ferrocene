@@ -100,8 +100,9 @@ approval from the release managers.
 
 Finally, you need to send another PR targeting the ``release/1.NN`` branch,
 changing ``ferrocene/ci/channel`` back to ``beta`` and incrementing the point
-release version in ``ferrocene/version`` by 1. Note that you might need to
-remove some digital signatures when you increment the version number.
+release version in ``ferrocene/version`` by 1. Note that you will need to
+remove digital signatures, because they will be invalidated by the version
+change. The CI also ensures that the signatures remain valid.
 
 Remove upcoming notes in the ``main`` branch
 --------------------------------------------

@@ -11,7 +11,7 @@ pub(crate) struct CertifiedApiDocs {
 
 impl Step for CertifiedApiDocs {
     type Output = PathBuf;
-    const DEFAULT: bool = false;
+    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-certified-api-docs")

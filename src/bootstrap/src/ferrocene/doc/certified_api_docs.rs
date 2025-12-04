@@ -11,14 +11,18 @@ pub(crate) struct CertifiedApiDocs {
 
 impl Step for CertifiedApiDocs {
     type Output = PathBuf;
-    const DEFAULT: bool = false;
+    const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-certified-api-docs")
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CertifiedApiDocs { target: run.target });
+        if run.target.try_certified_equivalent().is_some() {
+            run.builder.ensure(CertifiedApiDocs { target: run.target });
+        } else {
+            run.builder.info(&format!("No certified target for {:?}. skipping", run.target));
+        }
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {

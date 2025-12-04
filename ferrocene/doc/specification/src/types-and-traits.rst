@@ -979,7 +979,30 @@ parameters.
 
 :dp:`fls_hbn1l42xmr3h`
 A :t:`variadic part` shall be specified only when the :t:`ABI` of the
-:t:`function pointer type` is either ``extern "C"`` or ``extern "cdecl"``.
+:t:`function pointer type` is one of the following:
+
+* :dp:`fls_OR85NVifPwjr`
+  ``extern "C"``
+* :dp:`fls_4s2IdfYDzPrX`
+  ``extern "C-unwind"``
+* :dp:`fls_ZJJppPfiJRou`
+  ``extern "aapcs"``
+* :dp:`fls_jOyZh9ujWWHQ`
+  ``extern "aapcs-unwind"``
+* :dp:`fls_Xdr0bFwxhWiB`
+  ``extern "cdecl"``
+* :dp:`fls_DpTFEHZAABdD`
+  ``extern "cdecl-unwind"``
+* :dp:`fls_eHPWHrvs7ETl`
+  ``extern "sysv64"``
+* :dp:`fls_mjCrvmikm58M`
+  ``extern "sysv64-unwind"``
+* :dp:`fls_4EUb9zFatZ97`
+  ``extern "win64"``
+* :dp:`fls_4B4B5FIqAes9`
+  ``extern "win64-unwind"``
+* :dp:`fls_b7FTlWfnX2OI`
+  ``extern "efiapi"``
 
 :dp:`fls_g1iYVw7upBnH`
 The :t:`return type` of a :t:`function pointer type` is determined as follows:

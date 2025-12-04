@@ -15,7 +15,6 @@ pub use self::variance::{
     PhantomContravariant, PhantomContravariantLifetime, PhantomCovariant, PhantomCovariantLifetime,
     PhantomInvariant, PhantomInvariantLifetime, Variance, variance,
 };
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cell::UnsafeCell;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp;
@@ -935,7 +934,6 @@ pub trait DiscriminantKind {
 pub unsafe auto trait Freeze {}
 
 #[unstable(feature = "freeze", issue = "121675")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> !Freeze for UnsafeCell<T> {}
 marker_impls! {
     #[unstable(feature = "freeze", issue = "121675")]

@@ -302,6 +302,8 @@ getgrouplist
 getline
 getpwent
 getpwnam_r
+getresgid
+getresuid
 getrlimit
 getrusage
 getservbyport
@@ -324,6 +326,8 @@ reallocarray
 rlim_t
 setgrent
 setpwent
+setresgid
+setresuid
 setrlimit
 setservent
 sigqueue

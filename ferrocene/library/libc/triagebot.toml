@@ -18,6 +18,11 @@ check-commits = false # don't forbid links to issues
 # Prevents mentions in commits to avoid users being spammed
 [no-mentions]
 
+# Enable comments linking to triagebot range-diff when a PR is rebased
+# onto a different base commit
+# Documentation at: https://forge.rust-lang.org/triagebot/range-diff.html
+[range-diff]
+
 [autolabel."A-CI"]
 trigger_files = [
     ".cirrus.yml",
@@ -29,7 +34,10 @@ trigger_files = [
 new_pr = true
 
 [autolabel."O-android"]
-trigger_files = ["src/unix/linux_like/android"]
+trigger_files = [
+    "src/new/bionic_libc",
+    "src/unix/linux_like/android",
+]
 
 [autolabel."O-arm"]
 trigger_files = [
@@ -70,7 +78,11 @@ trigger_files = [
 trigger_files = ["src/unix/linux_like/mod.rs"]
 
 [autolabel."O-macos"]
-trigger_files = ["src/unix/bsd/apple"]
+trigger_files = [
+    "src/unix/bsd/apple",
+    "src/new/apple_lib",
+    "src/new/apple_xnu",
+]
 
 [autolabel."O-mips"]
 trigger_files = [

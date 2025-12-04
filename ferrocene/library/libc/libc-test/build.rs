@@ -2,9 +2,20 @@
 #![allow(clippy::match_like_matches_macro)]
 
 use std::fs::File;
-use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::path::{Path, PathBuf};
-use std::{env, io};
+use std::io::{
+    BufRead,
+    BufReader,
+    BufWriter,
+    Write,
+};
+use std::path::{
+    Path,
+    PathBuf,
+};
+use std::{
+    env,
+    io,
+};
 
 fn do_cc() {
     let target = env::var("TARGET").unwrap();
@@ -72,10 +83,16 @@ fn do_ctest() {
 fn ctest_cfg() -> ctest::TestGenerator {
     let mut cfg = ctest::TestGenerator::new();
     cfg.skip_private(true);
-    let libc_cfgs = ["libc_thread_local"];
-    for f in &libc_cfgs {
-        cfg.cfg(f, None);
-    }
+
+    // Skip anonymous unions/structs.
+    cfg.skip_union(|u| u.ident().starts_with("__c_anonymous_"));
+    cfg.skip_struct(|s| s.ident().starts_with("__c_anonymous_"));
+    cfg.skip_alias(|ty| ty.ident().starts_with("__c_anonymous_"));
+
+    // __uint128 is not declared in C, but is an alias we export.
+    // FIXME(1.0): These aliases will eventually be removed.
+    cfg.skip_alias(|ty| ty.ident() == "__uint128");
+
     cfg
 }
 
@@ -100,7 +117,7 @@ fn do_semver() {
     // maintain a file for Android.
     // NOTE: AIX doesn't include the unix file because there are definitions
     // missing on AIX. It is easier to maintain a file for AIX.
-    if family != os && !matches!(os.as_str(), "android" | "aix") {
+    if family != os && !matches!(os.as_str(), "android" | "aix") && os != "vxworks" {
         process_semver_file(&mut output, &mut semver_root, &family);
     }
     // We don't do semver for unknown targets.
@@ -163,22 +180,24 @@ fn main() {
 }
 
 macro_rules! headers {
-    ($cfg:ident: [$m:expr]: $header:literal) => {
-        if $m {
-            $cfg.header($header);
-        }
-    };
-    ($cfg:ident: $header:literal) => {
-        $cfg.header($header);
-    };
-    ($($cfg:ident: $([$c:expr]:)* $header:literal,)*) => {
-        $(headers!($cfg: $([$c]:)* $header);)*
-    };
-    ($cfg:ident: $( $([$c:expr]:)* $header:literal,)*) => {
-        headers!($($cfg: $([$c]:)* $header,)*);
-    };
-    ($cfg:ident: $( $([$c:expr]:)* $header:literal),*) => {
-        headers!($($cfg: $([$c]:)* $header,)*);
+    (
+        $cfg:ident,
+        $(
+            // Allow a simple header
+            $($header:literal)?
+            // As well as a style that is conditionally applied.
+            $(($pred:expr, $pred_header:literal))?
+            ,
+        )+
+    ) => {
+        $(
+            $( $cfg.header($header); )?
+            $(
+                if $pred {
+                    $cfg.header($pred_header);
+                }
+            )?
+        )+
     };
 }
 
@@ -192,7 +211,8 @@ fn test_apple(target: &str) {
     cfg.flag("-Wno-deprecated-declarations");
     cfg.define("__APPLE_USE_RFC_3542", None);
 
-    headers! { cfg:
+    headers!(
+        cfg,
         "aio.h",
         "CommonCrypto/CommonCrypto.h",
         "CommonCrypto/CommonRandom.h",
@@ -244,8 +264,7 @@ fn test_apple(target: &str) {
         "os/clock.h",
         "os/lock.h",
         "os/signpost.h",
-        // FIXME(macos): Requires the macOS 14.4 SDK.
-        //"os/os_sync_wait_on_address.h",
+        "os/os_sync_wait_on_address.h",
         "poll.h",
         "pthread.h",
         "pthread_spis.h",
@@ -306,14 +325,10 @@ fn test_apple(target: &str) {
         "utmpx.h",
         "wchar.h",
         "xlocale.h",
-        [x86_64]: "crt_externs.h",
-    }
+        (x86_64, "crt_externs.h"),
+    );
 
-    // Skip anonymous unions/structs.
-    cfg.skip_union(|u| u.ident().starts_with("__c_anonymous_"));
-    cfg.skip_struct(|s| s.ident().starts_with("__c_anonymous_"));
-
-    cfg.skip_struct(|s| {
+    cfg.skip_struct(move |s| {
         match s.ident() {
             // FIXME(union): actually a union
             "sigval" => true,
@@ -322,21 +337,9 @@ fn test_apple(target: &str) {
             // it is a moving target, changing through versions
             // also contains bitfields members
             "tcp_connection_info" => true,
+
             // FIXME(macos): The size is changed in recent macOSes.
-            "malloc_introspection_t" => true,
-            _ => false,
-        }
-    });
-
-    cfg.skip_alias(|ty| ty.ident().starts_with("__c_anonymous_"));
-    cfg.skip_alias(|ty| {
-        match ty.ident() {
-            // FIXME(macos): Requires the macOS 14.4 SDK.
-            "os_sync_wake_by_address_flags_t" | "os_sync_wait_on_address_flags_t" => true,
-
-            // FIXME(macos): "'__uint128' undeclared" in C
-            "__uint128" => true,
-
+            "malloc_introspection_t" if x86_64 => true,
             _ => false,
         }
     });
@@ -345,20 +348,13 @@ fn test_apple(target: &str) {
         match constant.ident() {
             // They're declared via `deprecated_mach` and we don't support it anymore.
             x if x.starts_with("VM_FLAGS_") => true,
-            // These OSX constants are removed in Sierra.
+            // FIXME(deprecated): These OSX constants are removed in Sierra.
             // https://developer.apple.com/library/content/releasenotes/General/APIDiffsMacOS10_12/Swift/Darwin.html
             "KERN_KDENABLE_BG_TRACE" | "KERN_KDDISABLE_BG_TRACE" => true,
-            // FIXME(macos): the value has been changed since Catalina (0xffff0000 -> 0x3fff0000).
-            "SF_SETTABLE" => true,
 
-            // FIXME(macos): XCode 13.1 doesn't have it.
+            // FIXME(deprecated): Removed since 12.0.1 / xnu-8019.41.5. See `ttycom.h` at
+            // https://github.com/apple-oss-distributions/xnu/commit/e6231be02a03711ca404e5121a151b24afbff733
             "TIOCREMOTE" => true,
-
-            // FIXME(macos): Requires the macOS 14.4 SDK.
-            "OS_SYNC_WAKE_BY_ADDRESS_NONE"
-            | "OS_SYNC_WAKE_BY_ADDRESS_SHARED"
-            | "OS_SYNC_WAIT_ON_ADDRESS_NONE"
-            | "OS_SYNC_WAIT_ON_ADDRESS_SHARED" => true,
 
             _ => false,
         }
@@ -369,41 +365,19 @@ fn test_apple(target: &str) {
         match func.ident() {
             // FIXME: https://github.com/rust-lang/libc/issues/1272
             "execv" | "execve" | "execvp" => true,
-            // close calls the close_nocancel system call
-            "close" => true,
-
+            // close calls the close_nocancel system call on x86
+            "close" if x86_64 => true,
             // FIXME(1.0): std removed libresolv support: https://github.com/rust-lang/rust/pull/102766
             "res_init" => true,
-
-            // FIXME(macos): remove once the target in CI is updated
-            "pthread_jit_write_freeze_callbacks_np" => true,
-
-            // FIXME(macos): ABI has been changed on recent macOSes.
-            "os_unfair_lock_assert_owner" | "os_unfair_lock_assert_not_owner" => true,
-
-            // FIXME(macos): Once the SDK get updated to Ventura's level
-            "freadlink" | "mknodat" | "mkfifoat" => true,
-
-            // FIXME(macos): Requires the macOS 14.4 SDK.
-            "os_sync_wake_by_address_any"
-            | "os_sync_wake_by_address_all"
-            | "os_sync_wake_by_address_flags_t"
-            | "os_sync_wait_on_address"
-            | "os_sync_wait_on_address_flags_t"
-            | "os_sync_wait_on_address_with_deadline"
-            | "os_sync_wait_on_address_with_timeout" => true,
-
             _ => false,
         }
     });
 
     cfg.skip_struct_field(move |struct_, field| {
         match (struct_.ident(), field.ident()) {
-            // FIXME(macos): the array size has been changed since macOS 10.15 ([8] -> [7]).
-            ("statfs", "f_reserved") => true,
-            ("__darwin_arm_neon_state64", "__v") => true,
             // MAXPATHLEN is too big for auto-derive traits on arrays.
             ("vnode_info_path", "vip_path") => true,
+            // Anonymous ADT fields
             ("ifreq", "ifr_ifru") => true,
             ("in6_ifreq", "ifr_ifru") => true,
             ("ifkpi", "ifk_data") => true,
@@ -454,8 +428,6 @@ fn test_apple(target: &str) {
     cfg.skip_roundtrip(move |s| match s {
         // FIXME(macos): this type has the wrong ABI
         "max_align_t" if i686 => true,
-        // Can't return an array from a C function.
-        "uuid_t" | "vol_capabilities_set_t" => true,
         _ => false,
     });
 
@@ -470,7 +442,8 @@ fn test_openbsd(target: &str) {
 
     let x86_64 = target.contains("x86_64");
 
-    headers! { cfg:
+    headers!(
+        cfg,
         "elf.h",
         "errno.h",
         "execinfo.h",
@@ -492,7 +465,7 @@ fn test_openbsd(target: &str) {
         "ctype.h",
         "dirent.h",
         "sys/socket.h",
-        [x86_64]:"machine/fpu.h",
+        (x86_64, "machine/fpu.h"),
         "net/if.h",
         "net/route.h",
         "net/if_arp.h",
@@ -554,7 +527,7 @@ fn test_openbsd(target: &str) {
         "sys/shm.h",
         "sys/param.h",
         "sys/auxv.h",
-    }
+    );
 
     cfg.rename_type(|ty| match ty {
         // FIXME(openbsd): https://github.com/rust-lang/libc/issues/1273
@@ -630,9 +603,6 @@ fn test_openbsd(target: &str) {
         }
     });
 
-    // Skip anonymous unions/structs.
-    cfg.skip_union(|u| u.ident().starts_with("__c_anonymous_"));
-    cfg.skip_struct(|s| s.ident().starts_with("__c_anonymous_"));
     cfg.skip_struct(move |ty| {
         match ty.ident() {
             // FIXME(union): actually a union
@@ -670,7 +640,8 @@ fn test_cygwin(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
 
-    headers! { cfg:
+    headers!(
+        cfg,
         "ctype.h",
         "dirent.h",
         "dlfcn.h",
@@ -696,6 +667,7 @@ fn test_cygwin(target: &str) {
         "spawn.h",
         "stddef.h",
         "stdlib.h",
+        "stdio.h",
         "string.h",
         "sys/cpuset.h",
         "sys/ioctl.h",
@@ -718,9 +690,10 @@ fn test_cygwin(target: &str) {
         "termios.h",
         "unistd.h",
         "utime.h",
+        "utmpx.h",
         "wait.h",
         "wchar.h",
-    }
+    );
 
     cfg.rename_type(|ty| match ty {
         "Ioctl" => Some("int".to_string()),
@@ -766,14 +739,6 @@ fn test_cygwin(target: &str) {
         "sighandler_t" => true,
 
         _ => false,
-    });
-
-    cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
-
-        false
     });
 
     cfg.rename_struct_field(move |struct_, field| {
@@ -846,7 +811,8 @@ fn test_windows(target: &str) {
     }
     cfg.define("_WIN32_WINNT", Some("0x8000"));
 
-    headers! { cfg:
+    headers!(
+        cfg,
         "direct.h",
         "errno.h",
         "fcntl.h",
@@ -864,9 +830,9 @@ fn test_windows(target: &str) {
         "sys/utime.h",
         "time.h",
         "wchar.h",
-        [gnu]: "ws2tcpip.h",
-        [!gnu]: "Winsock2.h",
-    }
+        (gnu, "ws2tcpip.h"),
+        (!gnu, "Winsock2.h"),
+    );
 
     cfg.rename_struct_ty(|ty| {
         match ty {
@@ -907,17 +873,12 @@ fn test_windows(target: &str) {
     });
 
     cfg.skip_struct(move |struct_| {
-        let ty = struct_.ident();
-        if ty.starts_with("__c_anonymous_") {
-            return true;
-        }
-        match ty {
+        match struct_.ident() {
             // FIXME(windows): The size and alignment of this struct are incorrect
             "timespec" if gnu && i686 => true,
             _ => false,
         }
     });
-    cfg.skip_union(move |union_| union_.ident().starts_with("__c_anonymous_"));
 
     cfg.skip_const(move |constant| {
         match constant.ident() {
@@ -965,8 +926,8 @@ fn test_redox(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
 
-    headers! {
-        cfg:
+    headers!(
+        cfg,
         "ctype.h",
         "dirent.h",
         "dlfcn.h",
@@ -1004,7 +965,7 @@ fn test_redox(target: &str) {
         "unistd.h",
         "utime.h",
         "wchar.h",
-    }
+    );
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
@@ -1030,8 +991,8 @@ fn test_solarish(target: &str) {
         cfg.define("SIGINFO", Some("41"));
     }
 
-    headers! {
-        cfg:
+    headers!(
+        cfg,
         "aio.h",
         "ctype.h",
         "dirent.h",
@@ -1110,19 +1071,14 @@ fn test_solarish(target: &str) {
         "utime.h",
         "utmpx.h",
         "wchar.h",
-    }
+    );
 
     if is_illumos {
-        headers! { cfg:
-            "sys/epoll.h",
-            "sys/eventfd.h",
-        }
+        headers!(cfg, "sys/epoll.h", "sys/eventfd.h",);
     }
 
     if is_solaris {
-        headers! { cfg:
-            "sys/lgrp_user_impl.h",
-        }
+        headers!(cfg, "sys/lgrp_user_impl.h",);
     }
 
     cfg.skip_alias(move |ty| match ty.ident() {
@@ -1184,15 +1140,12 @@ fn test_solarish(target: &str) {
 
     cfg.skip_union(|union_| {
         // the union handling is a mess
-        if union_.ident().starts_with("__c_anonymous_") || union_.ident().contains("door_desc_t_") {
+        if union_.ident().contains("door_desc_t_") {
             return true;
         }
         false
     });
     cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         // the union handling is a mess
         if struct_.ident().contains("door_desc_t_") {
             return true;
@@ -1314,11 +1267,17 @@ fn test_netbsd(target: &str) {
     assert!(target.contains("netbsd"));
     let mut cfg = ctest_cfg();
 
+    // Assume netbsd10 but check for netbsd9 for test config.
+    let netbsd9 = match try_command_output("uname", &["-sr"]) {
+        Some(s) if s.starts_with("NetBSD 9.") => true,
+        _ => false,
+    };
+
     cfg.flag("-Wno-deprecated-declarations");
     cfg.define("_NETBSD_SOURCE", Some("1"));
 
-    headers! {
-        cfg:
+    headers!(
+        cfg,
         "elf.h",
         "errno.h",
         "fcntl.h",
@@ -1340,10 +1299,12 @@ fn test_netbsd(target: &str) {
         "ctype.h",
         "dirent.h",
         "dlfcn.h",
+        "execinfo.h",
         "glob.h",
         "grp.h",
         "ifaddrs.h",
         "langinfo.h",
+        "lwp.h",
         "net/bpf.h",
         "net/if.h",
         "net/if_arp.h",
@@ -1362,12 +1323,14 @@ fn test_netbsd(target: &str) {
         "sched.h",
         "semaphore.h",
         "signal.h",
+        "spawn.h",
         "string.h",
         "sys/endian.h",
         "sys/exec_elf.h",
         "sys/xattr.h",
         "sys/extattr.h",
         "sys/file.h",
+        (!netbsd9, "sys/futex.h"),
         "sys/ioctl.h",
         "sys/ioctl_compat.h",
         "sys/ipc.h",
@@ -1375,12 +1338,15 @@ fn test_netbsd(target: &str) {
         "sys/mman.h",
         "sys/mount.h",
         "sys/ptrace.h",
+        (!netbsd9, "sys/random.h"),
         "sys/resource.h",
+        "sys/sched.h",
         "sys/shm.h",
         "sys/socket.h",
         "sys/statvfs.h",
         "sys/sysctl.h",
         "sys/time.h",
+        (!netbsd9, "sys/timerfd.h"),
         "sys/times.h",
         "sys/timex.h",
         "sys/ucontext.h",
@@ -1399,11 +1365,14 @@ fn test_netbsd(target: &str) {
         "mqueue.h",
         "netinet/dccp.h",
         "sys/event.h",
+        (!netbsd9, "sys/eventfd.h"),
         "sys/quota.h",
         "sys/reboot.h",
         "sys/shm.h",
         "iconv.h",
-    }
+        "utmp.h",
+        "utmpx.h",
+    );
 
     cfg.rename_type(move |ty| {
         match ty {
@@ -1435,16 +1404,15 @@ fn test_netbsd(target: &str) {
         }
     });
 
-    cfg.skip_struct(|ty| ty.ident().starts_with("__c_anonymous_"));
-    cfg.skip_union(|ty| ty.ident().starts_with("__c_anonymous_"));
+    cfg.alias_is_c_enum(|ty| ty == "fae_action");
 
     cfg.skip_alias(move |ty| {
-        if ty.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         match ty.ident() {
             // FIXME(netbsd): sighandler_t is crazy across platforms
             "sighandler_t" => true,
+            // Incomplete type in C
+            "cpuset_t" => true,
+            "eventfd_t" if netbsd9 => true,
             _ => false,
         }
     });
@@ -1456,6 +1424,14 @@ fn test_netbsd(target: &str) {
             // These are tested as part of the linux_fcntl tests since there are
             // header conflicts when including them with all the other structs.
             "termios2" => true,
+            // Anon struct
+            "__exit_status" => true,
+            // FIXME(netbsd): Should be importable but aren't for some reason.
+            "Aux32Info" | "Aux64Info" => true,
+            // deprecated, obsolete upstream
+            "ptrace_lwpinfo" => true,
+            // ABI change in NetBSD10, with symbol versioning.
+            "statvfs" if !netbsd9 => true,
             _ => false,
         }
     });
@@ -1475,11 +1451,18 @@ fn test_netbsd(target: &str) {
             "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true, // sighandler_t weirdness
             "SIGUNUSED" => true,                       // removed in glibc 2.26
 
+            // deprecated, obsolete upstream
+            "PT_LWPINFO" | "PL_EVENT_NONE" | "PL_EVENT_SIGNAL" | "PL_EVENT_SUSPENDED" => true,
+
             // weird signed extension or something like that?
             "MS_NOUSER" => true,
             "MS_RMT_MASK" => true, // updated in glibc 2.22 and musl 1.1.13
             "BOTHER" => true,
             "GRND_RANDOM" | "GRND_INSECURE" | "GRND_NONBLOCK" => true, // netbsd 10 minimum
+
+            // Due to the NetBSD `__BIT` macro this turns out to be an `unsigned long`, but
+            // the futex syscall takes `int` ops.
+            "FUTEX_CMD_MASK" => true,
 
             _ => false,
         }
@@ -1488,15 +1471,22 @@ fn test_netbsd(target: &str) {
     cfg.skip_fn(move |func| {
         #[expect(clippy::wildcard_in_or_patterns)]
         match func.ident() {
-            // FIXME(netbsd): netbsd 10 minimum
             // FIXME(netbsd): https://github.com/rust-lang/libc/issues/1272
             "execv" | "execve" | "execvp" => true,
-            "getentropy" | "getrandom" => true,
+            // FIXME(netbsd): Look into setting `_POSIX_C_SOURCE` to enable this
+            "qsort_r" => true,
 
-            "getrlimit" | "getrlimit64" |    // non-int in 1st arg
-            "setrlimit" | "setrlimit64" |    // non-int in 1st arg
-            "prlimit" | "prlimit64" |        // non-int in 2nd arg
+            "eventfd" | "eventfd_read" | "eventfd_write" if netbsd9 => true,
 
+            _ => false,
+        }
+    });
+
+    cfg.skip_fn_ptrcheck(move |func| {
+        match func {
+            // New symbol version present in NetBSD10, but we keep the old versions for NetBSD9
+            // compatibility.
+            "getmntinfo" | "statvfs" | "fstatvfs" | "getvfsstat" | "sigaction" => true,
             _ => false,
         }
     });
@@ -1519,9 +1509,64 @@ fn test_netbsd(target: &str) {
             ("Elf64_Phdr", "p_type") => true,
             // pthread_spin_t is a volatile uchar
             ("pthread_spinlock_t", "pts_spin") => true,
+
+            // `tcp_snd_wscale` and `tcp_rcv_wscale` are bitfields
+            ("tcp_info", "tcp_snd_wscale") => true,
+            ("tcp_info", "tcp_rcv_wscale") => true,
+
+            // Anonymous unions
+            ("ifconf", "ifc_ifcu") => true,
+            ("ifreq", "ifr_ifru") => true,
+            ("utmpx", "ut_exit") => true,
+            ("posix_spawn_file_actions_entry_t", "fae_data") => true,
+
             _ => false,
         }
     });
+
+    // Unless otherwise noted, everything in this block was an addition in NetBS 10.
+    if netbsd9 {
+        cfg.skip_const(move |constant| match constant.ident() {
+            "EOWNERDEAD"
+            | "ENOTRECOVERABLE"
+            | "F_GETPATH"
+            | "MNT_NFS4ACLS"
+            | "MNT_POSIX1EACLS"
+            | "MNT_ACLS"
+            | "EVFILT_USER"
+            | "EVFILT_EMPTY"
+            | "REG_ILLSEQ"
+            | "PT_SET_SIGPASS"
+            | "PT_GET_SIGPASS"
+            | "EXTATTR_NAMESPACE_EMPTY" => true,
+            x if x.starts_with("FUTEX") => true,
+            x if x.starts_with("NOTE_") => true,
+            x if x.starts_with("PT_LWP") => true,
+            x if x.starts_with("TFD_") => true,
+            "ELAST" => true, // not version-stable
+            _ => false,
+        });
+
+        cfg.skip_struct(move |struct_| match struct_.ident() {
+            "sockaddr_dl" if !netbsd9 => true, // Last field increased size in 10
+            x if x.starts_with("ptrace_lwp") => true,
+            // These were packed before NetBSD 10
+            "arphdr" | "in_addr" | "ip_mreq" | "sockaddr_in" => true,
+            _ => false,
+        });
+
+        cfg.skip_fn(move |func| match func.ident() {
+            "reallocarray" | "getentropy" | "ppoll" | "getrandom" => true,
+            x if x.starts_with("timerfd_") => true,
+            _ => false,
+        });
+
+        cfg.skip_struct_field(|struct_, field| match (struct_.ident(), field.ident()) {
+            ("statvfs", "f_mntfromlabel") => true, // added field
+            ("kevent", "udata") => true,           // changed type (ABI-compatible)
+            _ => false,
+        });
+    }
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
@@ -1531,8 +1576,8 @@ fn test_dragonflybsd(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
 
-    headers! {
-        cfg:
+    headers!(
+        cfg,
         "aio.h",
         "ctype.h",
         "dirent.h",
@@ -1620,7 +1665,7 @@ fn test_dragonflybsd(target: &str) {
         "vm/vm_map.h",
         "wchar.h",
         "iconv.h",
-    }
+    );
 
     cfg.rename_struct_ty(move |ty| {
         match ty {
@@ -1670,9 +1715,6 @@ fn test_dragonflybsd(target: &str) {
     });
 
     cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         match struct_.ident() {
             // FIXME(dragonflybsd): These are tested as part of the linux_fcntl tests since
             // there are header conflicts when including them with all the other
@@ -1757,7 +1799,8 @@ fn test_wasi(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
 
-    headers! { cfg:
+    headers!(
+        cfg,
         "ctype.h",
         "dirent.h",
         "errno.h",
@@ -1767,10 +1810,11 @@ fn test_wasi(target: &str) {
         "limits.h",
         "locale.h",
         "malloc.h",
-        [p2]: "netdb.h",
-        [p2]: "netinet/in.h",
-        [p2]: "netinet/tcp.h",
+        (p2, "netdb.h"),
+        (p2, "netinet/in.h"),
+        (p2, "netinet/tcp.h"),
         "poll.h",
+        "pthread.h",
         "sched.h",
         "stdbool.h",
         "stddef.h",
@@ -1794,7 +1838,7 @@ fn test_wasi(target: &str) {
         "wasi/libc-nocwd.h",
         "wasi/libc.h",
         "wchar.h",
-    }
+    );
 
     cfg.rename_struct_ty(move |ty| match ty {
         "FILE" | "fd_set" | "DIR" => Some(ty.to_string()),
@@ -1855,151 +1899,150 @@ fn test_android(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
 
-    headers! { cfg:
-               "arpa/inet.h",
-               "ctype.h",
-               "dirent.h",
-               "dlfcn.h",
-               "elf.h",
-               "errno.h",
-               "fcntl.h",
-               "fnmatch.h",
-               "getopt.h",
-               "grp.h",
-               "ifaddrs.h",
-               "libgen.h",
-               "limits.h",
-               "link.h",
-               "linux/sysctl.h",
-               "locale.h",
-               "malloc.h",
-               "net/ethernet.h",
-               "net/if.h",
-               "net/if_arp.h",
-               "net/route.h",
-               "netdb.h",
-               "netinet/in.h",
-               "netinet/ip.h",
-               "netinet/tcp.h",
-               "netinet/udp.h",
-               "netpacket/packet.h",
-               "poll.h",
-               "pthread.h",
-               "pty.h",
-               "pwd.h",
-               "regex.h",
-               "resolv.h",
-               "sched.h",
-               "semaphore.h",
-               "signal.h",
-               "spawn.h",
-               "stddef.h",
-               "stdint.h",
-               "stdio.h",
-               "stdlib.h",
-               "string.h",
-               "sys/auxv.h",
-               "sys/epoll.h",
-               "sys/eventfd.h",
-               "sys/file.h",
-               "sys/fsuid.h",
-               "sys/inotify.h",
-               "sys/ioctl.h",
-               "sys/klog.h",
-               "sys/mman.h",
-               "sys/mount.h",
-               "sys/personality.h",
-               "sys/prctl.h",
-               "sys/ptrace.h",
-               "sys/random.h",
-               "sys/reboot.h",
-               "sys/resource.h",
-               "sys/sendfile.h",
-               "sys/signalfd.h",
-               "sys/socket.h",
-               "sys/stat.h",
-               "sys/statvfs.h",
-               "sys/swap.h",
-               "sys/syscall.h",
-               "sys/sysinfo.h",
-               "sys/system_properties.h",
-               "sys/time.h",
-               "sys/timerfd.h",
-               "sys/times.h",
-               "sys/types.h",
-               "sys/ucontext.h",
-               "sys/uio.h",
-               "sys/un.h",
-               "sys/user.h",
-               "sys/utsname.h",
-               "sys/vfs.h",
-               "sys/xattr.h",
-               "sys/wait.h",
-               "syslog.h",
-               "termios.h",
-               "time.h",
-               "unistd.h",
-               "utime.h",
-               "utmp.h",
-               "wchar.h",
-               "xlocale.h",
-               // time64_t is not defined for 64-bit targets If included it will
-               // generate the error 'Your time_t is already 64-bit'
-               [target_pointer_width == 32]: "time64.h",
-               [x86]: "sys/reg.h",
-    }
+    headers!(
+        cfg,
+        "arpa/inet.h",
+        "ctype.h",
+        "dirent.h",
+        "dlfcn.h",
+        "elf.h",
+        "errno.h",
+        "fcntl.h",
+        "fnmatch.h",
+        "getopt.h",
+        "grp.h",
+        "ifaddrs.h",
+        "libgen.h",
+        "limits.h",
+        "link.h",
+        "linux/sysctl.h",
+        "locale.h",
+        "malloc.h",
+        "net/ethernet.h",
+        "net/if.h",
+        "net/if_arp.h",
+        "net/route.h",
+        "netdb.h",
+        "netinet/in.h",
+        "netinet/ip.h",
+        "netinet/tcp.h",
+        "netinet/udp.h",
+        "netpacket/packet.h",
+        "poll.h",
+        "pthread.h",
+        "pty.h",
+        "pwd.h",
+        "regex.h",
+        "resolv.h",
+        "sched.h",
+        "semaphore.h",
+        "signal.h",
+        "spawn.h",
+        "stddef.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "sys/auxv.h",
+        "sys/epoll.h",
+        "sys/eventfd.h",
+        "sys/file.h",
+        "sys/fsuid.h",
+        "sys/inotify.h",
+        "sys/ioctl.h",
+        "sys/klog.h",
+        "sys/mman.h",
+        "sys/mount.h",
+        "sys/personality.h",
+        "sys/prctl.h",
+        "sys/ptrace.h",
+        "sys/random.h",
+        "sys/reboot.h",
+        "sys/resource.h",
+        "sys/sendfile.h",
+        "sys/signalfd.h",
+        "sys/socket.h",
+        "sys/stat.h",
+        "sys/statvfs.h",
+        "sys/swap.h",
+        "sys/syscall.h",
+        "sys/sysinfo.h",
+        "sys/system_properties.h",
+        "sys/time.h",
+        "sys/timerfd.h",
+        "sys/times.h",
+        "sys/types.h",
+        "sys/ucontext.h",
+        "sys/uio.h",
+        "sys/un.h",
+        "sys/user.h",
+        "sys/utsname.h",
+        "sys/vfs.h",
+        "sys/xattr.h",
+        "sys/wait.h",
+        "syslog.h",
+        "termios.h",
+        "time.h",
+        "unistd.h",
+        "utime.h",
+        "utmp.h",
+        "wchar.h",
+        "xlocale.h",
+        // time64_t is not defined for 64-bit targets If included it will
+        // generate the error 'Your time_t is already 64-bit'
+        (target_pointer_width == 32, "time64.h"),
+        (x86, "sys/reg.h"),
+    );
 
     // Include linux headers at the end:
-    headers! { cfg:
-                "asm/mman.h",
-                "linux/auxvec.h",
-                "linux/dccp.h",
-                "linux/elf.h",
-                "linux/errqueue.h",
-                "linux/falloc.h",
-                "linux/filter.h",
-                "linux/futex.h",
-                "linux/fs.h",
-                "linux/genetlink.h",
-                "linux/if_alg.h",
-                "linux/if_addr.h",
-                "linux/if_ether.h",
-                "linux/if_link.h",
-                "linux/rtnetlink.h",
-                "linux/if_tun.h",
-                "linux/kexec.h",
-                "linux/magic.h",
-                "linux/membarrier.h",
-                "linux/memfd.h",
-                "linux/mempolicy.h",
-                "linux/module.h",
-                "linux/mount.h",
-                "linux/net_tstamp.h",
-                "linux/netfilter/nfnetlink.h",
-                "linux/netfilter/nfnetlink_log.h",
-                "linux/netfilter/nfnetlink_queue.h",
-                "linux/netfilter/nf_tables.h",
-                "linux/netfilter_arp.h",
-                "linux/netfilter_bridge.h",
-                "linux/netfilter_ipv4.h",
-                "linux/netfilter_ipv6.h",
-                "linux/netfilter_ipv6/ip6_tables.h",
-                "linux/netlink.h",
-                "linux/quota.h",
-                "linux/reboot.h",
-                "linux/seccomp.h",
-                "linux/sched.h",
-                "linux/sockios.h",
-                "linux/uinput.h",
-                "linux/vm_sockets.h",
-                "linux/wait.h",
-
-    }
+    headers!(
+        cfg,
+        "asm/mman.h",
+        "linux/auxvec.h",
+        "linux/dccp.h",
+        "linux/elf.h",
+        "linux/errqueue.h",
+        "linux/falloc.h",
+        "linux/filter.h",
+        "linux/futex.h",
+        "linux/fs.h",
+        "linux/genetlink.h",
+        "linux/if_alg.h",
+        "linux/if_addr.h",
+        "linux/if_ether.h",
+        "linux/if_link.h",
+        "linux/rtnetlink.h",
+        "linux/if_tun.h",
+        "linux/kexec.h",
+        "linux/magic.h",
+        "linux/membarrier.h",
+        "linux/memfd.h",
+        "linux/mempolicy.h",
+        "linux/module.h",
+        "linux/mount.h",
+        "linux/net_tstamp.h",
+        "linux/netfilter/nfnetlink.h",
+        "linux/netfilter/nfnetlink_log.h",
+        "linux/netfilter/nfnetlink_queue.h",
+        "linux/netfilter/nf_tables.h",
+        "linux/netfilter_arp.h",
+        "linux/netfilter_bridge.h",
+        "linux/netfilter_ipv4.h",
+        "linux/netfilter_ipv6.h",
+        "linux/netfilter_ipv6/ip6_tables.h",
+        "linux/netlink.h",
+        "linux/quota.h",
+        "linux/reboot.h",
+        "linux/seccomp.h",
+        "linux/sched.h",
+        "linux/sockios.h",
+        "linux/uinput.h",
+        "linux/vm_sockets.h",
+        "linux/wait.h",
+    );
 
     // Include Android-specific headers:
-    headers! { cfg:
-                "android/set_abort_message.h"
-    }
+    headers!(cfg, "android/set_abort_message.h",);
 
     cfg.rename_type(move |ty| match ty {
         "Ioctl" => Some("int".to_string()),
@@ -2049,8 +2092,6 @@ fn test_android(target: &str) {
             "posix_spawn_file_actions_t" => true,
             "posix_spawnattr_t" => true,
 
-            // FIXME(android): "'__uint128' undeclared" in C
-            "__uint128" => true,
             // Added in API level 24
             "if_nameindex" => true,
 
@@ -2058,12 +2099,7 @@ fn test_android(target: &str) {
         }
     });
 
-    cfg.skip_union(move |union_| union_.ident().starts_with("__c_anonymous_"));
-
     cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         match struct_.ident() {
             // These are tested as part of the linux_fcntl tests since there are
             // header conflicts when including them with all the other structs.
@@ -2235,6 +2271,9 @@ fn test_android(target: &str) {
             // FIXME(android): Requires >= 6.12 kernel headers.
             "SOF_TIMESTAMPING_OPT_RX_FILTER" => true,
 
+            // FIXME(android): Requires >= 6.9 kernel headers.
+            "AT_HWCAP3" | "AT_HWCAP4" => true,
+
             _ => false,
         }
     });
@@ -2358,7 +2397,21 @@ fn test_freebsd(target: &str) {
     assert!(target.contains("freebsd"));
     let mut cfg = ctest_cfg();
 
-    let freebsd_ver = which_freebsd();
+    let freebsd_ver = if let Ok(version) = env::var("RUST_LIBC_UNSTABLE_FREEBSD_VERSION") {
+        let vers = version.parse().unwrap();
+        println!("cargo:warning=setting FreeBSD version to {vers}");
+        Some(vers)
+    } else {
+        match &try_command_output("freebsd-version", &[]) {
+            Some(s) if s.starts_with("10") => Some(10),
+            Some(s) if s.starts_with("11") => Some(11),
+            Some(s) if s.starts_with("12") => Some(12),
+            Some(s) if s.starts_with("13") => Some(13),
+            Some(s) if s.starts_with("14") => Some(14),
+            Some(s) if s.starts_with("15") => Some(15),
+            Some(_) | None => None,
+        }
+    };
 
     match freebsd_ver {
         Some(12) => cfg.cfg("freebsd12", None),
@@ -2379,124 +2432,125 @@ fn test_freebsd(target: &str) {
     let freebsd14 = matches!(freebsd_ver, Some(n) if n >= 14);
     let freebsd15 = matches!(freebsd_ver, Some(n) if n >= 15);
 
-    headers! { cfg:
-                "aio.h",
-                "arpa/inet.h",
-                "bsm/audit.h",
-                "ctype.h",
-                "dirent.h",
-                "dlfcn.h",
-                "elf.h",
-                "errno.h",
-                "execinfo.h",
-                "fcntl.h",
-                "fnmatch.h",
-                "getopt.h",
-                "glob.h",
-                "grp.h",
-                "iconv.h",
-                "ifaddrs.h",
-                "kenv.h",
-                "langinfo.h",
-                "libgen.h",
-                "libutil.h",
-                "limits.h",
-                "link.h",
-                "locale.h",
-                "machine/elf.h",
-                "machine/reg.h",
-                "malloc_np.h",
-                "memstat.h",
-                "mqueue.h",
-                "net/bpf.h",
-                "net/if.h",
-                "net/if_arp.h",
-                "net/if_dl.h",
-                "net/if_mib.h",
-                "net/route.h",
-                "netdb.h",
-                "netinet/ip.h",
-                "netinet/in.h",
-                "netinet/sctp.h",
-                "netinet/tcp.h",
-                "netinet/udp.h",
-                "poll.h",
-                "pthread.h",
-                "pthread_np.h",
-                "pwd.h",
-                "regex.h",
-                "resolv.h",
-                "sched.h",
-                "semaphore.h",
-                "signal.h",
-                "spawn.h",
-                "stddef.h",
-                "stdint.h",
-                "stdio.h",
-                "stdlib.h",
-                "string.h",
-                "sys/capsicum.h",
-                "sys/auxv.h",
-                "sys/cpuset.h",
-                "sys/domainset.h",
-                "sys/eui64.h",
-                "sys/event.h",
-                [freebsd13]:"sys/eventfd.h",
-                "sys/extattr.h",
-                "sys/file.h",
-                "sys/ioctl.h",
-                "sys/ipc.h",
-                "sys/jail.h",
-                "sys/mman.h",
-                "sys/mount.h",
-                "sys/msg.h",
-                "sys/procctl.h",
-                "sys/procdesc.h",
-                "sys/ptrace.h",
-                "sys/queue.h",
-                "sys/random.h",
-                "sys/reboot.h",
-                "sys/resource.h",
-                "sys/rtprio.h",
-                "sys/sem.h",
-                "sys/shm.h",
-                "sys/socket.h",
-                "sys/socketvar.h",
-                [freebsd15]:"sys/ktls.h",
-                "netinet/in_pcb.h",	// must be after sys/socketvar.h, sys/ktls.h
-                "sys/stat.h",
-                "sys/statvfs.h",
-                "sys/sysctl.h",
-                "sys/thr.h",
-                "sys/time.h",
-                [freebsd14 || freebsd15]:"sys/timerfd.h",
-                [freebsd13 || freebsd14 || freebsd15]:"dev/evdev/input.h",
-                "sys/times.h",
-                "sys/timex.h",
-                "sys/types.h",
-                "sys/proc.h",
-                "kvm.h", // must be after "sys/types.h"
-                "sys/ucontext.h",
-                "sys/uio.h",
-                "sys/ktrace.h",
-                "sys/umtx.h",
-                "sys/un.h",
-                "sys/user.h",
-                "sys/utsname.h",
-                "sys/uuid.h",
-                "sys/vmmeter.h",
-                "sys/wait.h",
-                "libprocstat.h",
-                "devstat.h",
-                "syslog.h",
-                "termios.h",
-                "time.h",
-                "ufs/ufs/quota.h",
-                "unistd.h",
-                "utime.h",
-                "utmpx.h",
-                "wchar.h",
-    }
+    headers!(
+        cfg,
+        "aio.h",
+        "arpa/inet.h",
+        "bsm/audit.h",
+        "ctype.h",
+        "dirent.h",
+        "dlfcn.h",
+        "elf.h",
+        "errno.h",
+        "execinfo.h",
+        "fcntl.h",
+        "fnmatch.h",
+        "getopt.h",
+        "glob.h",
+        "grp.h",
+        "iconv.h",
+        "ifaddrs.h",
+        "kenv.h",
+        "langinfo.h",
+        "libgen.h",
+        "libutil.h",
+        "limits.h",
+        "link.h",
+        "locale.h",
+        "machine/elf.h",
+        "machine/reg.h",
+        "malloc_np.h",
+        "memstat.h",
+        "mqueue.h",
+        "net/bpf.h",
+        "net/if.h",
+        "net/if_arp.h",
+        "net/if_dl.h",
+        "net/if_mib.h",
+        "net/route.h",
+        "netdb.h",
+        "netinet/ip.h",
+        "netinet/in.h",
+        "netinet/sctp.h",
+        "netinet/tcp.h",
+        "netinet/udp.h",
+        "poll.h",
+        "pthread.h",
+        "pthread_np.h",
+        "pwd.h",
+        "regex.h",
+        "resolv.h",
+        "sched.h",
+        "semaphore.h",
+        "signal.h",
+        "spawn.h",
+        "stddef.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "sys/capsicum.h",
+        "sys/auxv.h",
+        "sys/cpuset.h",
+        "sys/domainset.h",
+        "sys/eui64.h",
+        "sys/event.h",
+        (freebsd13, "sys/eventfd.h"),
+        "sys/extattr.h",
+        "sys/file.h",
+        "sys/ioctl.h",
+        "sys/ipc.h",
+        "sys/jail.h",
+        "sys/mman.h",
+        "sys/mount.h",
+        "sys/msg.h",
+        "sys/procctl.h",
+        "sys/procdesc.h",
+        "sys/ptrace.h",
+        "sys/queue.h",
+        "sys/random.h",
+        "sys/reboot.h",
+        "sys/resource.h",
+        "sys/rtprio.h",
+        "sys/sem.h",
+        "sys/shm.h",
+        "sys/socket.h",
+        "sys/socketvar.h",
+        (freebsd15, "sys/ktls.h"),
+        "netinet/in_pcb.h", // must be after sys/socketvar.h, sys/ktls.h
+        "sys/stat.h",
+        "sys/statvfs.h",
+        "sys/sysctl.h",
+        "sys/thr.h",
+        "sys/time.h",
+        (freebsd14 || freebsd15, "sys/timerfd.h"),
+        (freebsd13 || freebsd14 || freebsd15, "dev/evdev/input.h"),
+        "sys/times.h",
+        "sys/timex.h",
+        "sys/types.h",
+        "sys/proc.h",
+        "kvm.h", // must be after "sys/types.h"
+        "sys/ucontext.h",
+        "sys/uio.h",
+        "sys/ktrace.h",
+        "sys/umtx.h",
+        "sys/un.h",
+        "sys/user.h",
+        "sys/utsname.h",
+        "sys/uuid.h",
+        "sys/vmmeter.h",
+        "sys/wait.h",
+        "libprocstat.h",
+        "devstat.h",
+        "syslog.h",
+        "termios.h",
+        "time.h",
+        "ufs/ufs/quota.h",
+        "unistd.h",
+        "utime.h",
+        "utmpx.h",
+        "wchar.h",
+    );
 
     cfg.rename_type(|ty| match ty {
         // FIXME(freebsd): https://github.com/rust-lang/libc/issues/1273
@@ -2831,6 +2885,9 @@ fn test_freebsd(target: &str) {
             // FIXME(deprecated): deprecated in 0.2, removed in main
             "TIOCMGDTRWAIT" | "TIOCMSDTRWAIT" => true,
 
+            // Added in FreeBSD 15
+            "AT_HWCAP3" | "AT_HWCAP4" if Some(15) > freebsd_ver => true,
+
             _ => false,
         }
     });
@@ -2847,13 +2904,8 @@ fn test_freebsd(target: &str) {
         }
     });
 
-    cfg.skip_union(|u| u.ident().starts_with("__c_anonymous_"));
     cfg.skip_struct(move |struct_| {
-        let ty = struct_.ident();
-        if ty.starts_with("__c_anonymous_") {
-            return true;
-        }
-        match ty {
+        match struct_.ident() {
             // `procstat` is a private struct
             "procstat" => true,
 
@@ -3049,81 +3101,82 @@ fn test_emscripten(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None); // FIXME(emscripten): ??
 
-    headers! { cfg:
-               "ctype.h",
-               "dirent.h",
-               "dlfcn.h",
-               "errno.h",
-               "fcntl.h",
-               "fnmatch.h",
-               "glob.h",
-               "grp.h",
-               "ifaddrs.h",
-               "langinfo.h",
-               "limits.h",
-               "locale.h",
-               "malloc.h",
-               "mntent.h",
-               "mqueue.h",
-               "net/ethernet.h",
-               "net/if.h",
-               "net/if_arp.h",
-               "net/route.h",
-               "netdb.h",
-               "netinet/in.h",
-               "netinet/ip.h",
-               "netinet/tcp.h",
-               "netinet/udp.h",
-               "netpacket/packet.h",
-               "poll.h",
-               "pthread.h",
-               "pty.h",
-               "pwd.h",
-               "resolv.h",
-               "sched.h",
-               "sched.h",
-               "semaphore.h",
-               "shadow.h",
-               "signal.h",
-               "stddef.h",
-               "stdint.h",
-               "stdio.h",
-               "stdlib.h",
-               "string.h",
-               "sys/file.h",
-               "sys/ioctl.h",
-               "sys/ipc.h",
-               "sys/mman.h",
-               "sys/mount.h",
-               "sys/msg.h",
-               "sys/resource.h",
-               "sys/sem.h",
-               "sys/shm.h",
-               "sys/socket.h",
-               "sys/stat.h",
-               "sys/statvfs.h",
-               "sys/syscall.h",
-               "sys/sysinfo.h",
-               "sys/time.h",
-               "sys/times.h",
-               "sys/types.h",
-               "sys/uio.h",
-               "sys/un.h",
-               "sys/user.h",
-               "sys/utsname.h",
-               "sys/vfs.h",
-               "sys/wait.h",
-               "sys/xattr.h",
-               "syslog.h",
-               "termios.h",
-               "time.h",
-               "ucontext.h",
-               "unistd.h",
-               "utime.h",
-               "utmp.h",
-               "utmpx.h",
-               "wchar.h",
-    }
+    headers!(
+        cfg,
+        "ctype.h",
+        "dirent.h",
+        "dlfcn.h",
+        "errno.h",
+        "fcntl.h",
+        "fnmatch.h",
+        "glob.h",
+        "grp.h",
+        "ifaddrs.h",
+        "langinfo.h",
+        "limits.h",
+        "locale.h",
+        "malloc.h",
+        "mntent.h",
+        "mqueue.h",
+        "net/ethernet.h",
+        "net/if.h",
+        "net/if_arp.h",
+        "net/route.h",
+        "netdb.h",
+        "netinet/in.h",
+        "netinet/ip.h",
+        "netinet/tcp.h",
+        "netinet/udp.h",
+        "netpacket/packet.h",
+        "poll.h",
+        "pthread.h",
+        "pty.h",
+        "pwd.h",
+        "resolv.h",
+        "sched.h",
+        "sched.h",
+        "semaphore.h",
+        "shadow.h",
+        "signal.h",
+        "stddef.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "sys/file.h",
+        "sys/ioctl.h",
+        "sys/ipc.h",
+        "sys/mman.h",
+        "sys/mount.h",
+        "sys/msg.h",
+        "sys/resource.h",
+        "sys/sem.h",
+        "sys/shm.h",
+        "sys/socket.h",
+        "sys/stat.h",
+        "sys/statvfs.h",
+        "sys/syscall.h",
+        "sys/sysinfo.h",
+        "sys/time.h",
+        "sys/times.h",
+        "sys/types.h",
+        "sys/uio.h",
+        "sys/un.h",
+        "sys/user.h",
+        "sys/utsname.h",
+        "sys/vfs.h",
+        "sys/wait.h",
+        "sys/xattr.h",
+        "syslog.h",
+        "termios.h",
+        "time.h",
+        "ucontext.h",
+        "unistd.h",
+        "utime.h",
+        "utmp.h",
+        "utmpx.h",
+        "wchar.h",
+    );
 
     cfg.rename_struct_ty(move |ty| {
         match ty {
@@ -3166,10 +3219,6 @@ fn test_emscripten(target: &str) {
     });
 
     cfg.skip_union(|union_| {
-        if union_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
-
         match union_.ident() {
             // No epoll support
             // https://github.com/emscripten-core/emscripten/issues/5033
@@ -3188,9 +3237,6 @@ fn test_emscripten(target: &str) {
     });
 
     cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         match struct_.ident() {
             // This is actually a union, not a struct
             "sigval" => true,
@@ -3306,17 +3352,19 @@ fn test_neutrino(target: &str) {
             .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
 
         cfg.include(qnx_target_val + "/usr/include/io-sock");
-        headers! { cfg:
+        headers!(
+            cfg,
             "io-sock.h",
             "sys/types.h",
             "sys/socket.h",
             "sys/sysctl.h",
             "net/if.h",
-            "net/if_arp.h"
-        }
+            "net/if_arp.h",
+        );
     }
 
-    headers! { cfg:
+    headers!(
+        cfg,
         "ctype.h",
         "dirent.h",
         "dlfcn.h",
@@ -3399,12 +3447,11 @@ fn test_neutrino(target: &str) {
         "net/bpf.h",
         "net/if_dl.h",
         "sys/syspage.h",
-
         // TODO: The following header file doesn't appear as part of the default headers
         //       found in a standard installation of Neutrino 7.1 SDP.  The structures/
         //       functions dependent on it are currently commented out.
         //"sys/asyncmsg.h",
-    }
+    );
 
     // Create and include a header file containing
     // items which are not included in any official
@@ -3463,17 +3510,11 @@ fn test_neutrino(target: &str) {
             // Does not exist in Neutrino
             "locale_t" => true,
 
-            // FIXME: "'__uint128' undeclared" in C
-            "__uint128" => true,
-
             _ => false,
         }
     });
 
     cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         match struct_.ident() {
             "Elf64_Phdr" | "Elf32_Phdr" => true,
 
@@ -3561,75 +3602,110 @@ fn test_neutrino(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
+fn which_vxworks() -> Option<(u32, u32)> {
+    let version = env::var("WIND_RELEASE_ID").ok()?; // When in VxWorks setup, WIND_RELEASE_ID is
+                                                     // always set as the version of the release.
+
+    let mut pieces = version.trim().split(['.']);
+
+    let major: u32 = pieces.next().and_then(|x| x.parse().ok()).unwrap_or(0);
+    let minor: u32 = pieces.next().and_then(|x| x.parse().ok()).unwrap_or(0);
+
+    Some((major, minor))
+}
+
 fn test_vxworks(target: &str) {
     assert!(target.contains("vxworks"));
 
     let mut cfg = ctest_cfg();
-    headers! { cfg:
-               "vxWorks.h",
-               "yvals.h",
-               "nfs/nfsCommon.h",
-               "rtpLibCommon.h",
-               "randomNumGen.h",
-               "taskLib.h",
-               "sysLib.h",
-               "ioLib.h",
-               "inetLib.h",
-               "socket.h",
-               "errnoLib.h",
-               "ctype.h",
-               "dirent.h",
-               "dlfcn.h",
-               "elf.h",
-               "fcntl.h",
-               "grp.h",
-               "sys/poll.h",
-               "ifaddrs.h",
-               "langinfo.h",
-               "limits.h",
-               "link.h",
-               "locale.h",
-               "sys/stat.h",
-               "netdb.h",
-               "pthread.h",
-               "pwd.h",
-               "sched.h",
-               "semaphore.h",
-               "signal.h",
-               "stddef.h",
-               "stdint.h",
-               "stdio.h",
-               "stdlib.h",
-               "string.h",
-               "sys/file.h",
-               "sys/ioctl.h",
-               "sys/socket.h",
-               "sys/time.h",
-               "sys/times.h",
-               "sys/types.h",
-               "sys/uio.h",
-               "sys/un.h",
-               "sys/utsname.h",
-               "sys/wait.h",
-               "netinet/tcp.h",
-               "syslog.h",
-               "termios.h",
-               "time.h",
-               "ucontext.h",
-               "unistd.h",
-               "utime.h",
-               "wchar.h",
-               "errno.h",
-               "sys/mman.h",
-               "pathLib.h",
-               "mqueue.h",
+
+    let vxworks_ver = which_vxworks();
+
+    if vxworks_ver < Some((25, 9)) {
+        cfg.cfg("vxworks_lt_25_09", None);
     }
+
+    headers!(
+        cfg,
+        "vxWorks.h",
+        "semLibCommon.h",
+        "yvals.h",
+        "nfs/nfsCommon.h",
+        "rtpLibCommon.h",
+        "randomNumGen.h",
+        "taskLib.h",
+        "sysLib.h",
+        "ioLib.h",
+        "inetLib.h",
+        "socket.h",
+        "errnoLib.h",
+        "ctype.h",
+        "dirent.h",
+        "dlfcn.h",
+        "elf.h",
+        "fcntl.h",
+        "grp.h",
+        "ifaddrs.h",
+        "langinfo.h",
+        "limits.h",
+        "link.h",
+        "locale.h",
+        "netdb.h",
+        "pthread.h",
+        "pwd.h",
+        "sched.h",
+        "semaphore.h",
+        "signal.h",
+        "stddef.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "sys/select.h",
+        "sys/stat.h",
+        "sys/poll.h",
+        "sys/file.h",
+        "sys/ioctl.h",
+        "sys/socket.h",
+        "sys/time.h",
+        "sys/times.h",
+        "sys/types.h",
+        "sys/uio.h",
+        "sys/un.h",
+        "sys/utsname.h",
+        "sys/wait.h",
+        "sys/ttycom.h",
+        "sys/utsname.h",
+        "sys/resource.h",
+        "sys/mman.h",
+        "netinet/tcp.h",
+        "netinet/udp.h",
+        "netinet/in.h",
+        "netinet6/in6.h",
+        "syslog.h",
+        "termios.h",
+        "time.h",
+        "ucontext.h",
+        "unistd.h",
+        "utime.h",
+        "wchar.h",
+        "errno.h",
+        "pathLib.h",
+        "mqueue.h",
+        "fnmatch.h",
+        "sioLibCommon.h",
+        "net/if.h",
+    );
     // FIXME(vxworks)
     cfg.skip_const(move |constant| match constant.ident() {
         // sighandler_t weirdness
         "SIG_DFL" | "SIG_ERR" | "SIG_IGN"
-        // This is not defined in vxWorks
-        | "RTLD_DEFAULT"   => true,
+        // These are not defined in VxWorks
+        | "RTLD_DEFAULT" | "PRIO_PROCESS"
+        // Sticky bits not supported
+        | "S_ISVTX"
+        // The following are obsolete for VxWorks
+        | "SIGIO" | "SIGWINCH" | "SIGLOST" => true,
         _ => false,
     });
     // FIXME(vxworks)
@@ -3640,7 +3716,12 @@ fn test_vxworks(target: &str) {
 
     cfg.skip_struct_field_type(
         move |struct_, field| match (struct_.ident(), field.ident()) {
-            ("siginfo_t", "si_value") | ("stat", "st_size") | ("sigaction", "sa_u") => true,
+            ("siginfo_t", "si_value")
+            | ("stat", "st_size")
+            // sighandler_t type is super weird
+            | ("sigaction", "sa_sigaction")
+            // sa_u_t type is not defined in vxworks
+            | ("sigaction", "sa_u") => true,
             _ => false,
         },
     );
@@ -3659,10 +3740,15 @@ fn test_vxworks(target: &str) {
         "sigqueue" | "_sigqueue"
         // sighandler_t
         | "signal"
+        // This is used a realpath and not _realpath
+        | "_realpath"
         // not used in static linking by default
         | "dlerror" => true,
         _ => false,
     });
+
+    // Not defined in vxworks. Just a crate specific union type.
+    cfg.skip_union(move |u| u.ident() == "sa_u_t");
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
@@ -3740,6 +3826,7 @@ fn test_linux(target: &str) {
     let loongarch64 = target.contains("loongarch64");
     let wasm32 = target.contains("wasm32");
     let uclibc = target.contains("uclibc");
+    let mips = target.contains("mips");
 
     let musl_v1_2_3 = env::var("RUST_LIBC_UNSTABLE_MUSL_V1_2_3").is_ok();
     let old_musl = musl && !musl_v1_2_3;
@@ -3756,128 +3843,127 @@ fn test_linux(target: &str) {
 
     config_gnu_bits(target, &mut cfg);
 
-    headers! { cfg:
-               "ctype.h",
-               "dirent.h",
-               "dlfcn.h",
-               "elf.h",
-               "fcntl.h",
-               "fnmatch.h",
-               "getopt.h",
-               "glob.h",
-               [gnu]: "gnu/libc-version.h",
-               "grp.h",
-               "iconv.h",
-               "ifaddrs.h",
-               "langinfo.h",
-               "libgen.h",
-               "limits.h",
-               "link.h",
-               "linux/sysctl.h",
-               "locale.h",
-               "malloc.h",
-               "mntent.h",
-               "mqueue.h",
-               "net/ethernet.h",
-               "net/if.h",
-               "net/if_arp.h",
-               "net/route.h",
-               "netdb.h",
-               "netinet/in.h",
-               "netinet/ip.h",
-               "netinet/tcp.h",
-               "netinet/udp.h",
-               "poll.h",
-               "pthread.h",
-               "pty.h",
-               "pwd.h",
-               "regex.h",
-               "resolv.h",
-               "sched.h",
-               "semaphore.h",
-               "shadow.h",
-               "signal.h",
-               "spawn.h",
-               "stddef.h",
-               "stdint.h",
-               "stdio.h",
-               "stdlib.h",
-               "string.h",
-               "sys/epoll.h",
-               "sys/eventfd.h",
-               "sys/file.h",
-               "sys/fsuid.h",
-               "sys/klog.h",
-               "sys/inotify.h",
-               "sys/ioctl.h",
-               "sys/ipc.h",
-               "sys/mman.h",
-               "sys/mount.h",
-               "sys/msg.h",
-               "sys/personality.h",
-               "sys/prctl.h",
-               "sys/ptrace.h",
-               "sys/quota.h",
-               "sys/random.h",
-               "sys/reboot.h",
-               "sys/resource.h",
-               "sys/sem.h",
-               "sys/sendfile.h",
-               "sys/shm.h",
-               "sys/signalfd.h",
-               "sys/socket.h",
-               "sys/stat.h",
-               "sys/statvfs.h",
-               "sys/swap.h",
-               "sys/syscall.h",
-               "sys/time.h",
-               "sys/timerfd.h",
-               "sys/times.h",
-               "sys/timex.h",
-               "sys/types.h",
-               "sys/uio.h",
-               "sys/un.h",
-               "sys/user.h",
-               "sys/utsname.h",
-               "sys/vfs.h",
-               "sys/wait.h",
-               "syslog.h",
-               "termios.h",
-               "time.h",
-               "ucontext.h",
-               "unistd.h",
-               "utime.h",
-               "utmp.h",
-               "utmpx.h",
-               "wchar.h",
-               "errno.h",
-               // `sys/io.h` is only available on x86*, Alpha, IA64, and 32-bit
-               // ARM: https://bugzilla.redhat.com/show_bug.cgi?id=1116162
-               // Also unavailable on gnueabihf with glibc 2.30.
-               // https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=6b33f373c7b9199e00ba5fbafd94ac9bfb4337b1
-               [(x86_64 || x86_32 || arm) && !gnueabihf]: "sys/io.h",
-               // `sys/reg.h` is only available on x86 and x86_64
-               [x86_64 || x86_32]: "sys/reg.h",
-               // sysctl system call is deprecated and not available on musl
-               // It is also unsupported in x32, deprecated since glibc 2.30:
-               [!(x32 || musl || gnu)]: "sys/sysctl.h",
-               // <execinfo.h> is not supported by musl:
-               // https://www.openwall.com/lists/musl/2015/04/09/3
-               // <execinfo.h> is not present on uclibc.
-               [!(musl || uclibc)]: "execinfo.h",
-    }
+    headers!(
+        cfg,
+        "ctype.h",
+        "dirent.h",
+        "dlfcn.h",
+        "elf.h",
+        "fcntl.h",
+        "fnmatch.h",
+        "getopt.h",
+        "glob.h",
+        (gnu, "gnu/libc-version.h"),
+        "grp.h",
+        "iconv.h",
+        "ifaddrs.h",
+        "langinfo.h",
+        "libgen.h",
+        "limits.h",
+        "link.h",
+        "linux/sysctl.h",
+        "locale.h",
+        "malloc.h",
+        "mntent.h",
+        "mqueue.h",
+        "net/ethernet.h",
+        "net/if.h",
+        "net/if_arp.h",
+        "net/route.h",
+        "netdb.h",
+        "netinet/in.h",
+        "netinet/ip.h",
+        "netinet/tcp.h",
+        "netinet/udp.h",
+        "poll.h",
+        "pthread.h",
+        "pty.h",
+        "pwd.h",
+        "regex.h",
+        "resolv.h",
+        "sched.h",
+        "semaphore.h",
+        "shadow.h",
+        "signal.h",
+        "spawn.h",
+        "stddef.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "sys/epoll.h",
+        "sys/eventfd.h",
+        "sys/file.h",
+        "sys/fsuid.h",
+        "sys/klog.h",
+        "sys/inotify.h",
+        "sys/ioctl.h",
+        "sys/ipc.h",
+        "sys/mman.h",
+        "sys/mount.h",
+        "sys/msg.h",
+        "sys/personality.h",
+        "sys/prctl.h",
+        "sys/ptrace.h",
+        "sys/quota.h",
+        "sys/random.h",
+        "sys/reboot.h",
+        "sys/resource.h",
+        "sys/sem.h",
+        "sys/sendfile.h",
+        "sys/shm.h",
+        "sys/signalfd.h",
+        "sys/socket.h",
+        "sys/stat.h",
+        "sys/statvfs.h",
+        "sys/swap.h",
+        "sys/syscall.h",
+        "sys/time.h",
+        "sys/timerfd.h",
+        "sys/times.h",
+        "sys/timex.h",
+        "sys/types.h",
+        "sys/uio.h",
+        "sys/un.h",
+        "sys/user.h",
+        "sys/utsname.h",
+        "sys/vfs.h",
+        "sys/wait.h",
+        "syslog.h",
+        "termios.h",
+        "time.h",
+        "ucontext.h",
+        "unistd.h",
+        "utime.h",
+        "utmp.h",
+        "utmpx.h",
+        "wchar.h",
+        "errno.h",
+        // `sys/io.h` is only available on x86*, Alpha, IA64, and 32-bit
+        // ARM: https://bugzilla.redhat.com/show_bug.cgi?id=1116162
+        // Also unavailable on gnueabihf with glibc 2.30.
+        // https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=6b33f373c7b9199e00ba5fbafd94ac9bfb4337b1
+        ((x86_64 || x86_32 || arm) && !gnueabihf, "sys/io.h"),
+        // `sys/reg.h` is only available on x86 and x86_64
+        (x86_64 || x86_32, "sys/reg.h"),
+        // sysctl system call is deprecated and not available on musl
+        // It is also unsupported in x32, deprecated since glibc 2.30:
+        (!(x32 || musl || gnu), "sys/sysctl.h"),
+        // <execinfo.h> is not supported by musl:
+        // https://www.openwall.com/lists/musl/2015/04/09/3
+        // <execinfo.h> is not present on uclibc.
+        (!(musl || uclibc), "execinfo.h"),
+    );
 
     // Include linux headers at the end:
-    headers! {
-        cfg:
-        [loongarch64 || riscv64]: "asm/hwcap.h",
-        "asm/mman.h",
-    }
+    headers!(cfg, (loongarch64 || riscv64, "asm/hwcap.h"), "asm/mman.h",);
 
     if !wasm32 {
-        headers! { cfg:
-            [gnu]: "linux/aio_abi.h",
+        headers!(
+            cfg,
+            (gnu, "linux/aio_abi.h"),
             "linux/can.h",
+            "linux/can/bcm.h",
             "linux/can/raw.h",
             "linux/can/j1939.h",
             "linux/cn_proc.h",
@@ -3940,19 +4026,19 @@ fn test_linux(target: &str) {
             "linux/wireless.h",
             "sys/fanotify.h",
             // <sys/auxv.h> is not present on uclibc
-            [!uclibc]: "sys/auxv.h",
-            [gnu || musl]: "linux/close_range.h",
-        }
+            (!uclibc, "sys/auxv.h"),
+            (gnu || musl, "linux/close_range.h"),
+        );
     }
 
     // note: aio.h must be included before sys/mount.h
-    headers! {
-        cfg:
+    headers!(
+        cfg,
         "sys/xattr.h",
         "sys/sysinfo.h",
         // AIO is not supported by uclibc:
-        [!uclibc]: "aio.h",
-    }
+        (!uclibc, "aio.h"),
+    );
 
     // Just pass all these through, no need for a "struct" prefix
     let typedef_structs = [
@@ -3986,7 +4072,7 @@ fn test_linux(target: &str) {
         }
     });
 
-    cfg.rename_struct_field(|struct_, field| {
+    cfg.rename_struct_field(move |struct_, field| {
         let struct_ = struct_.ident();
         match field.ident() {
             // Our stat *_nsec fields normally don't actually exist but are part
@@ -4008,6 +4094,9 @@ fn test_linux(target: &str) {
             {
                 Some("type".to_string())
             }
+
+            // FIXME(1.0): field has a different name on loongarch
+            "uc_flags" if loongarch64 && struct_ == "ucontext_t" => Some("__uc_flags".to_string()),
 
             _ => None,
         }
@@ -4043,9 +4132,6 @@ fn test_linux(target: &str) {
             // specific type.
             "Ioctl" => true,
 
-            // FIXME: "'__uint128' undeclared" in C
-            "__uint128" => true,
-
             t => {
                 if musl {
                     // LFS64 types have been removed in musl 1.2.4+
@@ -4056,10 +4142,6 @@ fn test_linux(target: &str) {
             }
         }
     });
-
-    // Skip structs and enums that are unnamed in C.
-    cfg.skip_union(move |union_| union_.ident().starts_with("__c_anonymous_"));
-    cfg.skip_struct(move |struct_| struct_.ident().starts_with("__c_anonymous_"));
 
     cfg.skip_struct(move |struct_| {
         let ty = struct_.ident();
@@ -4076,11 +4158,6 @@ fn test_linux(target: &str) {
 
         // FIXME(linux): sparc64 CI has old headers
         if sparc64 && (ty == "uinput_ff_erase" || ty == "uinput_abs_setup") {
-            return true;
-        }
-
-        // FIXME(#1558): passing by value corrupts the value for reasons not understood.
-        if (gnu && sparc64) && (ty == "ip_mreqn" || ty == "hwtstamp_config") {
             return true;
         }
 
@@ -4123,28 +4200,14 @@ fn test_linux(target: &str) {
             // structs.
             "termios2" => true,
 
-            // FIXME(linux): remove once we set minimum supported glibc version.
-            // ucontext_t added a new field as of glibc 2.28; our struct definition is
-            // conservative and omits the field, but that means the size doesn't match for newer
-            // glibcs (see https://github.com/rust-lang/libc/issues/1410)
-            "ucontext_t" if gnu => true,
-
-            // FIXME(linux): Somehow we cannot include headers correctly in glibc 2.30.
-            // So let's ignore for now and re-visit later.
-            // Probably related: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=91085
-            "statx" => true,
-            "statx_timestamp" => true,
-
             // On Linux, the type of `ut_exit` field of struct `utmpx`
             // can be an anonymous struct, so an extra struct,
             // which is absent in musl, has to be defined.
             "__exit_status" if musl => true,
 
-            // clone_args might differ b/w libc versions
-            "clone_args" => true,
-
-            // Might differ between kernel versions
-            "open_how" => true,
+            // FIXME(ppc): tests fail due to a field type mismatch (`long long unsigned` vs
+            // `long unsigned`).
+            "clone_args" if ppc64 => true,
 
             // Linux >= 6.13 (pidfd_info.exit_code: Linux >= 6.15)
             // Might differ between kernel versions
@@ -4153,37 +4216,6 @@ fn test_linux(target: &str) {
             "sctp_initmsg" | "sctp_sndrcvinfo" | "sctp_sndinfo" | "sctp_rcvinfo"
             | "sctp_nxtinfo" | "sctp_prinfo" | "sctp_authinfo" => true,
 
-            // FIXME(linux): requires >= 6.1 kernel headers
-            "canxl_frame" => true,
-
-            // FIXME(linux): The size of `iv` has been changed since Linux v6.0
-            // https://github.com/torvalds/linux/commit/94dfc73e7cf4a31da66b8843f0b9283ddd6b8381
-            "af_alg_iv" => true,
-
-            // FIXME(linux): Requires >= 5.1 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "tls12_crypto_info_aes_gcm_256"
-                if (aarch64 || arm || i686 || s390x || x86_64) && musl =>
-            {
-                true
-            }
-
-            // FIXME(linux): Requires >= 5.11 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "tls12_crypto_info_chacha20_poly1305"
-                if (aarch64 || arm || i686 || s390x || x86_64) && musl =>
-            {
-                true
-            }
-
-            // FIXME(linux): Requires >= 5.3 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "xdp_options" if musl => true,
-
-            // FIXME(linux): Requires >= 5.4 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "xdp_ring_offset" | "xdp_mmap_offsets" if musl => true,
-
             // FIXME(linux): Requires >= 6.8 kernel headers.
             // A field was added in 6.8.
             // https://github.com/torvalds/linux/commit/341ac980eab90ac1f6c22ee9f9da83ed9604d899
@@ -4191,15 +4223,8 @@ fn test_linux(target: &str) {
             // https://github.com/torvalds/linux/commit/32654bbd6313b4cfc82297e6634fa9725c3c900f
             "xdp_umem_reg" => true,
 
-            // FIXME(linux): Requires >= 5.9 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "xdp_statistics" if musl => true,
-
             // FIXME(linux): Requires >= 6.8 kernel headers.
-            "xsk_tx_metadata"
-            | "__c_anonymous_xsk_tx_metadata_union"
-            | "xsk_tx_metadata_request"
-            | "xsk_tx_metadata_completion" => true,
+            "xsk_tx_metadata" | "xsk_tx_metadata_request" | "xsk_tx_metadata_completion" => true,
 
             // A new field was added in kernel 5.4, this is the old version for backwards compatibility.
             // https://github.com/torvalds/linux/commit/77cd0d7b3f257fd0e3096b4fdcff1a7d38e99e10
@@ -4228,11 +4253,14 @@ fn test_linux(target: &str) {
             // FIXME(linux): Requires >= 6.12 kernel headers.
             "mnt_ns_info" => true,
 
-            // FIXME(linux): Requires >= 6.4 kernel headers.
-            "ptrace_sud_config" => true,
+            // FIXME(musl): Struct has changed for new musl versions
+            "tcp_info" if musl => true,
 
-            // Struct has changed for new musl versions
-            "tcp_info" if old_musl => true,
+            // FIXME(musl): Supported in new musl but we don't have a new enough version in CI.
+            "statx" | "statx_timestamp" if musl => true,
+
+            // FIXME(musl): New fields in newer versions
+            "utmpx" if !old_musl => true,
 
             _ => false,
         }
@@ -4278,48 +4306,6 @@ fn test_linux(target: &str) {
             }
         }
         if musl {
-            // FIXME(linux): Requires >= 5.0 kernel headers
-            if name == "SECCOMP_GET_NOTIF_SIZES"
-               || name == "SECCOMP_FILTER_FLAG_NEW_LISTENER"
-               || name == "SECCOMP_FILTER_FLAG_TSYNC_ESRCH"
-               || name == "SECCOMP_USER_NOTIF_FLAG_CONTINUE"  // requires >= 5.5
-               || name == "SECCOMP_ADDFD_FLAG_SETFD"  // requires >= 5.9
-               || name == "SECCOMP_ADDFD_FLAG_SEND"   // requires >= 5.9
-               || name == "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV"  // requires >= 5.19
-            {
-                return true;
-            }
-            // FIXME(linux): Requires >= 4.20 kernel headers
-            if name == "PTP_SYS_OFFSET_EXTENDED" {
-                return true;
-            }
-            // FIXME(linux): Requires >= 5.4 kernel headers
-            if name == "PTP_CLOCK_GETCAPS2"
-                || name == "PTP_ENABLE_PPS2"
-                || name == "PTP_EXTTS_REQUEST2"
-                || name == "PTP_PEROUT_REQUEST2"
-                || name == "PTP_PIN_GETFUNC2"
-                || name == "PTP_PIN_SETFUNC2"
-                || name == "PTP_SYS_OFFSET2"
-                || name == "PTP_SYS_OFFSET_PRECISE2"
-                || name == "PTP_SYS_OFFSET_EXTENDED2"
-            {
-                return true;
-            }
-            // FIXME(linux): Requires >= 5.4.1 kernel headers
-            if name.starts_with("J1939")
-                || name.starts_with("RTEXT_FILTER_")
-                || name.starts_with("SO_J1939")
-                || name.starts_with("SCM_J1939")
-            {
-                return true;
-            }
-            // FIXME(linux): Requires >= 5.10 kernel headers
-            if name.starts_with("MEMBARRIER_CMD_REGISTER")
-                || name.starts_with("MEMBARRIER_CMD_PRIVATE")
-            {
-                return true;
-            }
             // LFS64 types have been removed in musl 1.2.4+
             if name.starts_with("RLIM64") {
                 return true;
@@ -4328,66 +4314,83 @@ fn test_linux(target: &str) {
             if name.starts_with("NI_IDN") {
                 return true;
             }
-            // FIXME: Requires >= 6.3 kernel headers
-            if loongarch64 && (name == "MFD_NOEXEC_SEAL" || name == "MFD_EXEC") {
-                return true;
-            }
-            // FIXME: Requires >= 6.3 (6.6) kernel headers
-            if name == "PR_GET_MDWE" || name == "PR_MDWE_NO_INHERIT" || name == "PR_MDWE_REFUSE_EXEC_GAIN" || name == "PR_SET_MDWE" {
-                return true;
-            }
-            // Requires musl >= 1.2
-            if old_musl && (name == "SO_PREFER_BUSY_POLL"
-                || name == "SO_BUSY_POLL_BUDGET")
-            {
-                return true;
-            }
-            // FIXME(musl): Not in musl yet
-            if name == "SO_NETNS_COOKIE"
-                || name == "SO_BUF_LOCK"
-                || name == "SO_RESERVE_MEM"
-                || name == "SO_TXREHASH"
-                || name == "SO_RCVMARK"
-                || name == "SO_PASSPIDFD"
-                || name == "SO_PEERPIDFD"
-                || name == "SO_DEVMEM_LINEAR"
-                || name == "SO_DEVMEM_DMABUF"
-                || name == "SO_DEVMEM_DONTNEED"
-            {
-                        return true;
-            }
-            // FIXME(musl): Not in musl yet
-            if name == "SCM_DEVMEM_LINEAR"
-                || name == "SCM_DEVMEM_DMABUF"
-            {
-                        return true;
-            }
-            // Values changed in newer musl versions on these arches
-            if old_musl && (riscv64 || x86_64) && name == "O_LARGEFILE" {
-                return true;
-            }
-            // Values changed in newer musl versions
-            if old_musl && name == "RLIM_NLIMITS" {
-                return true;
-            }
-            // FIXME: Does not exist on non-x86 architectures, slated for removal
-            // in libc in 1.0
-            if ppc64 && name == "MAP_32BIT" {
-                return true;
+
+            match name {
+                // FIXME: Does not exist on non-x86 architectures, slated for removal
+                // in libc in 1.0
+                "MAP_32BIT" if ppc64 => return true,
+
+                // FIXME(musl): None of these are actually defined in musl, they should be removed.
+                "SO_NETNS_COOKIE"
+                | "SO_BUF_LOCK"
+                | "SO_RESERVE_MEM"
+                | "SO_TXREHASH"
+                | "SO_RCVMARK"
+                | "SO_PASSPIDFD"
+                | "SO_PEERPIDFD"
+                | "SO_DEVMEM_LINEAR"
+                | "SO_DEVMEM_DMABUF"
+                | "SO_DEVMEM_DONTNEED"
+                | "SCM_DEVMEM_LINEAR"
+                | "SCM_DEVMEM_DMABUF"
+                | "FAN_EVENT_INFO_TYPE_ERROR"
+                | "FAN_EVENT_INFO_TYPE_NEW_DFID_NAME"
+                | "FAN_EVENT_INFO_TYPE_OLD_DFID_NAME"
+                | "FAN_FS_ERROR"
+                | "FAN_INFO"
+                | "FAN_MARK_EVICTABLE"
+                | "FAN_MARK_IGNORE"
+                | "FAN_MARK_IGNORE_SURV"
+                | "FAN_RENAME"
+                | "FAN_REPORT_DFID_NAME_TARGET"
+                | "FAN_REPORT_TARGET_FID"
+                | "FAN_RESPONSE_INFO_AUDIT_RULE"
+                | "FAN_RESPONSE_INFO_NONE"
+                | "PR_GET_MDWE"
+                | "PR_MDWE_NO_INHERIT"
+                | "PR_MDWE_REFUSE_EXEC_GAIN"
+                | "PR_SET_MDWE"
+                | "IPPROTO_ETHERNET"
+                | "IPPROTO_MPTCP"
+                | "SI_DETHREAD"
+                | "PR_SET_VMA"
+                | "PR_SET_VMA_ANON_NAME"
+                | "PR_SCHED_CORE"
+                | "PR_SCHED_CORE_CREATE"
+                | "PR_SCHED_CORE_GET"
+                | "PR_SCHED_CORE_MAX"
+                | "PR_SCHED_CORE_SCOPE_PROCESS_GROUP"
+                | "PR_SCHED_CORE_SCOPE_THREAD"
+                | "PR_SCHED_CORE_SCOPE_THREAD_GROUP"
+                | "PR_SCHED_CORE_SHARE_FROM"
+                | "PR_SCHED_CORE_SHARE_TO" => return true,
+
+                /* Added in versions more recent than what we test */
+                // Since 1.2.3
+                "SO_BUSY_POLL_BUDGET" | "SO_PREFER_BUSY_POLL" => return true,
+
+                // FIXME(musl): value was updated in new musl
+                "RLIM_NLIMITS" => return true,
+
+                // FIXME(musl): Values changed in newer musl versions on these arches
+                "O_LARGEFILE" if riscv64 || x86_64 => return true,
+
+                _ => (),
             }
         }
+
         match name {
             // These constants are not available if gnu headers have been included
             // and can therefore not be tested here
             //
             // The IPV6 constants are tested in the `linux_ipv6.rs` tests:
-            | "IPV6_FLOWINFO"
+            "IPV6_FLOWINFO"
             | "IPV6_FLOWLABEL_MGR"
             | "IPV6_FLOWINFO_SEND"
             | "IPV6_FLOWINFO_FLOWLABEL"
-            | "IPV6_FLOWINFO_PRIORITY"
+            | "IPV6_FLOWINFO_PRIORITY" => true,
             // The F_ fnctl constants are tested in the `linux_fnctl.rs` tests:
-            | "F_CANCELLK"
+            "F_CANCELLK"
             | "F_ADD_SEALS"
             | "F_GET_SEALS"
             | "F_SEAL_SEAL"
@@ -4410,12 +4413,7 @@ fn test_linux(target: &str) {
 
             // FIXME(linux): conflicts with glibc headers and is tested in
             // `linux_termios.rs` below:
-            | "BOTHER"
-            | "IBSHIFT"
-            | "TCGETS2"
-            | "TCSETS2"
-            | "TCSETSW2"
-            | "TCSETSF2" => true,
+            "BOTHER" | "IBSHIFT" | "TCGETS2" | "TCSETS2" | "TCSETSW2" | "TCSETSF2" => true,
 
             // FIXME(musl): on musl the pthread types are defined a little differently
             // - these constants are used by the glibc implementation.
@@ -4428,46 +4426,24 @@ fn test_linux(target: &str) {
             // deprecated: not available from Linux kernel 5.6:
             "VMADDR_CID_RESERVED" => true,
 
-            // IPPROTO_MAX was increased in 5.6 for IPPROTO_MPTCP:
-            | "IPPROTO_MAX"
-            | "IPPROTO_ETHERNET"
-            | "IPPROTO_MPTCP" => true,
+            // FIXME(value): IPPROTO_MAX was increased in 5.6 for IPPROTO_MPTCP:
+            "IPPROTO_MAX" => true,
 
             // FIXME(linux): Not yet implemented on sparc64
             "SYS_clone3" if sparc64 => true,
 
-            // FIXME(linux): Not defined on ARM, gnueabihf, musl, PowerPC, riscv64, s390x, and sparc64.
-            "SYS_memfd_secret" if arm | gnueabihf | musl | ppc | riscv64 | s390x | sparc64 => true,
-
-            // FIXME(linux): Added in Linux 5.16
-            // https://github.com/torvalds/linux/commit/039c0ec9bb77446d7ada7f55f90af9299b28ca49
-            "SYS_futex_waitv" => true,
-
-            // FIXME(linux): Added in Linux 5.17
-            // https://github.com/torvalds/linux/commit/c6018b4b254971863bd0ad36bb5e7d0fa0f0ddb0
-            "SYS_set_mempolicy_home_node" => true,
-
-            // FIXME(linux): Added in Linux 5.18
-            // https://github.com/torvalds/linux/commit/8b5413647262dda8d8d0e07e14ea1de9ac7cf0b2
-            "NFQA_PRIORITY" => true,
-
-            // FIXME(linux): requires more recent kernel headers on CI
-            | "UINPUT_VERSION"
-            | "SW_MAX"
-            | "SW_CNT"
-                if ppc64 || riscv64 => true,
-
-            // FIXME(linux): requires more recent kernel headers on CI
-            "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV" if sparc64 => true,
-
-            // FIXME(linux): Not currently available in headers on ARM and musl.
-            "NETLINK_GET_STRICT_CHK" if arm => true,
+            // FIXME(linux): Not defined on ARM, gnueabihf, mips, musl, PowerPC, riscv64, s390x, and sparc64.
+            "SYS_memfd_secret"
+                if arm | gnueabihf | mips | musl | ppc | riscv64 | s390x | sparc64 =>
+            {
+                true
+            }
 
             // Skip as this signal codes and trap reasons need newer headers
-            "SI_DETHREAD" | "TRAP_PERF" => true,
+            "TRAP_PERF" => true,
 
             // kernel constants not available in uclibc 1.0.34
-            | "EXTPROC"
+            "EXTPROC"
             | "IPPROTO_BEETPH"
             | "IPPROTO_MPLS"
             | "IPV6_HDRINCL"
@@ -4480,7 +4456,10 @@ fn test_linux(target: &str) {
             | "SHM_EXEC"
             | "UDP_GRO"
             | "UDP_SEGMENT"
-                if uclibc => true,
+                if uclibc =>
+            {
+                true
+            }
 
             // headers conflicts with linux/pidfd.h
             "PIDFD_NONBLOCK" => true,
@@ -4512,68 +4491,18 @@ fn test_linux(target: &str) {
             // is a private value for kernel usage normally
             "FUSE_SUPER_MAGIC" => true,
 
-            // linux 5.17 min
-            "PR_SET_VMA" | "PR_SET_VMA_ANON_NAME" => true,
-
-            // present in recent kernels only
-            "PR_SCHED_CORE" | "PR_SCHED_CORE_CREATE" | "PR_SCHED_CORE_GET" | "PR_SCHED_CORE_MAX" | "PR_SCHED_CORE_SCOPE_PROCESS_GROUP" | "PR_SCHED_CORE_SCOPE_THREAD" | "PR_SCHED_CORE_SCOPE_THREAD_GROUP" | "PR_SCHED_CORE_SHARE_FROM" | "PR_SCHED_CORE_SHARE_TO" => true,
-
-            // present in recent kernels only >= 5.13
-            "PR_PAC_SET_ENABLED_KEYS" | "PR_PAC_GET_ENABLED_KEYS" => true,
-            // present in recent kernels only >= 5.19
-            "PR_SME_SET_VL" | "PR_SME_GET_VL" | "PR_SME_VL_LEN_MAX" | "PR_SME_SET_VL_INHERIT" | "PR_SME_SET_VL_ONE_EXEC" => true,
-
-            // Added in Linux 5.14
-            "FUTEX_LOCK_PI2" => true,
-
-            // Added in  linux 6.1
-            "STATX_DIOALIGN"
-            | "CAN_RAW_XL_FRAMES"
-            | "CANXL_HDR_SIZE"
-            | "CANXL_MAX_DLC"
-            | "CANXL_MAX_DLC_MASK"
-            | "CANXL_MAX_DLEN"
-            | "CANXL_MAX_MTU"
-            | "CANXL_MIN_DLC"
-            | "CANXL_MIN_DLEN"
-            | "CANXL_MIN_MTU"
-            | "CANXL_MTU"
-            | "CANXL_PRIO_BITS"
-            | "CANXL_PRIO_MASK"
-            | "CANXL_SEC"
-            | "CANXL_XLF"
-             => true,
-
-            // FIXME(linux): Parts of netfilter/nfnetlink*.h require more recent kernel headers:
-            | "RTNLGRP_MCTP_IFADDR" // linux v5.17+
-            | "RTNLGRP_TUNNEL" // linux v5.18+
-            | "RTNLGRP_STATS" // linux v5.18+
-                => true,
+            // Not present in glibc
+            "PR_SME_VL_LEN_MAX" | "PR_SME_SET_VL_INHERIT" | "PR_SME_SET_VL_ONE_EXEC" if gnu => true,
 
             // FIXME(linux): The below is no longer const in glibc 2.34:
             // https://github.com/bminor/glibc/commit/5d98a7dae955bafa6740c26eaba9c86060ae0344
-            | "PTHREAD_STACK_MIN"
-            | "SIGSTKSZ"
-            | "MINSIGSTKSZ"
-                if gnu => true,
+            "PTHREAD_STACK_MIN" | "SIGSTKSZ" | "MINSIGSTKSZ" if gnu => true,
 
-            // FIXME(linux): Linux >= 5.16:
-            // https://github.com/torvalds/linux/commit/42df6e1d221dddc0f2acf2be37e68d553ad65f96
-            "NF_NETDEV_EGRESS" if sparc64 => true,
             // value changed
             "NF_NETDEV_NUMHOOKS" if sparc64 => true,
 
-            // FIXME(linux): requires Linux >= v5.8
-            "IF_LINK_MODE_TESTING" if sparc64 => true,
-
             // DIFF(main): fixed in 1.0 with e9abac9ac2
             "CLONE_CLEAR_SIGHAND" | "CLONE_INTO_CGROUP" => true,
-
-            // kernel 6.1 minimum
-            "MADV_COLLAPSE" => true,
-
-            // kernel 6.2 minimum
-            "TUN_F_USO4" | "TUN_F_USO6" | "IFF_NO_CARRIER" => true,
 
             // kernel 6.9 minimum
             "RWF_NOAPPEND" => true,
@@ -4583,38 +4512,6 @@ fn test_linux(target: &str) {
 
             // kernel 6.14 minimum
             "RWF_DONTCACHE" => true,
-
-            // FIXME(linux): Requires more recent kernel headers
-            | "IFLA_PARENT_DEV_NAME"     // linux v5.13+
-            | "IFLA_PARENT_DEV_BUS_NAME" // linux v5.13+
-            | "IFLA_GRO_MAX_SIZE"        // linux v5.16+
-            | "IFLA_TSO_MAX_SIZE"        // linux v5.18+
-            | "IFLA_TSO_MAX_SEGS"        // linux v5.18+
-            | "IFLA_ALLMULTI"            // linux v6.0+
-            | "MADV_DONTNEED_LOCKED"     // linux v5.18+
-                => true,
-            "SCTP_FUTURE_ASSOC" | "SCTP_CURRENT_ASSOC" | "SCTP_ALL_ASSOC" | "SCTP_PEER_ADDR_THLDS_V2" => true, // linux 5.5+
-
-            // kernel 6.5 minimum
-            "MOVE_MOUNT_BENEATH" => true,
-            // FIXME(linux): Requires linux 6.1
-            "ALG_SET_KEY_BY_KEY_SERIAL" | "ALG_SET_DRBG_ENTROPY" => true,
-
-            // FIXME(linux): Requires more recent kernel headers
-            | "FAN_FS_ERROR"                      // linux v5.16+
-            | "FAN_RENAME"                        // linux v5.17+
-            | "FAN_REPORT_TARGET_FID"             // linux v5.17+
-            | "FAN_REPORT_DFID_NAME_TARGET"       // linux v5.17+
-            | "FAN_MARK_EVICTABLE"                // linux v5.19+
-            | "FAN_MARK_IGNORE"                   // linux v6.0+
-            | "FAN_MARK_IGNORE_SURV"              // linux v6.0+
-            | "FAN_EVENT_INFO_TYPE_ERROR"         // linux v5.16+
-            | "FAN_EVENT_INFO_TYPE_OLD_DFID_NAME" // linux v5.17+
-            | "FAN_EVENT_INFO_TYPE_NEW_DFID_NAME" // linux v5.17+
-            | "FAN_RESPONSE_INFO_NONE"            // linux v5.16+
-            | "FAN_RESPONSE_INFO_AUDIT_RULE"      // linux v5.16+
-            | "FAN_INFO"                          // linux v5.16+
-                => true,
 
             // musl doesn't use <linux/fanotify.h> in <sys/fanotify.h>
             "FAN_REPORT_PIDFD"
@@ -4626,43 +4523,36 @@ fn test_linux(target: &str) {
             | "FAN_EVENT_INFO_TYPE_PIDFD"
             | "FAN_NOPIDFD"
             | "FAN_EPIDFD"
-            if musl => true,
-
-            // FIXME(linux): Requires linux 6.5
-            "NFT_MSG_MAX" => true,
-
-            // FIXME(linux): Requires >= 6.6 kernel headers.
-            "XDP_USE_SG"
-            | "XDP_PKT_CONTD"
-                =>
+                if musl =>
             {
                 true
             }
 
             // FIXME(linux): Requires >= 6.6 kernel headers.
-            "PR_MDWE_NO_INHERIT" => true,
+            "XDP_USE_SG" | "XDP_PKT_CONTD" => true,
+
+            // FIXME(linux): Missing only on this platform for some reason
+            "PR_MDWE_NO_INHERIT" if gnueabihf => true,
 
             // FIXME(linux): Requires >= 6.8 kernel headers.
             "XDP_UMEM_TX_SW_CSUM"
             | "XDP_TXMD_FLAGS_TIMESTAMP"
             | "XDP_TXMD_FLAGS_CHECKSUM"
-            | "XDP_TX_METADATA"
-                =>
-            {
-                true
-            }
+            | "XDP_TX_METADATA" => true,
 
             // FIXME(linux): Requires >= 6.11 kernel headers.
-            "XDP_UMEM_TX_METADATA_LEN"
-                =>
-            {
-                true
-            }
+            "XDP_UMEM_TX_METADATA_LEN" => true,
 
             // FIXME(linux): Requires >= 6.11 kernel headers.
-            "NS_GET_MNTNS_ID" | "NS_GET_PID_FROM_PIDNS" | "NS_GET_TGID_FROM_PIDNS" | "NS_GET_PID_IN_PIDNS" | "NS_GET_TGID_IN_PIDNS" => true,
+            "NS_GET_MNTNS_ID"
+            | "NS_GET_PID_FROM_PIDNS"
+            | "NS_GET_TGID_FROM_PIDNS"
+            | "NS_GET_PID_IN_PIDNS"
+            | "NS_GET_TGID_IN_PIDNS" => true,
             // FIXME(linux): Requires >= 6.12 kernel headers.
-            "MNT_NS_INFO_SIZE_VER0" | "NS_MNT_GET_INFO" | "NS_MNT_GET_NEXT" | "NS_MNT_GET_PREV" => true,
+            "MNT_NS_INFO_SIZE_VER0" | "NS_MNT_GET_INFO" | "NS_MNT_GET_NEXT" | "NS_MNT_GET_PREV" => {
+                true
+            }
 
             // FIXME(linux): Requires >= 6.6 kernel headers.
             "SYS_fchmodat2" => true,
@@ -4671,58 +4561,30 @@ fn test_linux(target: &str) {
             "SYS_mseal" => true,
 
             // FIXME(linux): seems to not be available all the time (from <include/linux/sched.h>:
-            "PF_VCPU"
-            | "PF_IDLE"
-            | "PF_EXITING"
-            | "PF_POSTCOREDUMP"
-            | "PF_IO_WORKER"
-            | "PF_WQ_WORKER"
-            | "PF_FORKNOEXEC"
-            | "PF_MCE_PROCESS"
-            | "PF_SUPERPRIV"
-            | "PF_DUMPCORE"
-            | "PF_SIGNALED"
-            | "PF_MEMALLOC"
-            | "PF_NPROC_EXCEEDED"
-            | "PF_USED_MATH"
-            | "PF_USER_WORKER"
-            | "PF_NOFREEZE"
-            | "PF_KSWAPD"
-            | "PF_MEMALLOC_NOFS"
-            | "PF_MEMALLOC_NOIO"
-            | "PF_LOCAL_THROTTLE"
-            | "PF_KTHREAD"
-            | "PF_RANDOMIZE"
-            | "PF_NO_SETAFFINITY"
-            | "PF_MCE_EARLY"
-            | "PF_MEMALLOC_PIN"
-            | "PF_BLOCK_TS"
-            | "PF_SUSPEND_TASK" => true,
+            "PF_VCPU" | "PF_IDLE" | "PF_EXITING" | "PF_POSTCOREDUMP" | "PF_IO_WORKER"
+            | "PF_WQ_WORKER" | "PF_FORKNOEXEC" | "PF_MCE_PROCESS" | "PF_SUPERPRIV"
+            | "PF_DUMPCORE" | "PF_SIGNALED" | "PF_MEMALLOC" | "PF_NPROC_EXCEEDED"
+            | "PF_USED_MATH" | "PF_USER_WORKER" | "PF_NOFREEZE" | "PF_KSWAPD"
+            | "PF_MEMALLOC_NOFS" | "PF_MEMALLOC_NOIO" | "PF_LOCAL_THROTTLE" | "PF_KTHREAD"
+            | "PF_RANDOMIZE" | "PF_NO_SETAFFINITY" | "PF_MCE_EARLY" | "PF_MEMALLOC_PIN"
+            | "PF_BLOCK_TS" | "PF_SUSPEND_TASK" => true,
 
             // FIXME(linux): Requires >= 6.9 kernel headers.
-            "EPIOCSPARAMS"
-            | "EPIOCGPARAMS" => true,
+            "EPIOCSPARAMS" | "EPIOCGPARAMS" => true,
 
             // FIXME(linux): Requires >= 6.11 kernel headers.
             "MAP_DROPPABLE" => true,
-
-            // FIXME(linux): Requires >= 6.2 kernel headers.
-            "SOF_TIMESTAMPING_OPT_ID_TCP" => true,
 
             // FIXME(linux): Requires >= 6.12 kernel headers.
             "SOF_TIMESTAMPING_OPT_RX_FILTER" => true,
 
             // FIXME(linux): Requires >= 6.12 kernel headers.
-            "SO_DEVMEM_LINEAR"
-            | "SO_DEVMEM_DMABUF"
-            | "SO_DEVMEM_DONTNEED"
-            | "SCM_DEVMEM_LINEAR"
-            | "SCM_DEVMEM_DMABUF" => true,
-            // FIXME(linux): Requires >= 6.4 kernel headers.
-            "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG" | "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG" => true,
+            "SO_DEVMEM_LINEAR" | "SO_DEVMEM_DMABUF" | "SO_DEVMEM_DONTNEED"
+            | "SCM_DEVMEM_LINEAR" | "SCM_DEVMEM_DMABUF" => true,
 
-            // FIXME(linux): Requires >= 6.6 kernel headers.
-            "PROC_EVENT_NONZERO_EXIT" => true,
+            // FIXME(linux): Requires >= 6.4 kernel headers.
+            "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG"
+            | "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG" => true,
 
             // FIXME(linux): Requires >= 6.14 kernel headers.
             "SECBIT_EXEC_DENY_INTERACTIVE"
@@ -4733,6 +4595,9 @@ fn test_linux(target: &str) {
 
             // FIXME(linux): Value changed in 6.14
             "SECURE_ALL_BITS" | "SECURE_ALL_LOCKS" => true,
+
+            // FIXME(linux): Requires >= 6.9 kernel headers.
+            "AT_HWCAP3" | "AT_HWCAP4" => true,
 
             _ => false,
         }
@@ -4816,19 +4681,21 @@ fn test_linux(target: &str) {
             // assume it's a int instead.
             "getnameinfo" if uclibc => true,
 
-            // FIXME(musl): This needs musl 1.2.2 or later.
-            "gettid" if old_musl => true,
+            // FIXME(musl): This needs musl 1.2.2 or later, which is newer than what we test with
+            // on CI.
+            "gettid" | "reallocarray" if musl => true,
+            // Needs musl 1.2.3 or later.
+            "pthread_getname_np" if musl => true,
+            // Added in musl 1.2.5
+            "preadv2" | "pwritev2" if musl => true,
+            // FIXME(musl): Supported in new musl but we don't have a new enough version in CI.
+            "statx" if musl => true,
 
             // Needs glibc 2.33 or later.
             "mallinfo2" => true,
 
-            "reallocarray" if old_musl => true,
-
             // Not defined in uclibc as of 1.0.34
             "gettid" if uclibc => true,
-
-            // Needs musl 1.2.3 or later.
-            "pthread_getname_np" if old_musl => true,
 
             // pthread_sigqueue uses sigval, which was initially declared
             // as a struct but should be defined as a union. However due
@@ -4854,9 +4721,6 @@ fn test_linux(target: &str) {
 
             // FIXME(linux): function pointers changed since Ubuntu 23.10
             "strtol" | "strtoll" | "strtoul" | "strtoull" | "fscanf" | "scanf" | "sscanf" => true,
-
-            // Added in musl 1.2.5
-            "preadv2" | "pwritev2" if musl => true,
 
             _ => false,
         }
@@ -4949,7 +4813,7 @@ fn test_linux(target: &str) {
         (musl && struct_ == "tcp_info" && field == "tcpi_delivery_fastopen_bitfields") ||
         // either fsid_t or int[2] type
         (struct_ == "fanotify_event_info_fid" && field == "fsid") ||
-        // `handle` is a VLA
+        // `handle` is a flexible array member
         (struct_ == "fanotify_event_info_fid" && field == "handle") ||
         // `anonymous_1` is an anonymous union
         (struct_ == "ptp_perout_request" && field == "anonymous_1") ||
@@ -4967,7 +4831,11 @@ fn test_linux(target: &str) {
         // the `xsk_tx_metadata_union` field is an anonymous union
         (struct_ == "xsk_tx_metadata" && field == "xsk_tx_metadata_union") ||
         // After musl 1.2.0, the type becomes `int` instead of `long`.
-        (old_musl && struct_ == "utmpx" && field == "ut_session")
+        (musl && struct_ == "utmpx" && field == "ut_session") ||
+        // `frames` is a flexible array member
+        (struct_ == "bcm_msg_head" && field == "frames") ||
+        // FAM
+        (struct_ == "af_alg_iv" && field == "iv")
     });
 
     cfg.skip_roundtrip(move |s| match s {
@@ -5006,6 +4874,7 @@ fn test_linux(target: &str) {
         "inotify_event" => true,
         "fanotify_event_info_fid" => true,
         "cmsghdr" => true,
+        "bcm_msg_head" => true,
 
         // FIXME(linux): the call ABI of max_align_t is incorrect on these platforms:
         "max_align_t" if i686 || ppc64 => true,
@@ -5033,9 +4902,9 @@ fn test_linux_like_apis(target: &str) {
     if linux || android || emscripten {
         // test strerror_r from the `string.h` header
         config_gnu_bits(target, &mut cfg);
-        headers! { cfg: "string.h" }
 
-        cfg.skip_alias(|_| true)
+        cfg.header("string.h")
+            .skip_alias(|_| true)
             .skip_static(|_| true)
             .skip_const(|_| true)
             .skip_struct(|_| true)
@@ -5118,10 +4987,7 @@ fn test_linux_like_apis(target: &str) {
             .skip_const(move |constant| !ipv6_constants.contains(&constant.ident()));
 
         config_gnu_bits(target, &mut cfg);
-        headers! {
-            cfg:
-            "linux/in6.h"
-        }
+        headers!(cfg, "linux/in6.h",);
 
         ctest::generate_test(&mut cfg, "../src/lib.rs", "linux_ipv6.rs").unwrap();
     }
@@ -5164,34 +5030,6 @@ fn test_linux_like_apis(target: &str) {
     }
 }
 
-fn which_freebsd() -> Option<i32> {
-    if let Ok(version) = env::var("RUST_LIBC_UNSTABLE_FREEBSD_VERSION") {
-        let vers = version.parse().unwrap();
-        println!("cargo:warning=setting FreeBSD version to {vers}");
-        return Some(vers);
-    }
-
-    let output = std::process::Command::new("freebsd-version")
-        .output()
-        .ok()?;
-
-    if !output.status.success() {
-        return None;
-    }
-
-    let stdout = String::from_utf8(output.stdout).ok()?;
-
-    match &stdout {
-        s if s.starts_with("10") => Some(10),
-        s if s.starts_with("11") => Some(11),
-        s if s.starts_with("12") => Some(12),
-        s if s.starts_with("13") => Some(13),
-        s if s.starts_with("14") => Some(14),
-        s if s.starts_with("15") => Some(15),
-        _ => None,
-    }
-}
-
 fn test_haiku(target: &str) {
     assert!(target.contains("haiku"));
 
@@ -5202,143 +5040,142 @@ fn test_haiku(target: &str) {
     cfg.language(ctest::Language::CXX);
 
     // POSIX API
-    headers! { cfg:
-               "alloca.h",
-               "arpa/inet.h",
-               "arpa/nameser.h",
-               "arpa/nameser_compat.h",
-               "assert.h",
-               "complex.h",
-               "ctype.h",
-               "dirent.h",
-               "div_t.h",
-               "dlfcn.h",
-               "endian.h",
-               "errno.h",
-               "fcntl.h",
-               "fenv.h",
-               "fnmatch.h",
-               "fts.h",
-               "ftw.h",
-               "getopt.h",
-               "glob.h",
-               "grp.h",
-               "inttypes.h",
-               "iovec.h",
-               "langinfo.h",
-               "libgen.h",
-               "libio.h",
-               "limits.h",
-               "locale.h",
-               "malloc.h",
-               "malloc_debug.h",
-               "math.h",
-               "memory.h",
-               "monetary.h",
-               "net/if.h",
-               "net/if_dl.h",
-               "net/if_media.h",
-               "net/if_tun.h",
-               "net/if_types.h",
-               "net/route.h",
-               "netdb.h",
-               "netinet/in.h",
-               "netinet/ip.h",
-               "netinet/ip6.h",
-               "netinet/ip_icmp.h",
-               "netinet/ip_var.h",
-               "netinet/tcp.h",
-               "netinet/udp.h",
-               "netinet6/in6.h",
-               "nl_types.h",
-               "null.h",
-               "poll.h",
-               "pthread.h",
-               "pwd.h",
-               "regex.h",
-               "resolv.h",
-               "sched.h",
-               "search.h",
-               "semaphore.h",
-               "setjmp.h",
-               "shadow.h",
-               "signal.h",
-               "size_t.h",
-               "spawn.h",
-               "stdint.h",
-               "stdio.h",
-               "stdlib.h",
-               "string.h",
-               "strings.h",
-               "sys/cdefs.h",
-               "sys/file.h",
-               "sys/ioctl.h",
-               "sys/ipc.h",
-               "sys/mman.h",
-               "sys/msg.h",
-               "sys/param.h",
-               "sys/poll.h",
-               "sys/resource.h",
-               "sys/select.h",
-               "sys/sem.h",
-               "sys/socket.h",
-               "sys/sockio.h",
-               "sys/stat.h",
-               "sys/statvfs.h",
-               "sys/time.h",
-               "sys/timeb.h",
-               "sys/times.h",
-               "sys/types.h",
-               "sys/uio.h",
-               "sys/un.h",
-               "sys/utsname.h",
-               "sys/wait.h",
-               "syslog.h",
-               "tar.h",
-               "termios.h",
-               "time.h",
-               "uchar.h",
-               "unistd.h",
-               "utime.h",
-               "utmpx.h",
-               "wchar.h",
-               "wchar_t.h",
-               "wctype.h"
-    }
+    headers!(
+        cfg,
+        "alloca.h",
+        "arpa/inet.h",
+        "arpa/nameser.h",
+        "arpa/nameser_compat.h",
+        "assert.h",
+        "complex.h",
+        "ctype.h",
+        "dirent.h",
+        "div_t.h",
+        "dlfcn.h",
+        "endian.h",
+        "errno.h",
+        "fcntl.h",
+        "fenv.h",
+        "fnmatch.h",
+        "fts.h",
+        "ftw.h",
+        "getopt.h",
+        "glob.h",
+        "grp.h",
+        "inttypes.h",
+        "iovec.h",
+        "langinfo.h",
+        "libgen.h",
+        "libio.h",
+        "limits.h",
+        "locale.h",
+        "malloc.h",
+        "malloc_debug.h",
+        "math.h",
+        "memory.h",
+        "monetary.h",
+        "net/if.h",
+        "net/if_dl.h",
+        "net/if_media.h",
+        "net/if_tun.h",
+        "net/if_types.h",
+        "net/route.h",
+        "netdb.h",
+        "netinet/in.h",
+        "netinet/ip.h",
+        "netinet/ip6.h",
+        "netinet/ip_icmp.h",
+        "netinet/ip_var.h",
+        "netinet/tcp.h",
+        "netinet/udp.h",
+        "netinet6/in6.h",
+        "nl_types.h",
+        "null.h",
+        "poll.h",
+        "pthread.h",
+        "pwd.h",
+        "regex.h",
+        "resolv.h",
+        "sched.h",
+        "search.h",
+        "semaphore.h",
+        "setjmp.h",
+        "shadow.h",
+        "signal.h",
+        "size_t.h",
+        "spawn.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "strings.h",
+        "sys/cdefs.h",
+        "sys/file.h",
+        "sys/ioctl.h",
+        "sys/ipc.h",
+        "sys/mman.h",
+        "sys/msg.h",
+        "sys/param.h",
+        "sys/poll.h",
+        "sys/resource.h",
+        "sys/select.h",
+        "sys/sem.h",
+        "sys/socket.h",
+        "sys/sockio.h",
+        "sys/stat.h",
+        "sys/statvfs.h",
+        "sys/time.h",
+        "sys/timeb.h",
+        "sys/times.h",
+        "sys/types.h",
+        "sys/uio.h",
+        "sys/un.h",
+        "sys/utsname.h",
+        "sys/wait.h",
+        "syslog.h",
+        "tar.h",
+        "termios.h",
+        "time.h",
+        "uchar.h",
+        "unistd.h",
+        "utime.h",
+        "utmpx.h",
+        "wchar.h",
+        "wchar_t.h",
+        "wctype.h",
+    );
 
     // BSD Extensions
-    headers! { cfg:
-               "ifaddrs.h",
-               "libutil.h",
-               "link.h",
-               "pty.h",
-               "stdlib.h",
-               "stringlist.h",
-               "sys/link_elf.h",
-    }
+    headers!(
+        cfg,
+        "ifaddrs.h",
+        "libutil.h",
+        "link.h",
+        "pty.h",
+        "stdlib.h",
+        "stringlist.h",
+        "sys/link_elf.h",
+    );
 
     // Native API
-    headers! { cfg:
-               "kernel/OS.h",
-               "kernel/fs_attr.h",
-               "kernel/fs_index.h",
-               "kernel/fs_info.h",
-               "kernel/fs_query.h",
-               "kernel/fs_volume.h",
-               "kernel/image.h",
-               "kernel/scheduler.h",
-               "storage/FindDirectory.h",
-               "storage/StorageDefs.h",
-               "support/Errors.h",
-               "support/SupportDefs.h",
-               "support/TypeConstants.h"
-    }
+    headers!(
+        cfg,
+        "kernel/OS.h",
+        "kernel/fs_attr.h",
+        "kernel/fs_index.h",
+        "kernel/fs_info.h",
+        "kernel/fs_query.h",
+        "kernel/fs_volume.h",
+        "kernel/image.h",
+        "kernel/scheduler.h",
+        "storage/FindDirectory.h",
+        "storage/StorageDefs.h",
+        "support/Errors.h",
+        "support/SupportDefs.h",
+        "support/TypeConstants.h",
+    );
 
-    cfg.skip_union(|union_| union_.ident().starts_with("__c_anonymous_"));
     cfg.skip_struct(move |struct_| {
-        if struct_.ident().starts_with("__c_anonymous_") {
-            return true;
-        }
         match struct_.ident() {
             // FIXME(union): actually a union
             "sigval" => true,
@@ -5544,92 +5381,93 @@ fn test_aix(target: &str) {
     // 'IN6ADDR_LOOPBACK_INIT' in netinent/in.h.
     cfg.flag("-Wno-missing-braces");
 
-    headers! { cfg:
-               "aio.h",
-               "ctype.h",
-               "dirent.h",
-               "dlfcn.h",
-               "errno.h",
-               "fcntl.h",
-               "fnmatch.h",
-               "glob.h",
-               "grp.h",
-               "iconv.h",
-               "langinfo.h",
-               "libgen.h",
-               "limits.h",
-               "locale.h",
-               "malloc.h",
-               "mntent.h",
-               "mqueue.h",
-               "netinet/in.h", // this needs be before net/if.h
-               "poll.h", // this needs be before net/if.h
-               "sys/pollset.h", // this needs to be before net/if.h
-               "net/if.h",
-               "net/bpf.h", // this needs to be after net/if.h
-               "net/if_dl.h",
-               "netdb.h",
-               "netinet/tcp.h",
-               "netinet/sctp.h",
-               "pthread.h",
-               "pwd.h",
-               "rpcsvc/mount.h",
-               "rpcsvc/rstat.h",
-               "regex.h",
-               "resolv.h",
-               "sched.h",
-               "search.h",
-               "semaphore.h",
-               "signal.h",
-               "spawn.h",
-               "stddef.h",
-               "stdint.h",
-               "stdio.h",
-               "stdlib.h",
-               "string.h",
-               "strings.h",
-               "sys/aacct.h",
-               "sys/acct.h",
-               "sys/dr.h",
-               "sys/file.h",
-               "sys/io.h",
-               "sys/ioctl.h",
-               "sys/ipc.h",
-               "sys/ldr.h",
-               "sys/mman.h",
-               "sys/msg.h",
-               "sys/reg.h",
-               "sys/resource.h",
-               "sys/sem.h",
-               "sys/shm.h",
-               "sys/socket.h",
-               "sys/stat.h",
-               "sys/statfs.h",
-               "sys/statvfs.h",
-               "sys/stropts.h",
-               "sys/termio.h",
-               "sys/time.h",
-               "sys/times.h",
-               "sys/types.h",
-               "sys/uio.h",
-               "sys/un.h",
-               "sys/user.h",
-               "sys/utsname.h",
-               "sys/vattr.h",
-               "sys/vminfo.h",
-               "sys/wait.h",
-               "sys/xti.h",
-               "syslog.h",
-               "termios.h",
-               "thread.h",
-               "time.h",
-               "ucontext.h",
-               "unistd.h",
-               "utime.h",
-               "utmp.h",
-               "utmpx.h",
-               "wchar.h",
-    }
+    headers!(
+        cfg,
+        "aio.h",
+        "ctype.h",
+        "dirent.h",
+        "dlfcn.h",
+        "errno.h",
+        "fcntl.h",
+        "fnmatch.h",
+        "glob.h",
+        "grp.h",
+        "iconv.h",
+        "langinfo.h",
+        "libgen.h",
+        "limits.h",
+        "locale.h",
+        "malloc.h",
+        "mntent.h",
+        "mqueue.h",
+        "netinet/in.h",  // this needs be before net/if.h
+        "poll.h",        // this needs be before net/if.h
+        "sys/pollset.h", // this needs to be before net/if.h
+        "net/if.h",
+        "net/bpf.h", // this needs to be after net/if.h
+        "net/if_dl.h",
+        "netdb.h",
+        "netinet/tcp.h",
+        "netinet/sctp.h",
+        "pthread.h",
+        "pwd.h",
+        "rpcsvc/mount.h",
+        "rpcsvc/rstat.h",
+        "regex.h",
+        "resolv.h",
+        "sched.h",
+        "search.h",
+        "semaphore.h",
+        "signal.h",
+        "spawn.h",
+        "stddef.h",
+        "stdint.h",
+        "stdio.h",
+        "stdlib.h",
+        "string.h",
+        "strings.h",
+        "sys/aacct.h",
+        "sys/acct.h",
+        "sys/dr.h",
+        "sys/file.h",
+        "sys/io.h",
+        "sys/ioctl.h",
+        "sys/ipc.h",
+        "sys/ldr.h",
+        "sys/mman.h",
+        "sys/msg.h",
+        "sys/reg.h",
+        "sys/resource.h",
+        "sys/sem.h",
+        "sys/shm.h",
+        "sys/socket.h",
+        "sys/stat.h",
+        "sys/statfs.h",
+        "sys/statvfs.h",
+        "sys/stropts.h",
+        "sys/termio.h",
+        "sys/time.h",
+        "sys/times.h",
+        "sys/types.h",
+        "sys/uio.h",
+        "sys/un.h",
+        "sys/user.h",
+        "sys/utsname.h",
+        "sys/vattr.h",
+        "sys/vminfo.h",
+        "sys/wait.h",
+        "sys/xti.h",
+        "syslog.h",
+        "termios.h",
+        "thread.h",
+        "time.h",
+        "ucontext.h",
+        "unistd.h",
+        "utime.h",
+        "utmp.h",
+        "utmpx.h",
+        "wchar.h",
+    );
 
     cfg.skip_alias(move |ty| match ty.ident() {
         // AIX does not define type 'sighandler_t'.
@@ -5657,11 +5495,9 @@ fn test_aix(target: &str) {
         // Skip 'sighandler_t' assignments.
         "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true,
 
-        // _ALL_SOURCE defines these errno values as aliases of other errno
-        // values, but POSIX requires each errno to be unique. Skip these
-        // values because non-unique values are being used which will
-        // fail the test when _ALL_SOURCE is defined.
-        "EWOULDBLOCK" | "ENOTEMPTY" => true,
+        // _ALL_SOURCE defines ENOTEMPTY as an alias of EEXIST, but POSIX
+        // requires its value to be unique. Skip.
+        "ENOTEMPTY" => true,
 
         // FIXME(ctest): These constants are intended for use as the 'int request' argument
         // to 'ioctl()'. However, the AIX headers do not explicitly define their types. If a
@@ -5750,6 +5586,12 @@ fn test_aix(target: &str) {
             // The field 'data' is actually a unnamed union in the AIX header.
             "pollfd_ext" if field.ident() == "data" => true,
 
+            // On AIX, <stat.h> declares 'tv_nsec' as 'long', but the
+            // underlying system calls return a 32-bit value in both 32-bit
+            // and 64-bit modes. In the 'libc' crate it is declared as 'i32'
+            // to match the system call. Skip this field.
+            "timespec" if field.ident() == "tv_nsec" => true,
+
             _ => false,
         }
     });
@@ -5827,4 +5669,18 @@ fn test_aix(target: &str) {
     });
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
+}
+
+/// Attempt to execute a command and collect its output, If the command fails for whatever
+/// reason, return `None`.
+fn try_command_output(cmd: &str, args: &[&str]) -> Option<String> {
+    let output = std::process::Command::new(cmd).args(args).output().ok()?;
+
+    if !output.status.success() {
+        return None;
+    }
+
+    let res = String::from_utf8(output.stdout)
+        .unwrap_or_else(|e| panic!("command {cmd} returned non-UTF-8 output: {e}"));
+    Some(res)
 }

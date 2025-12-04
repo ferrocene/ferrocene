@@ -5,20 +5,25 @@
 
 set -eux
 
+old_musl=1.1.24
+new_musl=1.2.5
+
 case ${1} in
-    loongarch64)
-        musl_version=1.2.5
-        ;;
+    loongarch64) musl_version="$new_musl" ;;
     *)
-        [ -n "${RUST_LIBC_UNSTABLE_MUSL_V1_2_3:-}" ] && musl_version=1.2.3 || musl_version=1.1.24
+        [ -n "${RUST_LIBC_UNSTABLE_MUSL_V1_2_3:-}" ] &&
+            musl_version="$new_musl" ||
+            musl_version="$old_musl"
         ;;
 esac
 
 musl="musl-${musl_version}"
 
-# Download, configure, build, and install musl:
-curl --retry 5 "https://www.musl-libc.org/releases/${musl}.tar.gz" | tar xzf -
+# Note that if a new version of musl is needed, it needs to be added to the mirror
+# first. See https://github.com/rust-lang/ci-mirrors/blob/main/files/libc.toml.
+curl --retry 5 "https://ci-mirrors.rust-lang.org/libc/${musl}.tar.gz" | tar xzf -
 
+# Configure, build, and install musl:
 cd "$musl"
 case ${1} in
     aarch64)

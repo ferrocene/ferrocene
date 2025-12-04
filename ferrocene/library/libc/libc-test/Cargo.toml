@@ -9,20 +9,20 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/rust-lang/libc"
 
 [dependencies]
-cfg-if = "1.0.1"
-libc = { path = "..", version = "0.2.171", default-features = false }
+cfg-if = "1.0.4"
+libc = { path = "..", version = "0.2.177", default-features = false }
 
 [dev-dependencies]
-syn = { version = "2.0.104", features = ["full", "visit"] }
-proc-macro2 = { version = "1.0.95", features = ["span-locations"] }
-glob = "0.3.2"
+syn = { version = "2.0.108", features = ["full", "visit"] }
+proc-macro2 = { version = "1.0.103", features = ["span-locations"] }
+glob = "0.3.3"
 annotate-snippets = { version = "0.11.5", features = ["testing-colors"] }
 
 [build-dependencies]
-cc = "1.2.29"
+cc = "1.2.43"
 # Use the in-tree `ctest` from the `main` branch via crates.io
-ctest = "0.5.0-beta.0"
-regex = "1.11.1"
+ctest = "0.5.0-beta.2"
+regex = "1.12.2"
 
 [features]
 default = ["std"]
@@ -32,53 +32,35 @@ extra_traits = ["libc/extra_traits"]
 
 [[test]]
 name = "ctest"
-path = "test/ctest.rs"
 harness = false
 
 [[test]]
-name = "linux-fcntl"
-path = "test/linux_fcntl.rs"
+name = "linux_fcntl"
 harness = false
 
 [[test]]
-name = "linux-if-arp"
-path = "test/linux_if_arp.rs"
+name = "linux_if_arp"
 harness = false
 
 [[test]]
-name = "linux-ipv6"
-path = "test/linux_ipv6.rs"
+name = "linux_ipv6"
 harness = false
 
 [[test]]
-name = "linux-elf"
-path = "test/linux_elf.rs"
+name = "linux_elf"
 harness = false
 
 [[test]]
-name = "linux-strerror_r"
-path = "test/linux_strerror_r.rs"
+name = "linux_strerror_r"
 harness = false
 
 [[test]]
-name = "linux-termios"
-path = "test/linux_termios.rs"
+name = "linux_termios"
 harness = false
 
 [[test]]
 name = "semver"
-path = "test/semver.rs"
 harness = false
-
-[[test]]
-name = "style"
-path = "test/check_style.rs"
-harness = true
-
-[[test]]
-name = "style_tests"
-path = "test/style_tests.rs"
-harness = true
 
 # FIXME(msrv): These should be moved to the root Cargo.toml as `[workspace.lints.*]`
 #              once MSRV is above 1.64 and replaced with `[lints] workspace=true`

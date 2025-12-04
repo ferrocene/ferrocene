@@ -4458,7 +4458,11 @@ core::panic::location::Location::<'a>::column
 core::panic::location::Location::<'a>::file
 core::panic::location::Location::<'a>::line
 core::panic::panic_info::PanicInfo::<'a>::location
+core::panic::panic_info::PanicInfo::<'a>::message
 core::panic::panic_info::PanicInfo::<'a>::new
+core::panic::panic_info::PanicMessage::<'a>::as_str
+core::panicking::PanicArguments::<'a>::as_str
+core::panicking::PanicArguments::<'a>::new_const
 core::panicking::panic
 core::panicking::panic_bounds_check
 core::panicking::panic_cannot_unwind
@@ -4484,6 +4488,7 @@ core::panicking::panic_const::panic_const_rem_overflow
 core::panicking::panic_const::panic_const_shl_overflow
 core::panicking::panic_const::panic_const_shr_overflow
 core::panicking::panic_const::panic_const_sub_overflow
+core::panicking::panic_display
 core::panicking::panic_fmt
 core::panicking::panic_fmt::panic_impl
 core::panicking::panic_in_cleanup

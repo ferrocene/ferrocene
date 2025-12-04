@@ -2077,7 +2077,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -2150,7 +2150,7 @@ mod snapshot {
         [test] compiletest-run-make 1 <host>
         [build] rustc 0 <host> -> cargo 1 <host>
         [test] compiletest-run-make-cargo 1 <host>
-        "###);
+        ");
     }
 
     #[test]
@@ -2258,7 +2258,7 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .stage(2)
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -2336,7 +2336,7 @@ mod snapshot {
         [test] compiletest-run-make 2 <host>
         [build] rustc 1 <host> -> cargo 2 <host>
         [test] compiletest-run-make-cargo 2 <host>
-        "###);
+        ");
     }
 
     #[test]
@@ -2511,7 +2511,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("doc")
-                .render_steps(), @r###"
+                .render_steps(), @r"
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -2540,7 +2540,7 @@ mod snapshot {
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        "###);
+        ");
     }
 
     #[test]

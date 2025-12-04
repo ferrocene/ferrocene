@@ -3056,9 +3056,13 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
+        let mut ferrocene_certified_panic =
+            builder.config.rust_std_features.contains("ferrocene_certified_panic");
+
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {
                 instrument_coverage(builder, &mut cargo, build_compiler);
+                ferrocene_certified_panic = true;
             }
 
             measure_coverage(builder, cargo.as_mut(), build_compiler, target, coverage_for);
@@ -3071,7 +3075,7 @@ impl Step for Crate {
         // alloc themself for doctests
         if crates.iter().any(|crate_| crate_ == "core") {
             crates.push("coretests".to_owned());
-            if builder.config.rust_std_features.contains("ferrocene_certified_panic") {
+            if ferrocene_certified_panic {
                 cargo.arg("--features=coretests/ferrocene_certified_panic");
             }
         }

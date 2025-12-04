@@ -153,8 +153,14 @@ impl<'a, T> Iter<'a, T> {
     }
 }
 
+<<<<<<< HEAD
 iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, {
     #[cfg(not(feature = "ferrocene_certified"))]
+||||||| 6840234806e
+iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, {
+=======
+iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, each_ref, {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn is_sorted_by<F>(self, mut compare: F) -> bool
     where
         Self: Sized,
@@ -389,7 +395,7 @@ impl<T> AsRef<[T]> for IterMut<'_, T> {
 //     }
 // }
 
-iterator! {struct IterMut -> *mut T, &'a mut T, mut, {mut}, as_mut, {}}
+iterator! {struct IterMut -> *mut T, &'a mut T, mut, {mut}, as_mut, each_mut, {}}
 
 /// An internal abstraction over the splitting iterators, so that
 /// splitn, splitn_mut etc can be implemented once.

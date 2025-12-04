@@ -236,4 +236,8 @@ else
     #add --set ferrocene.core-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf"
 fi
 
+# FIXME: Debugging, strip this out
+add --set build.docs=true
+add --set build.compiler-docs=true
+
 ./configure ${configure_args[@]}

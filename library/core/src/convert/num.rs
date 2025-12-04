@@ -96,62 +96,37 @@ impl_from!(bool => u32);
 impl_from!(bool => u64);
 impl_from!(bool => u128);
 impl_from!(bool => usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(bool => i8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(bool => i16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(bool => i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(bool => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(bool => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(bool => isize);
 
 // unsigned integer -> unsigned integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => u16, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => u32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => u64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => u128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => usize, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => u32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => u64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => u128, #[stable(feature = "i128", since = "1.26.0")]);
 impl_from!(u32 => u64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
 impl_from!(u32 => u128, #[stable(feature = "i128", since = "1.26.0")]);
 impl_from!(u64 => u128, #[stable(feature = "i128", since = "1.26.0")]);
 
 // signed integer -> signed integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => i16, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => i32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => i64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => i128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => isize, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => i32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => i64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => i128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i32 => i64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i32 => i128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i64 => i128, #[stable(feature = "i128", since = "1.26.0")]);
 
 // unsigned integer -> signed integer

@@ -24,7 +24,7 @@ on:
 
 permissions:
   id-token: write # This is required for requesting the JWT
-  contents: read  # This is required for actions/checkout
+  contents: read # This is required for actions/checkout
 
 # One job per branch
 concurrency:
@@ -82,8 +82,7 @@ jobs:
               uv run x.py --stage 2 dist rust-std
           - run-name: tools
             build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
-            script:
-              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+            script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
       run-name: ${{ matrix.run-name }}
       script: ${{ matrix.script }}
@@ -126,7 +125,7 @@ jobs:
         # Don't abstract the entire command here since they use different variants
         suite:
           - test
-          - test:compiletest 
+          - test:compiletest
           - test:library
           - test:library-std
         include:
@@ -143,7 +142,7 @@ jobs:
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant 2021
       host-triple: ${{ matrix.host }}
-      runner:  ${{ matrix.runner }}
+      runner: ${{ matrix.runner }}
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -159,7 +158,7 @@ jobs:
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
-          - test:compiletest 
+          - test:compiletest
           - test:library
         include:
           - host: x86_64-unknown-linux-gnu
@@ -176,7 +175,7 @@ jobs:
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant 2021-cortex-a53
       host-triple: ${{ matrix.host }}
-      runner:  ${{ matrix.runner }}
+      runner: ${{ matrix.runner }}
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -191,7 +190,7 @@ jobs:
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
-          - test:compiletest 
+          - test:compiletest
           - test:library
         include:
           - host: x86_64-unknown-linux-gnu
@@ -224,7 +223,7 @@ jobs:
       matrix:
         # Don't abstract the entire command here since they use different variants
         suite:
-          - test:compiletest 
+          - test:compiletest
           - test:library
         include:
           - host: x86_64-unknown-linux-gnu
@@ -258,7 +257,7 @@ jobs:
   #     matrix:
   #       # Don't abstract the entire command here since they use different variants
   #       suite:
-  #         - test:compiletest 
+  #         - test:compiletest
   #         - test:library
   #         - test:library-std
   #       include:
@@ -297,7 +296,7 @@ jobs:
   #     matrix:
   #       # Don't abstract the entire command here since they use different variants
   #       suite:
-  #         - test:compiletest 
+  #         - test:compiletest
   #         - test:library
   #         - test:library-std
   #       include:
@@ -365,8 +364,7 @@ jobs:
 
           - run-name: Tools
             build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
-            script:
-              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+            script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
       run-name: ${{ matrix.run-name }}
       script: ${{ matrix.script }}
@@ -525,7 +523,7 @@ jobs:
   #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
   #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
   #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-  
+
   # self-test-aarch64-apple-darwin:
   #   name: Self-test (aarch64-apple-darwin)
   #   uses: ./.github/workflows/full-self-test.yml
@@ -613,38 +611,6 @@ jobs:
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ferrocene/ci/scripts/fetch-coverage-outcomes.sh
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
-      host-triple: x86_64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-20-amd64
-      use-minio: true
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
-      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
-      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
-      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: docs
-
-  docs-test:
-    name: Test (Docs)
-    uses: ./.github/workflows/full-docs.yml
-    needs:
-      - calculate-envs
-      - build-x86_64-unknown-linux-gnu
-      - coverage
-      - test-x86_64-unknown-linux-gnu
-      - test-aarch64-unknown-none
-      - test-thumbv7em-none-eabi
-      - test-thumbv7em-none-eabihf
-      # - test-x86_64-pc-nto-qnx710
-      # - test-aarch64-unknown-nto-qnx710
-      # - test-x86_64-pc-windows-msvc
-      # - test-aarch64-apple-darwin
-    secrets: inherit
-    with:
-      run-name: Dist (Docs)
-      script: |
-        ferrocene/ci/scripts/fetch-test-outcomes.sh
-        ferrocene/ci/scripts/fetch-coverage-outcomes.sh
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -655,7 +621,7 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: docs-test
+      build-metrics-artifact: docs
 
   source:
     name: Dist (source)

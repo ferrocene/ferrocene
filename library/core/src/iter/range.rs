@@ -664,7 +664,6 @@ impl Step for Ipv6Addr {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! range_exact_iter_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -964,7 +963,6 @@ impl<A: Step> Iterator for ops::Range<A> {
 //   For integer types in `RangeInclusive<_>`
 //   this is the case for types *strictly narrower* than `usize`
 //   since e.g. `(0..=u64::MAX).len()` would be `u64::MAX + 1`.
-#[cfg(not(feature = "ferrocene_subset"))]
 range_exact_iter_impl! {
     usize u8 u16
     isize i8 i16

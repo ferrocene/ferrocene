@@ -15,7 +15,7 @@ use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{intrinsics, ptr};
+use crate::{cmp, intrinsics, ptr};
 
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
@@ -1090,7 +1090,6 @@ impl<T> clone::Clone for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> cmp::PartialEq for Discriminant<T> {
     fn eq(&self, rhs: &Self) -> bool {
         self.0 == rhs.0

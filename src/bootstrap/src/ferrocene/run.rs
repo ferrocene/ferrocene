@@ -152,7 +152,7 @@ impl Step for CertifiedCoreSymbols {
         let CertifiedCoreSymbols { build_compiler, target } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
-        let certified_target = target.certified_equivalent();
+        let certified_target = target.subset_equivalent();
 
         // c.f. check::std
         let mut cargo = Cargo::new(
@@ -215,7 +215,7 @@ impl Step for CoverageReport {
 
     fn make_run(run: RunConfig<'_>) {
         let builder = run.builder;
-        let certified_target = run.target.certified_equivalent();
+        let certified_target = run.target.subset_equivalent();
         let for_ = FerroceneCoverageFor::Library;
         let paths = Paths::find(builder, run.target, for_);
         // FIXME(@jyn514): this is not a good CLI interface.

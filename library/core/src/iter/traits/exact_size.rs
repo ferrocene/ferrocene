@@ -119,9 +119,9 @@ pub trait ExactSizeIterator: Iterator {
         // guaranteed by the trait. If this trait were rust-internal,
         // we could use debug_assert!; assert_eq! will check all Rust user
         // implementations too.
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         assert_eq!(upper, Some(lower));
-        #[cfg(feature = "ferrocene_certified")]
+        #[cfg(feature = "ferrocene_subset")]
         assert!(upper == Some(lower));
         lower
     }

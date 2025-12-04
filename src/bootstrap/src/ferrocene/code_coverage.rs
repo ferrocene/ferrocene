@@ -169,7 +169,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         builder.ensure(CertifiedCoreSymbols::new(builder, builder.config.host_target));
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: builder.config.host_target.certified_equivalent(),
+        certified_target: builder.config.host_target.subset_equivalent(),
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
@@ -257,7 +257,7 @@ impl Step for CoverageOutcomesDir {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
             FerroceneCoverageOutcomes::Local => {
-                let certified_target = builder.host_target.certified_equivalent();
+                let certified_target = builder.host_target.subset_equivalent();
                 Some(coverage_dir(builder, certified_target))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),

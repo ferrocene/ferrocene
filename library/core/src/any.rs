@@ -86,11 +86,11 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, hash, intrinsics};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::intrinsics;
 
@@ -141,7 +141,7 @@ pub trait Any: 'static {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: 'static + ?Sized> Any for T {
     fn type_id(&self) -> TypeId {
         TypeId::of::<T>()
@@ -153,7 +153,7 @@ impl<T: 'static + ?Sized> Any for T {
 ///////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for dyn Any {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
@@ -164,7 +164,7 @@ impl fmt::Debug for dyn Any {
 // hence used with `unwrap`. May eventually no longer be needed if
 // dispatch works with upcasting.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for dyn Any + Send {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
@@ -172,14 +172,14 @@ impl fmt::Debug for dyn Any + Send {
 }
 
 #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for dyn Any + Send + Sync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any {
     /// Returns `true` if the inner type is the same as `T`.
     ///
@@ -339,7 +339,7 @@ impl dyn Any {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any + Send {
     /// Forwards to the method defined on the type `dyn Any`.
     ///
@@ -474,7 +474,7 @@ impl dyn Any + Send {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any + Send + Sync {
     /// Forwards to the method defined on the type `Any`.
     ///
@@ -727,10 +727,10 @@ impl dyn Any + Send + Sync {
 ///     std::mem::forget(fake_one_ring);
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, PartialOrd, Ord))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(Clone, Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Copy))]
-#[cfg_attr(feature = "ferrocene_certified", derive_const(Clone))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, PartialOrd, Ord))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(Clone, Eq))]
+#[cfg_attr(feature = "ferrocene_subset", derive(Copy))]
+#[cfg_attr(feature = "ferrocene_subset", derive_const(Clone))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
 pub struct TypeId {
@@ -803,7 +803,7 @@ impl TypeId {
         const { intrinsics::type_id::<T>() }
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn as_u128(self) -> u128 {
         let mut bytes = [0; 16];
 
@@ -818,7 +818,7 @@ impl TypeId {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl hash::Hash for TypeId {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -844,7 +844,7 @@ impl hash::Hash for TypeId {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for TypeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "TypeId({:#034x})", self.as_u128())

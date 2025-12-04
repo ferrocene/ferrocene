@@ -540,15 +540,15 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{convert, fmt, hint};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::{convert, hint};
 
@@ -556,8 +556,8 @@ use crate::{convert, hint};
 ///
 /// See the [module documentation](self) for details.
 #[doc(search_unbox)]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Debug, Hash))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive_const(PartialEq, PartialOrd, Eq, Ord))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(PartialEq, PartialOrd, Eq, Ord))]
 #[must_use = "this `Result` may be an `Err` variant, which should be handled"]
 #[rustc_diagnostic_item = "Result"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -1106,7 +1106,7 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
     // Ferrocene: blocked on Iterator
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter { inner: self.as_ref().ok() }
     }
@@ -1132,7 +1132,7 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
     // Ferrocene: blocked on Iterator
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut { inner: self.as_mut().ok() }
     }
@@ -1188,7 +1188,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
     // Ferrocene: blocked on Debug
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn expect(self, msg: &str) -> T
     where
         E: fmt::Debug,
@@ -1238,7 +1238,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     // Ferrocene: blocked on Debug
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn unwrap(self) -> T
     where
         E: fmt::Debug,
@@ -1306,7 +1306,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "result_expect_err", since = "1.17.0")]
     // Ferrocene: blocked on Debug
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn expect_err(self, msg: &str) -> E
     where
         T: fmt::Debug,
@@ -1339,7 +1339,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     // Ferrocene: blocked on Debug
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn unwrap_err(self) -> E
     where
         T: fmt::Debug,
@@ -1378,7 +1378,7 @@ impl<T, E> Result<T, E> {
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
     // Ferrocene: blocked on !
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn into_ok(self) -> T
     where
         E: [const] Into<!>,
@@ -1417,7 +1417,7 @@ impl<T, E> Result<T, E> {
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
     // Ferrocene: blocked on !
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn into_err(self) -> E
     where
         T: [const] Into<!>,
@@ -1879,7 +1879,7 @@ impl<T, E> Result<Result<T, E>, E> {
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "result_flattening", since = "1.89.0")]
     // Ferrocene: blocked on const impl Drop for Result<Result<T, E>>
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
         match self {
@@ -1895,7 +1895,7 @@ impl<T, E> Result<Result<T, E>, E> {
 #[cold]
 #[track_caller]
 // Ferrocene: blocked on Debug
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
     panic!("{msg}: {error:?}");
 }
@@ -1909,7 +1909,7 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 #[cold]
 #[track_caller]
 // Ferrocene: blocked on Debug
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
     panic!()
 }
@@ -1919,7 +1919,7 @@ const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, E> Clone for Result<T, E>
 where
     T: Clone,
@@ -1944,7 +1944,7 @@ where
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, E> crate::clone::UseCloned for Result<T, E>
 where
     T: crate::clone::UseCloned,
@@ -1953,7 +1953,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, E> IntoIterator for Result<T, E> {
     type Item = T;
     type IntoIter = IntoIter<T>;
@@ -1980,7 +1980,7 @@ impl<T, E> IntoIterator for Result<T, E> {
 }
 
 #[stable(since = "1.4.0", feature = "result_iter")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, E> IntoIterator for &'a Result<T, E> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
@@ -1991,7 +1991,7 @@ impl<'a, T, E> IntoIterator for &'a Result<T, E> {
 }
 
 #[stable(since = "1.4.0", feature = "result_iter")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, E> IntoIterator for &'a mut Result<T, E> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
@@ -2012,13 +2012,13 @@ impl<'a, T, E> IntoIterator for &'a mut Result<T, E> {
 /// Created by [`Result::iter`].
 #[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Iter<'a, T: 'a> {
     inner: Option<&'a T>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
@@ -2034,7 +2034,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a T> {
@@ -2043,19 +2043,19 @@ impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for Iter<'_, T> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for Iter<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for Iter<'_, A> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Clone for Iter<'_, T> {
     #[inline]
     fn clone(&self) -> Self {
@@ -2068,13 +2068,13 @@ impl<T> Clone for Iter<'_, T> {
 /// Created by [`Result::iter_mut`].
 #[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct IterMut<'a, T: 'a> {
     inner: Option<&'a mut T>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
@@ -2090,7 +2090,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut T> {
@@ -2099,15 +2099,15 @@ impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for IterMut<'_, T> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for IterMut<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 
 /// An iterator over the value in a [`Ok`] variant of a [`Result`].
@@ -2120,13 +2120,13 @@ unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 /// [`into_iter`]: IntoIterator::into_iter
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct IntoIter<T> {
     inner: Option<T>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
 
@@ -2142,7 +2142,7 @@ impl<T> Iterator for IntoIter<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> DoubleEndedIterator for IntoIter<T> {
     #[inline]
     fn next_back(&mut self) -> Option<T> {
@@ -2151,15 +2151,15 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for IntoIter<T> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for IntoIter<T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for IntoIter<A> {}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2167,7 +2167,7 @@ unsafe impl<A> TrustedLen for IntoIter<A> {}
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
     /// Takes each element in the `Iterator`: if it is an `Err`, no further
     /// elements are taken, and the `Err` is returned. Should no `Err` occur, a
@@ -2253,7 +2253,7 @@ impl<T, E, F: [const] From<E>> const ops::FromResidual<Result<convert::Infallibl
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, E, F: [const] From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
     #[inline]
     fn from_residual(ops::Yeet(e): ops::Yeet<E>) -> Self {

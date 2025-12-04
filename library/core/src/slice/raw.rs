@@ -1,6 +1,6 @@
 //! Free functions to create `&[T]` and `&mut [T]`.
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Range;
 use crate::{array, ptr, ub_checks};
 
@@ -275,7 +275,7 @@ pub const fn from_mut<T>(s: &mut T) -> &mut [T] {
 #[unstable(feature = "slice_from_ptr_range", issue = "89792")]
 #[rustc_const_unstable(feature = "const_slice_from_ptr_range", issue = "89792")]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn from_ptr_range<'a, T>(range: Range<*const T>) -> &'a [T] {
     // SAFETY: the caller must uphold the safety contract for `from_ptr_range`.
     unsafe { from_raw_parts(range.start, range.end.offset_from_unsigned(range.start)) }
@@ -346,7 +346,7 @@ pub const unsafe fn from_ptr_range<'a, T>(range: Range<*const T>) -> &'a [T] {
 /// [valid]: ptr#safety
 #[unstable(feature = "slice_from_ptr_range", issue = "89792")]
 #[rustc_const_unstable(feature = "const_slice_from_mut_ptr_range", issue = "89792")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn from_mut_ptr_range<'a, T>(range: Range<*mut T>) -> &'a mut [T] {
     // SAFETY: the caller must uphold the safety contract for `from_mut_ptr_range`.
     unsafe { from_raw_parts_mut(range.start, range.end.offset_from_unsigned(range.start)) }

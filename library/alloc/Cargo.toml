@@ -25,7 +25,7 @@ compiler-builtins-no-f16-f128 = ["compiler_builtins/no-f16-f128"]
 # Choose algorithms that are optimized for binary size instead of runtime performance
 optimize_for_size = ["core/optimize_for_size"]
 # Ferrocene addition
-ferrocene_certified = ["compiler_builtins/ferrocene_certified", "core/ferrocene_certified"]
+ferrocene_subset = ["compiler_builtins/ferrocene_subset", "core/ferrocene_subset"]
 
 [lints.rust.unexpected_cfgs]
 level = "warn"

@@ -84,7 +84,7 @@ use crate::{convert, ops};
 #[must_use]
 // ControlFlow should not implement PartialOrd or Ord, per RFC 3058:
 // https://rust-lang.github.io/rfcs/3058-try-trait-v2.html#traits-for-controlflow
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Copy, Hash))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Copy, Hash))]
 #[derive_const(Clone, PartialEq, Eq)]
 pub enum ControlFlow<B, C = ()> {
     /// Move on to the next phase of the operation as normal.

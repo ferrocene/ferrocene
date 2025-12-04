@@ -64,10 +64,10 @@ GENERIC_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
-    "x86_64-unknown-ferrocene.certified",
-    "aarch64-unknown-ferrocene.certified",
-    "thumbv7em-ferrocene.certified-eabi",
-    "thumbv7em-ferrocene.certified-eabihf",
+    "x86_64-unknown-ferrocene.subset",
+    "aarch64-unknown-ferrocene.subset",
+    "thumbv7em-ferrocene.subset-eabi",
+    "thumbv7em-ferrocene.subset-eabihf",
 ]
 
 # Targets only built (and self-tested!) on Linux.
@@ -95,10 +95,10 @@ X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_ST
 
 # Targets with a certified core library
 CERTIFIED_TARGETS = [
-    "aarch64-unknown-ferrocene.certified",
-    "thumbv7em-ferrocene.certified-eabi",
-    "thumbv7em-ferrocene.certified-eabihf",
-    "x86_64-unknown-ferrocene.certified",
+    "aarch64-unknown-ferrocene.subset",
+    "thumbv7em-ferrocene.subset-eabi",
+    "thumbv7em-ferrocene.subset-eabihf",
+    "x86_64-unknown-ferrocene.subset",
 ]
 
 s3 = boto3.client("s3", region_name=S3_REGION)

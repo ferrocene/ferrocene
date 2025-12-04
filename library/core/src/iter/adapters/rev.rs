@@ -1,4 +1,4 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
@@ -10,7 +10,7 @@ use crate::ops::Try;
 ///
 /// [`rev`]: Iterator::rev
 /// [`Iterator`]: trait.Iterator.html
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Rev<T> {
@@ -37,7 +37,7 @@ impl<T> Rev<T> {
     /// assert_eq!(rev.into_inner().collect::<String>(), "foo");
     /// ```
     #[unstable(feature = "rev_into_inner", issue = "144277")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn into_inner(self) -> T {
         self.iter
     }
@@ -139,7 +139,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> ExactSizeIterator for Rev<I>
 where
     I: ExactSizeIterator + DoubleEndedIterator,
@@ -154,15 +154,15 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> FusedIterator for Rev<I> where I: FusedIterator + DoubleEndedIterator {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedLen for Rev<I> where I: TrustedLen + DoubleEndedIterator {}
 
 #[stable(feature = "default_iters", since = "1.70.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Default> Default for Rev<I> {
     /// Creates a `Rev` iterator from the default value of `I`
     /// ```

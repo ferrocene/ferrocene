@@ -14,13 +14,13 @@
 pub use self::c_str::CStr;
 #[doc(inline)]
 #[stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::c_str::FromBytesUntilNulError;
 #[doc(inline)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::c_str::FromBytesWithNulError;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 
 #[stable(feature = "c_str_module", since = "1.88.0")]
@@ -31,7 +31,7 @@ pub mod c_str;
     issue = "44930",
     reason = "the `c_variadic` feature has not been properly tested on all supported platforms"
 )]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::va_list::{VaArgSafe, VaList, VaListImpl};
 
 #[unstable(
@@ -39,7 +39,7 @@ pub use self::va_list::{VaArgSafe, VaList, VaListImpl};
     issue = "44930",
     reason = "the `c_variadic` feature has not been properly tested on all supported platforms"
 )]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod va_list;
 
 mod primitives;
@@ -81,7 +81,7 @@ pub enum c_void {
 }
 
 #[stable(feature = "std_debug", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for c_void {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("c_void").finish()
@@ -96,5 +96,5 @@ impl fmt::Debug for c_void {
     cfg(not(target_feature = "crt-static"))
 )]
 #[link(name = "/defaultlib:libcmt", modifiers = "+verbatim", cfg(target_feature = "crt-static"))]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe extern "C" {}

@@ -4,38 +4,38 @@
 
 #![stable(feature = "core_array", since = "1.35.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::borrow::{Borrow, BorrowMut};
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::Infallible;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{self, Hash};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::transmute_unchecked;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{UncheckedIterator, repeat_n};
 use crate::mem::{self, MaybeUninit};
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
 use crate::ptr;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::iter::UncheckedIterator;
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod ascii;
 mod drain;
 mod equality;
@@ -67,7 +67,7 @@ pub use iter::IntoIter;
 #[inline]
 #[must_use = "cloning is often expensive and is not expected to have side effects"]
 #[stable(feature = "array_repeat", since = "1.91.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
     from_trusted_iterator(repeat_n(val, N))
 }
@@ -194,11 +194,11 @@ pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
 
 /// The error type returned when a conversion from a slice to an array fails.
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Copy, Clone))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Copy, Clone))]
 pub struct TryFromSliceError(());
 
 #[stable(feature = "core_array", since = "1.35.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -207,12 +207,12 @@ impl fmt::Display for TryFromSliceError {
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for TryFromSliceError {}
 
 #[stable(feature = "try_from_slice_error", since = "1.36.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl const From<Infallible> for TryFromSliceError {
     fn from(x: Infallible) -> TryFromSliceError {
         match x {}
@@ -230,7 +230,7 @@ impl<T, const N: usize> const AsRef<[T]> for [T; N] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> const AsMut<[T]> for [T; N] {
     #[inline]
     fn as_mut(&mut self) -> &mut [T] {
@@ -240,7 +240,7 @@ impl<T, const N: usize> const AsMut<[T]> for [T; N] {
 
 #[stable(feature = "array_borrow", since = "1.4.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> const Borrow<[T]> for [T; N] {
     fn borrow(&self) -> &[T] {
         self
@@ -249,7 +249,7 @@ impl<T, const N: usize> const Borrow<[T]> for [T; N] {
 
 #[stable(feature = "array_borrow", since = "1.4.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> const BorrowMut<[T]> for [T; N] {
     fn borrow_mut(&mut self) -> &mut [T] {
         self
@@ -366,7 +366,7 @@ impl<'a, T, const N: usize> const TryFrom<&'a mut [T]> for &'a mut [T; N] {
 /// assert_eq!(b.hash_one(a), b.hash_one(s));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Hash, const N: usize> Hash for [T; N] {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         Hash::hash(&self[..], state)
@@ -374,7 +374,7 @@ impl<T: Hash, const N: usize> Hash for [T; N] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for [T; N] {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&&self[..], f)
@@ -430,7 +430,7 @@ where
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
 // blocked by PartialOrd
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
     #[inline]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {
@@ -456,7 +456,7 @@ impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
 
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Ord, const N: usize> Ord for [T; N] {
     #[inline]
     fn cmp(&self, other: &[T; N]) -> Ordering {
@@ -475,7 +475,7 @@ impl<T: Clone, const N: usize> Clone for [T; N] {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn clone_from(&mut self, other: &Self) {
         self.clone_from_slice(other);
     }
@@ -514,7 +514,7 @@ impl<T: TrivialClone> SpecArrayClone for T {
 // - https://github.com/rust-lang/rust/issues/61415
 // - https://github.com/rust-lang/rust/pull/145457
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! array_impl_default {
     {$n:expr, $t:ident $($ts:ident)*} => {
         #[stable(since = "1.4.0", feature = "array_default")]
@@ -533,7 +533,7 @@ macro_rules! array_impl_default {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 array_impl_default! {32, T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T}
 
 impl<T, const N: usize> [T; N] {
@@ -666,7 +666,7 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[stable(feature = "array_methods", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_array_each_ref", since = "1.91.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn each_ref(&self) -> [&T; N] {
         let mut buf = [null::<T>(); N];
 
@@ -698,7 +698,7 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[stable(feature = "array_methods", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_array_each_ref", since = "1.91.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn each_mut(&mut self) -> [&mut T; N] {
         let mut buf = [null_mut::<T>(); N];
 
@@ -755,7 +755,7 @@ impl<T, const N: usize> [T; N] {
         issue = "90091"
     )]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T]) {
         self.split_first_chunk::<M>().unwrap()
     }
@@ -789,7 +789,7 @@ impl<T, const N: usize> [T; N] {
         issue = "90091"
     )]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn split_array_mut<const M: usize>(&mut self) -> (&mut [T; M], &mut [T]) {
         self.split_first_chunk_mut::<M>().unwrap()
     }
@@ -835,7 +835,7 @@ impl<T, const N: usize> [T; N] {
         issue = "90091"
     )]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn rsplit_array_ref<const M: usize>(&self) -> (&[T], &[T; M]) {
         self.split_last_chunk::<M>().unwrap()
     }
@@ -869,7 +869,7 @@ impl<T, const N: usize> [T; N] {
         issue = "90091"
     )]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn rsplit_array_mut<const M: usize>(&mut self) -> (&mut [T], &mut [T; M]) {
         self.split_last_chunk_mut::<M>().unwrap()
     }
@@ -1003,7 +1003,7 @@ impl<T> Drop for Guard<'_, T> {
 ///
 /// Used for [`Iterator::next_chunk`].
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) fn iter_next_chunk<T, const N: usize>(
     iter: &mut impl Iterator<Item = T>,
 ) -> Result<[T; N], IntoIter<T, N>> {
@@ -1027,7 +1027,7 @@ pub(crate) fn iter_next_chunk<T, const N: usize>(
 /// Unfortunately this loop has two exit conditions, the buffer filling up
 /// or the iterator running out of items, making it tend to optimize poorly.
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 fn iter_next_chunk_erased<T>(
     buffer: &mut [MaybeUninit<T>],
     iter: &mut impl Iterator<Item = T>,

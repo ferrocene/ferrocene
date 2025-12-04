@@ -98,52 +98,52 @@
 //
 // Library features:
 // not-alphabetical-start
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(bigint_helper_methods))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(bstr_internals))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(array_ptr_get))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(bigint_helper_methods))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
 #![feature(cfg_select)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_reliable_f16_f128))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_cmp))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_target_has_reliable_f16_f128))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_carrying_mul_add))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_select_unpredictable))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_select_unpredictable))]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
 #![feature(internal_impls_macro)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(ip))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(is_ascii_octdigit))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(lazy_get))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(ip))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(is_ascii_octdigit))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(lazy_get))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
 #![feature(panic_internals)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_ptr_get))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_internals))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_inclusive_remainder))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_remainder))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(pattern_type_macro))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_alignment_type))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_metadata))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(set_ptr_value))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_ptr_get))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![feature(ub_checks)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_neg))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_shifts))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsafe_pinned))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(utf16_extra))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(variant_count))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(unchecked_neg))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(unchecked_shifts))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(utf16_extra))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(variant_count))]
 // not-alphabetical-end
 //
 // Language features:
 // not-alphabetical-start
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(abi_unadjusted))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(abi_unadjusted))]
 #![feature(adt_const_params)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_sanitize))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_sanitize))]
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
@@ -153,20 +153,20 @@
 #![feature(deprecated_suggestion)]
 #![feature(derive_const)]
 #![feature(doc_cfg)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(doc_notable_trait))]
 #![feature(extern_types)]
 #![feature(f128)]
 #![feature(f16)]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![feature(funnel_shifts)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(if_let_guard))]
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(link_llvm_intrinsics))]
 #![feature(macro_metavar_expr)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(macro_metavar_expr_concat))]
 #![feature(marker_trait_attr)]
 #![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
@@ -178,11 +178,11 @@
 #![feature(pattern_types)]
 #![feature(prelude_import)]
 #![feature(reborrow)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(repr_simd))]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(simd_ffi))]
 #![feature(staged_api)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance_lints)]
@@ -190,36 +190,36 @@
 #![feature(transparent_unions)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(with_negative_coherence))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(unsized_fn_params))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(with_negative_coherence))]
 // not-alphabetical-end
 //
 // Target features:
 // not-alphabetical-start
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(avx10_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(hexagon_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(loongarch_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(mips_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(powerpc_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(nvptx_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(riscv_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(rtm_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(s390x_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(wasm_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(x86_amx_intrinsics))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(aarch64_unstable_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(arm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(avx10_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(hexagon_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(loongarch_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(mips_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(powerpc_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(nvptx_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(riscv_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(rtm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(s390x_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(wasm_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(x86_amx_intrinsics))]
 // not-alphabetical-end
 //
 // Ferrocene lints/features:
 #![cfg_attr(
-    feature = "ferrocene_certified",
+    feature = "ferrocene_subset",
     expect(rustdoc::broken_intra_doc_links),
     expect(rustdoc::private_intra_doc_links)
 )]
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
-#![doc(auto_cfg(hide(feature = "ferrocene_certified")))]
+#![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
@@ -238,7 +238,7 @@ mod macros;
 
 #[unstable(feature = "assert_matches", issue = "82775")]
 /// Unstable module containing the unstable `assert_matches` macro.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod assert_matches {
     #[unstable(feature = "assert_matches", issue = "82775")]
     pub use crate::macros::{assert_matches, debug_assert_matches};
@@ -260,7 +260,7 @@ pub mod autodiff {
 }
 
 #[unstable(feature = "contracts", issue = "128044")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod contracts;
 
 #[unstable(feature = "cfg_select", issue = "115585")]
@@ -270,24 +270,24 @@ pub use crate::macros::cfg_select;
 mod internal_macros;
 
 #[path = "num/shells/legacy_int_modules.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod legacy_int_modules;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(clippy::useless_attribute)] // FIXME false positive (https://github.com/rust-lang/rust-clippy/issues/15636)
 #[allow(deprecated_in_future)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use legacy_int_modules::{i8, i16, i32, i64, isize, u8, u16, u32, u64, usize};
 #[stable(feature = "i128", since = "1.26.0")]
 #[allow(clippy::useless_attribute)] // FIXME false positive (https://github.com/rust-lang/rust-clippy/issues/15636)
 #[allow(deprecated_in_future)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use legacy_int_modules::{i128, u128};
 
 #[path = "num/f128.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod f128;
 #[path = "num/f16.rs"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod f16;
 #[path = "num/f32.rs"]
 pub mod f32;
@@ -315,9 +315,9 @@ pub mod clone;
 pub mod cmp;
 pub mod convert;
 pub mod default;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod error;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod index;
 pub mod marker;
 pub mod ops;
@@ -326,45 +326,45 @@ pub mod ops;
 
 pub mod any;
 pub mod array;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ascii;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod asserting;
 #[unstable(feature = "async_iterator", issue = "79024")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bstr;
 pub mod cell;
 pub mod char;
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod io;
 pub mod iter;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod net;
 pub mod option;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod os;
 pub mod panic;
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod pat;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod range;
 pub mod result;
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod unsafe_binder;
 
 pub mod fmt;
@@ -373,16 +373,16 @@ pub mod slice;
 pub mod str;
 pub mod time;
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod wtf8;
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod unicode;
 
 /* Async */
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod future;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod task;
 
 /* Heap memory allocator trait */
@@ -391,14 +391,14 @@ pub mod alloc;
 
 // note: does not need to be public
 mod bool;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod escape;
 mod tuple;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod primitive;
 
 // Pull in the `core_arch` crate directly into core. The contents of
@@ -419,7 +419,7 @@ pub mod primitive;
     unreachable_pub
 )]
 #[allow(rustdoc::bare_urls)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]
@@ -435,11 +435,11 @@ pub mod arch;
 #[allow(missing_debug_implementations, dead_code, unsafe_op_in_unsafe_fn)]
 #[allow(rustdoc::bare_urls)]
 #[unstable(feature = "portable_simd", issue = "86656")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod core_simd;
 
 #[unstable(feature = "portable_simd", issue = "86656")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod simd {
     #![doc = include_str!("../../portable-simd/crates/core_simd/src/core_simd_docs.md")]
 

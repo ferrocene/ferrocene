@@ -21,7 +21,7 @@ impl Step for CertifiedApiDocs {
         if run.target.try_certified_equivalent().is_some() {
             run.builder.ensure(CertifiedApiDocs { target: run.target });
         } else {
-            run.builder.info(&format!("No certified target for {:?}. skipping", run.target));
+            run.builder.info(&format!("No certified target for {}", run.target.to_string()));
         }
     }
 

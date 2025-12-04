@@ -132,6 +132,10 @@
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+// Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
+#[cfg(all(ferrocene_coverage, not(panic = "abort")))]
+compile_error!("only -Cpanic=abort is certified");
+
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {
     ($t:ty: $left:expr, $right:expr) => {

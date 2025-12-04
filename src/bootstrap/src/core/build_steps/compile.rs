@@ -691,6 +691,13 @@ pub fn std_cargo(
             .arg("--manifest-path")
             .arg(builder.src.join("library/sysroot/Cargo.toml"));
 
+        // Ferrocene addition: coverage tests must run with panic=abort, we don't certify unwinding.
+        if builder.config.cmd.ferrocene_coverage_for().is_some()
+            && cargo.compiler().stage == builder.top_stage
+        {
+            cargo.rustflag("-Zpanic-abort-tests").rustflag("-Cpanic=abort");
+        }
+
         // Help the libc crate compile by assisting it in finding various
         // sysroot native libraries.
         if target.contains("musl")

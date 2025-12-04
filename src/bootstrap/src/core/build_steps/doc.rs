@@ -831,9 +831,9 @@ fn doc_std(
     }
 
     // Ferrocene addition
-    if target.contains("ferrocene.certified") {
-        cargo.rustdocflag("--cfg=ferrocene_certified");
-        cargo.arg("--features").arg("ferrocene_certified");
+    if target.contains("ferrocene.subset") {
+        cargo.rustdocflag("--cfg=ferrocene_subset");
+        cargo.arg("--features").arg("ferrocene_subset");
     }
     // Ferrocene addition
     if builder.config.library_docs_private_items {

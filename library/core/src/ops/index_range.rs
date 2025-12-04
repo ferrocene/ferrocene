@@ -1,4 +1,4 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::{NeverShortCircuit, Try};
@@ -10,14 +10,14 @@ use crate::ub_checks;
 ///
 /// (Normal `Range` code needs to handle degenerate ranges like `10..0`,
 ///  which takes extra checks compared to only handling the canonical form.)
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, Debug, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_certified", derive(Clone, PartialEq))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_subset", derive(Clone, PartialEq))]
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,
 }
 
-#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 impl IndexRange {
     /// # Safety
     /// - `start <= end`
@@ -217,7 +217,7 @@ impl DoubleEndedIterator for IndexRange {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for IndexRange {
     #[inline]
     fn len(&self) -> usize {
@@ -226,8 +226,8 @@ impl ExactSizeIterator for IndexRange {
 }
 
 // SAFETY: Because we only deal in `usize`, our `len` is always perfect.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl TrustedLen for IndexRange {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for IndexRange {}

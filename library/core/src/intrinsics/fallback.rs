@@ -8,7 +8,7 @@
 #![allow(missing_docs)]
 
 #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const trait CarryingMulAdd: Copy + 'static {
     type Unsigned: Copy + 'static;
     fn carrying_mul_add(
@@ -19,7 +19,7 @@ pub const trait CarryingMulAdd: Copy + 'static {
     ) -> (Self::Unsigned, Self);
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_carrying_mul_add_by_widening {
     ($($t:ident $u:ident $w:ident,)+) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
@@ -33,7 +33,7 @@ macro_rules! impl_carrying_mul_add_by_widening {
         }
     )+};
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl_carrying_mul_add_by_widening! {
     u8 u8 u16,
     u16 u16 u32,
@@ -47,17 +47,17 @@ impl_carrying_mul_add_by_widening! {
     isize usize UDoubleSize,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_pointer_width = "16")]
 type UDoubleSize = u32;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_pointer_width = "32")]
 type UDoubleSize = u64;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_pointer_width = "64")]
 type UDoubleSize = u128;
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn wide_mul_u128(a: u128, b: u128) -> (u128, u128) {
     #[inline]
@@ -86,7 +86,7 @@ const fn wide_mul_u128(a: u128, b: u128) -> (u128, u128) {
     (from_low_high([r0, r1]), from_low_high([r2, r3]))
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
 impl const CarryingMulAdd for u128 {
     type Unsigned = u128;
@@ -101,7 +101,7 @@ impl const CarryingMulAdd for u128 {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
 impl const CarryingMulAdd for i128 {
     type Unsigned = u128;

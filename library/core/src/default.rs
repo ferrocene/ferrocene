@@ -2,7 +2,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii::Char as AsciiChar;
 
 /// A trait for giving a type a useful default value.
@@ -165,7 +165,7 @@ macro_rules! default_impl {
 default_impl! { (), (), "Returns the default value of `()`" }
 default_impl! { bool, false, "Returns the default value of `false`" }
 default_impl! { char, '\x00', "Returns the default value of `\\x00`" }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 default_impl! { AsciiChar, AsciiChar::Null, "Returns the default value of `Null`" }
 
 default_impl! { usize, 0, "Returns the default value of `0`" }

@@ -2928,7 +2928,7 @@ mod snapshot {
         [doc] style-guide (book) <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-ferrocene.certified> crates=[core]
+        [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-ferrocene.subset> crates=[core]
         "###);
     }
 
@@ -3117,7 +3117,7 @@ fn normalize_target(target: TargetSelection, config: &RenderConfig) -> String {
         target = target.replace(&host_target(), "host");
         // Ferrocene addition: makes it possible to run tests for certified targets in a
         // platform-independent way.
-        if let Some(certified) = get_host_target().try_certified_equivalent() {
+        if let Some(certified) = get_host_target().try_subset_equivalent() {
             target = target.replace(&certified.to_string(), "host.certified");
         }
     }

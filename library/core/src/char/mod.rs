@@ -29,7 +29,7 @@ mod methods;
 #[stable(feature = "try_from", since = "1.34.0")]
 pub use self::convert::CharTryFromError;
 #[stable(feature = "char_from_str", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::convert::ParseCharError;
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 pub use self::decode::{DecodeUtf16, DecodeUtf16Error};
@@ -37,25 +37,25 @@ pub use self::decode::{DecodeUtf16, DecodeUtf16Error};
 // perma-unstable re-exports
 #[rustfmt::skip]
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::methods::encode_utf16_raw; // perma-unstable
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
 pub use self::methods::{encode_utf8_raw, encode_utf8_raw_unchecked}; // perma-unstable
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use self::methods::EscapeDebugExtArgs;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::escape::{AlwaysEscaped, EscapeIterInner, MaybeEscaped};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Write};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
 // UTF-8 ranges and tags for encoding characters
@@ -102,38 +102,38 @@ const MAX_THREE_B: u32 = 0x10000;
 
 /// The highest valid code point a `char` can have, `'\u{10FFFF}'`. Use [`char::MAX`] instead.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const MAX: char = char::MAX;
 
 /// The maximum number of bytes required to [encode](char::encode_utf8) a `char` to
 /// UTF-8 encoding.
 #[unstable(feature = "char_max_len", issue = "121714")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const MAX_LEN_UTF8: usize = char::MAX_LEN_UTF8;
 
 /// The maximum number of two-byte units required to [encode](char::encode_utf16) a `char`
 /// to UTF-16 encoding.
 #[unstable(feature = "char_max_len", issue = "121714")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const MAX_LEN_UTF16: usize = char::MAX_LEN_UTF16;
 
 /// `U+FFFD REPLACEMENT CHARACTER` (�) is used in Unicode to represent a
 /// decoding error. Use [`char::REPLACEMENT_CHARACTER`] instead.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const REPLACEMENT_CHARACTER: char = char::REPLACEMENT_CHARACTER;
 
 /// The version of [Unicode](https://www.unicode.org/) that the Unicode parts of
 /// `char` and `str` methods are based on. Use [`char::UNICODE_VERSION`] instead.
 #[stable(feature = "unicode_version", since = "1.45.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const UNICODE_VERSION: (u8, u8, u8) = char::UNICODE_VERSION;
 
 /// Creates an iterator over the UTF-16 encoded code points in `iter`, returning
 /// unpaired surrogates as `Err`s. Use [`char::decode_utf16`] instead.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
     self::decode::decode_utf16(iter)
 }
@@ -143,7 +143,7 @@ pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::Into
 #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
 #[must_use]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn from_u32(i: u32) -> Option<char> {
     self::convert::from_u32(i)
 }
@@ -154,7 +154,7 @@ pub const fn from_u32(i: u32) -> Option<char> {
 #[rustc_const_stable(feature = "const_char_from_u32_unchecked", since = "1.81.0")]
 #[must_use]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn from_u32_unchecked(i: u32) -> char {
     // SAFETY: the safety contract must be upheld by the caller.
     unsafe { self::convert::from_u32_unchecked(i) }
@@ -165,7 +165,7 @@ pub const unsafe fn from_u32_unchecked(i: u32) -> char {
 #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
 #[must_use]
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
     self::convert::from_digit(num, radix)
 }
@@ -179,10 +179,10 @@ pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
 /// [`escape_unicode`]: char::escape_unicode
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeUnicode(EscapeIterInner<10, AlwaysEscaped>);
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeUnicode {
     #[inline]
     const fn new(c: char) -> Self {
@@ -191,7 +191,7 @@ impl EscapeUnicode {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for EscapeUnicode {
     type Item = char;
 
@@ -223,7 +223,7 @@ impl Iterator for EscapeUnicode {
 }
 
 #[stable(feature = "exact_size_escape", since = "1.11.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeUnicode {
     #[inline]
     fn len(&self) -> usize {
@@ -232,11 +232,11 @@ impl ExactSizeIterator for EscapeUnicode {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for EscapeUnicode {}
 
 #[stable(feature = "char_struct_display", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for EscapeUnicode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.0, f)
@@ -251,10 +251,10 @@ impl fmt::Display for EscapeUnicode {
 /// [`escape_default`]: char::escape_default
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeDefault(EscapeIterInner<10, AlwaysEscaped>);
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeDefault {
     #[inline]
     const fn printable(c: ascii::Char) -> Self {
@@ -273,7 +273,7 @@ impl EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for EscapeDefault {
     type Item = char;
 
@@ -305,7 +305,7 @@ impl Iterator for EscapeDefault {
 }
 
 #[stable(feature = "exact_size_escape", since = "1.11.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDefault {
     #[inline]
     fn len(&self) -> usize {
@@ -314,11 +314,11 @@ impl ExactSizeIterator for EscapeDefault {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for EscapeDefault {}
 
 #[stable(feature = "char_struct_display", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for EscapeDefault {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -334,10 +334,10 @@ impl fmt::Display for EscapeDefault {
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 #[derive(Clone, Debug)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeDebug {
     #[inline]
     const fn printable(chr: char) -> Self {
@@ -356,7 +356,7 @@ impl EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for EscapeDebug {
     type Item = char;
 
@@ -378,7 +378,7 @@ impl Iterator for EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDebug {
     fn len(&self) -> usize {
         self.0.len()
@@ -386,11 +386,11 @@ impl ExactSizeIterator for EscapeDebug {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for EscapeDebug {}
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for EscapeDebug {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -398,7 +398,7 @@ impl fmt::Display for EscapeDebug {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! casemappingiter_impls {
     ($(#[$attr:meta])* $ITER_NAME:ident) => {
         $(#[$attr])*
@@ -500,7 +500,7 @@ macro_rules! casemappingiter_impls {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 casemappingiter_impls! {
     /// Returns an iterator that yields the lowercase equivalent of a `char`.
     ///
@@ -511,7 +511,7 @@ casemappingiter_impls! {
     ToLowercase
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 casemappingiter_impls! {
     /// Returns an iterator that yields the uppercase equivalent of a `char`.
     ///
@@ -523,10 +523,10 @@ casemappingiter_impls! {
 }
 
 #[derive(Debug, Clone)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 struct CaseMappingIter(core::array::IntoIter<char, 3>);
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl CaseMappingIter {
     #[inline]
     fn new(chars: [char; 3]) -> CaseMappingIter {
@@ -544,7 +544,7 @@ impl CaseMappingIter {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for CaseMappingIter {
     type Item = char;
 
@@ -581,7 +581,7 @@ impl Iterator for CaseMappingIter {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl DoubleEndedIterator for CaseMappingIter {
     fn next_back(&mut self) -> Option<char> {
         self.0.next_back()
@@ -599,7 +599,7 @@ impl DoubleEndedIterator for CaseMappingIter {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for CaseMappingIter {
     fn len(&self) -> usize {
         self.0.len()
@@ -610,24 +610,24 @@ impl ExactSizeIterator for CaseMappingIter {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for CaseMappingIter {}
 
 // SAFETY: forwards to inner `array::IntoIter`
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl TrustedLen for CaseMappingIter {}
 
 // SAFETY: forwards to inner `array::IntoIter`
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl TrustedRandomAccessNoCoerce for CaseMappingIter {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 // SAFETY: `CaseMappingIter` has no subtypes/supertypes
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl TrustedRandomAccess for CaseMappingIter {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for CaseMappingIter {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -641,11 +641,11 @@ impl fmt::Display for CaseMappingIter {
 /// The error type returned when a checked char conversion fails.
 #[stable(feature = "u8_from_char", since = "1.59.0")]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct TryFromCharError(pub(crate) ());
 
 #[stable(feature = "u8_from_char", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromCharError {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         "unicode code point out of range".fmt(fmt)
@@ -653,5 +653,5 @@ impl fmt::Display for TryFromCharError {
 }
 
 #[stable(feature = "u8_from_char", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for TryFromCharError {}

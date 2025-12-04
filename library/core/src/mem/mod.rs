@@ -7,13 +7,13 @@
 
 use crate::alloc::Layout;
 use crate::marker::{Destruct, DiscriminantKind};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::{intrinsics, ptr};
 
@@ -25,16 +25,16 @@ mod maybe_uninit;
 #[stable(feature = "maybe_uninit", since = "1.36.0")]
 pub use maybe_uninit::MaybeUninit;
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod transmutability;
 #[unstable(feature = "transmutability", issue = "99571")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use transmutability::{Assume, TransmuteFrom};
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod drop_guard;
 #[unstable(feature = "drop_guard", issue = "144426")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use drop_guard::DropGuard;
 
 // This one has to be a re-export (rather than wrapping the underlying intrinsic) so that we can do
@@ -193,7 +193,7 @@ pub const fn forget<T>(t: T) {
 /// [#71170]: https://github.com/rust-lang/rust/pull/71170
 #[inline]
 #[unstable(feature = "forget_unsized", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn forget_unsized<T: ?Sized>(t: T) {
     intrinsics::forget(t)
 }
@@ -452,7 +452,7 @@ pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of` instead", since = "1.2.0", suggestion = "align_of")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn min_align_of<T>() -> usize {
     intrinsics::align_of::<T>()
 }
@@ -476,7 +476,7 @@ pub fn min_align_of<T>() -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of_val` instead", since = "1.2.0", suggestion = "align_of_val")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn min_align_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: val is a reference, so it's a valid raw pointer
     unsafe { intrinsics::align_of_val(val) }
@@ -568,7 +568,7 @@ pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
 #[inline]
 #[must_use]
 #[unstable(feature = "layout_for_ptr", issue = "69835")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn align_of_val_raw<T: ?Sized>(val: *const T) -> usize {
     // SAFETY: the caller must provide a valid raw pointer
     unsafe { intrinsics::align_of_val(val) }
@@ -721,7 +721,7 @@ pub const unsafe fn zeroed<T>() -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_uninitialized"]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn uninitialized<T>() -> T {
     // SAFETY: the caller must guarantee that an uninitialized value is valid for `T`.
     unsafe {
@@ -1000,7 +1000,7 @@ where
 /// ```
 #[inline]
 #[unstable(feature = "mem_copy_fn", issue = "98262")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn copy<T: Copy>(x: &T) -> T {
     *x
 }
@@ -1078,11 +1078,11 @@ pub struct Discriminant<T>(<T as DiscriminantKind>::Discriminant);
 // N.B. These trait implementations cannot be derived because we don't want any bounds on T.
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Copy for Discriminant<T> {}
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> clone::Clone for Discriminant<T> {
     fn clone(&self) -> Self {
         *self
@@ -1090,7 +1090,7 @@ impl<T> clone::Clone for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> cmp::PartialEq for Discriminant<T> {
     fn eq(&self, rhs: &Self) -> bool {
         self.0 == rhs.0
@@ -1098,11 +1098,11 @@ impl<T> cmp::PartialEq for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> cmp::Eq for Discriminant<T> {}
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> hash::Hash for Discriminant<T> {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
@@ -1110,7 +1110,7 @@ impl<T> hash::Hash for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> fmt::Debug for Discriminant<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_tuple("Discriminant").field(&self.0).finish()
@@ -1247,7 +1247,7 @@ pub const fn discriminant<T>(v: &T) -> Discriminant<T> {
 #[unstable(feature = "variant_count", issue = "73662")]
 #[rustc_const_unstable(feature = "variant_count", issue = "73662")]
 #[rustc_diagnostic_item = "mem_variant_count"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn variant_count<T>() -> usize {
     const { intrinsics::variant_count::<T>() }
 }
@@ -1431,9 +1431,9 @@ impl<T> SizedTypeProperties for T {}
 /// [dynamically sized]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [`offset_of_enum`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-enum.html
 /// [`offset_of_slice`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-slice.html
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "offset_of", since = "1.77.0")]
 #[allow_internal_unstable(builtin_syntax)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
     // The `{}` is for better error messages
     {builtin # offset_of($Container, $($fields)+)}
@@ -1479,7 +1479,7 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 ///
 /// [inhabited]: https://doc.rust-lang.org/reference/glossary.html#inhabited
 #[unstable(feature = "mem_conjure_zst", issue = "95383")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn conjure_zst<T>() -> T {
     const_assert!(
         size_of::<T>() == 0,

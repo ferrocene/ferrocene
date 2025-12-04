@@ -1,6 +1,6 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::{Saturating, Wrapping};
 
 /// Trait to represent types that can be created by summing up an iterator.
@@ -37,7 +37,7 @@ pub trait Sum<A = Self>: Sized {
     message = "a value of type `{Self}` cannot be made by multiplying all elements of type `{A}` from an iterator",
     label = "value of type `{Self}` cannot be made by multiplying all elements from a `std::iter::Iterator<Item={A}>`"
 )]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Product<A = Self>: Sized {
     /// Takes an iterator and generates `Self` from the elements by multiplying
     /// the items.
@@ -59,7 +59,7 @@ macro_rules! integer_sum_product {
         }
 
         #[$attr]
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl Product for $a {
             fn product<I: Iterator<Item=Self>>(iter: I) -> Self {
                 iter.fold(
@@ -82,7 +82,7 @@ macro_rules! integer_sum_product {
         }
 
         #[$attr]
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl<'a> Product<&'a $a> for $a {
             fn product<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
                 iter.fold(
@@ -97,14 +97,14 @@ macro_rules! integer_sum_product {
         integer_sum_product!(@impls 0, 1,
                 #[stable(feature = "iter_arith_traits", since = "1.12.0")],
                 $($a)*);
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         integer_sum_product!(@impls Wrapping(0), Wrapping(1),
                 #[stable(feature = "wrapping_iter_arith", since = "1.14.0")],
                 $(Wrapping<$a>)*);
     );
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! saturating_integer_sum_product {
     (@impls $zero:expr, $one:expr, $doc:expr, #[$attr:meta], $($a:ty)*) => ($(
         #[$attr]
@@ -174,7 +174,7 @@ macro_rules! float_sum_product {
         }
 
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl Product for $a {
             fn product<I: Iterator<Item=Self>>(iter: I) -> Self {
                 iter.fold(
@@ -197,7 +197,7 @@ macro_rules! float_sum_product {
         }
 
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl<'a> Product<&'a $a> for $a {
             fn product<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
                 iter.fold(
@@ -211,12 +211,12 @@ macro_rules! float_sum_product {
 }
 
 integer_sum_product! { i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 saturating_integer_sum_product! { u8 u16 u32 u64 u128 usize }
 float_sum_product! { f16 f32 f64 f128 }
 
 #[stable(feature = "iter_arith_traits_result", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, U, E> Sum<Result<U, E>> for Result<T, E>
 where
     T: Sum<U>,
@@ -248,7 +248,7 @@ where
 }
 
 #[stable(feature = "iter_arith_traits_result", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, U, E> Product<Result<U, E>> for Result<T, E>
 where
     T: Product<U>,
@@ -279,7 +279,7 @@ where
 }
 
 #[stable(feature = "iter_arith_traits_option", since = "1.37.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, U> Sum<Option<U>> for Option<T>
 where
     T: Sum<U>,
@@ -310,7 +310,7 @@ where
 }
 
 #[stable(feature = "iter_arith_traits_option", since = "1.37.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, U> Product<Option<U>> for Option<T>
 where
     T: Product<U>,

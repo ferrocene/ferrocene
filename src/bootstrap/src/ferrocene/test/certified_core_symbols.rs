@@ -22,8 +22,8 @@ impl Step for CertifiedCoreSymbols {
         run.path(TRACKED_FILE).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
     }
 
-    fn is_default_step(_: &Builder<'_>) -> bool {
-        true
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.std_debug_assertions
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -31,6 +31,10 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        if !builder.config.std_debug_assertions && !builder.config.dry_run() {
+            panic!("x t {TRACKED_FILE} requires `rust.debug-assertions-std=true`");
+        }
+
         builder.info(&format!("Testing {TRACKED_FILE}"));
         let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
         let actual_symbol_report_path =

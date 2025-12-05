@@ -3760,7 +3760,6 @@ atomic_int! {
     i16 AtomicI16
 }
 #[cfg(target_has_atomic_load_store = "16")]
-#[cfg(not(feature = "ferrocene_subset"))]
 atomic_int! {
     cfg(target_has_atomic = "16"),
     cfg(target_has_atomic_equal_alignment = "16"),

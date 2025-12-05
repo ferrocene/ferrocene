@@ -2678,7 +2678,6 @@ impl<F: FnPtr> fmt::Debug for F {
 /// no difference whether the pointer is null or dangling.)
 #[stable(feature = "raw_ref_macros", since = "1.51.0")]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro addr_of($place:expr) {
     &raw const $place
 }
@@ -2769,7 +2768,6 @@ pub macro addr_of($place:expr) {
 /// makes no difference whether the pointer is null or dangling.)
 #[stable(feature = "raw_ref_macros", since = "1.51.0")]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro addr_of_mut($place:expr) {
     &raw mut $place
 }

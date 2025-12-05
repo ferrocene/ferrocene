@@ -13,7 +13,6 @@ pub(crate) struct FlipLink {
 
 impl Step for FlipLink {
     type Output = GeneratedTarball;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -22,6 +21,10 @@ impl Step for FlipLink {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(FlipLink { target: run.target });
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {

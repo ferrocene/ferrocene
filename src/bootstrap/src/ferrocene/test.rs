@@ -16,11 +16,14 @@ pub(crate) struct TraceabilityMatrixTool {
 
 impl Step for TraceabilityMatrixTool {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/traceability-matrix")
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -51,11 +54,14 @@ pub(crate) struct SelfTest {
 
 impl Step for SelfTest {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/self-test")
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -88,15 +94,17 @@ pub(crate) struct CheckDocumentSignatures {
 
 impl Step for CheckDocumentSignatures {
     type Output = ();
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let default_condition = !matches!(
-            run.builder.config.ferrocene_document_signatures,
-            crate::core::config::FerroceneDocumentSignatures::Disabled
-        );
-        run.alias("ferrocene-check-document-signatures").default_condition(default_condition)
+        run.alias("ferrocene-check-document-signatures")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        !matches!(
+            builder.config.ferrocene_document_signatures,
+            crate::core::config::FerroceneDocumentSignatures::Disabled,
+        )
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -125,7 +133,10 @@ pub(crate) struct GenerateTarball {
 impl Step for GenerateTarball {
     type Output = ();
     const IS_HOST: bool = true;
-    const DEFAULT: bool = true;
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
+    }
 
     fn run(self, builder: &Builder<'_>) {
         builder.info("test generate-tarball");

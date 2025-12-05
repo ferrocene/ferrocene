@@ -40,6 +40,7 @@ mod implicit_static;
 mod implied_dyn_trait;
 mod lifetime;
 mod param_name;
+mod placeholders;
 mod ra_fixture;
 mod range_exclusive;
 
@@ -88,9 +89,7 @@ pub(crate) fn inlay_hints(
 ) -> Vec<InlayHint> {
     let _p = tracing::info_span!("inlay_hints").entered();
     let sema = Semantics::new(db);
-    let file_id = sema
-        .attach_first_edition(file_id)
-        .unwrap_or_else(|| EditionedFileId::current_edition(db, file_id));
+    let file_id = sema.attach_first_edition(file_id);
     let file = sema.parse(file_id);
     let file = file.syntax();
 
@@ -141,9 +140,7 @@ pub(crate) fn inlay_hints_resolve(
 ) -> Option<InlayHint> {
     let _p = tracing::info_span!("inlay_hints_resolve").entered();
     let sema = Semantics::new(db);
-    let file_id = sema
-        .attach_first_edition(file_id)
-        .unwrap_or_else(|| EditionedFileId::current_edition(db, file_id));
+    let file_id = sema.attach_first_edition(file_id);
     let file = sema.parse(file_id);
     let file = file.syntax();
 
@@ -289,6 +286,10 @@ fn hints(
                 },
                 ast::Type::DynTraitType(dyn_) => {
                     implied_dyn_trait::hints(hints, famous_defs, config, Either::Right(dyn_));
+                    Some(())
+                },
+                ast::Type::InferType(placeholder) => {
+                    placeholders::type_hints(hints, famous_defs, config, display_target, placeholder);
                     Some(())
                 },
                 _ => Some(()),

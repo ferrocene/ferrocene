@@ -124,6 +124,9 @@ add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."aarch64-unknown-ferrocene.subset".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene.subset-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene.subset-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."aarch64-unknown-ferrocene.certified".cc=aarch64-linux-gnu-gcc'
+add --set 'target."thumbv7em-ferrocene.certified-eabi".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-ferrocene.certified-eabihf".cc=arm-none-eabi-gcc'
 
 # musl toolchains use the architecture, also we need to set the `musl-root`
 add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/

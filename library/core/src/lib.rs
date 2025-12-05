@@ -129,12 +129,26 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![feature(ub_checks)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unchecked_neg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unchecked_shifts))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(utf16_extra))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(variant_count))]
 // not-alphabetical-end
+||||||| 6840234806e
+#![feature(unchecked_neg)]
+#![feature(unchecked_shifts)]
+#![feature(unsafe_pinned)]
+#![feature(utf16_extra)]
+#![feature(variant_count)]
+// tidy-alphabetical-end
+=======
+#![feature(unsafe_pinned)]
+#![feature(utf16_extra)]
+#![feature(variant_count)]
+// tidy-alphabetical-end
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //
 // Language features:
 // not-alphabetical-start
@@ -152,6 +166,7 @@
 #![feature(decl_macro)]
 #![feature(deprecated_suggestion)]
 #![feature(derive_const)]
+#![feature(diagnostic_on_const)]
 #![feature(doc_cfg)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(doc_notable_trait))]
 #![feature(extern_types)]

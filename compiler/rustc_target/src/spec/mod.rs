@@ -3476,10 +3476,10 @@ impl Target {
         Symbol::intern(&self.vendor)
     }
 
-    /// Modify the target to be certified
+    /// Modify the target to be a subset one
     pub fn ferrocene_subset(&mut self) {
         self.metadata.description =
-            self.metadata.description.as_ref().map(|v| format!("{v} (certified)").into());
+            self.metadata.description.as_ref().map(|v| format!("{v} (subset)").into());
         self.metadata.tier = None;
     }
 }

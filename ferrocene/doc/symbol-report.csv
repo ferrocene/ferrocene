@@ -464,6 +464,8 @@
 <&mut T as core::convert::AsRef<U>>::as_ref
 <&mut T as core::ops::deref::Deref>::deref
 <&mut T as core::ops::deref::DerefMut>::deref_mut
+<&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnMut<(usize,)>>::call_mut
+<&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnOnce<(usize,)>>::call_once
 <&u128 as core::ops::arith::Add<&u128>>::add
 <&u128 as core::ops::arith::Add<u128>>::add
 <&u128 as core::ops::arith::Div<&u128>>::div
@@ -913,11 +915,7 @@
 <core::any::TypeId as core::cmp::PartialEq>::eq::compiletime
 <core::any::TypeId as core::cmp::PartialEq>::eq::runtime
 <core::array::Guard<'_, T> as core::ops::drop::Drop>::drop
-<core::array::drain::Drain<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::len
-<core::array::drain::Drain<'_, T> as core::iter::traits::iterator::Iterator>::next
-<core::array::drain::Drain<'_, T> as core::iter::traits::iterator::Iterator>::size_hint
-<core::array::drain::Drain<'_, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
-<core::array::drain::Drain<'_, T> as core::ops::drop::Drop>::drop
+<core::array::drain::Drain<'_, '_, T, N, F> as core::ops::drop::Drop>::drop
 <core::array::iter::IntoIter<T, N> as core::clone::Clone>::clone
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
@@ -1267,6 +1265,8 @@
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::FromResidual>::from_residual
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::branch
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::from_output
+<core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnMut<(A,)>>::call_mut
+<core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnOnce<(A,)>>::call_once
 <core::option::IntoIter<A> as core::iter::traits::iterator::Iterator>::next
 <core::option::IntoIter<A> as core::iter::traits::iterator::Iterator>::size_hint
 <core::option::Item<A> as core::iter::traits::exact_size::ExactSizeIterator>::len
@@ -3158,7 +3158,7 @@ core::array::<impl core::iter::traits::collect::IntoIterator for &'a mut [T; N]>
 core::array::<impl core::ops::index::Index<I> for [T; N]>::index
 core::array::<impl core::ops::index::IndexMut<I> for [T; N]>::index_mut
 core::array::Guard::<'_, T>::push_unchecked
-core::array::drain::drain_array_with
+core::array::drain::Drain::<'l, 'f, T, N, F>::new
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::eq
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::ne
 core::array::equality::<impl core::cmp::PartialEq<&mut [U]> for [T; N]>::eq
@@ -3761,6 +3761,10 @@ core::iter::traits::iterator::iter_compare::compare
 core::iter::traits::iterator::iter_eq
 core::mem::align_of
 core::mem::align_of_val
+core::mem::conjure_zst
+core::mem::conjure_zst::do_panic
+core::mem::conjure_zst::do_panic::compiletime
+core::mem::conjure_zst::do_panic::runtime
 core::mem::discriminant
 core::mem::drop
 core::mem::forget
@@ -3779,8 +3783,6 @@ core::mem::maybe_uninit::MaybeUninit::<T>::assume_init_mut
 core::mem::maybe_uninit::MaybeUninit::<T>::assume_init_read
 core::mem::maybe_uninit::MaybeUninit::<T>::assume_init_ref
 core::mem::maybe_uninit::MaybeUninit::<T>::new
-core::mem::maybe_uninit::MaybeUninit::<T>::slice_as_mut_ptr
-core::mem::maybe_uninit::MaybeUninit::<T>::slice_as_ptr
 core::mem::maybe_uninit::MaybeUninit::<T>::uninit
 core::mem::maybe_uninit::MaybeUninit::<T>::write
 core::mem::maybe_uninit::MaybeUninit::<T>::zeroed
@@ -4624,6 +4626,7 @@ core::ptr::non_null::NonNull::<T>::new_unchecked
 core::ptr::non_null::NonNull::<T>::new_unchecked::precondition_check
 core::ptr::non_null::NonNull::<T>::offset
 core::ptr::non_null::NonNull::<T>::offset_from_unsigned
+core::ptr::non_null::NonNull::<T>::read
 core::ptr::non_null::NonNull::<T>::sub
 core::ptr::null
 core::ptr::null_mut

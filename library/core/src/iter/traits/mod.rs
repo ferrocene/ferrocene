@@ -13,7 +13,6 @@ pub use self::marker::InPlaceIterable;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::marker::TrustedFused;
 #[unstable(feature = "trusted_step", issue = "85731")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::marker::TrustedStep;
 pub(crate) use self::unchecked_iterator::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]

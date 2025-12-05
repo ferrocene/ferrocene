@@ -567,7 +567,6 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_empty(&self) -> bool
     where
         Idx: [const] PartialOrd,

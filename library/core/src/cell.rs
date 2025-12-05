@@ -1664,7 +1664,6 @@ pub struct Ref<'b, T: ?Sized + 'b> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> const Deref for Ref<'_, T> {
     type Target = T;
 

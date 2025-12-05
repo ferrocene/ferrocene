@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::Step;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
@@ -117,5 +116,4 @@ pub unsafe trait InPlaceIterable {
 /// for details. Consumers are free to rely on the invariants in unsafe code.
 #[unstable(feature = "trusted_step", issue = "85731")]
 #[rustc_specialization_trait]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait TrustedStep: Step + Copy {}

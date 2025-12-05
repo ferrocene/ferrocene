@@ -154,11 +154,8 @@ impl_from!(u64 => i128, #[stable(feature = "i128", since = "1.26.0")]);
 // The C99 standard defines bounds on INTPTR_MIN, INTPTR_MAX, and UINTPTR_MAX
 // which imply that pointer-sized integers must be at least 16 bits:
 // https://port70.net/~nsz/c/c99/n1256.html#7.18.2.4
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => usize, #[stable(feature = "lossless_iusize_conv", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => isize, #[stable(feature = "lossless_iusize_conv", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => isize, #[stable(feature = "lossless_iusize_conv", since = "1.26.0")]);
 
 // RISC-V defines the possibility of a 128-bit address space (RV128).

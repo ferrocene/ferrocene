@@ -3995,6 +3995,7 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(80", stringify!($SelfT), ".clamp_magnitude(100), 80);")]
         #[doc = concat!("assert_eq!(-80", stringify!($SelfT), ".clamp_magnitude(100), -80);")]
         /// ```
+        #[cfg(not(feature = "ferrocene_subset"))]
         #[must_use = "this returns the clamped value and does not modify the original"]
         #[unstable(feature = "clamp_magnitude", issue = "148519")]
         #[inline]

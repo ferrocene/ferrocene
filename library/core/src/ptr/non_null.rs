@@ -26,6 +26,7 @@ use crate::{
     intrinsics,
     marker::PointeeSized,
     mem::{self, SizedTypeProperties},
+    ptr,
 };
 
 /// `*mut T` but non-zero and [covariant].
@@ -1016,7 +1017,6 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,

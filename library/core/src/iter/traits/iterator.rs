@@ -4115,6 +4115,7 @@ pub trait Iterator {
     /// // But there are two odds, which is too many:
     /// assert_eq!([1, 2, 3].into_iter().filter(|x| x % 2 == 1).exactly_one(), None);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "exact_length_collection", issue = "149266")]
     fn exactly_one(self) -> Option<Self::Item>
@@ -4144,6 +4145,7 @@ pub trait Iterator {
     /// // Taking 4 makes it work again:
     /// assert_eq!([1, 2, 3, 4, 5].into_iter().take(4).collect_array(), Some([1, 2, 3, 4]));
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "exact_length_collection", issue = "149266")]
     fn collect_array<const N: usize>(mut self) -> Option<[Self::Item; N]>

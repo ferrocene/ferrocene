@@ -113,13 +113,15 @@ fn option_methods() {
 }
 
 #[test]
-#[should_panic = "reached"]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic = "reached")]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn filter_option() {
     let _ = Some("foo").filter(|_| panic!("reached"));
 }
 
 #[test]
-#[should_panic = "reached"]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic = "reached")]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn inspect_option() {
     let _ = Some("foo").inspect(|_| panic!("reached"));
 }
@@ -176,13 +178,15 @@ fn result_methods() {
 }
 
 #[test]
-#[should_panic = "reached"]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic = "reached")]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn inspect_result() {
     let _ = Ok::<&str, &str>("foo").inspect(|_| panic!("reached"));
 }
 
 #[test]
-#[should_panic = "reached"]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic = "reached")]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn inspect_result_err() {
     let _ = Err::<&str, &str>("foo").inspect_err(|_| panic!("reached"));
 }

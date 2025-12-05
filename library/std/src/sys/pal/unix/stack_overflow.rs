@@ -68,10 +68,12 @@ mod imp {
 
     use super::Handler;
     use super::thread_info::{delete_current_info, set_current_info, with_current_info};
+    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_imports))]
+    use crate::io;
     use crate::ops::Range;
     use crate::sync::atomic::{Atomic, AtomicBool, AtomicPtr, AtomicUsize, Ordering};
     use crate::sys::pal::unix::os;
-    use crate::{io, mem, ptr};
+    use crate::{mem, ptr};
 
     // Signal handler for the SIGSEGV and SIGBUS handlers. We've got guard pages
     // (unmapped pages) at the end of every thread's stack, so if a thread ends

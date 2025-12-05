@@ -46,10 +46,10 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
-    "aarch64-unknown-ferrocene.certified",
-    "x86_64-unknown-ferrocene.certified",
-    "thumbv7em-ferrocene.certified-eabi",
-    "thumbv7em-ferrocene.certified-eabihf",
+    "aarch64-unknown-ferrocene.subset",
+    "x86_64-unknown-ferrocene.subset",
+    "thumbv7em-ferrocene.subset-eabi",
+    "thumbv7em-ferrocene.subset-eabihf",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM
@@ -356,7 +356,7 @@ than building it.
         // Ferrocene addition: set `no_std` for certified targets.
         // FIXME: bootstrap shouldn't silently assume std if it doesn't find a target, instead it
         // should panic ...
-        if let Some(certified_target) = target.try_certified_equivalent() {
+        if let Some(certified_target) = target.try_subset_equivalent() {
             build
                 .config
                 .target_config

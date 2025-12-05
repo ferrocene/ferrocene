@@ -490,7 +490,11 @@ fn is_aligned() {
 }
 
 #[test]
-#[should_panic = "is_aligned_to: align is not a power-of-two"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic = "is_aligned_to: align is not a power-of-two"
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn invalid_is_aligned() {
     let data = 42;
     let ptr: *const i32 = &data;

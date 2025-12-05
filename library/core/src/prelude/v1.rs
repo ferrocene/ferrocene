@@ -16,7 +16,7 @@ pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
 #[stable(feature = "async_closure", since = "1.85.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 
 // Re-exported functions
@@ -53,7 +53,7 @@ pub use crate::result::Result::{self, Err, Ok};
 // Re-exported built-in macros
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::fmt::macros::Debug;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
@@ -73,7 +73,7 @@ pub use crate::{
     reason = "`concat_bytes` is not stable enough for use and is subject to change"
 )]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::concat_bytes;
 
 // Do not `doc(no_inline)` so that they become doc items on their own

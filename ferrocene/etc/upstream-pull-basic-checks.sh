@@ -18,7 +18,7 @@ ferrocene/ci/scripts/detect-conflict-markers.py
 ./x run generate-help
 ./x test tests/ui/ferrocene $BLESS
 ./x test tidy $BLESS
-./x build core --set 'rust.std-features=["ferrocene_certified"]'
+./x build core --set 'rust.std-features=["ferrocene_subset"]'
 if [ -n "$BLESS" ]; then
     if ! ./x test bootstrap; then
         cargo insta review --manifest-path src/bootstrap/Cargo.toml

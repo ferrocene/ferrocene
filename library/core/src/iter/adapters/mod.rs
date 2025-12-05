@@ -1,88 +1,88 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::InPlaceIterable;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod array_chunks;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod by_ref_sized;
 mod chain;
 mod cloned;
 mod copied;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod cycle;
 mod enumerate;
 mod filter;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod filter_map;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod flatten;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod fuse;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod inspect;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod intersperse;
 mod map;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod map_while;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod map_windows;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod peekable;
 mod rev;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod scan;
 mod skip;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod skip_while;
 mod step_by;
 mod take;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod take_while;
 mod zip;
 
 #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::array_chunks::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::by_ref_sized::ByRefSized;
 #[stable(feature = "iter_chain", since = "1.91.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::chain::chain;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 pub use self::cloned::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
 pub use self::copied::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::flatten::Flatten;
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::intersperse::{Intersperse, IntersperseWith};
 #[stable(feature = "iter_map_while", since = "1.57.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::map_while::MapWhile;
 #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::map_windows::MapWindows;
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::step_by::StepBy;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::zip::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::zip::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_zip", since = "1.59.0")]
 pub use self::zip::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::{
     chain::Chain, cycle::Cycle, enumerate::Enumerate, filter::Filter, filter_map::FilterMap,
     flatten::FlatMap, fuse::Fuse, inspect::Inspect, map::Map, peekable::Peekable, rev::Rev,
@@ -91,7 +91,7 @@ pub use self::{
 
 // Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 pub use self::{
     chain::Chain, enumerate::Enumerate, filter::Filter, map::Map, rev::Rev, skip::Skip,
@@ -139,7 +139,7 @@ pub use self::{
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[doc(hidden)]
 #[rustc_specialization_trait]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait SourceIter {
     /// A source stage in an iterator pipeline.
     type Source;
@@ -179,7 +179,7 @@ pub unsafe trait SourceIter {
 ///
 /// If a `ControlFlow::Break` is encountered, the iterator stops and the
 /// residual is stored.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct GenericShunt<'a, I, R> {
     iter: I,
     residual: &'a mut Option<R>,
@@ -188,7 +188,7 @@ pub(crate) struct GenericShunt<'a, I, R> {
 /// Process the given iterator as if it yielded the item's `Try::Output`
 /// type instead. Any `Try::Residual`s encountered will stop the inner iterator
 /// and be propagated back to the overall result.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) fn try_process<I, T, R, F, U>(iter: I, mut f: F) -> ChangeOutputType<I::Item, U>
 where
     I: Iterator<Item: Try<Output = T, Residual = R>>,
@@ -204,7 +204,7 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, R> Iterator for GenericShunt<'_, I, R>
 where
     I: Iterator<Item: Try<Residual = R>>,
@@ -244,7 +244,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I, R> SourceIter for GenericShunt<'_, I, R>
 where
     I: SourceIter,
@@ -262,7 +262,7 @@ where
 // in order to return `Some(_)`. Since `iter` has type `I: InPlaceIterable` it's
 // guaranteed that at least one item will be moved out from the underlying source.
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I, R> InPlaceIterable for GenericShunt<'_, I, R>
 where
     I: InPlaceIterable,

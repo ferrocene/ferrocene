@@ -1,26 +1,26 @@
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, PointeeSized, Unsize};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::PinCoerceUnsized;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::Unique;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::slice::{self, SliceIndex};
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, hash, intrinsics, mem, ptr};
 
 // Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::{
     intrinsics,
@@ -107,7 +107,7 @@ impl<T: PointeeSized> !Send for NonNull<T> {}
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> !Sync for NonNull<T> {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Sized> NonNull<T> {
     /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
     ///
@@ -286,7 +286,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if !ptr.is_null() {
             // SAFETY: The pointer is already checked and is not null
@@ -322,7 +322,7 @@ impl<T: PointeeSized> NonNull<T> {
     /// [`std::ptr::from_raw_parts`]: crate::ptr::from_raw_parts
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_raw_parts(
         data_pointer: NonNull<impl super::Thin>,
         metadata: <T as super::Pointee>::Metadata,
@@ -340,7 +340,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_raw_parts(self) -> (NonNull<()>, <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self.as_ptr()))
     }
@@ -353,7 +353,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn addr(self) -> NonZero<usize> {
         // SAFETY: The pointer is guaranteed by the type to be non-null,
         // meaning that the address will be non-zero.
@@ -367,7 +367,7 @@ impl<T: PointeeSized> NonNull<T> {
     ///
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     #[stable(feature = "nonnull_provenance", since = "1.89.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn expose_provenance(self) -> NonZero<usize> {
         // SAFETY: The pointer is guaranteed by the type to be non-null,
         // meaning that the address will be non-zero.
@@ -383,7 +383,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn with_addr(self, addr: NonZero<usize>) -> Self {
         // SAFETY: The result of `ptr::from::with_addr` is non-null because `addr` is guaranteed to be non-zero.
         unsafe { NonNull::new_unchecked(self.as_ptr().with_addr(addr.get()) as *mut _) }
@@ -398,7 +398,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn map_addr(self, f: impl FnOnce(NonZero<usize>) -> NonZero<usize>) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -554,7 +554,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn try_cast_aligned<U>(self) -> Option<NonNull<U>> {
         if self.is_aligned_to(align_of::<U>()) { Some(self.cast()) } else { None }
     }
@@ -626,7 +626,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset` and `byte_offset` has
         // the same safety contract.
@@ -703,7 +703,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add` and `byte_add` has the same
         // safety contract.
@@ -786,7 +786,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub` and `byte_sub` has the same
         // safety contract.
@@ -885,7 +885,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn offset_from(self, origin: NonNull<T>) -> isize
     where
         T: Sized,
@@ -907,7 +907,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: NonNull<U>) -> isize {
         // SAFETY: the caller must uphold the safety contract for `byte_offset_from`.
         unsafe { self.as_ptr().byte_offset_from(origin.as_ptr()) }
@@ -1000,7 +1000,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: NonNull<U>) -> usize {
         // SAFETY: the caller must uphold the safety contract for `byte_offset_from_unsigned`.
         unsafe { self.as_ptr().byte_offset_from_unsigned(origin.as_ptr()) }
@@ -1016,7 +1016,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1038,7 +1038,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
@@ -1059,7 +1059,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1080,7 +1080,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn copy_to(self, dest: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1101,7 +1101,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1122,7 +1122,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn copy_from(self, src: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1143,7 +1143,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn copy_from_nonoverlapping(self, src: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1160,7 +1160,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline(always)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn drop_in_place(self)
     where
         T: [const] Destruct,
@@ -1179,7 +1179,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1199,7 +1199,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,
@@ -1221,7 +1221,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub unsafe fn write_volatile(self, val: T)
     where
         T: Sized,
@@ -1242,7 +1242,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn write_unaligned(self, val: T)
     where
         T: Sized,
@@ -1260,7 +1260,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline(always)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "1.88.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn replace(self, src: T) -> T
     where
         T: Sized,
@@ -1279,7 +1279,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline(always)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn swap(self, with: NonNull<T>)
     where
         T: Sized,
@@ -1337,7 +1337,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline]
     #[must_use]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1372,7 +1372,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline]
     #[must_use]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_aligned(self) -> bool
     where
         T: Sized,
@@ -1413,13 +1413,13 @@ impl<T: PointeeSized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_aligned_to(self, align: usize) -> bool {
         self.as_ptr().is_aligned_to(align)
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> NonNull<T> {
     /// Casts from a type to its maybe-uninitialized version.
     #[must_use]
@@ -1429,7 +1429,7 @@ impl<T> NonNull<T> {
         self.cast()
     }
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> NonNull<MaybeUninit<T>> {
     /// Casts from a maybe-uninitialized type to its initialized version.
     ///
@@ -1443,7 +1443,7 @@ impl<T> NonNull<MaybeUninit<T>> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> NonNull<[T]> {
     /// Creates a non-null raw slice from a thin pointer and a length.
     ///
@@ -1712,19 +1712,19 @@ impl<T: PointeeSized> Copy for NonNull<T> {}
 unsafe impl<T: ?Sized> TrivialClone for NonNull<T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized, U: PointeeSized> CoerceUnsized<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized, U: PointeeSized> DispatchFromDyn<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[stable(feature = "pin", since = "1.33.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: PointeeSized> PinCoerceUnsized for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> fmt::Debug for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1732,7 +1732,7 @@ impl<T: PointeeSized> fmt::Debug for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> fmt::Pointer for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1740,7 +1740,7 @@ impl<T: PointeeSized> fmt::Pointer for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Eq for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
@@ -1753,7 +1753,7 @@ impl<T: PointeeSized> PartialEq for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Ord for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1763,7 +1763,7 @@ impl<T: PointeeSized> Ord for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> PartialOrd for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1773,7 +1773,7 @@ impl<T: PointeeSized> PartialOrd for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> hash::Hash for NonNull<T> {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -1783,7 +1783,7 @@ impl<T: PointeeSized> hash::Hash for NonNull<T> {
 
 #[unstable(feature = "ptr_internals", issue = "none")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> const From<Unique<T>> for NonNull<T> {
     #[inline]
     fn from(unique: Unique<T>) -> Self {
@@ -1805,7 +1805,7 @@ impl<T: PointeeSized> const From<&mut T> for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> const From<&T> for NonNull<T> {
     /// Converts a `&T` to a `NonNull<T>`.
     ///

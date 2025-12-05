@@ -1,24 +1,24 @@
 //! Operations on ASCII `[u8]`.
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use core::ascii::EscapeDefault;
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Write};
 #[cfg(not(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "loongarch64", target_feature = "lsx")
 )))]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ascii, iter, ops};
 
 impl [u8] {
     /// Checks if all bytes in this slice are within the ASCII range.
     ///
     /// An empty slice returns `true`.
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
@@ -29,7 +29,7 @@ impl [u8] {
 
     /// If this slice [`is_ascii`](Self::is_ascii), returns it as a slice of
     /// [ASCII characters](`ascii::Char`), otherwise returns `None`.
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
@@ -48,7 +48,7 @@ impl [u8] {
     /// # Safety
     ///
     /// Every byte in the slice must be in `0..=127`, or else this is UB.
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
@@ -99,7 +99,7 @@ impl [u8] {
     /// [`to_ascii_uppercase`].
     ///
     /// [`to_ascii_uppercase`]: #method.to_ascii_uppercase
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
@@ -122,7 +122,7 @@ impl [u8] {
     /// [`to_ascii_lowercase`].
     ///
     /// [`to_ascii_lowercase`]: #method.to_ascii_lowercase
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
@@ -146,7 +146,7 @@ impl [u8] {
     /// let escaped = s.escape_ascii().to_string();
     /// assert_eq!(escaped, "0\\t\\r\\n\\'\\\"\\\\\\x9d");
     /// ```
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "this returns the escaped bytes as an iterator, \
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
@@ -166,7 +166,7 @@ impl [u8] {
     /// assert_eq!(b"  ".trim_ascii_start(), b"");
     /// assert_eq!(b"".trim_ascii_start(), b"");
     /// ```
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
@@ -196,7 +196,7 @@ impl [u8] {
     /// assert_eq!(b"  ".trim_ascii_end(), b"");
     /// assert_eq!(b"".trim_ascii_end(), b"");
     /// ```
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
@@ -227,7 +227,7 @@ impl [u8] {
     /// assert_eq!(b"  ".trim_ascii(), b"");
     /// assert_eq!(b"".trim_ascii(), b"");
     /// ```
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
@@ -236,7 +236,7 @@ impl [u8] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl_fn_for_zst! {
     #[derive(Clone)]
     struct EscapeByte impl Fn = |byte: &u8| -> ascii::EscapeDefault {
@@ -251,12 +251,12 @@ impl_fn_for_zst! {
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeAscii<'a> {
     inner: iter::FlatMap<super::Iter<'a, u8>, ascii::EscapeDefault, EscapeByte>,
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::Iterator for EscapeAscii<'a> {
     type Item = u8;
@@ -289,17 +289,17 @@ impl<'a> iter::Iterator for EscapeAscii<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::DoubleEndedIterator for EscapeAscii<'a> {
     fn next_back(&mut self) -> Option<u8> {
         self.inner.next_back()
     }
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::FusedIterator for EscapeAscii<'a> {}
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> fmt::Display for EscapeAscii<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -344,7 +344,7 @@ impl<'a> fmt::Display for EscapeAscii<'a> {
         Ok(())
     }
 }
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> fmt::Debug for EscapeAscii<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -357,7 +357,7 @@ impl<'a> fmt::Debug for EscapeAscii<'a> {
 /// This is carefully structured to produce nice small code -- it's smaller in
 /// `-O` than what the "obvious" ways produces under `-C opt-level=s`.  If you
 /// touch it, be sure to run (and update if needed) the assembly test.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
 #[inline]
@@ -383,7 +383,7 @@ pub const fn is_ascii_simple(mut bytes: &[u8]) -> bool {
 ///
 /// If any of these loads produces something for which `contains_nonascii`
 /// (above) returns true, then we know the answer is false.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "loongarch64", target_feature = "lsx")
@@ -490,7 +490,7 @@ const fn is_ascii(s: &[u8]) -> bool {
 ///
 /// Other platforms are not likely to benefit from this code structure, so they
 /// use SWAR techniques to test for ASCII in `usize`-sized chunks.
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "loongarch64", target_feature = "lsx")

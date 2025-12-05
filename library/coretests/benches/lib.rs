@@ -8,6 +8,7 @@
 #![feature(iter_array_chunks)]
 #![feature(iter_next_chunk)]
 #![feature(iter_advance_by)]
+#![cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
 
 extern crate test;
 

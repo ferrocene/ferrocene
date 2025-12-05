@@ -642,6 +642,7 @@ pub fn run_test(
                         Arc::get_mut(&mut runtest).unwrap().get_mut().unwrap().take().unwrap()();
                         None
                     }
+                    #[allow(unused_variables)]
                     Err(e) => panic!("failed to spawn thread to run test: {e}"),
                 }
             } else {
@@ -787,6 +788,7 @@ fn run_test_in_spawned_subprocess(desc: TestDesc, runnable_test: RunnableTest) -
     });
     let record_result2 = record_result.clone();
     panic::set_hook(Box::new(move |info| record_result2(Some(info))));
+    #[allow(unused_variables)]
     if let Err(message) = runnable_test.run() {
         panic!("{}", message);
     }

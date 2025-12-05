@@ -1450,7 +1450,6 @@ impl<T> SizedTypeProperties for T {}
 /// [dynamically sized]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [`offset_of_enum`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-enum.html
 /// [`offset_of_slice`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-slice.html
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "offset_of", since = "1.77.0")]
 #[allow_internal_unstable(builtin_syntax, core_intrinsics)]
 pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {

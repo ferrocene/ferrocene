@@ -368,7 +368,6 @@ pub struct AssertParamIsClone<T: Clone + PointeeSized> {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub struct AssertParamIsCopy<T: Copy + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }

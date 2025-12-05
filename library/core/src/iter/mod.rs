@@ -356,7 +356,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 // This needs to be up here in order to be usable in the child modules
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_fold_via_try_fold {
     (fold -> try_fold) => {
         impl_fold_via_try_fold! { @internal fold -> try_fold }
@@ -435,7 +434,6 @@ pub use self::adapters::{Intersperse, IntersperseWith};
     reason = "likely to be replaced by finer-grained traits",
     issue = "42168"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::range::Step;
 #[unstable(feature = "iter_macro", issue = "142269", reason = "generators are unstable")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -484,7 +482,6 @@ pub use self::traits::TrustedFused;
 #[unstable(feature = "trusted_len", issue = "37572")]
 pub use self::traits::TrustedLen;
 #[unstable(feature = "trusted_step", issue = "85731")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::traits::TrustedStep;
 pub(crate) use self::traits::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]

@@ -1916,7 +1916,6 @@ pub const fn bswap<T: Copy>(x: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn bitreverse<T: Copy>(x: T) -> T;
 
 /// Does a three-way comparison between the two arguments,

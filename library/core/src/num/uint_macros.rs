@@ -496,7 +496,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn reverse_bits(self) -> Self {
             intrinsics::bitreverse(self as $ActualT) as Self
         }

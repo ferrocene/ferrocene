@@ -192,7 +192,6 @@ pub trait Step: Clone + PartialOrd + Sized {
 
 // Separate impls for signed ranges because the distance within a signed range can be larger
 // than the signed::MAX value. Therefore `as` casting to the signed type would be incorrect.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! step_signed_methods {
     ($unsigned: ty) => {
         #[inline]
@@ -209,7 +208,6 @@ macro_rules! step_signed_methods {
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! step_unsigned_methods {
     () => {
         #[inline]
@@ -227,7 +225,6 @@ macro_rules! step_unsigned_methods {
 }
 
 // These are still macro-generated because the integer literals resolve to different types.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! step_identical_methods {
     () => {
         #[inline]
@@ -269,9 +266,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $u_narrower {
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_identical_methods!();
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_unsigned_methods!();
 
                 #[inline]
@@ -305,9 +300,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $i_narrower {
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_identical_methods!();
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_signed_methods!($u_narrower);
 
                 #[inline]
@@ -373,9 +366,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $u_wider {
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_identical_methods!();
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_unsigned_methods!();
 
                 #[inline]
@@ -405,9 +396,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             impl Step for $i_wider {
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_identical_methods!();
-                #[cfg(not(feature = "ferrocene_subset"))]
                 step_signed_methods!($u_wider);
 
                 #[inline]

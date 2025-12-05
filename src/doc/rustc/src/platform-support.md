@@ -458,10 +458,14 @@ target | std | host | notes
 `aarch64-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
-`x86_64-unknown-ferrocene.subset` | * |  | Freestanding/bare-metal x86_64, softfloat (certified)
-`aarch64-unknown-ferrocene.subset` | * |  | Bare ARM64, hardfloat (certified)
-`thumbv7em-ferrocene.subset-eabi` | * |  | Bare Armv7E-M (certified)
-`thumbv7em-ferrocene.subset-eabihf` | * |  | Bare Armv7E-M, hardfloat (certified)
+`x86_64-unknown-ferrocene.subset` | * |  | Freestanding/bare-metal x86_64, softfloat (subset)
+`aarch64-unknown-ferrocene.subset` | * |  | Bare ARM64, hardfloat (subset)
+`thumbv7em-ferrocene.subset-eabi` | * |  | Bare Armv7E-M (subset)
+`thumbv7em-ferrocene.subset-eabihf` | * |  | Bare Armv7E-M, hardfloat (subset)
+`x86_64-unknown-ferrocene.certified` | * |  | Freestanding/bare-metal x86_64, softfloat (certified panic)
+`aarch64-unknown-ferrocene.certified` | * |  | Bare ARM64, hardfloat (certified panic)
+`thumbv7em-ferrocene.certified-eabi` | * |  | Bare Armv7E-M (certified panic)
+`thumbv7em-ferrocene.certified-eabihf` | * |  | Bare Armv7E-M, hardfloat (certified panic)
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets
 [the AMD GPU]: https://llvm.org/docs/AMDGPUUsage.html#processors

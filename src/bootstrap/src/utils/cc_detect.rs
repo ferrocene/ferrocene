@@ -331,11 +331,16 @@ impl Language {
 }
 
 fn contains_ferrocene_vendors(triple: Interned<String>) -> bool {
-    triple.contains("ferrocene.facade") || triple.contains("ferrocene.subset")
+    triple.contains("ferrocene.facade")
+        || triple.contains("ferrocene.subset")
+        || triple.contains("ferrocene.certified")
 }
 
 fn replace_ferrocene_vendors(triple: Interned<String>) -> String {
-    triple.replace("ferrocene.facade", "none").replace("ferrocene.subset", "none")
+    triple
+        .replace("ferrocene.facade", "none")
+        .replace("ferrocene.subset", "none")
+        .replace("ferrocene.certified", "none")
 }
 
 #[cfg(test)]

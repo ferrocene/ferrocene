@@ -793,6 +793,18 @@
 //@ revisions: thumbv7em_ferrocene_subset_eabihf
 //@ [thumbv7em_ferrocene_subset_eabihf] compile-flags: --target thumbv7em-ferrocene.subset-eabihf
 //@ [thumbv7em_ferrocene_subset_eabihf] needs-llvm-components: arm
+//@ revisions: aarch64_unknown_ferrocene_certified
+//@ [aarch64_unknown_ferrocene_certified] compile-flags: --target aarch64-unknown-ferrocene.certified
+//@ [aarch64_unknown_ferrocene_certified] needs-llvm-components: aarch64
+//@ revisions: x86_64_unknown_ferrocene_certified
+//@ [x86_64_unknown_ferrocene_certified] compile-flags: --target x86_64-unknown-ferrocene.certified
+//@ [x86_64_unknown_ferrocene_certified] needs-llvm-components: x86
+//@ revisions: thumbv7em_ferrocene_certified_eabi
+//@ [thumbv7em_ferrocene_certified_eabi] compile-flags: --target thumbv7em-ferrocene.certified-eabi
+//@ [thumbv7em_ferrocene_certified_eabi] needs-llvm-components: arm
+//@ revisions: thumbv7em_ferrocene_certified_eabihf
+//@ [thumbv7em_ferrocene_certified_eabihf] compile-flags: --target thumbv7em-ferrocene.certified-eabihf
+//@ [thumbv7em_ferrocene_certified_eabihf] needs-llvm-components: arm
 
 // Sanity-check that each target can produce assembly code.
 

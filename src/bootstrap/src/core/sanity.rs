@@ -50,6 +50,10 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
+    "aarch64-unknown-ferrocene.certified",
+    "x86_64-unknown-ferrocene.certified",
+    "thumbv7em-ferrocene.certified-eabi",
+    "thumbv7em-ferrocene.certified-eabihf",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

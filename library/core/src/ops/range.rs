@@ -553,7 +553,6 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// ```
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_empty(&self) -> bool {
         self.exhausted || !(self.start <= self.end)
     }

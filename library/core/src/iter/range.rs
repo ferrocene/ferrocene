@@ -8,13 +8,12 @@ use crate::mem;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::net::{Ipv4Addr, Ipv6Addr};
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{self, Try};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::ops;
+use super::TrustedStep;
 
 // Safety: All invariants are upheld.
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -91,7 +90,6 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///   * Corollary: `Step::forward(a, 0) == a`
     /// * `Step::forward(a, n) >= a`
     /// * `Step::backward(Step::forward(a, n), n) == a`
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn forward(start: Self, count: usize) -> Self {
         Step::forward_checked(start, count).expect("overflow in `Step::forward`")
     }
@@ -117,7 +115,6 @@ pub trait Step: Clone + PartialOrd + Sized {
     /// For any `a` and `n`, where no overflow occurs:
     ///
     /// * `Step::forward_unchecked(a, n)` is equivalent to `Step::forward(a, n)`
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn forward_unchecked(start: Self, count: usize) -> Self {
         Step::forward(start, count)
     }
@@ -163,7 +160,6 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///   * Corollary: `Step::backward(a, 0) == a`
     /// * `Step::backward(a, n) <= a`
     /// * `Step::forward(Step::backward(a, n), n) == a`
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn backward(start: Self, count: usize) -> Self {
         Step::backward_checked(start, count).expect("overflow in `Step::backward`")
     }
@@ -189,7 +185,6 @@ pub trait Step: Clone + PartialOrd + Sized {
     /// For any `a` and `n`, where no overflow occurs:
     ///
     /// * `Step::backward_unchecked(a, n)` is equivalent to `Step::backward(a, n)`
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn backward_unchecked(start: Self, count: usize) -> Self {
         Step::backward(start, count)
     }
@@ -1085,7 +1080,6 @@ unsafe impl<A: TrustedStep> TrustedLen for ops::RangeFrom<A> {}
 #[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> FusedIterator for ops::RangeFrom<A> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait RangeInclusiveIteratorImpl {
     type Item;
 
@@ -1106,7 +1100,6 @@ trait RangeInclusiveIteratorImpl {
         R: Try<Output = B>;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     type Item = A;
 
@@ -1201,7 +1194,6 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     #[inline]
     fn spec_next(&mut self) -> Option<T> {
@@ -1295,7 +1287,6 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> Iterator for ops::RangeInclusive<A> {
     type Item = A;
 
@@ -1314,6 +1305,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         (hint.0.saturating_add(1), hint.1.and_then(|steps| steps.checked_add(1)))
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         if self.is_empty() {
@@ -1371,6 +1363,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next_back()
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn min(mut self) -> Option<A>
     where
@@ -1379,6 +1372,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next()
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn max(mut self) -> Option<A>
     where
@@ -1387,6 +1381,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next_back()
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn is_sorted(self) -> bool {
         true
@@ -1394,7 +1389,6 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> DoubleEndedIterator for ops::RangeInclusive<A> {
     #[inline]
     fn next_back(&mut self) -> Option<A> {

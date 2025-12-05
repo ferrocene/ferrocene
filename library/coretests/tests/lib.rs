@@ -91,7 +91,6 @@
 #![feature(lazy_get)]
 #![feature(maybe_uninit_as_bytes)]
 #![feature(maybe_uninit_fill)]
-#![feature(maybe_uninit_slice)]
 #![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(min_specialization)]
 #![feature(never_type)]

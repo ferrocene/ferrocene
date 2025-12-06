@@ -687,11 +687,14 @@ impl f16 {
 
     /// Returns the maximum of the two numbers, ignoring NaN.
     ///
-    /// If one of the arguments is NaN, then the other argument is returned.
-    /// This follows the IEEE 754-2008 semantics for maxNum, except for handling of signaling NaNs;
-    /// this function handles all NaNs the same way and avoids maxNum's problems with associativity.
-    /// This also matches the behavior of libm’s fmax. In particular, if the inputs compare equal
-    /// (such as for the case of `+0.0` and `-0.0`), either input may be returned non-deterministically.
+    /// If exactly one of the arguments is NaN, then the other argument is returned. If both
+    /// arguments are NaN, the return value is NaN, with the bit pattern picked using the usual
+    /// [rules for arithmetic operations](f32#nan-bit-patterns). If the inputs compare equal (such
+    /// as for the case of `+0.0` and `-0.0`), either input may be returned non-deterministically.
+    ///
+    /// This follows the IEEE 754-2008 semantics for `maxNum`, except for handling of signaling NaNs;
+    /// this function handles all NaNs the same way and avoids `maxNum`'s problems with associativity.
+    /// This also matches the behavior of libm’s `fmax`.
     ///
     /// ```
     /// #![feature(f16)]
@@ -701,6 +704,7 @@ impl f16 {
     /// let y = 2.0f16;
     ///
     /// assert_eq!(x.max(y), y);
+    /// assert_eq!(x.max(f16::NAN), x);
     /// # }
     /// ```
     #[inline]
@@ -713,11 +717,14 @@ impl f16 {
 
     /// Returns the minimum of the two numbers, ignoring NaN.
     ///
-    /// If one of the arguments is NaN, then the other argument is returned.
-    /// This follows the IEEE 754-2008 semantics for minNum, except for handling of signaling NaNs;
-    /// this function handles all NaNs the same way and avoids minNum's problems with associativity.
-    /// This also matches the behavior of libm’s fmin. In particular, if the inputs compare equal
-    /// (such as for the case of `+0.0` and `-0.0`), either input may be returned non-deterministically.
+    /// If exactly one of the arguments is NaN, then the other argument is returned. If both
+    /// arguments are NaN, the return value is NaN, with the bit pattern picked using the usual
+    /// [rules for arithmetic operations](f32#nan-bit-patterns). If the inputs compare equal (such
+    /// as for the case of `+0.0` and `-0.0`), either input may be returned non-deterministically.
+    ///
+    /// This follows the IEEE 754-2008 semantics for `minNum`, except for handling of signaling NaNs;
+    /// this function handles all NaNs the same way and avoids `minNum`'s problems with associativity.
+    /// This also matches the behavior of libm’s `fmin`.
     ///
     /// ```
     /// #![feature(f16)]
@@ -727,6 +734,7 @@ impl f16 {
     /// let y = 2.0f16;
     ///
     /// assert_eq!(x.min(y), x);
+    /// assert_eq!(x.min(f16::NAN), x);
     /// # }
     /// ```
     #[inline]
@@ -757,7 +765,7 @@ impl f16 {
     ///
     /// If one of the arguments is NaN, then NaN is returned. Otherwise this returns the greater
     /// of the two numbers. For this operation, -0.0 is considered to be less than +0.0.
-    /// Note that this follows the semantics specified in IEEE 754-2019.
+    /// Note that this follows the IEEE 754-2019 semantics for `maximum`.
     ///
     /// Also note that "propagation" of NaNs here doesn't necessarily mean that the bitpattern of a NaN
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
@@ -789,7 +797,7 @@ impl f16 {
     ///
     /// If one of the arguments is NaN, then NaN is returned. Otherwise this returns the lesser
     /// of the two numbers. For this operation, -0.0 is considered to be less than +0.0.
-    /// Note that this follows the semantics specified in IEEE 754-2019.
+    /// Note that this follows the IEEE 754-2019 semantics for `minimum`.
     ///
     /// Also note that "propagation" of NaNs here doesn't necessarily mean that the bitpattern of a NaN
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
@@ -1215,7 +1223,8 @@ impl f16 {
     /// less than `min`. Otherwise this returns `self`.
     ///
     /// Note that this function returns NaN if the initial value was NaN as
-    /// well.
+    /// well. If the result is zero and among the three inputs `self`, `min`, and `max` there are
+    /// zeros with different sign, either `0.0` or `-0.0` is returned non-deterministically.
     ///
     /// # Panics
     ///
@@ -1231,6 +1240,12 @@ impl f16 {
     /// assert!((0.0f16).clamp(-2.0, 1.0) == 0.0);
     /// assert!((2.0f16).clamp(-2.0, 1.0) == 1.0);
     /// assert!((f16::NAN).clamp(-2.0, 1.0).is_nan());
+    ///
+    /// // These always returns zero, but the sign (which is ignored by `==`) is non-deterministic.
+    /// assert!((0.0f16).clamp(-0.0, -0.0) == 0.0);
+    /// assert!((1.0f16).clamp(-0.0, 0.0) == 0.0);
+    /// // This is definitely a negative zero.
+    /// assert!((-1.0f16).clamp(-0.0, 1.0).is_sign_negative());
     /// # }
     /// ```
     #[inline]
@@ -1252,6 +1267,38 @@ impl f16 {
             self = max;
         }
         self
+    }
+
+    /// Clamps this number to a symmetric range centered around zero.
+    ///
+    /// The method clamps the number's magnitude (absolute value) to be at most `limit`.
+    ///
+    /// This is functionally equivalent to `self.clamp(-limit, limit)`, but is more
+    /// explicit about the intent.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `limit` is negative or NaN, as this indicates a logic error.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(f16)]
+    /// #![feature(clamp_magnitude)]
+    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// assert_eq!(5.0f16.clamp_magnitude(3.0), 3.0);
+    /// assert_eq!((-5.0f16).clamp_magnitude(3.0), -3.0);
+    /// assert_eq!(2.0f16.clamp_magnitude(3.0), 2.0);
+    /// assert_eq!((-2.0f16).clamp_magnitude(3.0), -2.0);
+    /// # }
+    /// ```
+    #[inline]
+    #[unstable(feature = "clamp_magnitude", issue = "148519")]
+    #[must_use = "this returns the clamped value and does not modify the original"]
+    pub fn clamp_magnitude(self, limit: f16) -> f16 {
+        assert!(limit >= 0.0, "limit must be non-negative");
+        let limit = limit.abs(); // Canonicalises -0.0 to 0.0
+        self.clamp(-limit, limit)
     }
 
     /// Computes the absolute value of `self`.

@@ -22,3 +22,6 @@ fn main(_: Alias<'_>) {
     with_positive(|&a| ());
     //~^ ERROR: cannot move out of a shared reference
 }
+
+// ferrocene-annotations: fls_8jb3sjqamdpu
+// Program Entry Point

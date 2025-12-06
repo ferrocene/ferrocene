@@ -96,9 +96,7 @@ class ConflictMarker:
     end_line: int
 
     def repr(self):
-        return (
-            f"conflict: {self.file}:{self.start_line}-{self.end_line}"
-        )
+        return f"{self.file}:{self.start_line}-{self.end_line}"
 
 
 @dataclass

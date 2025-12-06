@@ -65,9 +65,19 @@ of a :t:`pattern-without-range`, except for when the :t:`pattern` is ``&mut``
 :s:`Identifier`. Such a :t:`pattern` is interpreted as a :t:`reference pattern`
 with :t:`keyword` ``mut`` containing an :t:`identifier pattern`.
 
+:dp:`fls_72JHo343O7jp`
+An :t:`or pattern` is a :t:`pattern` that matches on one of two or more
+:t:`[pattern-without-alternation]s`. An :t:`or pattern` can nest arbitrarily.
+Syntactically, :t:`[or pattern]s` are allowed in any of the places where other
+:t:`[pattern]s` are allowed, with the exception of :t:`[let statement]s`,
+:t:`[function parameter]s`, and :t:`[closure parameter]s`.
+
+:dp:`fls_VQMmveZUfNTn`
+An :t:`or pattern` uses character 0x7C (vertical line) between the
+:t:`[pattern-without-alternation]s`.
+
 :dp:`fls_8luyomzppck`
-Any two :t:`[pattern-without-alternation]s` that are or-ed using character 0x7C
-(vertical line) are subject to the following restrictions:
+An :t:`or pattern` is subject to the following restrictions:
 
 * :dp:`fls_rpvdfmy3n05a`
   The :t:`[type]s` of the two :t:`[pattern-without-alternation]s` shall be

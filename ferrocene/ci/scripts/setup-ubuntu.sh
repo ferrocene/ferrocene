@@ -3,12 +3,18 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeo pipefail
 
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::group::Install dependencies (Ubuntu)"
+fi
+
 # Ensure we never get asked/prompted, always take the new config
 echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 
+sudo apt update
 sudo apt install -y \
     build-essential \
-    ninja-build
+    ninja-build \
+    bridge-utils
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
     sudo apt install -y \
@@ -20,11 +26,15 @@ else
 fi
 
 # Removing unused files to free some disk space (to avoid disk getting full)
-if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
     df --human-readable
     sudo rm -rf /usr/local/.ghcup
     sudo rm -rf /opt/hostedtoolcache/CodeQL
     sudo rm -rf /usr/local/lib/android
     sudo rm -rf /opt/ghcup
     df --human-readable
+fi
+
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::endgroup::"
 fi

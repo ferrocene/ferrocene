@@ -5,8 +5,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-CACHE_BUCKET="ferrocene-ci-caches"
-CACHE_PREFIX="persist-between-jobs"
+CACHE_BUCKET="${CACHE_BUCKET:-ferrocene-ci-caches}"
+CACHE_PREFIX="${CACHE_PREFIX:-/}"
+CACHE_DIR=persist-between-jobs
 
 usage() {
     echo "usage: $0 upload <path ...>"
@@ -28,7 +29,7 @@ s3_url() {
     #
     # We're reimplementing CirlceCI workspaces in this script, so we're using
     # the Workspace ID as the cache key.
-    echo "s3://${CACHE_BUCKET}/${CACHE_PREFIX}/${CIRCLE_WORKFLOW_WORKSPACE_ID}/$1.tar.zst"
+    echo "s3://${CACHE_BUCKET}/${CACHE_PREFIX}${CACHE_DIR}/${CIRCLE_WORKFLOW_WORKSPACE_ID}/$1.tar.zst"
 }
 
 if [[ "$#" -lt 1 ]]; then

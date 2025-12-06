@@ -47,10 +47,13 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-ferrocene.facade", std: true, linker: Linker::BundledLld },
+    #[cfg(target_arch = "x86_64")] // QNX does not distribute aarch64 host toolchains
     TargetSpec { tuple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
+    // We do not currently have access to a prebuilt riscv toolchain for aarch64, it must be skipped
+    #[cfg(target_arch = "x86_64")]
     TargetSpec {
         tuple: "riscv64gc-unknown-linux-gnu",
         std: true,
@@ -70,6 +73,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "thumbv8m.base-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
+    #[cfg(target_arch = "x86_64")] // QNX does not distribute aarch64 host toolchains
     TargetSpec { tuple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
 ];

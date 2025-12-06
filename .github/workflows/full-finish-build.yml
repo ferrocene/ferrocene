@@ -1,0 +1,83 @@
+name: Finish build
+run-name: Finish build
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      triple:
+        type: string
+        description: The Rust triple of the host platform
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
+      environment:
+        type: string
+
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  AWS_PROFILE: amazon # This is *always* amazon, that's where releases go!
+  BUILD_METRICS_ARTIFACT: finish-build
+jobs:
+
+  finish-build:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      FERROCENE_HOST: ${{ inputs.triple }}
+      FERROCENE_BUILD_HOST: ${{ inputs.triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: false
+
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
+        with:
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+
+      - name: Run
+        uses: ./.github/actions/run/
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.BUILD_METRICS_ARTIFACT }}
+        with:
+          container: ${{ inputs.container }}
+          script: |
+            uv run x.py dist ferrocene-build-metadata
+            ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+          # This should be re-enabled once GHA builds all platforms.
+          # ./ferrocene/ci/scripts/validate-packages-toml.py ${{ github.sha }}

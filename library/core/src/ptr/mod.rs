@@ -2545,28 +2545,44 @@ pub fn hash<T: PointeeSized, S: hash::Hasher>(hashee: *const T, into: &mut S) {
     hashee.hash(into);
 }
 
-#[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[diagnostic::on_const(
+    message = "pointers cannot be reliably compared during const eval",
+    note = "see issue #53020 <https://github.com/rust-lang/rust/issues/53020> for more information"
+)]
 impl<F: FnPtr> PartialEq for F {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.addr() == other.addr()
     }
 }
-#[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[diagnostic::on_const(
+    message = "pointers cannot be reliably compared during const eval",
+    note = "see issue #53020 <https://github.com/rust-lang/rust/issues/53020> for more information"
+)]
 impl<F: FnPtr> Eq for F {}
 
-#[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[diagnostic::on_const(
+    message = "pointers cannot be reliably compared during const eval",
+    note = "see issue #53020 <https://github.com/rust-lang/rust/issues/53020> for more information"
+)]
 impl<F: FnPtr> PartialOrd for F {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.addr().partial_cmp(&other.addr())
     }
 }
-#[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[diagnostic::on_const(
+    message = "pointers cannot be reliably compared during const eval",
+    note = "see issue #53020 <https://github.com/rust-lang/rust/issues/53020> for more information"
+)]
 impl<F: FnPtr> Ord for F {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {

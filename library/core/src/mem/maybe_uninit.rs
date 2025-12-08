@@ -1055,7 +1055,7 @@ impl<T> MaybeUninit<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(maybe_uninit_as_bytes, maybe_uninit_slice)]
+    /// #![feature(maybe_uninit_as_bytes)]
     /// use std::mem::MaybeUninit;
     ///
     /// let val = 0x12345678_i32;
@@ -1105,20 +1105,6 @@ impl<T> MaybeUninit<T> {
             )
         }
     }
-
-    /// Gets a pointer to the first element of the array.
-    #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
-    #[inline(always)]
-    pub const fn slice_as_ptr(this: &[MaybeUninit<T>]) -> *const T {
-        this.as_ptr() as *const T
-    }
-
-    /// Gets a mutable pointer to the first element of the array.
-    #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
-    #[inline(always)]
-    pub const fn slice_as_mut_ptr(this: &mut [MaybeUninit<T>]) -> *mut T {
-        this.as_mut_ptr() as *mut T
-    }
 }
 
 impl<T> [MaybeUninit<T>] {
@@ -1136,7 +1122,6 @@ impl<T> [MaybeUninit<T>] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(maybe_uninit_write_slice)]
     /// use std::mem::MaybeUninit;
     ///
     /// let mut dst = [MaybeUninit::uninit(); 32];
@@ -1148,8 +1133,6 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// ```
-    /// #![feature(maybe_uninit_write_slice)]
-    ///
     /// let mut vec = Vec::with_capacity(32);
     /// let src = [0; 16];
     ///
@@ -1165,8 +1148,9 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_clone_of_slice`]: slice::write_clone_of_slice
-    #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
     pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Copy,
@@ -1197,7 +1181,6 @@ impl<T> [MaybeUninit<T>] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(maybe_uninit_write_slice)]
     /// use std::mem::MaybeUninit;
     ///
     /// let mut dst = [const { MaybeUninit::uninit() }; 5];
@@ -1212,8 +1195,6 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// ```
-    /// #![feature(maybe_uninit_write_slice)]
-    ///
     /// let mut vec = Vec::with_capacity(32);
     /// let src = ["rust", "is", "a", "pretty", "cool", "language"].map(|s| s.to_string());
     ///
@@ -1229,8 +1210,8 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_copy_of_slice`]: slice::write_copy_of_slice
-    #[unstable(feature = "maybe_uninit_write_slice", issue = "79995")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
     pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Clone,
@@ -1428,7 +1409,7 @@ impl<T> [MaybeUninit<T>] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(maybe_uninit_as_bytes, maybe_uninit_write_slice, maybe_uninit_slice)]
+    /// #![feature(maybe_uninit_as_bytes)]
     /// use std::mem::MaybeUninit;
     ///
     /// let uninit = [MaybeUninit::new(0x1234u16), MaybeUninit::new(0x5678u16)];
@@ -1456,7 +1437,7 @@ impl<T> [MaybeUninit<T>] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(maybe_uninit_as_bytes, maybe_uninit_write_slice, maybe_uninit_slice)]
+    /// #![feature(maybe_uninit_as_bytes)]
     /// use std::mem::MaybeUninit;
     ///
     /// let mut uninit = [MaybeUninit::<u16>::uninit(), MaybeUninit::<u16>::uninit()];
@@ -1497,7 +1478,7 @@ impl<T> [MaybeUninit<T>] {
     /// requirement the compiler knows about it is that the data pointer must be
     /// non-null. Dropping such a `Vec<T>` however will cause undefined
     /// behaviour.
-    #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
+    #[stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
     #[inline(always)]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
     pub const unsafe fn assume_init_drop(&mut self)
@@ -1519,7 +1500,8 @@ impl<T> [MaybeUninit<T>] {
     /// Calling this when the content is not yet fully initialized causes undefined
     /// behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in
     /// the slice really is in an initialized state.
-    #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
+    #[stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
     #[inline(always)]
     pub const unsafe fn assume_init_ref(&self) -> &[T] {
         // SAFETY: casting `slice` to a `*const [T]` is safe since the caller guarantees that
@@ -1537,7 +1519,8 @@ impl<T> [MaybeUninit<T>] {
     /// behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in the
     /// slice really is in an initialized state. For instance, `.assume_init_mut()` cannot
     /// be used to initialize a `MaybeUninit` slice.
-    #[unstable(feature = "maybe_uninit_slice", issue = "63569")]
+    #[stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
     #[inline(always)]
     pub const unsafe fn assume_init_mut(&mut self) -> &mut [T] {
         // SAFETY: similar to safety notes for `slice_get_ref`, but we have a

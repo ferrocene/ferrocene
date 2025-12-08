@@ -30,12 +30,14 @@ pub(crate) struct Docs {
 
 impl Step for Docs {
     type Output = Vec<GeneratedTarball>;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let default = run.builder.config.docs;
-        run.alias("ferrocene-docs").default_condition(default)
+        run.alias("ferrocene-docs")
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -73,16 +75,18 @@ pub(crate) struct DocsDoctrees {
 
 impl Step for DocsDoctrees {
     type Output = GeneratedTarball;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let default = run.builder.config.docs;
-        run.alias("ferrocene-docs-doctrees").default_condition(default)
+        run.alias("ferrocene-docs-doctrees")
     }
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Self { target: run.target });
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.docs
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
@@ -102,16 +106,18 @@ pub(crate) struct SourceTarball;
 
 impl Step for SourceTarball {
     type Output = Vec<GeneratedTarball>;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.alias("ferrocene-src").default_condition(builder.config.rust_dist_src)
+        run.alias("ferrocene-src")
     }
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(SourceTarball);
+    }
+
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.config.rust_dist_src
     }
 
     fn run(self, builder: &Builder<'_>) -> Vec<GeneratedTarball> {
@@ -364,7 +370,6 @@ pub(crate) struct SelfTest {
 
 impl Step for SelfTest {
     type Output = GeneratedTarball;
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -373,6 +378,10 @@ impl Step for SelfTest {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(SelfTest { target: run.target });
+    }
+
+    fn is_default_step(_: &Builder<'_>) -> bool {
+        true
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
@@ -391,7 +400,6 @@ pub(crate) struct TestOutcomes;
 
 impl Step for TestOutcomes {
     type Output = Option<GeneratedTarball>;
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -416,7 +424,6 @@ pub(crate) struct CoverageOutcomes;
 
 impl Step for CoverageOutcomes {
     type Output = GeneratedTarball;
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -443,7 +450,6 @@ pub(crate) struct GenerateBuildMetadata;
 
 impl Step for GenerateBuildMetadata {
     type Output = ();
-    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

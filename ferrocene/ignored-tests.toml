@@ -126,3 +126,10 @@ tests = [
 ]
 targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "Currently output of these tests experiences multiple stdout writers colliding to create unreproducible results"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/alloc-error/alloc-error-backtrace.rs"
+]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+reason = "These targets cannot unwind"

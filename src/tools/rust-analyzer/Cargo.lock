@@ -561,6 +561,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
+name = "embedded-io"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
+
+[[package]]
+name = "embedded-io"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
+
+[[package]]
 name = "ena"
 version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -833,6 +845,7 @@ dependencies = [
 name = "hir-expand"
 version = "0.0.0"
 dependencies = [
+ "arrayvec",
  "base-db",
  "cfg",
  "cov-mark",
@@ -851,6 +864,7 @@ dependencies = [
  "stdx",
  "syntax",
  "syntax-bridge",
+ "thin-vec",
  "tracing",
  "triomphe",
  "tt",
@@ -893,6 +907,7 @@ dependencies = [
  "syntax",
  "test-fixture",
  "test-utils",
+ "thin-vec",
  "tracing",
  "tracing-subscriber",
  "tracing-tree",
@@ -1456,12 +1471,14 @@ name = "mbe"
 version = "0.0.0"
 dependencies = [
  "arrayvec",
+ "bitflags 2.9.4",
  "cov-mark",
  "expect-test",
  "intern",
  "parser",
  "ra-ap-rustc_lexer",
  "rustc-hash 2.1.1",
+ "salsa",
  "smallvec",
  "span",
  "stdx",
@@ -1785,6 +1802,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6764c3b5dd454e283a30e6dfe78e9b31096d9e32036b5d1eaac7a6119ccb9a24"
 dependencies = [
  "cobs",
+ "embedded-io 0.4.0",
+ "embedded-io 0.6.1",
  "heapless",
  "serde",
 ]
@@ -1820,8 +1839,10 @@ dependencies = [
  "indexmap",
  "intern",
  "paths",
+ "postcard",
  "proc-macro-srv",
  "rustc-hash 2.1.1",
+ "semver",
  "serde",
  "serde_derive",
  "serde_json",
@@ -2253,9 +2274,9 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
 name = "rowan"
-version = "0.15.15"
+version = "0.15.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32a58fa8a7ccff2aec4f39cc45bf5f985cec7125ab271cf681c279fd00192b49"
+checksum = "d4f1e4a001f863f41ea8d0e6a0c34b356d5b733db50dadab3efef640bafb779b"
 dependencies = [
  "countme",
  "hashbrown 0.14.5",

@@ -798,7 +798,6 @@ pub unsafe fn simd_fsqrt<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_fma<T>(x: T, y: T, z: T) -> T;
 
 /// Computes `(x*y) + z` for each element, non-deterministically executing either

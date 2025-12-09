@@ -3054,7 +3054,7 @@ impl Step for Crate {
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {
-                instrument_coverage(builder, &mut cargo);
+                instrument_coverage(builder, &mut cargo, build_compiler);
             }
 
             measure_coverage(builder, cargo.as_mut(), build_compiler, target, coverage_for);

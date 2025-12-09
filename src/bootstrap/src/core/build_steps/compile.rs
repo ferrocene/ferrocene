@@ -216,7 +216,19 @@ impl Step for Std {
         // Stage of the stdlib that we're building
         let stage = build_compiler.stage;
 
-        if Self::should_be_uplifted_from_stage_1(builder, build_compiler.stage) {
+        let should_instrument_coverage = builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
+            // If we instrument any stage other than the top stage, it will be linked into rustc,
+            // which will spam a bunch of `default_XXXXX.profraw` files in the top of the repo.
+            && build_compiler.stage == builder.top_stage
+            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
+            // likely to break.
+            && target == build_compiler.host;
+
+        // Ferrocene addition: We can't reuse stage1 std if we are instrumenting stage2 but not
+        // stage1.
+        if !should_instrument_coverage
+            && Self::should_be_uplifted_from_stage_1(builder, build_compiler.stage)
+        {
             let build_compiler_for_std_to_uplift = builder.compiler(1, builder.host_target);
             let stage_1_stamp = builder.std(build_compiler_for_std_to_uplift, target);
 
@@ -274,15 +286,8 @@ impl Step for Std {
             cargo
         };
 
-        if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
-            // Note that for the standard library, stage 1 is tested when either --stage 1 or
-            // --stage 2 are passed.
-            && build_compiler.stage == 1
-            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
-            // likely to break.
-            && target == build_compiler.host
-        {
-            instrument_coverage(builder, &mut cargo);
+        if should_instrument_coverage {
+            instrument_coverage(builder, &mut cargo, build_compiler);
         }
 
         // See src/bootstrap/synthetic_targets.rs
@@ -690,6 +695,13 @@ pub fn std_cargo(
             .arg(features)
             .arg("--manifest-path")
             .arg(builder.src.join("library/sysroot/Cargo.toml"));
+
+        // Ferrocene addition: coverage tests must run with panic=abort, we don't certify unwinding.
+        if builder.config.cmd.ferrocene_coverage_for().is_some()
+            && cargo.compiler().stage == builder.top_stage
+        {
+            cargo.rustflag("-Zpanic-abort-tests").rustflag("-Cpanic=abort");
+        }
 
         // Help the libc crate compile by assisting it in finding various
         // sysroot native libraries.

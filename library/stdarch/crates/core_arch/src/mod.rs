@@ -3,7 +3,6 @@
 #![allow(unknown_lints, unnecessary_transmutes)]
 
 #[macro_use]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod macros;
 
 #[cfg(any(target_arch = "riscv32", target_arch = "riscv64", doc))]

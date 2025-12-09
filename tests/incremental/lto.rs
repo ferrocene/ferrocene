@@ -2,6 +2,7 @@
 //@ revisions:rpass1 rpass2
 //@ compile-flags: -C lto
 //@ ignore-backends: gcc
+//@ edition: 2015
 
 mod x {
     pub struct X {

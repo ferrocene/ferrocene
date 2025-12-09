@@ -7,6 +7,7 @@
 //@ compile-flags: -Z query-dep-graph
 //@ build-pass
 //@ ignore-backends: gcc
+//@ edition: 2015
 
 #![feature(rustc_attrs)]
 #![feature(stmt_expr_attributes)]

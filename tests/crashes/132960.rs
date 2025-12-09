@@ -1,5 +1,5 @@
 //@ known-bug: #132960
-
+//@ edition: 2015
 #![feature(adt_const_params, const_ptr_read, generic_const_exprs, unsized_const_params)]
 
 const fn concat_strs<const A: &'static str, const B: &'static str>() -> &'static str

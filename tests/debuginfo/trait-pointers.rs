@@ -1,5 +1,6 @@
 //@ compile-flags:-g
 //@ disable-gdb-pretty-printers
+//@ edition: 2015
 // gdb-command:run
 // lldb-command:run
 

@@ -8,6 +8,7 @@
 //@ compile-flags: --target i686-unknown-linux-gnu -Cno-prepopulate-passes -Copt-level=3
 //@ [ENABLED] compile-flags: -Zreg-struct-return
 //@ needs-llvm-components: x86
+//@ edition: 2015
 
 #![crate_type = "lib"]
 #![no_std]

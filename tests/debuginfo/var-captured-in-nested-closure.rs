@@ -1,4 +1,5 @@
 //@ compile-flags:-g
+//@ edition: 2015
 //@ disable-gdb-pretty-printers
 //@ ignore-backends: gcc
 

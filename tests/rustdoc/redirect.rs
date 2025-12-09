@@ -1,6 +1,7 @@
 //@ aux-build:reexp-stripped.rs
 //@ build-aux-docs
 //@ ignore-cross-compile
+//@ edition: 2015
 
 extern crate reexp_stripped;
 

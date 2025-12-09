@@ -1,4 +1,5 @@
 // https://github.com/rust-lang/rust/issues/31948
+//@ edition: 2015
 #![crate_name="foobar"]
 
 //@ aux-build:rustdoc-nonreachable-impls.rs

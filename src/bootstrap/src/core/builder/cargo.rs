@@ -99,6 +99,7 @@ pub struct Cargo {
     command: BootstrapCommand,
     args: Vec<OsString>,
     compiler: Compiler,
+    mode: Mode,
     target: TargetSelection,
     rustflags: Rustflags,
     rustdocflags: Rustflags,
@@ -147,6 +148,10 @@ impl Cargo {
 
     pub fn compiler(&self) -> Compiler {
         self.compiler
+    }
+
+    pub fn mode(&self) -> Mode {
+        self.mode
     }
 
     pub fn into_cmd(self) -> BootstrapCommand {
@@ -1428,6 +1433,7 @@ impl Builder<'_> {
             command: cargo,
             args: vec![],
             compiler,
+            mode,
             target,
             rustflags,
             rustdocflags,

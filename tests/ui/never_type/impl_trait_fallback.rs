@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ check-pass
 #![expect(dependency_on_unit_never_type_fallback)]
 

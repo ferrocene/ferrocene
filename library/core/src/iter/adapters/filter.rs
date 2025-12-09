@@ -9,9 +9,15 @@ use core::ops::ControlFlow;
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused};
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 1d60f9e070c
+use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused};
+=======
+use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -149,7 +155,13 @@ where
             move |x| predicate(&x) as usize
         }
 
-        self.iter.map(to_usize(self.predicate)).sum()
+        let before = self.iter.size_hint().1.unwrap_or(usize::MAX);
+        let total = self.iter.map(to_usize(self.predicate)).sum();
+        // SAFETY: `total` and `before` came from the same iterator of type `I`
+        unsafe {
+            <I as SpecAssumeCount>::assume_count_le_upper_bound(total, before);
+        }
+        total
     }
 
     #[inline]
@@ -229,4 +241,35 @@ where
 unsafe impl<I: InPlaceIterable, P> InPlaceIterable for Filter<I, P> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
+}
+
+trait SpecAssumeCount {
+    /// # Safety
+    ///
+    /// `count` must be an number of items actually read from the iterator.
+    ///
+    /// `upper` must either:
+    /// - have come from `size_hint().1` on the iterator, or
+    /// - be `usize::MAX` which will vacuously do nothing.
+    unsafe fn assume_count_le_upper_bound(count: usize, upper: usize);
+}
+
+impl<I: Iterator> SpecAssumeCount for I {
+    #[inline]
+    #[rustc_inherit_overflow_checks]
+    default unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {
+        // In the default we can't trust the `upper` for soundness
+        // because it came from an untrusted `size_hint`.
+
+        // In debug mode we might as well check that the size_hint wasn't too small
+        let _ = upper - count;
+    }
+}
+
+impl<I: TrustedLen> SpecAssumeCount for I {
+    #[inline]
+    unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {
+        // SAFETY: The `upper` is trusted because it came from a `TrustedLen` iterator.
+        unsafe { crate::hint::assert_unchecked(count <= upper) }
+    }
 }

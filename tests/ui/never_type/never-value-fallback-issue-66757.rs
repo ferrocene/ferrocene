@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Regression test for #66757
 //
 // Test than when you have a `!` value (e.g., the local variable

@@ -1,9 +1,7 @@
 //! ARMv7 NEON intrinsics
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustfmt::skip]
 mod generated;
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustfmt::skip]
 #[cfg_attr(not(target_arch = "arm"), stable(feature = "neon_intrinsics", since = "1.59.0"))]
 #[cfg_attr(target_arch = "arm", unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800"))]

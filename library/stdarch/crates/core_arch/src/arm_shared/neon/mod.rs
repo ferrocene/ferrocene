@@ -16,7 +16,7 @@ use stdarch_test::assert_instr;
 // Ferrocene addition: Imports used by the certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::intrinsics::simd::*;
+use crate::{intrinsics::simd::*, mem::transmute};
 
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) trait AsUnsigned {

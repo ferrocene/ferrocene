@@ -9077,7 +9077,7 @@ intrinsics:
     doc: Vector reinterpret cast operation
     arguments: ["a: {type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
+    attr: [*neon-stable]
     assert_instr: [nop]
     safety: safe
     types:
@@ -9153,7 +9153,6 @@ intrinsics:
     arguments: ["a: {type[0]}"]
     return_type: "{type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec

@@ -10609,7 +10609,6 @@ intrinsics:
     doc: "Store multiple single-element structures to one, two, three, or four registers"
     arguments: ["a: {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [st1]]}]]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     safety:
@@ -10633,7 +10632,6 @@ intrinsics:
     doc: "Store multiple single-element structures to one, two, three, or four registers"
     arguments: ["a: {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [st1]]}]]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     safety:
@@ -10658,7 +10656,6 @@ intrinsics:
     doc: "Store multiple single-element structures to one, two, three, or four registers"
     arguments: ["a: {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [st1]]}]]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     safety:
@@ -13570,7 +13567,6 @@ intrinsics:
     doc: "Store multiple single-element structures from one, two, three, or four registers."
     arguments: ["ptr: {type[0]}", "a: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "{type[2]}"']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [str]]}]]
       - FnCall: [allow, ['clippy::cast_ptr_alignment']]
@@ -13617,7 +13613,6 @@ intrinsics:
     doc: "Store multiple single-element structures from one, two, three, or four registers."
     arguments: ["ptr: {type[0]}", "a: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "{type[2]}"']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [str]]}]]
       - FnCall: [allow, ['clippy::cast_ptr_alignment']]

@@ -33832,7 +33832,6 @@ pub fn vmovn_u64(a: uint64x2_t) -> uint32x2_t {
 #[doc = "Multiply"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.f16"))]
 #[cfg_attr(
@@ -33848,7 +33847,6 @@ pub fn vmul_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 #[doc = "Multiply"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.f16"))]
 #[cfg_attr(
@@ -33865,7 +33863,6 @@ pub fn vmulq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.f32"))]
 #[cfg_attr(
@@ -33887,7 +33884,6 @@ pub fn vmul_f32(a: float32x2_t, b: float32x2_t) -> float32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.f32"))]
 #[cfg_attr(
@@ -34882,7 +34878,6 @@ pub fn vmulq_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_s16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i16"))]
 #[cfg_attr(
@@ -34904,7 +34899,6 @@ pub fn vmul_s16(a: int16x4_t, b: int16x4_t) -> int16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_s16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i16"))]
 #[cfg_attr(
@@ -34926,7 +34920,6 @@ pub fn vmulq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_u16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i16"))]
 #[cfg_attr(
@@ -34948,7 +34941,6 @@ pub fn vmul_u16(a: uint16x4_t, b: uint16x4_t) -> uint16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_u16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i16"))]
 #[cfg_attr(
@@ -34970,7 +34962,6 @@ pub fn vmulq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_s32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i32"))]
 #[cfg_attr(
@@ -34992,7 +34983,6 @@ pub fn vmul_s32(a: int32x2_t, b: int32x2_t) -> int32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_s32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i32"))]
 #[cfg_attr(
@@ -35014,7 +35004,6 @@ pub fn vmulq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_u32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i32"))]
 #[cfg_attr(
@@ -35036,7 +35025,6 @@ pub fn vmul_u32(a: uint32x2_t, b: uint32x2_t) -> uint32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_u32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i32"))]
 #[cfg_attr(
@@ -35058,7 +35046,6 @@ pub fn vmulq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_s8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i8"))]
 #[cfg_attr(
@@ -35080,7 +35067,6 @@ pub fn vmul_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_s8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i8"))]
 #[cfg_attr(
@@ -35102,7 +35088,6 @@ pub fn vmulq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_u8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i8"))]
 #[cfg_attr(
@@ -35124,7 +35109,6 @@ pub fn vmul_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_u8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmul.i8"))]
 #[cfg_attr(

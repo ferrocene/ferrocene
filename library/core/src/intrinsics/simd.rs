@@ -80,7 +80,6 @@ pub unsafe fn simd_sub<T>(lhs: T, rhs: T) -> T;
 /// `T` must be a vector of integers or floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_mul<T>(x: T, y: T) -> T;
 
 /// Divides `lhs` by `rhs` elementwise.

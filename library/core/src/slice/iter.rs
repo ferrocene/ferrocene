@@ -2317,14 +2317,8 @@ impl<'a, T: 'a, const N: usize> ArrayWindows<'a, T, N> {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "array_windows", issue = "75027")]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 1d60f9e070c
-#[unstable(feature = "array_windows", issue = "75027")]
-=======
 #[stable(feature = "array_windows", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<'a, T, const N: usize> Iterator for ArrayWindows<'a, T, N> {
     type Item = &'a [T; N];
 
@@ -2361,14 +2355,8 @@ impl<'a, T, const N: usize> Iterator for ArrayWindows<'a, T, N> {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "array_windows", issue = "75027")]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 1d60f9e070c
-#[unstable(feature = "array_windows", issue = "75027")]
-=======
 #[stable(feature = "array_windows", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<'a, T, const N: usize> DoubleEndedIterator for ArrayWindows<'a, T, N> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a [T; N]> {
@@ -2387,14 +2375,8 @@ impl<'a, T, const N: usize> DoubleEndedIterator for ArrayWindows<'a, T, N> {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "array_windows", issue = "75027")]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 1d60f9e070c
-#[unstable(feature = "array_windows", issue = "75027")]
-=======
 #[stable(feature = "array_windows", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T, const N: usize> ExactSizeIterator for ArrayWindows<'_, T, N> {
     fn is_empty(&self) -> bool {
         self.v.len() < N

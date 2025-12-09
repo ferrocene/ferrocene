@@ -238,25 +238,12 @@ pub(crate) fn prepare_conditions(config: &Config) -> PreparedConditions {
         );
     }
 
-<<<<<<< HEAD
     // ferrocene addition
-    condition! {
-        name: "ferrocene.facade",
-        condition: config.target.contains("ferrocene.facade"),
-        message: "when the target is part of the Ferrocene facade target family"
-    }
-    if prefix == "ignore-" && outcome == MatchOutcome::Invalid {
-        // Don't error out for ignore-tidy-* diretives, as those are not handled by compiletest.
-        if name.starts_with("tidy-") {
-            outcome = MatchOutcome::External;
-        }
-||||||| 1d60f9e070c
-    if prefix == "ignore-" && outcome == MatchOutcome::Invalid {
-        // Don't error out for ignore-tidy-* diretives, as those are not handled by compiletest.
-        if name.starts_with("tidy-") {
-            outcome = MatchOutcome::External;
-        }
-=======
+    builder.cond(
+        "ferrocene.facade",
+        config.target.contains("ferrocene.facade"),
+        "when the target is part of the Ferrocene facade target family",
+    );
     // FIXME(Zalathar): Ideally this should be configured by a command-line
     // flag, not an environment variable.
     builder.cond(
@@ -264,7 +251,6 @@ pub(crate) fn prepare_conditions(config: &Config) -> PreparedConditions {
         std::env::var("COMPILETEST_ENABLE_DIST_TESTS").as_deref() == Ok("1"),
         "when performing tests on dist toolchain",
     );
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     builder.build()
 }

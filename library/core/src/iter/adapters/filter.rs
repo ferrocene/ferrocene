@@ -9,15 +9,9 @@ use core::ops::ControlFlow;
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused};
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 1d60f9e070c
-use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused};
-=======
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -243,6 +237,7 @@ unsafe impl<I: InPlaceIterable, P> InPlaceIterable for Filter<I, P> {
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 trait SpecAssumeCount {
     /// # Safety
     ///
@@ -254,6 +249,7 @@ trait SpecAssumeCount {
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize);
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator> SpecAssumeCount for I {
     #[inline]
     #[rustc_inherit_overflow_checks]
@@ -266,6 +262,7 @@ impl<I: Iterator> SpecAssumeCount for I {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: TrustedLen> SpecAssumeCount for I {
     #[inline]
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {

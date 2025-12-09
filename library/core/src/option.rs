@@ -2054,6 +2054,7 @@ impl<T: IntoIterator> Option<T> {
     /// assert_eq!(o1.into_flat_iter().collect::<Vec<_>>(), [1, 2]);
     /// assert_eq!(o2.into_flat_iter().collect::<Vec<_>>(), Vec::<&usize>::new());
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "option_into_flat_iter", issue = "148441")]
     pub fn into_flat_iter<A>(self) -> OptionFlatten<A>
     where
@@ -2659,12 +2660,14 @@ impl<A> FusedIterator for IntoIter<A> {}
 unsafe impl<A> TrustedLen for IntoIter<A> {}
 
 /// The iterator produced by [`Option::into_flat_iter`]. See its documentation for more.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[derive(Clone, Debug)]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 pub struct OptionFlatten<A> {
     iter: Option<A>,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: Iterator> Iterator for OptionFlatten<A> {
     type Item = A::Item;
@@ -2678,6 +2681,7 @@ impl<A: Iterator> Iterator for OptionFlatten<A> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: DoubleEndedIterator> DoubleEndedIterator for OptionFlatten<A> {
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -2685,12 +2689,15 @@ impl<A: DoubleEndedIterator> DoubleEndedIterator for OptionFlatten<A> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: ExactSizeIterator> ExactSizeIterator for OptionFlatten<A> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: FusedIterator> FusedIterator for OptionFlatten<A> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 unsafe impl<A: TrustedLen> TrustedLen for OptionFlatten<A> {}
 

@@ -434,6 +434,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "allocator_api", issue = "32838")]
 unsafe impl<A> Allocator for &mut A
 where

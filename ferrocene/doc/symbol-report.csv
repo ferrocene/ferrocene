@@ -3299,6 +3299,7 @@ core::cell::UnsafeCell::<T>::get
 core::cell::UnsafeCell::<T>::get_mut
 core::cell::UnsafeCell::<T>::into_inner
 core::cell::UnsafeCell::<T>::new
+core::cell::UnsafeCell::<T>::raw_get
 core::cell::is_reading
 core::cell::is_writing
 core::cell::panic_already_borrowed
@@ -3845,6 +3846,7 @@ core::iter::traits::iterator::Iterator::all
 core::iter::traits::iterator::Iterator::all::check
 core::iter::traits::iterator::Iterator::any
 core::iter::traits::iterator::Iterator::any::check
+core::iter::traits::iterator::Iterator::by_ref
 core::iter::traits::iterator::Iterator::chain
 core::iter::traits::iterator::Iterator::cloned
 core::iter::traits::iterator::Iterator::collect
@@ -4174,6 +4176,7 @@ core::num::<impl u128>::from_str_radix
 core::num::<impl u128>::ilog2
 core::num::<impl u128>::is_multiple_of
 core::num::<impl u128>::is_power_of_two
+core::num::<impl u128>::leading_ones
 core::num::<impl u128>::leading_zeros
 core::num::<impl u128>::overflowing_add
 core::num::<impl u128>::overflowing_add_signed
@@ -4226,6 +4229,7 @@ core::num::<impl u16>::ilog2
 core::num::<impl u16>::is_multiple_of
 core::num::<impl u16>::is_power_of_two
 core::num::<impl u16>::is_utf16_surrogate
+core::num::<impl u16>::leading_ones
 core::num::<impl u16>::leading_zeros
 core::num::<impl u16>::overflowing_add
 core::num::<impl u16>::overflowing_add_signed
@@ -4277,6 +4281,7 @@ core::num::<impl u32>::from_str_radix
 core::num::<impl u32>::ilog2
 core::num::<impl u32>::is_multiple_of
 core::num::<impl u32>::is_power_of_two
+core::num::<impl u32>::leading_ones
 core::num::<impl u32>::leading_zeros
 core::num::<impl u32>::overflowing_add
 core::num::<impl u32>::overflowing_add_signed
@@ -4328,6 +4333,7 @@ core::num::<impl u64>::from_str_radix
 core::num::<impl u64>::ilog2
 core::num::<impl u64>::is_multiple_of
 core::num::<impl u64>::is_power_of_two
+core::num::<impl u64>::leading_ones
 core::num::<impl u64>::leading_zeros
 core::num::<impl u64>::overflowing_add
 core::num::<impl u64>::overflowing_add_signed
@@ -4382,6 +4388,7 @@ core::num::<impl u8>::is_ascii_uppercase
 core::num::<impl u8>::is_multiple_of
 core::num::<impl u8>::is_power_of_two
 core::num::<impl u8>::is_utf8_char_boundary
+core::num::<impl u8>::leading_ones
 core::num::<impl u8>::leading_zeros
 core::num::<impl u8>::overflowing_add
 core::num::<impl u8>::overflowing_add_signed
@@ -4434,6 +4441,7 @@ core::num::<impl usize>::from_str_radix
 core::num::<impl usize>::ilog2
 core::num::<impl usize>::is_multiple_of
 core::num::<impl usize>::is_power_of_two
+core::num::<impl usize>::leading_ones
 core::num::<impl usize>::leading_zeros
 core::num::<impl usize>::overflowing_add
 core::num::<impl usize>::overflowing_add_signed

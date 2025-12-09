@@ -14723,7 +14723,6 @@ intrinsics:
     return_type: "{neon_type[2]}"
     big_endian_inverse: false
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, { FnCall: [assert_instr, ['"{type[3]}"']] }  ]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, { FnCall: [assert_instr, ['{type[4]}']]}] ]

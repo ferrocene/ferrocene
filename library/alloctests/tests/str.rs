@@ -2474,3 +2474,13 @@ fn ceil_char_boundary() {
     // above len
     check_many("hello", 5..=10, 5);
 }
+
+#[test]
+fn bytes() {
+    let s = "yellow submarine";
+
+    assert!(s.bytes().all(|b| b.is_ascii()));
+    assert!(s.bytes().any(|b| b.is_ascii_whitespace()));
+    assert!(s.bytes().find(|b| *b == b'i').is_some());
+    assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
+}

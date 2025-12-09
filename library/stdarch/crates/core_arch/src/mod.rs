@@ -72,7 +72,6 @@ pub mod arch {
     #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec", doc))]
     #[doc(cfg(any(target_arch = "aarch64", target_arch = "arm64ec")))]
     #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod aarch64 {
         #[stable(feature = "neon_intrinsics", since = "1.59.0")]
         pub use crate::core_arch::aarch64::*;
@@ -339,7 +338,6 @@ mod x86_64;
 
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec", doc))]
 #[doc(cfg(any(target_arch = "aarch64", target_arch = "arm64ec")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod aarch64;
 #[cfg(any(target_arch = "arm", doc))]
 #[doc(cfg(any(target_arch = "arm")))]

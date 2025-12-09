@@ -1923,7 +1923,6 @@ pub trait Iterator {
     /// assert_eq!(of_rust, vec!["of", "Rust"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn by_ref(&mut self) -> &mut Self
     where
         Self: Sized,

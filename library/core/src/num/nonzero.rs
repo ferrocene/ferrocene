@@ -605,7 +605,6 @@ macro_rules! nonzero_integer {
         ///
         /// [null pointer optimization]: crate::option#representation
         #[$stability]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub type $Ty = NonZero<$Int>;
 
         impl NonZero<$Int> {

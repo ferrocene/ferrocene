@@ -19,10 +19,8 @@ mod mte;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::mte::*;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod neon;
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::neon::*;
 
 #[cfg(not(feature = "ferrocene_subset"))]

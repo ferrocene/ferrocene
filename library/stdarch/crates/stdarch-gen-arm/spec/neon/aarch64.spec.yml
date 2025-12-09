@@ -76,7 +76,7 @@ intrinsics:
     doc: Add
     arguments: ["a: {type}", "b: {type}"]
     return_type: "{type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety: safe
     types:
@@ -136,7 +136,7 @@ intrinsics:
     doc: Absolute difference between the arguments of Floating
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fabd]
     safety: safe
     types:
@@ -153,7 +153,7 @@ intrinsics:
     doc: "Floating-point absolute difference"
     arguments: ["a: {type[1]}", "b: {type[1]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fabd]
     safety: safe
     types:
@@ -194,7 +194,7 @@ intrinsics:
     doc: Signed Absolute difference Long
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sabdl2]
     safety: safe
     types:
@@ -2896,7 +2896,7 @@ intrinsics:
     doc: Extract narrow
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [xtn2]
     safety: safe
     types:
@@ -2923,7 +2923,7 @@ intrinsics:
     doc: Negate
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [neg]
     safety: safe
     types:
@@ -2938,7 +2938,7 @@ intrinsics:
     doc: Negate
     arguments: ["a: {type}"]
     return_type: "{type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [neg]
     safety: safe
     types:
@@ -2987,7 +2987,7 @@ intrinsics:
     doc: Signed saturating negate
     arguments: ["a: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sqneg]
     safety: safe
     types:
@@ -3007,7 +3007,7 @@ intrinsics:
     doc: Signed saturating negate
     arguments: ["a: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sqneg]
     safety: safe
     types:
@@ -3024,7 +3024,7 @@ intrinsics:
     doc: Saturating subtract
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sqsub]
     safety: safe
     types:
@@ -3041,7 +3041,7 @@ intrinsics:
     doc: Saturating subtract
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uqsub]
     safety: safe
     types:
@@ -3058,7 +3058,7 @@ intrinsics:
     doc: Saturating subtract
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sqsub]
     safety: safe
     types:
@@ -3089,7 +3089,7 @@ intrinsics:
     doc: Saturating subtract
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uqsub]
     safety: safe
     types:
@@ -3120,7 +3120,7 @@ intrinsics:
     doc: Reverse bit order
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [rbit]
     safety: safe
     types:
@@ -3135,7 +3135,7 @@ intrinsics:
     doc: Reverse bit order
     arguments: ["a: {neon_type[0]}"]
     return_type: "{neon_type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [rbit]
     safety: safe
     types:
@@ -3154,7 +3154,7 @@ intrinsics:
     doc: "Floating-point round to integral exact, using current rounding mode"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frintx]
     safety: safe
     types:
@@ -3205,7 +3205,7 @@ intrinsics:
     doc: "Floating-point round to integral, to nearest with ties to away"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frinta]
     safety: safe
     types:
@@ -3255,7 +3255,7 @@ intrinsics:
     doc: "Floating-point round to integral, to nearest with ties to even"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frintn]
     safety: safe
     types:
@@ -3272,7 +3272,7 @@ intrinsics:
     doc: "Floating-point round to integral, to nearest with ties to even"
     arguments: ["a: {type}"]
     return_type: "{type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frintn]
     safety: safe
     types:
@@ -3308,7 +3308,7 @@ intrinsics:
     doc: "Floating-point round to integral, toward minus infinity"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frintm]
     safety: safe
     types:
@@ -3360,7 +3360,7 @@ intrinsics:
     doc: "Floating-point round to integral, toward plus infinity"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frintp]
     safety: safe
     types:
@@ -3409,7 +3409,7 @@ intrinsics:
     doc: "Floating-point round to integral, toward zero"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frintz]
     safety: safe
     types:
@@ -3459,7 +3459,7 @@ intrinsics:
     doc: "Floating-point round to integral, using current rounding mode"
     arguments: ["a: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [frinti]
     safety: safe
     types:
@@ -3522,7 +3522,7 @@ intrinsics:
     doc: Saturating add
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uqadd]
     safety: safe
     types:
@@ -3539,7 +3539,7 @@ intrinsics:
     doc: Saturating add
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sqadd]
     safety: safe
     types:
@@ -3556,7 +3556,7 @@ intrinsics:
     doc: Saturating add
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sqadd]
     safety: safe
     types:
@@ -3587,7 +3587,7 @@ intrinsics:
     doc: Saturating add
     arguments: ["a: {type[0]}", "b: {type[0]}"]
     return_type: "{type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uqadd]
     safety: safe
     types:
@@ -3618,7 +3618,7 @@ intrinsics:
     doc: "Load multiple single-element structures to one, two, three, or four registers"
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ld1]
     safety:
       unsafe: [neon]
@@ -3811,7 +3811,7 @@ intrinsics:
     doc: Load multiple 2-element structures to two registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ld2]
     safety:
       unsafe: [neon]
@@ -3834,7 +3834,7 @@ intrinsics:
     doc: Load multiple 2-element structures to two registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety:
       unsafe: [neon]
@@ -3856,7 +3856,7 @@ intrinsics:
     doc: Load multiple 2-element structures to two registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ld2]
     safety:
       unsafe: [neon]
@@ -4183,7 +4183,7 @@ intrinsics:
     doc: Load multiple 3-element structures to three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     safety:
       unsafe: [neon]
     assert_instr: [ld3]
@@ -4204,7 +4204,7 @@ intrinsics:
     doc: Load multiple 3-element structures to three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     safety:
       unsafe: [neon]
     assert_instr: [nop]
@@ -4224,7 +4224,7 @@ intrinsics:
     doc: Load multiple 3-element structures to three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     safety:
       unsafe: [neon]
     assert_instr: [ld3]
@@ -4265,7 +4265,7 @@ intrinsics:
     doc: Load single 3-element structure and replicate to all lanes of three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ld3r]
     safety:
       unsafe: [neon]
@@ -4287,7 +4287,7 @@ intrinsics:
     doc: Load single 3-element structure and replicate to all lanes of three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ld3r]
     safety:
       unsafe: [neon]
@@ -4373,7 +4373,7 @@ intrinsics:
     doc: Load multiple 4-element structures to four registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ld4]
     safety:
       unsafe: [neon]
@@ -4842,7 +4842,7 @@ intrinsics:
   - name: "vst3{neon_type[1].nox}"
     doc: "Store multiple 3-element structures from three registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety:
       unsafe: [neon]
@@ -4924,7 +4924,7 @@ intrinsics:
   - name: "vst3{neon_type[1].nox}"
     doc: "Store multiple 3-element structures from three registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [st3]
     safety:
       unsafe: [neon]
@@ -4947,7 +4947,7 @@ intrinsics:
   - name: "vst3{neon_type[1].nox}"
     doc: "Store multiple 3-element structures from three registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [st3]
     safety:
       unsafe: [neon]
@@ -5063,7 +5063,7 @@ intrinsics:
   - name: "vst4{neon_type[1].nox}"
     doc: "Store multiple 4-element structures from four registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety:
       unsafe: [neon]
@@ -5146,7 +5146,7 @@ intrinsics:
   - name: "vst4{neon_type[1].nox}"
     doc: "Store multiple 4-element structures from four registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [st4]
     safety:
       unsafe: [neon]
@@ -5170,7 +5170,7 @@ intrinsics:
   - name: "vst4{neon_type[1].nox}"
     doc: "Store multiple 4-element structures from four registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [st4]
     safety:
       unsafe: [neon]
@@ -5337,7 +5337,7 @@ intrinsics:
     doc: Multiply
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmul]
     safety: safe
     types:
@@ -5350,7 +5350,7 @@ intrinsics:
     doc: Signed multiply long
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[3]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [smull2]
     safety: safe
     types:
@@ -5372,7 +5372,7 @@ intrinsics:
     doc: "Unsigned multiply long"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[3]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [umull2]
     safety: safe
     types:
@@ -5455,7 +5455,7 @@ intrinsics:
     doc: Floating-point multiply extended
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmulx]
     safety: safe
     types:
@@ -5497,7 +5497,7 @@ intrinsics:
     doc: Floating-point multiply extended
     arguments: ["a: {type[1]}", "b: {type[1]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmulx]
     safety: safe
     types:
@@ -5859,7 +5859,7 @@ intrinsics:
     doc: "Divide"
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fdiv]
     safety: safe
     types:
@@ -5907,7 +5907,7 @@ intrinsics:
     doc: "Subtract"
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fsub]
     safety: safe
     types:
@@ -5920,7 +5920,7 @@ intrinsics:
     doc: "Subtract"
     arguments: ["a: {type[1]}", "b: {type[1]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety: safe
     types:
@@ -5972,7 +5972,7 @@ intrinsics:
     doc: Signed Add Long across Vector
     arguments: ["a: {neon_type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [saddlv]
     safety: safe
     types:
@@ -5990,7 +5990,7 @@ intrinsics:
     doc: Signed Add Long across Vector
     arguments: ["a: {neon_type}"]
     return_type: "i64"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [saddlp]
     safety: safe
     types:
@@ -6006,7 +6006,7 @@ intrinsics:
     doc: Unsigned Add Long across Vector
     arguments: ["a: {neon_type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uaddlv]
     safety: safe
     types:
@@ -6025,7 +6025,7 @@ intrinsics:
     doc: Unsigned Add Long across Vector
     arguments: ["a: {neon_type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uaddlp]
     safety: safe
     types:
@@ -6042,7 +6042,7 @@ intrinsics:
     doc: Signed Subtract Wide
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ssubw2]
     safety: safe
     types:
@@ -6063,7 +6063,7 @@ intrinsics:
     doc: Unsigned Subtract Wide
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[0]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [usubw2]
     safety: safe
     types:
@@ -6084,7 +6084,7 @@ intrinsics:
     doc: "Signed Subtract Long"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [ssubl2]
     safety: safe
     types:
@@ -6114,7 +6114,7 @@ intrinsics:
     doc: "Unsigned Subtract Long"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [usubl2]
     safety: safe
     types:
@@ -6895,7 +6895,7 @@ intrinsics:
     doc: Maximum (vector)
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmax]
     safety: safe
     types:
@@ -6934,7 +6934,7 @@ intrinsics:
     doc: Floating-point Maximum Number (vector)
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmaxnm]
     safety: safe
     types:
@@ -6982,7 +6982,7 @@ intrinsics:
     doc: Floating-point maximum number across vector
     arguments: ["a: {neon_type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmaxnmp]
     safety: safe
     types:
@@ -6995,7 +6995,7 @@ intrinsics:
     doc: Floating-point maximum number across vector
     arguments: ["a: {neon_type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmaxnmv]
     safety: safe
     types:
@@ -7086,7 +7086,7 @@ intrinsics:
     doc: "Floating-point maximum pairwise"
     arguments: ["a: {neon_type[1]}"]
     return_type: "{type[2]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmaxp]
     safety: safe
     types:
@@ -7103,7 +7103,7 @@ intrinsics:
     doc: "Minimum (vector)"
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fmin]
     safety: safe
     types:
@@ -7142,7 +7142,7 @@ intrinsics:
     doc: "Floating-point Minimum Number (vector)"
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{neon_type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fminnm]
     safety: safe
     types:
@@ -7184,7 +7184,7 @@ intrinsics:
     doc: Vector move
     arguments: ["a: {neon_type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [sxtl2]
     safety: safe
     types:
@@ -7202,7 +7202,7 @@ intrinsics:
     doc: Vector move
     arguments: ["a: {neon_type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [uxtl2]
     safety: safe
     types:
@@ -7220,7 +7220,7 @@ intrinsics:
     doc: Floating-point add pairwise
     arguments: ["a: {neon_type}", "b: {neon_type}"]
     return_type: "{type}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [faddp]
     safety: safe
     types:
@@ -7347,7 +7347,7 @@ intrinsics:
     doc: "Floating-point add pairwise"
     arguments: ["a: {neon_type[1]}"]
     return_type: "{type[2]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety: safe
     types:
@@ -7368,7 +7368,7 @@ intrinsics:
     doc: Floating-point minimum pairwise
     arguments: ["a: {neon_type[1]}"]
     return_type: "{type[2]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [fminp]
     safety: safe
     types:
@@ -9079,7 +9079,7 @@ intrinsics:
     doc: Vector reinterpret cast operation
     arguments: ["a: {type[0]}"]
     return_type: "{type[1]}"
-    attr: [*neon-stable]
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [nop]
     safety: safe
     types:

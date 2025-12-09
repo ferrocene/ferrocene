@@ -74,8 +74,7 @@ The following :t:`[ABI]s` are supported:
   :dt:`Rust ABI`.
 
 * :dp:`fls_8m7pc3riokst`
-  ``extern "system"`` - The operating system-dependent :t:`ABI`, referred to as
-  :dt:`external system ABI`.
+  ``extern "system"`` - The operating system-dependent :t:`ABI`.
 
 * :dp:`fls_NQAzj5ai1La5`
   ``extern "system-unwind"`` - The same as ``extern "system"`` with the

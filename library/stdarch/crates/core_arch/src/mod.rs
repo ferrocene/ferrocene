@@ -21,7 +21,6 @@ mod arm_shared;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod loongarch_shared;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod simd;
 
 #[doc = include_str!("core_arch_docs.md")]

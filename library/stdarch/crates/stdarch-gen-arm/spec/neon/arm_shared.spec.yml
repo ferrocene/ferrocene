@@ -13189,7 +13189,6 @@ intrinsics:
     arguments: ["crc: {type[0]}", "data: {type[1]}"]
     return_type: "{type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "crc"']]
       - *neon-v8
       - FnCall: [cfg_attr, [test, { FnCall: [assert_instr, ["crc32b"]] }]]
@@ -13343,7 +13342,6 @@ intrinsics:
     arguments: ["crc: {type[0]}", "data: {type[1]}"]
     return_type: "{type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "crc"']]
       - *target-is-arm
       - FnCall: [cfg_attr, [test, { FnCall: [assert_instr, ["crc32w"]] }]]

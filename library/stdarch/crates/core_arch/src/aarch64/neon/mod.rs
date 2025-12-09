@@ -3,11 +3,9 @@
 #![allow(non_camel_case_types)]
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod generated;
 #[rustfmt::skip]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::generated::*;
 
 // FIXME: replace neon with asimd

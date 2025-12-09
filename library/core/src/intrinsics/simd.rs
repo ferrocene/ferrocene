@@ -64,7 +64,6 @@ pub unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U {
 /// `T` must be a vector of integers or floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_add<T>(x: T, y: T) -> T;
 
 /// Subtracts `rhs` from `lhs` elementwise.

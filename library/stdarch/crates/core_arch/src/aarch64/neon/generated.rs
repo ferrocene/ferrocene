@@ -32,7 +32,6 @@ pub fn __crc32cd(crc: u32, data: u64) -> u32 {
 #[doc = "CRC32 single round checksum for quad words (64 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32d)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "crc")]
 #[cfg_attr(test, assert_instr(crc32x))]
 #[stable(feature = "stdarch_aarch64_crc32", since = "1.80.0")]

@@ -36,7 +36,6 @@ mod prefetch;
 pub use self::prefetch::*;
 
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use super::arm_shared::*;
 
 #[cfg(test)]

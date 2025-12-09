@@ -76,7 +76,6 @@ pub use self::hints::*;
     target_feature = "v7",
     doc
 ))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod neon;
 
 #[cfg(any(
@@ -93,7 +92,6 @@ pub(crate) mod neon;
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::neon::*;
 
 #[cfg(test)]

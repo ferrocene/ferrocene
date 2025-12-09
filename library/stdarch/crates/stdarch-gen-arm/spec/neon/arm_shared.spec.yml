@@ -4174,7 +4174,7 @@ intrinsics:
     doc: Load single 3-element structure and replicate to all lanes of three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*target-not-arm, *neon-stable]
+    attr: [FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]], *target-not-arm, *neon-stable]
     assert_instr: [ld3r]
     safety:
       unsafe: [neon]
@@ -4202,7 +4202,7 @@ intrinsics:
     doc: Load single 3-element structure and replicate to all lanes of three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*enable-v7, *target-is-arm, *neon-arm-unstable]
+    attr: [FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]], *enable-v7, *target-is-arm, *neon-arm-unstable]
     assert_instr: [vld3]
     safety:
       unsafe: [neon]
@@ -4262,7 +4262,7 @@ intrinsics:
     doc: Load single 3-element structure and replicate to all lanes of three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*target-is-arm, *enable-v7, *neon-arm-unstable]
+    attr: [FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]], *target-is-arm, *enable-v7, *neon-arm-unstable]
     assert_instr: [nop]
     safety:
       unsafe: [neon]
@@ -4359,7 +4359,7 @@ intrinsics:
     doc: Load multiple 4-element structures to four registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-    attr: [*target-not-arm, *neon-stable]
+    attr: [FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]], *target-not-arm, *neon-stable]
     assert_instr: [nop]
     safety:
       unsafe: [neon]
@@ -5685,7 +5685,7 @@ intrinsics:
   - name: "vst3{neon_type[1].nox}"
     doc: "Store multiple 3-element structures from three registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*target-not-arm, *neon-stable]
+    attr: [FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]], *target-not-arm, *neon-stable]
     assert_instr: [st3]
     safety:
       unsafe: [neon]
@@ -6096,7 +6096,7 @@ intrinsics:
   - name: "vst4{neon_type[1].nox}"
     doc: "Store multiple 4-element structures from four registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
-    attr: [*target-not-arm, *neon-stable]
+    attr: [FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]], *target-not-arm, *neon-stable]
     assert_instr: [st4]
     safety:
       unsafe: [neon]

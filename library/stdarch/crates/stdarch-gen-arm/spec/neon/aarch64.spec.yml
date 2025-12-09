@@ -10070,7 +10070,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-stable
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env = "msvc"']]}]]}, {FnCall: [assert_instr, [trn1]]}]]
     safety: safe
@@ -10099,7 +10098,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
@@ -10116,7 +10114,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-stable
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env = "msvc"']]}]]}, {FnCall: [assert_instr, [zip1]]}]]
     safety: safe

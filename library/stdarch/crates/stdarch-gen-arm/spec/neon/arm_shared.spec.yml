@@ -6799,7 +6799,6 @@ intrinsics:
     arguments: ["a: {neon_type}", "b: {neon_type}", "c: {neon_type}"]
     return_type: "{neon_type}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [target_arch = "arm", {FnCall: [target_feature, ['enable = "vfp4"']]}]]
       - FnCall:
           - cfg_attr

@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test for the projection bug in <https://github.com/rust-lang/rust/issues/123953>
 //
 //@ compile-flags: -Zincremental-verify-ich=yes

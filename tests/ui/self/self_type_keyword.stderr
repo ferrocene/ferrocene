@@ -65,7 +65,7 @@ error[E0531]: cannot find unit struct, unit variant or constant `Self` in this s
 LL |         mut Self => (),
    |             ^^^^ not found in this scope
    |
-note: unit struct `foo::Self` exists but is inaccessible
+note: unit struct `crate::foo::Self` exists but is inaccessible
   --> $DIR/self_type_keyword.rs:2:3
    |
 LL |   struct Self;

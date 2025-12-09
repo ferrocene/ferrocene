@@ -2,6 +2,8 @@
 thread 'main' ($TID) panicked at $DIR/issue-47429-short-backtraces.rs:28:5:
 explicit panic
 stack backtrace:
-   0: std::panicking::begin_panic
-   1: issue_47429_short_backtraces::main
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::panicking::panic
+   3: issue_47429_short_backtraces::main
 note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.

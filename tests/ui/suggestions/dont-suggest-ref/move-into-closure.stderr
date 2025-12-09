@@ -1,5 +1,5 @@
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:75:21
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:75:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -7,10 +7,7 @@ LL |     let x = X(Y);
 LL |     consume_fn(|| {
    |                -- captured by this `Fn` closure
 LL |         let X(_t) = x;
-   |               --    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:13:18
@@ -19,8 +16,8 @@ LL | fn consume_fn<F: Fn()>(_f: F) { }
    |                  ^^^^
 help: consider borrowing here
    |
-LL |         let X(_t) = &x;
-   |                     +
+LL |         let X(&_t) = x;
+   |               +
 
 error[E0507]: cannot move out of `e.0`, as `e` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:78:34
@@ -128,8 +125,8 @@ help: consider borrowing here
 LL |         match &e {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:98:25
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:98:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -138,10 +135,7 @@ LL |     consume_fn(|| {
    |                -- captured by this `Fn` closure
 ...
 LL |         let X(mut _t) = x;
-   |               ------    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^^^^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:13:18
@@ -150,8 +144,8 @@ LL | fn consume_fn<F: Fn()>(_f: F) { }
    |                  ^^^^
 help: consider borrowing here
    |
-LL |         let X(mut _t) = &x;
-   |                         +
+LL |         let X(&mut _t) = x;
+   |               +
 
 error[E0507]: cannot move out of `em.0`, as `em` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:101:38
@@ -259,8 +253,8 @@ help: consider borrowing here
 LL |         match &em {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:132:21
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:132:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -268,10 +262,7 @@ LL |     let x = X(Y);
 LL |     <() as T>::consume_fn(|| {
    |                           -- captured by this `Fn` closure
 LL |         let X(_t) = x;
-   |               --    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:39:22
@@ -280,8 +271,8 @@ LL |     fn consume_fn<F: Fn()>(_f: F) { }
    |                      ^^^^
 help: consider borrowing here
    |
-LL |         let X(_t) = &x;
-   |                     +
+LL |         let X(&_t) = x;
+   |               +
 
 error[E0507]: cannot move out of `e.0`, as `e` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:135:34
@@ -389,8 +380,8 @@ help: consider borrowing here
 LL |         match &e {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:155:25
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:155:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -399,10 +390,7 @@ LL |     <() as T>::consume_fn(|| {
    |                           -- captured by this `Fn` closure
 ...
 LL |         let X(mut _t) = x;
-   |               ------    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^^^^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:39:22
@@ -411,8 +399,8 @@ LL |     fn consume_fn<F: Fn()>(_f: F) { }
    |                      ^^^^
 help: consider borrowing here
    |
-LL |         let X(mut _t) = &x;
-   |                         +
+LL |         let X(&mut _t) = x;
+   |               +
 
 error[E0507]: cannot move out of `em.0`, as `em` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:158:38
@@ -520,8 +508,8 @@ help: consider borrowing here
 LL |         match &em {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:189:21
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:189:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -529,10 +517,7 @@ LL |     let x = X(Y);
 LL |     ().method_consume_fn(|| {
    |                          -- captured by this `Fn` closure
 LL |         let X(_t) = x;
-   |               --    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:50:29
@@ -541,8 +526,8 @@ LL |     fn method_consume_fn<F: Fn()>(&self, _f: F) { }
    |                             ^^^^
 help: consider borrowing here
    |
-LL |         let X(_t) = &x;
-   |                     +
+LL |         let X(&_t) = x;
+   |               +
 
 error[E0507]: cannot move out of `e.0`, as `e` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:192:34
@@ -650,8 +635,8 @@ help: consider borrowing here
 LL |         match &e {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:212:25
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:212:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -660,10 +645,7 @@ LL |     ().method_consume_fn(|| {
    |                          -- captured by this `Fn` closure
 ...
 LL |         let X(mut _t) = x;
-   |               ------    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^^^^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:50:29
@@ -672,8 +654,8 @@ LL |     fn method_consume_fn<F: Fn()>(&self, _f: F) { }
    |                             ^^^^
 help: consider borrowing here
    |
-LL |         let X(mut _t) = &x;
-   |                         +
+LL |         let X(&mut _t) = x;
+   |               +
 
 error[E0507]: cannot move out of `em.0`, as `em` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:215:38
@@ -781,8 +763,8 @@ help: consider borrowing here
 LL |         match &em {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `FnMut` closure
-  --> $DIR/move-into-closure.rs:246:21
+error[E0507]: cannot move out of `x.0`, a captured variable in an `FnMut` closure
+  --> $DIR/move-into-closure.rs:246:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -790,10 +772,7 @@ LL |     let x = X(Y);
 LL |     consume_fnmut(|| {
    |                   -- captured by this `FnMut` closure
 LL |         let X(_t) = x;
-   |               --    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:25:21
@@ -802,8 +781,8 @@ LL | fn consume_fnmut<F: FnMut()>(_f: F) { }
    |                     ^^^^^^^
 help: consider borrowing here
    |
-LL |         let X(_t) = &x;
-   |                     +
+LL |         let X(&_t) = x;
+   |               +
 
 error[E0507]: cannot move out of `e.0`, as `e` is a captured variable in an `FnMut` closure
   --> $DIR/move-into-closure.rs:249:34
@@ -911,8 +890,8 @@ help: consider borrowing here
 LL |         match &e {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `FnMut` closure
-  --> $DIR/move-into-closure.rs:269:25
+error[E0507]: cannot move out of `x.0`, a captured variable in an `FnMut` closure
+  --> $DIR/move-into-closure.rs:269:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -921,10 +900,7 @@ LL |     consume_fnmut(|| {
    |                   -- captured by this `FnMut` closure
 ...
 LL |         let X(mut _t) = x;
-   |               ------    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^^^^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
   --> $DIR/move-into-closure.rs:25:21
@@ -933,8 +909,8 @@ LL | fn consume_fnmut<F: FnMut()>(_f: F) { }
    |                     ^^^^^^^
 help: consider borrowing here
    |
-LL |         let X(mut _t) = &x;
-   |                         +
+LL |         let X(&mut _t) = x;
+   |               +
 
 error[E0507]: cannot move out of `em.0`, as `em` is a captured variable in an `FnMut` closure
   --> $DIR/move-into-closure.rs:272:38

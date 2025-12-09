@@ -13,6 +13,18 @@ error[E0573]: expected type, found variant `Err`
    |
 LL |     fn into_future() -> Err {}
    |                         ^^^ not a type
+   |
+help: try using the variant's enum
+   |
+LL -     fn into_future() -> Err {}
+LL +     fn into_future() -> core::result::Result {}
+   |
+LL -     fn into_future() -> Err {}
+LL +     fn into_future() -> crate::result::Result {}
+   |
+LL -     fn into_future() -> Err {}
+LL +     fn into_future() -> std::result::Result {}
+   |
 
 error: aborting due to 2 previous errors
 

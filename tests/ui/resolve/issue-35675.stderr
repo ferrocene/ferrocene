@@ -4,10 +4,10 @@ error[E0412]: cannot find type `Apple` in this scope
 LL | fn should_return_fruit() -> Apple {
    |                             ^^^^^ not found in this scope
    |
-help: there is an enum variant `Fruit::Apple`; try using the variant's enum
+help: there is an enum variant `crate::Fruit::Apple`; try using the variant's enum
    |
 LL - fn should_return_fruit() -> Apple {
-LL + fn should_return_fruit() -> Fruit {
+LL + fn should_return_fruit() -> crate::Fruit {
    |
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Apple` in this scope
@@ -18,7 +18,7 @@ LL |     Apple(5)
    |
 help: consider importing this tuple variant
    |
-LL + use Fruit::Apple;
+LL + use crate::Fruit::Apple;
    |
 
 error[E0573]: expected type, found variant `Fruit::Apple`
@@ -28,7 +28,7 @@ LL | fn should_return_fruit_too() -> Fruit::Apple {
    |                                 ^^^^^^^^^^^^
    |                                 |
    |                                 not a type
-   |                                 help: try using the variant's enum: `Fruit`
+   |                                 help: try using the variant's enum: `crate::Fruit`
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Apple` in this scope
   --> $DIR/issue-35675.rs:15:5
@@ -38,17 +38,23 @@ LL |     Apple(5)
    |
 help: consider importing this tuple variant
    |
-LL + use Fruit::Apple;
+LL + use crate::Fruit::Apple;
    |
 
 error[E0573]: expected type, found variant `Ok`
   --> $DIR/issue-35675.rs:19:13
    |
 LL | fn foo() -> Ok {
-   |             ^^
-   |             |
-   |             not a type
-   |             help: try using the variant's enum: `std::result::Result`
+   |             ^^ not a type
+   |
+help: try using the variant's enum
+   |
+LL - fn foo() -> Ok {
+LL + fn foo() -> core::result::Result {
+   |
+LL - fn foo() -> Ok {
+LL + fn foo() -> std::result::Result {
+   |
 
 error[E0412]: cannot find type `Variant3` in this scope
   --> $DIR/issue-35675.rs:24:13
@@ -56,20 +62,26 @@ error[E0412]: cannot find type `Variant3` in this scope
 LL | fn bar() -> Variant3 {
    |             ^^^^^^^^ not found in this scope
    |
-help: there is an enum variant `x::Enum::Variant3`; try using the variant's enum
+help: there is an enum variant `crate::x::Enum::Variant3`; try using the variant's enum
    |
 LL - fn bar() -> Variant3 {
-LL + fn bar() -> x::Enum {
+LL + fn bar() -> crate::x::Enum {
    |
 
 error[E0573]: expected type, found variant `Some`
   --> $DIR/issue-35675.rs:28:13
    |
 LL | fn qux() -> Some {
-   |             ^^^^
-   |             |
-   |             not a type
-   |             help: try using the variant's enum: `std::option::Option`
+   |             ^^^^ not a type
+   |
+help: try using the variant's enum
+   |
+LL - fn qux() -> Some {
+LL + fn qux() -> core::option::Option {
+   |
+LL - fn qux() -> Some {
+LL + fn qux() -> std::option::Option {
+   |
 
 error: aborting due to 7 previous errors
 

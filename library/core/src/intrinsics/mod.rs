@@ -555,7 +555,6 @@ pub const fn caller_location() -> &'static crate::panic::Location<'static>;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn forget<T: ?Sized>(_: T);
 
 /// Reinterprets the bits of a value of one type as another type.

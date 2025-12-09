@@ -2043,7 +2043,6 @@ pub const unsafe fn write<T>(dst: *mut T, src: T) {
 #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_write_unaligned"]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
     // SAFETY: the caller must guarantee that `dst` is valid for writes.
     // `dst` cannot overlap `src` because the caller has mutable access

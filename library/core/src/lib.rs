@@ -138,7 +138,7 @@
 //
 // Language features:
 // not-alphabetical-start
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(abi_unadjusted))]
+#![feature(abi_unadjusted)]
 #![feature(adt_const_params)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
@@ -164,7 +164,7 @@
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(link_llvm_intrinsics))]
+#![feature(link_llvm_intrinsics)]
 #![feature(macro_metavar_expr)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(macro_metavar_expr_concat))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(marker_trait_attr))]
@@ -182,7 +182,7 @@
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(simd_ffi))]
+#![feature(simd_ffi)]
 #![feature(staged_api)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance_lints)]
@@ -190,7 +190,7 @@
 #![feature(transparent_unions)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(unsized_fn_params))]
+#![feature(unsized_fn_params)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(with_negative_coherence))]
 // not-alphabetical-end
 //

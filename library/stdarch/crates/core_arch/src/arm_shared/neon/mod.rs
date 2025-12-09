@@ -1,26 +1,33 @@
 //! ARMv7 NEON intrinsics
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustfmt::skip]
 mod generated;
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustfmt::skip]
 #[cfg_attr(not(target_arch = "arm"), stable(feature = "neon_intrinsics", since = "1.59.0"))]
 #[cfg_attr(target_arch = "arm", unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800"))]
 pub use self::generated::*;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{core_arch::simd::*, hint::unreachable_unchecked, intrinsics::simd::*, mem::transmute};
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(test)]
 use stdarch_test::assert_instr;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) trait AsUnsigned {
     type Unsigned;
     fn as_unsigned(self) -> Self::Unsigned;
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) trait AsSigned {
     type Signed;
     fn as_signed(self) -> Self::Signed;
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_sign_conversions_neon {
     ($(($signed:ty, $unsigned:ty))*) => ($(
         impl AsUnsigned for $signed {
@@ -43,11 +50,16 @@ macro_rules! impl_sign_conversions_neon {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p8 = u8;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p16 = u16;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p64 = u64;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p128 = u128;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 types! {
     #![cfg_attr(not(target_arch = "arm"), stable(feature = "neon_intrinsics", since = "1.59.0"))]
     #![cfg_attr(target_arch = "arm", unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800"))]
@@ -103,6 +115,7 @@ types! {
     pub struct poly64x2_t(2 x pub(crate) p64);
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 types! {
     #![unstable(feature = "stdarch_neon_f16", issue = "136306")]
 
@@ -123,6 +136,7 @@ types! {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int8x8x2_t(pub int8x8_t, pub int8x8_t);
 /// Arm-specific type containing three `int8x8_t` vectors.
 #[repr(C)]
@@ -135,6 +149,7 @@ pub struct int8x8x2_t(pub int8x8_t, pub int8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int8x8x3_t(pub int8x8_t, pub int8x8_t, pub int8x8_t);
 /// Arm-specific type containing four `int8x8_t` vectors.
 #[repr(C)]
@@ -147,6 +162,7 @@ pub struct int8x8x3_t(pub int8x8_t, pub int8x8_t, pub int8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int8x8x4_t(pub int8x8_t, pub int8x8_t, pub int8x8_t, pub int8x8_t);
 
 /// Arm-specific type containing two `int8x16_t` vectors.
@@ -160,6 +176,7 @@ pub struct int8x8x4_t(pub int8x8_t, pub int8x8_t, pub int8x8_t, pub int8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int8x16x2_t(pub int8x16_t, pub int8x16_t);
 /// Arm-specific type containing three `int8x16_t` vectors.
 #[repr(C)]
@@ -172,6 +189,7 @@ pub struct int8x16x2_t(pub int8x16_t, pub int8x16_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int8x16x3_t(pub int8x16_t, pub int8x16_t, pub int8x16_t);
 /// Arm-specific type containing four `int8x16_t` vectors.
 #[repr(C)]
@@ -184,6 +202,7 @@ pub struct int8x16x3_t(pub int8x16_t, pub int8x16_t, pub int8x16_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int8x16x4_t(pub int8x16_t, pub int8x16_t, pub int8x16_t, pub int8x16_t);
 
 /// Arm-specific type containing two `uint8x8_t` vectors.
@@ -197,6 +216,7 @@ pub struct int8x16x4_t(pub int8x16_t, pub int8x16_t, pub int8x16_t, pub int8x16_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint8x8x2_t(pub uint8x8_t, pub uint8x8_t);
 /// Arm-specific type containing three `uint8x8_t` vectors.
 #[repr(C)]
@@ -209,6 +229,7 @@ pub struct uint8x8x2_t(pub uint8x8_t, pub uint8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint8x8x3_t(pub uint8x8_t, pub uint8x8_t, pub uint8x8_t);
 /// Arm-specific type containing four `uint8x8_t` vectors.
 #[repr(C)]
@@ -221,6 +242,7 @@ pub struct uint8x8x3_t(pub uint8x8_t, pub uint8x8_t, pub uint8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint8x8x4_t(pub uint8x8_t, pub uint8x8_t, pub uint8x8_t, pub uint8x8_t);
 
 /// Arm-specific type containing two `uint8x16_t` vectors.
@@ -234,6 +256,7 @@ pub struct uint8x8x4_t(pub uint8x8_t, pub uint8x8_t, pub uint8x8_t, pub uint8x8_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint8x16x2_t(pub uint8x16_t, pub uint8x16_t);
 /// Arm-specific type containing three `uint8x16_t` vectors.
 #[repr(C)]
@@ -246,6 +269,7 @@ pub struct uint8x16x2_t(pub uint8x16_t, pub uint8x16_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint8x16x3_t(pub uint8x16_t, pub uint8x16_t, pub uint8x16_t);
 /// Arm-specific type containing four `uint8x16_t` vectors.
 #[repr(C)]
@@ -258,6 +282,7 @@ pub struct uint8x16x3_t(pub uint8x16_t, pub uint8x16_t, pub uint8x16_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint8x16x4_t(
     pub uint8x16_t,
     pub uint8x16_t,
@@ -276,6 +301,7 @@ pub struct uint8x16x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly8x8x2_t(pub poly8x8_t, pub poly8x8_t);
 /// Arm-specific type containing three `poly8x8_t` vectors.
 #[repr(C)]
@@ -288,6 +314,7 @@ pub struct poly8x8x2_t(pub poly8x8_t, pub poly8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly8x8x3_t(pub poly8x8_t, pub poly8x8_t, pub poly8x8_t);
 /// Arm-specific type containing four `poly8x8_t` vectors.
 #[repr(C)]
@@ -300,6 +327,7 @@ pub struct poly8x8x3_t(pub poly8x8_t, pub poly8x8_t, pub poly8x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly8x8x4_t(pub poly8x8_t, pub poly8x8_t, pub poly8x8_t, pub poly8x8_t);
 
 /// Arm-specific type containing two `poly8x16_t` vectors.
@@ -313,6 +341,7 @@ pub struct poly8x8x4_t(pub poly8x8_t, pub poly8x8_t, pub poly8x8_t, pub poly8x8_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly8x16x2_t(pub poly8x16_t, pub poly8x16_t);
 /// Arm-specific type containing three `poly8x16_t` vectors.
 #[repr(C)]
@@ -325,6 +354,7 @@ pub struct poly8x16x2_t(pub poly8x16_t, pub poly8x16_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly8x16x3_t(pub poly8x16_t, pub poly8x16_t, pub poly8x16_t);
 /// Arm-specific type containing four `poly8x16_t` vectors.
 #[repr(C)]
@@ -337,6 +367,7 @@ pub struct poly8x16x3_t(pub poly8x16_t, pub poly8x16_t, pub poly8x16_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly8x16x4_t(
     pub poly8x16_t,
     pub poly8x16_t,
@@ -355,6 +386,7 @@ pub struct poly8x16x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int16x4x2_t(pub int16x4_t, pub int16x4_t);
 /// Arm-specific type containing three `int16x4_t` vectors.
 #[repr(C)]
@@ -367,6 +399,7 @@ pub struct int16x4x2_t(pub int16x4_t, pub int16x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int16x4x3_t(pub int16x4_t, pub int16x4_t, pub int16x4_t);
 /// Arm-specific type containing four `int16x4_t` vectors.
 #[repr(C)]
@@ -379,6 +412,7 @@ pub struct int16x4x3_t(pub int16x4_t, pub int16x4_t, pub int16x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int16x4x4_t(pub int16x4_t, pub int16x4_t, pub int16x4_t, pub int16x4_t);
 
 /// Arm-specific type containing two `int16x8_t` vectors.
@@ -392,6 +426,7 @@ pub struct int16x4x4_t(pub int16x4_t, pub int16x4_t, pub int16x4_t, pub int16x4_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int16x8x2_t(pub int16x8_t, pub int16x8_t);
 /// Arm-specific type containing three `int16x8_t` vectors.
 #[repr(C)]
@@ -404,6 +439,7 @@ pub struct int16x8x2_t(pub int16x8_t, pub int16x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int16x8x3_t(pub int16x8_t, pub int16x8_t, pub int16x8_t);
 /// Arm-specific type containing four `int16x8_t` vectors.
 #[repr(C)]
@@ -416,6 +452,7 @@ pub struct int16x8x3_t(pub int16x8_t, pub int16x8_t, pub int16x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int16x8x4_t(pub int16x8_t, pub int16x8_t, pub int16x8_t, pub int16x8_t);
 
 /// Arm-specific type containing two `uint16x4_t` vectors.
@@ -429,6 +466,7 @@ pub struct int16x8x4_t(pub int16x8_t, pub int16x8_t, pub int16x8_t, pub int16x8_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint16x4x2_t(pub uint16x4_t, pub uint16x4_t);
 /// Arm-specific type containing three `uint16x4_t` vectors.
 #[repr(C)]
@@ -441,6 +479,7 @@ pub struct uint16x4x2_t(pub uint16x4_t, pub uint16x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint16x4x3_t(pub uint16x4_t, pub uint16x4_t, pub uint16x4_t);
 /// Arm-specific type containing four `uint16x4_t` vectors.
 #[repr(C)]
@@ -453,6 +492,7 @@ pub struct uint16x4x3_t(pub uint16x4_t, pub uint16x4_t, pub uint16x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint16x4x4_t(
     pub uint16x4_t,
     pub uint16x4_t,
@@ -471,6 +511,7 @@ pub struct uint16x4x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint16x8x2_t(pub uint16x8_t, pub uint16x8_t);
 /// Arm-specific type containing three `uint16x8_t` vectors.
 #[repr(C)]
@@ -483,6 +524,7 @@ pub struct uint16x8x2_t(pub uint16x8_t, pub uint16x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint16x8x3_t(pub uint16x8_t, pub uint16x8_t, pub uint16x8_t);
 /// Arm-specific type containing four `uint16x8_t` vectors.
 #[repr(C)]
@@ -495,6 +537,7 @@ pub struct uint16x8x3_t(pub uint16x8_t, pub uint16x8_t, pub uint16x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint16x8x4_t(
     pub uint16x8_t,
     pub uint16x8_t,
@@ -513,6 +556,7 @@ pub struct uint16x8x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly16x4x2_t(pub poly16x4_t, pub poly16x4_t);
 /// Arm-specific type containing three `poly16x4_t` vectors.
 #[repr(C)]
@@ -525,6 +569,7 @@ pub struct poly16x4x2_t(pub poly16x4_t, pub poly16x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly16x4x3_t(pub poly16x4_t, pub poly16x4_t, pub poly16x4_t);
 /// Arm-specific type containing four `poly16x4_t` vectors.
 #[repr(C)]
@@ -537,6 +582,7 @@ pub struct poly16x4x3_t(pub poly16x4_t, pub poly16x4_t, pub poly16x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly16x4x4_t(
     pub poly16x4_t,
     pub poly16x4_t,
@@ -555,6 +601,7 @@ pub struct poly16x4x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly16x8x2_t(pub poly16x8_t, pub poly16x8_t);
 /// Arm-specific type containing three `poly16x8_t` vectors.
 #[repr(C)]
@@ -567,6 +614,7 @@ pub struct poly16x8x2_t(pub poly16x8_t, pub poly16x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly16x8x3_t(pub poly16x8_t, pub poly16x8_t, pub poly16x8_t);
 /// Arm-specific type containing four `poly16x8_t` vectors.
 #[repr(C)]
@@ -579,6 +627,7 @@ pub struct poly16x8x3_t(pub poly16x8_t, pub poly16x8_t, pub poly16x8_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly16x8x4_t(
     pub poly16x8_t,
     pub poly16x8_t,
@@ -597,6 +646,7 @@ pub struct poly16x8x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int32x2x2_t(pub int32x2_t, pub int32x2_t);
 /// Arm-specific type containing three `int32x2_t` vectors.
 #[repr(C)]
@@ -609,6 +659,7 @@ pub struct int32x2x2_t(pub int32x2_t, pub int32x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int32x2x3_t(pub int32x2_t, pub int32x2_t, pub int32x2_t);
 /// Arm-specific type containing four `int32x2_t` vectors.
 #[repr(C)]
@@ -621,6 +672,7 @@ pub struct int32x2x3_t(pub int32x2_t, pub int32x2_t, pub int32x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int32x2x4_t(pub int32x2_t, pub int32x2_t, pub int32x2_t, pub int32x2_t);
 
 /// Arm-specific type containing two `int32x4_t` vectors.
@@ -634,6 +686,7 @@ pub struct int32x2x4_t(pub int32x2_t, pub int32x2_t, pub int32x2_t, pub int32x2_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int32x4x2_t(pub int32x4_t, pub int32x4_t);
 /// Arm-specific type containing three `int32x4_t` vectors.
 #[repr(C)]
@@ -646,6 +699,7 @@ pub struct int32x4x2_t(pub int32x4_t, pub int32x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int32x4x3_t(pub int32x4_t, pub int32x4_t, pub int32x4_t);
 /// Arm-specific type containing four `int32x4_t` vectors.
 #[repr(C)]
@@ -658,6 +712,7 @@ pub struct int32x4x3_t(pub int32x4_t, pub int32x4_t, pub int32x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int32x4x4_t(pub int32x4_t, pub int32x4_t, pub int32x4_t, pub int32x4_t);
 
 /// Arm-specific type containing two `uint32x2_t` vectors.
@@ -671,6 +726,7 @@ pub struct int32x4x4_t(pub int32x4_t, pub int32x4_t, pub int32x4_t, pub int32x4_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint32x2x2_t(pub uint32x2_t, pub uint32x2_t);
 /// Arm-specific type containing three `uint32x2_t` vectors.
 #[repr(C)]
@@ -683,6 +739,7 @@ pub struct uint32x2x2_t(pub uint32x2_t, pub uint32x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint32x2x3_t(pub uint32x2_t, pub uint32x2_t, pub uint32x2_t);
 /// Arm-specific type containing four `uint32x2_t` vectors.
 #[repr(C)]
@@ -695,6 +752,7 @@ pub struct uint32x2x3_t(pub uint32x2_t, pub uint32x2_t, pub uint32x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint32x2x4_t(
     pub uint32x2_t,
     pub uint32x2_t,
@@ -713,6 +771,7 @@ pub struct uint32x2x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint32x4x2_t(pub uint32x4_t, pub uint32x4_t);
 /// Arm-specific type containing three `uint32x4_t` vectors.
 #[repr(C)]
@@ -725,6 +784,7 @@ pub struct uint32x4x2_t(pub uint32x4_t, pub uint32x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint32x4x3_t(pub uint32x4_t, pub uint32x4_t, pub uint32x4_t);
 /// Arm-specific type containing four `uint32x4_t` vectors.
 #[repr(C)]
@@ -737,6 +797,7 @@ pub struct uint32x4x3_t(pub uint32x4_t, pub uint32x4_t, pub uint32x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint32x4x4_t(
     pub uint32x4_t,
     pub uint32x4_t,
@@ -748,18 +809,21 @@ pub struct uint32x4x4_t(
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float16x4x2_t(pub float16x4_t, pub float16x4_t);
 
 /// Arm-specific type containing three `float16x4_t` vectors.
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float16x4x3_t(pub float16x4_t, pub float16x4_t, pub float16x4_t);
 
 /// Arm-specific type containing four `float16x4_t` vectors.
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float16x4x4_t(
     pub float16x4_t,
     pub float16x4_t,
@@ -771,18 +835,21 @@ pub struct float16x4x4_t(
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float16x8x2_t(pub float16x8_t, pub float16x8_t);
 
 /// Arm-specific type containing three `float16x8_t` vectors.
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float16x8x3_t(pub float16x8_t, pub float16x8_t, pub float16x8_t);
 
 /// Arm-specific type containing four `float16x8_t` vectors.
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float16x8x4_t(
     pub float16x8_t,
     pub float16x8_t,
@@ -801,6 +868,7 @@ pub struct float16x8x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x2x2_t(pub float32x2_t, pub float32x2_t);
 /// Arm-specific type containing three `float32x2_t` vectors.
 #[repr(C)]
@@ -813,6 +881,7 @@ pub struct float32x2x2_t(pub float32x2_t, pub float32x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x2x3_t(pub float32x2_t, pub float32x2_t, pub float32x2_t);
 /// Arm-specific type containing four `float32x2_t` vectors.
 #[repr(C)]
@@ -825,6 +894,7 @@ pub struct float32x2x3_t(pub float32x2_t, pub float32x2_t, pub float32x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x2x4_t(
     pub float32x2_t,
     pub float32x2_t,
@@ -843,6 +913,7 @@ pub struct float32x2x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x4x2_t(pub float32x4_t, pub float32x4_t);
 /// Arm-specific type containing three `float32x4_t` vectors.
 #[repr(C)]
@@ -855,6 +926,7 @@ pub struct float32x4x2_t(pub float32x4_t, pub float32x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x4x3_t(pub float32x4_t, pub float32x4_t, pub float32x4_t);
 /// Arm-specific type containing four `float32x4_t` vectors.
 #[repr(C)]
@@ -867,6 +939,7 @@ pub struct float32x4x3_t(pub float32x4_t, pub float32x4_t, pub float32x4_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x4x4_t(
     pub float32x4_t,
     pub float32x4_t,
@@ -885,6 +958,7 @@ pub struct float32x4x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int64x1x2_t(pub int64x1_t, pub int64x1_t);
 /// Arm-specific type containing three `int64x1_t` vectors.
 #[repr(C)]
@@ -897,6 +971,7 @@ pub struct int64x1x2_t(pub int64x1_t, pub int64x1_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int64x1x3_t(pub int64x1_t, pub int64x1_t, pub int64x1_t);
 /// Arm-specific type containing four `int64x1_t` vectors.
 #[repr(C)]
@@ -909,6 +984,7 @@ pub struct int64x1x3_t(pub int64x1_t, pub int64x1_t, pub int64x1_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int64x1x4_t(pub int64x1_t, pub int64x1_t, pub int64x1_t, pub int64x1_t);
 
 /// Arm-specific type containing two `int64x2_t` vectors.
@@ -922,6 +998,7 @@ pub struct int64x1x4_t(pub int64x1_t, pub int64x1_t, pub int64x1_t, pub int64x1_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int64x2x2_t(pub int64x2_t, pub int64x2_t);
 /// Arm-specific type containing three `int64x2_t` vectors.
 #[repr(C)]
@@ -934,6 +1011,7 @@ pub struct int64x2x2_t(pub int64x2_t, pub int64x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int64x2x3_t(pub int64x2_t, pub int64x2_t, pub int64x2_t);
 /// Arm-specific type containing four `int64x2_t` vectors.
 #[repr(C)]
@@ -946,6 +1024,7 @@ pub struct int64x2x3_t(pub int64x2_t, pub int64x2_t, pub int64x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct int64x2x4_t(pub int64x2_t, pub int64x2_t, pub int64x2_t, pub int64x2_t);
 
 /// Arm-specific type containing two `uint64x1_t` vectors.
@@ -959,6 +1038,7 @@ pub struct int64x2x4_t(pub int64x2_t, pub int64x2_t, pub int64x2_t, pub int64x2_
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint64x1x2_t(pub uint64x1_t, pub uint64x1_t);
 /// Arm-specific type containing three `uint64x1_t` vectors.
 #[repr(C)]
@@ -971,6 +1051,7 @@ pub struct uint64x1x2_t(pub uint64x1_t, pub uint64x1_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint64x1x3_t(pub uint64x1_t, pub uint64x1_t, pub uint64x1_t);
 /// Arm-specific type containing four `uint64x1_t` vectors.
 #[repr(C)]
@@ -983,6 +1064,7 @@ pub struct uint64x1x3_t(pub uint64x1_t, pub uint64x1_t, pub uint64x1_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint64x1x4_t(
     pub uint64x1_t,
     pub uint64x1_t,
@@ -1001,6 +1083,7 @@ pub struct uint64x1x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint64x2x2_t(pub uint64x2_t, pub uint64x2_t);
 /// Arm-specific type containing three `uint64x2_t` vectors.
 #[repr(C)]
@@ -1013,6 +1096,7 @@ pub struct uint64x2x2_t(pub uint64x2_t, pub uint64x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint64x2x3_t(pub uint64x2_t, pub uint64x2_t, pub uint64x2_t);
 /// Arm-specific type containing four `uint64x2_t` vectors.
 #[repr(C)]
@@ -1025,6 +1109,7 @@ pub struct uint64x2x3_t(pub uint64x2_t, pub uint64x2_t, pub uint64x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct uint64x2x4_t(
     pub uint64x2_t,
     pub uint64x2_t,
@@ -1043,6 +1128,7 @@ pub struct uint64x2x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly64x1x2_t(pub poly64x1_t, pub poly64x1_t);
 /// Arm-specific type containing three `poly64x1_t` vectors.
 #[repr(C)]
@@ -1055,6 +1141,7 @@ pub struct poly64x1x2_t(pub poly64x1_t, pub poly64x1_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly64x1x3_t(pub poly64x1_t, pub poly64x1_t, pub poly64x1_t);
 /// Arm-specific type containing four `poly64x1_t` vectors.
 #[repr(C)]
@@ -1067,6 +1154,7 @@ pub struct poly64x1x3_t(pub poly64x1_t, pub poly64x1_t, pub poly64x1_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly64x1x4_t(
     pub poly64x1_t,
     pub poly64x1_t,
@@ -1085,6 +1173,7 @@ pub struct poly64x1x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly64x2x2_t(pub poly64x2_t, pub poly64x2_t);
 /// Arm-specific type containing three `poly64x2_t` vectors.
 #[repr(C)]
@@ -1097,6 +1186,7 @@ pub struct poly64x2x2_t(pub poly64x2_t, pub poly64x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly64x2x3_t(pub poly64x2_t, pub poly64x2_t, pub poly64x2_t);
 /// Arm-specific type containing four `poly64x2_t` vectors.
 #[repr(C)]
@@ -1109,6 +1199,7 @@ pub struct poly64x2x3_t(pub poly64x2_t, pub poly64x2_t, pub poly64x2_t);
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct poly64x2x4_t(
     pub poly64x2_t,
     pub poly64x2_t,
@@ -1116,6 +1207,7 @@ pub struct poly64x2x4_t(
     pub poly64x2_t,
 );
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl_sign_conversions_neon! {
     (i8, u8)
     (i16, u16)

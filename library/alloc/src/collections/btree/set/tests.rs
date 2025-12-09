@@ -833,7 +833,11 @@ fn from_array() {
     assert_eq!(set, unordered_duplicates);
 }
 
-#[should_panic(expected = "range start is greater than range end in BTreeSet")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "range start is greater than range end in BTreeSet")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 #[test]
 fn test_range_panic_1() {
     let mut set = BTreeSet::new();
@@ -844,7 +848,11 @@ fn test_range_panic_1() {
     let _invalid_range = set.range((Included(&8), Included(&3)));
 }
 
-#[should_panic(expected = "range start and end are equal and excluded in BTreeSet")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "range start and end are equal and excluded in BTreeSet")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 #[test]
 fn test_range_panic_2() {
     let mut set = BTreeSet::new();

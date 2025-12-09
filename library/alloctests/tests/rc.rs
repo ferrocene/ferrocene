@@ -151,7 +151,11 @@ fn shared_from_iter_trustedlen_normal() {
 }
 
 #[test]
-#[should_panic = "I've almost got 99 problems."]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic = "I've almost got 99 problems."
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn shared_from_iter_trustedlen_panic() {
     // Exercise the `TrustedLen` implementation when `size_hint()` matches
     // `(_, Some(exact_len))` but where `.next()` drops before the last iteration.

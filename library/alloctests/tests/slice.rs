@@ -1467,7 +1467,11 @@ fn test_copy_from_slice() {
 }
 
 #[test]
-#[should_panic(expected = "source slice length (4) does not match destination slice length (5)")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "source slice length (4) does not match destination slice length (5)")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn test_copy_from_slice_dst_longer() {
     let src = [0, 1, 2, 3];
     let mut dst = [0; 5];
@@ -1475,7 +1479,11 @@ fn test_copy_from_slice_dst_longer() {
 }
 
 #[test]
-#[should_panic(expected = "source slice length (4) does not match destination slice length (3)")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "source slice length (4) does not match destination slice length (3)")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn test_copy_from_slice_dst_shorter() {
     let src = [0, 1, 2, 3];
     let mut dst = [0; 3];

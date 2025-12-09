@@ -3127,6 +3127,9 @@ impl Step for Crate {
         }
         if crates.iter().any(|crate_| crate_ == "alloc") {
             crates.push("alloctests".to_owned());
+            if ferrocene_certified_panic {
+                cargo.arg("--features=alloctests/ferrocene_certified_panic");
+            }
         }
 
         // Ferrocene annotation:

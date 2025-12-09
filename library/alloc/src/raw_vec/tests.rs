@@ -136,7 +136,11 @@ fn zst() {
 }
 
 #[test]
-#[should_panic(expected = "capacity overflow")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "capacity overflow")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn zst_reserve_panic() {
     let mut v: RawVec<ZST> = RawVec::new();
     zst_sanity(&v);
@@ -145,7 +149,11 @@ fn zst_reserve_panic() {
 }
 
 #[test]
-#[should_panic(expected = "capacity overflow")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "capacity overflow")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn zst_reserve_exact_panic() {
     let mut v: RawVec<ZST> = RawVec::new();
     zst_sanity(&v);

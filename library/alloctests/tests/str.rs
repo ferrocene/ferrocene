@@ -377,7 +377,11 @@ mod slice_index {
     //  in the FIRST method that panics, as the macro is not designed
     //  to be used in `should_panic`)
     #[test]
-    #[should_panic(expected = "out of bounds")]
+    #[cfg_attr(
+        not(feature = "ferrocene_certified_panic"),
+        should_panic(expected = "out of bounds")
+    )]
+    #[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
     fn assert_range_eq_can_fail_by_panic() {
         assert_range_eq!("abc", 0..5, "abc");
     }
@@ -386,7 +390,8 @@ mod slice_index {
     //  in the FIRST method it calls, as the macro is not designed
     //  to be used in `should_panic`)
     #[test]
-    #[should_panic(expected = "==")]
+    #[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic(expected = "=="))]
+    #[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
     fn assert_range_eq_can_fail_by_inequality() {
         assert_range_eq!("abc", 0..2, "abc");
     }
@@ -433,7 +438,8 @@ mod slice_index {
                 }
 
                 #[test]
-                #[should_panic(expected = $expect_msg)]
+                #[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic(expected = $expect_msg))]
+                #[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
                 fn index_fail() {
                     let v: String = $data.into();
                     let v: &str = &v;
@@ -441,7 +447,8 @@ mod slice_index {
                 }
 
                 #[test]
-                #[should_panic(expected = $expect_msg)]
+                #[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic(expected = $expect_msg))]
+                #[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
                 fn index_mut_fail() {
                     let mut v: String = $data.into();
                     let v: &mut str = &mut v;
@@ -716,13 +723,21 @@ mod slice_index {
 
     // check the panic includes the prefix of the sliced string
     #[test]
-    #[should_panic(expected = "byte index 1024 is out of bounds of `Lorem ipsum dolor sit amet")]
+    #[cfg_attr(
+        not(feature = "ferrocene_certified_panic"),
+        should_panic(expected = "byte index 1024 is out of bounds of `Lorem ipsum dolor sit amet")
+    )]
+    #[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
     fn test_slice_fail_truncated_1() {
         let _ = &LOREM_PARAGRAPH[..1024];
     }
     // check the truncation in the panic message
     #[test]
-    #[should_panic(expected = "luctus, im`[...]")]
+    #[cfg_attr(
+        not(feature = "ferrocene_certified_panic"),
+        should_panic(expected = "luctus, im`[...]")
+    )]
+    #[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
     fn test_slice_fail_truncated_2() {
         let _ = &LOREM_PARAGRAPH[..1024];
     }
@@ -1963,6 +1978,7 @@ mod pattern {
             }
         }
 
+        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
         if let Some(err) = err {
             panic!("Input skipped range at {err}");
         }

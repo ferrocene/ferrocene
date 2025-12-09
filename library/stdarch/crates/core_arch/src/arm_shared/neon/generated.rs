@@ -11004,7 +11004,6 @@ pub fn vdup_laneq_u64<const N: i32>(a: uint64x2_t) -> uint64x1_t {
 #[doc = "Create a new vector with all lanes set to a value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdup_n_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16"))]
 #[cfg_attr(
@@ -11020,7 +11019,6 @@ pub fn vdup_n_f16(a: f16) -> float16x4_t {
 #[doc = "Create a new vector with all lanes set to a value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdupq_n_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16"))]
 #[cfg_attr(
@@ -33052,7 +33050,6 @@ pub fn vmmlaq_u32(a: uint32x4_t, b: uint8x16_t, c: uint8x16_t) -> uint32x4_t {
 #[doc = "Duplicate element to vector"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmov_n_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16"))]
 #[cfg_attr(
@@ -33068,7 +33065,6 @@ pub fn vmov_n_f16(a: f16) -> float16x4_t {
 #[doc = "Duplicate element to vector"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmovq_n_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16"))]
 #[cfg_attr(

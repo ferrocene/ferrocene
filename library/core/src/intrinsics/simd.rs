@@ -77,7 +77,6 @@ pub const unsafe fn simd_add<T>(x: T, y: T) -> T;
 /// `T` must be a vector of integers or floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_sub<T>(lhs: T, rhs: T) -> T;
 
 /// Multiplies two simd vectors elementwise.

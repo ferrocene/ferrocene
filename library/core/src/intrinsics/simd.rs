@@ -358,7 +358,6 @@ pub unsafe fn simd_ge<T, U>(x: T, y: T) -> U;
 /// of `xy`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_shuffle<T, U, V>(x: T, y: T, idx: U) -> V;
 
 /// Reads a vector of pointers.

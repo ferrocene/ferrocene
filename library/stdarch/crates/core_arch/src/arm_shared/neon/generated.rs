@@ -65444,7 +65444,6 @@ pub unsafe fn vstrq_p128(a: *mut p128, b: p128) {
 #[doc = "Subtract"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.f16"))]
 #[cfg_attr(
@@ -65460,7 +65459,6 @@ pub fn vsub_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 #[doc = "Subtract"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_f16)"]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.f16"))]
 #[cfg_attr(
@@ -65477,7 +65475,6 @@ pub fn vsubq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.f32"))]
 #[cfg_attr(
@@ -65499,7 +65496,6 @@ pub fn vsub_f32(a: float32x2_t, b: float32x2_t) -> float32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.f32"))]
 #[cfg_attr(
@@ -65521,7 +65517,6 @@ pub fn vsubq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_s16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i16"))]
 #[cfg_attr(
@@ -65543,7 +65538,6 @@ pub fn vsub_s16(a: int16x4_t, b: int16x4_t) -> int16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_s16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i16"))]
 #[cfg_attr(
@@ -65565,7 +65559,6 @@ pub fn vsubq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_u16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i16"))]
 #[cfg_attr(
@@ -65587,7 +65580,6 @@ pub fn vsub_u16(a: uint16x4_t, b: uint16x4_t) -> uint16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_u16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i16"))]
 #[cfg_attr(
@@ -65609,7 +65601,6 @@ pub fn vsubq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_s32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i32"))]
 #[cfg_attr(
@@ -65631,7 +65622,6 @@ pub fn vsub_s32(a: int32x2_t, b: int32x2_t) -> int32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_s32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i32"))]
 #[cfg_attr(
@@ -65653,7 +65643,6 @@ pub fn vsubq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_u32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i32"))]
 #[cfg_attr(
@@ -65675,7 +65664,6 @@ pub fn vsub_u32(a: uint32x2_t, b: uint32x2_t) -> uint32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_u32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i32"))]
 #[cfg_attr(
@@ -65697,7 +65685,6 @@ pub fn vsubq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_s64)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i64"))]
 #[cfg_attr(
@@ -65719,7 +65706,6 @@ pub fn vsub_s64(a: int64x1_t, b: int64x1_t) -> int64x1_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_s64)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i64"))]
 #[cfg_attr(
@@ -65741,7 +65727,6 @@ pub fn vsubq_s64(a: int64x2_t, b: int64x2_t) -> int64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_u64)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i64"))]
 #[cfg_attr(
@@ -65763,7 +65748,6 @@ pub fn vsub_u64(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_u64)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i64"))]
 #[cfg_attr(
@@ -65785,7 +65769,6 @@ pub fn vsubq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_s8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i8"))]
 #[cfg_attr(
@@ -65807,7 +65790,6 @@ pub fn vsub_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_s8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i8"))]
 #[cfg_attr(
@@ -65829,7 +65811,6 @@ pub fn vsubq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsub_u8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i8"))]
 #[cfg_attr(
@@ -65851,7 +65832,6 @@ pub fn vsub_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsubq_u8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vsub.i8"))]
 #[cfg_attr(

@@ -23,7 +23,6 @@ pub const unsafe fn simd_insert<T, U>(x: T, idx: u32, val: U) -> T;
 /// `idx` must be const and in-bounds of the vector.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_extract<T, U>(x: T, idx: u32) -> U;
 
 /// Inserts an element into a vector, returning the updated vector.

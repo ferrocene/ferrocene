@@ -161,6 +161,7 @@ pub fn vabal_high_u32(a: uint64x2_t, b: uint32x4_t, c: uint32x4_t) -> uint64x2_t
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fabd))]
 pub fn vabd_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe extern "unadjusted" {
@@ -177,6 +178,7 @@ pub fn vabd_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fabd))]
 pub fn vabdq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -193,6 +195,7 @@ pub fn vabdq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fabd))]
 pub fn vabdd_f64(a: f64, b: f64) -> f64 {
     unsafe { simd_extract!(vabd_f64(vdup_n_f64(a), vdup_n_f64(b)), 0) }
@@ -202,6 +205,7 @@ pub fn vabdd_f64(a: f64, b: f64) -> f64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fabd))]
 pub fn vabds_f32(a: f32, b: f32) -> f32 {
     unsafe { simd_extract!(vabd_f32(vdup_n_f32(a), vdup_n_f32(b)), 0) }
@@ -252,6 +256,7 @@ pub fn vabdl_high_s32(a: int32x4_t, b: int32x4_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sabdl2))]
 pub fn vabdl_high_s8(a: int8x16_t, b: int8x16_t) -> int16x8_t {
     unsafe {
@@ -373,6 +378,7 @@ pub fn vabsd_s64(a: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vaddd_s64(a: i64, b: i64) -> i64 {
     a.wrapping_add(b)
@@ -382,6 +388,7 @@ pub fn vaddd_s64(a: i64, b: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vaddd_u64(a: u64, b: u64) -> u64 {
     a.wrapping_add(b)
@@ -391,6 +398,7 @@ pub fn vaddd_u64(a: u64, b: u64) -> u64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(saddlv))]
 pub fn vaddlv_s16(a: int16x4_t) -> i32 {
     unsafe extern "unadjusted" {
@@ -407,6 +415,7 @@ pub fn vaddlv_s16(a: int16x4_t) -> i32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(saddlv))]
 pub fn vaddlvq_s16(a: int16x8_t) -> i32 {
     unsafe extern "unadjusted" {
@@ -423,6 +432,7 @@ pub fn vaddlvq_s16(a: int16x8_t) -> i32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(saddlv))]
 pub fn vaddlvq_s32(a: int32x4_t) -> i64 {
     unsafe extern "unadjusted" {
@@ -439,6 +449,7 @@ pub fn vaddlvq_s32(a: int32x4_t) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(saddlp))]
 pub fn vaddlv_s32(a: int32x2_t) -> i64 {
     unsafe extern "unadjusted" {
@@ -489,6 +500,7 @@ pub fn vaddlvq_s8(a: int8x16_t) -> i16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uaddlv))]
 pub fn vaddlv_u16(a: uint16x4_t) -> u32 {
     unsafe extern "unadjusted" {
@@ -505,6 +517,7 @@ pub fn vaddlv_u16(a: uint16x4_t) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uaddlv))]
 pub fn vaddlvq_u16(a: uint16x8_t) -> u32 {
     unsafe extern "unadjusted" {
@@ -521,6 +534,7 @@ pub fn vaddlvq_u16(a: uint16x8_t) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uaddlv))]
 pub fn vaddlvq_u32(a: uint32x4_t) -> u64 {
     unsafe extern "unadjusted" {
@@ -537,6 +551,7 @@ pub fn vaddlvq_u32(a: uint32x4_t) -> u64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uaddlp))]
 pub fn vaddlv_u32(a: uint32x2_t) -> u64 {
     unsafe extern "unadjusted" {
@@ -9939,6 +9954,7 @@ pub fn vdivq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fdiv))]
 pub fn vdiv_f32(a: float32x2_t, b: float32x2_t) -> float32x2_t {
     unsafe { simd_div(a, b) }
@@ -9948,6 +9964,7 @@ pub fn vdiv_f32(a: float32x2_t, b: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fdiv))]
 pub fn vdivq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
     unsafe { simd_div(a, b) }
@@ -9957,6 +9974,7 @@ pub fn vdivq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fdiv))]
 pub fn vdiv_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe { simd_div(a, b) }
@@ -9966,6 +9984,7 @@ pub fn vdiv_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fdiv))]
 pub fn vdivq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe { simd_div(a, b) }
@@ -12126,6 +12145,7 @@ pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1_f64_x2(a: *const f64) -> float64x1x2_t {
     unsafe extern "unadjusted" {
@@ -12144,6 +12164,7 @@ pub unsafe fn vld1_f64_x2(a: *const f64) -> float64x1x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1_f64_x3(a: *const f64) -> float64x1x3_t {
     unsafe extern "unadjusted" {
@@ -12162,6 +12183,7 @@ pub unsafe fn vld1_f64_x3(a: *const f64) -> float64x1x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1_f64_x4(a: *const f64) -> float64x1x4_t {
     unsafe extern "unadjusted" {
@@ -12180,6 +12202,7 @@ pub unsafe fn vld1_f64_x4(a: *const f64) -> float64x1x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1q_f64_x2(a: *const f64) -> float64x2x2_t {
     unsafe extern "unadjusted" {
@@ -12198,6 +12221,7 @@ pub unsafe fn vld1q_f64_x2(a: *const f64) -> float64x2x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1q_f64_x3(a: *const f64) -> float64x2x3_t {
     unsafe extern "unadjusted" {
@@ -12216,6 +12240,7 @@ pub unsafe fn vld1q_f64_x3(a: *const f64) -> float64x2x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1q_f64_x4(a: *const f64) -> float64x2x4_t {
     unsafe extern "unadjusted" {
@@ -12291,6 +12316,7 @@ pub unsafe fn vld2q_dup_s64(a: *const i64) -> int64x2x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vld2_f64(a: *const f64) -> float64x1x2_t {
     unsafe extern "unadjusted" {
@@ -12437,6 +12463,7 @@ pub unsafe fn vld2q_dup_u64(a: *const u64) -> uint64x2x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld2))]
 pub unsafe fn vld2q_f64(a: *const f64) -> float64x2x2_t {
     unsafe extern "unadjusted" {
@@ -12455,6 +12482,7 @@ pub unsafe fn vld2q_f64(a: *const f64) -> float64x2x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld2))]
 pub unsafe fn vld2q_s64(a: *const i64) -> int64x2x2_t {
     unsafe extern "unadjusted" {
@@ -12623,6 +12651,7 @@ pub unsafe fn vld2q_p64(a: *const p64) -> poly64x2x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld2))]
 pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
     transmute(vld2q_s64(transmute(a)))
@@ -12635,6 +12664,7 @@ pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld2))]
 pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
     let mut ret_val: uint64x2x2_t = transmute(vld2q_s64(transmute(a)));
@@ -12649,6 +12679,7 @@ pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3r))]
 pub unsafe fn vld3_dup_f64(a: *const f64) -> float64x1x3_t {
     unsafe extern "unadjusted" {
@@ -12667,6 +12698,7 @@ pub unsafe fn vld3_dup_f64(a: *const f64) -> float64x1x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3r))]
 pub unsafe fn vld3q_dup_f64(a: *const f64) -> float64x2x3_t {
     unsafe extern "unadjusted" {
@@ -12685,6 +12717,7 @@ pub unsafe fn vld3q_dup_f64(a: *const f64) -> float64x2x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3r))]
 pub unsafe fn vld3q_dup_s64(a: *const i64) -> int64x2x3_t {
     unsafe extern "unadjusted" {
@@ -12703,6 +12736,7 @@ pub unsafe fn vld3q_dup_s64(a: *const i64) -> int64x2x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vld3_f64(a: *const f64) -> float64x1x3_t {
     unsafe extern "unadjusted" {
@@ -12834,6 +12868,7 @@ pub unsafe fn vld3q_dup_p64(a: *const p64) -> poly64x2x3_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3r))]
 pub unsafe fn vld3q_dup_u64(a: *const u64) -> uint64x2x3_t {
     transmute(vld3q_dup_s64(transmute(a)))
@@ -12846,6 +12881,7 @@ pub unsafe fn vld3q_dup_u64(a: *const u64) -> uint64x2x3_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3r))]
 pub unsafe fn vld3q_dup_u64(a: *const u64) -> uint64x2x3_t {
     let mut ret_val: uint64x2x3_t = transmute(vld3q_dup_s64(transmute(a)));
@@ -12861,6 +12897,7 @@ pub unsafe fn vld3q_dup_u64(a: *const u64) -> uint64x2x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3))]
 pub unsafe fn vld3q_f64(a: *const f64) -> float64x2x3_t {
     unsafe extern "unadjusted" {
@@ -12879,6 +12916,7 @@ pub unsafe fn vld3q_f64(a: *const f64) -> float64x2x3_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3))]
 pub unsafe fn vld3q_s64(a: *const i64) -> int64x2x3_t {
     unsafe extern "unadjusted" {
@@ -13065,6 +13103,7 @@ pub unsafe fn vld3q_p64(a: *const p64) -> poly64x2x3_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3))]
 pub unsafe fn vld3q_u64(a: *const u64) -> uint64x2x3_t {
     transmute(vld3q_s64(transmute(a)))
@@ -13077,6 +13116,7 @@ pub unsafe fn vld3q_u64(a: *const u64) -> uint64x2x3_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld3))]
 pub unsafe fn vld3q_u64(a: *const u64) -> uint64x2x3_t {
     let mut ret_val: uint64x2x3_t = transmute(vld3q_s64(transmute(a)));
@@ -13524,6 +13564,7 @@ pub unsafe fn vld4q_p64(a: *const p64) -> poly64x2x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld4))]
 pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
     transmute(vld4q_s64(transmute(a)))
@@ -13536,6 +13577,7 @@ pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld4))]
 pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
     let mut ret_val: uint64x2x4_t = transmute(vld4q_s64(transmute(a)));
@@ -13973,6 +14015,7 @@ pub unsafe fn vluti4q_laneq_p8<const LANE: i32>(a: poly8x16_t, b: uint8x16_t) ->
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmax))]
 pub fn vmax_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe extern "unadjusted" {
@@ -13989,6 +14032,7 @@ pub fn vmax_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmax))]
 pub fn vmaxq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -14023,6 +14067,7 @@ pub fn vmaxh_f16(a: f16, b: f16) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxnm))]
 pub fn vmaxnm_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe { simd_fmax(a, b) }
@@ -14032,6 +14077,7 @@ pub fn vmaxnm_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxnm))]
 pub fn vmaxnmq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe { simd_fmax(a, b) }
@@ -14074,6 +14120,7 @@ pub fn vmaxnmvq_f16(a: float16x8_t) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxnmp))]
 pub fn vmaxnmv_f32(a: float32x2_t) -> f32 {
     unsafe { simd_reduce_max(a) }
@@ -14083,6 +14130,7 @@ pub fn vmaxnmv_f32(a: float32x2_t) -> f32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxnmp))]
 pub fn vmaxnmvq_f64(a: float64x2_t) -> f64 {
     unsafe { simd_reduce_max(a) }
@@ -14092,6 +14140,7 @@ pub fn vmaxnmvq_f64(a: float64x2_t) -> f64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxnmv))]
 pub fn vmaxnmvq_f32(a: float32x4_t) -> f32 {
     unsafe { simd_reduce_max(a) }
@@ -14308,6 +14357,7 @@ pub fn vmaxvq_u32(a: uint32x4_t) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmin))]
 pub fn vmin_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe extern "unadjusted" {
@@ -14324,6 +14374,7 @@ pub fn vmin_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmin))]
 pub fn vminq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -14358,6 +14409,7 @@ pub fn vminh_f16(a: f16, b: f16) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fminnm))]
 pub fn vminnm_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe { simd_fmin(a, b) }
@@ -14367,6 +14419,7 @@ pub fn vminnm_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fminnm))]
 pub fn vminnmq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe { simd_fmin(a, b) }
@@ -15374,6 +15427,7 @@ pub fn vmlsl_high_u32(a: uint64x2_t, b: uint32x4_t, c: uint32x4_t) -> uint64x2_t
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sxtl2))]
 pub fn vmovl_high_s8(a: int8x16_t) -> int16x8_t {
     unsafe {
@@ -15386,6 +15440,7 @@ pub fn vmovl_high_s8(a: int8x16_t) -> int16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sxtl2))]
 pub fn vmovl_high_s16(a: int16x8_t) -> int32x4_t {
     unsafe {
@@ -15398,6 +15453,7 @@ pub fn vmovl_high_s16(a: int16x8_t) -> int32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sxtl2))]
 pub fn vmovl_high_s32(a: int32x4_t) -> int64x2_t {
     unsafe {
@@ -15410,6 +15466,7 @@ pub fn vmovl_high_s32(a: int32x4_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uxtl2))]
 pub fn vmovl_high_u8(a: uint8x16_t) -> uint16x8_t {
     unsafe {
@@ -15422,6 +15479,7 @@ pub fn vmovl_high_u8(a: uint8x16_t) -> uint16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uxtl2))]
 pub fn vmovl_high_u16(a: uint16x8_t) -> uint32x4_t {
     unsafe {
@@ -15434,6 +15492,7 @@ pub fn vmovl_high_u16(a: uint16x8_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uxtl2))]
 pub fn vmovl_high_u32(a: uint32x4_t) -> uint64x2_t {
     unsafe {
@@ -15446,6 +15505,7 @@ pub fn vmovl_high_u32(a: uint32x4_t) -> uint64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(xtn2))]
 pub fn vmovn_high_s16(a: int8x8_t, b: int16x8_t) -> int8x16_t {
     unsafe {
@@ -15458,6 +15518,7 @@ pub fn vmovn_high_s16(a: int8x8_t, b: int16x8_t) -> int8x16_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(xtn2))]
 pub fn vmovn_high_s32(a: int16x4_t, b: int32x4_t) -> int16x8_t {
     unsafe {
@@ -15470,6 +15531,7 @@ pub fn vmovn_high_s32(a: int16x4_t, b: int32x4_t) -> int16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(xtn2))]
 pub fn vmovn_high_s64(a: int32x2_t, b: int64x2_t) -> int32x4_t {
     unsafe {
@@ -15482,6 +15544,7 @@ pub fn vmovn_high_s64(a: int32x2_t, b: int64x2_t) -> int32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(xtn2))]
 pub fn vmovn_high_u16(a: uint8x8_t, b: uint16x8_t) -> uint8x16_t {
     unsafe {
@@ -15494,6 +15557,7 @@ pub fn vmovn_high_u16(a: uint8x8_t, b: uint16x8_t) -> uint8x16_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(xtn2))]
 pub fn vmovn_high_u32(a: uint16x4_t, b: uint32x4_t) -> uint16x8_t {
     unsafe {
@@ -15506,6 +15570,7 @@ pub fn vmovn_high_u32(a: uint16x4_t, b: uint32x4_t) -> uint16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(xtn2))]
 pub fn vmovn_high_u64(a: uint32x2_t, b: uint64x2_t) -> uint32x4_t {
     unsafe {
@@ -15518,6 +15583,7 @@ pub fn vmovn_high_u64(a: uint32x2_t, b: uint64x2_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmul))]
 pub fn vmul_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe { simd_mul(a, b) }
@@ -15527,6 +15593,7 @@ pub fn vmul_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmul))]
 pub fn vmulq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe { simd_mul(a, b) }
@@ -15939,6 +16006,7 @@ pub fn vmull_high_p8(a: poly8x16_t, b: poly8x16_t) -> poly16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(smull2))]
 pub fn vmull_high_s8(a: int8x16_t, b: int8x16_t) -> int16x8_t {
     unsafe {
@@ -15952,6 +16020,7 @@ pub fn vmull_high_s8(a: int8x16_t, b: int8x16_t) -> int16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(smull2))]
 pub fn vmull_high_s16(a: int16x8_t, b: int16x8_t) -> int32x4_t {
     unsafe {
@@ -15965,6 +16034,7 @@ pub fn vmull_high_s16(a: int16x8_t, b: int16x8_t) -> int32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(smull2))]
 pub fn vmull_high_s32(a: int32x4_t, b: int32x4_t) -> int64x2_t {
     unsafe {
@@ -15978,6 +16048,7 @@ pub fn vmull_high_s32(a: int32x4_t, b: int32x4_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(umull2))]
 pub fn vmull_high_u8(a: uint8x16_t, b: uint8x16_t) -> uint16x8_t {
     unsafe {
@@ -15991,6 +16062,7 @@ pub fn vmull_high_u8(a: uint8x16_t, b: uint8x16_t) -> uint16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(umull2))]
 pub fn vmull_high_u16(a: uint16x8_t, b: uint16x8_t) -> uint32x4_t {
     unsafe {
@@ -16004,6 +16076,7 @@ pub fn vmull_high_u16(a: uint16x8_t, b: uint16x8_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(umull2))]
 pub fn vmull_high_u32(a: uint32x4_t, b: uint32x4_t) -> uint64x2_t {
     unsafe {
@@ -16139,6 +16212,7 @@ pub fn vmulxq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmulx))]
 pub fn vmulx_f32(a: float32x2_t, b: float32x2_t) -> float32x2_t {
     unsafe extern "unadjusted" {
@@ -16155,6 +16229,7 @@ pub fn vmulx_f32(a: float32x2_t, b: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmulx))]
 pub fn vmulxq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
     unsafe extern "unadjusted" {
@@ -16171,6 +16246,7 @@ pub fn vmulxq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmulx))]
 pub fn vmulx_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe extern "unadjusted" {
@@ -16187,6 +16263,7 @@ pub fn vmulx_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmulx))]
 pub fn vmulxq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -16417,6 +16494,7 @@ pub fn vmulxq_n_f16(a: float16x8_t, b: f16) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmulx))]
 pub fn vmulxd_f64(a: f64, b: f64) -> f64 {
     unsafe extern "unadjusted" {
@@ -16433,6 +16511,7 @@ pub fn vmulxd_f64(a: f64, b: f64) -> f64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmulx))]
 pub fn vmulxs_f32(a: f32, b: f32) -> f32 {
     unsafe extern "unadjusted" {
@@ -16573,6 +16652,7 @@ pub fn vnegq_f64(a: float64x2_t) -> float64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(neg))]
 pub fn vneg_s64(a: int64x1_t) -> int64x1_t {
     unsafe { simd_neg(a) }
@@ -16582,6 +16662,7 @@ pub fn vneg_s64(a: int64x1_t) -> int64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(neg))]
 pub fn vnegq_s64(a: int64x2_t) -> int64x2_t {
     unsafe { simd_neg(a) }
@@ -16591,6 +16672,7 @@ pub fn vnegq_s64(a: int64x2_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(neg))]
 pub fn vnegd_s64(a: i64) -> i64 {
     a.wrapping_neg()
@@ -16611,6 +16693,7 @@ pub fn vnegh_f16(a: f16) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vpaddd_f64(a: float64x2_t) -> f64 {
     unsafe {
@@ -16624,6 +16707,7 @@ pub fn vpaddd_f64(a: float64x2_t) -> f64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vpadds_f32(a: float32x2_t) -> f32 {
     unsafe {
@@ -16675,6 +16759,7 @@ pub fn vpaddq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(faddp))]
 pub fn vpaddq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
     unsafe extern "unadjusted" {
@@ -16691,6 +16776,7 @@ pub fn vpaddq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(faddp))]
 pub fn vpaddq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -17182,6 +17268,7 @@ pub fn vpmaxq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxp))]
 pub fn vpmaxqd_f64(a: float64x2_t) -> f64 {
     unsafe extern "unadjusted" {
@@ -17198,6 +17285,7 @@ pub fn vpmaxqd_f64(a: float64x2_t) -> f64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fmaxp))]
 pub fn vpmaxs_f32(a: float32x2_t) -> f32 {
     unsafe extern "unadjusted" {
@@ -17507,6 +17595,7 @@ pub fn vpminq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fminp))]
 pub fn vpminqd_f64(a: float64x2_t) -> f64 {
     unsafe extern "unadjusted" {
@@ -17523,6 +17612,7 @@ pub fn vpminqd_f64(a: float64x2_t) -> f64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fminp))]
 pub fn vpmins_f32(a: float32x2_t) -> f32 {
     unsafe extern "unadjusted" {
@@ -17627,6 +17717,7 @@ pub fn vqabsd_s64(a: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqadd))]
 pub fn vqaddb_s8(a: i8, b: i8) -> i8 {
     let a: int8x8_t = vdup_n_s8(a);
@@ -17638,6 +17729,7 @@ pub fn vqaddb_s8(a: i8, b: i8) -> i8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqadd))]
 pub fn vqaddh_s16(a: i16, b: i16) -> i16 {
     let a: int16x4_t = vdup_n_s16(a);
@@ -17649,6 +17741,7 @@ pub fn vqaddh_s16(a: i16, b: i16) -> i16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqadd))]
 pub fn vqaddb_u8(a: u8, b: u8) -> u8 {
     let a: uint8x8_t = vdup_n_u8(a);
@@ -17660,6 +17753,7 @@ pub fn vqaddb_u8(a: u8, b: u8) -> u8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqadd))]
 pub fn vqaddh_u16(a: u16, b: u16) -> u16 {
     let a: uint16x4_t = vdup_n_u16(a);
@@ -17671,6 +17765,7 @@ pub fn vqaddh_u16(a: u16, b: u16) -> u16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqadd))]
 pub fn vqadds_s32(a: i32, b: i32) -> i32 {
     unsafe extern "unadjusted" {
@@ -17687,6 +17782,7 @@ pub fn vqadds_s32(a: i32, b: i32) -> i32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqadd))]
 pub fn vqaddd_s64(a: i64, b: i64) -> i64 {
     unsafe extern "unadjusted" {
@@ -17703,6 +17799,7 @@ pub fn vqaddd_s64(a: i64, b: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqadd))]
 pub fn vqadds_u32(a: u32, b: u32) -> u32 {
     unsafe extern "unadjusted" {
@@ -17719,6 +17816,7 @@ pub fn vqadds_u32(a: u32, b: u32) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqadd))]
 pub fn vqaddd_u64(a: u64, b: u64) -> u64 {
     unsafe extern "unadjusted" {
@@ -18682,6 +18780,7 @@ pub fn vqmovund_s64(a: i64) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqneg))]
 pub fn vqneg_s64(a: int64x1_t) -> int64x1_t {
     unsafe extern "unadjusted" {
@@ -18698,6 +18797,7 @@ pub fn vqneg_s64(a: int64x1_t) -> int64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqneg))]
 pub fn vqnegq_s64(a: int64x2_t) -> int64x2_t {
     unsafe extern "unadjusted" {
@@ -18714,6 +18814,7 @@ pub fn vqnegq_s64(a: int64x2_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqneg))]
 pub fn vqnegb_s8(a: i8) -> i8 {
     unsafe { simd_extract!(vqneg_s8(vdup_n_s8(a)), 0) }
@@ -18723,6 +18824,7 @@ pub fn vqnegb_s8(a: i8) -> i8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqneg))]
 pub fn vqnegh_s16(a: i16) -> i16 {
     unsafe { simd_extract!(vqneg_s16(vdup_n_s16(a)), 0) }
@@ -18732,6 +18834,7 @@ pub fn vqnegh_s16(a: i16) -> i16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqneg))]
 pub fn vqnegs_s32(a: i32) -> i32 {
     unsafe { simd_extract!(vqneg_s32(vdup_n_s32(a)), 0) }
@@ -18741,6 +18844,7 @@ pub fn vqnegs_s32(a: i32) -> i32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqneg))]
 pub fn vqnegd_s64(a: i64) -> i64 {
     unsafe { simd_extract!(vqneg_s64(vdup_n_s64(a)), 0) }
@@ -20253,6 +20357,7 @@ pub fn vqshruns_n_s32<const N: i32>(a: i32) -> u16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqsub))]
 pub fn vqsubb_s8(a: i8, b: i8) -> i8 {
     let a: int8x8_t = vdup_n_s8(a);
@@ -20264,6 +20369,7 @@ pub fn vqsubb_s8(a: i8, b: i8) -> i8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqsub))]
 pub fn vqsubh_s16(a: i16, b: i16) -> i16 {
     let a: int16x4_t = vdup_n_s16(a);
@@ -20275,6 +20381,7 @@ pub fn vqsubh_s16(a: i16, b: i16) -> i16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqsub))]
 pub fn vqsubb_u8(a: u8, b: u8) -> u8 {
     let a: uint8x8_t = vdup_n_u8(a);
@@ -20286,6 +20393,7 @@ pub fn vqsubb_u8(a: u8, b: u8) -> u8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqsub))]
 pub fn vqsubh_u16(a: u16, b: u16) -> u16 {
     let a: uint16x4_t = vdup_n_u16(a);
@@ -20297,6 +20405,7 @@ pub fn vqsubh_u16(a: u16, b: u16) -> u16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqsub))]
 pub fn vqsubs_s32(a: i32, b: i32) -> i32 {
     unsafe extern "unadjusted" {
@@ -20313,6 +20422,7 @@ pub fn vqsubs_s32(a: i32, b: i32) -> i32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(sqsub))]
 pub fn vqsubd_s64(a: i64, b: i64) -> i64 {
     unsafe extern "unadjusted" {
@@ -20329,6 +20439,7 @@ pub fn vqsubd_s64(a: i64, b: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqsub))]
 pub fn vqsubs_u32(a: u32, b: u32) -> u32 {
     unsafe extern "unadjusted" {
@@ -20345,6 +20456,7 @@ pub fn vqsubs_u32(a: u32, b: u32) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(uqsub))]
 pub fn vqsubd_u64(a: u64, b: u64) -> u64 {
     unsafe extern "unadjusted" {
@@ -22349,6 +22461,7 @@ pub fn vrax1q_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbit_s8(a: int8x8_t) -> int8x8_t {
     unsafe { simd_bitreverse(a) }
@@ -22358,6 +22471,7 @@ pub fn vrbit_s8(a: int8x8_t) -> int8x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbitq_s8(a: int8x16_t) -> int8x16_t {
     unsafe { simd_bitreverse(a) }
@@ -22368,6 +22482,7 @@ pub fn vrbitq_s8(a: int8x16_t) -> int8x16_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbit_u8(a: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vrbit_s8(transmute(a))) }
@@ -22378,6 +22493,7 @@ pub fn vrbit_u8(a: uint8x8_t) -> uint8x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbit_u8(a: uint8x8_t) -> uint8x8_t {
     let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -22392,6 +22508,7 @@ pub fn vrbit_u8(a: uint8x8_t) -> uint8x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbitq_u8(a: uint8x16_t) -> uint8x16_t {
     unsafe { transmute(vrbitq_s8(transmute(a))) }
@@ -22402,6 +22519,7 @@ pub fn vrbitq_u8(a: uint8x16_t) -> uint8x16_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbitq_u8(a: uint8x16_t) -> uint8x16_t {
     let a: uint8x16_t =
@@ -22421,6 +22539,7 @@ pub fn vrbitq_u8(a: uint8x16_t) -> uint8x16_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbit_p8(a: poly8x8_t) -> poly8x8_t {
     unsafe { transmute(vrbit_s8(transmute(a))) }
@@ -22431,6 +22550,7 @@ pub fn vrbit_p8(a: poly8x8_t) -> poly8x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbit_p8(a: poly8x8_t) -> poly8x8_t {
     let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -22445,6 +22565,7 @@ pub fn vrbit_p8(a: poly8x8_t) -> poly8x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbitq_p8(a: poly8x16_t) -> poly8x16_t {
     unsafe { transmute(vrbitq_s8(transmute(a))) }
@@ -22455,6 +22576,7 @@ pub fn vrbitq_p8(a: poly8x16_t) -> poly8x16_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(rbit))]
 pub fn vrbitq_p8(a: poly8x16_t) -> poly8x16_t {
     let a: poly8x16_t =
@@ -22806,6 +22928,7 @@ pub fn vreinterpretq_f16_f64(a: float64x2_t) -> float16x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p128(a: p128) -> float64x2_t {
     unsafe { transmute(a) }
@@ -22816,6 +22939,7 @@ pub fn vreinterpretq_f64_p128(a: p128) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p128(a: p128) -> float64x2_t {
     unsafe {
@@ -22829,6 +22953,7 @@ pub fn vreinterpretq_f64_p128(a: p128) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_f32(a: float32x2_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -22839,6 +22964,7 @@ pub fn vreinterpret_f64_f32(a: float32x2_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_f32(a: float32x2_t) -> float64x1_t {
     let a: float32x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -22850,6 +22976,7 @@ pub fn vreinterpret_f64_f32(a: float32x2_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p64_f32(a: float32x2_t) -> poly64x1_t {
     unsafe { transmute(a) }
@@ -22860,6 +22987,7 @@ pub fn vreinterpret_p64_f32(a: float32x2_t) -> poly64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p64_f32(a: float32x2_t) -> poly64x1_t {
     let a: float32x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -22871,6 +22999,7 @@ pub fn vreinterpret_p64_f32(a: float32x2_t) -> poly64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_f32(a: float32x4_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -22881,6 +23010,7 @@ pub fn vreinterpretq_f64_f32(a: float32x4_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_f32(a: float32x4_t) -> float64x2_t {
     let a: float32x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -22895,6 +23025,7 @@ pub fn vreinterpretq_f64_f32(a: float32x4_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_f32(a: float32x4_t) -> poly64x2_t {
     unsafe { transmute(a) }
@@ -22905,6 +23036,7 @@ pub fn vreinterpretq_p64_f32(a: float32x4_t) -> poly64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_f32(a: float32x4_t) -> poly64x2_t {
     let a: float32x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -22919,6 +23051,7 @@ pub fn vreinterpretq_p64_f32(a: float32x4_t) -> poly64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f32_f64(a: float64x1_t) -> float32x2_t {
     unsafe { transmute(a) }
@@ -22929,6 +23062,7 @@ pub fn vreinterpret_f32_f64(a: float64x1_t) -> float32x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f32_f64(a: float64x1_t) -> float32x2_t {
     unsafe {
@@ -22942,6 +23076,7 @@ pub fn vreinterpret_f32_f64(a: float64x1_t) -> float32x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s8_f64(a: float64x1_t) -> int8x8_t {
     unsafe { transmute(a) }
@@ -22952,6 +23087,7 @@ pub fn vreinterpret_s8_f64(a: float64x1_t) -> int8x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s8_f64(a: float64x1_t) -> int8x8_t {
     unsafe {
@@ -22965,6 +23101,7 @@ pub fn vreinterpret_s8_f64(a: float64x1_t) -> int8x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s16_f64(a: float64x1_t) -> int16x4_t {
     unsafe { transmute(a) }
@@ -22975,6 +23112,7 @@ pub fn vreinterpret_s16_f64(a: float64x1_t) -> int16x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s16_f64(a: float64x1_t) -> int16x4_t {
     unsafe {
@@ -22988,6 +23126,7 @@ pub fn vreinterpret_s16_f64(a: float64x1_t) -> int16x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s32_f64(a: float64x1_t) -> int32x2_t {
     unsafe { transmute(a) }
@@ -22998,6 +23137,7 @@ pub fn vreinterpret_s32_f64(a: float64x1_t) -> int32x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s32_f64(a: float64x1_t) -> int32x2_t {
     unsafe {
@@ -23010,6 +23150,7 @@ pub fn vreinterpret_s32_f64(a: float64x1_t) -> int32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s64_f64(a: float64x1_t) -> int64x1_t {
     unsafe { transmute(a) }
@@ -23020,6 +23161,7 @@ pub fn vreinterpret_s64_f64(a: float64x1_t) -> int64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u8_f64(a: float64x1_t) -> uint8x8_t {
     unsafe { transmute(a) }
@@ -23030,6 +23172,7 @@ pub fn vreinterpret_u8_f64(a: float64x1_t) -> uint8x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u8_f64(a: float64x1_t) -> uint8x8_t {
     unsafe {
@@ -23043,6 +23186,7 @@ pub fn vreinterpret_u8_f64(a: float64x1_t) -> uint8x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u16_f64(a: float64x1_t) -> uint16x4_t {
     unsafe { transmute(a) }
@@ -23053,6 +23197,7 @@ pub fn vreinterpret_u16_f64(a: float64x1_t) -> uint16x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u16_f64(a: float64x1_t) -> uint16x4_t {
     unsafe {
@@ -23066,6 +23211,7 @@ pub fn vreinterpret_u16_f64(a: float64x1_t) -> uint16x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u32_f64(a: float64x1_t) -> uint32x2_t {
     unsafe { transmute(a) }
@@ -23076,6 +23222,7 @@ pub fn vreinterpret_u32_f64(a: float64x1_t) -> uint32x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u32_f64(a: float64x1_t) -> uint32x2_t {
     unsafe {
@@ -23088,6 +23235,7 @@ pub fn vreinterpret_u32_f64(a: float64x1_t) -> uint32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u64_f64(a: float64x1_t) -> uint64x1_t {
     unsafe { transmute(a) }
@@ -23098,6 +23246,7 @@ pub fn vreinterpret_u64_f64(a: float64x1_t) -> uint64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p8_f64(a: float64x1_t) -> poly8x8_t {
     unsafe { transmute(a) }
@@ -23108,6 +23257,7 @@ pub fn vreinterpret_p8_f64(a: float64x1_t) -> poly8x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p8_f64(a: float64x1_t) -> poly8x8_t {
     unsafe {
@@ -23121,6 +23271,7 @@ pub fn vreinterpret_p8_f64(a: float64x1_t) -> poly8x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p16_f64(a: float64x1_t) -> poly16x4_t {
     unsafe { transmute(a) }
@@ -23131,6 +23282,7 @@ pub fn vreinterpret_p16_f64(a: float64x1_t) -> poly16x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p16_f64(a: float64x1_t) -> poly16x4_t {
     unsafe {
@@ -23143,6 +23295,7 @@ pub fn vreinterpret_p16_f64(a: float64x1_t) -> poly16x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p64_f64(a: float64x1_t) -> poly64x1_t {
     unsafe { transmute(a) }
@@ -23153,6 +23306,7 @@ pub fn vreinterpret_p64_f64(a: float64x1_t) -> poly64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p128_f64(a: float64x2_t) -> p128 {
     unsafe { transmute(a) }
@@ -23163,6 +23317,7 @@ pub fn vreinterpretq_p128_f64(a: float64x2_t) -> p128 {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p128_f64(a: float64x2_t) -> p128 {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23174,6 +23329,7 @@ pub fn vreinterpretq_p128_f64(a: float64x2_t) -> p128 {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f32_f64(a: float64x2_t) -> float32x4_t {
     unsafe { transmute(a) }
@@ -23184,6 +23340,7 @@ pub fn vreinterpretq_f32_f64(a: float64x2_t) -> float32x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f32_f64(a: float64x2_t) -> float32x4_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23198,6 +23355,7 @@ pub fn vreinterpretq_f32_f64(a: float64x2_t) -> float32x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s8_f64(a: float64x2_t) -> int8x16_t {
     unsafe { transmute(a) }
@@ -23208,6 +23366,7 @@ pub fn vreinterpretq_s8_f64(a: float64x2_t) -> int8x16_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s8_f64(a: float64x2_t) -> int8x16_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23226,6 +23385,7 @@ pub fn vreinterpretq_s8_f64(a: float64x2_t) -> int8x16_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s16_f64(a: float64x2_t) -> int16x8_t {
     unsafe { transmute(a) }
@@ -23236,6 +23396,7 @@ pub fn vreinterpretq_s16_f64(a: float64x2_t) -> int16x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s16_f64(a: float64x2_t) -> int16x8_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23250,6 +23411,7 @@ pub fn vreinterpretq_s16_f64(a: float64x2_t) -> int16x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s32_f64(a: float64x2_t) -> int32x4_t {
     unsafe { transmute(a) }
@@ -23260,6 +23422,7 @@ pub fn vreinterpretq_s32_f64(a: float64x2_t) -> int32x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s32_f64(a: float64x2_t) -> int32x4_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23274,6 +23437,7 @@ pub fn vreinterpretq_s32_f64(a: float64x2_t) -> int32x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s64_f64(a: float64x2_t) -> int64x2_t {
     unsafe { transmute(a) }
@@ -23284,6 +23448,7 @@ pub fn vreinterpretq_s64_f64(a: float64x2_t) -> int64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s64_f64(a: float64x2_t) -> int64x2_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23298,6 +23463,7 @@ pub fn vreinterpretq_s64_f64(a: float64x2_t) -> int64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u8_f64(a: float64x2_t) -> uint8x16_t {
     unsafe { transmute(a) }
@@ -23308,6 +23474,7 @@ pub fn vreinterpretq_u8_f64(a: float64x2_t) -> uint8x16_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u8_f64(a: float64x2_t) -> uint8x16_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23326,6 +23493,7 @@ pub fn vreinterpretq_u8_f64(a: float64x2_t) -> uint8x16_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u16_f64(a: float64x2_t) -> uint16x8_t {
     unsafe { transmute(a) }
@@ -23336,6 +23504,7 @@ pub fn vreinterpretq_u16_f64(a: float64x2_t) -> uint16x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u16_f64(a: float64x2_t) -> uint16x8_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23350,6 +23519,7 @@ pub fn vreinterpretq_u16_f64(a: float64x2_t) -> uint16x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u32_f64(a: float64x2_t) -> uint32x4_t {
     unsafe { transmute(a) }
@@ -23360,6 +23530,7 @@ pub fn vreinterpretq_u32_f64(a: float64x2_t) -> uint32x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u32_f64(a: float64x2_t) -> uint32x4_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23374,6 +23545,7 @@ pub fn vreinterpretq_u32_f64(a: float64x2_t) -> uint32x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u64_f64(a: float64x2_t) -> uint64x2_t {
     unsafe { transmute(a) }
@@ -23384,6 +23556,7 @@ pub fn vreinterpretq_u64_f64(a: float64x2_t) -> uint64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u64_f64(a: float64x2_t) -> uint64x2_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23398,6 +23571,7 @@ pub fn vreinterpretq_u64_f64(a: float64x2_t) -> uint64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p8_f64(a: float64x2_t) -> poly8x16_t {
     unsafe { transmute(a) }
@@ -23408,6 +23582,7 @@ pub fn vreinterpretq_p8_f64(a: float64x2_t) -> poly8x16_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p8_f64(a: float64x2_t) -> poly8x16_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23426,6 +23601,7 @@ pub fn vreinterpretq_p8_f64(a: float64x2_t) -> poly8x16_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p16_f64(a: float64x2_t) -> poly16x8_t {
     unsafe { transmute(a) }
@@ -23436,6 +23612,7 @@ pub fn vreinterpretq_p16_f64(a: float64x2_t) -> poly16x8_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p16_f64(a: float64x2_t) -> poly16x8_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23450,6 +23627,7 @@ pub fn vreinterpretq_p16_f64(a: float64x2_t) -> poly16x8_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_f64(a: float64x2_t) -> poly64x2_t {
     unsafe { transmute(a) }
@@ -23460,6 +23638,7 @@ pub fn vreinterpretq_p64_f64(a: float64x2_t) -> poly64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_f64(a: float64x2_t) -> poly64x2_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23474,6 +23653,7 @@ pub fn vreinterpretq_p64_f64(a: float64x2_t) -> poly64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s8(a: int8x8_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23484,6 +23664,7 @@ pub fn vreinterpret_f64_s8(a: int8x8_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s8(a: int8x8_t) -> float64x1_t {
     let a: int8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -23495,6 +23676,7 @@ pub fn vreinterpret_f64_s8(a: int8x8_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s8(a: int8x16_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23505,6 +23687,7 @@ pub fn vreinterpretq_f64_s8(a: int8x16_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s8(a: int8x16_t) -> float64x2_t {
     let a: int8x16_t =
@@ -23520,6 +23703,7 @@ pub fn vreinterpretq_f64_s8(a: int8x16_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s16(a: int16x4_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23530,6 +23714,7 @@ pub fn vreinterpret_f64_s16(a: int16x4_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s16(a: int16x4_t) -> float64x1_t {
     let a: int16x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -23541,6 +23726,7 @@ pub fn vreinterpret_f64_s16(a: int16x4_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s16(a: int16x8_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23551,6 +23737,7 @@ pub fn vreinterpretq_f64_s16(a: int16x8_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s16(a: int16x8_t) -> float64x2_t {
     let a: int16x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -23565,6 +23752,7 @@ pub fn vreinterpretq_f64_s16(a: int16x8_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s32(a: int32x2_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23575,6 +23763,7 @@ pub fn vreinterpret_f64_s32(a: int32x2_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s32(a: int32x2_t) -> float64x1_t {
     let a: int32x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23586,6 +23775,7 @@ pub fn vreinterpret_f64_s32(a: int32x2_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s32(a: int32x4_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23596,6 +23786,7 @@ pub fn vreinterpretq_f64_s32(a: int32x4_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s32(a: int32x4_t) -> float64x2_t {
     let a: int32x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -23609,6 +23800,7 @@ pub fn vreinterpretq_f64_s32(a: int32x4_t) -> float64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_s64(a: int64x1_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23618,6 +23810,7 @@ pub fn vreinterpret_f64_s64(a: int64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p64_s64(a: int64x1_t) -> poly64x1_t {
     unsafe { transmute(a) }
@@ -23628,6 +23821,7 @@ pub fn vreinterpret_p64_s64(a: int64x1_t) -> poly64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s64(a: int64x2_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23638,6 +23832,7 @@ pub fn vreinterpretq_f64_s64(a: int64x2_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_s64(a: int64x2_t) -> float64x2_t {
     let a: int64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23652,6 +23847,7 @@ pub fn vreinterpretq_f64_s64(a: int64x2_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_s64(a: int64x2_t) -> poly64x2_t {
     unsafe { transmute(a) }
@@ -23662,6 +23858,7 @@ pub fn vreinterpretq_p64_s64(a: int64x2_t) -> poly64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_s64(a: int64x2_t) -> poly64x2_t {
     let a: int64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23676,6 +23873,7 @@ pub fn vreinterpretq_p64_s64(a: int64x2_t) -> poly64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u8(a: uint8x8_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23686,6 +23884,7 @@ pub fn vreinterpret_f64_u8(a: uint8x8_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u8(a: uint8x8_t) -> float64x1_t {
     let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -23697,6 +23896,7 @@ pub fn vreinterpret_f64_u8(a: uint8x8_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u8(a: uint8x16_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23707,6 +23907,7 @@ pub fn vreinterpretq_f64_u8(a: uint8x16_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u8(a: uint8x16_t) -> float64x2_t {
     let a: uint8x16_t =
@@ -23722,6 +23923,7 @@ pub fn vreinterpretq_f64_u8(a: uint8x16_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u16(a: uint16x4_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23732,6 +23934,7 @@ pub fn vreinterpret_f64_u16(a: uint16x4_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u16(a: uint16x4_t) -> float64x1_t {
     let a: uint16x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -23743,6 +23946,7 @@ pub fn vreinterpret_f64_u16(a: uint16x4_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u16(a: uint16x8_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23753,6 +23957,7 @@ pub fn vreinterpretq_f64_u16(a: uint16x8_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u16(a: uint16x8_t) -> float64x2_t {
     let a: uint16x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -23767,6 +23972,7 @@ pub fn vreinterpretq_f64_u16(a: uint16x8_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u32(a: uint32x2_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23777,6 +23983,7 @@ pub fn vreinterpret_f64_u32(a: uint32x2_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u32(a: uint32x2_t) -> float64x1_t {
     let a: uint32x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23788,6 +23995,7 @@ pub fn vreinterpret_f64_u32(a: uint32x2_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u32(a: uint32x4_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23798,6 +24006,7 @@ pub fn vreinterpretq_f64_u32(a: uint32x4_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u32(a: uint32x4_t) -> float64x2_t {
     let a: uint32x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -23811,6 +24020,7 @@ pub fn vreinterpretq_f64_u32(a: uint32x4_t) -> float64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_u64(a: uint64x1_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23820,6 +24030,7 @@ pub fn vreinterpret_f64_u64(a: uint64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_p64_u64(a: uint64x1_t) -> poly64x1_t {
     unsafe { transmute(a) }
@@ -23830,6 +24041,7 @@ pub fn vreinterpret_p64_u64(a: uint64x1_t) -> poly64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u64(a: uint64x2_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23840,6 +24052,7 @@ pub fn vreinterpretq_f64_u64(a: uint64x2_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_u64(a: uint64x2_t) -> float64x2_t {
     let a: uint64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23854,6 +24067,7 @@ pub fn vreinterpretq_f64_u64(a: uint64x2_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_u64(a: uint64x2_t) -> poly64x2_t {
     unsafe { transmute(a) }
@@ -23864,6 +24078,7 @@ pub fn vreinterpretq_p64_u64(a: uint64x2_t) -> poly64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_p64_u64(a: uint64x2_t) -> poly64x2_t {
     let a: uint64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -23878,6 +24093,7 @@ pub fn vreinterpretq_p64_u64(a: uint64x2_t) -> poly64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_p8(a: poly8x8_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23888,6 +24104,7 @@ pub fn vreinterpret_f64_p8(a: poly8x8_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_p8(a: poly8x8_t) -> float64x1_t {
     let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -23899,6 +24116,7 @@ pub fn vreinterpret_f64_p8(a: poly8x8_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p8(a: poly8x16_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23909,6 +24127,7 @@ pub fn vreinterpretq_f64_p8(a: poly8x16_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p8(a: poly8x16_t) -> float64x2_t {
     let a: poly8x16_t =
@@ -23924,6 +24143,7 @@ pub fn vreinterpretq_f64_p8(a: poly8x16_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_p16(a: poly16x4_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -23934,6 +24154,7 @@ pub fn vreinterpret_f64_p16(a: poly16x4_t) -> float64x1_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_p16(a: poly16x4_t) -> float64x1_t {
     let a: poly16x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
@@ -23945,6 +24166,7 @@ pub fn vreinterpret_f64_p16(a: poly16x4_t) -> float64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p16(a: poly16x8_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -23955,6 +24177,7 @@ pub fn vreinterpretq_f64_p16(a: poly16x8_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p16(a: poly16x8_t) -> float64x2_t {
     let a: poly16x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
@@ -23969,6 +24192,7 @@ pub fn vreinterpretq_f64_p16(a: poly16x8_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f32_p64(a: poly64x1_t) -> float32x2_t {
     unsafe { transmute(a) }
@@ -23979,6 +24203,7 @@ pub fn vreinterpret_f32_p64(a: poly64x1_t) -> float32x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f32_p64(a: poly64x1_t) -> float32x2_t {
     unsafe {
@@ -23991,6 +24216,7 @@ pub fn vreinterpret_f32_p64(a: poly64x1_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_f64_p64(a: poly64x1_t) -> float64x1_t {
     unsafe { transmute(a) }
@@ -24000,6 +24226,7 @@ pub fn vreinterpret_f64_p64(a: poly64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_s64_p64(a: poly64x1_t) -> int64x1_t {
     unsafe { transmute(a) }
@@ -24009,6 +24236,7 @@ pub fn vreinterpret_s64_p64(a: poly64x1_t) -> int64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpret_u64_p64(a: poly64x1_t) -> uint64x1_t {
     unsafe { transmute(a) }
@@ -24019,6 +24247,7 @@ pub fn vreinterpret_u64_p64(a: poly64x1_t) -> uint64x1_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f32_p64(a: poly64x2_t) -> float32x4_t {
     unsafe { transmute(a) }
@@ -24029,6 +24258,7 @@ pub fn vreinterpretq_f32_p64(a: poly64x2_t) -> float32x4_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f32_p64(a: poly64x2_t) -> float32x4_t {
     let a: poly64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -24043,6 +24273,7 @@ pub fn vreinterpretq_f32_p64(a: poly64x2_t) -> float32x4_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p64(a: poly64x2_t) -> float64x2_t {
     unsafe { transmute(a) }
@@ -24053,6 +24284,7 @@ pub fn vreinterpretq_f64_p64(a: poly64x2_t) -> float64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_f64_p64(a: poly64x2_t) -> float64x2_t {
     let a: poly64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -24067,6 +24299,7 @@ pub fn vreinterpretq_f64_p64(a: poly64x2_t) -> float64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s64_p64(a: poly64x2_t) -> int64x2_t {
     unsafe { transmute(a) }
@@ -24077,6 +24310,7 @@ pub fn vreinterpretq_s64_p64(a: poly64x2_t) -> int64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_s64_p64(a: poly64x2_t) -> int64x2_t {
     let a: poly64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -24091,6 +24325,7 @@ pub fn vreinterpretq_s64_p64(a: poly64x2_t) -> int64x2_t {
 #[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u64_p64(a: poly64x2_t) -> uint64x2_t {
     unsafe { transmute(a) }
@@ -24101,6 +24336,7 @@ pub fn vreinterpretq_u64_p64(a: poly64x2_t) -> uint64x2_t {
 #[cfg(target_endian = "big")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vreinterpretq_u64_p64(a: poly64x2_t) -> uint64x2_t {
     let a: poly64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
@@ -24408,6 +24644,7 @@ pub fn vrndq_f16(a: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintz))]
 pub fn vrnd_f32(a: float32x2_t) -> float32x2_t {
     unsafe { simd_trunc(a) }
@@ -24417,6 +24654,7 @@ pub fn vrnd_f32(a: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintz))]
 pub fn vrndq_f32(a: float32x4_t) -> float32x4_t {
     unsafe { simd_trunc(a) }
@@ -24426,6 +24664,7 @@ pub fn vrndq_f32(a: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintz))]
 pub fn vrnd_f64(a: float64x1_t) -> float64x1_t {
     unsafe { simd_trunc(a) }
@@ -24435,6 +24674,7 @@ pub fn vrnd_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintz))]
 pub fn vrndq_f64(a: float64x2_t) -> float64x2_t {
     unsafe { simd_trunc(a) }
@@ -24466,6 +24706,7 @@ pub fn vrndaq_f16(a: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinta))]
 pub fn vrnda_f32(a: float32x2_t) -> float32x2_t {
     unsafe { simd_round(a) }
@@ -24475,6 +24716,7 @@ pub fn vrnda_f32(a: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinta))]
 pub fn vrndaq_f32(a: float32x4_t) -> float32x4_t {
     unsafe { simd_round(a) }
@@ -24484,6 +24726,7 @@ pub fn vrndaq_f32(a: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinta))]
 pub fn vrnda_f64(a: float64x1_t) -> float64x1_t {
     unsafe { simd_round(a) }
@@ -24493,6 +24736,7 @@ pub fn vrnda_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinta))]
 pub fn vrndaq_f64(a: float64x2_t) -> float64x2_t {
     unsafe { simd_round(a) }
@@ -24560,6 +24804,7 @@ pub fn vrndiq_f16(a: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinti))]
 pub fn vrndi_f32(a: float32x2_t) -> float32x2_t {
     unsafe extern "unadjusted" {
@@ -24576,6 +24821,7 @@ pub fn vrndi_f32(a: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinti))]
 pub fn vrndiq_f32(a: float32x4_t) -> float32x4_t {
     unsafe extern "unadjusted" {
@@ -24592,6 +24838,7 @@ pub fn vrndiq_f32(a: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinti))]
 pub fn vrndi_f64(a: float64x1_t) -> float64x1_t {
     unsafe extern "unadjusted" {
@@ -24608,6 +24855,7 @@ pub fn vrndi_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frinti))]
 pub fn vrndiq_f64(a: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -24664,6 +24912,7 @@ pub fn vrndmq_f16(a: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintm))]
 pub fn vrndm_f32(a: float32x2_t) -> float32x2_t {
     unsafe { simd_floor(a) }
@@ -24673,6 +24922,7 @@ pub fn vrndm_f32(a: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintm))]
 pub fn vrndmq_f32(a: float32x4_t) -> float32x4_t {
     unsafe { simd_floor(a) }
@@ -24682,6 +24932,7 @@ pub fn vrndmq_f32(a: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintm))]
 pub fn vrndm_f64(a: float64x1_t) -> float64x1_t {
     unsafe { simd_floor(a) }
@@ -24691,6 +24942,7 @@ pub fn vrndm_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintm))]
 pub fn vrndmq_f64(a: float64x2_t) -> float64x2_t {
     unsafe { simd_floor(a) }
@@ -24711,6 +24963,7 @@ pub fn vrndmh_f16(a: f16) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintn))]
 pub fn vrndn_f64(a: float64x1_t) -> float64x1_t {
     unsafe extern "unadjusted" {
@@ -24727,6 +24980,7 @@ pub fn vrndn_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintn))]
 pub fn vrndnq_f64(a: float64x2_t) -> float64x2_t {
     unsafe extern "unadjusted" {
@@ -24761,6 +25015,7 @@ pub fn vrndnh_f16(a: f16) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintn))]
 pub fn vrndns_f32(a: f32) -> f32 {
     unsafe extern "unadjusted" {
@@ -24799,6 +25054,7 @@ pub fn vrndpq_f16(a: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintp))]
 pub fn vrndp_f32(a: float32x2_t) -> float32x2_t {
     unsafe { simd_ceil(a) }
@@ -24808,6 +25064,7 @@ pub fn vrndp_f32(a: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintp))]
 pub fn vrndpq_f32(a: float32x4_t) -> float32x4_t {
     unsafe { simd_ceil(a) }
@@ -24817,6 +25074,7 @@ pub fn vrndpq_f32(a: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintp))]
 pub fn vrndp_f64(a: float64x1_t) -> float64x1_t {
     unsafe { simd_ceil(a) }
@@ -24826,6 +25084,7 @@ pub fn vrndp_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintp))]
 pub fn vrndpq_f64(a: float64x2_t) -> float64x2_t {
     unsafe { simd_ceil(a) }
@@ -24868,6 +25127,7 @@ pub fn vrndxq_f16(a: float16x8_t) -> float16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintx))]
 pub fn vrndx_f32(a: float32x2_t) -> float32x2_t {
     unsafe { simd_round_ties_even(a) }
@@ -24877,6 +25137,7 @@ pub fn vrndx_f32(a: float32x2_t) -> float32x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintx))]
 pub fn vrndxq_f32(a: float32x4_t) -> float32x4_t {
     unsafe { simd_round_ties_even(a) }
@@ -24886,6 +25147,7 @@ pub fn vrndxq_f32(a: float32x4_t) -> float32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintx))]
 pub fn vrndx_f64(a: float64x1_t) -> float64x1_t {
     unsafe { simd_round_ties_even(a) }
@@ -24895,6 +25157,7 @@ pub fn vrndx_f64(a: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(frintx))]
 pub fn vrndxq_f64(a: float64x2_t) -> float64x2_t {
     unsafe { simd_round_ties_even(a) }
@@ -27589,6 +27852,7 @@ pub unsafe fn vst2q_u64(a: *mut u64, b: uint64x2x2_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vst3_f64(a: *mut f64, b: float64x1x3_t) {
     unsafe extern "unadjusted" {
@@ -27677,6 +27941,7 @@ pub unsafe fn vst3_lane_u64<const LANE: i32>(a: *mut u64, b: uint64x1x3_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(st3))]
 pub unsafe fn vst3q_f64(a: *mut f64, b: float64x2x3_t) {
     unsafe extern "unadjusted" {
@@ -27695,6 +27960,7 @@ pub unsafe fn vst3q_f64(a: *mut f64, b: float64x2x3_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(st3))]
 pub unsafe fn vst3q_s64(a: *mut i64, b: int64x2x3_t) {
     unsafe extern "unadjusted" {
@@ -27844,6 +28110,7 @@ pub unsafe fn vst3q_p64(a: *mut p64, b: poly64x2x3_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(st3))]
 pub unsafe fn vst3q_u64(a: *mut u64, b: uint64x2x3_t) {
     vst3q_s64(transmute(a), transmute(b))
@@ -27855,6 +28122,7 @@ pub unsafe fn vst3q_u64(a: *mut u64, b: uint64x2x3_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vst4_f64(a: *mut f64, b: float64x1x4_t) {
     unsafe extern "unadjusted" {
@@ -27957,6 +28225,7 @@ pub unsafe fn vst4_lane_u64<const LANE: i32>(a: *mut u64, b: uint64x1x4_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(st4))]
 pub unsafe fn vst4q_f64(a: *mut f64, b: float64x2x4_t) {
     unsafe extern "unadjusted" {
@@ -27975,6 +28244,7 @@ pub unsafe fn vst4q_f64(a: *mut f64, b: float64x2x4_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(st4))]
 pub unsafe fn vst4q_s64(a: *mut i64, b: int64x2x4_t) {
     unsafe extern "unadjusted" {
@@ -28145,6 +28415,7 @@ pub unsafe fn vst4q_p64(a: *mut p64, b: poly64x2x4_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(st4))]
 pub unsafe fn vst4q_u64(a: *mut u64, b: uint64x2x4_t) {
     vst4q_s64(transmute(a), transmute(b))
@@ -28154,6 +28425,7 @@ pub unsafe fn vst4q_u64(a: *mut u64, b: uint64x2x4_t) {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fsub))]
 pub fn vsub_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe { simd_sub(a, b) }
@@ -28163,6 +28435,7 @@ pub fn vsub_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fsub))]
 pub fn vsubq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe { simd_sub(a, b) }
@@ -28172,6 +28445,7 @@ pub fn vsubq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vsubd_s64(a: i64, b: i64) -> i64 {
     a.wrapping_sub(b)
@@ -28181,6 +28455,7 @@ pub fn vsubd_s64(a: i64, b: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub fn vsubd_u64(a: u64, b: u64) -> u64 {
     a.wrapping_sub(b)
@@ -28201,6 +28476,7 @@ pub fn vsubh_f16(a: f16, b: f16) -> f16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ssubl2))]
 pub fn vsubl_high_s8(a: int8x16_t, b: int8x16_t) -> int16x8_t {
     unsafe {
@@ -28216,6 +28492,7 @@ pub fn vsubl_high_s8(a: int8x16_t, b: int8x16_t) -> int16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ssubl2))]
 pub fn vsubl_high_s16(a: int16x8_t, b: int16x8_t) -> int32x4_t {
     unsafe {
@@ -28231,6 +28508,7 @@ pub fn vsubl_high_s16(a: int16x8_t, b: int16x8_t) -> int32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ssubl2))]
 pub fn vsubl_high_s32(a: int32x4_t, b: int32x4_t) -> int64x2_t {
     unsafe {
@@ -28246,6 +28524,7 @@ pub fn vsubl_high_s32(a: int32x4_t, b: int32x4_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(usubl2))]
 pub fn vsubl_high_u8(a: uint8x16_t, b: uint8x16_t) -> uint16x8_t {
     unsafe {
@@ -28261,6 +28540,7 @@ pub fn vsubl_high_u8(a: uint8x16_t, b: uint8x16_t) -> uint16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(usubl2))]
 pub fn vsubl_high_u16(a: uint16x8_t, b: uint16x8_t) -> uint32x4_t {
     unsafe {
@@ -28276,6 +28556,7 @@ pub fn vsubl_high_u16(a: uint16x8_t, b: uint16x8_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(usubl2))]
 pub fn vsubl_high_u32(a: uint32x4_t, b: uint32x4_t) -> uint64x2_t {
     unsafe {
@@ -28291,6 +28572,7 @@ pub fn vsubl_high_u32(a: uint32x4_t, b: uint32x4_t) -> uint64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ssubw2))]
 pub fn vsubw_high_s8(a: int16x8_t, b: int8x16_t) -> int16x8_t {
     unsafe {
@@ -28303,6 +28585,7 @@ pub fn vsubw_high_s8(a: int16x8_t, b: int8x16_t) -> int16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ssubw2))]
 pub fn vsubw_high_s16(a: int32x4_t, b: int16x8_t) -> int32x4_t {
     unsafe {
@@ -28315,6 +28598,7 @@ pub fn vsubw_high_s16(a: int32x4_t, b: int16x8_t) -> int32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ssubw2))]
 pub fn vsubw_high_s32(a: int64x2_t, b: int32x4_t) -> int64x2_t {
     unsafe {
@@ -28327,6 +28611,7 @@ pub fn vsubw_high_s32(a: int64x2_t, b: int32x4_t) -> int64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(usubw2))]
 pub fn vsubw_high_u8(a: uint16x8_t, b: uint8x16_t) -> uint16x8_t {
     unsafe {
@@ -28339,6 +28624,7 @@ pub fn vsubw_high_u8(a: uint16x8_t, b: uint8x16_t) -> uint16x8_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(usubw2))]
 pub fn vsubw_high_u16(a: uint32x4_t, b: uint16x8_t) -> uint32x4_t {
     unsafe {
@@ -28351,6 +28637,7 @@ pub fn vsubw_high_u16(a: uint32x4_t, b: uint16x8_t) -> uint32x4_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(usubw2))]
 pub fn vsubw_high_u32(a: uint64x2_t, b: uint32x4_t) -> uint64x2_t {
     unsafe {

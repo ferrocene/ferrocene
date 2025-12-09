@@ -97,7 +97,6 @@ pub use nonzero::ZeroablePrimitive;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use nonzero::{NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize};
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use nonzero::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize};
 #[stable(feature = "saturating_int_impl", since = "1.74.0")]
 #[cfg(not(feature = "ferrocene_subset"))]

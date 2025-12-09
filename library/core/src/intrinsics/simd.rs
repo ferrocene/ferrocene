@@ -239,7 +239,6 @@ pub unsafe fn simd_as<T, U>(x: T) -> U;
 /// Rust panics for `-<int>::Min` due to overflow, but it is not UB with this intrinsic.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_neg<T>(x: T) -> T;
 
 /// Returns absolute value of a vector, elementwise.

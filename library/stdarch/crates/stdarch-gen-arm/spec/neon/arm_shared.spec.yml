@@ -15403,7 +15403,6 @@ intrinsics:
     arguments: ["value: {type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [target_arch = "arm", {FnCall: [target_feature, ['enable = "vfp4"']]}]]
       - FnCall: [cfg_attr, [*test-is-arm, { FnCall: [assert_instr, ['"vdup.32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, ['dup']]}]]
@@ -15505,7 +15504,6 @@ intrinsics:
     arguments: ["value: {type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, { FnCall: [assert_instr, ['"{type[3]}"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, ['{type[4]}']]}]]
@@ -15543,7 +15541,6 @@ intrinsics:
     arguments: ["value: {type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, { FnCall: [assert_instr, ['"{type[3]}"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, ['{type[4]}']]}]]

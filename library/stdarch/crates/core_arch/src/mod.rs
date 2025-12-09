@@ -16,7 +16,6 @@ mod riscv_shared;
     target_arch = "arm64ec",
     doc
 ))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod arm_shared;
 
 #[cfg(any(target_arch = "loongarch32", target_arch = "loongarch64", doc))]

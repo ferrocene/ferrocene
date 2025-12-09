@@ -544,8 +544,7 @@ impl Step for Rustfmt {
 
     /// Runs `cargo test` for rustfmt.
     fn run(self, builder: &Builder<'_>) {
-        let tool_result = builder.ensure(tool::Rustfmt::from_compilers(self.compilers));
-        let build_compiler = tool_result.build_compiler;
+        let build_compiler = self.compilers.build_compiler();
         let target = self.compilers.target();
 
         let mut cargo = tool::prepare_tool_cargo(
@@ -889,11 +888,9 @@ impl Step for Clippy {
         // We need to carefully distinguish the compiler that builds clippy, and the compiler
         // that is linked into the clippy being tested. `target_compiler` is the latter,
         // and it must also be used by clippy's test runner to build tests and their dependencies.
-        let compilers = self.compilers;
-        let target_compiler = compilers.target_compiler();
+        let target_compiler = self.compilers.target_compiler();
+        let build_compiler = self.compilers.build_compiler();
 
-        let tool_result = builder.ensure(tool::Clippy::from_compilers(compilers));
-        let build_compiler = tool_result.build_compiler;
         let mut cargo = tool::prepare_tool_cargo(
             builder,
             build_compiler,
@@ -2868,10 +2865,15 @@ pub(crate) fn run_cargo_test<'a>(
     builder: &Builder<'_>,
 ) -> bool {
     let compiler = cargo.compiler();
+    let stage = match cargo.mode() {
+        Mode::Std => compiler.stage,
+        _ => compiler.stage + 1,
+    };
+
     let mut cargo = prepare_cargo_test(cargo, libtest_args, crates, target, builder);
     let _time = helpers::timeit(builder);
-    let _group =
-        description.into().and_then(|what| builder.msg_test(what, target, compiler.stage + 1));
+
+    let _group = description.into().and_then(|what| builder.msg_test(what, target, stage));
 
     let variant = TestVariant::current(builder, target);
     for condition in variant.condititions() {

@@ -1,12 +1,13 @@
+// Regression test for <https://github.com/rust-lang/rust/issues/44402>
+//
+// Previously inhabitedness check was handling cycles incorrectly causing this
+// to not compile.
+//
 //@ check-pass
 
 #![allow(dead_code)]
 #![feature(never_type)]
 #![feature(exhaustive_patterns)]
-
-// Regression test for inhabitedness check. The old
-// cache used to cause us to incorrectly decide
-// that `test_b` was invalid.
 
 struct Foo {
     field1: !,
@@ -30,7 +31,7 @@ fn test_b() {
     }
 }
 
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_e5td0fa92fay
 // Match Expressions

@@ -32,7 +32,7 @@ pub mod c_str;
     reason = "the `c_variadic` feature has not been properly tested on all supported platforms"
 )]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub use self::va_list::{VaArgSafe, VaList, VaListImpl};
+pub use self::va_list::{VaArgSafe, VaList};
 
 #[unstable(
     feature = "c_variadic",

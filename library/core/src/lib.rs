@@ -178,7 +178,7 @@
 #![feature(pattern_types)]
 #![feature(prelude_import)]
 #![feature(reborrow)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(repr_simd))]
+#![feature(repr_simd)]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]

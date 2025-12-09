@@ -48,16 +48,11 @@ macro_rules! impl_sign_conversions_neon {
     )*)
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p8 = u8;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p16 = u16;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p64 = u64;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) type p128 = u128;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 types! {
     #![cfg_attr(not(target_arch = "arm"), stable(feature = "neon_intrinsics", since = "1.59.0"))]
     #![cfg_attr(target_arch = "arm", unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800"))]
@@ -113,7 +108,6 @@ types! {
     pub struct poly64x2_t(2 x pub(crate) p64);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 types! {
     #![unstable(feature = "stdarch_neon_f16", issue = "136306")]
 

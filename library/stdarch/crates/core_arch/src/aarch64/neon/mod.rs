@@ -17,11 +17,13 @@ use crate::{
     intrinsics::{simd::*, *},
     mem::transmute,
 };
+// Ferrocene addition: Imports used by the certified subset
+#[cfg(feature = "ferrocene_subset")]
+use crate::core_arch::arm_shared::*;
 #[cfg(test)]
 #[cfg(not(feature = "ferrocene_subset"))]
 use stdarch_test::assert_instr;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 types! {
     #![stable(feature = "neon_intrinsics", since = "1.59.0")]
 

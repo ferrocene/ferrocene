@@ -14959,7 +14959,6 @@ pub unsafe fn vld1q_dup_f16(ptr: *const f16) -> float16x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 #[cfg_attr(
@@ -14983,7 +14982,6 @@ pub unsafe fn vld1_dup_f32(ptr: *const f32) -> float32x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 #[cfg_attr(
@@ -15007,7 +15005,6 @@ pub unsafe fn vld1_dup_p16(ptr: *const p16) -> poly16x4_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 #[cfg_attr(
@@ -15031,7 +15028,6 @@ pub unsafe fn vld1_dup_p8(ptr: *const p8) -> poly8x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 #[cfg_attr(
@@ -15055,7 +15051,6 @@ pub unsafe fn vld1_dup_s16(ptr: *const i16) -> int16x4_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 #[cfg_attr(
@@ -15079,7 +15074,6 @@ pub unsafe fn vld1_dup_s32(ptr: *const i32) -> int32x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 #[cfg_attr(
@@ -15103,7 +15097,6 @@ pub unsafe fn vld1_dup_s8(ptr: *const i8) -> int8x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 #[cfg_attr(
@@ -15127,7 +15120,6 @@ pub unsafe fn vld1_dup_u16(ptr: *const u16) -> uint16x4_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 #[cfg_attr(
@@ -15151,7 +15143,6 @@ pub unsafe fn vld1_dup_u32(ptr: *const u32) -> uint32x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 #[cfg_attr(
@@ -15175,7 +15166,6 @@ pub unsafe fn vld1_dup_u8(ptr: *const u8) -> uint8x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 #[cfg_attr(
@@ -15199,7 +15189,6 @@ pub unsafe fn vld1q_dup_f32(ptr: *const f32) -> float32x4_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 #[cfg_attr(
@@ -15223,7 +15212,6 @@ pub unsafe fn vld1q_dup_p16(ptr: *const p16) -> poly16x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 #[cfg_attr(
@@ -15247,7 +15235,6 @@ pub unsafe fn vld1q_dup_p8(ptr: *const p8) -> poly8x16_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 #[cfg_attr(
@@ -15271,7 +15258,6 @@ pub unsafe fn vld1q_dup_s16(ptr: *const i16) -> int16x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 #[cfg_attr(
@@ -15295,7 +15281,6 @@ pub unsafe fn vld1q_dup_s32(ptr: *const i32) -> int32x4_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vldr"))]
 #[cfg_attr(
@@ -15319,7 +15304,6 @@ pub unsafe fn vld1q_dup_s64(ptr: *const i64) -> int64x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 #[cfg_attr(
@@ -15343,7 +15327,6 @@ pub unsafe fn vld1q_dup_s8(ptr: *const i8) -> int8x16_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 #[cfg_attr(
@@ -15367,7 +15350,6 @@ pub unsafe fn vld1q_dup_u16(ptr: *const u16) -> uint16x8_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 #[cfg_attr(
@@ -15391,7 +15373,6 @@ pub unsafe fn vld1q_dup_u32(ptr: *const u32) -> uint32x4_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vldr"))]
 #[cfg_attr(
@@ -15415,7 +15396,6 @@ pub unsafe fn vld1q_dup_u64(ptr: *const u64) -> uint64x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 #[cfg_attr(

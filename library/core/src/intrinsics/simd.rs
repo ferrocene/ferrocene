@@ -193,7 +193,6 @@ pub const unsafe fn simd_or<T>(x: T, y: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_xor<T>(x: T, y: T) -> T;
 
 /// Numerically casts a vector, elementwise.

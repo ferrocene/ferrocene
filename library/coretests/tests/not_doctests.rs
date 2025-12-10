@@ -485,3 +485,10 @@ fn skip_as_iter_try_fold() {
     let folded = vals.iter().skip(10).try_fold(0, |x, y| std::io::Result::Ok(x + y)).unwrap();
     assert_eq!(folded, 0);
 }
+
+#[test]
+fn spec_iter_eq() {
+    let inf_1 = 0..;
+    let inf_2 = 1..;
+    assert_eq!(inf_1.into_iter().eq(inf_2), false);
+}

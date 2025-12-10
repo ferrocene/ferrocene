@@ -1,3 +1,4 @@
+mod atomic;
 mod num;
 
 use core::cmp::Ordering;

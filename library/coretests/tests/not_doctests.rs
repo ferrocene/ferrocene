@@ -784,3 +784,28 @@ fn spec_iter_eq() {
     let inf_2 = 1..;
     assert_eq!(inf_1.into_iter().eq(inf_2), false);
 }
+
+// <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
+// Basically `test_decode_utf16_size_hint` from `char.rs`
+#[test]
+fn decode_utf_16_as_iter_size_hint() {
+    fn check(s: &[u16]) {
+        let mut iter = char::decode_utf16(s.iter().cloned());
+
+        loop {
+            let count = iter.clone().count();
+            let (lower, upper) = iter.size_hint();
+
+            assert!(
+                lower <= count && count <= upper.unwrap(),
+                "lower = {lower}, count = {count}, upper = {upper:?}"
+            );
+
+            if let None = iter.next() {
+                break;
+            }
+        }
+    }
+
+    check(&[0xD801, 0xD800, 0xD801, 0xD801]);
+}

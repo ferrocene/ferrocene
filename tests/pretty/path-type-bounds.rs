@@ -1,6 +1,5 @@
 //@ pp-exact
 //@ edition: 2015
-//@ edition: 2015
 
 trait Tr {
     fn dummy(&self) {}

@@ -1,7 +1,7 @@
 use core::cmp::Ordering;
 use core::ops::{Bound, ControlFlow};
 use core::panic::Location;
-use core::sync::atomic::AtomicU32;
+use core::sync::atomic::{self, AtomicU32};
 use core::time::Duration;
 
 #[test]
@@ -456,4 +456,51 @@ fn as_mut_array() {
 
     assert!(slice.as_mut_array::<2>().is_none());
     assert!(slice.as_mut_array::<1>().is_some());
+}
+
+#[test]
+#[expect(deprecated)]
+fn atomic_int_compare_and_swap() {
+    macro_rules! test_atomic_compare_and_swap {
+        ($atomic_t:ty) => {{
+            let atomic = <$atomic_t>::new(5);
+
+            assert_eq!(atomic.compare_and_swap(5, 10, atomic::Ordering::Relaxed), 5); // success
+            assert_eq!(atomic.compare_and_swap(20, 30, atomic::Ordering::Relaxed), 10); // failure
+        }};
+    }
+
+    test_atomic_compare_and_swap!(atomic::AtomicU8);
+    test_atomic_compare_and_swap!(atomic::AtomicU16);
+    test_atomic_compare_and_swap!(atomic::AtomicU32);
+    test_atomic_compare_and_swap!(atomic::AtomicU64);
+    test_atomic_compare_and_swap!(atomic::AtomicUsize);
+    test_atomic_compare_and_swap!(atomic::AtomicI8);
+    test_atomic_compare_and_swap!(atomic::AtomicI16);
+    test_atomic_compare_and_swap!(atomic::AtomicI32);
+    test_atomic_compare_and_swap!(atomic::AtomicI64);
+    test_atomic_compare_and_swap!(atomic::AtomicIsize);
+}
+
+#[test]
+#[expect(deprecated)]
+fn atomic_bool_compare_and_swap() {
+    let atomic = atomic::AtomicBool::new(false);
+
+    assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::Relaxed), false); // success
+    assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::Relaxed), true); // failure
+}
+
+#[test]
+#[expect(deprecated)]
+fn atomic_ptr_compare_and_swap() {
+    let mut pointee1 = [1, 2, 3, 4, 5];
+    let ptr1 = pointee1.as_mut_ptr();
+    let mut pointee2 = [5, 4, 3, 2, 1];
+    let ptr2 = pointee2.as_mut_ptr();
+
+    let atomic = atomic::AtomicPtr::new(ptr1);
+
+    assert_eq!(atomic.compare_and_swap(ptr1, ptr2, atomic::Ordering::Relaxed), ptr1); // success
+    assert_eq!(atomic.compare_and_swap(ptr1, ptr2, atomic::Ordering::Relaxed), ptr2); // failure
 }

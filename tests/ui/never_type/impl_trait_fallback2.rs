@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ edition:2015..2021
 #![feature(type_alias_impl_trait)]
 

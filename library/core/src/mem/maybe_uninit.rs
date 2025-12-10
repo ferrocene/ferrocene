@@ -1148,9 +1148,17 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_clone_of_slice`]: slice::write_clone_of_slice
+<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
+||||||| 1d60f9e070c
+    #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
+=======
+    #[stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
+    #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Copy,
@@ -1210,8 +1218,14 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_copy_of_slice`]: slice::write_copy_of_slice
+<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
+||||||| 1d60f9e070c
+    #[stable(feature = "maybe_uninit_write_slice", since = "CURRENT_RUSTC_VERSION")]
+=======
+    #[stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
         T: Clone,
@@ -1478,7 +1492,7 @@ impl<T> [MaybeUninit<T>] {
     /// requirement the compiler knows about it is that the data pointer must be
     /// non-null. Dropping such a `Vec<T>` however will cause undefined
     /// behaviour.
-    #[stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[inline(always)]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
     pub const unsafe fn assume_init_drop(&mut self)
@@ -1500,8 +1514,8 @@ impl<T> [MaybeUninit<T>] {
     /// Calling this when the content is not yet fully initialized causes undefined
     /// behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in
     /// the slice really is in an initialized state.
-    #[stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "maybe_uninit_slice", since = "1.93.0")]
+    #[rustc_const_stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[inline(always)]
     pub const unsafe fn assume_init_ref(&self) -> &[T] {
         // SAFETY: casting `slice` to a `*const [T]` is safe since the caller guarantees that
@@ -1519,8 +1533,8 @@ impl<T> [MaybeUninit<T>] {
     /// behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in the
     /// slice really is in an initialized state. For instance, `.assume_init_mut()` cannot
     /// be used to initialize a `MaybeUninit` slice.
-    #[stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "maybe_uninit_slice", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "maybe_uninit_slice", since = "1.93.0")]
+    #[rustc_const_stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[inline(always)]
     pub const unsafe fn assume_init_mut(&mut self) -> &mut [T] {
         // SAFETY: similar to safety notes for `slice_get_ref`, but we have a

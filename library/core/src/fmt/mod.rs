@@ -58,8 +58,14 @@ pub use num_buffer::{NumBuffer, NumBufferTrait};
 #[stable(feature = "debug_builders", since = "1.2.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fmt_from_fn", since = "CURRENT_RUSTC_VERSION")]
+||||||| 1d60f9e070c
+#[stable(feature = "fmt_from_fn", since = "CURRENT_RUSTC_VERSION")]
+=======
+#[stable(feature = "fmt_from_fn", since = "1.93.0")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::builders::{FromFn, from_fn};
 
 /// The type returned by formatter methods.

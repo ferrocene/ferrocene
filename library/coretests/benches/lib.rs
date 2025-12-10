@@ -8,7 +8,12 @@
 #![feature(iter_array_chunks)]
 #![feature(iter_next_chunk)]
 #![feature(iter_advance_by)]
+<<<<<<< HEAD
 #![cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+||||||| 1d60f9e070c
+=======
+#![feature(uint_gather_scatter_bits)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 extern crate test;
 

@@ -148,12 +148,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             let diag = self.ambiguity_diagnostic(ambiguity_error);
 
             if ambiguity_error.warning {
-                let NameBindingKind::Import { import, .. } = ambiguity_error.b1.0.kind else {
-                    unreachable!()
+                let node_id = match ambiguity_error.b1.0.kind {
+                    NameBindingKind::Import { import, .. } => import.root_id,
+                    NameBindingKind::Res(_) => CRATE_NODE_ID,
                 };
                 self.lint_buffer.buffer_lint(
                     AMBIGUOUS_GLOB_IMPORTS,
-                    import.root_id,
+                    node_id,
                     diag.ident.span,
                     diag,
                 );
@@ -3070,7 +3071,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 continue;
             }
 
-            let item_was = if let CfgEntry::NameValue { value: Some((feature, _)), .. } = cfg.0 {
+            let item_was = if let CfgEntry::NameValue { value: Some(feature), .. } = cfg.0 {
                 errors::ItemWas::BehindFeature { feature, span: cfg.1 }
             } else {
                 errors::ItemWas::CfgOut { span: cfg.1 }

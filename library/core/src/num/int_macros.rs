@@ -3232,7 +3232,8 @@ macro_rules! int_impl {
         }
 
 
-        /// Calculates the least nonnegative remainder of `self (mod rhs)`.
+        /// Calculates the least nonnegative remainder of `self` when
+        /// divided by `rhs`.
         ///
         /// This is done as if by the Euclidean division algorithm -- given
         /// `r = self.rem_euclid(rhs)`, the result satisfies
@@ -3621,11 +3622,7 @@ macro_rules! int_impl {
         #[inline]
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_ilog10(self) -> Option<u32> {
-            if self > 0 {
-                Some(int_log10::$ActualT(self as $ActualT))
-            } else {
-                None
-            }
+            int_log10::$ActualT(self as $ActualT)
         }
 
         /// Computes the absolute value of `self`.

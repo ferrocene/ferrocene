@@ -35,6 +35,7 @@ Language changes in Rust 1.91.0
 
     - :p:`fls_hbn1l42xmr3h`
     - :p:`fls_dbbfqaqa80r8`
+    - :p:`fls_icdzs1mjh0n4`
 
   - New paragraphs:
 
@@ -49,6 +50,7 @@ Language changes in Rust 1.91.0
     - :p:`fls_4EUb9zFatZ97`
     - :p:`fls_4B4B5FIqAes9`
     - :p:`fls_b7FTlWfnX2OI`
+    - :p:`fls_o4uSLPo00KUg`
 
     - :p:`fls_UippZpUyYpHl`
     - :p:`fls_CIyK8BYzzo26`

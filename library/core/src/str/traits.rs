@@ -33,7 +33,6 @@ impl Ord for str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl const PartialEq for str {
     #[inline]
     fn eq(&self, other: &str) -> bool {

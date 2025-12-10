@@ -16,7 +16,7 @@ use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{intrinsics, ptr};
+use crate::{cmp, intrinsics, ptr};
 
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
@@ -1095,7 +1095,6 @@ impl<T> clone::Clone for Discriminant<T> {
 unsafe impl<T> TrivialClone for Discriminant<T> {}
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> cmp::PartialEq for Discriminant<T> {
     fn eq(&self, rhs: &Self) -> bool {
         self.0 == rhs.0
@@ -1451,7 +1450,6 @@ impl<T> SizedTypeProperties for T {}
 /// [dynamically sized]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [`offset_of_enum`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-enum.html
 /// [`offset_of_slice`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-slice.html
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "offset_of", since = "1.77.0")]
 #[allow_internal_unstable(builtin_syntax, core_intrinsics)]
 pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {

@@ -625,7 +625,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_add_unsigned(self, rhs: $UnsignedT) -> Option<Self> {
             let (a, b) = self.overflowing_add_unsigned(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
@@ -769,7 +768,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_sub_unsigned(self, rhs: $UnsignedT) -> Option<Self> {
             let (a, b) = self.overflowing_sub_unsigned(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
@@ -2608,7 +2606,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_add_unsigned(self, rhs: $UnsignedT) -> (Self, bool) {
             let rhs = rhs as Self;
             let (res, overflowed) = self.overflowing_add(rhs);
@@ -2713,7 +2710,6 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_sub_unsigned(self, rhs: $UnsignedT) -> (Self, bool) {
             let rhs = rhs as Self;
             let (res, overflowed) = self.overflowing_sub(rhs);

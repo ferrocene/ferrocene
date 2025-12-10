@@ -320,7 +320,6 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
 #[track_caller]
 #[lang = "panic_misaligned_pointer_dereference"] // needed by codegen for panic on misaligned pointer deref
 #[rustc_nounwind] // `CheckAlignment` MIR pass requires this function to never unwind
-#[cfg(not(feature = "ferrocene_subset"))]
 fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
@@ -345,7 +344,6 @@ fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
 #[track_caller]
 #[lang = "panic_null_pointer_dereference"] // needed by codegen for panic on null pointer deref
 #[rustc_nounwind] // `CheckNull` MIR pass requires this function to never unwind
-#[cfg(not(feature = "ferrocene_subset"))]
 fn panic_null_pointer_dereference() -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()

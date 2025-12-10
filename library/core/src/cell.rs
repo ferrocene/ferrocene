@@ -1664,7 +1664,6 @@ pub struct Ref<'b, T: ?Sized + 'b> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> const Deref for Ref<'_, T> {
     type Target = T;
 
@@ -2556,7 +2555,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_const_stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_diagnostic_item = "unsafe_cell_raw_get"]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn raw_get(this: *const Self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)]. This exploits std's special status, there is

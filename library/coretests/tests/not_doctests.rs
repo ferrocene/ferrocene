@@ -1,3 +1,4 @@
+mod atomic;
 mod borrow;
 mod iter;
 mod num;

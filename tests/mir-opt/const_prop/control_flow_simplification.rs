@@ -1,7 +1,7 @@
 // EMIT_MIR_FOR_EACH_PANIC_STRATEGY
 //@ test-mir-pass: GVN
 //@ compile-flags: -Zmir-opt-level=1
-
+//@ edition: 2015
 trait NeedsDrop: Sized {
     const NEEDS: bool = std::mem::needs_drop::<Self>();
 }

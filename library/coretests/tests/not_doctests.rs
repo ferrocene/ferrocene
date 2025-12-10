@@ -504,3 +504,22 @@ fn atomic_ptr_compare_and_swap() {
     assert_eq!(atomic.compare_and_swap(ptr1, ptr2, atomic::Ordering::Relaxed), ptr1); // success
     assert_eq!(atomic.compare_and_swap(ptr1, ptr2, atomic::Ordering::Relaxed), ptr2); // failure
 }
+
+/// While this test case is borderline useless it is essentially the same what LLVM does:
+/// [`llvm/llvm-project/libcxx/test/std/atomics/atomics.fences/atomic_signal_fence.pass.cpp`](https://github.com/llvm/llvm-project/blob/f8580c915f0b5205ddc3ae5e8286653ddc1d8d68/libcxx/test/std/atomics/atomics.fences/atomic_signal_fence.pass.cpp)
+#[test]
+fn atomic_compiler_fence() {
+    use atomic::Ordering::*;
+
+    atomic::compiler_fence(Acquire);
+    atomic::compiler_fence(Release);
+    atomic::compiler_fence(AcqRel);
+    atomic::compiler_fence(SeqCst);
+}
+
+#[test]
+#[should_panic]
+#[expect(invalid_atomic_ordering)]
+fn atomic_compiler_fence_relaxed() {
+    atomic::compiler_fence(atomic::Ordering::Relaxed);
+}

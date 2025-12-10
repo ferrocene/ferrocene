@@ -1,6 +1,7 @@
 mod atomic;
 mod borrow;
 mod cell;
+mod intrinsics;
 mod iter;
 mod num;
 mod str;

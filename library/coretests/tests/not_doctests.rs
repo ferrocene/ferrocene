@@ -1,5 +1,6 @@
 mod atomic;
 mod borrow;
+mod cell;
 mod iter;
 mod num;
 mod time;

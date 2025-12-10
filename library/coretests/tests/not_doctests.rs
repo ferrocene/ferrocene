@@ -1,4 +1,5 @@
 mod atomic;
+mod cell;
 mod num;
 
 use core::cmp::Ordering;

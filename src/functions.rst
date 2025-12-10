@@ -105,7 +105,7 @@ The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[function parameter]s` of 
 
 :dp:`fls_icdzs1mjh0n4`
 A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless
-it is an :t:`external function`.
+it is an :t:`external function` subject to a :t:`variadic ABI`.
 
 :dp:`fls_vljy4mm0zca2`
 A :t:`return type` is the :t:`type` of the result a :t:`function`, :t:`closure type` or :t:`function pointer type` returns.

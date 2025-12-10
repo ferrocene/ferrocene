@@ -979,7 +979,10 @@ parameters.
 
 :dp:`fls_hbn1l42xmr3h`
 A :t:`variadic part` shall be specified only when the :t:`ABI` of the
-:t:`function pointer type` is one of the following:
+:t:`function pointer type` is a :t:`variadic ABI`.
+
+:dp:`fls_o4uSLPo00KUg`
+A :dt:`variadic ABI` is any of the following :t:`[ABI]s`:
 
 * :dp:`fls_OR85NVifPwjr`
   ``extern "C"``

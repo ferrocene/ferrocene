@@ -1,6 +1,7 @@
 //! These functions compute the integer logarithm of their type, assuming
 //! that someone has already checked that the value is strictly positive.
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
 // 0 < val <= u8::MAX
@@ -99,18 +100,7 @@ const fn u128_impl(mut val: u128) -> u32 {
     log + u64_impl(val as u64)
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[cfg(target_pointer_width = "16")]
-#[inline]
-pub(super) const fn usize(val: usize) -> u32 {
-    u16(val as _)
-||||||| aa301763000
-#[cfg(target_pointer_width = "16")]
-#[inline]
-pub(super) const fn usize(val: usize) -> u32 {
-    u16(val as _)
-=======
 macro_rules! define_unsigned_ilog10 {
     ($($ty:ident => $impl_fn:ident,)*) => {$(
         #[inline]
@@ -124,37 +114,18 @@ macro_rules! define_unsigned_ilog10 {
             result
         }
     )*};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[cfg(target_pointer_width = "32")]
-#[inline]
-pub(super) const fn usize(val: usize) -> u32 {
-    u32(val as _)
-||||||| aa301763000
-#[cfg(target_pointer_width = "32")]
-#[inline]
-pub(super) const fn usize(val: usize) -> u32 {
-    u32(val as _)
-=======
 define_unsigned_ilog10! {
     u8 => u8_impl,
     u16 => u16_impl,
     u32 => u32_impl,
     u64 => u64_impl,
     u128 => u128_impl,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[cfg(target_pointer_width = "64")]
-||||||| aa301763000
-#[cfg(target_pointer_width = "64")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[inline]
 pub(super) const fn usize(val: NonZero<usize>) -> u32 {
     #[cfg(target_pointer_width = "16")]
@@ -171,18 +142,7 @@ pub(super) const fn usize(val: NonZero<usize>) -> u32 {
     impl_fn(unsafe { NonZero::new_unchecked(val.get() as _) })
 }
 
-<<<<<<< HEAD
-// 0 < val <= i8::MAX
 #[cfg(not(feature = "ferrocene_subset"))]
-#[inline]
-pub(super) const fn i8(val: i8) -> u32 {
-    u8(val as u8)
-||||||| aa301763000
-// 0 < val <= i8::MAX
-#[inline]
-pub(super) const fn i8(val: i8) -> u32 {
-    u8(val as u8)
-=======
 macro_rules! define_signed_ilog10 {
     ($($ty:ident => $impl_fn:ident,)*) => {$(
         // 0 < val <= $ty::MAX
@@ -203,67 +163,15 @@ macro_rules! define_signed_ilog10 {
             }
         }
     )*};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
-<<<<<<< HEAD
-// 0 < val <= i16::MAX
 #[cfg(not(feature = "ferrocene_subset"))]
-#[inline]
-pub(super) const fn i16(val: i16) -> u32 {
-    u16(val as u16)
-}
-
-// 0 < val <= i32::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
-#[inline]
-pub(super) const fn i32(val: i32) -> u32 {
-    u32(val as u32)
-}
-
-// 0 < val <= i64::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
-#[inline]
-pub(super) const fn i64(val: i64) -> u32 {
-    u64(val as u64)
-}
-
-// 0 < val <= i128::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
-#[inline]
-pub(super) const fn i128(val: i128) -> u32 {
-    u128(val as u128)
-||||||| aa301763000
-// 0 < val <= i16::MAX
-#[inline]
-pub(super) const fn i16(val: i16) -> u32 {
-    u16(val as u16)
-}
-
-// 0 < val <= i32::MAX
-#[inline]
-pub(super) const fn i32(val: i32) -> u32 {
-    u32(val as u32)
-}
-
-// 0 < val <= i64::MAX
-#[inline]
-pub(super) const fn i64(val: i64) -> u32 {
-    u64(val as u64)
-}
-
-// 0 < val <= i128::MAX
-#[inline]
-pub(super) const fn i128(val: i128) -> u32 {
-    u128(val as u128)
-=======
 define_signed_ilog10! {
     i8 => u8_impl,
     i16 => u16_impl,
     i32 => u32_impl,
     i64 => u64_impl,
     i128 => u128_impl,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 /// Instantiate this panic logic once, rather than for all the ilog methods

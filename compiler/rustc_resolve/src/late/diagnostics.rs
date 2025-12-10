@@ -705,7 +705,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             if !enum_candidates.is_empty() {
                 enum_candidates.sort();
 
-                // Contextualize for E0412 "cannot find type", but don't belabor the point
+                // Contextualize for E0425 "cannot find type", but don't belabor the point
                 // (that it's a variant) for E0573 "expected type, found variant".
                 let preamble = if res.is_none() {
                     let others = match enum_candidates.len() {
@@ -1135,7 +1135,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 }
 
                 self.suggest_ident_hidden_by_hygiene(err, path, span);
-            } else if err_code == E0412 {
+                // cannot find type in this scope
                 if let Some(correct) = Self::likely_rust_type(path) {
                     err.span_suggestion(
                         span,
@@ -1155,6 +1155,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         let callsite_span = span.source_callsite();
         for rib in self.ribs[ValueNS].iter().rev() {
             for (binding_ident, _) in &rib.bindings {
+                // Case 1: the identifier is defined in the same scope as the macro is called
                 if binding_ident.name == ident.name
                     && !binding_ident.span.eq_ctxt(span)
                     && !binding_ident.span.from_expansion()
@@ -1163,6 +1164,19 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     err.span_help(
                         binding_ident.span,
                         "an identifier with the same name exists, but is not accessible due to macro hygiene",
+                    );
+                    return;
+                }
+
+                // Case 2: the identifier is defined in a macro call in the same scope
+                if binding_ident.name == ident.name
+                    && binding_ident.span.from_expansion()
+                    && binding_ident.span.source_callsite().eq_ctxt(callsite_span)
+                    && binding_ident.span.source_callsite().lo() < callsite_span.lo()
+                {
+                    err.span_help(
+                        binding_ident.span,
+                        "an identifier with the same name is defined here, but is not accessible due to macro hygiene",
                     );
                     return;
                 }

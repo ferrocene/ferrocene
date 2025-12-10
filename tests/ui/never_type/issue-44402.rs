@@ -31,13 +31,7 @@ fn test_b() {
     }
 }
 
-<<<<<<< HEAD
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_e5td0fa92fay
 // Match Expressions
-||||||| 1d60f9e070c
-fn main() { }
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

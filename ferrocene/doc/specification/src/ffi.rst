@@ -95,10 +95,18 @@ A tool is allowed to specify additional :t:`[ABI]s`. These :t:`[ABI]s` may
 include, but may not be limited to, the following:
 
 * :dp:`fls_dbbfqaqa80r8`
-  ``extern "aapcs"`` - The ARM :t:`ABI`.
+  ``extern "aapcs"`` - The soft-float ABI for 32-bit ARM targets.
+
+* :dp:`fls_UippZpUyYpHl`
+  ``extern "aapcs-unwind"`` - The same as ``extern "aapcs"``
+  with the addition that unwinding across FFI is permitted.
 
 * :dp:`fls_36qrs2fxxvi7`
   ``extern "cdecl"`` - The x86_32 :t:`ABI` of :t:`C` code.
+
+* :dp:`fls_CIyK8BYzzo26`
+  ``extern "cdecl-unwind"`` - The same as ``extern "cdecl"``
+  with the addition that unwinding across FFI is permitted.
 
 * :dp:`fls_6rtj6rwqxojh`
   ``extern "fastcall"`` - The ``fastcall`` :t:`ABI` that corresponds to MSVC's
@@ -110,12 +118,23 @@ include, but may not be limited to, the following:
 * :dp:`fls_7t7yxh94wnbl`
   ``extern "sysv64"`` - The x86_64 non-Windows :t:`ABI` of :t:`C` code.
 
+* :dp:`fls_ccFdnlX5HIYk`
+  ``extern "sysv64-unwind"`` - The same as ``extern "sysv64"``
+  with the addition that unwinding across FFI is permitted.
+
 * :dp:`fls_sxj4vy39sj4g`
   ``extern "vectorcall"`` - The ``vectorcall`` :t:`ABI` that corresponds to
   MSVC's ``__vectorcall`` and clang's ``__attribute__((vectorcall))``.
 
 * :dp:`fls_tyjs1x4j8ovp`
   ``extern "win64"`` - The x86_64 Windows :t:`ABI` of :t:`C` code.
+
+* :dp:`fls_xrCRprWS13R1`
+  ``extern "win64-unwind"`` - The same as ``extern "win64"``
+  with the addition that unwinding across FFI is permitted.
+
+* :dp:`fls_JHlqXjn4Sf07`
+  ``extern "efiapi"`` - The :t:`ABI` for `UEFI <https://uefi.org/specifications>`_.
 
 .. rubric:: Undefined Behavior
 

@@ -31,7 +31,10 @@ Language changes in Rust 1.91.0
 - `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
   This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
 
-  - Changed paragraph: :p:`fls_hbn1l42xmr3h`
+  - Changed paragraphs:
+
+    - :p:`fls_hbn1l42xmr3h`
+    - :p:`fls_dbbfqaqa80r8`
 
   - New paragraphs:
 
@@ -46,6 +49,12 @@ Language changes in Rust 1.91.0
     - :p:`fls_4EUb9zFatZ97`
     - :p:`fls_4B4B5FIqAes9`
     - :p:`fls_b7FTlWfnX2OI`
+
+    - :p:`fls_UippZpUyYpHl`
+    - :p:`fls_CIyK8BYzzo26`
+    - :p:`fls_ccFdnlX5HIYk`
+    - :p:`fls_xrCRprWS13R1`
+    - :p:`fls_JHlqXjn4Sf07`
 
 - `Add dangling_pointers_from_locals lint to warn against dangling pointers from local variables <https://github.com/rust-lang/rust/pull/144322>`_
 

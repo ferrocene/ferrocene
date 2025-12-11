@@ -107,9 +107,9 @@ impl Callbacks for LoadCoreSymbols {
                 as Box<dyn Write + Send>,
             Err(_) => Box::new(io::stdout()) as _,
         };
-        let mut vis = Vis::new(tcx);
 
-        extract_all_functions(tcx, &mut vis);
+        let vis = Vis::new(tcx);
+        let mut vis = extract_all_functions(tcx, vis);
 
         tcx.hir_visit_all_item_likes_in_crate(&mut vis);
         // It is very important that we walk the attributes *after* we visit the rest of the items.
@@ -131,7 +131,7 @@ fn main() {
     }))
 }
 
-fn extract_all_functions(tcx: TyCtxt<'_>, vis: &mut Vis<'_>) {
+fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {
     for def in tcx.hir_crate_items(()).definitions() {
         if should_skip_item(tcx, def) {
             continue;
@@ -143,7 +143,7 @@ fn extract_all_functions(tcx: TyCtxt<'_>, vis: &mut Vis<'_>) {
             continue;
         }
 
-        let (filename, start_line, end_line) = get_span(tcx, vis, def);
+        let (filename, start_line, end_line) = get_span(tcx, &mut vis, def);
 
         // We don't check for annotations those inside the `Visitor` implementation so we do it
         // here.
@@ -154,6 +154,8 @@ fn extract_all_functions(tcx: TyCtxt<'_>, vis: &mut Vis<'_>) {
 
         vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });
     }
+
+    vis
 }
 
 /// These functions exist only to allow code using `.subset` targets to compile,

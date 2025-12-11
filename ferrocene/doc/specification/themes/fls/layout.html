@@ -1,0 +1,63 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+{# SPDX-FileCopyrightText: The Rust Project Developers #}
+
+{% extends "basic/layout.html" %}
+{% from "fontawesome.html" import icon_search %}
+
+{% block extrahead %}
+    {{ super() }}
+    <link rel="icon" href="{{ pathto('_static/favicon.svg', 1) }}" sizes="any" type="image/svg+xml" />
+{% endblock %}
+
+{% block content %}
+{% if theme_include_in_header %}
+    {% include theme_include_in_header %}
+{% endif %}
+<div class="wrapper">
+    <div class="sidebar">
+        <header>
+            <a href="{{ pathto('index') }}">
+                <img src="{{ pathto('_static/rust-lang.svg', 1) }}" alt="Rust logo">
+                <h1>{{ shorttitle }}</h1>
+            </a>
+        </header>
+        <form action="{{ pathto('search') }}" method="get" class="side-search">
+            <input type="text" name="q" placeholder="Search...">
+            <button type="submit">{{ icon_search() }}</button>
+        </form>
+        <nav>
+            <label for="toggle-toctree" class="toggle">Toggle navigation</label>
+            <input type="checkbox" id="toggle-toctree">
+            <div class="toctree">
+                {{ toctree(includehidden=false, collapse=false, maxdepth=1) }}
+            </div>
+        </nav>
+    </div>
+    <div class="content">
+        <div class="page">
+            {% block body %}{% endblock %}
+        </div>
+        <footer>
+            <p>
+                Copyright &copy; {{ copyright }}.
+                {% if theme_license %}
+                    Contents released under the {{ theme_license }} license.
+                {% endif %}
+            </p>
+            {% if document_id %}
+                <p>Document ID: <code>{{ document_id }}</code></p>
+            {% endif %}
+            {% if theme_commit %}
+                <p>Built from commit: <code>{{ theme_commit }}</code></p>
+            {% endif %}
+        </footer>
+    </div>
+</div>
+{% endblock %}
+
+{# The blocks below, defined in the basic layout, are effectively removed from
+   the template as we replace their contents with an empty string. #}
+{% block relbar1 %}{% endblock %}
+{% block relbar2 %}{% endblock %}
+{% block footer %}{% endblock %}

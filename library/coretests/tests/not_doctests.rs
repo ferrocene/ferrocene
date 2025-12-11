@@ -778,6 +778,7 @@ fn chunks_as_iter_nth() {
     assert!(chunk.is_none());
 }
 
+// <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::nth
 #[test]
 fn take_as_iter_nth() {
     let vals = [0, 1, 2, 3, 4, 5];
@@ -785,6 +786,7 @@ fn take_as_iter_nth() {
     assert!(nth.is_none());
 }
 
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
 #[test]
 fn skip_as_iter_fold() {
     let vals = [0, 1, 2, 3, 4, 5];

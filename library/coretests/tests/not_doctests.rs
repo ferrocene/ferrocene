@@ -465,6 +465,7 @@ fn chunks_as_iter_nth() {
     assert!(chunk.is_none());
 }
 
+// <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::nth
 #[test]
 fn take_as_iter_nth() {
     let vals = [0, 1, 2, 3, 4, 5];
@@ -472,6 +473,7 @@ fn take_as_iter_nth() {
     assert!(nth.is_none());
 }
 
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
 #[test]
 fn skip_as_iter_fold() {
     let vals = [0, 1, 2, 3, 4, 5];
@@ -479,6 +481,7 @@ fn skip_as_iter_fold() {
     assert_eq!(folded, 0);
 }
 
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold
 #[test]
 fn skip_as_iter_try_fold() {
     let vals = [0, 1, 2, 3, 4, 5];
@@ -486,6 +489,7 @@ fn skip_as_iter_try_fold() {
     assert_eq!(folded, 0);
 }
 
+// <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 #[test]
 fn spec_iter_eq() {
     let inf_1 = 0..;
@@ -493,6 +497,7 @@ fn spec_iter_eq() {
     assert_eq!(inf_1.into_iter().eq(inf_2), false);
 }
 
+// <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
 // Basically `test_decode_utf16_size_hint` from `char.rs`
 #[test]
 fn decode_utf_16_as_iter_size_hint() {

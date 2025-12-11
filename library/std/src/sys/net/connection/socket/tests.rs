@@ -6,6 +6,7 @@ fn no_lookup_host_duplicates() {
     let mut addrs = HashMap::new();
     let lh = match lookup_host("localhost", 0) {
         Ok(lh) => lh,
+        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
         Err(e) => panic!("couldn't resolve `localhost`: {e}"),
     };
     for sa in lh {

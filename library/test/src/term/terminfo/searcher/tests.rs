@@ -2,6 +2,7 @@ use super::*;
 
 #[test]
 #[ignore = "buildbots don't have ncurses installed and I can't mock everything I need"]
+#[cfg(not(feature = "ferrocene_certified_panic"))] // format! temporary lifetimes don't last long enough
 fn test_get_dbpath_for_term() {
     // woefully inadequate test coverage
     // note: current tests won't work with non-standard terminfo hierarchies (e.g., macOS's)

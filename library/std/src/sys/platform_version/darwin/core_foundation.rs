@@ -51,6 +51,7 @@ macro_rules! dlsym_fn {
                 )
             };
             if ptr.is_null() {
+                #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
                 let err = unsafe { CStr::from_ptr(libc::dlerror()) };
                 panic!("could not find function {}: {err:?}", stringify!($name));
             }
@@ -83,6 +84,7 @@ impl CFHandle {
         .expect("failed allocating string");
 
         if handle.is_null() {
+            #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
             let err = unsafe { CStr::from_ptr(libc::dlerror()) };
             panic!("could not open CoreFoundation.framework: {err:?}");
         }
@@ -94,6 +96,7 @@ impl CFHandle {
         // Available: in all CF versions.
         let static_ptr = unsafe { libc::dlsym(self.0, c"kCFAllocatorNull".as_ptr()) };
         if static_ptr.is_null() {
+            #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
             let err = unsafe { CStr::from_ptr(libc::dlerror()) };
             panic!("could not find kCFAllocatorNull: {err:?}");
         }

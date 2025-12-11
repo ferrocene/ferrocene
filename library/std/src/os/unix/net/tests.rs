@@ -17,6 +17,7 @@ macro_rules! or_panic {
     ($e:expr) => {
         match $e {
             Ok(e) => e,
+            #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
             Err(e) => panic!("{e}"),
         }
     };
@@ -150,6 +151,7 @@ fn iter() {
 
 #[test]
 #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
 fn long_path() {
     let dir = tmpdir();
     let socket_path = dir.path().join(

@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+
 use rand::RngCore;
 
 use crate::assert_matches::assert_matches;
@@ -23,6 +25,7 @@ macro_rules! check {
     ($e:expr) => {
         match $e {
             Ok(t) => t,
+            #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
             Err(e) => panic!("{} failed with: {e}", stringify!($e)),
         }
     };

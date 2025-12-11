@@ -7,6 +7,7 @@ macro_rules! t {
     ($e:expr) => {
         match $e {
             Ok(t) => t,
+            #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
             Err(e) => panic!("received error for `{}`: {}", stringify!($e), e),
         }
     };

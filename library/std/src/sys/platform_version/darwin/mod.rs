@@ -3,6 +3,7 @@ use self::core_foundation::{
     kCFPropertyListImmutable, kCFStringEncodingUTF8,
 };
 use crate::borrow::Cow;
+#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_imports))]
 use crate::bstr::ByteStr;
 use crate::ffi::{CStr, c_char};
 use crate::num::{NonZero, ParseIntError};
@@ -135,6 +136,7 @@ fn version_from_sysctl() -> Option<OSVersion> {
             return None;
         }
 
+        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
         Some(parse_os_version(buf).unwrap_or_else(|err| {
             panic!("failed parsing version from sysctl ({}): {err}", ByteStr::new(buf))
         }))
@@ -197,6 +199,7 @@ fn version_from_sysctl() -> Option<OSVersion> {
 fn version_from_plist() -> OSVersion {
     // Read `SystemVersion.plist`. Always present on Apple platforms, reading it cannot fail.
     let path = root_relative("/System/Library/CoreServices/SystemVersion.plist");
+    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
     let plist_buffer = fs::read(&path).unwrap_or_else(|e| panic!("failed reading {path:?}: {e}"));
     let cf_handle = CFHandle::new();
     parse_version_from_plist(&cf_handle, &plist_buffer)
@@ -302,6 +305,7 @@ unsafe fn string_version_key(
     let version_str =
         CStr::from_bytes_until_nul(&version_str).expect("failed converting CFString to CStr");
 
+    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
     Some(parse_os_version(version_str.to_bytes()).unwrap_or_else(|err| {
         panic!(
             "failed parsing version from PList ({}): {err}",

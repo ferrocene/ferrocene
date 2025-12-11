@@ -65,6 +65,7 @@ impl Mutex {
         #[cold]
         #[inline(never)]
         fn fail(r: i32) -> ! {
+            #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
             let error = Error::from_raw_os_error(r);
             panic!("failed to lock mutex: {error}");
         }

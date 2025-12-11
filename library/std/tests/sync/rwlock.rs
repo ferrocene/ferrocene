@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+
 use std::fmt::Debug;
 use std::ops::FnMut;
 use std::panic::{self, AssertUnwindSafe};

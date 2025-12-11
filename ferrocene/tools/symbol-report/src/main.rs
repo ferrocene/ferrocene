@@ -136,7 +136,13 @@ fn extract_all_functions(tcx: TyCtxt<'_>, vis: &mut Vis<'_>) {
         if should_skip_item(tcx, def) {
             continue;
         }
+
         let qualified_name = get_qualified_name(tcx, def);
+
+        if should_filter_out(&qualified_name) {
+            continue;
+        }
+
         let (filename, start_line, end_line) = get_span(tcx, vis, def);
 
         // We don't check for annotations those inside the `Visitor` implementation so we do it
@@ -168,6 +174,12 @@ fn should_skip_item(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
 
 fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
     with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))))
+}
+
+fn should_filter_out(qualified_name: &str) -> bool {
+    const FILTER_LIST: &[&str] = &["<core::core_arch::simd", "core::core_arch::simd"];
+
+    FILTER_LIST.iter().any(|filter| qualified_name.starts_with(filter))
 }
 
 fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usize, usize) {

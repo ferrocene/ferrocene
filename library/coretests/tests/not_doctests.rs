@@ -811,3 +811,14 @@ fn decode_utf_16_as_iter_size_hint() {
 
     check(&[0xD801, 0xD800, 0xD801, 0xD801]);
 }
+
+// <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_iterator_chain_advance_by() {
+    let first = vec![1, 2];
+    let second = vec![4, 5];
+    let mut iter = first.into_iter().chain(second.into_iter());
+    iter.advance_back_by(3).unwrap(); // Make `self.b = None`
+    iter.advance_by(2).ok(); // Go past `self.a`
+    assert_eq!(iter.next(), None);
+}

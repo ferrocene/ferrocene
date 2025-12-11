@@ -845,6 +845,7 @@ where
 ///
 /// [`prefetch_read`]: crate::hint::prefetch_read
 /// [`prefetch_write`]: crate::hint::prefetch_write
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -863,6 +864,7 @@ pub enum Locality {
     L1,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Locality {
     /// Convert to the constant that LLVM associates with a locality.
     const fn to_llvm(self) -> i32 {
@@ -899,6 +901,7 @@ impl Locality {
 ///     }
 /// }
 /// ```
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_read<T>(ptr: *const T, locality: Locality) {
@@ -919,6 +922,7 @@ pub const fn prefetch_read<T>(ptr: *const T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_read_non_temporal<T>(ptr: *const T, locality: Locality) {
@@ -936,6 +940,7 @@ pub const fn prefetch_read_non_temporal<T>(ptr: *const T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_write<T>(ptr: *mut T, locality: Locality) {
@@ -956,6 +961,7 @@ pub const fn prefetch_write<T>(ptr: *mut T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_write_non_temporal<T>(ptr: *const T, locality: Locality) {
@@ -973,6 +979,7 @@ pub const fn prefetch_write_non_temporal<T>(ptr: *const T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_read_instruction<T>(ptr: *const T, locality: Locality) {

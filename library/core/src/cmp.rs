@@ -1868,6 +1868,7 @@ mod impls {
     use crate::hint::unreachable_unchecked;
     use crate::marker::PointeeSized;
     use crate::ops::ControlFlow::{self, Break, Continue};
+    #[cfg(not(feature = "ferrocene_subset"))]
     use crate::panic::const_assert;
 
     macro_rules! partial_eq_impl {
@@ -2012,6 +2013,7 @@ mod impls {
                     crate::intrinsics::three_way_compare(*self, *other)
                 }
 
+                #[cfg(not(feature = "ferrocene_subset"))]
                 #[inline]
                 #[track_caller]
                 fn clamp(self, min: Self, max: Self) -> Self

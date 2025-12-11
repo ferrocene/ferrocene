@@ -297,10 +297,10 @@ pub const fn prefetch_read_data<T, const LOCALITY: i32>(data: *const T) {
 /// to (3) - extremely local keep in cache.
 ///
 /// This intrinsic does not have a stable counterpart.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn prefetch_write_data<T, const LOCALITY: i32>(data: *const T) {
     // This operation is a no-op, unless it is overridden by the backend.
     let _ = data;

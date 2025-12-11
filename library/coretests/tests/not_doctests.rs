@@ -3,6 +3,7 @@ mod borrow;
 mod cell;
 mod iter;
 mod num;
+mod str;
 mod time;
 
 use core::cmp::Ordering;

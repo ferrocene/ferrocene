@@ -64,9 +64,17 @@ pub mod arm;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64;
 
+<<<<<<< HEAD
 #[cfg(all(target_arch = "aarch64", target_os = "linux"))]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64_linux;
+||||||| aa301763000
+#[cfg(all(target_arch = "aarch64", target_os = "linux"))]
+pub mod aarch64_linux;
+=======
+#[cfg(all(target_arch = "aarch64", target_feature = "outline-atomics"))]
+pub mod aarch64_outline_atomics;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[cfg(all(
     kernel_user_helpers,

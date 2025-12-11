@@ -255,7 +255,7 @@ impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
 
 #[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
-unsafe impl<Dyn: ?Sized> TrivialClone for DynMetadata<Dyn> {}
+unsafe impl<Dyn: PointeeSized> TrivialClone for DynMetadata<Dyn> {}
 
 #[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Eq for DynMetadata<Dyn> {}

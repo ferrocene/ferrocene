@@ -1731,6 +1731,14 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
             record_defaulted_array!(self.tables.module_children_reexports[def_id] <-
                 module_children.iter().filter(|child| !child.reexport_chain.is_empty()));
+
+            let ambig_module_children = tcx
+                .resolutions(())
+                .ambig_module_children
+                .get(&local_def_id)
+                .map_or_default(|v| &v[..]);
+            record_defaulted_array!(self.tables.ambig_module_children[def_id] <-
+                ambig_module_children);
         }
     }
 
@@ -2205,7 +2213,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             .incoherent_impls
             .iter()
             .map(|(&simp, impls)| IncoherentImpls {
-                self_ty: simp,
+                self_ty: self.lazy(simp),
                 impls: self.lazy_array(impls.iter().map(|def_id| def_id.local_def_index)),
             })
             .collect();

@@ -17,7 +17,10 @@ use std::sync::LazyLock;
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
-use rustc_hir::{AttrId, HirId, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind};
+use rustc_hir::def_id::LocalDefId;
+use rustc_hir::{
+    AttrId, Attribute, HirId, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
+};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
@@ -38,6 +41,10 @@ struct Vis<'tcx> {
 }
 
 impl<'tcx> Vis<'tcx> {
+    fn new(tcx: TyCtxt<'tcx>) -> Self {
+        Self { tcx, report: SymbolReport::new(), visited_attrs: BTreeSet::new() }
+    }
+
     fn convert_span(&mut self, span: Span) -> (String, usize, usize) {
         let lines = self.tcx.sess.source_map().span_to_lines(span).expect("failed to look up span");
         let filename = lines.file.name.display(FileNameDisplayPreference::Local).to_string();
@@ -100,43 +107,9 @@ impl Callbacks for LoadCoreSymbols {
                 as Box<dyn Write + Send>,
             Err(_) => Box::new(io::stdout()) as _,
         };
-        let mut vis = Vis { tcx, report: SymbolReport::new(), visited_attrs: BTreeSet::new() };
+        let mut vis = Vis::new(tcx);
 
-        for def in tcx.hir_crate_items(()).definitions() {
-            let kind = tcx.def_kind(def);
-            if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {
-                continue;
-            }
-            // Skip intrinsics, extern functions, and associated default functions provided by the trait.
-            match tcx.hir_node_by_def_id(def) {
-                Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
-                | Node::TraitItem(TraitItem {
-                    kind: TraitItemKind::Fn(_, TraitFn::Required(_)),
-                    ..
-                }) => {
-                    info!("skipping item {def:?}");
-                    continue;
-                }
-                _ => {}
-            }
-            let qualified_name = with_no_visible_paths!(with_resolve_crate_name!(
-                with_no_trimmed_paths!(tcx.def_path_str(def))
-            ));
-
-            let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
-            let (filename, start_line, end_line) = vis.convert_span(span);
-
-            // We don't check for annotations those inside the `Visitor` implementation so we do it
-            // here.
-            if let Some(attr) =
-                tcx.get_attrs_by_path(def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
-            {
-                vis.report.add_annotation(filename.clone(), start_line, end_line);
-                vis.visited_attrs.insert(attr.id());
-            }
-
-            vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });
-        }
+        extract_all_functions(tcx, &mut vis);
 
         tcx.hir_visit_all_item_likes_in_crate(&mut vis);
         // It is very important that we walk the attributes *after* we visit the rest of the items.
@@ -156,4 +129,53 @@ fn main() {
         let args: Vec<String> = std::env::args().collect();
         rustc_driver::run_compiler(&args, &mut LoadCoreSymbols)
     }))
+}
+
+fn extract_all_functions(tcx: TyCtxt<'_>, vis: &mut Vis<'_>) {
+    for def in tcx.hir_crate_items(()).definitions() {
+        if should_skip_item(tcx, def) {
+            continue;
+        }
+        let qualified_name = get_qualified_name(tcx, def);
+        let (filename, start_line, end_line) = get_span(tcx, vis, def);
+
+        // We don't check for annotations those inside the `Visitor` implementation so we do it
+        // here.
+        if let Some(attr) = has_ferrocene_annotation(tcx, def) {
+            vis.report.add_annotation(filename.clone(), start_line, end_line);
+            vis.visited_attrs.insert(attr.id());
+        }
+
+        vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });
+    }
+}
+
+fn should_skip_item(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
+    let kind = tcx.def_kind(def);
+    if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {
+        return true;
+    }
+    // Skip intrinsics, extern functions, and associated default functions provided by the trait.
+    match tcx.hir_node_by_def_id(def) {
+        Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
+        | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
+            info!("skipping item {def:?}");
+            true
+        }
+        _ => false,
+    }
+}
+
+fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
+    with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))))
+}
+
+fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usize, usize) {
+    let span = tcx.hir_span_with_body(tcx.local_def_id_to_hir_id(def));
+    let (filename, start_line, end_line) = vis.convert_span(span);
+    (filename, start_line, end_line)
+}
+
+fn has_ferrocene_annotation(tcx: TyCtxt<'_>, def: LocalDefId) -> Option<&Attribute> {
+    tcx.get_attrs_by_path(def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
 }

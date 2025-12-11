@@ -8,12 +8,12 @@ aarch64-apple-visionos
 aarch64-apple-visionos-sim
 aarch64-apple-watchos
 aarch64-apple-watchos-sim
+aarch64-ferrocene-none
 aarch64-kmc-solid_asp3
 aarch64-linux-android
 aarch64-nintendo-switch-freestanding
 aarch64-pc-windows-gnullvm
 aarch64-pc-windows-msvc
-aarch64-unknown-ferrocene.certified
 aarch64-unknown-ferrocene.facade
 aarch64-unknown-ferrocene.subset
 aarch64-unknown-freebsd
@@ -228,8 +228,8 @@ thumbv7a-nuttx-eabi
 thumbv7a-nuttx-eabihf
 thumbv7a-pc-windows-msvc
 thumbv7a-uwp-windows-msvc
-thumbv7em-ferrocene.certified-eabi
-thumbv7em-ferrocene.certified-eabihf
+thumbv7em-ferrocene-none-eabi
+thumbv7em-ferrocene-none-eabihf
 thumbv7em-ferrocene.facade-eabi
 thumbv7em-ferrocene.facade-eabihf
 thumbv7em-ferrocene.subset-eabi
@@ -263,6 +263,7 @@ x86_64-apple-ios
 x86_64-apple-ios-macabi
 x86_64-apple-tvos
 x86_64-apple-watchos-sim
+x86_64-ferrocene-none
 x86_64-fortanix-unknown-sgx
 x86_64-linux-android
 x86_64-lynx-lynxos178
@@ -276,7 +277,6 @@ x86_64-pc-windows-gnullvm
 x86_64-pc-windows-msvc
 x86_64-unikraft-linux-musl
 x86_64-unknown-dragonfly
-x86_64-unknown-ferrocene.certified
 x86_64-unknown-ferrocene.subset
 x86_64-unknown-freebsd
 x86_64-unknown-fuchsia

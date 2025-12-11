@@ -68,10 +68,10 @@ GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
-    "x86_64-unknown-ferrocene.certified",
-    "aarch64-unknown-ferrocene.certified",
-    "thumbv7em-ferrocene.certified-eabi",
-    "thumbv7em-ferrocene.certified-eabihf",
+    "x86_64-ferrocene-none",
+    "aarch64-ferrocene-none",
+    "thumbv7em-ferrocene-none-eabi",
+    "thumbv7em-ferrocene-none-eabihf",
 ]
 
 # Targets only built (and self-tested!) on Linux.

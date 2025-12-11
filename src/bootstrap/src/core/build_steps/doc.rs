@@ -11,6 +11,8 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs, mem};
 
+use build_helper::ferrocene_targets::has_certified_runtime;
+
 use crate::core::build_steps::compile;
 use crate::core::build_steps::tool::{
     self, RustcPrivateCompilers, SourceType, Tool, prepare_tool_cargo,
@@ -836,7 +838,7 @@ fn doc_std(
         cargo.arg("--features").arg("ferrocene_subset");
     }
     // Ferrocene addition
-    if target.contains("ferrocene.certified") {
+    if has_certified_runtime(target.triple) {
         cargo.arg("--features").arg("ferrocene_certified_runtime");
     }
     // Ferrocene addition

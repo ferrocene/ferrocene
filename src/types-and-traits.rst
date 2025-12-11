@@ -996,6 +996,8 @@ A :dt:`variadic ABI` is any of the following :t:`[ABI]s`:
   ``extern "cdecl"``
 * :dp:`fls_DpTFEHZAABdD`
   ``extern "cdecl-unwind"``
+* :dp:`fls_b7FTlWfnX2OI`
+  ``extern "efiapi"``
 * :dp:`fls_eHPWHrvs7ETl`
   ``extern "sysv64"``
 * :dp:`fls_mjCrvmikm58M`
@@ -1004,8 +1006,6 @@ A :dt:`variadic ABI` is any of the following :t:`[ABI]s`:
   ``extern "win64"``
 * :dp:`fls_4B4B5FIqAes9`
   ``extern "win64-unwind"``
-* :dp:`fls_b7FTlWfnX2OI`
-  ``extern "efiapi"``
 
 :dp:`fls_g1iYVw7upBnH`
 The :t:`return type` of a :t:`function pointer type` is determined as follows:

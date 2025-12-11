@@ -2012,7 +2012,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn swap_remove(&mut self, index: usize) -> T {
-        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+        #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
         #[cold]
         #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
         #[optimize(size)]
@@ -2094,7 +2094,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[track_caller]
     #[must_use = "if you don't need a reference to the value, use `Vec::insert` instead"]
     pub fn insert_mut(&mut self, index: usize, element: T) -> &mut T {
-        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+        #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
         #[cold]
         #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
         #[track_caller]
@@ -2159,7 +2159,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[track_caller]
     #[rustc_confusables("delete", "take")]
     pub fn remove(&mut self, index: usize) -> T {
-        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+        #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
         #[cold]
         #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
         #[track_caller]
@@ -2973,7 +2973,7 @@ impl<T, A: Allocator> Vec<T, A> {
     where
         A: Clone,
     {
-        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+        #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
         #[cold]
         #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
         #[track_caller]

@@ -119,9 +119,9 @@ pub trait ExactSizeIterator: Iterator {
         // guaranteed by the trait. If this trait were rust-internal,
         // we could use debug_assert!; assert_eq! will check all Rust user
         // implementations too.
-        #[cfg(not(feature = "ferrocene_certified_panic"))]
+        #[cfg(not(feature = "ferrocene_certified_runtime"))]
         assert_eq!(upper, Some(lower));
-        #[cfg(feature = "ferrocene_certified_panic")]
+        #[cfg(feature = "ferrocene_certified_runtime")]
         assert!(upper == Some(lower));
         lower
     }

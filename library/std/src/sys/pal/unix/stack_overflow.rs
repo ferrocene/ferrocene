@@ -68,7 +68,7 @@ mod imp {
 
     use super::Handler;
     use super::thread_info::{delete_current_info, set_current_info, with_current_info};
-    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_imports))]
+    #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_imports))]
     use crate::io;
     use crate::ops::Range;
     use crate::sync::atomic::{Atomic, AtomicBool, AtomicPtr, AtomicUsize, Ordering};

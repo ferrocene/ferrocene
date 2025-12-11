@@ -39,4 +39,4 @@ check-cfg = [
 ]
 
 [features]
-ferrocene_certified_panic = []
+ferrocene_certified_runtime = []

@@ -63,4 +63,4 @@ unstable-public-internals = []
 
 # Ferrocene addition
 ferrocene_subset = []
-ferrocene_certified_panic = []
+ferrocene_certified_runtime = []

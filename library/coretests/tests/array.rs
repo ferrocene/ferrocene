@@ -287,7 +287,7 @@ fn array_default_impl_avoids_leaks_on_panic() {
         Ok(_) => unreachable!(),
         Err(p) => p.downcast::<&'static str>().unwrap(),
     };
-    #[cfg(not(feature = "ferrocene_certified_panic"))]
+    #[cfg(not(feature = "ferrocene_certified_runtime"))]
     assert_eq!(*panic_msg, "bomb limit exceeded");
     // check that all bombs are successfully dropped
     assert_eq!(COUNTER.load(Relaxed), 0);

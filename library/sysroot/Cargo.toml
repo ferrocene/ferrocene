@@ -42,4 +42,4 @@ windows_raw_dylib = ["std/windows_raw_dylib"]
 
 # Ferrocene addition: enable "ferrocene_subset" feature in the core library
 ferrocene_subset = ["std/ferrocene_subset"]
-ferrocene_certified_panic = ["std/ferrocene_certified_panic"]
+ferrocene_certified_runtime = ["std/ferrocene_certified_runtime"]

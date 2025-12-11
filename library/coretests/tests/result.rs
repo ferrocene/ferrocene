@@ -150,10 +150,10 @@ pub fn test_expect_ok() {
 }
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic(expected = "Got expected error: \"All good\"")
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 pub fn test_expect_err() {
     let err: Result<isize, &'static str> = Err("All good");
     err.expect("Got expected error");
@@ -166,10 +166,10 @@ pub fn test_expect_err_err() {
 }
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic(expected = "Got expected ok: \"All good\"")
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 pub fn test_expect_err_ok() {
     let err: Result<&'static str, isize> = Ok("All good");
     err.expect_err("Got expected ok");

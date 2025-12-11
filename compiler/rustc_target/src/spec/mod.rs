@@ -3234,7 +3234,7 @@ impl Target {
     }
 
     /// Modify the target to be a certified-panic one
-    pub fn ferrocene_certified_panic(&mut self) {
+    pub fn ferrocene_certified_runtime(&mut self) {
         self.metadata.description =
             self.metadata.description.as_ref().map(|v| format!("{v} (certified panic)").into());
         self.metadata.tier = None;

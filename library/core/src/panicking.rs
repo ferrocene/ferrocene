@@ -31,21 +31,21 @@
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 use crate::marker::PhantomData;
 use crate::panic::{Location, PanicInfo};
 
 /// Ferrocene addition: Alias used in our panic-related patches to avoid having to certify `fmt`.
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub(crate) type PanicArguments<'a> = fmt::Arguments<'a>;
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 #[allow(missing_debug_implementations)]
 pub struct PanicArguments<'a> {
     pub(crate) inner: &'static str,
     _marker: PhantomData<&'a ()>,
 }
 
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 impl<'a> PanicArguments<'a> {
     pub const fn new_const<const N: usize>(inner: &'a [&'static str; N]) -> Self {
         const { assert!(N <= 1) };
@@ -267,7 +267,7 @@ pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
 #[inline]
 #[track_caller]
 #[rustc_diagnostic_item = "unreachable_display"] // needed for `non-fmt-panics` lint
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub fn unreachable_display<T: fmt::Display>(x: &T) -> ! {
     panic_fmt(format_args!("internal error: entered unreachable code: {}", *x));
 }
@@ -278,12 +278,12 @@ pub fn unreachable_display<T: fmt::Display>(x: &T) -> ! {
 #[track_caller]
 #[rustc_diagnostic_item = "panic_str_2015"]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub const fn panic_str_2015(expr: &str) -> ! {
     panic_display(&expr);
 }
 
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 #[inline]
 #[track_caller]
 #[lang = "panic_display"] // needed for const-evaluated panics
@@ -293,7 +293,7 @@ pub const fn panic_display(msg: &&'static str) -> ! {
     panic_fmt(PanicArguments::new_const(&[*msg]));
 }
 
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[inline]
 #[track_caller]
 #[lang = "panic_display"] // needed for const-evaluated panics
@@ -303,7 +303,7 @@ pub const fn panic_display<T: fmt::Display>(x: &T) -> ! {
     panic_fmt(format_args!("{}", *x));
 }
 
-#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
@@ -315,7 +315,7 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
     panic!("index out of bounds: the len is {len} but the index is {index}")
 }
 
-#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
@@ -326,14 +326,14 @@ fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
         super::intrinsics::abort()
     }
 
-    #[cfg(not(feature = "ferrocene_certified_panic"))]
+    #[cfg(not(feature = "ferrocene_certified_runtime"))]
     panic_nounwind_fmt(
         format_args!(
             "misaligned pointer dereference: address must be a multiple of {required:#x} but is {found:#x}"
         ),
         /* force_no_backtrace */ false,
     );
-    #[cfg(feature = "ferrocene_certified_panic")]
+    #[cfg(feature = "ferrocene_certified_runtime")]
     panic_nounwind_fmt(
         PanicArguments::new_const(&["misaligned pointer dereference"]),
         /* force_no_backtrace */ false,
@@ -356,7 +356,7 @@ fn panic_null_pointer_dereference() -> ! {
     )
 }
 
-#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
@@ -368,12 +368,12 @@ fn panic_invalid_enum_construction(source: u128) -> ! {
         super::intrinsics::abort()
     }
 
-    #[cfg(not(feature = "ferrocene_certified_panic"))]
+    #[cfg(not(feature = "ferrocene_certified_runtime"))]
     panic_nounwind_fmt(
         format_args!("trying to construct an enum from an invalid value {source:#x}"),
         /* force_no_backtrace */ false,
     );
-    #[cfg(feature = "ferrocene_certified_panic")]
+    #[cfg(feature = "ferrocene_certified_runtime")]
     panic_nounwind_fmt(
         PanicArguments::new_const(&["trying to construct an enum from an invalid value"]),
         /* force_no_backtrace */ false,
@@ -479,7 +479,7 @@ pub fn assert_matches_failed<T: fmt::Debug + ?Sized>(
 }
 
 /// Non-generic version of the above functions, to avoid code bloat.
-#[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]

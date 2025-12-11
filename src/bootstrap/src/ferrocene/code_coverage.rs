@@ -27,7 +27,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
     cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
     cargo.rustflag("--cfg=ferrocene_coverage");
-    cargo.arg("--features=core/ferrocene_inject_profiler_builtins,std/ferrocene_certified_panic");
+    cargo.arg("--features=core/ferrocene_inject_profiler_builtins,std/ferrocene_certified_runtime");
 
     // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
     // building the sysroot itself: in those cases, the sysroot is empty. We thus need to

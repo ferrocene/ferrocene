@@ -724,7 +724,7 @@ pub fn std_cargo(
         cargo.arg("--features=ferrocene_subset");
     }
     if target.contains("ferrocene.certified") {
-        cargo.arg("--features=ferrocene_certified_panic");
+        cargo.arg("--features=ferrocene_certified_runtime");
     }
 
     // By default, rustc uses `-Cembed-bitcode=yes`, and Cargo overrides that

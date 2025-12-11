@@ -239,7 +239,7 @@ s_no_extra_traits! {
         pub pminfo: syspage_entry_info,
         pub old_mdriver: syspage_entry_info,
         spare0: [u32; 1],
-        __reserved: [u8; 160], // anonymous union with architecture dependent structs
+        __reserved: Padding<[u8; 160]>, // anonymous union with architecture dependent structs
         pub new_asinfo: syspage_array_info,
         pub new_cpuinfo: syspage_array_info,
         pub new_cacheattr: syspage_array_info,

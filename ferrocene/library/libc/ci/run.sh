@@ -9,6 +9,9 @@ target="$1"
 
 export RUST_BACKTRACE="${RUST_BACKTRACE:-1}"
 
+# For logging
+uname -a
+
 cmd="cargo test --target $target ${LIBC_CI_ZBUILD_STD+"-Zbuild-std"}"
 test_flags="--skip check_style"
 
@@ -22,39 +25,21 @@ case "$target" in
     *) cmd="$cmd --workspace" ;;
 esac
 
-if [ "$target" = "s390x-unknown-linux-gnu" ]; then
-    # FIXME: s390x-unknown-linux-gnu often fails to test due to timeout,
-    # so we retry this N times.
-    N=5
-    n=0
-    passed=0
-    until [ $n -ge $N ]; do
-        if [ "$passed" = "0" ]; then
-            # shellcheck disable=SC2086
-            if $cmd --no-default-features -- $test_flags; then
-                passed=$((passed + 1))
-                continue
-            fi
-        elif [ "$passed" = "1" ]; then
-            # shellcheck disable=SC2086
-            if $cmd -- $test_flags; then
-                passed=$((passed + 1))
-                continue
-            fi
-        elif [ "$passed" = "2" ]; then
-            # shellcheck disable=SC2086
-            if $cmd --features extra_traits -- $test_flags; then
-                break
-            fi
-        fi
-        n=$((n + 1))
-        sleep 1
-    done
-else
+env="$(rustc --print cfg --target "$target" | sed -n 's/target_env="\(.*\)"/\1/p')"
+bits="$(rustc --print cfg --target "$target" | sed -n 's/target_pointer_width="\(.*\)"/\1/p')"
+
+# shellcheck disable=SC2086
+$cmd --no-default-features -- $test_flags
+# shellcheck disable=SC2086
+$cmd -- $test_flags
+# shellcheck disable=SC2086
+$cmd --features extra_traits -- $test_flags
+
+# On relevant platforms, also test with our optional settings
+
+if [ "$env" = "gnu" ] && [ "$bits" = "32" ]; then
     # shellcheck disable=SC2086
-    $cmd --no-default-features -- $test_flags
+    RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS=64 $cmd -- $test_flags
     # shellcheck disable=SC2086
-    $cmd -- $test_flags
-    # shellcheck disable=SC2086
-    $cmd --features extra_traits -- $test_flags
+    RUST_LIBC_UNSTABLE_GNU_TIME_BITS=64 $cmd -- $test_flags
 fi

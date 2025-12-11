@@ -70,8 +70,8 @@
           StorageLive(_9);
 -         _9 = copy _7;
 -         _8 = move _9 as fn() (PointerCoercion(ClosureFnPointer(Safe), AsCast));
-+         _9 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 617:21};
-+         _8 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 617:21} as fn() (PointerCoercion(ClosureFnPointer(Safe), AsCast));
++         _9 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 618:21};
++         _8 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 618:21} as fn() (PointerCoercion(ClosureFnPointer(Safe), AsCast));
           StorageDead(_9);
           StorageLive(_10);
           StorageLive(_11);
@@ -88,8 +88,8 @@
           StorageLive(_13);
 -         _13 = copy _7;
 -         _12 = move _13 as fn() (PointerCoercion(ClosureFnPointer(Safe), AsCast));
-+         _13 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 617:21};
-+         _12 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 617:21} as fn() (PointerCoercion(ClosureFnPointer(Safe), AsCast));
++         _13 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 618:21};
++         _12 = const ZeroSized: {closure@$DIR/gvn.rs:618:19: 618:21} as fn() (PointerCoercion(ClosureFnPointer(Safe), AsCast));
           StorageDead(_13);
           StorageLive(_14);
           StorageLive(_15);

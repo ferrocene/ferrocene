@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use std::{env, fs, str};
 
+use build_helper::ferrocene_targets::has_certified_runtime;
 use serde_derive::Deserialize;
 #[cfg(feature = "tracing")]
 use tracing::span;
@@ -725,7 +726,7 @@ pub fn std_cargo(
     if target.contains("ferrocene.subset") {
         cargo.arg("--features=ferrocene_subset");
     }
-    if target.contains("ferrocene.certified") {
+    if has_certified_runtime(target.triple) {
         cargo.arg("--features=ferrocene_certified_runtime");
     }
 

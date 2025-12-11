@@ -156,6 +156,8 @@ fn extract_all_functions(tcx: TyCtxt<'_>, vis: &mut Vis<'_>) {
     }
 }
 
+/// These functions exist only to allow code using `.subset` targets to compile,
+/// and will be removed once `#[ferrocene::certified] is implemented.
 fn should_skip_item(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
     let kind = tcx.def_kind(def);
     if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {

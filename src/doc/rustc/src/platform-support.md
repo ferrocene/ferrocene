@@ -455,10 +455,10 @@ target | std | host | notes
 `aarch64-unknown-ferrocene.subset` | * |  | Bare ARM64, hardfloat (subset)
 `thumbv7em-ferrocene.subset-eabi` | * |  | Bare Armv7E-M (subset)
 `thumbv7em-ferrocene.subset-eabihf` | * |  | Bare Armv7E-M, hardfloat (subset)
-`x86_64-ferrocene-none` | * |  | Freestanding/bare-metal x86_64, softfloat (certified panic)
-`aarch64-ferrocene-none` | * |  | Bare ARM64, hardfloat (certified panic)
-`thumbv7em-ferrocene-none-eabi` | * |  | Bare Armv7E-M (certified panic)
-`thumbv7em-ferrocene-none-eabihf` | * |  | Bare Armv7E-M, hardfloat (certified panic)
+`x86_64-ferrocene-none` | * |  | Freestanding/bare-metal x86_64, softfloat (certified runtime)
+`aarch64-ferrocene-none` | * |  | Bare ARM64, hardfloat (certified runtime)
+`thumbv7em-ferrocene-none-eabi` | * |  | Bare Armv7E-M (certified runtime)
+`thumbv7em-ferrocene-none-eabihf` | * |  | Bare Armv7E-M, hardfloat (certified runtime)
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets
 [the AMD GPU]: https://llvm.org/docs/AMDGPUUsage.html#processors

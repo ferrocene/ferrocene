@@ -587,7 +587,7 @@ use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
 use crate::panicking::panic;
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 use crate::panicking::panic_display;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::Pin;
@@ -982,14 +982,14 @@ impl<T> Option<T> {
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     pub const fn expect(
         self,
-        #[cfg(not(feature = "ferrocene_certified_panic"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_panic")] msg: &'static str,
+        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
+        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
     ) -> T {
         match self {
             Some(val) => val,
-            #[cfg(not(feature = "ferrocene_certified_panic"))]
+            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             None => expect_failed(msg),
-            #[cfg(feature = "ferrocene_certified_panic")]
+            #[cfg(feature = "ferrocene_certified_runtime")]
             None => panic(msg),
         }
     }
@@ -2236,7 +2236,7 @@ const fn unwrap_failed() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 const fn expect_failed(msg: &str) -> ! {
     panic_display(&msg)
 }

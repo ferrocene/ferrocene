@@ -327,10 +327,10 @@ fn test_format_debug_hex() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "Formatting argument out of range"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn test_rt_width_too_long() {
     let _ = format!("Hello {:width$}!", "x", width = u16::MAX as usize + 1);
 }

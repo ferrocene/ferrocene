@@ -52,7 +52,7 @@ cfg_select! {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Command {
-    #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+    #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
     pub fn spawn(
         &mut self,
         default: Stdio,

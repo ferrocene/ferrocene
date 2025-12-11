@@ -138,7 +138,7 @@ windows_raw_dylib = ["windows-targets/windows_raw_dylib"]
 
 # Ferrocene addition: enable "ferrocene_subset" feature in the core library
 ferrocene_subset = ["alloc/ferrocene_subset"]
-ferrocene_certified_panic = ["alloc/ferrocene_certified_panic"]
+ferrocene_certified_runtime = ["alloc/ferrocene_certified_runtime"]
 
 [package.metadata.fortanix-sgx]
 # Maximum possible number of threads when testing

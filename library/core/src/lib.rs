@@ -221,8 +221,8 @@
 #![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
 
 // Ferrocene addition: ensure we don't instrument core without the certified panic
-#[cfg(all(ferrocene_coverage, not(feature = "ferrocene_certified_panic")))]
-compile_error!("Cannot instrument core without the \"ferrocene_certified_panic\" feature");
+#[cfg(all(ferrocene_coverage, not(feature = "ferrocene_certified_runtime")))]
+compile_error!("Cannot instrument core without the \"ferrocene_certified_runtime\" feature");
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use std::{env, fs, str};
 
+use build_helper::ferrocene_targets::has_certified_runtime;
 use serde_derive::Deserialize;
 #[cfg(feature = "tracing")]
 use tracing::span;
@@ -724,6 +725,9 @@ pub fn std_cargo(
 
     if target.contains("ferrocene.subset") {
         cargo.arg("--features=ferrocene_subset");
+    }
+    if has_certified_runtime(target.triple) {
+        cargo.arg("--features=ferrocene_certified_runtime");
     }
 
     // By default, rustc uses `-Cembed-bitcode=yes`, and Cargo overrides that

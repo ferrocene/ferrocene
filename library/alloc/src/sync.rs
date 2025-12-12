@@ -56,7 +56,7 @@ use crate::vec::Vec;
 const MAX_REFCOUNT: usize = (isize::MAX) as usize;
 
 /// The error in case either counter reaches above `MAX_REFCOUNT`, and we can `panic` safely.
-#[cfg_attr(feature = "ferrocene_certified_panic", expect(dead_code))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(dead_code))]
 const INTERNAL_OVERFLOW_ERROR: &str = "Arc counter overflow";
 
 #[cfg(not(sanitize = "thread"))]

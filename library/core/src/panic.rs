@@ -25,7 +25,7 @@ use crate::any::Any;
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 pub macro panic_2015($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 
 #[doc(hidden)]
@@ -33,7 +33,7 @@ pub macro panic_2015($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro panic_2015 {
     () => (
         $crate::panicking::panic("explicit panic")
@@ -62,7 +62,7 @@ pub macro panic_2015 {
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 
 #[doc(hidden)]
@@ -70,7 +70,7 @@ pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro panic_2021 {
     () => (
         $crate::panicking::panic("explicit panic")
@@ -92,7 +92,7 @@ pub macro panic_2021 {
 #[allow_internal_unstable(panic_internals)]
 #[rustc_diagnostic_item = "unreachable_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 pub macro unreachable_2015 {
     ($($t:tt)*) => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -104,7 +104,7 @@ pub macro unreachable_2015 {
 #[allow_internal_unstable(panic_internals)]
 #[rustc_diagnostic_item = "unreachable_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro unreachable_2015 {
     () => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -124,7 +124,7 @@ pub macro unreachable_2015 {
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(feature = "ferrocene_certified_panic")]
+#[cfg(feature = "ferrocene_certified_runtime")]
 pub macro unreachable_2021 {
     ($($t:tt)*) => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -135,7 +135,7 @@ pub macro unreachable_2021 {
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro unreachable_2021 {
     () => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -216,7 +216,7 @@ pub macro const_panic {
         #[inline(always)] // inline the wrapper
         #[track_caller]
         // Ferrocene addition: otherwise "unused variable" errors
-        #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+        #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

@@ -1784,6 +1784,10 @@ supported_targets! {
     ("aarch64-unknown-ferrocene.subset", aarch64_unknown_ferrocene_subset),
     ("thumbv7em-ferrocene.subset-eabi", thumbv7em_ferrocene_subset_eabi),
     ("thumbv7em-ferrocene.subset-eabihf", thumbv7em_ferrocene_subset_eabihf),
+    ("x86_64-ferrocene-none", x86_64_ferrocene_none),
+    ("aarch64-ferrocene-none", aarch64_ferrocene_none),
+    ("thumbv7em-ferrocene-none-eabi", thumbv7em_ferrocene_none_eabi),
+    ("thumbv7em-ferrocene-none-eabihf", thumbv7em_ferrocene_none_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),
@@ -3476,10 +3480,17 @@ impl Target {
         Symbol::intern(&self.vendor)
     }
 
-    /// Modify the target to be certified
+    /// Modify the target to be a subset one
     pub fn ferrocene_subset(&mut self) {
         self.metadata.description =
-            self.metadata.description.as_ref().map(|v| format!("{v} (certified)").into());
+            self.metadata.description.as_ref().map(|v| format!("{v} (subset)").into());
+        self.metadata.tier = None;
+    }
+
+    /// Modify the target to be a certified-panic one
+    pub fn ferrocene_certified_runtime(&mut self) {
+        self.metadata.description =
+            self.metadata.description.as_ref().map(|v| format!("{v} (certified runtime)").into());
         self.metadata.tier = None;
     }
 }

@@ -72,6 +72,7 @@ subset = "default"
 [groups.cross-compilation]
 targets = [
   # tidy-alphabetical-start
+  "aarch64-ferrocene-none",
   "aarch64-unknown-ferrocene.subset",
   "aarch64-unknown-ferrocene.facade",
   "aarch64-unknown-linux-gnu",
@@ -82,6 +83,8 @@ targets = [
   "armv8r-none-eabihf",
   "riscv64gc-unknown-linux-gnu",
   "thumbv6m-none-eabi",
+  "thumbv7em-ferrocene-none-eabihf",
+  "thumbv7em-ferrocene-none-eabi",
   "thumbv7em-ferrocene.subset-eabihf",
   "thumbv7em-ferrocene.subset-eabi",
   "thumbv7em-ferrocene.facade-eabi",
@@ -92,6 +95,7 @@ targets = [
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
   "wasm32-unknown-unknown",
+  "x86_64-ferrocene-none",
   "x86_64-unknown-ferrocene.subset",
   "x86_64-unknown-linux-musl",
   # tidy-alphabetical-end

@@ -9,7 +9,7 @@
 #![feature(iter_next_chunk)]
 #![feature(iter_advance_by)]
 #![feature(uint_gather_scatter_bits)]
-#![cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
+#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 
 extern crate test;
 

@@ -12,8 +12,8 @@ use crate::panicking::PanicArguments;
 /// [`std::panic::PanicHookInfo`]: ../../std/panic/struct.PanicHookInfo.html
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(not(feature = "ferrocene_certified_panic"), derive(Debug))]
-#[cfg_attr(feature = "ferrocene_certified_panic", allow(missing_debug_implementations))]
+#[cfg_attr(not(feature = "ferrocene_certified_runtime"), derive(Debug))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", allow(missing_debug_implementations))]
 pub struct PanicInfo<'a> {
     message: &'a PanicArguments<'a>,
     location: &'a Location<'a>,
@@ -30,7 +30,7 @@ pub struct PanicInfo<'a> {
 ///
 /// See [`PanicInfo::message`].
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg_attr(feature = "ferrocene_certified_panic", allow(missing_debug_implementations))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", allow(missing_debug_implementations))]
 pub struct PanicMessage<'a> {
     message: &'a PanicArguments<'a>,
 }
@@ -151,7 +151,7 @@ impl<'a> PanicInfo<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 impl Display for PanicInfo<'_> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("panicked at ")?;
@@ -185,7 +185,7 @@ impl<'a> PanicMessage<'a> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 impl Display for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -194,7 +194,7 @@ impl Display for PanicMessage<'_> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg(all(not(feature = "ferrocene_subset"), feature = "ferrocene_certified_panic"))]
+#[cfg(all(not(feature = "ferrocene_subset"), feature = "ferrocene_certified_runtime"))]
 impl Display for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -203,7 +203,7 @@ impl Display for PanicMessage<'_> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg(not(feature = "ferrocene_certified_panic"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 impl fmt::Debug for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

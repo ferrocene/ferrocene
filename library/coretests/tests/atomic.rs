@@ -13,10 +13,10 @@ fn bool_() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as an acquire store"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn store_illegal_rt_store_acquire_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::Acquire;
@@ -25,10 +25,10 @@ fn store_illegal_rt_store_acquire_ordering() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as an acquire-release store"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn store_illegal_rt_store_acq_rel_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::AcqRel;
@@ -37,10 +37,10 @@ fn store_illegal_rt_store_acq_rel_ordering() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as a release load"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn store_illegal_rt_load_release_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::Release;
@@ -49,10 +49,10 @@ fn store_illegal_rt_load_release_ordering() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as an acquire-release load"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn store_illegal_rt_load_acq_rel_ordering() {
     let a = AtomicBool::new(false);
     let ord = Ordering::AcqRel;
@@ -393,10 +393,10 @@ fn atomic_compare_exchange() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as an acquire-release failure ordering"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn atomic_compare_exchange_illegal_acq_rel() {
     use Ordering::*;
 
@@ -409,10 +409,10 @@ fn atomic_compare_exchange_illegal_acq_rel() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as a release failure ordering"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn atomic_compare_exchange_illegal_release() {
     use Ordering::*;
 
@@ -425,10 +425,10 @@ fn atomic_compare_exchange_illegal_release() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as an acquire-release failure ordering"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn atomic_compare_exchange_weak_illegal_acq_rel() {
     use Ordering::*;
 
@@ -441,10 +441,10 @@ fn atomic_compare_exchange_weak_illegal_acq_rel() {
 
 #[test]
 #[cfg_attr(
-    not(feature = "ferrocene_certified_panic"),
+    not(feature = "ferrocene_certified_runtime"),
     should_panic = "there is no such thing as a release failure ordering"
 )]
-#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn atomic_compare_exchange_weak_illegal_release() {
     use Ordering::*;
 

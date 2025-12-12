@@ -74,7 +74,7 @@ fn test_clone_to_uninit_slice_drops_on_panic() {
         }
     })
     .unwrap_err();
-    #[cfg(not(feature = "ferrocene_certified_panic"))]
+    #[cfg(not(feature = "ferrocene_certified_runtime"))]
     assert_eq!(panic_payload.downcast().unwrap(), Box::new("intentional panic"));
 
     // Check for lack of leak, which is what this test is looking for

@@ -112,14 +112,14 @@ Nightly features are tested by the ``compiletest`` test suite, by tests that act
 Nightly flags
 """""""""""""
 
-The core library also relies on various unqualified flags of the compiler.
-Regular users of Ferrocene are not allowed to use them.
+The core library also relies on various normally unqualified flags of the compiler.
+These are only for the use of core; Ferrocene customers must still adhere to the permitted flags in :doc:`safety-manual:rustc/options`.
 Like nightly features, these flags work well but are experimental, internal, or simply have not yet been qualified.
 This is not a problem for the core library, because ``rustc`` and the core library are developed, built, and tested together.
 
-Unqualified flags are enabled by passing them to the compiler when the core library is being built.
+The flags used for core are enabled by passing them to the compiler when the core library is being built.
 
-Unqualified flags are directly tested by the ``compiletest`` test suite, by tests that pass that flag explicitly.
+The flags used for core are directly tested by the ``compiletest`` test suite, by tests that pass that flag explicitly.
 Flags are also indirectly tested each time the core library is used, and the core library is used extensively by the compiler in all test suites.
 
 Compiler built-in functions

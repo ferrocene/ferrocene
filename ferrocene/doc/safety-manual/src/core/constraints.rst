@@ -71,3 +71,12 @@ Use matching version of the core library and rustc
 .. id::  CORE_CSTR_0040_MATCHING_VERSION
 
 The user shall verify that the version of the core library and the version of rustc used to compile code match. This is ensured by following the :doc:`Installation Procedures <../procedures>`.
+
+Use a certified target
+----------------------
+
+.. id::  CORE_CSTR_0060_CERTIFIED_TARGET
+
+Associated requirement ID: :id:`CORE_AVD_CERT_004`.
+
+The user shall always provide a ``--target`` option to ``rustc`` with an argument that is a :ref:`certified target <certified-core-targets>`.

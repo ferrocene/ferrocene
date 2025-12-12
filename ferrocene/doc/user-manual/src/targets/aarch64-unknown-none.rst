@@ -46,3 +46,16 @@ which means it can use ``std`` for testing and enriched interactive development 
 :target:`aarch64-unknown-linux-gnu` or :ref:`x86_64-unknown-linux-gnu` host.
 
 For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
+
+.. _aarch64-ferrocene-none:
+
+Certified equivalent
+--------------------
+
+This :ref:`qualified <qualified-targets>` target's certified equivalent is
+``aarch64-ferrocene-none``. To use the certified core library, the
+following additional flags must be provided to ``rustc``:
+
+* ``--target=aarch64-ferrocene-none``
+
+Refer to :ref:`certified-core-targets` for more information about certified targets.

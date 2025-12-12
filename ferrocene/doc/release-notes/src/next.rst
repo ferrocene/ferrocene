@@ -12,7 +12,7 @@ release.
 New features
 ------------
 
-The certified subset of the ``core`` library that is certified to IEC-61508 SIL 2 has been significantly expanded.
+The certified subset of the ``core`` library that is certified to IEC 61508 SIL 2 has been significantly expanded.
 For more information, see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
 
 Fixed known problems

@@ -196,6 +196,101 @@ fn ilog10_u128() {
     ilog10_loop! { u128, 38 }
 }
 
+macro_rules! ilog2_loop {
+    ($T:ty, $ilog2_max:expr) => {
+        assert_eq!(<$T>::MAX.ilog2(), $ilog2_max);
+        for i in 0..=$ilog2_max {
+            let p = (2 as $T).pow(i as u32);
+            if p >= 2 {
+                assert_eq!((p - 1).ilog2(), i - 1);
+            }
+            assert_eq!(p.ilog2(), i);
+            if p >= 2 {
+                assert_eq!((p + 1).ilog2(), i);
+            }
+
+            // also check `x.ilog(2)`
+            if p >= 2 {
+                assert_eq!((p - 1).ilog(2), i - 1);
+            }
+            assert_eq!(p.ilog(2), i);
+            if p >= 2 {
+                assert_eq!((p + 1).ilog(2), i);
+            }
+        }
+    };
+}
+
+#[test]
+fn ilog2_u8() {
+    ilog2_loop! { u8, 7 }
+}
+
+#[test]
+fn ilog2_u16() {
+    ilog2_loop! { u16, 15 }
+}
+
+#[test]
+fn ilog2_u32() {
+    ilog2_loop! { u32, 31 }
+}
+
+#[test]
+fn ilog2_u64() {
+    ilog2_loop! { u64, 63 }
+}
+
+#[test]
+fn ilog2_u128() {
+    ilog2_loop! { u128, 127 }
+}
+
+#[test]
+fn ilog2_i8() {
+    ilog2_loop! { i8, 6 }
+}
+
+#[test]
+fn ilog2_i16() {
+    ilog2_loop! { i16, 14 }
+}
+
+#[test]
+fn ilog2_i32() {
+    ilog2_loop! { i32, 30 }
+}
+
+#[test]
+fn ilog2_i64() {
+    ilog2_loop! { i64, 62 }
+}
+
+#[test]
+fn ilog2_i128() {
+    ilog2_loop! { i128, 126 }
+}
+
+macro_rules! nonpositive_ilog2 {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic]
+            fn $fn() {
+                let _ = (-1 as $T).ilog2();
+            }
+        )*
+    };
+}
+
+nonpositive_ilog2! {
+    i8 => nonpositive_ilog2_of_i8,
+    i16 => nonpositive_ilog2_of_i16,
+    i32 => nonpositive_ilog2_of_i32,
+    i64 => nonpositive_ilog2_of_i64,
+    i128 => nonpositive_ilog2_of_i128,
+}
+
 #[test]
 #[cfg_attr(
     not(feature = "ferrocene_certified_panic"),

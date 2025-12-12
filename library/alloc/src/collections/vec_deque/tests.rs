@@ -248,7 +248,11 @@ fn test_swap() {
 }
 
 #[test]
-#[should_panic = "assertion failed: j < self.len()"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic = "assertion failed: j < self.len()"
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn test_swap_panic() {
     let mut tester = VecDeque::new();
     tester.push_back(1);
@@ -271,7 +275,8 @@ fn test_reserve_exact() {
 }
 
 #[test]
-#[should_panic = "capacity overflow"]
+#[cfg_attr(not(feature = "ferrocene_certified_panic"), should_panic = "capacity overflow")]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn test_reserve_exact_panic() {
     let mut tester: VecDeque<i32> = VecDeque::new();
     tester.reserve_exact(usize::MAX);
@@ -354,14 +359,22 @@ fn test_rotate_left_right() {
 }
 
 #[test]
-#[should_panic = "assertion failed: n <= self.len()"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic = "assertion failed: n <= self.len()"
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn test_rotate_left_panic() {
     let mut tester: VecDeque<_> = (1..=10).collect();
     tester.rotate_left(tester.len() + 1);
 }
 
 #[test]
-#[should_panic = "assertion failed: n <= self.len()"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic = "assertion failed: n <= self.len()"
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn test_rotate_right_panic() {
     let mut tester: VecDeque<_> = (1..=10).collect();
     tester.rotate_right(tester.len() + 1);

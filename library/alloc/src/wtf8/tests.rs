@@ -686,21 +686,33 @@ fn wtf8_valid_utf8_boundaries() {
 }
 
 #[test]
-#[should_panic(expected = "byte index 4 is out of bounds")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "byte index 4 is out of bounds")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn wtf8_utf8_boundary_out_of_bounds() {
     let string = Wtf8::from_str("aé");
     string.check_utf8_boundary(4);
 }
 
 #[test]
-#[should_panic(expected = "byte index 1 is not a codepoint boundary")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "byte index 1 is not a codepoint boundary")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn wtf8_utf8_boundary_inside_codepoint() {
     let string = Wtf8::from_str("é");
     string.check_utf8_boundary(1);
 }
 
 #[test]
-#[should_panic(expected = "byte index 1 is not a codepoint boundary")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "byte index 1 is not a codepoint boundary")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn wtf8_utf8_boundary_inside_surrogate() {
     let mut string = Wtf8Buf::new();
     string.push(CodePoint::from_u32(0xD800).unwrap());
@@ -708,7 +720,11 @@ fn wtf8_utf8_boundary_inside_surrogate() {
 }
 
 #[test]
-#[should_panic(expected = "byte index 3 lies between surrogate codepoints")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "byte index 3 lies between surrogate codepoints")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 fn wtf8_utf8_boundary_between_surrogates() {
     let mut string = Wtf8Buf::new();
     string.push(CodePoint::from_u32(0xD800).unwrap());

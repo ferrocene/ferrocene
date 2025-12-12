@@ -894,7 +894,11 @@ fn test_range_mut() {
     map.check();
 }
 
-#[should_panic(expected = "range start is greater than range end in BTreeMap")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "range start is greater than range end in BTreeMap")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 #[test]
 fn test_range_panic_1() {
     let mut map = BTreeMap::new();
@@ -905,7 +909,11 @@ fn test_range_panic_1() {
     let _invalid_range = map.range((Included(&8), Included(&3)));
 }
 
-#[should_panic(expected = "range start and end are equal and excluded in BTreeMap")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "range start and end are equal and excluded in BTreeMap")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 #[test]
 fn test_range_panic_2() {
     let mut map = BTreeMap::new();
@@ -916,7 +924,11 @@ fn test_range_panic_2() {
     let _invalid_range = map.range((Excluded(&5), Excluded(&5)));
 }
 
-#[should_panic(expected = "range start and end are equal and excluded in BTreeMap")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_panic"),
+    should_panic(expected = "range start and end are equal and excluded in BTreeMap")
+)]
+#[cfg_attr(feature = "ferrocene_certified_panic", should_panic)]
 #[test]
 fn test_range_panic_3() {
     let mut map: BTreeMap<i32, ()> = BTreeMap::new();

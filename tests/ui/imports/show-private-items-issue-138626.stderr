@@ -4,7 +4,7 @@ error[E0432]: unresolved import `crate::two::foo::Foo`
 LL |     pub use crate::two::foo::Foo;
    |             ^^^^^^^^^^^^^^^^^^^^ no `Foo` in `two::foo`
    |
-note: struct `two::foo::bar::Foo` exists but is inaccessible
+note: struct `crate::two::foo::bar::Foo` exists but is inaccessible
   --> $DIR/show-private-items-issue-138626.rs:12:13
    |
 LL |             pub struct Foo;
@@ -12,7 +12,7 @@ LL |             pub struct Foo;
 help: consider importing this struct through its public re-export instead
    |
 LL -     pub use crate::two::foo::Foo;
-LL +     pub use one::Foo;
+LL +     pub use crate::one::Foo;
    |
 
 error: aborting due to 1 previous error

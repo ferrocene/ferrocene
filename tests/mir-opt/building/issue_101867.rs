@@ -1,6 +1,7 @@
 //@ compile-flags: -Zmir-opt-level=0
 // skip-filecheck
 // EMIT_MIR issue_101867.main.built.after.mir
+//@ edition: 2015
 fn main() {
     let x: Option<u8> = Some(1);
     let Some(y) = x else {

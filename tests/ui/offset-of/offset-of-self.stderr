@@ -12,7 +12,7 @@ LL |         offset_of!(self::S, v);
    |
 help: consider importing this struct
    |
-LL +     use S;
+LL +     use crate::S;
    |
 help: if you import `S`, refer to it directly
    |

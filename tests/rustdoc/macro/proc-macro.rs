@@ -1,6 +1,7 @@
 //@ force-host
 //@ no-prefer-dynamic
 //@ compile-flags: --crate-type proc-macro --document-private-items
+//@ edition: 2015
 
 #![crate_type="proc-macro"]
 #![crate_name="some_macros"]

@@ -22,15 +22,15 @@ LL |     || x = 2;
 LL |     r.use_mut();
    |     - first borrow later used here
 
-error[E0500]: closure requires unique access to `x` but it is already borrowed
+error[E0499]: cannot borrow `*x` as mutable more than once at a time
   --> $DIR/closure-access-spans.rs:17:5
    |
 LL |     let r = &mut x;
-   |             ------ borrow occurs here
+   |             ------ first mutable borrow occurs here
 LL |     || *x = 2;
-   |     ^^ -- second borrow occurs due to use of `x` in closure
+   |     ^^ -- second borrow occurs due to use of `*x` in closure
    |     |
-   |     closure construction occurs here
+   |     second mutable borrow occurs here
 LL |     r.use_mut();
    |     - first borrow later used here
 
@@ -123,5 +123,5 @@ LL |     || x;
 
 error: aborting due to 9 previous errors
 
-Some errors have detailed explanations: E0382, E0499, E0500, E0502, E0503, E0505.
+Some errors have detailed explanations: E0382, E0499, E0502, E0503, E0505.
 For more information about an error, try `rustc --explain E0382`.

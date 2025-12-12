@@ -1,14 +1,14 @@
-error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `gen`
+error: expected one of `move`, `use`, `{`, `|`, or `||`, found `gen`
   --> $DIR/feature-gate-gen_blocks.rs:12:11
    |
 LL |     async gen {};
-   |           ^^^ expected one of 8 possible tokens
+   |           ^^^ expected one of `move`, `use`, `{`, `|`, or `||`
 
-error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `gen`
+error: expected one of `move`, `use`, `{`, `|`, or `||`, found `gen`
   --> $DIR/feature-gate-gen_blocks.rs:25:11
    |
 LL |     async gen {};
-   |           ^^^ expected one of 8 possible tokens
+   |           ^^^ expected one of `move`, `use`, `{`, `|`, or `||`
 
 error[E0422]: cannot find struct, variant or union type `gen` in this scope
   --> $DIR/feature-gate-gen_blocks.rs:5:5

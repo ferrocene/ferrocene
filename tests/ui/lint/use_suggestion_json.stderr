@@ -397,6 +397,75 @@ mod foo {
 ",
           "suggestion_applicability": "MaybeIncorrect",
           "expansion": null
+        },
+        {
+          "file_name": "$DIR/use_suggestion_json.rs",
+          "byte_start": 541,
+          "byte_end": 541,
+          "line_start": 11,
+          "line_end": 11,
+          "column_start": 1,
+          "column_end": 1,
+          "is_primary": true,
+          "text": [
+            {
+              "text": "fn main() {",
+              "highlight_start": 1,
+              "highlight_end": 1
+            }
+          ],
+          "label": null,
+          "suggested_replacement": "use core::option::Iter;
+
+",
+          "suggestion_applicability": "MaybeIncorrect",
+          "expansion": null
+        },
+        {
+          "file_name": "$DIR/use_suggestion_json.rs",
+          "byte_start": 541,
+          "byte_end": 541,
+          "line_start": 11,
+          "line_end": 11,
+          "column_start": 1,
+          "column_end": 1,
+          "is_primary": true,
+          "text": [
+            {
+              "text": "fn main() {",
+              "highlight_start": 1,
+              "highlight_end": 1
+            }
+          ],
+          "label": null,
+          "suggested_replacement": "use core::result::Iter;
+
+",
+          "suggestion_applicability": "MaybeIncorrect",
+          "expansion": null
+        },
+        {
+          "file_name": "$DIR/use_suggestion_json.rs",
+          "byte_start": 541,
+          "byte_end": 541,
+          "line_start": 11,
+          "line_end": 11,
+          "column_start": 1,
+          "column_end": 1,
+          "is_primary": true,
+          "text": [
+            {
+              "text": "fn main() {",
+              "highlight_start": 1,
+              "highlight_end": 1
+            }
+          ],
+          "label": null,
+          "suggested_replacement": "use core::slice::Iter;
+
+",
+          "suggestion_applicability": "MaybeIncorrect",
+          "expansion": null
         }
       ],
       "children": [],
@@ -419,7 +488,7 @@ mod foo {
    \u001b[1m\u001b[94m|\u001b[0m
 \u001b[1m\u001b[94mLL\u001b[0m \u001b[92m+ use std::collections::hash_map::Iter;\u001b[0m
    \u001b[1m\u001b[94m|\u001b[0m
-   \u001b[1m\u001b[94m= \u001b[0mand 9 other candidates
+   \u001b[1m\u001b[94m= \u001b[0mand 12 other candidates
 
 "
 }

@@ -1,6 +1,7 @@
 // Regression test for #138942, where a function was incorrectly internalized, despite the fact
 // that it was referenced by a var debug info from another code generation unit.
 //
+//@ edition: 2015
 //@ build-pass
 //@ revisions: limited full
 //@ compile-flags: -Ccodegen-units=4

@@ -2,6 +2,7 @@
 // http://creativecommons.org/publicdomain/zero/1.0/
 
 //@ pp-exact
+//@ edition: 2015
 
 fn call_it(f: Box<FnMut(String) -> String>) {}
 

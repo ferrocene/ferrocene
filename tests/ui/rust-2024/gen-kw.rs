@@ -1,5 +1,6 @@
 //@ revisions: e2015 e2018
 //@[e2018] edition: 2018
+//@[e2015] edition: 2015
 
 #![deny(rust_2024_compatibility)]
 

@@ -4,6 +4,7 @@
 //@ compile-flags: -Z query-dep-graph
 //@ build-pass
 //@ ignore-backends: gcc
+//@ edition: 2015
 
 #![crate_type = "rlib"]
 #![feature(rustc_attrs)]

@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub trait Foo {
     //@ has assoc_consts/trait.Foo.html '//pre[@class="rust item-decl"]' \
     //      'const FOO: usize = 13usize;'

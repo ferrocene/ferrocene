@@ -1,4 +1,5 @@
 //@ compile-flags: -Cmetadata=aux
+//@ edition: 2015
 
 pub mod tree {
     pub use tree;

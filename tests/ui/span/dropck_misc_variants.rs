@@ -1,3 +1,4 @@
+//@ edition: 2015
 // check that dropck does the right thing with misc. Ty variants
 
 use std::fmt;

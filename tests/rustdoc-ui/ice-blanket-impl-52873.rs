@@ -1,4 +1,5 @@
 //@ check-pass
+//@ edition: 2015
 // https://github.com/rust-lang/rust/issues/52873
 #![crate_name="foo"]
 

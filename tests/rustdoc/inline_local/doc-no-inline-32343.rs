@@ -1,4 +1,5 @@
 // https://github.com/rust-lang/rust/issues/32343
+//@ edition: 2015
 #![crate_name="foobar"]
 
 //@ !has foobar/struct.Foo.html

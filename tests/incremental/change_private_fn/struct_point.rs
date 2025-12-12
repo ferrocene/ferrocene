@@ -5,6 +5,7 @@
 //@ compile-flags: -Z query-dep-graph
 //@ build-pass (FIXME(62277): could be check-pass?)
 //@ ignore-backends: gcc
+//@ edition: 2015
 
 #![feature(rustc_attrs)]
 #![feature(stmt_expr_attributes)]

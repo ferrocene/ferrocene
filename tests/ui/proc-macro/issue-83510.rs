@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ proc-macro: issue-83510.rs
 //@ ignore-backends: gcc
 

@@ -1,5 +1,6 @@
 //@ revisions: edition2015 edition2021
 //@[edition2021]edition:2021
+//@[edition2015]edition:2015
 
 #![allow(warnings)]
 

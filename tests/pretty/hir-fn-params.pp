@@ -5,6 +5,7 @@ use ::std::prelude::rust_2015::*;
 //@ pretty-compare-only
 //@ pretty-mode:hir
 //@ pp-exact:hir-fn-params.pp
+//@ edition: 2015
 
 // This tests the pretty-printing of various kinds of function parameters.
 

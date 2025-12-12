@@ -31,7 +31,7 @@ help: consider changing this to be mutable
 LL |     pub fn capture_assign_whole(mut x: (i32,)) {
    |                                 +++
 
-error[E0594]: cannot assign to `x.0`, as `x` is not declared as mutable
+error[E0594]: cannot assign to `x.0`, as it is not declared as mutable
   --> $DIR/issue-55492-borrowck-migrate-scans-parents.rs:41:13
    |
 LL |             x.0 = 1;
@@ -53,7 +53,7 @@ help: consider changing this to be mutable
 LL |     pub fn capture_reborrow_whole(mut x: (i32,)) {
    |                                   +++
 
-error[E0596]: cannot borrow `x.0` as mutable, as `x` is not declared as mutable
+error[E0596]: cannot borrow `x.0` as mutable, as it is not declared as mutable
   --> $DIR/issue-55492-borrowck-migrate-scans-parents.rs:53:13
    |
 LL |             &mut x.0;

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 
 #![allow(ellipsis_inclusive_range_patterns)]

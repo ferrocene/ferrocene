@@ -6,11 +6,11 @@ LL | impl Mul for Foo {
    |
 help: consider importing one of these traits
    |
+LL + use crate::mul1::Mul;
+   |
+LL + use crate::mul2::Mul;
+   |
 LL + use std::ops::Mul;
-   |
-LL + use mul1::Mul;
-   |
-LL + use mul2::Mul;
    |
 
 error[E0412]: cannot find type `Mul` in this scope
@@ -23,20 +23,20 @@ note: these items exist but are inaccessible
   --> $DIR/issue-21221-1.rs:10:5
    |
 LL |     enum Mul {
-   |     ^^^^^^^^ `mul3::Mul`: not accessible
+   |     ^^^^^^^^ `crate::mul3::Mul`: not accessible
 ...
 LL |     type Mul = String;
-   |     ^^^^^^^^^^^^^^^^^^ `mul4::Mul`: not accessible
+   |     ^^^^^^^^^^^^^^^^^^ `crate::mul4::Mul`: not accessible
 ...
 LL |     struct Mul{
-   |     ^^^^^^^^^^ `mul5::Mul`: not accessible
+   |     ^^^^^^^^^^ `crate::mul5::Mul`: not accessible
 help: consider importing one of these traits
    |
+LL + use crate::mul1::Mul;
+   |
+LL + use crate::mul2::Mul;
+   |
 LL + use std::ops::Mul;
-   |
-LL + use mul1::Mul;
-   |
-LL + use mul2::Mul;
    |
 
 error[E0405]: cannot find trait `ThisTraitReallyDoesntExistInAnyModuleReally` in this scope

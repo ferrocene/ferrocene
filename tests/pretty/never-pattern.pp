@@ -1,5 +1,4 @@
 #![feature(prelude_import)]
-#![no_std]
 //@ pretty-mode:expanded
 //@ pp-exact:never-pattern.pp
 //@ only-x86_64
@@ -10,7 +9,7 @@
 #[macro_use]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 fn f(x: Result<u32, !>) { _ = match x { Ok(x) => x, Err(!) , }; }
 

@@ -15,7 +15,7 @@ ast-stats - Ptr                       64 (NN.N%)             1
 ast-stats - Ref                       64 (NN.N%)             1
 ast-stats - ImplicitSelf             128 (NN.N%)             2
 ast-stats - Path                     640 (NN.N%)            10
-ast-stats PathSegment              888 (NN.N%)            37            24
+ast-stats PathSegment              864 (NN.N%)            36            24
 ast-stats Expr                     648 (NN.N%)             9            72
 ast-stats - InlineAsm                 72 (NN.N%)             1
 ast-stats - Match                     72 (NN.N%)             1
@@ -57,13 +57,13 @@ ast-stats GenericArgs               40 (NN.N%)             1            40
 ast-stats - AngleBracketed            40 (NN.N%)             1
 ast-stats Crate                     40 (NN.N%)             1            40
 ast-stats ----------------------------------------------------------------
-ast-stats Total                  7_528                   129
+ast-stats Total                  7_504                   128
 ast-stats ================================================================
 hir-stats ================================================================
 hir-stats HIR STATS: input_stats
 hir-stats Name                Accumulated Size         Count     Item Size
 hir-stats ----------------------------------------------------------------
-hir-stats PathSegment            1_776 (NN.N%)            37            48
+hir-stats PathSegment            1_728 (NN.N%)            36            48
 hir-stats Path                   1_040 (NN.N%)            26            40
 hir-stats Item                     968 (NN.N%)            11            88
 hir-stats - Enum                      88 (NN.N%)             1
@@ -119,5 +119,5 @@ hir-stats TraitItemId                8 (NN.N%)             2             4
 hir-stats ImplItemId                 8 (NN.N%)             2             4
 hir-stats ForeignItemId              4 (NN.N%)             1             4
 hir-stats ----------------------------------------------------------------
-hir-stats Total                  8_624                   173
+hir-stats Total                  8_576                   172
 hir-stats ================================================================

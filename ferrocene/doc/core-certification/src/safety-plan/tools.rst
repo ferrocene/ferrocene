@@ -107,6 +107,21 @@ Nightly features used by the core library are listed as ``#![feature(name_of_the
 
 Nightly features are tested by the ``compiletest`` test suite, by tests that activate that feature explicitly. E.g. ``tests/ui/unknown-language-item.rs`` tests ``#![feature(lang_items)]``.
 
+.. _nightly-flags:
+
+Nightly flags
+"""""""""""""
+
+The core library also relies on various unqualified flags of the compiler.
+Regular users of Ferrocene are not allowed to use them.
+Like nightly features, these flags work well but are experimental, internal, or simply have not yet been qualified.
+This is not a problem for the core library, because ``rustc`` and the core library are developed, built, and tested together.
+
+Unqualified flags are enabled by passing them to the compiler when the core library is being built.
+
+Unqualified flags are directly tested by the ``compiletest`` test suite, by tests that pass that flag explicitly.
+Flags are also indirectly tested each time the core library is used, and the core library is used extensively by the compiler in all test suites.
+
 Compiler built-in functions
 """""""""""""""""""""""""""
 
@@ -228,6 +243,100 @@ Failure modes
 - False-negative: Report test as failing, although it is successful
    - Risk: None
    - Mitigation: Report issue upstream.
+
+Build orchestrator
+------------------
+
+Version
+~~~~~~~
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``bootstrap``
+     - |ferrocene_version|
+
+Usage
+~~~~~
+
+The bootstrap build orchestrator compiles the compiler, core library, test runner, and test suites.
+
+Safety Assessment
+~~~~~~~~~~~~~~~~~
+
+- Tool classification: T2
+- Level of reliance: High, ensures the safety plan is being adhered to.
+
+``bootstrap`` is the build system used to build, package, and test the rustc compiler.
+Most of the build system is used heavily by the upstream Rust project.
+However, Ferrocene has custom modifications to bootstrap that are not used anywhere else, so there is only a moderate chance of a bug in the modifications being detected.
+
+.. _bootstrap-failure-modes:
+
+Failure modes
+"""""""""""""
+
+- Test/dist mismatch: The core library is tested in a configuration that does not match the distributed code.
+   - Risk: All tests pass, but the distributed code would have failed the tests.
+   - Mitigation: Package exactly the code that was tested.
+- Incorrect configuration: The core library is built in a configuration that does not match the safety plan.
+   - Risk: Some certified code calls uncertified code.
+   - Mitigation: Building for a certified target automatically sets configuration flags that ensure all certified code only calls certified code.
+                 Tests and coverage collection run on that certified target.
+- Missing build flags: The core library is built without flags required by the safety plan, such as ``-Cpanic=abort``.
+  - Risk: The core library uses unwinding panics at runtime, which are not certified.
+  - Mitigation: The tests for the core library, when instrumented for coverage, give a compilation error if the ``panic = "abort"`` conditional compilation option is unset.
+- Unqualified flags: The core library is built with extra flags that are not qualified, such as `-Z inline-mir`.
+  - Risk: Unqualified compiler flags introduce errors. For example, MIR inlining introduces a codegen bug.
+  - Mitigation: Refer to :ref:`nightly-flags`.
+
+Continuous integration job orchestrator
+----------------------------------------
+
+Version
+~~~~~~~
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``circleci``
+     - |ferrocene_version|
+
+Usage
+~~~~~
+
+The CircleCI job orchestrator instructs the ``bootstrap`` build system to build, test, and package the core library.
+It schedules "jobs" that execute in a constrained order, saves the results of the tests, and uploads the generated artifacts for the core library.
+
+Safety Assessment
+~~~~~~~~~~~~~~~~~
+
+- Tool classification: T2
+- Level of reliance: High, ensures all tests are run.
+
+CircleCI itself is used extensively by many different open-source projects.
+However, our custom execution plan for CircleCI is unique to Ferrocene.
+
+See the description of :ref:`circleci` in the qualification docs for more information.
+
+Failure modes
+"""""""""""""
+
+- Missing test job: A test job fails or is not run, but the core library is distributed to customers anyway.
+   - Risk: Customers run untested code.
+   - Mitigation: All "distribution" CI jobs depend on test jobs.
+                 If a test job fails, the distribution job never runs.
+- Missing test suite: A test suite is never run in any test job.
+  - Risk: Not all test suites in the safety plan are run.
+  - Mitigation: The ``ferrocene/ci/split-tasks.py`` script chooses which suites are run in which job.
+                This script has an exhaustive list of all test suites required by our safety plan,
+                and ensures each suite is run in at least one job.
 
 Version control system
 ----------------------

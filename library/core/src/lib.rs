@@ -197,7 +197,7 @@
 // Target features:
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(aarch64_unstable_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(arm_target_feature))]
+#![feature(arm_target_feature)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(hexagon_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(loongarch_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(mips_target_feature))]

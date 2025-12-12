@@ -171,6 +171,9 @@ macro_rules! impl_funnel_shifts {
     ($($type:ident),*) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
         impl const FunnelShift for $type {
+            #[ferrocene::annotation(
+                "This function is indirectly but thoroughly tested through the `test_funnel_shift`, `test_funnel_shl_overflow` and `test_funnel_shifts_runtime` tests in `coretests::num`. The fact that is shown as uncovered is a known problem in our coverage tooling."
+            )]
             #[cfg_attr(miri, track_caller)]
             #[inline]
             unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
@@ -196,6 +199,9 @@ macro_rules! impl_funnel_shifts {
                 }
             }
 
+            #[ferrocene::annotation(
+                "This function is indirectly but thoroughly tested through the `test_funnel_shift`, `test_funnel_shr_overflow` and `test_funnel_shifts_runtime` tests in `coretests::num`. The fact that is shown as uncovered is a known problem in our coverage tooling."
+            )]
             #[cfg_attr(miri, track_caller)]
             #[inline]
             unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {

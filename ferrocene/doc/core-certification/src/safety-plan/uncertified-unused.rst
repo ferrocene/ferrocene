@@ -9,11 +9,13 @@ Uncertified code
 
 It has to be ensured that no uncertified code from the core library is being used in a customer project.
 
-This is achieved in two steps.
+This is achieved in three steps.
 
 Firstly, it is ensured that the certified subset only contains certified code.
 
 Secondly, customers must ensure they only use code from the certified subset.
+
+Thirdly,  customers must ensure they only use a certified target in their final build.
 
 All uncertified code, and certified code that is not called, is unused code.
 

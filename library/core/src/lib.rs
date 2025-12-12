@@ -136,7 +136,7 @@
 //
 // Language features:
 // not-alphabetical-start
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(abi_unadjusted))]
+#![feature(abi_unadjusted)]
 #![feature(adt_const_params)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
@@ -163,7 +163,7 @@
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(link_llvm_intrinsics))]
+#![feature(link_llvm_intrinsics)]
 #![feature(macro_metavar_expr)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(macro_metavar_expr_concat))]
 #![feature(marker_trait_attr)]
@@ -177,11 +177,11 @@
 #![feature(pattern_types)]
 #![feature(prelude_import)]
 #![feature(reborrow)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(repr_simd))]
+#![feature(repr_simd)]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(simd_ffi))]
+#![feature(simd_ffi)]
 #![feature(staged_api)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance_lints)]
@@ -189,14 +189,14 @@
 #![feature(transparent_unions)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(unsized_fn_params))]
+#![feature(unsized_fn_params)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(with_negative_coherence))]
 // not-alphabetical-end
 //
 // Target features:
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(aarch64_unstable_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(arm_target_feature))]
+#![feature(arm_target_feature)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(avx10_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(hexagon_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(loongarch_target_feature))]
@@ -422,7 +422,6 @@ pub mod primitive;
     unreachable_pub
 )]
 #[allow(rustdoc::bare_urls)]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]

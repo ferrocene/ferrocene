@@ -4818,6 +4818,7 @@ core::ptr::write
 core::ptr::write::precondition_check
 core::ptr::write_bytes
 core::ptr::write_bytes::precondition_check
+core::ptr::write_unaligned
 core::ptr::write_volatile
 core::ptr::write_volatile::precondition_check
 core::result::Result::<&T, E>::cloned

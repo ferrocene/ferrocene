@@ -58,12 +58,16 @@
 
 // 8, 7 and 6-M are supported via dedicated instructions like DMB. All other arches are supported
 // via CP15 instructions. See Section 10.1 of ACLE
+#[cfg(not(feature = "ferrocene_subset"))]
 mod barrier;
 #[unstable(feature = "stdarch_arm_barrier", issue = "117219")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::barrier::*;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 mod hints;
 #[unstable(feature = "stdarch_arm_hints", issue = "117218")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::hints::*;
 
 #[cfg(any(
@@ -97,8 +101,10 @@ pub use self::neon::*;
     target_feature = "v7",
     doc
 ))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod test_support;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 mod sealed {
     #[unstable(feature = "stdarch_arm_barrier", issue = "117219")]
     pub trait Dmb {

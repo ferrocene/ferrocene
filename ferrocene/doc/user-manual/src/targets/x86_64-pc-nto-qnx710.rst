@@ -10,12 +10,12 @@ The ``x86_64-pc-nto-qnx710`` Ferrocene target provides support for QNX on
 x86-64 processors.
 
 .. note::
-    
+
     QNX SDP 7.1.0 only supports :ref:`x86_64-unknown-linux-gnu` and
     :ref:`x86_64-pc-windows-msvc` as host platforms.
 
     Currently, Ferrocene only qualifies cross compilation to this target from
-    :ref:`x86_64-unknown-linux-gnu`. Cross-compilation from 
+    :ref:`x86_64-unknown-linux-gnu`. Cross-compilation from
     :ref:`x86_64-pc-windows-msvc` is experimental and cross-compilation from
     :ref:`aarch64-apple-darwin` is unsupported.
 
@@ -83,3 +83,13 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 * ``--target=x86_64-pc-nto-qnx710``
+
+.. We don't qualify x86_64-unknown-none so we can't certify this target.
+
+Certified equivalent
+--------------------
+
+This qualified target has no certified equivalent.
+It remains qualified for use with the Ferrocene compiler, but the core library for this target is not certified.
+
+Refer to :ref:`certified-core-targets` for more information about certified targets.

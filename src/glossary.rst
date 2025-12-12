@@ -4716,7 +4716,7 @@ that nullifies an implicitly added :t:`trait bound`.
 
 .. _fls_LnPDQW3bnNUw:
 
-or pattern
+or-pattern
 ^^^^^^^^^^
 
 :dp:`fls_LnPDQW3bnNUw`

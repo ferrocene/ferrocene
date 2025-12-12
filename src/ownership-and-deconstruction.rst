@@ -695,12 +695,12 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
 :t:`drop scope` are :t:`dropped` as follows:
 
 * :dp:`fls_g07zq3n55094`
-  :t:`[Binding]s` are :t:`dropped` in reverse declaration order.
+  All other :t:`bindings` are :t:`dropped` in reverse declaration order.
 
 * :dp:`fls_W2S2FrkuedYC`
-  For the purpose of drop order, an :t:`[Or Pattern]` declares its
-  :t:`[Binding]s` in the order given by its first
-  :t:`[Pattern Without Alternation]`.
+  :t:`[Binding]s` introduced by an :t:`or-pattern` are dropped in reverse
+  declaration order, where the declaration order is defined by the first
+  :t:`subpattern`.
 
 * :dp:`fls_a5tmilqxdb6f`
   :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.

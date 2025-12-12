@@ -297,10 +297,10 @@ pub const fn prefetch_read_data<T, const LOCALITY: i32>(data: *const T) {
 /// to (3) - extremely local keep in cache.
 ///
 /// This intrinsic does not have a stable counterpart.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn prefetch_write_data<T, const LOCALITY: i32>(data: *const T) {
     // This operation is a no-op, unless it is overridden by the backend.
     let _ = data;
@@ -1375,6 +1375,7 @@ pub fn log2f128(x: f128) -> f128;
 ///
 /// The stabilized version of this intrinsic is
 /// [`f16::mul_add`](../../std/primitive.f16.html#method.mul_add)
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -1383,6 +1384,7 @@ pub const fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 ///
 /// The stabilized version of this intrinsic is
 /// [`f32::mul_add`](../../std/primitive.f32.html#method.mul_add)
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -1391,6 +1393,7 @@ pub const fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 ///
 /// The stabilized version of this intrinsic is
 /// [`f64::mul_add`](../../std/primitive.f64.html#method.mul_add)
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -1399,6 +1402,7 @@ pub const fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 ///
 /// The stabilized version of this intrinsic is
 /// [`f128::mul_add`](../../std/primitive.f128.html#method.mul_add)
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_subset"))]

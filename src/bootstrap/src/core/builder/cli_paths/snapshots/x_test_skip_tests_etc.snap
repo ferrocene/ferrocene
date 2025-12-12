@@ -11,10 +11,6 @@ expression: test --skip=tests --skip=coverage-map --skip=coverage-run --skip=lib
 [Test] bootstrap::ferrocene::test::GenerateTarball
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::ferrocene/tools/generate-tarball})
-[Test] bootstrap::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({test::certified-core-symbols})
-    - Set({test::ferrocene/doc/symbol-report.csv})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/tidy})

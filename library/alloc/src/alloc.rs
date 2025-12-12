@@ -427,26 +427,15 @@ pub mod __alloc_error_handler {
     #[cfg_attr(feature = "ferrocene_certified_panic", expect(unused_variables))]
     #[rustc_std_internal_symbol]
     pub unsafe fn __rdl_alloc_error_handler(size: usize, _align: usize) -> ! {
-        unsafe extern "Rust" {
-            // This symbol is emitted by rustc next to __rust_alloc_error_handler.
-            // Its value depends on the -Zoom={panic,abort} compiler option.
-            #[rustc_std_internal_symbol]
-            fn __rust_alloc_error_handler_should_panic_v2() -> u8;
-        }
-
-        if unsafe { __rust_alloc_error_handler_should_panic_v2() != 0 } {
-            panic!("memory allocation of {size} bytes failed")
-        } else {
-            #[cfg(not(feature = "ferrocene_certified_panic"))]
-            core::panicking::panic_nounwind_fmt(
-                format_args!("memory allocation of {size} bytes failed"),
-                /* force_no_backtrace */ false,
-            );
-            #[cfg(feature = "ferrocene_certified_panic")]
-            core::panicking::panic_nounwind_fmt(
-                core::panicking::PanicArguments::from_str("memory allocation failed"),
-                /* force_no_backtrace */ false,
-            );
-        }
+        #[cfg(not(feature = "ferrocene_certified_panic"))]
+        core::panicking::panic_nounwind_fmt(
+            format_args!("memory allocation of {size} bytes failed"),
+            /* force_no_backtrace */ false,
+        );
+        #[cfg(feature = "ferrocene_certified_panic")]
+        core::panicking::panic_nounwind_fmt(
+            core::panicking::PanicArguments::from_str("memory allocation failed"),
+            /* force_no_backtrace */ false,
+        );
     }
 }

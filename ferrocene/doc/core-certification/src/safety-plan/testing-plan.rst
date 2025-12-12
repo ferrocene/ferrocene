@@ -58,7 +58,9 @@ In order to gather code coverage information, an additional test run of the core
 
 It is ensured that both the instrumented and not instrumented coretests run succeeds. This ensures that coverage instrumentation does not introduce any correctness issues.
 
-Code coverage is measured only on one platform, ``x86_64-ferrocene-linux-gnu``. This is sufficient because the code of the core library is largely platform independent, and code coverage is only a measure of the quality of the test suite. Correctness is still tested by running the tests on all qualified targets.
+Code coverage is measured only on one platform, ``x86_64-ferrocene-linux-gnu``.
+This is sufficient because the certified subset only contains platform-independent code, and code coverage is only a measure of the quality of the test suite.
+Correctness is still tested by running the tests on all qualified targets.
 
 How it works:
 

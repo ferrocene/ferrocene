@@ -596,3 +596,12 @@ fn str_from_utf8_unchecked_mut_err() {
     let sparkle_heart_err = unsafe { str::from_utf8_unchecked_mut(&mut sparkle_heart_err) };
     assert_eq!("💖", sparkle_heart_err);
 }
+
+#[test]
+fn str_utf8_error() {
+    let sparkle_heart_err = vec![0, 159, 146, 150];
+    let sparkle_heart_err = str::from_utf8(&sparkle_heart_err).unwrap_err();
+
+    assert_eq!(sparkle_heart_err.valid_up_to(), 1);
+    assert_eq!(sparkle_heart_err.error_len(), Some(1));
+}

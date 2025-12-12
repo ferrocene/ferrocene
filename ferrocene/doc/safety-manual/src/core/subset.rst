@@ -4,7 +4,7 @@
 Certified subset
 ================
 
-The `Certified core library API docs <../../certification/api-docs/core/index.html>`_ is the autoritative document stating which items are included in the certified subset of the core library.
+The `Certified core library API docs <../../certification/api-docs/core/index.html>`_ is the authoritative document stating which items are included in the certified subset of the core library.
 
 Compliance with subset
 ----------------------
@@ -16,9 +16,9 @@ To prove compliance with the subset, follow these steps:
 3. If it succeeds, your code is compliant with the subset.
 4. If it fails, do one of the following:
 
-    1. Remove the non-compliant function(s) and rewrite the code to maintain the semantics.
-    2. Contact Ferrous Systems to discuss the option of adding your desired function(s) to the certified subset.
-    3. Keep using the function(s), but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
+   - Remove the non-compliant function and rewrite the code to maintain the semantics.
+   - Contact Ferrous Systems to discuss the option of adding your desired function to the certified subset.
+   - Keep using the function, but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
 
 .. warning::
 
@@ -51,4 +51,4 @@ For functions in the certified subset of the core library, Ferrous Systems prove
 For functions outside of the certified subset, this safety is not proven by Ferrous Systems.
 
 Nevertheless, using those functions is still possible for customers if they prove the safety themselves.
-Often this is even more feasible because only the exact usage of the function has to be proven safe and not all possible uses.
+This could be more feasible because only the exact usage of the function has to be proven safe, and not all possible uses.

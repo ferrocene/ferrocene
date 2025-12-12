@@ -29,7 +29,7 @@ Certified targets
 
 The core library is certified only on "certified targets".
 Certified targets are like qualified targets, but furthermore ship with a
-pre-compiled certified core standard library. Each certified target has a
+pre-compiled certified core library. Each certified target has a
 qualified "base" target. Refer to :ref:`qualified-targets` for more information
 about qualified targets.
 
@@ -42,13 +42,13 @@ about qualified targets.
 Like qualified targets, only stable releases of certified targets are certified.
 Other releases, such as beta, should be considered Quality Managed. Such releases can be certified upon request.
 
-The following targets are certified for use with the pre-compiled certified core standard library:
+The following targets are certified for use with the pre-compiled certified core library:
 
 .. list-table::
    :header-rows: 1
 
    * - Target
-     - Qualified (Base) target tuple
+     - Qualified target tuple
      - Certified target tuple
 
    * - :ref:`aarch64-unknown-none`

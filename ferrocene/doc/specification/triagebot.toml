@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Rust Project Contributors
+
+# Ease review after a rebase be ensuring no other changes occurred.
+# https://forge.rust-lang.org/triagebot/range-diff.html
+[range-diff]
+
+# Canonicalize issue mentions (change "fixes #1234" to "fixes rust-lang/fls#1234"),
+# to avoid wrong mentions where this repo (rust-lang/fls) is a subtree to another repo.
+# https://forge.rust-lang.org/triagebot/issue-links.html
+[issue-links]
+check-commits = false

@@ -4713,6 +4713,19 @@ opt-out trait bound
 An :dt:`opt-out trait bound` is a :t:`trait bound` with :s:`Punctuation` ``?``
 that nullifies an implicitly added :t:`trait bound`.
 
+
+.. _fls_LnPDQW3bnNUw:
+
+or pattern
+^^^^^^^^^^
+
+:dp:`fls_LnPDQW3bnNUw`
+An :dt:`or pattern` is a :t:`pattern` that matches on one of two or more
+:t:`[pattern-without-alternation]s`.
+
+:dp:`fls_urIJ5JNHLhm6`
+See :s:`Pattern`.
+
 .. _fls_gllzixm9yt9w:
 
 outer attribute
@@ -7259,8 +7272,9 @@ Unicode
 ^^^^^^^
 
 :dp:`fls_y7gwku7pe1f4`
-:dt:`Unicode` is the colloquial name for the ISO/IEC 10646:2017 Universal Coded
-Character Set standard.
+:dt:`Unicode` is the universal character encoding standard for written
+characters and text described in the Unicode® Standard by the Unicode
+Consortium.
 
 .. _fls_y7m6AentM6Ik:
 

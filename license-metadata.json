@@ -95,6 +95,136 @@
               {
                 "children": [
                   {
+                    "children": [],
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "workflows",
+                    "type": "directory"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Rust Project Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/.github",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "directories": [],
+                                "files": [
+                                  "raleway-400-italic.ttf",
+                                  "raleway-400-italic.woff2",
+                                  "raleway-400.ttf",
+                                  "raleway-400.woff2",
+                                  "raleway-700-italic.ttf",
+                                  "raleway-700-italic.woff2",
+                                  "raleway-700.ttf",
+                                  "raleway-700.woff2"
+                                ],
+                                "license": {
+                                  "copyright": [
+                                    "The Raleway Project Authors (impallari@gmail.com)"
+                                  ],
+                                  "spdx": "OFL-1.1"
+                                },
+                                "type": "group"
+                              }
+                            ],
+                            "license": {
+                              "copyright": [
+                                "Christian Robertson"
+                              ],
+                              "spdx": "Apache-2.0"
+                            },
+                            "name": "fonts",
+                            "type": "directory"
+                          },
+                          {
+                            "license": {
+                              "copyright": [
+                                "The Ferrocene Developers"
+                              ],
+                              "spdx": "Apache-2.0 OR MIT"
+                            },
+                            "name": "fls.css",
+                            "type": "file"
+                          }
+                        ],
+                        "license": {
+                          "copyright": [
+                            "The Rust Foundation"
+                          ],
+                          "spdx": "CC-BY-4.0"
+                        },
+                        "name": "static",
+                        "type": "directory"
+                      },
+                      {
+                        "license": {
+                          "copyright": [
+                            "2022 Fonticons, Inc",
+                            "Fonticons, Inc"
+                          ],
+                          "spdx": "CC-BY-4.0"
+                        },
+                        "name": "fontawesome.html",
+                        "type": "file"
+                      },
+                      {
+                        "license": {
+                          "copyright": [
+                            "&copy; {{ copyright }}",
+                            "The Ferrocene Developers",
+                            "The Rust Project Developers"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "layout.html",
+                        "type": "file"
+                      },
+                      {
+                        "license": {
+                          "copyright": [
+                            "The Ferrocene Developers",
+                            "The Rust Project Developers"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "theme.toml",
+                        "type": "file"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "fls",
+                    "type": "directory"
+                  }
+                ],
+                "license": null,
+                "name": "doc/specification/themes",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
                     "children": [
                       {
                         "directories": [],
@@ -183,13 +313,48 @@
               {
                 "license": {
                   "copyright": [
+                    "The Rust Project Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/.gitattributes",
+                "type": "file"
+              },
+              {
+                "directories": [],
+                "files": [
+                  "doc/specification/CONTRIBUTING.rst",
+                  "doc/specification/README.rst",
+                  "doc/specification/make.py",
+                  "doc/specification/pyproject.toml",
+                  "doc/specification/src/conf.py",
+                  "doc/specification/src/general.rst",
+                  "doc/specification/src/glossary.rst",
+                  "doc/specification/src/index.rst",
+                  "doc/specification/src/undefined-behavior.rst"
+                ],
+                "license": {
+                  "copyright": [
                     "The Ferrocene Developers",
                     "The Rust Project Contributors"
                   ],
                   "spdx": "Apache-2.0 OR MIT"
                 },
-                "name": "doc/specification/src/glossary.rst",
-                "type": "file"
+                "type": "group"
+              },
+              {
+                "directories": [],
+                "files": [
+                  "doc/specification/triagebot.toml",
+                  "doc/specification/src/background.rst"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Rust Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
               },
               {
                 "license": {
@@ -206,23 +371,23 @@
               {
                 "license": {
                   "copyright": [
-                    "The Ferrocene Developers",
-                    "The Rust Project Developers"
-                  ],
-                  "spdx": "Apache-2.0 OR MIT"
-                },
-                "name": "doc/specification/version.rst",
-                "type": "file"
-              },
-              {
-                "license": {
-                  "copyright": [
                     "2022 Fonticons, Inc",
                     "Fonticons, Inc"
                   ],
                   "spdx": "CC-BY-4.0"
                 },
                 "name": "doc/sphinx-shared-resources/src/ferrocene_theme/fontawesome.html",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/version.rst",
                 "type": "file"
               },
               {

@@ -697,6 +697,11 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
 * :dp:`fls_g07zq3n55094`
   :t:`[Binding]s` are :t:`dropped` in reverse declaration order.
 
+* :dp:`fls_W2S2FrkuedYC`
+  For the purpose of drop order, an :t:`[Or Pattern]` declares its
+  :t:`[Binding]s` in the order given by its first
+  :t:`[Pattern Without Alternation]`.
+
 * :dp:`fls_a5tmilqxdb6f`
   :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.
 
@@ -747,4 +752,39 @@ proceeds as follows:
        let b = PrintOnDrop("1");
    }
    let c = PrintOnDrop("2");
+
+:dp:`fls_THzA0QFdMMJB`
+When an :t:`or pattern` is used, the drop order of :t:`[Binding]s` is
+determined by the first :t:`pattern-without-alternation`, regardless of which
+alternative matches at runtime.
+
+.. code-block:: rust
+
+   // Drops `x` before `y`.
+   fn or_pattern_drop_order<T>(
+       (Ok([x, y]) | Err([y, x])): Result<[T; 2], [T; 2]>
+   //   ^^^^^^^^^^   ^^^^^^^^^^^ This is the second pattern-without-alternation.
+   //   |
+   //   This is the first pattern-without-alternation.
+   //
+   //   In the first pattern-without-alternation, `x` is declared before `y`.
+   //   Since it is the first pattern-without-alternation, that is the order
+   //   used even if the second pattern-without-alternation, where the bindings
+   //   are declared in the opposite order, is matched.
+   ) {}
+
+   // Here we match the first pattern-without-alternation, and the drops happen
+   // according to the declaration order in the first pattern-without-alternation.
+   or_pattern_drop_order(Ok([
+       PrintOnDrop("Declared first, dropped last"),
+       PrintOnDrop("Declared last, dropped first"),
+   ]));
+
+   // Here we match the second pattern-without-alternation, and the drops still
+   // happen according to the declaration order in the first
+   // pattern-without-alternation.
+   or_pattern_drop_order(Err([
+       PrintOnDrop("Declared last, dropped first"),
+       PrintOnDrop("Declared first, dropped last"),
+   ]));
 

@@ -4,8 +4,8 @@
 .. default-domain:: spec
 .. informational-page::
 
-FLS Changelog
-=============
+Changelog
+=========
 
 This page describes the changes that have been applied to the FLS itself to
 address changes and new features introduced in each Rust release. Every item
@@ -18,6 +18,75 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.91.1
+-------------------------------
+
+This release has no language changes.
+
+Language changes in Rust 1.91.0
+-------------------------------
+
+- `Lower pattern bindings in the order they're written and base drop order on primary bindings' order <https://github.com/rust-lang/rust/pull/143764>`_
+
+- `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
+  This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
+
+  - Changed paragraphs:
+
+    - :p:`fls_hbn1l42xmr3h`
+    - :p:`fls_dbbfqaqa80r8`
+    - :p:`fls_icdzs1mjh0n4`
+
+  - New paragraphs:
+
+    - :p:`fls_OR85NVifPwjr`
+    - :p:`fls_4s2IdfYDzPrX`
+    - :p:`fls_ZJJppPfiJRou`
+    - :p:`fls_jOyZh9ujWWHQ`
+    - :p:`fls_Xdr0bFwxhWiB`
+    - :p:`fls_DpTFEHZAABdD`
+    - :p:`fls_eHPWHrvs7ETl`
+    - :p:`fls_mjCrvmikm58M`
+    - :p:`fls_4EUb9zFatZ97`
+    - :p:`fls_4B4B5FIqAes9`
+    - :p:`fls_b7FTlWfnX2OI`
+    - :p:`fls_o4uSLPo00KUg`
+    - :p:`fls_UippZpUyYpHl`
+    - :p:`fls_CIyK8BYzzo26`
+    - :p:`fls_ccFdnlX5HIYk`
+    - :p:`fls_xrCRprWS13R1`
+    - :p:`fls_JHlqXjn4Sf07`
+
+- `Add dangling_pointers_from_locals lint to warn against dangling pointers from local variables <https://github.com/rust-lang/rust/pull/144322>`_
+
+  - No change: lints are not part of the FLS
+
+- `Upgrade semicolon_in_expressions_from_macros from warn to deny <https://github.com/rust-lang/rust/pull/144369>`_
+
+  - No change: lints are not part of the FLS
+
+- `Stabilize LoongArch32 inline assembly <https://github.com/rust-lang/rust/pull/144402>`_
+
+  - No change: the target is outside the scope of the FLS
+
+- `Add warn-by-default integer_to_ptr_transmutes lint against integer-to-pointer transmutes <https://github.com/rust-lang/rust/pull/144531>`_
+
+  - No change: lints are not part of the FLS
+
+- `Stabilize 'sse4a' and 'tbm' target features <https://github.com/rust-lang/rust/pull/144542>`_
+
+  - Changed syntax: :s:`Feature`
+
+  * New paragraphs:
+
+    - :p:`fls_pGHKFrgGlFtg`
+
+    - :p:`fls_K6TM6oTLL1BA`
+
+- `Add 'target_env = "macabi"' and 'target_env = "sim"' cfgs <https://github.com/rust-lang/rust/pull/139451>`_ as replacements for the `target_abi` cfgs with the same values.
+
+  - No change: configuration options are environment-specific and not exhaustive
+
 Language changes in Rust 1.90.0
 -------------------------------
 
@@ -27,7 +96,25 @@ Language changes in Rust 1.90.0
 
 - `Allow constants whose final value has references to mutable/external memory, but reject such constants as patterns <https://github.com/rust-lang/rust/pull/140942>`_
 
-  - New paragraph: :p:`fls_wJ9f906BlBvg`
+  - This lifted restriction was not specified in the FLS
+  - The restriction on patterns is documented in :p:`fls_wJ9f906BlBvg`
+  - New paragraph: :p:`fls_zyuxqty09SDO`
+
+    - Above paragraph replaces :p:`fls_6g7c1kjrmfnr` and :p:`fls_hkbwa8xx2fwx`
+
+  * New paragraphs:
+
+    - :p:`fls_ooOYxhVh8hZo`
+
+    - :p:`fls_zkNFeBLy80UA`
+
+    - :p:`fls_VhzGfnWg7YrG`
+
+    - :p:`fls_ibYKKQdB2tDn`
+
+    - :p:`fls_dQdSxf8kOgbi`
+
+    - :p:`fls_qC6L0km0ZMFI`
 
 - `Allow volatile access to non-Rust memory, including address 0 <https://github.com/rust-lang/rust/pull/141260>`_
 
@@ -90,7 +177,7 @@ Language changes in Rust 1.89.0
     - :p:`fls_gRf8F9PIGySt`
     - :p:`fls_NNj4H6A9VTR8`
 
-- `Stabilize these target featires for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
+- `Stabilize these target features for x86: kl, widekl <https://github.com/rust-lang/rust/pull/140766>`_
 
   - Changed syntax: :s:`Feature`
 
@@ -127,11 +214,14 @@ Language changes in Rust 1.89.0
 
 - `Extend temporary lifetime extension to also go through tuple struct and tuple variant constructors <https://github.com/rust-lang/rust/pull/140593>`_
 
-  - Changed paragraph: :p:`fls_DQaCUkskfXzk`
+  - Changed paragraphs:
+
+    - :p:`fls_DQaCUkskfXzk`
+    - :p:`fls_wyzau8hhq74d`
+
   - New paragraphs:
 
     - :p:`fls_YeeZWqTdMivX`
-    - :p:`fls_wyzau8hhq74d`
     - :p:`fls_eeaJtK4w5gVK`
 
 - `extern "C" functions on the wasm32-unknown-unknown target now have a standards compliant ABI <https://blog.rust-lang.org/2025/04/04/c-abi-changes-for-wasm32-unknown-unknown/>`_
@@ -323,7 +413,7 @@ Language changes in Rust 1.84.0
 
 * `Execute drop glue when unwinding in an \`extern "C"\` function <https://github.com/rust-lang/rust/pull/129582>`_
 
-  * No change: This restricted past behavior is specified by the FLS.
+  * No change: This lifted restriction was not specified in the FLS
 
 Language changes in Rust 1.83.0
 -------------------------------
@@ -331,6 +421,8 @@ Language changes in Rust 1.83.0
 * `Stabilize \`&mut\`, \`*mut\`, \`&Cell\`, and \`*const Cell\` in const. <https://github.com/rust-lang/rust/pull/129195>`_
 
   * Changed paragraphs: :p:`fls_to4e7imq2c0w`, :p:`fls_6g7c1kjrmfnr`, :p:`fls_hkbwa8xx2fwx`
+
+  * Removed paragraph: :p:`fls_ox6sgl9n43g2`
 
 * `Allow creating references to statics in \`const\` initializers. <https://github.com/rust-lang/rust/pull/129759>`_
 

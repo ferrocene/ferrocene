@@ -64,6 +64,7 @@ GitHub repository.
 
    GitHub Actions
 
+.. _circleci:
 
 CircleCI
 --------

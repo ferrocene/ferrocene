@@ -22,10 +22,61 @@ Certified version
 
 The certified version of the core library is |rust_version|.
 
+.. _certified-core-targets:
+
 Certified targets
 -----------------
 
-The core library is certified for all compilation targets Ferrocene rustc is qualified for. See :doc:`user-manual:targets/index` for a full list.
+The core library is certified only on "certified targets".
+Certified targets are like qualified targets, but furthermore ship with a
+pre-compiled certified core standard library. Each certified target has a
+qualified "base" target. Refer to :ref:`qualified-targets` for more information
+about qualified targets.
+
+.. warning::
+
+    Qualified targets are not certified. Subset targets are not certified. Code
+    which wishes to use the certified core library must use a certified target,
+    not a qualified target.
+
+Like qualified targets, only stable releases of certified targets are certified.
+Other releases, such as beta, should be considered Quality Managed. Such releases can be certified upon request.
+
+The following targets are certified for use with the pre-compiled certified core standard library:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Qualified (Base) target tuple
+     - Certified target tuple
+
+   * - :ref:`aarch64-unknown-none`
+     - ``aarch64-unknown-none``
+     - ``aarch64-ferrocene-none``
+
+   * - :ref:`aarch64-unknown-nto-qnx710`
+     - ``aarch64-unknown-nto-qnx710``
+     - ``aarch64-ferrocene-none``
+
+   * - :ref:`thumbv7em-none-eabi`
+     - ``thumbv7em-none-eabi``
+     - ``thumbv7em-ferrocene-none-eabi``
+
+   * - :ref:`thumbv7em-none-eabihf`
+     - ``thumbv7em-none-eabihf``
+     - ``thumbv7em-ferrocene-none-eabihf``
+
+   * - :ref:`x86_64-unknown-linux-gnu`
+     - ``x86_64-unknown-linux-gnu``
+     - ``x86_64-ferrocene-linux-gnu``
+
+
+.. note::
+
+    The ``x86_64-pc-nto-qnx710`` target has no certified equivalent.
+    This target remains qualified for use with the Ferrocene compiler,
+    but the core library for this target is not certified.
 
 Certified subset
 ----------------

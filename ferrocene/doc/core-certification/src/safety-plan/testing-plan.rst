@@ -42,7 +42,7 @@ One example test is ``coretests::slice::test_position``. It calls ``.position`` 
       assert_eq!(b.iter().position(|&v| v == 0), None);
   }
 
-This test suite is executed on :ref:`all qualified targets of Ferrocene <targets/index:qualified targets>`.
+This test suite is executed on :ref:`all certified targets of Ferrocene <certified-core-targets>`.
 
 The results of the coretests test suite can be found in the "Library Test Suite" section of :doc:`each targets test results <qualification-report:rustc/index>`.
 
@@ -54,11 +54,11 @@ Doc-tests are the code snippets in doc-comments. The doc-tests for the core libr
 Code coverage tests
 ~~~~~~~~~~~~~~~~~~~
 
-In order to gather code coverage information, an additional test run of the coretests test suite on the ``x86_64-unknown-linux-gnu`` target is performed.
+In order to gather code coverage information, an additional test run of the coretests test suite on the ``x86_64-ferrocene-linux-gnu`` target is performed.
 
 It is ensured that both the instrumented and not instrumented coretests run succeeds. This ensures that coverage instrumentation does not introduce any correctness issues.
 
-Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``. This is sufficient because the code of the core library is largely platform independent, and code coverage is only a measure of the quality of the test suite. Correctness is still tested by running the tests on all qualified targets.
+Code coverage is measured only on one platform, ``x86_64-ferrocene-linux-gnu``. This is sufficient because the code of the core library is largely platform independent, and code coverage is only a measure of the quality of the test suite. Correctness is still tested by running the tests on all qualified targets.
 
 How it works:
 
@@ -70,7 +70,8 @@ How it works:
 Manual test coverage
 """"""""""""""""""""
 
-If a line cannot be covered by automated tests it will be marked with a ``// Ferrocene annotation: REASON`` comment stating the reson. This annotation will be displayed in the generated HTML report.
+If a line cannot be covered by automated tests it will be marked with a ``#[ferrocene::annotation(REASON)]`` attribute stating the reason.
+This annotation will be displayed in the generated HTML report.
 
 Tidy test suite
 ~~~~~~~~~~~~~~~

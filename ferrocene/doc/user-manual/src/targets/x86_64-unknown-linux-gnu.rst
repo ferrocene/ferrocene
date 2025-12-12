@@ -65,3 +65,16 @@ If your C compiler loads the GCC LTO plugins by default, you will also need to
 switch off GCC LTO with:
 
 - ``-Clink-arg=-fno-lto``
+
+.. _x86_64-ferrocene-linux-gnu:
+
+Certified equivalent
+--------------------
+
+This :ref:`qualified <qualified-targets>` target's certified equivalent is
+``x86_64-ferrocene-linux-gnu``. To use the certified core library, the
+following additional flags must be provided to ``rustc``:
+
+* ``--target=x86_64-ferrocene-linux-gnu``
+
+Refer to :ref:`certified-core-targets` for more information about certified targets.

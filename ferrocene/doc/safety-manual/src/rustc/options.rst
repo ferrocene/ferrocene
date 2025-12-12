@@ -18,6 +18,10 @@ Ferrocene is qualified exclusively for the following command line options:
 - When building certified software with the certified core library, users
   shall pass command line option ``-C panic=abort`` to each invocation of rustc.
 
+- When building certified software with the certified core library, users shall
+  pass command line option ``--target`` with a certified core target to each
+  invocation of rustc. Refer to :ref:`certified-core-targets`.
+
 - Users shall pass all target-specific command line options, as listed in the
   page of the target in the :doc:`Compilation Targets
   <user-manual:targets/index>` section of the User Manual.

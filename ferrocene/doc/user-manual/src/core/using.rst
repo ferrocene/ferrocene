@@ -10,6 +10,14 @@ Required compiler flags
 -----------------------
 
 The certified core library requires use of the ``-C panic=abort`` compiler flag.
+It also requires compiling using a target with a certified core runtime.
+Refer to :doc:`Certified core library <safety-manual:core/usage>`.
+
+The behavior of the core library is different when using a certified target. In
+particular, ``panic!`` macros only support static strings, not arbitrary
+``format_args!`` macros. This does not affect normal operation of your program,
+but does mean that panic messages may be less informative when compiled for a
+certified target.
 
 Building an executable
 ----------------------

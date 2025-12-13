@@ -31,15 +31,13 @@ fn test_repeat_take_collect() {
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "iterator is infinite")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "iterator is infinite"]
 fn test_repeat_count() {
     repeat(42).count();
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "iterator is infinite")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "iterator is infinite"]
 fn test_repeat_last() {
     assert_eq!(repeat(42).last(), Some(42));
 }

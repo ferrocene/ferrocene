@@ -39,7 +39,7 @@ macro_rules! panic {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "assert_eq_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 macro_rules! assert_eq {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -59,6 +59,121 @@ macro_rules! assert_eq {
             (left_val, right_val) => {
                 if !(*left_val == *right_val) {
                     let kind = $crate::panicking::AssertKind::Eq;
+                    // The reborrows below are intentional. Without them, the stack slot for the
+                    // borrow is initialized even before the values are compared, leading to a
+                    // noticeable slow down.
+                    $crate::panicking::assert_failed(kind, &*left_val, &*right_val, $crate::option::Option::Some($crate::format_args!($($arg)+)));
+                }
+            }
+        }
+    };
+}
+
+/// Asserts that two expressions are equal to each other (using [`PartialEq`]).
+///
+/// Assertions are always checked in both debug and release builds, and cannot
+/// be disabled. See [`debug_assert_eq!`] for assertions that are disabled in
+/// release builds by default.
+///
+/// [`debug_assert_eq!`]: crate::debug_assert_eq
+///
+/// On panic, this macro will print the values of the expressions with their
+/// debug representations.
+///
+/// Like [`assert!`], this macro has a second form, where a custom
+/// panic message can be provided.
+///
+/// # Examples
+///
+/// ```
+/// let a = 3;
+/// let b = 1 + 2;
+/// assert_eq!(a, b);
+///
+/// assert_eq!(a, b, "we are testing addition with {} and {}", a, b);
+/// ```
+#[macro_export]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_diagnostic_item = "assert_eq_macro"]
+#[allow_internal_unstable(panic_internals)]
+#[cfg(feature = "ferrocene_certified_runtime")]
+macro_rules! assert_eq {
+    ($left:expr, $right:expr $(,)?) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    panic!("assertion `left == right` failed")
+                }
+            }
+        }
+    };
+    ($left:expr, $right:expr, $msg:literal) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    panic!(concat!("assertion `left == right` failed: ", $msg))
+                }
+            }
+        }
+    };
+    ($left:expr, $right:expr, $($arg:tt)+) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    panic!("assertion `left == right` failed")
+                }
+            }
+        }
+    };
+}
+
+/// Asserts that two expressions are not equal to each other (using [`PartialEq`]).
+///
+/// Assertions are always checked in both debug and release builds, and cannot
+/// be disabled. See [`debug_assert_ne!`] for assertions that are disabled in
+/// release builds by default.
+///
+/// [`debug_assert_ne!`]: crate::debug_assert_ne
+///
+/// On panic, this macro will print the values of the expressions with their
+/// debug representations.
+///
+/// Like [`assert!`], this macro has a second form, where a custom
+/// panic message can be provided.
+///
+/// # Examples
+///
+/// ```
+/// let a = 3;
+/// let b = 2;
+/// assert_ne!(a, b);
+///
+/// assert_ne!(a, b, "we are testing that the values are not equal");
+/// ```
+#[macro_export]
+#[stable(feature = "assert_ne", since = "1.13.0")]
+#[rustc_diagnostic_item = "assert_ne_macro"]
+#[allow_internal_unstable(panic_internals)]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
+macro_rules! assert_ne {
+    ($left:expr, $right:expr $(,)?) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if *left_val == *right_val {
+                    let kind = $crate::panicking::AssertKind::Ne;
+                    // The reborrows below are intentional. Without them, the stack slot for the
+                    // borrow is initialized even before the values are compared, leading to a
+                    // noticeable slow down.
+                    $crate::panicking::assert_failed(kind, &*left_val, &*right_val, $crate::option::Option::None);
+                }
+            }
+        }
+    };
+    ($left:expr, $right:expr, $($arg:tt)+) => {
+        match (&($left), &($right)) {
+            (left_val, right_val) => {
+                if *left_val == *right_val {
+                    let kind = $crate::panicking::AssertKind::Ne;
                     // The reborrows below are intentional. Without them, the stack slot for the
                     // borrow is initialized even before the values are compared, leading to a
                     // noticeable slow down.
@@ -96,30 +211,31 @@ macro_rules! assert_eq {
 #[stable(feature = "assert_ne", since = "1.13.0")]
 #[rustc_diagnostic_item = "assert_ne_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(feature = "ferrocene_certified_runtime")]
 macro_rules! assert_ne {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
             (left_val, right_val) => {
                 if *left_val == *right_val {
-                    let kind = $crate::panicking::AssertKind::Ne;
-                    // The reborrows below are intentional. Without them, the stack slot for the
-                    // borrow is initialized even before the values are compared, leading to a
-                    // noticeable slow down.
-                    $crate::panicking::assert_failed(kind, &*left_val, &*right_val, $crate::option::Option::None);
+                    panic!("assertion `left != right` failed")
+                }
+            }
+        }
+    };
+    ($left:expr, $right:expr, $msg:literal) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if *left_val == *right_val {
+                    panic!(concat!("assertion `left != right` failed: ", $msg))
                 }
             }
         }
     };
     ($left:expr, $right:expr, $($arg:tt)+) => {
-        match (&($left), &($right)) {
+        match (&$left, &$right) {
             (left_val, right_val) => {
                 if *left_val == *right_val {
-                    let kind = $crate::panicking::AssertKind::Ne;
-                    // The reborrows below are intentional. Without them, the stack slot for the
-                    // borrow is initialized even before the values are compared, leading to a
-                    // noticeable slow down.
-                    $crate::panicking::assert_failed(kind, &*left_val, &*right_val, $crate::option::Option::Some($crate::format_args!($($arg)+)));
+                    panic!("assertion `left != right` failed")
                 }
             }
         }
@@ -171,7 +287,7 @@ macro_rules! assert_ne {
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         match $left {
@@ -199,6 +315,78 @@ pub macro assert_matches {
     },
 }
 
+/// Asserts that an expression matches the provided pattern.
+///
+/// This macro is generally preferable to `assert!(matches!(value, pattern))`, because it can print
+/// the debug representation of the actual value shape that did not meet expectations. In contrast,
+/// using [`assert!`] will only print that expectations were not met, but not why.
+///
+/// The pattern syntax is exactly the same as found in a match arm and the `matches!` macro. The
+/// optional if guard can be used to add additional checks that must be true for the matched value,
+/// otherwise this macro will panic.
+///
+/// Assertions are always checked in both debug and release builds, and cannot
+/// be disabled. See [`debug_assert_matches!`] for assertions that are disabled in
+/// release builds by default.
+///
+/// [`debug_assert_matches!`]: crate::assert_matches::debug_assert_matches
+///
+/// On panic, this macro will print the value of the expression with its debug representation.
+///
+/// Like [`assert!`], this macro has a second form, where a custom panic message can be provided.
+///
+/// # Examples
+///
+/// ```
+/// #![feature(assert_matches)]
+///
+/// use std::assert_matches::assert_matches;
+///
+/// let a = Some(345);
+/// let b = Some(56);
+/// assert_matches!(a, Some(_));
+/// assert_matches!(b, Some(_));
+///
+/// assert_matches!(a, Some(345));
+/// assert_matches!(a, Some(345) | None);
+///
+/// // assert_matches!(a, None); // panics
+/// // assert_matches!(b, Some(345)); // panics
+/// // assert_matches!(b, Some(345) | None); // panics
+///
+/// assert_matches!(a, Some(x) if x > 100);
+/// // assert_matches!(a, Some(x) if x < 100); // panics
+/// ```
+#[unstable(feature = "assert_matches", issue = "82775")]
+#[allow_internal_unstable(panic_internals)]
+#[rustc_macro_transparency = "semitransparent"]
+#[cfg(feature = "ferrocene_certified_runtime")]
+pub macro assert_matches {
+    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) =>{
+        match $left {
+            $( $pattern )|+ $( if $guard )? => {}
+            ref left_val => {
+                panic!("assertion `left matches right` failed");
+            }
+        }
+    },
+    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )?, $msg:literal) => {
+        match $left {
+            $( $pattern )|+ $( if $guard )? => {}
+            ref left_val => {
+                panic!(concat!("assertion `left matches right` failed: ", $msg));
+            }
+        }
+    },
+    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )?, $($arg:tt)+) => {
+        match $left {
+            $( $pattern )|+ $( if $guard )? => {}
+            ref left_val => {
+                panic!("assertion `left matches right` failed");
+            }
+        }
+    },
+}
 /// Selects code at compile-time based on `cfg` predicates.
 ///
 /// This macro evaluates, at compile-time, a series of `cfg` predicates,

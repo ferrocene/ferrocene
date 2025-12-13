@@ -1,7 +1,6 @@
 use core::mem::*;
 use core::{array, ptr};
 use std::cell::Cell;
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[cfg(panic = "unwind")]
 use std::rc::Rc;
 
@@ -135,7 +134,6 @@ fn test_transmute_copy_unaligned() {
     assert_eq!(0_u64, unsafe { transmute_copy(&u.b) });
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[test]
 #[cfg(panic = "unwind")]
 fn test_transmute_copy_grow_panics() {
@@ -211,13 +209,8 @@ fn uninit_write_copy_of_slice() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(
-        expected = "source slice length (32) does not match destination slice length (64)"
-    )
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+// Ferrocene addition: modified due to limitations of the certified runtime
+#[should_panic(expected = "does not match destination slice length")]
 fn uninit_write_copy_of_slice_panic_lt() {
     let mut dst = [MaybeUninit::uninit(); 64];
     let src = [0; 32];
@@ -226,13 +219,8 @@ fn uninit_write_copy_of_slice_panic_lt() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(
-        expected = "source slice length (128) does not match destination slice length (64)"
-    )
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+// Ferrocene addition: modified due to limitations of the certified runtime
+#[should_panic(expected = "does not match destination slice length")]
 fn uninit_write_copy_of_slice_panic_gt() {
     let mut dst = [MaybeUninit::uninit(); 64];
     let src = [0; 128];
@@ -249,11 +237,7 @@ fn uninit_write_clone_of_slice() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "destination and source slices have different lengths")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic(expected = "destination and source slices have different lengths")]
 fn uninit_write_clone_of_slice_panic_lt() {
     let mut dst = [MaybeUninit::uninit(); 64];
     let src = [0; 32];
@@ -262,11 +246,7 @@ fn uninit_write_clone_of_slice_panic_lt() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "destination and source slices have different lengths")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic(expected = "destination and source slices have different lengths")]
 fn uninit_write_clone_of_slice_panic_gt() {
     let mut dst = [MaybeUninit::uninit(); 64];
     let src = [0; 128];
@@ -274,7 +254,6 @@ fn uninit_write_clone_of_slice_panic_gt() {
     dst.write_clone_of_slice(&src);
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[test]
 #[cfg(panic = "unwind")]
 fn uninit_write_clone_of_slice_mid_panic() {
@@ -358,14 +337,12 @@ fn uninit_write_filled() {
     assert_eq!(dst.write_filled(0), &expect);
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[cfg(panic = "unwind")]
 struct CloneUntilPanic {
     limit: usize,
     rc: Rc<()>,
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[cfg(panic = "unwind")]
 impl Clone for CloneUntilPanic {
     fn clone(&self) -> Self {
@@ -376,7 +353,6 @@ impl Clone for CloneUntilPanic {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[test]
 #[cfg(panic = "unwind")]
 fn uninit_write_filled_panic_drop() {
@@ -419,7 +395,6 @@ fn uninit_write_with() {
     assert_eq!(dst.write_with(|idx| idx), &expect);
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[test]
 #[cfg(panic = "unwind")]
 fn uninit_write_with_mid_panic() {
@@ -500,7 +475,6 @@ fn uninit_write_iter_empty() {
     assert_eq!(remainder.len(), 64);
 }
 
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[test]
 #[cfg(panic = "unwind")]
 fn uninit_write_iter_mid_panic() {

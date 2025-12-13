@@ -424,7 +424,6 @@ pub const fn handle_alloc_error(layout: Layout) -> ! {
 pub mod __alloc_error_handler {
     // called via generated `__rust_alloc_error_handler` if there is no
     // `#[alloc_error_handler]`.
-    #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
     #[rustc_std_internal_symbol]
     pub unsafe fn __rdl_alloc_error_handler(size: usize, _align: usize) -> ! {
         #[cfg(not(feature = "ferrocene_certified_runtime"))]

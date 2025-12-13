@@ -428,7 +428,6 @@ impl fmt::Display for AccessError {
 impl Error for AccessError {}
 
 // This ensures the panicking code is outlined from `with` for `LocalKey`.
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]

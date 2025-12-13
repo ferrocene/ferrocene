@@ -58,9 +58,9 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: 'true'
+          llvm-subset: "true"
           # We call this later with `INSTALL_LLVM` and `SKIP_UPGRADE` set for speed
-          build-dependencies: 'false'
+          build-dependencies: "false"
 
       - name: Check whether all of our Python scripts use uv
         run: ferrocene/ci/scripts/require-uv-shebang.py

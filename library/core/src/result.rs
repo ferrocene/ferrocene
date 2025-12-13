@@ -1189,13 +1189,20 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_expect", since = "1.4.0")]
     // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub fn expect(self, msg: &str) -> T
+    pub fn expect(
+        self,
+        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
+        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
+    ) -> T
     where
         E: fmt::Debug,
     {
         match self {
             Ok(t) => t,
+            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             Err(e) => unwrap_failed(msg, &e),
+            #[cfg(feature = "ferrocene_certified_runtime")]
+            Err(_) => crate::panicking::panic(msg),
         }
     }
 
@@ -1307,12 +1314,19 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_expect_err", since = "1.17.0")]
     // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub fn expect_err(self, msg: &str) -> E
+    pub fn expect_err(
+        self,
+        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
+        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
+    ) -> E
     where
         T: fmt::Debug,
     {
         match self {
+            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             Ok(t) => unwrap_failed(msg, &t),
+            #[cfg(feature = "ferrocene_certified_runtime")]
+            Ok(_) => crate::panicking::panic(msg),
             Err(e) => e,
         }
     }
@@ -1890,7 +1904,6 @@ impl<T, E> Result<Result<T, E>, E> {
 }
 
 // This is a separate function to reduce the code size of the methods
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg(not(panic = "immediate-abort"))]
 #[inline(never)]
 #[cold]

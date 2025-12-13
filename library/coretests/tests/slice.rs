@@ -1285,11 +1285,7 @@ mod slice_index {
     //  in the FIRST method that panics, as the macro is not designed
     //  to be used in `should_panic`)
     #[test]
-    #[cfg_attr(
-        not(feature = "ferrocene_certified_runtime"),
-        should_panic(expected = "out of range")
-    )]
-    #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+    #[should_panic(expected = "out of range")]
     fn assert_range_eq_can_fail_by_panic() {
         assert_range_eq!([0, 1, 2], 0..5, [0, 1, 2]);
     }
@@ -1298,8 +1294,7 @@ mod slice_index {
     //  in the FIRST method it calls, as the macro is not designed
     //  to be used in `should_panic`)
     #[test]
-    #[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic(expected = "=="))]
-    #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+    #[should_panic(expected = "==")]
     fn assert_range_eq_can_fail_by_inequality() {
         assert_range_eq!([0, 1, 2], 0..2, [0, 1, 2]);
     }
@@ -1351,7 +1346,7 @@ mod slice_index {
                 }
 
                 #[test]
-                #[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic(expected = $expect_msg))] #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+                #[should_panic(expected = $expect_msg)]
                 fn index_fail() {
                     let v = $data;
                     let v: &[_] = &v;
@@ -1359,7 +1354,7 @@ mod slice_index {
                 }
 
                 #[test]
-                #[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic(expected = $expect_msg))] #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+                #[should_panic(expected = $expect_msg)]
                 fn index_mut_fail() {
                     let mut v = $data;
                     let v: &mut [_] = &mut v;
@@ -1738,21 +1733,15 @@ fn select_nth_unstable() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "index 0 greater than length of slice")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+// Ferrocene addition: modified due to limitations of the certified runtime
+#[should_panic(expected = "greater than length of slice")]
 fn select_nth_unstable_zero_length() {
     [0i32; 0].select_nth_unstable(0);
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "index 20 greater than length of slice")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+// Ferrocene addition: modified due to limitations of the certified runtime
+#[should_panic(expected = "greater than length of slice")]
 fn select_nth_unstable_past_length() {
     [0i32; 10].select_nth_unstable(20);
 }
@@ -2007,11 +1996,8 @@ fn test_copy_within() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "range end index 14 out of range for slice of length 13")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+// Ferrocene addition: modified due to limitations of the certified runtime
+#[should_panic(expected = "out of range for slice of length")]
 fn test_copy_within_panics_src_too_long() {
     let mut bytes = *b"Hello, World!";
     // The length is only 13, so 14 is out of bounds.
@@ -2019,11 +2005,7 @@ fn test_copy_within_panics_src_too_long() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "dest is out of bounds")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic(expected = "dest is out of bounds")]
 fn test_copy_within_panics_dest_too_long() {
     let mut bytes = *b"Hello, World!";
     // The length is only 13, so a slice of length 4 starting at index 10 is out of bounds.
@@ -2031,19 +2013,15 @@ fn test_copy_within_panics_dest_too_long() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic(expected = "slice index starts at 2 but ends at 1")
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+// Ferrocene addition: modified due to limitations of the certified runtime
+#[should_panic(expected = "slice index starts at")]
 fn test_copy_within_panics_src_inverted() {
     let mut bytes = *b"Hello, World!";
     // 2 is greater than 1, so this range is invalid.
     bytes.copy_within(2..1, 0);
 }
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic(expected = "out of range"))]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic(expected = "out of range")]
 fn test_copy_within_panics_src_out_of_bounds() {
     let mut bytes = *b"Hello, World!";
     // an inclusive range ending at usize::MAX would make src_end overflow
@@ -2146,44 +2124,28 @@ fn test_swap() {
 
 mod swap_panics {
     #[test]
-    #[cfg_attr(
-        not(feature = "ferrocene_certified_runtime"),
-        should_panic(expected = "index out of bounds: the len is 4 but the index is 4")
-    )]
-    #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+    #[should_panic(expected = "index out of bounds")]
     fn index_a_equals_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(4, 2);
     }
 
     #[test]
-    #[cfg_attr(
-        not(feature = "ferrocene_certified_runtime"),
-        should_panic(expected = "index out of bounds: the len is 4 but the index is 4")
-    )]
-    #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+    #[should_panic(expected = "index out of bounds")]
     fn index_b_equals_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(2, 4);
     }
 
     #[test]
-    #[cfg_attr(
-        not(feature = "ferrocene_certified_runtime"),
-        should_panic(expected = "index out of bounds: the len is 4 but the index is 5")
-    )]
-    #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+    #[should_panic(expected = "index out of bounds")]
     fn index_a_greater_than_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(5, 2);
     }
 
     #[test]
-    #[cfg_attr(
-        not(feature = "ferrocene_certified_runtime"),
-        should_panic(expected = "index out of bounds: the len is 4 but the index is 5")
-    )]
-    #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+    #[should_panic(expected = "index out of bounds")]
     fn index_b_greater_than_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(2, 5);
@@ -2400,16 +2362,14 @@ fn test_slice_from_ptr_range() {
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "slice len overflow")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "slice len overflow"]
 fn test_flatten_size_overflow() {
     let x = &[[(); usize::MAX]; 2][..];
     let _ = x.as_flattened();
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "slice len overflow")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "slice len overflow"]
 fn test_flatten_mut_size_overflow() {
     let x = &mut [[(); usize::MAX]; 2][..];
     let _ = x.as_flattened_mut();

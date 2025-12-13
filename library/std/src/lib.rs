@@ -416,6 +416,9 @@
 //
 // Ferrocene added lints/features:
 #![feature(coverage_attribute)]
+// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
+// panics in the certified runtime
+#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables, unused_imports))]
 //
 #![default_lib_allocator]
 

@@ -44,3 +44,6 @@ check-cfg = [
     'cfg(no_sync)',
     'cfg(randomized_layouts)',
 ]
+
+[features]
+ferrocene_certified_runtime = []

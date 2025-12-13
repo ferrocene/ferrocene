@@ -171,11 +171,7 @@ fn test_case_from_pr_82413_comment() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "array in `Iterator::map_windows` must contain more than 0 elements"
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "array in `Iterator::map_windows` must contain more than 0 elements"]
 fn check_zero_window() {
     let _ = std::iter::repeat(0).map_windows(|_: &[_; 0]| ());
 }
@@ -190,11 +186,7 @@ fn test_zero_sized_type() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "array size of `Iterator::map_windows` is too large"
-)]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "array size of `Iterator::map_windows` is too large"]
 fn test_too_large_array_size() {
     let _ = std::iter::repeat(()).map_windows(|arr: &[(); usize::MAX]| *arr);
 }

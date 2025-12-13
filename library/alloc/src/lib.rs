@@ -211,6 +211,9 @@
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
 #![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
+// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
+// panics in the certified runtime
+#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables, dead_code))]
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]

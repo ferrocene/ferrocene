@@ -24,6 +24,9 @@
 // By default, disallow this as it is forbidden in edition 2024. There is a lot of unsafe code to
 // be migrated, however, so exceptions exist.
 #![warn(unsafe_op_in_unsafe_fn)]
+// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
+// panics in the certified runtime
+#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 
 // We disable #[no_mangle] for tests so that we can verify the test results
 // against the native compiler-rt implementations of the builtins.

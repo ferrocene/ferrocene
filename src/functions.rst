@@ -124,6 +124,10 @@ A :t:`variadic function` can only be used with one of the following :t:`[ABI]s`:
   ``extern "cdecl-unwind"``
 * :dp:`fls_b7FTlWfnX2OI`
   ``extern "efiapi"``
+* :dp:`fls_6urL6fZ5cpaA`
+  ``extern "system"``
+* :dp:`fls_TMOzb6cYIOlH`
+  ``extern "system-unwind"``
 * :dp:`fls_eHPWHrvs7ETl`
   ``extern "sysv64"``
 * :dp:`fls_mjCrvmikm58M`

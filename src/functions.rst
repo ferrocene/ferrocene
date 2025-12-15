@@ -108,7 +108,7 @@ A :dt:`variadic function` is an :t:`external function` that specifies
 :s:`FunctionParameterVariadicPart` as the last :t:`function parameter`.
 
 :dp:`fls_icdzs1mjh0n4`
-A :t:`variadic function` can only be used with one of the following :t:`[ABI]s`:
+A :t:`variadic function` shall specify one of the following :t:`[ABI]s`:
 
 * :dp:`fls_OR85NVifPwjr`
   ``extern "C"``

@@ -26,13 +26,7 @@ use core::panic;
 use std::collections::HashSet;
 use std::fmt::Write;
 use std::io::{self, ErrorKind};
-<<<<<<< HEAD
-use std::process::{Command, Stdio};
 use std::sync::mpsc::Sender;
-||||||| f5209000832
-use std::process::{Command, Stdio};
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
 use std::{env, fs, vec};

@@ -62,8 +62,8 @@ an :t:`attribute`.
 
 .. code-block:: rust
 
-   #[cfg[target_os = "linux"]]
-   mod linux_only_module {
+   #[cfg(target_os = "linux")]
+   fn linux_only_function() {
        #![allow(unused_variables)]
 
        let unused = ();

@@ -472,3 +472,65 @@ fn chunks_exact_is_empty() {
     assert!([0; 10].chunks_exact_mut(11).is_empty());
     assert!(![0; 10].chunks_exact_mut(2).is_empty());
 }
+macro_rules! ilog2_loop {
+    ($(($T:ty, $ilog2_max:expr) => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(<$T>::MAX.ilog2(), $ilog2_max);
+                for i in 0..=$ilog2_max {
+                    let p = (2 as $T).pow(i as u32);
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog2(), i - 1);
+                    }
+                    assert_eq!(p.ilog2(), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog2(), i);
+                    }
+
+                    // also check `x.ilog(2)`
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog(2), i - 1);
+                    }
+                    assert_eq!(p.ilog(2), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog(2), i);
+                    }
+                }
+            }
+        )*
+    };
+}
+
+ilog2_loop! {
+    (u8, 7) => ilog2_u8,
+    (u16, 15) => ilog2_u16,
+    (u32, 31) => ilog2_u32,
+    (u64, 63) => ilog2_u64,
+    (u128, 127) => ilog2_u128,
+    (i8, 6) => ilog2_i8,
+    (i16, 14) => ilog2_i16,
+    (i32, 30) => ilog2_i32,
+    (i64, 62) => ilog2_i64,
+    (i128, 126) => ilog2_i128,
+}
+
+macro_rules! nonpositive_ilog2 {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic]
+            fn $fn() {
+                let _ = (-1 as $T).ilog2();
+            }
+        )*
+    };
+}
+
+nonpositive_ilog2! {
+    i8 => nonpositive_ilog2_of_i8,
+    i16 => nonpositive_ilog2_of_i16,
+    i32 => nonpositive_ilog2_of_i32,
+    i64 => nonpositive_ilog2_of_i64,
+    i128 => nonpositive_ilog2_of_i128,
+}

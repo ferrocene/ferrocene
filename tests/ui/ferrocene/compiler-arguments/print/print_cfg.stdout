@@ -1,4 +1,5 @@
 debug_assertions
+emscripten_wasm_eh
 fmt_debug="full"
 overflow_checks
 panic="unwind"

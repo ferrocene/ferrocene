@@ -11,6 +11,9 @@ macro_rules! uint_module {
             assert!(MAX > 0);
             assert!(MIN <= 0);
             assert!((MIN + MAX).wrapping_add(1) == 0);
+            // Ferrocene addition: cover `wrapping_add_signed`
+            assert!((MIN + MAX).wrapping_add_signed(1) == 0);
+            assert!(MIN.wrapping_add_signed(-1) == MAX);
         }
 
         #[test]

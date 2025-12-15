@@ -3883,6 +3883,10 @@ core::iter::traits::iterator::iter_compare::compare
 core::iter::traits::iterator::iter_eq
 core::mem::align_of
 core::mem::align_of_val
+core::mem::conjure_zst
+core::mem::conjure_zst::do_panic
+core::mem::conjure_zst::do_panic::compiletime
+core::mem::conjure_zst::do_panic::runtime
 core::mem::discriminant
 core::mem::drop
 core::mem::forget

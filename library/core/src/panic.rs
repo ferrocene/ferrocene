@@ -247,7 +247,6 @@ pub macro const_panic {
 /// See [`const_panic!`].
 #[unstable(feature = "panic_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub macro const_assert {
     ($condition: expr, $const_msg:literal, $runtime_msg:literal, $($arg:tt)*) => {{
         if !$crate::intrinsics::likely($condition) {

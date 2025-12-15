@@ -978,8 +978,7 @@ A :t:`variadic part` indicates the presence of :t:`C`-like optional
 parameters.
 
 :dp:`fls_hbn1l42xmr3h`
-A :t:`variadic part` shall be specified only when the :t:`ABI` of the
-:t:`function pointer type` is either ``extern "C"`` or ``extern "cdecl"``.
+A :t:`variadic part` can only be used in a :t:`variadic function`.
 
 :dp:`fls_g1iYVw7upBnH`
 The :t:`return type` of a :t:`function pointer type` is determined as follows:

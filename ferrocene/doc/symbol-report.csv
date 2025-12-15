@@ -4786,6 +4786,7 @@ core::ptr::non_null::NonNull::<T>::new_unchecked
 core::ptr::non_null::NonNull::<T>::new_unchecked::precondition_check
 core::ptr::non_null::NonNull::<T>::offset
 core::ptr::non_null::NonNull::<T>::offset_from_unsigned
+core::ptr::non_null::NonNull::<T>::read
 core::ptr::non_null::NonNull::<T>::sub
 core::ptr::null
 core::ptr::null_mut

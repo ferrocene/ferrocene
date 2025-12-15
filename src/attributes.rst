@@ -1509,10 +1509,14 @@ Attribute ``repr``
 .. syntax::
 
    ReprContent ::=
-       $$repr$$ $$($$ Representation $$)$$
+       $$repr$$ $$($$ RepresentationList $$)$$
+
+   RepresentationList ::=
+       Representation ($$,$$ Representation)* $$,$$?
 
    Representation ::=
-       RepresentationKind Alignment?
+       RepresentationKind
+     | Alignment
 
    RepresentationKind ::=
        PrimitiveRepresentation

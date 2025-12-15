@@ -2109,7 +2109,6 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 
 /// Performs rotate right.
@@ -2125,7 +2124,6 @@ pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
 
 /// Returns (a + b) mod 2<sup>N</sup>, where N is the width of T in bits.

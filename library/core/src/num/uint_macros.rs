@@ -358,7 +358,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn rotate_left(self, n: u32) -> Self {
             return intrinsics::rotate_left(self, n);
         }
@@ -382,7 +381,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn rotate_right(self, n: u32) -> Self {
             return intrinsics::rotate_right(self, n);
         }

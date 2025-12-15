@@ -3938,6 +3938,7 @@ core::num::<impl i128>::overflowing_mul
 core::num::<impl i128>::overflowing_neg
 core::num::<impl i128>::overflowing_sub
 core::num::<impl i128>::overflowing_sub_unsigned
+core::num::<impl i128>::rotate_left
 core::num::<impl i128>::to_le
 core::num::<impl i128>::to_le_bytes
 core::num::<impl i128>::to_ne_bytes
@@ -3977,6 +3978,7 @@ core::num::<impl i16>::overflowing_mul
 core::num::<impl i16>::overflowing_neg
 core::num::<impl i16>::overflowing_sub
 core::num::<impl i16>::overflowing_sub_unsigned
+core::num::<impl i16>::rotate_left
 core::num::<impl i16>::to_le
 core::num::<impl i16>::to_le_bytes
 core::num::<impl i16>::to_ne_bytes
@@ -4016,6 +4018,7 @@ core::num::<impl i32>::overflowing_mul
 core::num::<impl i32>::overflowing_neg
 core::num::<impl i32>::overflowing_sub
 core::num::<impl i32>::overflowing_sub_unsigned
+core::num::<impl i32>::rotate_left
 core::num::<impl i32>::to_le
 core::num::<impl i32>::to_le_bytes
 core::num::<impl i32>::to_ne_bytes
@@ -4055,6 +4058,7 @@ core::num::<impl i64>::overflowing_mul
 core::num::<impl i64>::overflowing_neg
 core::num::<impl i64>::overflowing_sub
 core::num::<impl i64>::overflowing_sub_unsigned
+core::num::<impl i64>::rotate_left
 core::num::<impl i64>::to_le
 core::num::<impl i64>::to_le_bytes
 core::num::<impl i64>::to_ne_bytes
@@ -4094,6 +4098,7 @@ core::num::<impl i8>::overflowing_mul
 core::num::<impl i8>::overflowing_neg
 core::num::<impl i8>::overflowing_sub
 core::num::<impl i8>::overflowing_sub_unsigned
+core::num::<impl i8>::rotate_left
 core::num::<impl i8>::to_le
 core::num::<impl i8>::to_le_bytes
 core::num::<impl i8>::to_ne_bytes
@@ -4133,6 +4138,7 @@ core::num::<impl isize>::overflowing_mul
 core::num::<impl isize>::overflowing_neg
 core::num::<impl isize>::overflowing_sub
 core::num::<impl isize>::overflowing_sub_unsigned
+core::num::<impl isize>::rotate_left
 core::num::<impl isize>::to_le
 core::num::<impl isize>::to_le_bytes
 core::num::<impl isize>::to_ne_bytes
@@ -4175,6 +4181,8 @@ core::num::<impl u128>::overflowing_add_signed
 core::num::<impl u128>::overflowing_mul
 core::num::<impl u128>::overflowing_sub
 core::num::<impl u128>::reverse_bits
+core::num::<impl u128>::rotate_left
+core::num::<impl u128>::rotate_right
 core::num::<impl u128>::saturating_add
 core::num::<impl u128>::saturating_mul
 core::num::<impl u128>::saturating_sub
@@ -4226,6 +4234,8 @@ core::num::<impl u16>::overflowing_add_signed
 core::num::<impl u16>::overflowing_mul
 core::num::<impl u16>::overflowing_sub
 core::num::<impl u16>::reverse_bits
+core::num::<impl u16>::rotate_left
+core::num::<impl u16>::rotate_right
 core::num::<impl u16>::saturating_add
 core::num::<impl u16>::saturating_mul
 core::num::<impl u16>::saturating_sub
@@ -4276,6 +4286,8 @@ core::num::<impl u32>::overflowing_add_signed
 core::num::<impl u32>::overflowing_mul
 core::num::<impl u32>::overflowing_sub
 core::num::<impl u32>::reverse_bits
+core::num::<impl u32>::rotate_left
+core::num::<impl u32>::rotate_right
 core::num::<impl u32>::saturating_add
 core::num::<impl u32>::saturating_mul
 core::num::<impl u32>::saturating_sub
@@ -4326,6 +4338,8 @@ core::num::<impl u64>::overflowing_add_signed
 core::num::<impl u64>::overflowing_mul
 core::num::<impl u64>::overflowing_sub
 core::num::<impl u64>::reverse_bits
+core::num::<impl u64>::rotate_left
+core::num::<impl u64>::rotate_right
 core::num::<impl u64>::saturating_add
 core::num::<impl u64>::saturating_mul
 core::num::<impl u64>::saturating_sub
@@ -4379,6 +4393,8 @@ core::num::<impl u8>::overflowing_add_signed
 core::num::<impl u8>::overflowing_mul
 core::num::<impl u8>::overflowing_sub
 core::num::<impl u8>::reverse_bits
+core::num::<impl u8>::rotate_left
+core::num::<impl u8>::rotate_right
 core::num::<impl u8>::saturating_add
 core::num::<impl u8>::saturating_mul
 core::num::<impl u8>::saturating_sub
@@ -4431,6 +4447,8 @@ core::num::<impl usize>::overflowing_mul
 core::num::<impl usize>::overflowing_sub
 core::num::<impl usize>::repeat_u8
 core::num::<impl usize>::reverse_bits
+core::num::<impl usize>::rotate_left
+core::num::<impl usize>::rotate_right
 core::num::<impl usize>::saturating_add
 core::num::<impl usize>::saturating_mul
 core::num::<impl usize>::saturating_sub

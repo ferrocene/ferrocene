@@ -164,7 +164,6 @@ impl Collector {
 
 fn sample_config() -> Config {
     Config {
-        color: crate::ColorConfig::NeverColor,
         mode: env("FERROCENE_MODE"),
         src_root: env("FERROCENE_SRC_ROOT"),
         src_test_suite_root: env("FERROCENE_SRC_TEST_SUITE_ROOT"),
@@ -225,7 +224,6 @@ fn sample_config() -> Config {
         remote_test_client: Default::default(),
         compare_mode: Default::default(),
         rustfix_coverage: Default::default(),
-        has_html_tidy: Default::default(),
         has_enzyme: Default::default(),
         channel: Default::default(),
         git_hash: Default::default(),

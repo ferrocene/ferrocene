@@ -5,10 +5,10 @@ Compilation targets overview
 ============================
 
 Ferrocene has support for multiple compilation targets and host platforms.
-Targets are categorized as either "supported" or "experimental" depending on
-the level of support. This page lists the current support status for all
-targets, and individual pages with more details are provided for supported
-targets.
+Targets are categorized into levels of support. This page lists
+the current support status for all targets, and individual pages with more
+details are provided for all Qualified and Quality managed targets, along
+with some other selected targets.
 
 There are two kinds of targets available:
 
@@ -27,19 +27,49 @@ There are also two variants of the standard library available:
   ``proc_macro`` built-in crates.
 
 .. note::
-  The libraries provided are evaluated and tested within the scope of Ferrocene qualification for compiler use only.
-  The use of these libraries by end-use code is outside the scope of the current Ferrocene qualification.
+  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core`` 
+  are  provided are evaluated and tested within the scope of Ferrocene qualification for
+  compiler use only. The use of these libraries by end-use code is outside the scope of the
+  current Ferrocene qualification.
   It is the end-user responsibility to certify these libraries if they are used in their code.
+
+  A subset of ``core`` is certified against IEC 61508 (SIL 2) on qualified targets; see the
+  :doc:`user-manual:core/index` and :doc:`core-certification:index`.
+
+A summary of the assurances and support offered by target levels is summarized immediately below.
+For more details, refer to the appropriate section.
+
+================ ========== =============== ======================== ============
+Feature          Qualified  Quality managed Supported                Experimental
+================ ========== =============== ======================== ============
+Binaries         Yes        Yes             Yes                      Best effort
+Tested           Per merge  Per release     Best effort              No
+Qualified        Yes        No              No                       No
+Known Issues     Yes        Yes             Documented only          No
+Customer Support Yes        Yes             Yes                      Best effort
+Support Patches  2 years    2 years         2 years (critical only)  None
+Deprecation      1 year     1 year          1 year (with exceptions) Any time
+LTS available    Yes        Yes             Yes (with exceptions)    No
+================ ========== =============== ======================== ============
+
 
 .. _qualified-targets:
 
 Qualified targets
 -----------------
 
-Qualified targets are provided with the highest level of assurance. They are
-qualified for use in safety-critical contexts when used with a qualified
-rustc. The full Ferrocene test suite is executed on the target for every
-code change.
+Qualified targets are provided with the highest level of assurance and are
+qualified for use in safety-critical contexts.
+
+Support is available. Known problems are tracked and available.
+
+The full Ferrocene test suite is executed on the target before any
+change is merged.
+
+Qualified targets have a two year support window from their release date.
+Qualified targets may be removed from future release after a deprecation period of
+1 year after announcement or when circumstances outside our control require removal,
+for example when the target vendor no longer supports the target.
 
 Most qualified targets come with a "certified equivalent" target. This
 certified target allows using the certified core library. The core library is
@@ -98,15 +128,17 @@ qualified upon request.
 Quality managed targets
 -----------------------
 
-Quality managed targets are targets which are suitable for use in production
-outside of safety critical contexts. Support is available. The Ferrocene test
-suite successfully executed on the target. Known problems are tracked and
-available.
+Quality managed targets are targets which are suitable for use in production 
+outside of safety critical contexts.
 
-For any of the following reasons, the target is not qualified:
+Support is available. Known problems are tracked and available.
 
-* The target is deemed unlikely to be used in a safety critical context.
-* The target is in the process of qualification, but is not completed yet.
+The Ferrocene test suite is executed on the target prior to release.
+
+Quality managed targets have a two year support window from their release date.
+Quality managed targets may be removed from future release after a deprecation period of
+1 year after announcement or when circumstances outside our control require removal,
+for example when the target vendor no longer supports the target.
 
 Quality managed targets are not qualified, but can usually be qualified on request.
 
@@ -126,13 +158,24 @@ Quality managed targets are not qualified, but can usually be qualified on reque
      - \-
 
 
-Experimental targets
---------------------
+Supported targets
+-----------------
 
-Experimental targets cannot be used in safety-critical contexts, and there is
-no guarantee that the Ferrocene test suite is successfully executed on the
-target. They are provided as a preview, with limited support available. They
-should not be used in production.
+Supported targets are targets which are suitable for use outside of safety-critical
+contexts, and may be suitable for production given adequate user testing.
+
+Support is available. Known problems are tracked and documented, but are prioritized
+lower than Qualified or Quality Managed targets.
+
+While supported targets are built and provided to customers, the
+Ferrocene test suite may not always be fully executed.
+
+Supported targets may be removed from future release after a deprecation period of
+1 year after announcement or when circumstances outside our control require removal,
+for example when the target vendor no longer supports the target.
+
+Supported targets can often be qualified or quality managed upon request.
+
 
 .. list-table::
    :header-rows: 1
@@ -153,12 +196,6 @@ should not be used in production.
      - ``aarch64-unknown-linux-musl``
      - Cross-compilation
      - Full
-     - \-
-
-   * - :target:`armebv7r-none-eabihf`
-     - ``armebv7r-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
      - \-
 
    * - :target:`armv7r-none-eabihf`
@@ -203,12 +240,6 @@ should not be used in production.
      - Bare-metal
      - \-
 
-   * - :target:`wasm32-unknown-unknown`
-     - ``wasm32-unknown-unknown``
-     - Cross-compilation
-     - Full
-     - The full standard library is available, but unsupported functions in ``std`` will panic.
-
    * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``
      - Host platform
@@ -222,8 +253,41 @@ should not be used in production.
      - \-
 
 
-If your project needs support for one of these targets, please reach out to the
-Ferrocene support team.
+Experimental Targets
+--------------------
+
+Experimental targets are provided as a preview and without any assurances.
+Use for production is generally not advised.
+
+Limited support available. Known problems are not tracked.
+
+The Ferrocene test suite may have been executed at some point.
+
+Experimental targets may be removed for any reason without warning or deprecation period.
+
+It is sometimes possible for Experimental targets to be qualified or quality managed upon request.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Tuple
+     - Kind
+     - Standard library
+     - Notes
+
+   * - :target:`armebv7r-none-eabihf`
+     - ``armebv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`wasm32-unknown-unknown`
+     - ``wasm32-unknown-unknown``
+     - Cross-compilation
+     - Full
+     - The full standard library is available, but unsupported functions in ``std`` will panic.
+
 
 Unsupported targets
 -------------------

@@ -534,3 +534,13 @@ nonpositive_ilog2! {
     i64 => nonpositive_ilog2_of_i64,
     i128 => nonpositive_ilog2_of_i128,
 }
+
+#[test]
+fn str_bytes() {
+    let s = "yellow submarine";
+
+    assert!(s.bytes().all(|b| b.is_ascii()));
+    assert!(s.bytes().any(|b| b.is_ascii_whitespace()));
+    assert!(s.bytes().find(|b| *b == b'i').is_some());
+    assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
+}

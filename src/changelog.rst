@@ -1,5 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
+   SPDX-FileCopyrightText: The Rust Project Contributors
 
 .. default-domain:: spec
 .. informational-page::
@@ -383,7 +384,7 @@ Language changes in Rust 1.84.0
 
 * `Show a warning when \`-Ctarget-feature\` is used to toggle features that can lead to unsoundness due to ABI mismatches <https://github.com/rust-lang/rust/pull/129884>`_
 
-  * No change: `target-feature` is outside the scope of the Ferrocene qualification
+  * No change: `target-feature` is outside the scope of the FLS
 
 * `Use the next-generation trait solver in coherence <https://github.com/rust-lang/rust/pull/130654>`_
 
@@ -780,7 +781,4 @@ language changes in Rust 1.77.0
 
   * New paragraph: :p:`fls_1s1UikGU5YQb`
 
-.. Note: for the publicly rendered version of the FLS we want to link to
-   upstream's release notes. In the Ferrocene subtree this should be replaced
-   to the link to the Ferrocene release notes!
 .. _release notes: https://doc.rust-lang.org/releases.html

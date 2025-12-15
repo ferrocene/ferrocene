@@ -41,15 +41,15 @@ Contribution Process
 
 Before contributing, it would be helpful to familiarize yourself with the
 grammar and structure of the FLS. You'll find everything you need to in `Chapter
-1: General <https://spec.ferrocene.dev/general.html>`_ of the specification.
+1: General <https://rust-lang.github.io/fls/general>`_ of the specification.
 
 There are three kinds of contribution that can be made:
 
-* **Flags:** Here the contributor makes the Ferrocene team aware of changes that
-  were made upstream, but leaves the changes up to the Ferrocene team. This
-  helps Ferrocene with our mission to "keep the moving parts safe" and ensures
-  that we can respond to upstream changes in a timely manner. Please `open an
-  issue <https://github.com/ferrocene/specification/issues>`_ for this.
+* **Flags:** Here the contributor makes the `FLS team`_ aware of changes that
+  were made upstream, but leaves the changes up to the team. This
+  helps the team "keep the moving parts safe" and ensures
+  that the team can respond to upstream changes in a timely manner. Please `open an
+  issue <https://github.com/rust-lang/fls/issues>`_ for this.
 
 * **Fixes:** These are defined as small errors or suggestions for improvements
   within one or two sentences. The structure of the content still makes sense,
@@ -65,8 +65,10 @@ PRs and approval
 ================
 
 Whether the changes appear in the FLS will remain the responsibility and
-discretion of the Ferrocene team. Changes may be approved as is or may be edited
+discretion of the `FLS team`_. Changes may be approved as is, or may be edited
 to match the tone, style and format of the FLS.
 
 Again, we thank you for your patience as we address the suggested changes and,
 last but not least, thank you for your interest and contributions to the FLS!
+
+.. _FLS team: https://rust-lang.org/governance/teams/lang/#team-fls

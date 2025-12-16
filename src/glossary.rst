@@ -4720,8 +4720,7 @@ or-pattern
 ^^^^^^^^^^
 
 :dp:`fls_LnPDQW3bnNUw`
-An :dt:`or pattern` is a :t:`pattern` that matches on one of two or more
-:t:`[pattern-without-alternation]s`.
+An :dt:`or pattern` is a :t:`pattern` that matches on one of two or more :t:`[pattern-without-alternation]s` and or-s two or more :t:`[subpattern]s` using character 0x7C (vertical line).
 
 :dp:`fls_urIJ5JNHLhm6`
 See :s:`Pattern`.

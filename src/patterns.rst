@@ -42,8 +42,7 @@ A :t:`pattern` is a :t:`construct` that matches a :t:`value` which satisfies all
 the criteria of the :t:`pattern`.
 
 :dp:`fls_VQMmveZUfNTn`
-An :t:`or-pattern` is a :t:`pattern` which or-s two or more :t:`[subpattern]s` using
-character 0x7C (vertical line).
+An :t:`or pattern` is a :t:`pattern` that matches on one of two or more :t:`[pattern-without-alternation]s` and or-s two or more :t:`[subpattern]s` using character 0x7C (vertical line).
 
 :dp:`fls_mp6i4blzexnu`
 A :t:`pattern-without-alternation` is a :t:`pattern` that cannot be alternated.

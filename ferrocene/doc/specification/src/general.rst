@@ -48,15 +48,15 @@ Scope
 
 :dp:`fls_srdq4mota5pr`
 This document specifies the form and meaning of programs written in the 2021 Edition of the
-programming language Rust, as implemented by the :t:`rustc` |spec_version| compiler shipped
-with Ferrocene. It documents the current understanding for the purposes of
+Rust programming language, as implemented by the Rust compiler (:t:`rustc`),
+version |spec_version|.
+It documents the current understanding for the purposes of
 compiler validation. As such, given any doubt, it prefers documenting behavior
-of :t:`rustc` as included in the associated Ferrocene release over claiming
-correctness as a specification.
+of :t:`rustc` over claiming correctness as a specification.
 
 :dp:`fls_dv1qish8svc`
-This document is made available for contribution and review as it is useful
-outside of the Ferrocene effort and can be a place of shared understanding. It
+This document is made available for contribution and review,
+and can be a place of shared understanding. It
 is not intended as a discussion ground for language evolution. It is also not
 intended as a document enabling conformance between compilers.
 

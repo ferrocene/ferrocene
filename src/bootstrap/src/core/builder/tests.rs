@@ -2927,10 +2927,67 @@ mod snapshot {
         [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
         [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
         [doc] style-guide (book) <x86_64-unknown-linux-gnu>
+<<<<<<< HEAD
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
         [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-ferrocene.subset> crates=[core]
         "###);
+||||||| 2a3a62d26e9
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> releases 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+        [dist] docs <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
+        [build] rustdoc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer-proc-macro-srv 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> GenerateCopyright 1 <x86_64-unknown-linux-gnu>
+        [dist] rustc <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> cargo 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustfmt 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-fmt 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustfmt 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> clippy-driver 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-clippy 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> clippy 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> miri 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-miri 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> miri 2 <x86_64-unknown-linux-gnu>
+        [dist] src <>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc_codegen_cranelift 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustc_codegen_cranelift 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> LlvmBitcodeLinker 2 <x86_64-unknown-linux-gnu>
+        ");
+=======
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> releases 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+        [dist] docs <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
+        [build] rustdoc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer-proc-macro-srv 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> GenerateCopyright 1 <x86_64-unknown-linux-gnu>
+        [dist] rustc <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustc-dev 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> cargo 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rust-analyzer 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustfmt 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-fmt 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustfmt 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> clippy-driver 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-clippy 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> clippy 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> miri 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> cargo-miri 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> miri 2 <x86_64-unknown-linux-gnu>
+        [dist] src <>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc_codegen_cranelift 2 <x86_64-unknown-linux-gnu>
+        [dist] rustc 1 <x86_64-unknown-linux-gnu> -> rustc_codegen_cranelift 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> LlvmBitcodeLinker 2 <x86_64-unknown-linux-gnu>
+        ");
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     // Check that `x run miri --target FOO` actually builds miri for the host.

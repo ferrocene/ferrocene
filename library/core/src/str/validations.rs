@@ -75,7 +75,6 @@ pub unsafe fn next_code_point<'a, I: Iterator<Item = &'a u8>>(bytes: &mut I) -> 
 ///
 /// `bytes` must produce a valid UTF-8-like (UTF-8 or WTF-8) string
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub(super) unsafe fn next_code_point_reverse<'a, I>(bytes: &mut I) -> Option<u32>
 where
     I: DoubleEndedIterator<Item = &'a u8>,

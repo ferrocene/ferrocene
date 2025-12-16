@@ -164,13 +164,13 @@ macro_rules! uint_module {
         }
 
         #[test]
-        #[should_panic = "attempt to funnel shift left with overflow"]
+        #[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "attempt to funnel shift left with overflow")] #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
         fn test_funnel_shl_overflow() {
             let _ = <$T>::funnel_shl(A, B, $T::BITS);
         }
 
         #[test]
-        #[should_panic = "attempt to funnel shift right with overflow"]
+        #[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "attempt to funnel shift right with overflow")] #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
         fn test_funnel_shr_overflow() {
             let _ = <$T>::funnel_shr(A, B, $T::BITS);
         }

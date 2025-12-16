@@ -7,17 +7,16 @@ mod marker;
 mod unchecked_iterator;
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::marker::InPlaceIterable;
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::marker::TrustedFused;
 #[unstable(feature = "trusted_step", issue = "85731")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::marker::TrustedStep;
 pub(crate) use self::unchecked_iterator::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::{
     accum::{Product, Sum},
     collect::{Extend, FromIterator, IntoIterator},
@@ -29,7 +28,7 @@ pub use self::{
 
 // Ferrocene addition: imports for certified subset
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 pub use self::{
     accum::Sum,
@@ -37,5 +36,5 @@ pub use self::{
     double_ended::DoubleEndedIterator,
     exact_size::ExactSizeIterator,
     iterator::Iterator,
-    marker::TrustedLen,
+    marker::{FusedIterator, TrustedLen},
 };

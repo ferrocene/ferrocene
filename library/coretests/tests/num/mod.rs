@@ -112,7 +112,11 @@ fn from_str_issue7588() {
 }
 
 #[test]
-#[should_panic = "radix must lie in the range `[2, 36]`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "radix must lie in the range `[2, 36]`"
+)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn from_ascii_radix_panic() {
     let radix = 1;
     let _parsed = u64::from_str_radix("12345ABCD", radix);

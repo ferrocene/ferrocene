@@ -13,27 +13,35 @@
     allow(aarch64_softfloat_neon)
 )]
 
+#[cfg(not(feature = "ferrocene_subset"))]
 mod mte;
 #[unstable(feature = "stdarch_aarch64_mte", issue = "129010")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::mte::*;
 
 mod neon;
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub use self::neon::*;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 mod tme;
 #[unstable(feature = "stdarch_aarch64_tme", issue = "117216")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::tme::*;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 mod prefetch;
 #[unstable(feature = "stdarch_aarch64_prefetch", issue = "117217")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::prefetch::*;
 
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub use super::arm_shared::*;
 
 #[cfg(test)]
+#[cfg(not(feature = "ferrocene_subset"))]
 use stdarch_test::assert_instr;
 
 #[cfg(test)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod test_support;

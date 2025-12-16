@@ -11,11 +11,11 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::FloatToInt;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::FpCategory;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
 use crate::{intrinsics, mem};
 
@@ -504,23 +504,22 @@ impl f64 {
     pub const NEG_INFINITY: f64 = -1.0_f64 / 0.0_f64;
 
     /// Sign bit
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) const SIGN_MASK: u64 = 0x8000_0000_0000_0000;
 
     /// Exponent mask
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const EXP_MASK: u64 = 0x7ff0_0000_0000_0000;
 
     /// Mantissa mask
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const MAN_MASK: u64 = 0x000f_ffff_ffff_ffff;
 
     /// Minimum representable positive value (min subnormal)
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     const TINY_BITS: u64 = 0x1;
 
     /// Minimum representable negative value (min negative subnormal)
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     const NEG_TINY_BITS: u64 = Self::TINY_BITS | Self::SIGN_MASK;
 
     /// Returns `true` if this value is NaN.
@@ -537,7 +536,6 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_nan(self) -> bool {
         self != self
     }
@@ -561,7 +559,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_infinite(self) -> bool {
         // Getting clever with transmutation can result in incorrect answers on some FPUs
         // FIXME: alter the Rust <-> Rust calling convention to prevent this problem.
@@ -587,7 +584,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_finite(self) -> bool {
         // There's no need to handle NaN separately: if self is NaN,
         // the comparison is not true, exactly as desired.
@@ -616,7 +613,7 @@ impl f64 {
     #[stable(feature = "is_subnormal", since = "1.53.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_subnormal(self) -> bool {
         matches!(self.classify(), FpCategory::Subnormal)
     }
@@ -644,7 +641,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_normal(self) -> bool {
         matches!(self.classify(), FpCategory::Normal)
     }
@@ -664,7 +661,7 @@ impl f64 {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn classify(self) -> FpCategory {
         // We used to have complicated logic here that avoids the simple bit-based tests to work
         // around buggy codegen for x87 targets (see
@@ -702,7 +699,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_sign_positive(self) -> bool {
         !self.is_sign_negative()
     }
@@ -712,7 +708,6 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
     #[inline]
     #[doc(hidden)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_positive(self) -> bool {
         self.is_sign_positive()
     }
@@ -738,7 +733,6 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_sign_negative(self) -> bool {
         // IEEE754 says: isSignMinus(x) is true if and only if x has negative sign. isSignMinus
         // applies to zeros and NaNs as well.
@@ -750,7 +744,6 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
     #[inline]
     #[doc(hidden)]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_negative(self) -> bool {
         self.is_sign_negative()
     }
@@ -786,7 +779,7 @@ impl f64 {
     #[doc(alias = "nextUp")]
     #[stable(feature = "float_next_up_down", since = "1.86.0")]
     #[rustc_const_stable(feature = "float_next_up_down", since = "1.86.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn next_up(self) -> Self {
         // Some targets violate Rust's assumption of IEEE semantics, e.g. by flushing
         // denormals to zero. This is in general unsound and unsupported, but here
@@ -838,7 +831,7 @@ impl f64 {
     #[doc(alias = "nextDown")]
     #[stable(feature = "float_next_up_down", since = "1.86.0")]
     #[rustc_const_stable(feature = "float_next_up_down", since = "1.86.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn next_down(self) -> Self {
         // Some targets violate Rust's assumption of IEEE semantics, e.g. by flushing
         // denormals to zero. This is in general unsound and unsupported, but here
@@ -871,7 +864,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn recip(self) -> f64 {
         1.0 / self
     }
@@ -897,7 +890,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_degrees(self) -> f64 {
         // The division here is correctly rounded with respect to the true value of 180/π.
         // Although π is irrational and already rounded, the double rounding happens
@@ -927,7 +920,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_radians(self) -> f64 {
         // The division here is correctly rounded with respect to the true value of π/180.
         // Although π is irrational and already rounded, the double rounding happens
@@ -954,7 +947,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn max(self, other: f64) -> f64 {
         intrinsics::maxnumf64(self, other)
     }
@@ -977,7 +970,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn min(self, other: f64) -> f64 {
         intrinsics::minnumf64(self, other)
     }
@@ -1005,7 +998,7 @@ impl f64 {
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[unstable(feature = "float_minimum_maximum", issue = "91079")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn maximum(self, other: f64) -> f64 {
         intrinsics::maximumf64(self, other)
     }
@@ -1033,7 +1026,7 @@ impl f64 {
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[unstable(feature = "float_minimum_maximum", issue = "91079")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn minimum(self, other: f64) -> f64 {
         intrinsics::minimumf64(self, other)
     }
@@ -1053,7 +1046,7 @@ impl f64 {
     #[doc(alias = "average")]
     #[stable(feature = "num_midpoint", since = "1.85.0")]
     #[rustc_const_stable(feature = "num_midpoint", since = "1.85.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn midpoint(self, other: f64) -> f64 {
         const HI: f64 = f64::MAX / 2.;
 
@@ -1093,7 +1086,7 @@ impl f64 {
                   without modifying the original"]
     #[stable(feature = "float_approx_unchecked_to", since = "1.44.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub unsafe fn to_int_unchecked<Int>(self) -> Int
     where
         Self: FloatToInt<Int>,
@@ -1194,7 +1187,7 @@ impl f64 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_be_bytes(self) -> [u8; 8] {
         self.to_bits().to_be_bytes()
     }
@@ -1250,7 +1243,7 @@ impl f64 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_ne_bytes(self) -> [u8; 8] {
         self.to_bits().to_ne_bytes()
     }
@@ -1270,7 +1263,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_be_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_be_bytes(bytes))
     }
@@ -1320,7 +1313,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_ne_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_ne_bytes(bytes))
     }
@@ -1388,7 +1381,7 @@ impl f64 {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {
         let mut left = self.to_bits() as i64;
         let mut right = other.to_bits() as i64;
@@ -1445,7 +1438,7 @@ impl f64 {
     #[stable(feature = "clamp", since = "1.50.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn clamp(mut self, min: f64, max: f64) -> f64 {
         const_assert!(
             min <= max,
@@ -1507,7 +1500,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn signum(self) -> f64 {
         if self.is_nan() { Self::NAN } else { 1.0_f64.copysign(self) }
     }
@@ -1542,7 +1535,6 @@ impl f64 {
     #[stable(feature = "copysign", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn copysign(self, sign: f64) -> f64 {
         intrinsics::copysignf64(self, sign)
     }
@@ -1554,7 +1546,7 @@ impl f64 {
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn algebraic_add(self, rhs: f64) -> f64 {
         intrinsics::fadd_algebraic(self, rhs)
     }
@@ -1566,7 +1558,7 @@ impl f64 {
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn algebraic_sub(self, rhs: f64) -> f64 {
         intrinsics::fsub_algebraic(self, rhs)
     }
@@ -1578,7 +1570,7 @@ impl f64 {
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn algebraic_mul(self, rhs: f64) -> f64 {
         intrinsics::fmul_algebraic(self, rhs)
     }
@@ -1590,7 +1582,7 @@ impl f64 {
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn algebraic_div(self, rhs: f64) -> f64 {
         intrinsics::fdiv_algebraic(self, rhs)
     }
@@ -1602,7 +1594,7 @@ impl f64 {
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn algebraic_rem(self, rhs: f64) -> f64 {
         intrinsics::frem_algebraic(self, rhs)
     }
@@ -1613,7 +1605,7 @@ impl f64 {
 ///
 /// _The standalone functions in this module are for testing only.
 /// They will be stabilized as inherent methods._
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod math {
     use crate::intrinsics;
     use crate::num::libm;

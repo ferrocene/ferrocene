@@ -31,6 +31,8 @@ There are also two variants of the standard library available:
   The use of these libraries by end-use code is outside the scope of the current Ferrocene qualification.
   It is the end-user responsibility to certify these libraries if they are used in their code.
 
+.. _qualified-targets:
+
 Qualified targets
 -----------------
 
@@ -38,6 +40,11 @@ Qualified targets are provided with the highest level of assurance. They are
 qualified for use in safety-critical contexts when used with a qualified
 rustc. The full Ferrocene test suite is executed on the target for every
 code change.
+
+Most qualified targets come with a "certified equivalent" target. This
+certified target allows using the certified core library. The core library is
+not certified when using qualified targets, only when using certified targets.
+Refer to :ref:`certified-core-targets`.
 
 Only stable releases of qualified targets are qualified. Other releases, such
 as beta, should be considered Quality Managed. Such releases can be
@@ -91,7 +98,7 @@ qualified upon request.
 Quality managed targets
 -----------------------
 
-Quality managed targets are targets which are suitable for use in production 
+Quality managed targets are targets which are suitable for use in production
 outside of safety critical contexts. Support is available. The Ferrocene test
 suite successfully executed on the target. Known problems are tracked and
 available.
@@ -135,7 +142,7 @@ should not be used in production.
      - Kind
      - Standard library
      - Notes
-  
+
    * - :target:`aarch64-unknown-linux-gnu`
      - ``aarch64-unknown-linux-gnu``
      - Host platform

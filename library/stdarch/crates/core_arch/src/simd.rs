@@ -60,6 +60,7 @@ macro_rules! simd_ty {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl core::fmt::Debug for $id {
             #[inline]
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -117,6 +118,7 @@ macro_rules! simd_m_ty {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl core::fmt::Debug for $id {
             #[inline]
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -1008,6 +1010,7 @@ simd_ty!(
 /// Used to continue `Debug`ging SIMD types as `MySimd(1, 2, 3, 4)`, as they
 /// were before moving to array-based simd.
 #[inline]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) fn debug_simd_finish<T: crate::fmt::Debug, const N: usize>(
     formatter: &mut crate::fmt::Formatter<'_>,
     type_name: &str,

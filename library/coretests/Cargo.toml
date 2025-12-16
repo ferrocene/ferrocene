@@ -37,3 +37,6 @@ check-cfg = [
     'cfg(target_has_reliable_f128)',
     'cfg(target_has_reliable_f128_math)',
 ]
+
+[features]
+ferrocene_certified_runtime = []

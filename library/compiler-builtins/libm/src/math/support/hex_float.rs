@@ -3,6 +3,7 @@
 use super::{Round, Status, f32_from_bits, f64_from_bits};
 
 /// Construct a 16-bit float from hex float representation (C-style)
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg(f16_enabled)]
 pub const fn hf16(s: &str) -> f16 {
     match parse_hex_exact(s, 16, 10) {
@@ -21,6 +22,7 @@ pub const fn hf32(s: &str) -> f32 {
 }
 
 /// Construct a 64-bit float from hex float representation (C-style)
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 pub const fn hf64(s: &str) -> f64 {
     match parse_hex_exact(s, 64, 52) {
         Ok(bits) => f64_from_bits(bits as u64),
@@ -29,6 +31,7 @@ pub const fn hf64(s: &str) -> f64 {
 }
 
 /// Construct a 128-bit float from hex float representation (C-style)
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg(f128_enabled)]
 pub const fn hf128(s: &str) -> f128 {
     match parse_hex_exact(s, 128, 112) {

@@ -7,9 +7,9 @@
 ===============================================
 
 .. note::
-   
+
    Currently the baseline target is qualified, without any specific
-   ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book 
+   ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book
    <https://doc.rust-lang.org/1.86/rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
 
    Please contact support if your use case demands fully optimized builds for
@@ -17,7 +17,7 @@
 
 
 The ``thumbv7em-none-eabi`` Ferrocene target provides support for
-bare-metal ARMv7E-M processors with the 
+bare-metal ARMv7E-M processors with the
 `T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
 using the *soft-float ABI*. This includes the Arm Cortex-M4 and Arm Cortex-M7.
 
@@ -66,3 +66,16 @@ which means it can use ``std`` for testing and enriched interactive development 
 :target:`aarch64-unknown-linux-gnu` or :ref:`x86_64-unknown-linux-gnu` host.
 
 For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
+
+.. _thumbv7em-ferrocene-none-eabi:
+
+Certified equivalent
+--------------------
+
+This :ref:`qualified <qualified-targets>` target's certified equivalent is
+``thumbv7em-ferrocene-none-eabi``. To use the certified core library, the
+following additional flags must be provided to ``rustc``:
+
+* ``--target=thumbv7em-ferrocene-none-eabi``
+
+Refer to :ref:`certified-core-targets` for more information about certified targets.

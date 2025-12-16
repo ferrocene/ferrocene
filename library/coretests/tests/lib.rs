@@ -131,6 +131,7 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 
 // Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
 #[cfg(all(ferrocene_coverage, not(panic = "abort")))]

@@ -62,4 +62,5 @@ rustc-dep-of-std = ["compiler-builtins", "dep:core"]
 unstable-public-internals = []
 
 # Ferrocene addition
-ferrocene_certified = []
+ferrocene_subset = []
+ferrocene_certified_runtime = []

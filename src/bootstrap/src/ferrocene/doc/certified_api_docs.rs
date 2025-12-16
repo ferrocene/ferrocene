@@ -18,12 +18,21 @@ impl Step for CertifiedApiDocs {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CertifiedApiDocs { target: run.target });
+        if run.target.try_subset_equivalent().is_some() {
+            run.builder.ensure(CertifiedApiDocs { target: run.target });
+        } else if run.builder.was_invoked_explicitly::<CertifiedApiDocs>(crate::Kind::Doc) {
+            panic!(
+                "Could not build certified API docs, no certified target exists for {}",
+                run.target.to_string()
+            )
+        } else {
+            run.builder.info(&format!("No certified target for {}", run.target.to_string()));
+        }
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let certified_crates = vec!["core".into()];
-        let certified_target = self.target.certified_equivalent();
+        let certified_target = self.target.subset_equivalent();
 
         // Build the docs for the certified target
         let certified_target_doc_out = builder.ensure(

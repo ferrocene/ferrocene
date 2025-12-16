@@ -2,11 +2,11 @@
 
 use super::Utf8Error;
 use super::validations::run_utf8_validation;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{mem, ptr};
 
 // Ferrocene addition: Imports for certified subset
-#[cfg(feature = "ferrocene_certified")]
+#[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::mem;
 
@@ -232,7 +232,7 @@ pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
 #[inline]
 #[must_use]
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn from_raw_parts<'a>(ptr: *const u8, len: usize) -> &'a str {
     // SAFETY: the caller must uphold the safety contract for `from_raw_parts`.
     unsafe { &*ptr::from_raw_parts(ptr, len) }
@@ -251,7 +251,7 @@ pub const unsafe fn from_raw_parts<'a>(ptr: *const u8, len: usize) -> &'a str {
 #[inline]
 #[must_use]
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn from_raw_parts_mut<'a>(ptr: *mut u8, len: usize) -> &'a mut str {
     // SAFETY: the caller must uphold the safety contract for `from_raw_parts_mut`.
     unsafe { &mut *ptr::from_raw_parts_mut(ptr, len) }

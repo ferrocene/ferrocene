@@ -22,7 +22,8 @@ bench = false
 
 [features]
 # Ferrocene addition: only include certified code
-ferrocene_certified = []
+ferrocene_subset = [ "ferrocene_certified_runtime" ]
+ferrocene_certified_runtime = []
 # Ferrocene addition: only add the explicit dependency to profiler_builtins when we are building
 # core specifically for profiling.
 ferrocene_inject_profiler_builtins = ["dep:profiler_builtins"]

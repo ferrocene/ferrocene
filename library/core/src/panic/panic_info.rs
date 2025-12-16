@@ -1,7 +1,7 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Display};
 use crate::panic::Location;
-use crate::panicking::PanicFmt;
+use crate::panicking::PanicArguments;
 
 /// A struct providing information about a panic.
 ///
@@ -12,14 +12,14 @@ use crate::panicking::PanicFmt;
 /// [`std::panic::PanicHookInfo`]: ../../std/panic/struct.PanicHookInfo.html
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
+#[cfg_attr(not(feature = "ferrocene_certified_runtime"), derive(Debug))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", allow(missing_debug_implementations))]
 pub struct PanicInfo<'a> {
-    #[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
-    message: &'a PanicFmt<'a>,
+    message: &'a PanicArguments<'a>,
     location: &'a Location<'a>,
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     can_unwind: bool,
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     force_no_backtrace: bool,
 }
 
@@ -30,27 +30,16 @@ pub struct PanicInfo<'a> {
 ///
 /// See [`PanicInfo::message`].
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(feature = "ferrocene_certified_runtime", allow(missing_debug_implementations))]
 pub struct PanicMessage<'a> {
-    message: &'a fmt::Arguments<'a>,
-}
-
-// Ferrocene addition: When `ferrocene_certified` is enabled, `PanicInfo` only holds a reference to
-// a static string with the panic message. This `impl` adds a new builder to reflect that.
-#[cfg(feature = "ferrocene_certified")]
-impl<'a> PanicInfo<'a> {
-    #[inline]
-    pub(crate) fn new(message: &'a PanicFmt<'a>, location: &'a Location<'a>) -> Self {
-        PanicInfo { message, location }
-    }
+    message: &'a PanicArguments<'a>,
 }
 
 impl<'a> PanicInfo<'a> {
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub(crate) fn new(
-        // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicFmt` alias.
-        message: &'a PanicFmt<'a>,
+        // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicArguments` alias.
+        message: &'a PanicArguments<'a>,
         location: &'a Location<'a>,
         can_unwind: bool,
         force_no_backtrace: bool,
@@ -76,7 +65,6 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_info_message", since = "1.81.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn message(&self) -> PanicMessage<'_> {
         PanicMessage { message: self.message }
     }
@@ -126,7 +114,7 @@ impl<'a> PanicInfo<'a> {
     #[deprecated(since = "1.81.0", note = "this never returns anything useful")]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[allow(deprecated, deprecated_in_future)]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn payload(&self) -> &(dyn crate::any::Any + Send) {
         struct NoPayload;
         &NoPayload
@@ -144,7 +132,7 @@ impl<'a> PanicInfo<'a> {
     /// again.
     #[must_use]
     #[unstable(feature = "panic_can_unwind", issue = "92988")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn can_unwind(&self) -> bool {
         self.can_unwind
     }
@@ -156,14 +144,14 @@ impl<'a> PanicInfo<'a> {
     )]
     #[doc(hidden)]
     #[inline]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn force_no_backtrace(&self) -> bool {
         self.force_no_backtrace
     }
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 impl Display for PanicInfo<'_> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("panicked at ")?;
@@ -174,7 +162,6 @@ impl Display for PanicInfo<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> PanicMessage<'a> {
     /// Gets the formatted message, if it has no arguments to be formatted at runtime.
     ///
@@ -198,7 +185,7 @@ impl<'a> PanicMessage<'a> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 impl Display for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -207,7 +194,16 @@ impl Display for PanicMessage<'_> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(all(not(feature = "ferrocene_subset"), feature = "ferrocene_certified_runtime"))]
+impl Display for PanicMessage<'_> {
+    #[inline]
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.message.inner)
+    }
+}
+
+#[stable(feature = "panic_info_message", since = "1.81.0")]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 impl fmt::Debug for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

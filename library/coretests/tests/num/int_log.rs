@@ -197,31 +197,51 @@ fn ilog10_u128() {
 }
 
 #[test]
-#[should_panic(expected = "argument of integer logarithm must be positive")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic(expected = "argument of integer logarithm must be positive")
+)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn ilog2_of_0_panic() {
     let _ = 0u32.ilog2();
 }
 
 #[test]
-#[should_panic(expected = "argument of integer logarithm must be positive")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic(expected = "argument of integer logarithm must be positive")
+)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn ilog10_of_0_panic() {
     let _ = 0u32.ilog10();
 }
 
 #[test]
-#[should_panic(expected = "argument of integer logarithm must be positive")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic(expected = "argument of integer logarithm must be positive")
+)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn ilog3_of_0_panic() {
     let _ = 0u32.ilog(3);
 }
 
 #[test]
-#[should_panic(expected = "base of integer logarithm must be at least 2")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic(expected = "base of integer logarithm must be at least 2")
+)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn ilog0_of_1_panic() {
     let _ = 1u32.ilog(0);
 }
 
 #[test]
-#[should_panic(expected = "base of integer logarithm must be at least 2")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic(expected = "base of integer logarithm must be at least 2")
+)]
+#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
 fn ilog1_of_1_panic() {
     let _ = 1u32.ilog(1);
 }

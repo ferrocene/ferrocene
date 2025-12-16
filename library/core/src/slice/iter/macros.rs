@@ -77,7 +77,6 @@ macro_rules! iterator {
             ///
             /// The iterator must not be empty
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             unsafe fn next_back_unchecked(&mut self) -> $elem {
                 // SAFETY: the caller promised it's not empty, so
                 // the offsetting is in-bounds and there's an element to return.
@@ -87,7 +86,7 @@ macro_rules! iterator {
             // Helper function for creating a slice from the iterator.
             #[inline(always)]
             // NOTE(dead_code): Method is used by Iter, but not IterMut
-            #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
+            #[cfg_attr(feature = "ferrocene_subset", allow(dead_code))]
             fn make_slice(&self) -> &'a [T] {
                 // SAFETY: the iterator was created from a slice with pointer
                 // `self.ptr` and length `len!(self)`. This guarantees that all
@@ -118,7 +117,6 @@ macro_rules! iterator {
             // returning the new end.
             // Unsafe because the offset must not exceed `self.len()`.
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_certified"))]
             unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {
                 if_zst!(mut self,
                     // SAFETY: By our precondition, `offset` can be at most the
@@ -147,7 +145,7 @@ macro_rules! iterator {
             }
 
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            #[cfg(not(feature = "ferrocene_subset"))]
             fn is_empty(&self) -> bool {
                 is_empty!(self)
             }
@@ -196,14 +194,14 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            #[cfg(not(feature = "ferrocene_subset"))]
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let exact = len!(self);
                 (exact, Some(exact))
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            #[cfg(not(feature = "ferrocene_subset"))]
             fn count(self) -> usize {
                 len!(self)
             }
@@ -234,7 +232,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
             fn last(mut self) -> Option<$elem> {
                 self.next_back()
             }
@@ -341,7 +338,7 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            #[cfg(not(feature = "ferrocene_subset"))]
             fn find_map<B, F>(&mut self, mut f: F) -> Option<B>
             where
                 Self: Sized,
@@ -382,7 +379,7 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            #[cfg(not(feature = "ferrocene_subset"))]
             fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
                 P: FnMut(Self::Item) -> bool,
                 Self: Sized + ExactSizeIterator + DoubleEndedIterator
@@ -402,7 +399,7 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_certified"))]
+            #[cfg(not(feature = "ferrocene_subset"))]
             unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
                 // SAFETY: the caller must guarantee that `i` is in bounds of
                 // the underlying slice, so `i` cannot overflow an `isize`, and
@@ -421,7 +418,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "rust1", since = "1.0.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
         impl<'a, T> DoubleEndedIterator for $name<'a, T> {
             #[inline]
             fn next_back(&mut self) -> Option<$elem> {
@@ -465,7 +461,7 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "fused", since = "1.26.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl<T> FusedIterator for $name<'_, T> {}
 
         #[unstable(feature = "trusted_len", issue = "37572")]
@@ -482,7 +478,7 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "default_iters", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_certified"))]
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl<T> Default for $name<'_, T> {
             /// Creates an empty slice iterator.
             ///
@@ -498,7 +494,7 @@ macro_rules! iterator {
     }
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! forward_iterator {
     ($name:ident: $elem:ident, $iter_of:ty) => {
         #[stable(feature = "rust1", since = "1.0.0")]

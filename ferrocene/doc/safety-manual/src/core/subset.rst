@@ -12,7 +12,7 @@ Compliance with subset
 To prove compliance with the subset, follow these steps:
 
 1. Ensure that your code successfully compiles with your compilation target.
-2. Ensure that it also compiles with the certified equivalent listed in the table below.
+2. Ensure that it also compiles with the subset equivalent listed in the table below.
 3. If it succeeds, your code is compliant with the subset.
 4. If it fails, do one of the following:
 
@@ -20,22 +20,28 @@ To prove compliance with the subset, follow these steps:
     2. Contact Ferrous Systems to discuss the option of adding your desired function(s) to the certified subset.
     3. Keep using the function(s), but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
 
+.. warning::
+
+   Subset targets can **only** be used to verify compliance with the subset.
+   Subset targets **cannot** be used at runtime as a certified target.
+   When creating a certified production build, use a :ref:`certified target <certified-core-targets>` instead.
+
 .. list-table::
    :align: left
    :header-rows: 1
 
    * - Compilation target
-     - Certified equivalent
+     - Subset equivalent
    * - | ``aarch64-unknown-none``
        | ``aarch64-unknown-nto-qnx710``
-     - ``aarch64-unknown-ferrocene.certified``
+     - ``aarch64-unknown-ferrocene.subset``
    * - ``thumbv7em-none-eabi``
-     - ``thumbv7em-ferrocene.certified-eabi``
+     - ``thumbv7em-ferrocene.subset-eabi``
    * - ``thumbv7em-none-eabihf``
-     - ``thumbv7em-ferrocene.certified-eabihf``
+     - ``thumbv7em-ferrocene.subset-eabihf``
    * - | ``x86_64-unknown-linux-gnu``
        | ``x86_64-pc-nto-qnx710``
-     - ``x86_64-unknown-ferrocene.certified``
+     - ``x86_64-unknown-ferrocene.subset``
 
 Use uncertified core functions
 ------------------------------

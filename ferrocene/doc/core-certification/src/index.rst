@@ -26,6 +26,7 @@ Core Library Certification
    :caption: Safety Report
 
    safety-report/code-coverage
+   safety-report/subset
 
 .. toctree::
    :numbered:

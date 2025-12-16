@@ -27,7 +27,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
     cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
     cargo.rustflag("--cfg=ferrocene_coverage");
-    cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
+    cargo.arg("--features=core/ferrocene_inject_profiler_builtins,std/ferrocene_certified_runtime");
 
     // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
     // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
@@ -169,7 +169,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         builder.ensure(CertifiedCoreSymbols::new(builder, builder.config.host_target));
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: builder.config.host_target.certified_equivalent(),
+        certified_target: builder.config.host_target.subset_equivalent(),
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
@@ -257,7 +257,7 @@ impl Step for CoverageOutcomesDir {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
             FerroceneCoverageOutcomes::Local => {
-                let certified_target = builder.host_target.certified_equivalent();
+                let certified_target = builder.host_target.subset_equivalent();
                 Some(coverage_dir(builder, certified_target))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),

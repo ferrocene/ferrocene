@@ -242,7 +242,7 @@ path = [
     "requirements.txt",
     ".python-version",
     "src/bootstrap/src/ferrocene/**",
-    "ferrocene/doc/symbol-report.json",
+    "ferrocene/doc/symbol-report.csv",
     "ferrocene/tools/blanket/**",
     "ferrocene/tools/symbol-report/**",
     "CODEOWNERS",

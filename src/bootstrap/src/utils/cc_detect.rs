@@ -25,6 +25,8 @@ use std::collections::HashSet;
 use std::iter;
 use std::path::{Path, PathBuf};
 
+use build_helper::ferrocene_targets::{has_certified_runtime, replace_certified_runtime};
+
 use crate::core::config::TargetSelection;
 use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
@@ -83,7 +85,7 @@ pub fn fill_compilers(build: &mut Build) {
                 .cloned()
                 .chain(iter::once(build.host_target))
                 // Ferrocene addition: Load the matching certified target
-                .flat_map(|t| std::iter::once(t).chain(t.try_certified_equivalent()))
+                .flat_map(|t| std::iter::once(t).chain(t.try_subset_equivalent()))
                 .collect()
         }
     };
@@ -331,11 +333,15 @@ impl Language {
 }
 
 fn contains_ferrocene_vendors(triple: Interned<String>) -> bool {
-    triple.contains("ferrocene.facade") || triple.contains("ferrocene.certified")
+    triple.contains("ferrocene.facade")
+        || triple.contains("ferrocene.subset")
+        || has_certified_runtime(triple)
 }
 
 fn replace_ferrocene_vendors(triple: Interned<String>) -> String {
-    triple.replace("ferrocene.facade", "none").replace("ferrocene.certified", "none")
+    replace_certified_runtime(
+        triple.replace("ferrocene.facade", "none").replace("ferrocene.subset", "none"),
+    )
 }
 
 #[cfg(test)]

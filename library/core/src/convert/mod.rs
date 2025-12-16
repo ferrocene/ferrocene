@@ -35,18 +35,18 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::PointeeSized;
 
 mod num;
 
 #[unstable(feature = "convert_float_to_int", issue = "67057")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use num::FloatToInt;
 
 /// The identity function.
@@ -803,7 +803,7 @@ impl<T> const From<T> for T {
 #[rustc_reservation_impl = "permitting this impl would forbid us from adding \
                             `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const From<!> for T {
     fn from(t: !) -> T {
         t
@@ -865,7 +865,7 @@ impl<T> const AsMut<[T]> for [T] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl const AsRef<str> for str {
     #[inline(always)]
     fn as_ref(&self) -> &str {
@@ -944,7 +944,7 @@ impl const Clone for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
@@ -952,7 +952,7 @@ impl fmt::Debug for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
@@ -960,7 +960,7 @@ impl fmt::Display for Infallible {
 }
 
 #[stable(feature = "str_parse_error2", since = "1.8.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
@@ -977,7 +977,7 @@ impl const Eq for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl const PartialOrd for Infallible {
     fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
         match *self {}
@@ -986,7 +986,7 @@ impl const PartialOrd for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl const Ord for Infallible {
     fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
         match *self {}
@@ -995,7 +995,7 @@ impl const Ord for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl const From<!> for Infallible {
     #[inline]
     fn from(x: !) -> Self {
@@ -1004,7 +1004,7 @@ impl const From<!> for Infallible {
 }
 
 #[stable(feature = "convert_infallible_hash", since = "1.44.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Hash for Infallible {
     fn hash<H: Hasher>(&self, _: &mut H) {
         match *self {}

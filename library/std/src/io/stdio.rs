@@ -1152,6 +1152,7 @@ pub fn try_set_output_capture(
 ///
 /// Writing to non-blocking stdout/stderr can cause an error, which will lead
 /// this function to panic.
+#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 fn print_to<T>(args: fmt::Arguments<'_>, global_s: fn() -> T, label: &str)
 where
     T: Write,

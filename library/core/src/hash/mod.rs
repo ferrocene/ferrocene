@@ -83,15 +83,24 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated)]
 pub use self::sip::SipHasher;
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "hashmap_internals", issue = "none")]
 #[allow(deprecated)]
 #[doc(hidden)]
 pub use self::sip::SipHasher13;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, marker};
 
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+use crate::marker;
+
+#[cfg(not(feature = "ferrocene_subset"))]
 mod sip;
 
 /// A hashable type.
@@ -554,6 +563,7 @@ pub trait Hasher {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "indirect_hasher_impl", since = "1.22.0")]
 impl<H: Hasher + ?Sized> Hasher for &mut H {
     fn finish(&self) -> u64 {
@@ -633,6 +643,7 @@ impl<H: Hasher + ?Sized> Hasher for &mut H {
 ///
 /// [`build_hasher`]: BuildHasher::build_hasher
 /// [`HashMap`]: ../../std/collections/struct.HashMap.html
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 pub trait BuildHasher {
     /// Type of the hasher that will be created.
@@ -747,9 +758,11 @@ pub trait BuildHasher {
 /// [`HashMap`]: ../../std/collections/struct.HashMap.html
 /// [`HashSet`]: ../../std/collections/struct.HashSet.html
 /// [zero-sized]: https://doc.rust-lang.org/nomicon/exotic-sizes.html#zero-sized-types-zsts
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 pub struct BuildHasherDefault<H>(marker::PhantomData<fn() -> H>);
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<H> BuildHasherDefault<H> {
     /// Creates a new BuildHasherDefault for Hasher `H`.
     #[stable(feature = "build_hasher_default_const_new", since = "1.85.0")]
@@ -759,6 +772,7 @@ impl<H> BuildHasherDefault<H> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.9.0", feature = "core_impl_debug")]
 impl<H> fmt::Debug for BuildHasherDefault<H> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -766,6 +780,7 @@ impl<H> fmt::Debug for BuildHasherDefault<H> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 impl<H: Default + Hasher> BuildHasher for BuildHasherDefault<H> {
     type Hasher = H;
@@ -775,6 +790,7 @@ impl<H: Default + Hasher> BuildHasher for BuildHasherDefault<H> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 impl<H> Clone for BuildHasherDefault<H> {
     fn clone(&self) -> BuildHasherDefault<H> {
@@ -782,6 +798,7 @@ impl<H> Clone for BuildHasherDefault<H> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 impl<H> Default for BuildHasherDefault<H> {
     fn default() -> BuildHasherDefault<H> {
@@ -789,6 +806,7 @@ impl<H> Default for BuildHasherDefault<H> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.29.0", feature = "build_hasher_eq")]
 impl<H> PartialEq for BuildHasherDefault<H> {
     fn eq(&self, _other: &BuildHasherDefault<H>) -> bool {
@@ -796,6 +814,7 @@ impl<H> PartialEq for BuildHasherDefault<H> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.29.0", feature = "build_hasher_eq")]
 impl<H> Eq for BuildHasherDefault<H> {}
 

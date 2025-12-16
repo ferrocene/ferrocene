@@ -1,10 +1,10 @@
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ffi::CStr;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::PhantomData;
 use crate::ptr::NonNull;
@@ -39,8 +39,7 @@ use crate::ptr::NonNull;
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(feature = "ferrocene_certified", expect(dead_code))]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone))]
 pub struct Location<'a> {
     // A raw pointer is used rather than a reference because the pointer is valid for one more byte
     // than the length stored in this pointer; the additional byte is the NUL-terminator used by
@@ -52,7 +51,7 @@ pub struct Location<'a> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl PartialEq for Location<'_> {
     fn eq(&self, other: &Self) -> bool {
         // Compare col / line first as they're cheaper to compare and more likely to differ,
@@ -62,11 +61,11 @@ impl PartialEq for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Eq for Location<'_> {}
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Ord for Location<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.file()
@@ -77,7 +76,7 @@ impl Ord for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl PartialOrd for Location<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -85,7 +84,7 @@ impl PartialOrd for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Hash for Location<'_> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.file().hash(state);
@@ -95,7 +94,7 @@ impl Hash for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Location<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Location")
@@ -194,7 +193,6 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file(&self) -> &'a str {
         // SAFETY: The filename is valid.
         unsafe { self.filename.as_ref() }
@@ -208,7 +206,7 @@ impl<'a> Location<'a> {
     #[inline]
     #[stable(feature = "file_with_nul", since = "1.92.0")]
     #[rustc_const_stable(feature = "file_with_nul", since = "1.92.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn file_as_c_str(&self) -> &'a CStr {
         let filename = self.filename.as_ptr();
 
@@ -275,7 +273,7 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -3741,6 +3741,15 @@ tests for a less-than-or-equals relationship.
 :dp:`fls_ft5aeo4ilgwc`
 See :s:`LessThanOrEqualsExpression`.
 
+
+.. _fls_DdZ1ZwjLZTeG:
+
+let binding
+^^^^^^^^^^^
+
+:dp:`fls_sw6HrsxsnG2y`
+A :dt:`let binding` is a :t:`construct` that introduces :t:`[binding]s` by matching a :t:`value` against a :t:`pattern` using the keyword ``let``. :t:`[let binding]s` appear in :t:`[let statement]s`, :t:`[if let expression]s`, :t:`[while let loop expression]s`, and :t:`[let initializer]s`.
+
 .. _fls_hqj80jHcxEBB:
 
 let initializer

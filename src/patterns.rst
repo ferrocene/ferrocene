@@ -70,7 +70,7 @@ with :t:`keyword` ``mut`` containing an :t:`identifier pattern`.
 
 :dp:`fls_72JHo343O7jp`
 An or-pattern shall not appear in the :t:`pattern-without-alternation` of a
-:t:`closure parameter`, a :t:`function parameter`, or a :t:`let statement`.
+:t:`closure parameter`, a :t:`function parameter`, or a :t:`let binding`.
 
 :dp:`fls_8luyomzppck`
 Any two :t:`[subpattern]s` of an :t:`or-pattern` are subject to the following

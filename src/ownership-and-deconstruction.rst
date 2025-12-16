@@ -763,7 +763,7 @@ Dropping proceeds as follows:
 #. :dp:`fls_zxFM7EoE2Xq8`
    The first :t:`pattern-without-alternation` ``Ok([a, b])`` declares ``a`` before ``b``.
 
-#. :dp:`fls_zxFM7EoE2Xq8`
+#. :dp:`fls_093YxG6YXQz2`
    When the first call matches ``Ok([a, b])``, the :t:`[binding]s` are dropped in reverse declaration order: ``b`` then ``a``.
 
 #. :dp:`fls_gNWXh61ZXXt8`

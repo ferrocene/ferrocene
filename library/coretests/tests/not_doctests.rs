@@ -544,3 +544,28 @@ fn str_bytes() {
     assert!(s.bytes().find(|b| *b == b'i').is_some());
     assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
 }
+
+#[test]
+fn step_default_forward_and_backward() {
+    use core::iter::Step;
+
+    #[derive(Clone, PartialOrd, PartialEq)]
+    struct Wrapper(usize);
+
+    impl Step for Wrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            usize::steps_between(&start.0, &end.0)
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::forward_checked(start.0, count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::backward_checked(start.0, count).map(Self)
+        }
+    }
+
+    assert_eq!(unsafe { Step::forward_unchecked(Wrapper(0), 10) }, Wrapper(10));
+    assert_eq!(unsafe { Step::backward_unchecked(Wrapper(10), 10) }, Wrapper(0));
+}

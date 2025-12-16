@@ -822,3 +822,41 @@ fn test_iterator_chain_advance_by() {
     iter.advance_by(2).ok(); // Go past `self.a`
     assert_eq!(iter.next(), None);
 }
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::size_hint
+#[test]
+fn iter_zip_size_hint() {
+    #[derive(Clone, Copy)]
+    struct MaybeUpper {
+        val: usize,
+        size_hint: (usize, Option<usize>),
+    }
+
+    impl Iterator for MaybeUpper {
+        type Item = usize;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(self.val)
+        }
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            self.size_hint
+        }
+    }
+
+    let none = MaybeUpper { val: 1, size_hint: (0, None) };
+
+    let some_1 = MaybeUpper { val: 1, size_hint: (1, Some(1)) };
+    let some_2 = MaybeUpper { val: 2, size_hint: (2, Some(2)) };
+
+    let none_none_zip = none.zip(none);
+    assert_eq!(none_none_zip.size_hint(), (0, None));
+
+    let some_some_zip = some_1.zip(some_2);
+    assert_eq!(some_some_zip.size_hint(), (1, Some(1)));
+
+    let some_none_zip = some_1.zip(none);
+    assert_eq!(some_none_zip.size_hint(), (0, Some(1)));
+
+    let none_some_zip = none.zip(some_2);
+    assert_eq!(none_some_zip.size_hint(), (0, Some(2)));
+}

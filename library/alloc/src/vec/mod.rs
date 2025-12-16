@@ -781,7 +781,7 @@ impl<T> Vec<T> {
     /// assert_eq!(rebuilt, [4294967295, 0, 1]);
     /// ```
     #[must_use = "losing the pointer will leak memory"]
-    #[stable(feature = "vec_into_raw_parts", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "vec_into_raw_parts", since = "1.93.0")]
     pub fn into_raw_parts(self) -> (*mut T, usize, usize) {
         let mut me = ManuallyDrop::new(self);
         (me.as_mut_ptr(), me.len(), me.capacity())
@@ -3344,6 +3344,10 @@ impl<T: Clone, A: Allocator> Vec<T, A> {
     /// except that it also works with slice elements that are Clone but not Copy.
     /// If Rust gets specialization this function may be deprecated.
     ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity exceeds `isize::MAX` _bytes_.
+    ///
     /// # Examples
     ///
     /// ```
@@ -3365,8 +3369,9 @@ impl<T: Clone, A: Allocator> Vec<T, A> {
     ///
     /// # Panics
     ///
-    /// Panics if starting index is greater than the end index
-    /// or if the index is greater than the length of the vector.
+    /// Panics if starting index is greater than the end index, if the index is
+    /// greater than the length of the vector, or if the new capacity exceeds
+    /// `isize::MAX` _bytes_.
     ///
     /// # Examples
     ///

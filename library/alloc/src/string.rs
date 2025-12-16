@@ -454,6 +454,10 @@ impl String {
     ///
     /// [`new`]: String::new
     ///
+    /// # Panics
+    ///
+    /// Panics if the capacity exceeds `isize::MAX` _bytes_.
+    ///
     /// # Examples
     ///
     /// ```
@@ -933,7 +937,7 @@ impl String {
     /// assert_eq!(rebuilt, "hello");
     /// ```
     #[must_use = "losing the pointer will leak memory"]
-    #[stable(feature = "vec_into_raw_parts", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "vec_into_raw_parts", since = "1.93.0")]
     pub fn into_raw_parts(self) -> (*mut u8, usize, usize) {
         self.vec.into_raw_parts()
     }
@@ -1079,6 +1083,10 @@ impl String {
 
     /// Appends a given string slice onto the end of this `String`.
     ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity exceeds `isize::MAX` _bytes_.
+    ///
     /// # Examples
     ///
     /// ```
@@ -1101,8 +1109,9 @@ impl String {
     ///
     /// # Panics
     ///
-    /// Panics if the range has `start_bound > end_bound`, or, if the range is
-    /// bounded on either end and does not lie on a [`char`] boundary.
+    /// Panics if the range has `start_bound > end_bound`, if the range is
+    /// bounded on either end and does not lie on a [`char`] boundary, or if the
+    /// new capacity exceeds `isize::MAX` bytes.
     ///
     /// # Examples
     ///
@@ -1158,7 +1167,7 @@ impl String {
     ///
     /// # Panics
     ///
-    /// Panics if the new capacity overflows [`usize`].
+    /// Panics if the new capacity exceeds `isize::MAX` _bytes_.
     ///
     /// # Examples
     ///
@@ -1208,7 +1217,7 @@ impl String {
     ///
     /// # Panics
     ///
-    /// Panics if the new capacity overflows [`usize`].
+    /// Panics if the new capacity exceeds `isize::MAX` _bytes_.
     ///
     /// # Examples
     ///
@@ -1371,6 +1380,10 @@ impl String {
     }
 
     /// Appends the given [`char`] to the end of this `String`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity exceeds `isize::MAX` _bytes_.
     ///
     /// # Examples
     ///

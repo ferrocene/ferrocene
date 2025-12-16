@@ -573,12 +573,6 @@ Exercises the `format!` macro.
 
 A broad category of tests on functions.
 
-## `tests/ui/for/`: `for` keyword
-
-Tests on the `for` keyword and some of its associated errors, such as attempting to write the faulty pattern `for _ in 0..1 {} else {}`.
-
-**FIXME**: Should be merged with `ui/for-loop-while`.
-
 ## `tests/ui/force-inlining/`: `#[rustc_force_inline]`
 
 Tests for `#[rustc_force_inline]`, which will force a function to always be labelled as inline by the compiler (it will be inserted at the point of its call instead of being used as a normal function call.) If the compiler is unable to inline the function, an error will be reported. See <https://github.com/rust-lang/rust/pull/134082>.
@@ -940,6 +934,8 @@ Contains a single test. It imports a massive amount of very similar types from a
 **FIXME**: Move under either `tests/ui/modules/` or `tests/ui/resolve/`.
 
 ## `tests/ui/never_type/`
+
+Tests relating to the never type. Most tests are specifically about the never type fallback behavior.
 
 See [Tracking issue for promoting `!` to a type (RFC 1216) #35121](https://github.com/rust-lang/rust/issues/35121).
 
@@ -1518,10 +1514,6 @@ Tests on `enum` variants.
 ## `tests/ui/version/`
 
 **FIXME**: Contains a single test described as "Check that rustc accepts various version info flags.", should be rehomed.
-
-## `tests/ui/warnings/`
-
-**FIXME**: Contains a single test on non-explicit paths (`::one()`). Should be rehomed probably to `tests/ui/resolve/`.
 
 ## `tests/ui/wasm/`
 

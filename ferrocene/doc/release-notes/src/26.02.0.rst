@@ -7,6 +7,8 @@ Ferrocene 26.02.0
 New features
 ------------
 
+* The target support tiers were updated. Many previously experimental targets are now supported, and support tiers
+  are now better described. For more information, see :doc:`user-manual:targets/index`.
 * The certified subset of the ``core`` library that is certified to IEC 61508 SIL 2 has been significantly expanded.
 * Targets with certified ``core`` libraries now have ``*-ferrocene-*`` equivalents, which contain a minimal certified panic implementation.
 * The core certification documentations has been expanded.

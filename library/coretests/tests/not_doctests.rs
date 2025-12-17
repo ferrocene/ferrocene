@@ -549,7 +549,7 @@ fn str_bytes() {
 fn step_default_forward_and_backward() {
     use core::iter::Step;
 
-    #[derive(Clone, PartialOrd, PartialEq)]
+    #[derive(Debug, Clone, PartialOrd, PartialEq)]
     struct Wrapper(usize);
 
     impl Step for Wrapper {
@@ -568,4 +568,81 @@ fn step_default_forward_and_backward() {
 
     assert_eq!(unsafe { Step::forward_unchecked(Wrapper(0), 10) }, Wrapper(10));
     assert_eq!(unsafe { Step::backward_unchecked(Wrapper(10), 10) }, Wrapper(0));
+}
+
+macro_rules! int_step {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&<$T>::MIN, &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MAX / 2), &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MIN), &(<$T>::MIN + 1));
+                assert_eq!(1, lower_bound);
+                assert_eq!(Some(1), upper_bound);
+
+                assert_eq!(
+                    (0, None),
+                    <$T as core::iter::Step>::steps_between(&<$T>::MAX, &<$T>::MIN)
+                );
+
+                assert_eq!(
+                    <$T>::MAX,
+                    <$T as core::iter::Step>::backward(<$T>::MIN, 1)
+                );
+                let half_max = (<$T>::MAX / 2) as usize;
+                let expected = <$T>::MAX - half_max as $T;
+                assert_eq!(
+                    expected,
+                    <$T as core::iter::Step>::backward(<$T>::MAX, half_max)
+                );
+                assert_eq!(
+                    expected,
+                    unsafe { <$T as core::iter::Step>::backward_unchecked(<$T>::MAX, half_max) }
+                );
+                assert_eq!(
+                    Some(expected),
+                    <$T as core::iter::Step>::backward_checked(<$T>::MAX, half_max)
+                );
+                assert!(
+                    <$T as core::iter::Step>::backward_checked(<$T>::MIN, usize::MAX).is_none()
+                );
+
+                assert!(
+                    <$T as core::iter::Step>::forward_checked(<$T>::MAX, usize::MAX).is_none()
+                );
+                assert_eq!(
+                    Some(<$T>::MIN + <$T>::MAX as usize as $T),
+                    <$T as core::iter::Step>::forward_checked(<$T>::MIN, <$T>::MAX as usize)
+                );
+                assert_eq!(
+                    <$T>::MIN,
+                    <$T as core::iter::Step>::forward(<$T>::MAX, 1)
+                );
+                assert_eq!(
+                    <$T>::MIN + <$T>::MAX as usize as $T,
+                    <$T as core::iter::Step>::forward(<$T>::MIN, <$T>::MAX as usize)
+                );
+            }
+        )*
+    };
+}
+
+int_step! {
+    i8 => i8_step,
+    i16 => i16_step,
+    i32 => i32_step,
+    i64 => i64_step,
+    i128 => i128_step,
+    isize => isize_step,
+    u8 => u8_step,
+    u16 => u16_step,
+    u32 => u32_step,
+    u64 => u64_step,
+    u128 => u128_step,
+    usize => usize_step,
 }

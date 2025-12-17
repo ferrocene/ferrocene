@@ -5,4 +5,5 @@
    :host: x86_64-unknown-linux-gnu
    :target: aarch64-unknown-none
    :bare_metal_test_target: aarch64-unknown-ferrocene.facade
+   :certified_target: aarch64-ferrocene-none
    :remote_testing:

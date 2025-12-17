@@ -781,7 +781,7 @@ language changes in Rust 1.77.0
 
   * New paragraph: :p:`fls_1s1UikGU5YQb`
 
-.. Note: for the publicly rendered version of the FLS we want to link to
-   upstream's release notes. In the Ferrocene subtree this should be replaced
-   to the link to the Ferrocene release notes!
+.. note:
+   This is a custom change for the FLS in the Ferrocene subtree.
+   Upstream FLS points to release notes of upstream.
 .. _release notes: ../release-notes/index.html

@@ -62,8 +62,8 @@ an :t:`attribute`.
 
 .. code-block:: rust
 
-   #[cfg[target_os = "linux"]]
-   mod linux_only_module {
+   #[cfg(target_os = "linux")]
+   fn linux_only_function() {
        #![allow(unused_variables)]
 
        let unused = ();
@@ -139,7 +139,7 @@ Built-in Attributes
      | MacroExportContent
      | MacroUseContent
      | NakedContent
-     | NoBinutilsContent
+     | NoBuiltinsContent
      | NoImplicitPreludeContent
      | NoLinkContent
      | NoMainContent
@@ -445,7 +445,7 @@ Attribute ``no_builtins``
 
 .. syntax::
 
-   NoBinutilsContent ::=
+   NoBuiltinsContent ::=
        $$no_builtins$$
 
 .. rubric:: Legality Rules
@@ -1509,10 +1509,14 @@ Attribute ``repr``
 .. syntax::
 
    ReprContent ::=
-       $$repr$$ $$($$ Representation $$)$$
+       $$repr$$ $$($$ RepresentationList $$)$$
+
+   RepresentationList ::=
+       Representation ($$,$$ Representation)* $$,$$?
 
    Representation ::=
-       RepresentationKind Alignment?
+       RepresentationKind
+     | Alignment
 
    RepresentationKind ::=
        PrimitiveRepresentation

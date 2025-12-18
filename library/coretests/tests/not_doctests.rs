@@ -883,3 +883,12 @@ fn iter_zip_size_hint() {
     let none_some_zip = none.zip(some_2);
     assert_eq!(none_some_zip.size_hint(), (0, Some(2)));
 }
+
+// <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_nth
+#[test]
+fn iter_step_by_spec_nth() {
+    let mut it = (0_u128..).step_by(1);
+    let first = it.next();
+    let stepped = it.nth(usize::MAX);
+    assert_eq!(stepped, Some(usize::MAX as u128 + 1));
+}

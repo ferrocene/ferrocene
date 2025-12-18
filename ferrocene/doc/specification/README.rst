@@ -69,17 +69,17 @@ You can build the rendered version by running::
 
 By default, Sphinx uses incremental rebuilds to generate the content that
 changed since the last invocation. If you notice a problem with incremental
-rebuilds, you can pass the ``-c`` flag to clear the existing artifacts before
+rebuilds, you can pass the ``--clear`` flag to clear the existing artifacts before
 building::
 
-   ./make.py -c
+   ./make.py --clear
 
 The rendered version will be available in ``build/html/``.
 
 You can also start a local server on port 8000 with automatic rebuild and reload
-whenever you change a file by passing the ``-s`` flag::
+whenever you change a file by passing the ``--serve`` flag::
 
-   ./make.py -s
+   ./make.py --serve
 
 Checking links consistency
 ==========================

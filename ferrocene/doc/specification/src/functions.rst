@@ -103,9 +103,39 @@ The :t:`expected type` of the :t:`pattern` of a :t:`function parameter` is the :
 :dp:`fls_PGDKWK7nPvgw`
 The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[function parameter]s` of a :t:`function` shall not shadow another.
 
+:dp:`fls_o4uSLPo00KUg`
+A :dt:`variadic function` is an :t:`external function` that specifies
+:s:`FunctionParameterVariadicPart` as the last :t:`function parameter`.
+
 :dp:`fls_icdzs1mjh0n4`
-A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless
-it is an :t:`external function`.
+A :t:`variadic function` shall specify one of the following :t:`[ABI]s`:
+
+* :dp:`fls_OR85NVifPwjr`
+  ``extern "C"``
+* :dp:`fls_4s2IdfYDzPrX`
+  ``extern "C-unwind"``
+* :dp:`fls_ZJJppPfiJRou`
+  ``extern "aapcs"``
+* :dp:`fls_jOyZh9ujWWHQ`
+  ``extern "aapcs-unwind"``
+* :dp:`fls_Xdr0bFwxhWiB`
+  ``extern "cdecl"``
+* :dp:`fls_DpTFEHZAABdD`
+  ``extern "cdecl-unwind"``
+* :dp:`fls_b7FTlWfnX2OI`
+  ``extern "efiapi"``
+* :dp:`fls_6urL6fZ5cpaA`
+  ``extern "system"``
+* :dp:`fls_TMOzb6cYIOlH`
+  ``extern "system-unwind"``
+* :dp:`fls_eHPWHrvs7ETl`
+  ``extern "sysv64"``
+* :dp:`fls_mjCrvmikm58M`
+  ``extern "sysv64-unwind"``
+* :dp:`fls_4EUb9zFatZ97`
+  ``extern "win64"``
+* :dp:`fls_4B4B5FIqAes9`
+  ``extern "win64-unwind"``
 
 :dp:`fls_vljy4mm0zca2`
 A :t:`return type` is the :t:`type` of the result a :t:`function`, :t:`closure type` or :t:`function pointer type` returns.

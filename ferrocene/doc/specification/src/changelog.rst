@@ -1,5 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
+   SPDX-FileCopyrightText: The Rust Project Contributors
 
 .. default-domain:: spec
 .. informational-page::
@@ -30,6 +31,34 @@ Language changes in Rust 1.91.0
 
 - `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
   This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
+
+  - Changed paragraphs:
+
+    - :p:`fls_hbn1l42xmr3h`
+    - :p:`fls_dbbfqaqa80r8`
+    - :p:`fls_icdzs1mjh0n4`
+
+  - New paragraphs:
+
+    - :p:`fls_OR85NVifPwjr`
+    - :p:`fls_4s2IdfYDzPrX`
+    - :p:`fls_ZJJppPfiJRou`
+    - :p:`fls_jOyZh9ujWWHQ`
+    - :p:`fls_Xdr0bFwxhWiB`
+    - :p:`fls_DpTFEHZAABdD`
+    - :p:`fls_6urL6fZ5cpaA`
+    - :p:`fls_TMOzb6cYIOlH`
+    - :p:`fls_eHPWHrvs7ETl`
+    - :p:`fls_mjCrvmikm58M`
+    - :p:`fls_4EUb9zFatZ97`
+    - :p:`fls_4B4B5FIqAes9`
+    - :p:`fls_b7FTlWfnX2OI`
+    - :p:`fls_o4uSLPo00KUg`
+    - :p:`fls_UippZpUyYpHl`
+    - :p:`fls_CIyK8BYzzo26`
+    - :p:`fls_ccFdnlX5HIYk`
+    - :p:`fls_xrCRprWS13R1`
+    - :p:`fls_JHlqXjn4Sf07`
 
 - `Add dangling_pointers_from_locals lint to warn against dangling pointers from local variables <https://github.com/rust-lang/rust/pull/144322>`_
 
@@ -355,7 +384,7 @@ Language changes in Rust 1.84.0
 
 * `Show a warning when \`-Ctarget-feature\` is used to toggle features that can lead to unsoundness due to ABI mismatches <https://github.com/rust-lang/rust/pull/129884>`_
 
-  * No change: `target-feature` is outside the scope of the Ferrocene qualification
+  * No change: `target-feature` is outside the scope of the FLS
 
 * `Use the next-generation trait solver in coherence <https://github.com/rust-lang/rust/pull/130654>`_
 
@@ -752,7 +781,7 @@ language changes in Rust 1.77.0
 
   * New paragraph: :p:`fls_1s1UikGU5YQb`
 
-.. Note: for the publicly rendered version of the FLS we want to link to
-   upstream's release notes. In the Ferrocene subtree this should be replaced
-   to the link to the Ferrocene release notes!
+.. note:
+   This is a custom change for the FLS in the Ferrocene subtree.
+   Upstream FLS points to release notes of upstream.
 .. _release notes: ../release-notes/index.html

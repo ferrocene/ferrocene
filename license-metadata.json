@@ -344,6 +344,7 @@
                   "doc/specification/README.rst",
                   "doc/specification/make.py",
                   "doc/specification/pyproject.toml",
+                  "doc/specification/src/changelog.rst",
                   "doc/specification/src/conf.py",
                   "doc/specification/src/general.rst",
                   "doc/specification/src/glossary.rst",

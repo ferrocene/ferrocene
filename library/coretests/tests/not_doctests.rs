@@ -893,3 +893,11 @@ fn iter_chunks_exact_mut_nth() {
     let mut iter = slice.chunks_exact_mut(2);
     assert_eq!(iter.nth(55), None);
 }
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_mut_last() {
+    let mut buf: Vec<usize> = vec![];
+    let it = buf.chunks_mut(5);
+    assert_eq!(it.last(), None)
+}

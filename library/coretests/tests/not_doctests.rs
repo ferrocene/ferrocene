@@ -901,3 +901,11 @@ fn iter_chunks_mut_last() {
     let it = buf.chunks_mut(5);
     assert_eq!(it.last(), None)
 }
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_mut(2);
+    assert_eq!(iter.nth(55), None);
+}

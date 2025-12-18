@@ -457,3 +457,192 @@ fn as_mut_array() {
     assert!(slice.as_mut_array::<2>().is_none());
     assert!(slice.as_mut_array::<1>().is_some());
 }
+
+#[test]
+fn exact_iterator_mut_ref_is_empty() {
+    assert!((&mut (0..0)).is_empty());
+    assert!(!(&mut (0..1)).is_empty());
+}
+
+#[test]
+fn chunks_exact_is_empty() {
+    assert!([0; 10].chunks_exact(11).is_empty());
+    assert!(![0; 10].chunks_exact(2).is_empty());
+
+    assert!([0; 10].chunks_exact_mut(11).is_empty());
+    assert!(![0; 10].chunks_exact_mut(2).is_empty());
+}
+macro_rules! ilog2_loop {
+    ($(($T:ty, $ilog2_max:expr) => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(<$T>::MAX.ilog2(), $ilog2_max);
+                for i in 0..=$ilog2_max {
+                    let p = (2 as $T).pow(i as u32);
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog2(), i - 1);
+                    }
+                    assert_eq!(p.ilog2(), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog2(), i);
+                    }
+
+                    // also check `x.ilog(2)`
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog(2), i - 1);
+                    }
+                    assert_eq!(p.ilog(2), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog(2), i);
+                    }
+                }
+            }
+        )*
+    };
+}
+
+ilog2_loop! {
+    (u8, 7) => ilog2_u8,
+    (u16, 15) => ilog2_u16,
+    (u32, 31) => ilog2_u32,
+    (u64, 63) => ilog2_u64,
+    (u128, 127) => ilog2_u128,
+    (i8, 6) => ilog2_i8,
+    (i16, 14) => ilog2_i16,
+    (i32, 30) => ilog2_i32,
+    (i64, 62) => ilog2_i64,
+    (i128, 126) => ilog2_i128,
+}
+
+macro_rules! nonpositive_ilog2 {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic]
+            fn $fn() {
+                let _ = (-1 as $T).ilog2();
+            }
+        )*
+    };
+}
+
+nonpositive_ilog2! {
+    i8 => nonpositive_ilog2_of_i8,
+    i16 => nonpositive_ilog2_of_i16,
+    i32 => nonpositive_ilog2_of_i32,
+    i64 => nonpositive_ilog2_of_i64,
+    i128 => nonpositive_ilog2_of_i128,
+}
+
+#[test]
+fn str_bytes() {
+    let s = "yellow submarine";
+
+    assert!(s.bytes().all(|b| b.is_ascii()));
+    assert!(s.bytes().any(|b| b.is_ascii_whitespace()));
+    assert!(s.bytes().find(|b| *b == b'i').is_some());
+    assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
+}
+
+#[test]
+fn step_default_forward_and_backward() {
+    use core::iter::Step;
+
+    #[derive(Debug, Clone, PartialOrd, PartialEq)]
+    struct Wrapper(usize);
+
+    impl Step for Wrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            usize::steps_between(&start.0, &end.0)
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::forward_checked(start.0, count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::backward_checked(start.0, count).map(Self)
+        }
+    }
+
+    assert_eq!(unsafe { Step::forward_unchecked(Wrapper(0), 10) }, Wrapper(10));
+    assert_eq!(unsafe { Step::backward_unchecked(Wrapper(10), 10) }, Wrapper(0));
+}
+
+macro_rules! int_step {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&<$T>::MIN, &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MAX / 2), &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MIN), &(<$T>::MIN + 1));
+                assert_eq!(1, lower_bound);
+                assert_eq!(Some(1), upper_bound);
+
+                assert_eq!(
+                    (0, None),
+                    <$T as core::iter::Step>::steps_between(&<$T>::MAX, &<$T>::MIN)
+                );
+
+                assert_eq!(
+                    <$T>::MAX,
+                    <$T as core::iter::Step>::backward(<$T>::MIN, 1)
+                );
+                let half_max = (<$T>::MAX / 2) as usize;
+                let expected = <$T>::MAX - half_max as $T;
+                assert_eq!(
+                    expected,
+                    <$T as core::iter::Step>::backward(<$T>::MAX, half_max)
+                );
+                assert_eq!(
+                    expected,
+                    unsafe { <$T as core::iter::Step>::backward_unchecked(<$T>::MAX, half_max) }
+                );
+                assert_eq!(
+                    Some(expected),
+                    <$T as core::iter::Step>::backward_checked(<$T>::MAX, half_max)
+                );
+                assert!(
+                    <$T as core::iter::Step>::backward_checked(<$T>::MIN, usize::MAX).is_none()
+                );
+
+                assert!(
+                    <$T as core::iter::Step>::forward_checked(<$T>::MAX, usize::MAX).is_none()
+                );
+                assert_eq!(
+                    Some(<$T>::MIN + <$T>::MAX as usize as $T),
+                    <$T as core::iter::Step>::forward_checked(<$T>::MIN, <$T>::MAX as usize)
+                );
+                assert_eq!(
+                    <$T>::MIN,
+                    <$T as core::iter::Step>::forward(<$T>::MAX, 1)
+                );
+                assert_eq!(
+                    <$T>::MIN + <$T>::MAX as usize as $T,
+                    <$T as core::iter::Step>::forward(<$T>::MIN, <$T>::MAX as usize)
+                );
+            }
+        )*
+    };
+}
+
+int_step! {
+    i8 => i8_step,
+    i16 => i16_step,
+    i32 => i32_step,
+    i64 => i64_step,
+    i128 => i128_step,
+    isize => isize_step,
+    u8 => u8_step,
+    u16 => u16_step,
+    u32 => u32_step,
+    u64 => u64_step,
+    u128 => u128_step,
+    usize => usize_step,
+}

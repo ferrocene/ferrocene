@@ -877,3 +877,11 @@ fn iter_chunks_last() {
     let it = buf.chunks(5);
     assert_eq!(it.last(), None)
 }
+
+// <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_nth() {
+    let slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact(2);
+    assert_eq!(iter.nth(55), None);
+}

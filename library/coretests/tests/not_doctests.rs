@@ -642,3 +642,16 @@ int_step! {
     u128 => u128_step,
     usize => usize_step,
 }
+
+// covers:
+// - `<core::mem::Discriminant<T> as core::cmp::PartialEq>::eq`
+// - `core::mem::discriminant`
+#[test]
+fn discriminant() {
+    enum Foo {
+        A,
+        B,
+    }
+    assert_eq!(core::mem::discriminant(&Foo::A), core::mem::discriminant(&Foo::A));
+    assert_ne!(core::mem::discriminant(&Foo::A), core::mem::discriminant(&Foo::B));
+}

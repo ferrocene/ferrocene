@@ -885,3 +885,11 @@ fn iter_chunks_exact_nth() {
     let mut iter = slice.chunks_exact(2);
     assert_eq!(iter.nth(55), None);
 }
+
+// <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact_mut(2);
+    assert_eq!(iter.nth(55), None);
+}

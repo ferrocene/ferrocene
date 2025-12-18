@@ -1453,6 +1453,9 @@ pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {
 }
 
 /// Same behavior and safety conditions as [`swap_nonoverlapping`]
+#[ferrocene::annotation(
+    "This function is only called inside `swap_nonoverlapping` as the `const` arm of a `const_eval_select!` so it cannot be covered"
+)]
 #[inline]
 const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize) {
     let mut i = 0;

@@ -87,7 +87,12 @@ impl TestVariant {
                 .unwrap_or(DEFAULT_VARIANT_FALLBACK),
         };
 
-        let base = find_in_slice(VARIANTS, name).expect(&format!("unknown test variant: {name}"));
+        let base = find_in_slice(VARIANTS, name).unwrap_or_else(|| {
+            panic!(
+                "unknown test variant: {name}\nexpected one of {:?}",
+                VARIANTS.iter().map(|(k, _)| k).collect::<Vec<_>>()
+            )
+        });
         TestVariant { masks: RefCell::new(vec![true; base.len()]), base }
     }
 

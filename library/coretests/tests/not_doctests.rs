@@ -869,3 +869,11 @@ fn iter_step_by_spec_nth() {
     let stepped = it.nth(usize::MAX);
     assert_eq!(stepped, Some(usize::MAX as u128 + 1));
 }
+
+// <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_last() {
+    let buf: Vec<usize> = vec![];
+    let it = buf.chunks(5);
+    assert_eq!(it.last(), None)
+}

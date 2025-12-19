@@ -485,7 +485,6 @@ unsafe fn slice_unchecked(s: &Wtf8, begin: usize, end: usize) -> &Wtf8 {
 }
 
 /// Copied from core::str::raw::slice_error_fail
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[inline(never)]
 fn slice_error_fail(s: &Wtf8, begin: usize, end: usize) -> ! {
     assert!(begin <= end);

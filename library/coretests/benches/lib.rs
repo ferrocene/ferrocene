@@ -9,6 +9,8 @@
 #![feature(iter_next_chunk)]
 #![feature(iter_advance_by)]
 #![feature(uint_gather_scatter_bits)]
+// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
+// panics in the certified runtime
 #![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 
 extern crate test;

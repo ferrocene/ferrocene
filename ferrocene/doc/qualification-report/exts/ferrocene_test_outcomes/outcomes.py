@@ -109,11 +109,10 @@ class Outcomes:
             platform.ignored_doc_tests.sort()
             platform.invocations.sort()
 
-    def platform(self, host, target):
-        key = (host, target)
-        if key not in self.platforms:
-            self.platforms[key] = Platform()
-        return self.platforms[key]
+    def platform(self, target):
+        if target not in self.platforms:
+            self.platforms[target] = Platform()
+        return self.platforms[target]
 
 
 class FileLoader:
@@ -138,7 +137,7 @@ class FileLoader:
 
     def load_test_suite(self, suite):
         metadata = suite["metadata"]
-        platform = self.outcomes.platform(metadata["host"], metadata["target"])
+        platform = self.outcomes.platform(metadata["target"])
 
         if metadata["kind"] == "compiletest":
             mode = metadata["mode"] if metadata["mode"] != metadata["suite"] else None

@@ -211,7 +211,8 @@ macro_rules! signed_check {
                 #[cfg(panic = "unwind")]
                 {
                     std::panic::catch_unwind(core::panic::AssertUnwindSafe(|| (-n).isqrt())).expect_err(
-                        &format!("`({negative_n}).isqrt()` should have panicked, as {negative_n} is negative.")
+                        // Ferrocene addition: core::fmt not supported when certified
+                        "`({negative_n}).isqrt()` should have panicked, as {negative_n} is negative."
                     );
                 }
             }

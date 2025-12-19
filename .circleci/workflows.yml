@@ -357,6 +357,17 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
+  x86_64-linux-test-library-certified-panic:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --test-variant 2021-certified-panic
+    steps:
+      - ferrocene-job-test-container:
+          restore-from-job: x86_64-linux-build
+
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
@@ -667,6 +678,51 @@ jobs:
               --tty \
               << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >> \
 
+  facade-certified-panic-test:
+    executor: linux-vm
+    parameters:
+      qemu-arch:
+        type: string
+      test-variant:
+        type: string
+      target:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: << parameters.target >>
+      SCRIPT: |
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --test-variant 2021-<< parameters.test-variant>>-certified-panic
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - run:
+          name: Pull the Docker image used for CI
+          command: |
+            aws ecr get-login-password --region us-east-1 \
+              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      - ferrocene-ci:
+          wrapper: |
+            docker run \
+              --rm \
+              $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/awsjwt:/tmp/awsjwt \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --privileged \
+              --interactive \
+              --tty \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >> \
+
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
@@ -882,6 +938,7 @@ workflows:
             - misc-checks
             - x86_64-linux-test
             - x86_64-linux-test-library
+            - x86_64-linux-test-library-certified-panic
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
@@ -892,10 +949,13 @@ workflows:
             - aarch64-qnx-test-library-std
             - aarch64-qnx-test-compiletest
             - aarch64-none-test-library
+            - aarch64-none-test-library-certified-panic
             - aarch64-none-compiletest
             - thumbv7em-eabihf-test-library
+            - thumbv7em-eabihf-test-library-certified-panic
             - thumbv7em-eabihf-test-compiletest
             - thumbv7em-eabi-test-library
+            - thumbv7em-eabi-test-library-certified-panic
             - thumbv7em-eabi-test-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
@@ -932,6 +992,9 @@ workflows:
           test-variant: "2021"
           requires:
             - x86_64-linux-build
+      - x86_64-linux-test-library-certified-panic:
+          requires:
+            - x86_64-linux-build
       - x86_64-linux-test-library-std:
           test-variant: "2021"
           requires:
@@ -955,6 +1018,14 @@ workflows:
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - facade-certified-panic-test:
+          name: aarch64-none-test-library-certified-panic
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: cortex-a53
+          qemu-arch: qemu-aarch64
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1014,6 +1085,24 @@ workflows:
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-certified-panic-test:
+          name: thumbv7em-eabihf-test-library-certified-panic
+          target: thumbv7em-ferrocene.facade-eabihf
+          test-variant: cortex-m4
+          qemu-arch: qemu-arm
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-certified-panic-test:
+          name: thumbv7em-eabi-test-library-certified-panic
+          target: thumbv7em-ferrocene.facade-eabi
+          test-variant: cortex-m4
+          qemu-arch: qemu-arm
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

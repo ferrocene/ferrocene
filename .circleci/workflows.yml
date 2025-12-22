@@ -636,12 +636,15 @@ jobs:
         type: string
       resource-class:
         type: string
+      stage:
+        type: integer
+        default: 2
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << parameters.target >>
       SCRIPT: |
-        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage << parameters.stage >> test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -944,6 +947,7 @@ workflows:
           job: test:library
           resource-class: large # 4-core
           test-variant: "2021-certified-panic"
+          stage: 1
           requires:
             - x86_64-linux-build
       - x86_64-linux-test-library-std:
@@ -978,6 +982,7 @@ workflows:
           test-variant: 2021-cortex-a53-certified-panic
           qemu-arch: qemu-aarch64
           job: test:library
+          stage: 1
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1047,6 +1052,7 @@ workflows:
           test-variant: 2021-cortex-m4-certified-panic
           qemu-arch: qemu-arm
           job: test:library
+          stage: 1
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1057,6 +1063,7 @@ workflows:
           test-variant: 2021-cortex-m4-certified-panic
           qemu-arch: qemu-arm
           job: test:library
+          stage: 1
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

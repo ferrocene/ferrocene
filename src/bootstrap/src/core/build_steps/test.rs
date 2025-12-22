@@ -3126,8 +3126,11 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut ferrocene_certified_runtime =
-            builder.config.rust_std_features.contains("ferrocene_certified_runtime");
+        let mut ferrocene_certified_runtime = builder
+            .config
+            .rust_std_features
+            .contains("ferrocene_certified_runtime")
+            || builder.config.cmd.test_variant().map_or(false, |x| x.contains("certified-panic"));
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {

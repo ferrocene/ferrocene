@@ -668,6 +668,14 @@ impl Subcommand {
         }
     }
 
+    // Ferrocene addition
+    pub fn test_variant(&self) -> Option<&str> {
+        match self {
+            Subcommand::Test { test_variant, .. } => test_variant.as_deref(),
+            _ => None,
+        }
+    }
+
     pub fn ferrocene_coverage_for(&self) -> Option<FerroceneCoverageFor> {
         match *self {
             Subcommand::Test { coverage, .. } => coverage,

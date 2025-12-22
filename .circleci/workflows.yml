@@ -223,12 +223,15 @@ jobs:
         type: string
       resource-class:
         type: string
+      stage:
+        type: integer
+        default: 2
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        ./x.py --stage << parameters.stage >> test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build

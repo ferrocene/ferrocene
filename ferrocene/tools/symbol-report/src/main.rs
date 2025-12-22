@@ -181,7 +181,7 @@ fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
 }
 
 fn should_filter_out(qualified_name: &str) -> bool {
-    const FILTER_LIST: &[&str] = &["<core::core_arch::simd", "core::core_arch::simd"];
+    const FILTER_LIST: &[&str] = &["<core::core_arch::", "core::core_arch::"];
 
     FILTER_LIST.iter().any(|filter| qualified_name.starts_with(filter))
 }

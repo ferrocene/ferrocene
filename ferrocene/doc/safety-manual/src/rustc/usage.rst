@@ -30,16 +30,6 @@ delete any previous compilation artifacts, as follows:
   library.
 
 
-Warnings and Errors
--------------------
-
-The user shall pass command line option :cli:option:`-D warnings <rustc -D
-<lints>>` to the Ferrocene rustc in order to treat warnings as errors. The
-user shall **not** employ command line options :cli:option:`-A <rustc -A
-<lints>>` and :cli:option:`-W <rustc -W <lints>>` as those options lower the
-severity of errors.
-
-
 Building a Library
 ------------------
 

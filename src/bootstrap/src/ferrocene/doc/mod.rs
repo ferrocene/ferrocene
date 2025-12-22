@@ -359,9 +359,11 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         if self.require_test_outcomes {
             if let Some(path) = builder.ensure(TestOutcomesDir) {
                 cmd.env("FERROCENE_TEST_OUTCOMES_DIR", path);
-                cmd.env("FERROCENE_DEFAULT_HOST", builder.build.host_target.triple);
             }
         }
+        // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host
+        // to show in the docs.
+        cmd.env("FERROCENE_DEFAULT_HOST", builder.build.host_target.triple);
 
         if should_serve && builder.config.cmd.open() {
             cmd.arg("--open-browser");

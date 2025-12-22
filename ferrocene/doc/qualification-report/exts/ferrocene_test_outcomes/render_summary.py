@@ -49,7 +49,7 @@ class InjectSummaryTransform(SphinxTransform):
         )
         for page in pages:
             platform = (
-                self.env.ferrocene_test_outcomes.platform(page.host, page.tested_target)
+                self.env.ferrocene_test_outcomes.platform(page.tested_target)
                 if self.env.ferrocene_test_outcomes is not None
                 else None
             )

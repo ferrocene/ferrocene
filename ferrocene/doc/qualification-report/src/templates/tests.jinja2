@@ -120,6 +120,12 @@ This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust
      - ``{{ bare_metal_test_target }}``
    {% endif %}
 
+   {% if certified_target %}
+   * - :ref:`Certified <certified-core-targets>` target:
+     - :target:`{{ target }}`
+     - ``{{ certified_target }}``
+   {% endif %}
+
 Test results
 ============
 

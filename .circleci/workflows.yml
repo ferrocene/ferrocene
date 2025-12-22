@@ -223,12 +223,15 @@ jobs:
         type: string
       resource-class:
         type: string
+      stage:
+        type: integer
+        default: 2
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        ./x.py --stage << parameters.stage >> test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
@@ -633,12 +636,15 @@ jobs:
         type: string
       resource-class:
         type: string
+      stage:
+        type: integer
+        default: 2
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << parameters.target >>
       SCRIPT: |
-        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage << parameters.stage >> test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -882,6 +888,7 @@ workflows:
             - misc-checks
             - x86_64-linux-test
             - x86_64-linux-test-library
+            - x86_64-linux-test-library-certified-panic
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
@@ -892,10 +899,13 @@ workflows:
             - aarch64-qnx-test-library-std
             - aarch64-qnx-test-compiletest
             - aarch64-none-test-library
+            - aarch64-none-test-library-certified-panic
             - aarch64-none-compiletest
             - thumbv7em-eabihf-test-library
+            - thumbv7em-eabihf-test-library-certified-panic
             - thumbv7em-eabihf-test-compiletest
             - thumbv7em-eabi-test-library
+            - thumbv7em-eabi-test-library-certified-panic
             - thumbv7em-eabi-test-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
@@ -932,6 +942,14 @@ workflows:
           test-variant: "2021"
           requires:
             - x86_64-linux-build
+      - x86_64-linux-generic-test-container:
+          name: x86_64-linux-test-library-certified-panic
+          job: test:library
+          resource-class: large # 4-core
+          test-variant: "2021-certified-panic"
+          stage: 1
+          requires:
+            - x86_64-linux-build
       - x86_64-linux-test-library-std:
           test-variant: "2021"
           requires:
@@ -955,6 +973,16 @@ workflows:
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - facade-generic-test:
+          name: aarch64-none-test-library-certified-panic
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: 2021-cortex-a53-certified-panic
+          qemu-arch: qemu-aarch64
+          job: test:library
+          stage: 1
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1014,6 +1042,28 @@ workflows:
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: thumbv7em-eabihf-test-library-certified-panic
+          target: thumbv7em-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-m4-certified-panic
+          qemu-arch: qemu-arm
+          job: test:library
+          stage: 1
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: thumbv7em-eabi-test-library-certified-panic
+          target: thumbv7em-ferrocene.facade-eabi
+          test-variant: 2021-cortex-m4-certified-panic
+          qemu-arch: qemu-arm
+          job: test:library
+          stage: 1
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

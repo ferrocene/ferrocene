@@ -276,6 +276,7 @@ also accepts multiple options:
 * ``bare_metal_test_target`` (optional): the target tuple of the special
   target used for bare metal testing; it should be omitted if no special target
   was used
+* ``certified_target`` (optional): the target tuple that has a certified standard library
 * ``remote_testing`` (optional): whether the tests were executed on CI or on a
   remote machine/emulator; its presence without a value means ``true``, while
   its absence means ``false``

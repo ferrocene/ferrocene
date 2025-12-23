@@ -69,7 +69,7 @@ The following targets are certified for use with the pre-compiled certified core
 
    * - :ref:`x86_64-unknown-linux-gnu`
      - ``x86_64-unknown-linux-gnu``
-     - ``x86_64-ferrocene-linux-gnu``
+     - ``x86_64-ferrocene-none``
 
 
 .. note::

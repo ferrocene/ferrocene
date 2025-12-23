@@ -141,6 +141,9 @@ impl<T> [T] {
     #[rustc_no_implicit_autorefs]
     #[inline]
     #[must_use]
+    #[ferrocene::annotation(
+        "this function is guaranteed to be constant-evaluated as the size of arrays is always available at compilation"
+    )]
     pub const fn len(&self) -> usize {
         ptr::metadata(self)
     }
@@ -4091,6 +4094,9 @@ impl<T> [T] {
         // Ts = size_of::<U> / gcd(size_of::<T>, size_of::<U>)
         //
         // Luckily since all this is constant-evaluated... performance here matters not!
+        #[ferrocene::annotation(
+            "the only use of this function is in a const block, which means it cannot be reached during runtime"
+        )]
         const fn gcd(a: usize, b: usize) -> usize {
             if b == 0 { a } else { gcd(b, a % b) }
         }

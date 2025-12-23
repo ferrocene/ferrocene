@@ -107,7 +107,6 @@ struct SphinxBook<P: Step + IsSphinxBook> {
     mode: SphinxMode,
     target: TargetSelection,
     name: String,
-    fresh_build: bool,
     signature: SignatureStatus,
     inject_all_other_document_ids: bool,
     require_test_outcomes: bool,
@@ -158,14 +157,13 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         let breadcrumbs = ferrocene_doc.join("breadcrumbs");
         let public_docs_warning = ferrocene_doc.join("public-docs-warning");
 
-        // In some cases we have to perform a fresh build to guarantee deterministic output (for
-        // example to generate signatures). We want to purge the old build artifacts only when
-        // necessary, to avoid thrashing incremental builds.
-        if self.fresh_build || builder.config.cmd.fresh() {
-            for path in [&out, &doctrees] {
-                if path.exists() {
-                    builder.remove_dir(path);
-                }
+        // By default, sphinx caches all doctrees.
+        // It doesn't know when our environment variables, such as FERROCENE_TEST_OUTCOMES_DIR,
+        // change, so it can't automatically invalidate the cache.
+        // Rather than trying to be smart, just unconditionally delete it on each run.
+        for path in [&out, &doctrees] {
+            if path.exists() {
+                builder.remove_dir(path);
             }
         }
 
@@ -253,15 +251,13 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             comma_separated_paths(&include_in_header),
         ));
 
-        if builder.config.cmd.fresh() {
-            // The `-E` flag forces Sphinx to ignore any saved environment and build everything
-            // from scratch. This is not strictly required during normal builds or initial builds
-            // with --serve, as code above already clears the directory before invoking Sphinx.
-            //
-            // Without this code, followup builds of --serve would be incremental rather than
-            // fresh, as our code to delete directories only runs once. Passing `-E` fixes that.
-            cmd.arg("-E");
-        }
+        // The `-E` flag forces Sphinx to ignore any saved environment and build everything
+        // from scratch. This is not strictly required during normal builds or initial builds
+        // with --serve, as code above already clears the directory before invoking Sphinx.
+        //
+        // Without this code, followup builds of --serve would be incremental rather than
+        // fresh, as our code to delete directories only runs once. Passing `-E` fixes that.
+        cmd.arg("-E");
 
         if self.require_relnotes {
             cmd.arg(path_define(
@@ -483,7 +479,6 @@ macro_rules! sphinx_books {
             pub(crate) struct $ty {
                 pub(crate) mode: SphinxMode,
                 pub(crate) target: TargetSelection,
-                pub(crate) fresh_build: bool,
             }
 
             impl Step for $ty {
@@ -501,7 +496,6 @@ macro_rules! sphinx_books {
                     run.builder.ensure(Self {
                         mode: SphinxMode::Html,
                         target: run.target,
-                        fresh_build: false,
                     });
                 }
 
@@ -535,7 +529,6 @@ macro_rules! sphinx_books {
                         mode: self.mode,
                         target: self.target,
                         name: $name.into(),
-                        fresh_build: self.fresh_build,
                         signature,
                         inject_all_other_document_ids,
                         require_test_outcomes,
@@ -574,7 +567,6 @@ macro_rules! sphinx_books {
                     builder.ensure($ty {
                         mode: SphinxMode::Html,
                         target: self.target,
-                        fresh_build: false,
                     });
                 )*
 
@@ -592,7 +584,6 @@ macro_rules! sphinx_books {
                 builder.ensure($ty {
                     mode: SphinxMode::OnlyObjectsInv,
                     target,
-                    fresh_build: false,
                 });
             )*
         }
@@ -623,7 +614,6 @@ macro_rules! sphinx_books {
                         builder.ensure($ty {
                             mode: SphinxMode::Html,
                             target,
-                            fresh_build: false,
                         }).join("document-id.txt"),
                     );
                 }
@@ -642,7 +632,6 @@ macro_rules! sphinx_books {
                 builder.ensure($ty {
                     mode: SphinxMode::XmlDoctrees,
                     target,
-                    fresh_build: false,
                 })
             );)*
             paths

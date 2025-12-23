@@ -355,20 +355,22 @@ pub enum Subcommand {
         If no arguments are passed then everything is documented:
             ./x.py doc
             ./x.py doc --stage 1")]
+    #[rustfmt::skip]
     /// Build documentation
     Doc {
         #[arg(long)]
         /// open the docs in a browser
         open: bool,
+
+        // Ferrocene additions
         #[arg(long)]
         /// start a live-relodaing web server
         serve: bool,
         #[arg(long)]
-        /// ignore caches when building the documentation
-        fresh: bool,
-        #[arg(long)]
         /// allow easier debugging of Sphinx extensions
         debug_sphinx: bool,
+        // End Ferrocene additions
+
         #[arg(long)]
         /// render the documentation in JSON format in addition to the usual HTML format
         json: bool,
@@ -692,13 +694,6 @@ impl Subcommand {
     pub fn serve(&self) -> bool {
         match *self {
             Subcommand::Doc { serve, .. } => serve,
-            _ => false,
-        }
-    }
-
-    pub fn fresh(&self) -> bool {
-        match *self {
-            Subcommand::Doc { fresh, .. } => fresh,
             _ => false,
         }
     }

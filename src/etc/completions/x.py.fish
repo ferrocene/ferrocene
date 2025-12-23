@@ -287,7 +287,6 @@ complete -c x.py -n "__fish_x.py_using_subcommand doc" -l set -d 'override optio
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l open -d 'open the docs in a browser'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l serve -d 'start a live-relodaing web server'
-complete -c x.py -n "__fish_x.py_using_subcommand doc" -l fresh -d 'ignore caches when building the documentation'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l debug-sphinx -d 'allow easier debugging of Sphinx extensions'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l json -d 'render the documentation in JSON format in addition to the usual HTML format'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -s v -l verbose -d 'use verbose output (-vv for very verbose)'

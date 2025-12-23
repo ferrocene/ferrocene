@@ -1,3 +1,5 @@
+mod cell;
+
 use core::cmp::Ordering;
 use core::ops::{Bound, ControlFlow};
 use core::panic::Location;

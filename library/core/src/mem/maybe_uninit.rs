@@ -167,11 +167,10 @@ use crate::{intrinsics, ptr, slice};
 ///
 /// ## Initializing a struct field-by-field
 ///
-/// You can use `MaybeUninit<T>`, and the [`std::ptr::addr_of_mut`] macro, to initialize structs field by field:
+/// You can use `MaybeUninit<T>` and the [`&raw mut`] syntax to initialize structs field by field:
 ///
 /// ```rust
 /// use std::mem::MaybeUninit;
-/// use std::ptr::addr_of_mut;
 ///
 /// #[derive(Debug, PartialEq)]
 /// pub struct Foo {
@@ -186,11 +185,11 @@ use crate::{intrinsics, ptr, slice};
 ///     // Initializing the `name` field
 ///     // Using `write` instead of assignment via `=` to not call `drop` on the
 ///     // old, uninitialized value.
-///     unsafe { addr_of_mut!((*ptr).name).write("Bob".to_string()); }
+///     unsafe { (&raw mut (*ptr).name).write("Bob".to_string()); }
 ///
 ///     // Initializing the `list` field
 ///     // If there is a panic here, then the `String` in the `name` field leaks.
-///     unsafe { addr_of_mut!((*ptr).list).write(vec![0, 1, 2]); }
+///     unsafe { (&raw mut (*ptr).list).write(vec![0, 1, 2]); }
 ///
 ///     // All the fields are initialized, so we call `assume_init` to get an initialized Foo.
 ///     unsafe { uninit.assume_init() }
@@ -204,7 +203,7 @@ use crate::{intrinsics, ptr, slice};
 ///     }
 /// );
 /// ```
-/// [`std::ptr::addr_of_mut`]: crate::ptr::addr_of_mut
+/// [`&raw mut`]: https://doc.rust-lang.org/reference/types/pointer.html#r-type.pointer.raw.constructor
 /// [ub]: ../../reference/behavior-considered-undefined.html
 ///
 /// # Layout

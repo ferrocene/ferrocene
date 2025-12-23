@@ -1054,6 +1054,7 @@ impl<'a> Builder<'a> {
                 // // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
                 // // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
                 // install::Rustc,
+                // install::RustcDev,
                 // install::Cargo,
                 // install::RustAnalyzer,
                 // install::Rustfmt,

@@ -1138,10 +1138,10 @@ pub(crate) struct IgnoredUnlessCrateSpecified<'a> {
 // dangling.rs
 #[derive(LintDiagnostic)]
 #[diag(lint_dangling_pointers_from_temporaries)]
-#[note]
 #[help(lint_help_bind)]
-#[help(lint_help_returned)]
-#[help(lint_help_visit)]
+#[note(lint_note_safe)]
+#[note(lint_note_return)]
+#[note(lint_note_more_info)]
 // FIXME: put #[primary_span] on `ptr_span` once it does not cause conflicts
 pub(crate) struct DanglingPointersFromTemporaries<'tcx> {
     pub callee: Ident,
@@ -1154,7 +1154,8 @@ pub(crate) struct DanglingPointersFromTemporaries<'tcx> {
 
 #[derive(LintDiagnostic)]
 #[diag(lint_dangling_pointers_from_locals)]
-#[note]
+#[note(lint_note_safe)]
+#[note(lint_note_more_info)]
 pub(crate) struct DanglingPointersFromLocals<'tcx> {
     pub ret_ty: Ty<'tcx>,
     #[label(lint_ret_ty)]
@@ -2400,6 +2401,17 @@ pub(crate) mod unexpected_cfg_name {
             with_similar_values: Vec<FoundWithSimilarValue>,
             #[subdiagnostic]
             expected_names: Option<ExpectedNames>,
+        },
+        #[suggestion(
+            lint_unexpected_cfg_boolean,
+            applicability = "machine-applicable",
+            style = "verbose",
+            code = "{literal}"
+        )]
+        BooleanLiteral {
+            #[primary_span]
+            span: Span,
+            literal: bool,
         },
     }
 

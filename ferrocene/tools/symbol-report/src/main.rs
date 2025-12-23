@@ -28,7 +28,7 @@ use rustc_middle::ty::print::{
 };
 use rustc_session::EarlyDiagCtxt;
 use rustc_session::config::ErrorOutputType;
-use rustc_span::{FileNameDisplayPreference, Span, Symbol};
+use rustc_span::{Span, Symbol};
 use tracing::info;
 
 static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =
@@ -47,7 +47,7 @@ impl<'tcx> Vis<'tcx> {
 
     fn convert_span(&mut self, span: Span) -> (String, usize, usize) {
         let lines = self.tcx.sess.source_map().span_to_lines(span).expect("failed to look up span");
-        let filename = lines.file.name.display(FileNameDisplayPreference::Local).to_string();
+        let filename = lines.file.name.prefer_local_unconditionally().to_string();
         let start = lines.lines.first().unwrap().line_index;
         let end = lines.lines.last().unwrap().line_index;
 

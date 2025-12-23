@@ -232,7 +232,10 @@ Safety Assessment
 - Tool classification: T2
 - Level of reliance: High, ensures correctness of the test results.
 
-``libtest`` is used extensively by virtually every user of Rust, since it powers the common ``cargo test`` command. Heavy users of it include the upstream Rust project and Ferrous Systems which uses it in the rustc compiler qualification. Both upstream and Ferrous Systems execute thousands of tests with it, every day. Therefore there is a high chance of a bug in libtest being detected.
+``libtest`` is used extensively by virtually every user of Rust, since it powers the common ``cargo test`` command.
+Heavy users of it include the upstream Rust project and Ferrous Systems which uses it in the Rust compiler qualification.
+Both upstream and Ferrous Systems execute thousands of tests with it, every day.
+Therefore there is a high chance of a bug in libtest being detected.
 
 Failure modes
 """""""""""""
@@ -270,7 +273,7 @@ Safety Assessment
 - Tool classification: T2
 - Level of reliance: High, ensures the safety plan is being adhered to.
 
-``bootstrap`` is the build system used to build, package, and test the rustc compiler.
+``bootstrap`` is the build system used to build, package, and test the Rust compiler.
 Most of the build system is used heavily by the upstream Rust project.
 However, Ferrocene has custom modifications to bootstrap that are not used anywhere else, so there is only a moderate chance of a bug in the modifications being detected.
 
@@ -287,9 +290,11 @@ Failure modes
    - Mitigation: Building for a certified target automatically sets configuration flags that ensure all certified code only calls certified code.
                  Tests and coverage collection run on that certified target.
 - Missing build flags: The core library is built without flags required by the safety plan, such as ``-Cpanic=abort``.
+
   - Risk: The core library uses unwinding panics at runtime, which are not certified.
   - Mitigation: The tests for the core library, when instrumented for coverage, give a compilation error if the ``panic = "abort"`` conditional compilation option is unset.
 - Unqualified flags: The core library is built with extra flags that are not qualified, such as `-Z inline-mir`.
+
   - Risk: Unqualified compiler flags introduce errors. For example, MIR inlining introduces a codegen bug.
   - Mitigation: Refer to :ref:`nightly-flags`.
 
@@ -333,6 +338,7 @@ Failure modes
    - Mitigation: All "distribution" CI jobs depend on test jobs.
                  If a test job fails, the distribution job never runs.
 - Missing test suite: A test suite is never run in any test job.
+
   - Risk: Not all test suites in the safety plan are run.
   - Mitigation: The ``ferrocene/ci/split-tasks.py`` script chooses which suites are run in which job.
                 This script has an exhaustive list of all test suites required by our safety plan,

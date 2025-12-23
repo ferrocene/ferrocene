@@ -157,7 +157,7 @@ impl Step for Std {
     /// This will build the standard library for a particular stage of the build
     /// using the `compiler` targeting the `target` architecture. The artifacts
     /// created will also be linked into the sysroot directory.
-    fn run(self, builder: &Builder<'_>) -> Self::Output {
+    fn run(mut self, builder: &Builder<'_>) -> Self::Output {
         let target = self.target;
 
         // In most cases, we already have the std ready to be used for stage 0.
@@ -172,6 +172,16 @@ impl Step for Std {
 
             return None;
         }
+
+        // Ferrocene addition
+        let should_instrument_coverage = builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
+            // If we instrument any stage other than the top stage, it will be linked into rustc,
+            // which will spam a bunch of `default_XXXXX.profraw` files in the top of the repo.
+            && self.build_compiler.stage == builder.top_stage
+            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
+            // likely to break.
+            && target == builder.config.host_target;
+        self.force_recompile |= should_instrument_coverage;
 
         let build_compiler = if builder.download_rustc() && self.force_recompile {
             // When there are changes in the library tree with CI-rustc, we want to build
@@ -218,14 +228,6 @@ impl Step for Std {
 
         // Stage of the stdlib that we're building
         let stage = build_compiler.stage;
-
-        let should_instrument_coverage = builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
-            // If we instrument any stage other than the top stage, it will be linked into rustc,
-            // which will spam a bunch of `default_XXXXX.profraw` files in the top of the repo.
-            && build_compiler.stage == builder.top_stage
-            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
-            // likely to break.
-            && target == build_compiler.host;
 
         // Ferrocene addition: We can't reuse stage1 std if we are instrumenting stage2 but not
         // stage1.
@@ -289,8 +291,27 @@ impl Step for Std {
             cargo
         };
 
+        // Ferrocene addition
         if should_instrument_coverage {
-            instrument_coverage(builder, &mut cargo, build_compiler);
+            // If we are building a profiler_builtins for instrumenting core itself, it will conflict when
+            // we later build the standard library. Filter it out here.
+            if self.crates.contains(&"profiler_builtins".to_owned()) {
+                eprintln!(
+                    "error: cannot explicitly build profiler_builtins when collecting coverage for core"
+                );
+                build_helper::exit!(1);
+            }
+
+            // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
+            // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
+            // to build it from source.
+            //
+            // We don't do this when testing, because when download-rustc is enabled, we may have
+            // overridden `build_compiler` to something else. Rather than trying to duplicate the
+            // logic, just smuggle the proper path through a RefCell.
+            let rlib = builder.ensure(ProfilerBuiltins { target, build_compiler });
+            instrument_coverage(builder, &mut cargo, &rlib);
+            builder.profiler_runtime.replace(Some(rlib));
         }
 
         // See src/bootstrap/synthetic_targets.rs
@@ -329,6 +350,75 @@ impl Step for Std {
 
     fn metadata(&self) -> Option<StepMetadata> {
         Some(StepMetadata::build("std", self.target).built_by(self.build_compiler))
+    }
+}
+
+/// Like Std, but only builds the profiler runtime and nothing else.
+/// See the comments in Std::run above.
+///
+/// We don't use Std directly because the stamp file contains a bunch of info we don't need, and I
+/// think bootstrap will panic if it thinks it detects a cycle...
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct ProfilerBuiltins {
+    pub(crate) target: TargetSelection,
+    /// Compiler that builds the standard library.
+    pub(crate) build_compiler: Compiler,
+}
+
+impl Step for ProfilerBuiltins {
+    type Output = PathBuf;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.never()
+    }
+
+    // c.f. impl Step for Std
+    fn run(self, builder: &Builder<'_>) -> PathBuf {
+        let mut cargo = builder::Cargo::new(
+            builder,
+            self.build_compiler,
+            Mode::Std,
+            SourceType::InTree,
+            self.target,
+            Kind::Build,
+        );
+        std_cargo(builder, self.target, &mut cargo, &["profiler_builtins".to_owned()]);
+
+        // Ferrocene addition: coverage tests must run with panic=abort, we don't certify unwinding.
+        cargo.rustflag("-Cpanic=abort");
+
+        // See src/bootstrap/synthetic_targets.rs
+        if self.target.is_synthetic() {
+            cargo.env("RUSTC_BOOTSTRAP_SYNTHETIC_TARGET", "1");
+        }
+
+        let _guard = builder.msg(
+            Kind::Build,
+            "profiler_builtins",
+            Mode::Std,
+            self.build_compiler,
+            self.target,
+        );
+
+        let stamp =
+            BuildStamp::new(&builder.cargo_out(self.build_compiler, Mode::Std, self.target))
+                .with_prefix("profiler_builtins");
+        let mut artifacts = run_cargo(
+            builder,
+            cargo,
+            vec![], // tail_args
+            &stamp,
+            vec![], // target_deps
+            false,  // is_check
+            false,  // rlib_only_metadata
+        );
+
+        if builder.config.dry_run() {
+            PathBuf::new()
+        } else {
+            assert_eq!(artifacts.len(), 1, "meant to only build profiler_builtins");
+            artifacts.pop().unwrap()
+        }
     }
 }
 
@@ -698,13 +788,6 @@ pub fn std_cargo(
             .arg(features)
             .arg("--manifest-path")
             .arg(builder.src.join("library/sysroot/Cargo.toml"));
-
-        // Ferrocene addition: coverage tests must run with panic=abort, we don't certify unwinding.
-        if builder.config.cmd.ferrocene_coverage_for().is_some()
-            && cargo.compiler().stage == builder.top_stage
-        {
-            cargo.rustflag("-Zpanic-abort-tests").rustflag("-Cpanic=abort");
-        }
 
         // Help the libc crate compile by assisting it in finding various
         // sysroot native libraries.

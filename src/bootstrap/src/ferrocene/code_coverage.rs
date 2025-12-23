@@ -3,7 +3,7 @@
 
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use build_helper::exit;
 
@@ -15,7 +15,11 @@ use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::ferrocene::{self, download_and_extract_ci_outcomes};
 use crate::{BootstrapCommand, Compiler, Mode};
 
-pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
+pub(crate) fn instrument_coverage(
+    builder: &Builder<'_>,
+    cargo: &mut Cargo,
+    profiler_runtime: &Path,
+) {
     if !builder.config.profiler {
         eprintln!();
         eprintln!("Error: the profiler needs to be enabled to measure coverage.");
@@ -24,30 +28,27 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
     }
 
     // This guarantees that the coverage information is not stripped away from the binary
+    cargo.rustdocflag("-Copt-level=2");
     cargo.rustflag("-Copt-level=2");
-
+    // Tell the compiler to instrument these crates.
     cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
+    // Tell the crate that it's being instrumented.
     cargo.rustflag("--cfg=ferrocene_coverage");
-    cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
-
-    // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
-    // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
-    // fetch profiler_builtins from somewhere else.
-    //
-    // Thankfully profiler_builtins is built as part of building the sysroot, so it will be
-    // placed in the `deps` directory inside of Cargo's target directory. In theory this
-    // would result in Cargo picking it up automatically, but in practice it doesn't.
-    //
-    // Turns out that Cargo passes `-L dependency=$target_dir/deps` to rustc instead of
-    // just `-L $target_dir/deps`. The `dependency=` prefix causes rustc to only load
-    // explicit dependencies from that directory, not implicitly injected crates.
-    //
-    // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
-    // the location of profiler_builtins without the `dependency=` prefix.
-    let target_dir = builder.cargo_out(compiler, Mode::Std, cargo.target()).join("deps");
-
-    cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
+    // Coverage tests must run with panic=abort, we don't certify unwinding.
+    cargo.rustdocflag("-Cpanic=abort");
+    cargo.rustflag("-Cpanic=abort");
+    cargo.rustflag("-Zpanic-abort-tests");
+    // Tell the compiler where to find the profiler runtime.
+    // Normally it's in the sysroot, but we are the sysroot.
+    cargo.rustflag(&format!("--extern=profiler_builtins={}", profiler_runtime.to_str().unwrap()));
+    // parent() will return None on empty paths
+    if !builder.config.dry_run() {
+        cargo.rustflag(&format!(
+            "-Ldependency={}",
+            profiler_runtime.parent().unwrap().to_str().unwrap()
+        ));
+    }
 }
 
 pub(crate) fn measure_coverage(

@@ -17,7 +17,7 @@
 //! also check out the `src/bootstrap/README.md` file for more information.
 #![cfg_attr(test, allow(unused))]
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::Display;
 use std::path::{Path, PathBuf};
@@ -215,6 +215,10 @@ pub struct Build {
     version: String,
     // Ferrocene addition
     ferrocene_version: String,
+    /// Ferrocene addition: needed for code coverage instrumentation
+    ///
+    /// NOTE: separate from ferrocene_coverage because it gets initialized at different times.
+    pub(crate) profiler_runtime: RefCell<Option<PathBuf>>,
 
     // Properties derived from the above configuration
     src: PathBuf,
@@ -583,6 +587,7 @@ impl Build {
             config,
             version: version.to_string(),
             ferrocene_version: ferrocene_version.to_string(),
+            profiler_runtime: RefCell::new(None),
             src,
             out,
             bootstrap_out,
@@ -875,7 +880,7 @@ impl Build {
             features.insert("backtrace");
         }
 
-        if self.config.profiler_enabled(target) {
+        if self.config.profiler_enabled(target) && self.profiler_runtime.borrow().is_none() {
             features.insert("profiler");
         }
 

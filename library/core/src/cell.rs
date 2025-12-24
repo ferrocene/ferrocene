@@ -2788,26 +2788,62 @@ fn assert_coerce_unsized(
     let _: RefCell<&dyn Send> = d;
 }
 
+<<<<<<< HEAD
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| cec70080fd4
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+=======
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 unsafe impl<T: ?Sized> PinCoerceUnsized for UnsafeCell<T> {}
 
+<<<<<<< HEAD
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| cec70080fd4
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+=======
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 unsafe impl<T: ?Sized> PinCoerceUnsized for SyncUnsafeCell<T> {}
 
+<<<<<<< HEAD
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| cec70080fd4
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+=======
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 unsafe impl<T: ?Sized> PinCoerceUnsized for Cell<T> {}
 
+<<<<<<< HEAD
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| cec70080fd4
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+=======
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 unsafe impl<T: ?Sized> PinCoerceUnsized for RefCell<T> {}
 
+<<<<<<< HEAD
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| cec70080fd4
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+=======
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 unsafe impl<'b, T: ?Sized> PinCoerceUnsized for Ref<'b, T> {}
 
+<<<<<<< HEAD
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| cec70080fd4
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+=======
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 unsafe impl<'b, T: ?Sized> PinCoerceUnsized for RefMut<'b, T> {}

@@ -674,6 +674,17 @@ impl CStr {
     pub fn display(&self) -> impl fmt::Display {
         crate::bstr::ByteStr::from_bytes(self.to_bytes())
     }
+
+    /// Returns the same string as a string slice `&CStr`.
+    ///
+    /// This method is redundant when used directly on `&CStr`, but
+    /// it helps dereferencing other string-like types to string slices,
+    /// for example references to `Box<CStr>` or `Arc<CStr>`.
+    #[inline]
+    #[unstable(feature = "str_as_str", issue = "130366")]
+    pub const fn as_c_str(&self) -> &CStr {
+        self
+    }
 }
 
 #[cfg(not(feature = "ferrocene_subset"))]

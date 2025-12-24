@@ -149,6 +149,22 @@ Note that there are some limitations to be aware of when doing so:
   outcomes, remove the ``build/metrics.json`` file before invoking the build
   system.
 
+Note that test metrics are only measured for qualified targets, i.e. a target listed in :doc:`qualification-report:rustc/index`.
+Other targets will be ignored when generating the docs.
+For each target in the docs, use the "testing" target, which is the "Bare metal testing target" if it exists or the "Compilation target" otherwise.
+
+Non-linux hosts
+"""""""""""""""
+
+The facade targets have a Linux base, which means there is no way to run facade binaries on macOS.
+However, you can still collect test outcomes for a subset of tests as long as they are only ``//@ build-pass`` or ``//@ check-pass``.
+These outcomes are never suitable for signed documents, only for local testing.
+An example:
+
+.. code-block::
+
+   x t tests/ui/annotate-snippet --target aarch64-unknown-ferrocene.facade --test-variant 2021
+
 Injecting external test outcomes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

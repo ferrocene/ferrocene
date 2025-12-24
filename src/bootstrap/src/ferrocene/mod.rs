@@ -167,6 +167,7 @@ fn download_and_extract_ci_outcomes(builder: &Builder<'_>, kind: &str) -> PathBu
 
     let name = format!("{kind}-outcomes");
     let prefix = "s3://ferrocene-ci-artifacts/ferrocene/dist";
+    // NOTE: this says upstream, but it uses ferrocene/ferrocene, not rust-lang/rust.
     let commit = get_closest_upstream_commit(None, &builder.config.git_config(), CiEnv::None)
         .expect(&format!("failed to retrieve git commit for ferrocene.{name}=download-ci"))
         .expect("did not find a commit by merge bot");

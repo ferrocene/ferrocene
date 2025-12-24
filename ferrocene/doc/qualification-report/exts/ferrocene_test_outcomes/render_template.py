@@ -5,6 +5,7 @@ from docutils import nodes
 from docutils.statemachine import StringList
 from sphinx.directives import SphinxDirective
 from sphinx.transforms import SphinxTransform
+import os
 import docutils
 import jinja2
 import sphinx
@@ -37,8 +38,19 @@ class RenderOutcomesTemplate(SphinxDirective):
             self.options["target"],
         )
 
+        # Can be None if test outcomes were not injected.
+        outcomes = self.env.ferrocene_test_outcomes.platform(
+            tested_target,
+        ) if self.env.ferrocene_test_outcomes is not None else None
+
+        if outcomes and len(outcomes.invocations):
+            host = outcomes.invocations[0].host
+            assert all(inv.host == host for inv in outcomes.invocations), "Don't know how to display multiple hosts"
+        else:
+            host = os.environ["FERROCENE_DEFAULT_HOST"]
+
         page_node = OutcomesPageNode(
-            self.options["host"],
+            host,
             self.options["target"],
             tested_target,
             self.options["upcoming"] if "upcoming" in self.options else None,
@@ -47,19 +59,13 @@ class RenderOutcomesTemplate(SphinxDirective):
             self,
             self.arguments[0],
             {
-                "host": self.options["host"],
+                "host": host,
                 "target": self.options["target"],
                 "upcoming": self.options["upcoming"] if "upcoming" in self.options else None,
                 "bare_metal_test_target": self.options.get("bare_metal_test_target"),
                 "certified_target": self.options.get("certified_target"),
                 "remote_testing": "remote_testing" in self.options,
-                # Can be None if test outcomes were not injected.
-                "platform_outcomes": self.env.ferrocene_test_outcomes.platform(
-                    self.options["host"],
-                    tested_target,
-                )
-                if self.env.ferrocene_test_outcomes is not None
-                else None,
+                "platform_outcomes": outcomes,
             },
         )
         return [page_node] + content_node

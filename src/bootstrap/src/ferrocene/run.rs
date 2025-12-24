@@ -42,16 +42,10 @@ impl Step for TraceabilityMatrix {
         let test_annotations_base =
             builder.out.join(self.target.triple).join("ferrocene").join("test-annotations");
 
-        let specification = builder.ensure(Specification {
-            mode: SphinxMode::Html,
-            target: self.target,
-            fresh_build: false,
-        });
-        let user_manual = builder.ensure(UserManual {
-            mode: SphinxMode::Html,
-            target: self.target,
-            fresh_build: false,
-        });
+        let specification =
+            builder.ensure(Specification { mode: SphinxMode::Html, target: self.target });
+        let user_manual =
+            builder.ensure(UserManual { mode: SphinxMode::Html, target: self.target });
 
         let compiletest = builder.tool_exe(Tool::Compiletest);
         for (suite, mode) in &[("ui", "ui"), ("run-make", "run-make")] {

@@ -89,7 +89,6 @@ macro_rules! documents {
                             target: self.target,
                             // Ensure there are no leftover artifacts from a previous incremental
                             // build when generating the signature.
-                            fresh_build: true,
                         },
                     });
                 }
@@ -106,7 +105,6 @@ macro_rules! documents {
                 let output_dir = builder.ensure(crate::ferrocene::doc::$name {
                     mode: SphinxMode::Html,
                     target,
-                    fresh_build: false,
                 });
                 let cmd = document_signatures_cmd::<crate::ferrocene::doc::$name>(builder);
                 f(cmd, &source_dir, &output_dir);

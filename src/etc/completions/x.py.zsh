@@ -324,7 +324,6 @@ _arguments "${_arguments_options[@]}" : \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--open[open the docs in a browser]' \
 '--serve[start a live-relodaing web server]' \
-'--fresh[ignore caches when building the documentation]' \
 '--debug-sphinx[allow easier debugging of Sphinx extensions]' \
 '--json[render the documentation in JSON format in addition to the usual HTML format]' \
 '*-v[use verbose output (-vv for very verbose)]' \

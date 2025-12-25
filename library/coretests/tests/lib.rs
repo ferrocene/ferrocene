@@ -118,6 +118,7 @@
 #![feature(str_as_str)]
 #![feature(str_internals)]
 #![feature(strict_provenance_lints)]
+#![feature(temporary_niche_types)]
 #![feature(test)]
 #![feature(trusted_len)]
 #![feature(trusted_random_access)]

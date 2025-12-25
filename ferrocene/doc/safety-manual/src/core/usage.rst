@@ -8,4 +8,4 @@ Use the certified core library exactly how you'd use the normal Rust core librar
 with the following additions and modifications:
 
 - Always take into account the safety constraints of all core library functions you are using.
-- Follow the guidance in :doc:`Handling Unsafety </rustc/unsafety>`
+- Follow the guidance in :doc:`Handling Unsafety </rustc/unsafety>`.

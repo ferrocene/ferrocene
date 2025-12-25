@@ -52,7 +52,7 @@ For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
 Certified equivalent
 --------------------
 
-This :ref:`qualified <qualified-targets>` target's certified equivalent is
+This :ref:`qualified target<qualified-targets>`'s certified equivalent is
 ``aarch64-ferrocene-none``. To use the certified core library, the
 following additional flags must be provided to ``rustc``:
 

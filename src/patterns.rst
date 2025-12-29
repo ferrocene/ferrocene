@@ -1368,9 +1368,8 @@ introduced into a :t:`binding scope`.
 Or-pattern Matching
 ~~~~~~~~~~~~~~~~~~~
 
-
 :dp:`fls_njpiXkgi8Ryb`
-Or-pattern matching of an :t:`or-pattern` of the form `constructor(or-pattern, rest)`,
+:dt:`Or-pattern matching` of an :t:`or-pattern` of the form `constructor(or-pattern, rest)`,
 where `constructor` is an arbitrary constructor, `or-pattern` is the :t:`or-pattern`,
 and `rest` is optionally a remaining pattern, proceeds as follows:
 

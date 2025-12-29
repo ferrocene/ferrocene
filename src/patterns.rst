@@ -77,7 +77,7 @@ Any two :t:`[subpattern]s` of an :t:`or-pattern` are subject to the following
 restrictions:
 
 * :dp:`fls_rpvdfmy3n05a`
-  The :t:`[type]s` of the two :t:`[subpattern]s` shall be
+  The :t:`[type]s` of the two :t:`[pattern-without-alternation]s` shall be
   :t:`unifiable`.
 
 * :dp:`fls_YDVgFaTQwcL8`

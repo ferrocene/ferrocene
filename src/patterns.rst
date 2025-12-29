@@ -81,7 +81,7 @@ restrictions:
   :t:`unifiable`.
 
 * :dp:`fls_YDVgFaTQwcL8`
-  The set of :t:`[binding]s` introduced by the two :t:`[subpattern]s` shall be the same.
+  The set of :t:`[binding]s` introduced by the two :t:`[pattern-without-alternation]s` shall be the same.
 
 * :dp:`fls_kv533rntni1x`
   Any two :t:`[binding]s` with the same name in the two :t:`[subpattern]s` shall have

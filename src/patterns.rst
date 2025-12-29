@@ -1377,6 +1377,7 @@ and `rest` is optionally a remaining pattern, proceeds as follows:
    Perform pattern matching of the form `constructor(subpattern, rest)`, where
    `subpattern` is a :t:`subpattern` of the :t:`or-pattern`, starting from the
    first such :t:`subpattern` and proceeding in declarative order.
+
 #. :dp:`fls_P8yB2b5enpw7`
    Otherwise pattern matching fails.
 

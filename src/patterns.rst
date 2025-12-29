@@ -1306,7 +1306,7 @@ Pattern Matching
 proceeds as follows:
 
 #. :dp:`fls_tZJgZDWVChJV`
-   If the pattern is an :t:`or-pattern`, then perform or-pattern matching.
+   If the :t:`pattern` is an :t:`or-pattern`, then perform :t:`or-pattern matching`.
 
 #. :dp:`fls_67ajub7d2b4c`
    For each :t:`pattern-without-alternation` of the :t:`pattern`:

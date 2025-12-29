@@ -3748,7 +3748,7 @@ let binding
 ^^^^^^^^^^^
 
 :dp:`fls_sw6HrsxsnG2y`
-A :dt:`let binding` is a :t:`construct` that introduces :t:`[binding]s` by matching a :t:`value` against a :t:`pattern` using the keyword ``let``. :t:`[let binding]s` appear in :t:`[let statement]s`, :t:`[if let expression]s`, :t:`[while let loop expression]s`, and :t:`[let initializer]s`.
+A :dt:`let binding` is the :t:`binding` introduced by a :t:`let statement`, an :t:`if let expression`, or a :t:`while let loop expression`.
 
 .. _fls_hqj80jHcxEBB:
 

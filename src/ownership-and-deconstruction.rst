@@ -700,7 +700,7 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
 * :dp:`fls_W2S2FrkuedYC`
   :t:`[Binding]s` introduced by an :t:`or-pattern` are dropped in reverse
   declaration order, where the declaration order is defined by the first
-  :t:`subpattern`.
+  :t:`pattern-without-alternation`.
 
 * :dp:`fls_a5tmilqxdb6f`
   :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.

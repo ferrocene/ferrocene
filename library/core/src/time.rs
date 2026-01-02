@@ -1676,9 +1676,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
     #[inline]
-    #[ferrocene::annotation(
-        "`mantissa_bits` cannot be covered due to a coverage tooling bug"
-    )]
+    #[ferrocene::annotation("`mantissa_bits` cannot be covered due to a coverage tooling bug")]
     pub fn try_from_secs_f32(secs: f32) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,

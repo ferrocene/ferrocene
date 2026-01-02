@@ -216,6 +216,7 @@ riscv64gc-unknown-none-elf
 riscv64gc-unknown-nuttx-elf
 riscv64gc-unknown-openbsd
 riscv64gc-unknown-redox
+riscv64im-unknown-none-elf
 riscv64imac-unknown-none-elf
 riscv64imac-unknown-nuttx-elf
 s390x-unknown-linux-gnu

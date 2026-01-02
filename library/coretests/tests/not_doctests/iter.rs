@@ -52,3 +52,14 @@ fn test_iter_zip_fold() {
     let zipped: core::iter::Zip<_, _> = first_iter.zip(second_iter);
     assert_eq!(zipped.fold(0, |a, (b1, b2)| a + b1 + b2), 12);
 }
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::nth
+#[test]
+fn test_iter_zip_nth() {
+    let first = vec![1, 2, 3];
+    let first_iter: Box<dyn Iterator<Item = i32>> = Box::new(first.into_iter());
+    let second = vec![1, 2, 3];
+    let second_iter: Box<dyn Iterator<Item = i32>> = Box::new(second.into_iter());
+    let mut zipped: core::iter::Zip<_, _> = first_iter.zip(second_iter);
+    assert_eq!(zipped.nth(1), Some((2, 2)));
+}

@@ -31,3 +31,12 @@ fn test_iter_rev_double_ended_rfind() {
     let mut rev = iter.rev();
     assert_eq!(*rev.rfind(|v| true).unwrap(), 1);
 }
+
+// <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+#[test]
+fn test_iter_rev_double_ended_rfold() {
+    let val = vec![1, 2, 3];
+    let iter = val.iter();
+    let rev = iter.rev();
+    assert_eq!(rev.rfold(0, |a, b| a + b), 6);
+}

@@ -50,13 +50,27 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
     ("2021", &[
         VariantCondition::Edition("2015"),
     ]),
+    ("2021-certified-panic", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::PanicRuntime,
+    ]),
     ("2021-cortex-a53", &[
         VariantCondition::Edition("2015"),
         VariantCondition::QemuCpu("cortex-a53"),
     ]),
+    ("2021-cortex-a53-certified-panic", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::QemuCpu("cortex-a53"),
+        VariantCondition::PanicRuntime,
+    ]),
     ("2021-cortex-m4", &[
         VariantCondition::Edition("2015"),
         VariantCondition::QemuCpu("cortex-m4"),
+    ]),
+    ("2021-cortex-m4-certified-panic", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::QemuCpu("cortex-m4"),
+        VariantCondition::PanicRuntime,
     ]),
     // INTERNAL_PROCEDURES_END_TEST_VARIANTS
 ];
@@ -70,6 +84,7 @@ static DEFAULT_VARIANT_FALLBACK: &str = "2021";
 pub(crate) enum VariantCondition {
     Edition(&'static str),
     QemuCpu(&'static str),
+    PanicRuntime,
 }
 
 #[derive(Clone)]
@@ -87,7 +102,12 @@ impl TestVariant {
                 .unwrap_or(DEFAULT_VARIANT_FALLBACK),
         };
 
-        let base = find_in_slice(VARIANTS, name).expect(&format!("unknown test variant: {name}"));
+        let base = find_in_slice(VARIANTS, name).unwrap_or_else(|| {
+            panic!(
+                "unknown test variant: {name}\nexpected one of {:?}",
+                VARIANTS.iter().map(|(k, _)| k).collect::<Vec<_>>()
+            )
+        });
         TestVariant { masks: RefCell::new(vec![true; base.len()]), base }
     }
 
@@ -109,6 +129,7 @@ impl TestVariant {
             match condition.get() {
                 VariantCondition::Edition(edition) => id.push_str(&format!("e{edition}")),
                 VariantCondition::QemuCpu(cpu) => id.push_str(&format!("q{cpu}")),
+                VariantCondition::PanicRuntime => id.push_str(&format!("p")),
             }
         }
         if id.is_empty() { "empty".into() } else { id }
@@ -124,6 +145,9 @@ impl TestVariant {
                 }
                 VariantCondition::QemuCpu(cpu) => {
                     fields.insert("Emulated CPU".into(), cpu.to_string());
+                }
+                VariantCondition::PanicRuntime => {
+                    fields.insert("Panic Runtime".into(), "Certified".into());
                 }
             }
         }

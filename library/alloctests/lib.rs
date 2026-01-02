@@ -66,7 +66,7 @@
 
 // Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
 // panics in the certified runtime
-#![cfg_attr(feature = "ferrocene_certified_runtime", expect(dead_code))]
+#![cfg_attr(feature = "ferrocene_certified_runtime", allow(dead_code))]
 
 // Allow testing this library
 extern crate alloc as realalloc;

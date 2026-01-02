@@ -425,6 +425,7 @@ impl Step for Cargo {
         // same value as `-Zroot-dir`.
         cargo.env("CARGO_RUSTC_CURRENT_DIR", builder.src.display().to_string());
 
+        // Ferrocene addition
         let variant = TestVariant::current(builder, self.host);
         for condition in variant.condititions() {
             match condition.get() {
@@ -432,6 +433,7 @@ impl Step for Cargo {
                 VariantCondition::QemuCpu(cpu) => {
                     cargo.env("QEMU_CPU", cpu);
                 }
+                VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
 
@@ -2481,6 +2483,7 @@ Please disable assertions with `rust.debug-assertions = false`.
                 VariantCondition::QemuCpu(cpu) => {
                     cmd.env("QEMU_CPU", cpu);
                 }
+                VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
 
@@ -2935,6 +2938,7 @@ pub(crate) fn run_cargo_test<'a>(
 
     let _group = description.into().and_then(|what| builder.msg_test(what, target, stage));
 
+    // Ferrocene addition: --test-variant
     let variant = TestVariant::current(builder, target);
     for condition in variant.condititions() {
         match condition.get() {
@@ -2942,6 +2946,7 @@ pub(crate) fn run_cargo_test<'a>(
             VariantCondition::QemuCpu(cpu) => {
                 cargo.env("QEMU_CPU", cpu);
             }
+            VariantCondition::PanicRuntime => {} // handled by build::Std
         }
     }
 
@@ -3162,8 +3167,11 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut ferrocene_certified_runtime =
-            builder.config.rust_std_features.contains("ferrocene_certified_runtime");
+        let mut ferrocene_certified_runtime = builder
+            .config
+            .rust_std_features
+            .contains("ferrocene_certified_runtime")
+            || builder.config.cmd.test_variant().map_or(false, |x| x.contains("certified-panic"));
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {

@@ -22,3 +22,12 @@ fn test_iterator_copied_nth() {
     let mut iter = first.iter().copied();
     assert_eq!(iter.nth(1), Some(2));
 }
+
+// <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfind
+#[test]
+fn test_iter_rev_double_ended_rfind() {
+    let val = vec![1, 2, 3, 4];
+    let iter = val.iter();
+    let mut rev = iter.rev();
+    assert_eq!(*rev.rfind(|v| true).unwrap(), 1);
+}

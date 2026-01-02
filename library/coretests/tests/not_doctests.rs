@@ -747,3 +747,165 @@ fn volatile_ops() {
         assert_eq!(std::ptr::read_volatile(y), 12);
     }
 }
+
+#[test]
+fn chunks_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let chunk = vals.chunks(2).nth(10);
+    assert!(chunk.is_none());
+}
+
+// <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn take_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let nth = vals.iter().take(2).nth(10);
+    assert!(nth.is_none());
+}
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
+#[test]
+fn skip_as_iter_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).fold(0, |x, y| x + y);
+    assert_eq!(folded, 0);
+}
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold
+#[test]
+fn skip_as_iter_try_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).try_fold(0, |x, y| std::io::Result::Ok(x + y)).unwrap();
+    assert_eq!(folded, 0);
+}
+
+// <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
+#[test]
+fn spec_iter_eq() {
+    let inf_1 = 0..;
+    let inf_2 = 1..;
+    assert_eq!(inf_1.into_iter().eq(inf_2), false);
+}
+
+// <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
+// Basically `test_decode_utf16_size_hint` from `char.rs`
+#[test]
+fn decode_utf_16_as_iter_size_hint() {
+    fn check(s: &[u16]) {
+        let mut iter = char::decode_utf16(s.iter().cloned());
+
+        loop {
+            let count = iter.clone().count();
+            let (lower, upper) = iter.size_hint();
+
+            assert!(
+                lower <= count && count <= upper.unwrap(),
+                "lower = {lower}, count = {count}, upper = {upper:?}"
+            );
+
+            if let None = iter.next() {
+                break;
+            }
+        }
+    }
+
+    check(&[0xD801, 0xD800, 0xD801, 0xD801]);
+}
+
+// <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_iterator_chain_advance_by() {
+    let first = vec![1, 2];
+    let second = vec![4, 5];
+    let mut iter = first.into_iter().chain(second.into_iter());
+    iter.advance_back_by(3).unwrap(); // Make `self.b = None`
+    iter.advance_by(2).ok(); // Go past `self.a`
+    assert_eq!(iter.next(), None);
+}
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::size_hint
+#[test]
+fn iter_zip_size_hint() {
+    #[derive(Clone, Copy)]
+    struct MaybeUpper {
+        val: usize,
+        size_hint: (usize, Option<usize>),
+    }
+
+    impl Iterator for MaybeUpper {
+        type Item = usize;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(self.val)
+        }
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            self.size_hint
+        }
+    }
+
+    let none = MaybeUpper { val: 1, size_hint: (0, None) };
+
+    let some_1 = MaybeUpper { val: 1, size_hint: (1, Some(1)) };
+    let some_2 = MaybeUpper { val: 2, size_hint: (2, Some(2)) };
+
+    let none_none_zip = none.zip(none);
+    assert_eq!(none_none_zip.size_hint(), (0, None));
+
+    let some_some_zip = some_1.zip(some_2);
+    assert_eq!(some_some_zip.size_hint(), (1, Some(1)));
+
+    let some_none_zip = some_1.zip(none);
+    assert_eq!(some_none_zip.size_hint(), (0, Some(1)));
+
+    let none_some_zip = none.zip(some_2);
+    assert_eq!(none_some_zip.size_hint(), (0, Some(2)));
+}
+
+// <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_nth
+#[test]
+fn iter_step_by_spec_nth() {
+    let mut it = (0_u128..).step_by(1);
+    let _first = it.next();
+    let stepped = it.nth(usize::MAX);
+    assert_eq!(stepped, Some(usize::MAX as u128 + 1));
+}
+
+// <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_last() {
+    let buf: Vec<usize> = vec![];
+    let it = buf.chunks(5);
+    assert_eq!(it.last(), None)
+}
+
+// <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_nth() {
+    let slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact(2);
+    assert_eq!(iter.nth(55), None);
+}
+
+// <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact_mut(2);
+    assert_eq!(iter.nth(55), None);
+}
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_mut_last() {
+    let mut buf: Vec<usize> = vec![];
+    let it = buf.chunks_mut(5);
+    assert_eq!(it.last(), None)
+}
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_mut(2);
+    assert_eq!(iter.nth(55), None);
+}

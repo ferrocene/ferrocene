@@ -190,14 +190,25 @@ impl Config {
             if bin_root.exists() {
                 t!(fs::remove_dir_all(&bin_root));
             }
-            let filename = format!("rust-std-{version}-{host}.tar.xz");
+
+            // Ferrocene addition: Our CI uploads things in a different format than upstream.
+            // Account for this.
+            let make_filename = |component: &str| {
+                if sysroot == "ci-rustc" {
+                    format!("{component}-{host}-{version}.tar.xz")
+                } else {
+                    format!("{component}-{version}-{host}.tar.xz")
+                }
+            };
+
+            let filename = make_filename("rust-std");
             let pattern = format!("rust-std-{host}");
             download_component(self, filename, &pattern, stamp_key);
-            let filename = format!("rustc-{version}-{host}.tar.xz");
+            let filename = make_filename("rustc");
             download_component(self, filename, "rustc", stamp_key);
 
             for component in extra_components {
-                let filename = format!("{component}-{version}-{host}.tar.xz");
+                let filename = make_filename(component);
                 download_component(self, filename, component, stamp_key);
             }
 
@@ -233,6 +244,7 @@ impl Config {
         )
     }
 
+    #[rustfmt::skip]
     fn download_component(
         &self,
         mode: DownloadSource,
@@ -242,7 +254,7 @@ impl Config {
         destination: &str,
     ) {
         let dwn_ctx: DownloadContext<'_> = self.into();
-        download_component(dwn_ctx, &self.out, mode, filename, prefix, key, destination);
+        download_component(Some(self), dwn_ctx, &self.out, mode, filename, prefix, key, destination);
     }
 
     #[cfg(test)]
@@ -523,6 +535,7 @@ pub(crate) fn maybe_download_rustfmt<'a>(
     }
 
     download_component(
+        None,
         dwn_ctx,
         out,
         DownloadSource::Dist,
@@ -533,6 +546,7 @@ pub(crate) fn maybe_download_rustfmt<'a>(
     );
 
     download_component(
+        None,
         dwn_ctx,
         out,
         DownloadSource::Dist,
@@ -585,6 +599,7 @@ pub(crate) fn download_beta_toolchain<'a>(dwn_ctx: impl AsRef<DownloadContext<'a
 }
 
 #[allow(clippy::too_many_arguments)]
+#[rustfmt::skip]
 fn download_toolchain<'a>(
     dwn_ctx: impl AsRef<DownloadContext<'a>>,
     out: &Path,
@@ -608,13 +623,14 @@ fn download_toolchain<'a>(
         }
         let filename = format!("rust-std-{version}-{host}.tar.xz");
         let pattern = format!("rust-std-{host}");
-        download_component(dwn_ctx, out, mode.clone(), filename, &pattern, stamp_key, destination);
+        download_component(None, dwn_ctx, out, mode.clone(), filename, &pattern, stamp_key, destination);
         let filename = format!("rustc-{version}-{host}.tar.xz");
-        download_component(dwn_ctx, out, mode.clone(), filename, "rustc", stamp_key, destination);
+        download_component(None, dwn_ctx, out, mode.clone(), filename, "rustc", stamp_key, destination);
 
         for component in extra_components {
             let filename = format!("{component}-{version}-{host}.tar.xz");
             download_component(
+                None,
                 dwn_ctx,
                 out,
                 mode.clone(),
@@ -760,6 +776,7 @@ fn should_fix_bins_and_dylibs(
 }
 
 fn download_component<'a>(
+    config: Option<&Config>, // Ferrocene addition: used for `download-rustc`
     dwn_ctx: impl AsRef<DownloadContext<'a>>,
     out: &Path,
     mode: DownloadSource,
@@ -847,7 +864,7 @@ HELP: if trying to compile an old commit of rustc, disable `download-rustc` in b
 download-rustc = false
 ";
     }
-    download_file(None, dwn_ctx, out, &format!("{base_url}/{url}"), &tarball, help_on_error);
+    download_file(config, dwn_ctx, out, &format!("{base_url}/{url}"), &tarball, help_on_error);
     if let Some(sha256) = checksum
         && !verify(dwn_ctx.exec_ctx, &tarball, sha256)
     {
@@ -1003,7 +1020,8 @@ fn download_file<'a>(
             help_on_error,
         ),
         Some("s3") => {
-            crate::ferrocene::download_from_s3(config.unwrap(), url, &tempfile, help_on_error)
+            let config = config.expect("ferrocene S3 downloader needs an S3 config");
+            crate::ferrocene::download_from_s3(config, url, &tempfile, help_on_error)
         }
         Some(other) => panic!("unsupported protocol {other} in {url}"),
         None => crate::ferrocene::download_from_local_filesystem(url, &tempfile, help_on_error),

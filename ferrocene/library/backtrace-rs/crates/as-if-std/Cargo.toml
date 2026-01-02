@@ -28,7 +28,7 @@ optional = true
 features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 
 [target.'cfg(any(windows, target_os = "cygwin"))'.dependencies]
-windows-targets = "0.52.6"
+windows-link = "0.2"
 
 [features]
 default = ['backtrace']

@@ -24,7 +24,7 @@ use super::util::ensure_monomorphic_enough;
 use super::{
     AllocId, CheckInAllocMsg, ImmTy, InterpCx, InterpResult, Machine, OpTy, PlaceTy, Pointer,
     PointerArithmetic, Provenance, Scalar, err_ub_custom, err_unsup_format, interp_ok, throw_inval,
-    throw_ub_custom, throw_ub_format,
+    throw_ub, throw_ub_custom, throw_ub_format, throw_unsup_format,
 };
 use crate::interpret::Writeable;
 
@@ -748,6 +748,116 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             }
             sym::fmuladdf128 => {
                 self.float_muladd_intrinsic::<Quad>(args, dest, MulAddType::Nondeterministic)?
+            }
+
+            sym::va_copy => {
+                // fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f>
+                let src_ptr = self.read_pointer(&args[0])?;
+
+                // Read the token pointer from the src VaList (alloc_id + offset-as-index).
+                let src_va_list_ptr = {
+                    let pointer_size = tcx.data_layout.pointer_size();
+                    let alloc = self
+                        .get_ptr_alloc(src_ptr, pointer_size)?
+                        .expect("va_list storage should not be a ZST");
+                    let scalar = alloc.read_pointer(Size::ZERO)?;
+                    scalar.to_pointer(self)?
+                };
+
+                let (prov, offset) = src_va_list_ptr.into_raw_parts();
+                let src_alloc_id = prov.unwrap().get_alloc_id().unwrap();
+                let index = offset.bytes();
+
+                // Look up arguments without consuming src.
+                let Some(arguments) = self.get_va_list_alloc(src_alloc_id) else {
+                    throw_unsup_format!("va_copy on unknown va_list allocation {:?}", src_alloc_id);
+                };
+
+                // Create a new allocation pointing at the same index.
+                let new_va_list_ptr = self.va_list_ptr(arguments.to_vec(), index);
+                let addr = Scalar::from_pointer(new_va_list_ptr, self);
+
+                // Now overwrite the token pointer stored inside the VaList.
+                let mplace = self.force_allocation(dest)?;
+                let mut alloc = self.get_place_alloc_mut(&mplace)?.unwrap();
+                alloc.write_ptr_sized(Size::ZERO, addr)?;
+            }
+
+            sym::va_end => {
+                let ptr_size = self.tcx.data_layout.pointer_size();
+
+                // The only argument is a `&mut VaList`.
+                let ap_ref = self.read_pointer(&args[0])?;
+
+                // The first bytes of the `VaList` value store a pointer. The `AllocId` of this
+                // pointer is a key into a global map of variable argument lists. The offset is
+                // used as the index of the argument to read.
+                let va_list_ptr = {
+                    let alloc = self
+                        .get_ptr_alloc(ap_ref, ptr_size)?
+                        .expect("va_list storage should not be a ZST");
+                    let scalar = alloc.read_pointer(Size::ZERO)?;
+                    scalar.to_pointer(self)?
+                };
+
+                let (prov, _offset) = va_list_ptr.into_raw_parts();
+                let alloc_id = prov.unwrap().get_alloc_id().unwrap();
+
+                let Some(_) = self.remove_va_list_alloc(alloc_id) else {
+                    throw_unsup_format!("va_end on unknown va_list allocation {:?}", alloc_id)
+                };
+            }
+
+            sym::va_arg => {
+                let ptr_size = self.tcx.data_layout.pointer_size();
+
+                // The only argument is a `&mut VaList`.
+                let ap_ref = self.read_pointer(&args[0])?;
+
+                // The first bytes of the `VaList` value store a pointer. The `AllocId` of this
+                // pointer is a key into a global map of variable argument lists. The offset is
+                // used as the index of the argument to read.
+                let va_list_ptr = {
+                    let alloc = self
+                        .get_ptr_alloc(ap_ref, ptr_size)?
+                        .expect("va_list storage should not be a ZST");
+                    let scalar = alloc.read_pointer(Size::ZERO)?;
+                    scalar.to_pointer(self)?
+                };
+
+                let (prov, offset) = va_list_ptr.into_raw_parts();
+                let alloc_id = prov.unwrap().get_alloc_id().unwrap();
+                let index = offset.bytes();
+
+                let Some(varargs) = self.remove_va_list_alloc(alloc_id) else {
+                    throw_unsup_format!("va_arg on unknown va_list allocation {:?}", alloc_id)
+                };
+
+                let Some(src_mplace) = varargs.get(offset.bytes_usize()).cloned() else {
+                    throw_ub!(VaArgOutOfBounds)
+                };
+
+                // Update the offset in this `VaList` value so that a subsequent call to `va_arg`
+                // reads the next argument.
+                let new_va_list_ptr = self.va_list_ptr(varargs, index + 1);
+                let addr = Scalar::from_pointer(new_va_list_ptr, self);
+                let mut alloc = self
+                    .get_ptr_alloc_mut(ap_ref, ptr_size)?
+                    .expect("va_list storage should not be a ZST");
+                alloc.write_ptr_sized(Size::ZERO, addr)?;
+
+                // NOTE: In C some type conversions are allowed (e.g. casting between signed and
+                // unsigned integers). For now we require c-variadic arguments to be read with the
+                // exact type they were passed as.
+                if src_mplace.layout.ty != dest.layout.ty {
+                    throw_unsup_format!(
+                        "va_arg type mismatch: requested `{}`, but next argument is `{}`",
+                        dest.layout.ty,
+                        src_mplace.layout.ty
+                    );
+                }
+
+                self.copy_op(&src_mplace, dest)?;
             }
 
             // Unsupported intrinsic: skip the return_to_block below.

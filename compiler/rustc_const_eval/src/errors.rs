@@ -757,6 +757,7 @@ impl<'a> ReportErrorExt for UndefinedBehaviorInfo<'a> {
             WriteToReadOnly(_) => msg!("writing to {$allocation} which is read-only"),
             DerefFunctionPointer(_) => msg!("accessing {$allocation} which contains a function"),
             DerefVTablePointer(_) => msg!("accessing {$allocation} which contains a vtable"),
+            DerefVaListPointer(_) => msg!("accessing {$allocation} which contains a variable argument list"),
             DerefTypeIdPointer(_) => msg!("accessing {$allocation} which contains a `TypeId`"),
             InvalidBool(_) => msg!("interpreting an invalid 8-bit value as a bool: 0x{$value}"),
             InvalidChar(_) => msg!("interpreting an invalid 32-bit value as a char: 0x{$value}"),
@@ -776,6 +777,7 @@ impl<'a> ReportErrorExt for UndefinedBehaviorInfo<'a> {
             }
             AbiMismatchArgument { .. } => msg!("calling a function whose parameter #{$arg_idx} has type {$callee_ty} passing argument of type {$caller_ty}"),
             AbiMismatchReturn { .. } => msg!("calling a function with return type {$callee_ty} passing return place of type {$caller_ty}"),
+            VaArgOutOfBounds => "more C-variadic arguments read than were passed".into(),
         }
     }
 
@@ -800,6 +802,7 @@ impl<'a> ReportErrorExt for UndefinedBehaviorInfo<'a> {
             | InvalidMeta(InvalidMetaKind::TooBig)
             | InvalidUninitBytes(None)
             | DeadLocal
+            | VaArgOutOfBounds
             | UninhabitedEnumVariantWritten(_)
             | UninhabitedEnumVariantRead(_) => {}
 
@@ -874,6 +877,7 @@ impl<'a> ReportErrorExt for UndefinedBehaviorInfo<'a> {
             WriteToReadOnly(alloc)
             | DerefFunctionPointer(alloc)
             | DerefVTablePointer(alloc)
+            | DerefVaListPointer(alloc)
             | DerefTypeIdPointer(alloc) => {
                 diag.arg("allocation", alloc);
             }

@@ -23,8 +23,8 @@ use tracing::{debug, instrument, trace};
 
 use super::{
     AllocBytes, AllocId, AllocInit, AllocMap, AllocRange, Allocation, CheckAlignMsg,
-    CheckInAllocMsg, CtfeProvenance, GlobalAlloc, InterpCx, InterpResult, Machine, MayLeak,
-    Misalignment, Pointer, PointerArithmetic, Provenance, Scalar, alloc_range, err_ub,
+    CheckInAllocMsg, CtfeProvenance, GlobalAlloc, InterpCx, InterpResult, MPlaceTy, Machine,
+    MayLeak, Misalignment, Pointer, PointerArithmetic, Provenance, Scalar, alloc_range, err_ub,
     err_ub_custom, interp_ok, throw_ub, throw_ub_custom, throw_unsup, throw_unsup_format,
 };
 use crate::const_eval::ConstEvalErrKind;
@@ -67,6 +67,8 @@ pub enum AllocKind {
     LiveData,
     /// A function allocation (that fn ptrs point to).
     Function,
+    /// A variable argument list allocation (used by c-variadic functions).
+    VaList,
     /// A vtable allocation.
     VTable,
     /// A TypeId allocation.
@@ -126,6 +128,9 @@ pub struct Memory<'tcx, M: Machine<'tcx>> {
     /// Map for "extra" function pointers.
     extra_fn_ptr_map: FxIndexMap<AllocId, M::ExtraFnVal>,
 
+    /// Map storing variable argument lists.
+    va_list_map: FxIndexMap<AllocId, Vec<MPlaceTy<'tcx, M::Provenance>>>,
+
     /// To be able to compare pointers with null, and to check alignment for accesses
     /// to ZSTs (where pointers may dangle), we keep track of the size even for allocations
     /// that do not exist any more.
@@ -161,6 +166,7 @@ impl<'tcx, M: Machine<'tcx>> Memory<'tcx, M> {
         Memory {
             alloc_map: M::MemoryMap::default(),
             extra_fn_ptr_map: FxIndexMap::default(),
+            va_list_map: FxIndexMap::default(),
             dead_alloc_map: FxIndexMap::default(),
             validation_in_progress: Cell::new(false),
         }
@@ -199,9 +205,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 return M::extern_static_pointer(self, def_id);
             }
             None => {
+                let is_fn_ptr = self.memory.extra_fn_ptr_map.contains_key(&alloc_id);
+                let is_va_list = self.memory.va_list_map.contains_key(&alloc_id);
                 assert!(
-                    self.memory.extra_fn_ptr_map.contains_key(&alloc_id),
-                    "{alloc_id:?} is neither global nor a function pointer"
+                    is_fn_ptr || is_va_list,
+                    "{alloc_id:?} is neither global, va_list nor a function pointer"
                 );
             }
             _ => {}
@@ -227,6 +235,21 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         // Functions are global allocations, so make sure we get the right root pointer.
         // We know this is not an `extern static` so this cannot fail.
         self.global_root_pointer(Pointer::from(id)).unwrap()
+    }
+
+    pub fn va_list_ptr(
+        &mut self,
+        varargs: Vec<MPlaceTy<'tcx, M::Provenance>>,
+        index: u64,
+    ) -> Pointer<M::Provenance> {
+        let id = self.tcx.reserve_alloc_id();
+        let old = self.memory.va_list_map.insert(id, varargs);
+        assert!(old.is_none());
+        // The offset is used to store the current index.
+        let ptr = Pointer::new(id.into(), Size::from_bytes(index));
+        // Variable argument lists are global allocations, so make sure we get the right root
+        // pointer. We know this is not an `extern static` so this cannot fail.
+        self.global_root_pointer(ptr).unwrap()
     }
 
     pub fn allocate_ptr(
@@ -956,6 +979,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
     pub fn is_alloc_live(&self, id: AllocId) -> bool {
         self.memory.alloc_map.contains_key_ref(&id)
             || self.memory.extra_fn_ptr_map.contains_key(&id)
+            || self.memory.va_list_map.contains_key(&id)
             // We check `tcx` last as that has to acquire a lock in `many-seeds` mode.
             // This also matches the order in `get_alloc_info`.
             || self.tcx.try_get_global_alloc(id).is_some()
@@ -993,6 +1017,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             };
 
             return AllocInfo::new(Size::ZERO, align, AllocKind::Function, Mutability::Not);
+        }
+
+        // # Variable argument lists
+        if let Some(_) = self.get_va_list_alloc(id) {
+            return AllocInfo::new(Size::ZERO, Align::ONE, AllocKind::VaList, Mutability::Not);
         }
 
         // # Global allocations
@@ -1040,6 +1069,18 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 _ => None,
             }
         }
+    }
+
+    pub fn get_va_list_alloc(&self, id: AllocId) -> Option<&[MPlaceTy<'tcx, M::Provenance>]> {
+        self.memory.va_list_map.get(&id).map(|v| &**v)
+    }
+
+    pub fn remove_va_list_alloc(
+        &mut self,
+        id: AllocId,
+    ) -> Option<Vec<MPlaceTy<'tcx, M::Provenance>>> {
+        self.memory.dead_alloc_map.insert(id, (Size::ZERO, Align::ONE));
+        self.memory.va_list_map.swap_remove(&id)
     }
 
     /// Takes a pointer that is the first chunk of a `TypeId` and return the type that its

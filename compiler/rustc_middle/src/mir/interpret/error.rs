@@ -392,6 +392,8 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     DerefFunctionPointer(AllocId),
     /// Trying to access the data behind a vtable pointer.
     DerefVTablePointer(AllocId),
+    /// Trying to access the data behind a va_list pointer.
+    DerefVaListPointer(AllocId),
     /// Trying to access the actual type id.
     DerefTypeIdPointer(AllocId),
     /// Using a non-boolean `u8` as bool.
@@ -434,6 +436,8 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     },
     /// ABI-incompatible return types.
     AbiMismatchReturn { caller_ty: Ty<'tcx>, callee_ty: Ty<'tcx> },
+    /// `va_arg` was called on an exhausted `VaList`.
+    VaArgOutOfBounds,
 }
 
 #[derive(Debug, Clone, Copy)]

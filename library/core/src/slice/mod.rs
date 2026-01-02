@@ -5023,6 +5023,7 @@ impl<T> [T] {
     /// This method is redundant when used directly on `&[T]`, but
     /// it helps dereferencing other "container" types to slices,
     /// for example `Box<[T]>` or `Arc<[T]>`.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "str_as_str", issue = "130366")]
     pub const fn as_slice(&self) -> &[T] {
@@ -5034,6 +5035,7 @@ impl<T> [T] {
     /// This method is redundant when used directly on `&mut [T]`, but
     /// it helps dereferencing other "container" types to slices,
     /// for example `Box<[T]>` or `MutexGuard<[T]>`.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "str_as_str", issue = "130366")]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {

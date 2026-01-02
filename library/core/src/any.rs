@@ -958,6 +958,7 @@ pub const fn type_name_of_val<T: ?Sized>(_val: &T) -> &'static str {
 /// let not_an_animal: Option<&dyn Animal> = try_as_dyn::<Rock, dyn Animal>(&rock);
 /// assert!(not_an_animal.is_none());
 /// ```
+#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "try_as_dyn", issue = "144361")]
 pub const fn try_as_dyn<
@@ -1011,6 +1012,7 @@ pub const fn try_as_dyn<
 /// let not_an_animal: Option<&mut dyn Animal> = try_as_dyn_mut::<Rock, dyn Animal>(&mut rock);
 /// assert!(not_an_animal.is_none());
 /// ```
+#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "try_as_dyn", issue = "144361")]
 pub const fn try_as_dyn_mut<

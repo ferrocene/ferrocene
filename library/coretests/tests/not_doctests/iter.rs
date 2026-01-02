@@ -63,3 +63,11 @@ fn test_iter_zip_nth() {
     let mut zipped: core::iter::Zip<_, _> = first_iter.zip(second_iter);
     assert_eq!(zipped.nth(1), Some((2, 2)));
 }
+
+// <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::find
+#[test]
+fn test_iter_rev_find() {
+    let first = vec![1, 2, 3];
+    let mut reversed = first.iter().rev();
+    assert_eq!(*reversed.find(|a| true).unwrap(), 3);
+}

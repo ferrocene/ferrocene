@@ -888,7 +888,7 @@ fn iter_zip_size_hint() {
 #[test]
 fn iter_step_by_spec_nth() {
     let mut it = (0_u128..).step_by(1);
-    let first = it.next();
+    let _first = it.next();
     let stepped = it.nth(usize::MAX);
     assert_eq!(stepped, Some(usize::MAX as u128 + 1));
 }

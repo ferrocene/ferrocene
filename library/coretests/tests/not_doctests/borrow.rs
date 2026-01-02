@@ -17,3 +17,11 @@ fn mut_ref_borrow_mut() {
     let borrowed: &u64 = core::borrow::BorrowMut::borrow_mut(&mut z);
     assert_eq!(*borrowed, 1);
 }
+
+// <T as core::borrow::BorrowMut<T>>::borrow_mut
+#[test]
+fn val_borrow_mut() {
+    let mut x: u64 = 1;
+    let borrowed: &u64 = core::borrow::BorrowMut::borrow_mut(&mut x);
+    assert_eq!(*borrowed, 1);
+}

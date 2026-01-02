@@ -6,6 +6,8 @@ use core::panic::Location;
 use core::sync::atomic::AtomicU32;
 use core::time::Duration;
 
+mod slice;
+
 #[test]
 fn ordering_equality() {
     let os = [Ordering::Less, Ordering::Equal, Ordering::Greater];
@@ -746,4 +748,12 @@ fn volatile_ops() {
         std::ptr::write_volatile(y, 12);
         assert_eq!(std::ptr::read_volatile(y), 12);
     }
+}
+
+// covers `core::slice::rotate::ptr_rotate`
+#[test]
+fn rotate_zst() {
+    let mut zst_arr = [(); 5];
+
+    zst_arr.rotate_left(5);
 }

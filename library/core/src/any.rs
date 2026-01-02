@@ -86,14 +86,8 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::{fmt, hash, intrinsics};
-||||||| cec70080fd4
-use crate::{fmt, hash, intrinsics};
-=======
 use crate::{fmt, hash, intrinsics, ptr};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]

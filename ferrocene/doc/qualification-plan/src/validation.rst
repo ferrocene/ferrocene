@@ -82,6 +82,7 @@ Quick checks should always include ensuring:
 * :ref:`qualification-report:test-results-overview` shows expected counts
 * The Specification documents the right version
 * :ref:`release-notes:index`
+
   * Displays the correct version
   * Does not have an ``:upcoming-release:`` tag
   * Follows the process in :ref:`release-notes-maintenance`

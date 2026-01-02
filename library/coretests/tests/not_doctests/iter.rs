@@ -29,7 +29,7 @@ fn test_iter_rev_double_ended_rfind() {
     let val = vec![1, 2, 3, 4];
     let iter = val.iter();
     let mut rev = iter.rev();
-    assert_eq!(*rev.rfind(|v| true).unwrap(), 1);
+    assert_eq!(*rev.rfind(|_| true).unwrap(), 1);
 }
 
 // <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
@@ -68,5 +68,13 @@ fn test_iter_zip_nth() {
 fn test_iter_rev_find() {
     let first = vec![1, 2, 3];
     let mut reversed = first.iter().rev();
-    assert_eq!(*reversed.find(|a| true).unwrap(), 3);
+    assert_eq!(*reversed.find(|_| true).unwrap(), 3);
+}
+
+// <&mut I as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_mut_ref_iterator_advance_by() {
+    let x = &mut [1, 2, 3];
+    let mut iter = x.iter();
+    assert!(Iterator::advance_by(&mut &mut iter, 1).is_ok());
 }

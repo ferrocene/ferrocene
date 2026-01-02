@@ -35,9 +35,7 @@ pub struct Finder {
 // Targets can be removed from this list once they are present in the stage0 compiler (usually by updating the beta compiler of the bootstrap).
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // just a dummy comment so the list doesn't get onelined
-<<<<<<< HEAD
-    "riscv64gc-unknown-redox",
-    "hexagon-unknown-qurt",
+    "riscv64im-unknown-none-elf",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -50,12 +48,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-ferrocene-none",
     "thumbv7em-ferrocene-none-eabi",
     "thumbv7em-ferrocene-none-eabihf",
-||||||| cec70080fd4
-    "riscv64gc-unknown-redox",
-    "hexagon-unknown-qurt",
-=======
-    "riscv64im-unknown-none-elf",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

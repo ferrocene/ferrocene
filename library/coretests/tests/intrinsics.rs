@@ -1,5 +1,8 @@
 use core::any::TypeId;
-use core::intrinsics::assume;
+use core::intrinsics::{assume, vtable_for};
+use std::fmt::Debug;
+use std::option::Option;
+use std::ptr::DynMetadata;
 
 #[test]
 fn test_typeid_sized_types() {
@@ -195,10 +198,25 @@ fn carrying_mul_add_fallback_i128() {
 }
 
 #[test]
+<<<<<<< HEAD
 fn disjoint_bitor_fallback_u32() {
     use std::intrinsics::fallback::DisjointBitOr;
 
     let right_mask = u16::MAX as u32;
     let left_mask = u32::MAX ^ right_mask;
     assert_eq!(unsafe { (u32::MAX & right_mask).disjoint_bitor(u32::MAX & left_mask) }, u32::MAX);
+||||||| cec70080fd4
+=======
+fn test_vtable_for() {
+    #[derive(Debug)]
+    struct A {}
+
+    struct B {}
+
+    const A_VTABLE: Option<DynMetadata<dyn Debug>> = vtable_for::<A, dyn Debug>();
+    assert!(A_VTABLE.is_some());
+
+    const B_VTABLE: Option<DynMetadata<dyn Debug>> = vtable_for::<B, dyn Debug>();
+    assert!(B_VTABLE.is_none());
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }

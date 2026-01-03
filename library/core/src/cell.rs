@@ -2788,26 +2788,26 @@ fn assert_coerce_unsized(
     let _: RefCell<&dyn Send> = d;
 }
 
-#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for UnsafeCell<T> {}
 
-#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for SyncUnsafeCell<T> {}
 
-#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for Cell<T> {}
 
-#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for RefCell<T> {}
 
-#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<'b, T: ?Sized> PinCoerceUnsized for Ref<'b, T> {}
 
-#[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<'b, T: ?Sized> PinCoerceUnsized for RefMut<'b, T> {}

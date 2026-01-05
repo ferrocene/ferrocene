@@ -53,6 +53,10 @@ fn unchecked_funnel_shift_u128() {
 
 #[test]
 fn unchecked_funnel_shift_usize() {
+    #[cfg(target_pointer_width = "32")]
+    test_unchecked_funnel_shift!(0x10000b3usize, 0x2fe78e45usize, 8, 0xb32f, 0xb32fe78e);
+
+    #[cfg(target_pointer_width = "64")]
     test_unchecked_funnel_shift!(
         0xaa00000000006e1usize,
         0x2fe78e45983acd98usize,

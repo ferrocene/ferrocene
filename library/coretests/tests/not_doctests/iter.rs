@@ -245,3 +245,14 @@ fn test_range_spec_nth_invariant() {
         None,
     );
 }
+
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_by
+#[test]
+#[should_panic = "`Step` invariants not upheld"]
+fn test_range_spec_advance_by() {
+    let mut x = core::ops::Range { start: SteppableBrokenStepsBetween::A, end: SteppableBrokenStepsBetween::C };
+    assert!(
+        <core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::advance_by(&mut x, 4).is_err()
+    );
+}

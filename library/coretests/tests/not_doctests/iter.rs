@@ -104,3 +104,144 @@ fn test_iter_step_by_spec_try_fold() {
         Some(4),
     );
 }
+
+// Used to test Range bits.
+#[derive(Clone, PartialEq, PartialOrd)]
+enum Steppable {
+    A,
+    B,
+    C,
+}
+impl core::iter::Step for Steppable {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        match (start, end) {
+            (Self::A, Self::A) => (0, Some(0)),
+            (Self::A, Self::B) => (1, Some(1)),
+            (Self::A, Self::C) => (2, Some(2)),
+            (Self::B, Self::B) => (0, Some(0)),
+            (Self::B, Self::C) => (1, Some(1)),
+            (Self::C, Self::C) => (0, Some(0)),
+            (Self::C, Self::B) => (1, Some(1)),
+            (Self::C, Self::A) => (2, Some(2)),
+            (Self::B, Self::A) => (1, Some(1)),
+        }
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                1 => Some(Self::B),
+                2 => Some(Self::C),
+                _ => None,
+            }
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::C),
+                _ => None,
+            }
+            Self::C => match count {
+                0 => Some(Self::C),
+                _ => None,
+            }
+        }
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                _ => None,
+            }
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::A),
+                _ => None,
+            }
+            Self::C => match count {
+                0 => Some(Self::C),
+                1 => Some(Self::B),
+                2 => Some(Self::A),
+                _ => None,
+            }
+        }
+    }
+}
+
+// Used to test Range bits.
+#[derive(Clone, PartialEq, PartialOrd)]
+enum SteppableBrokenStepsBetween {
+    A,
+    B,
+    C,
+}
+
+impl core::iter::Step for SteppableBrokenStepsBetween {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        (1, None)
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        if count == 1 { return None }
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                1 => Some(Self::B),
+                2 => Some(Self::C),
+                _ => None,
+            }
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::C),
+                _ => None,
+            }
+            Self::C => match count {
+                0 => Some(Self::C),
+                _ => None,
+            }
+        }
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        if count == 1 { return None }
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                _ => None,
+            }
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::A),
+                _ => None,
+            }
+            Self::C => match count {
+                0 => Some(Self::C),
+                1 => Some(Self::B),
+                2 => Some(Self::A),
+                _ => None,
+            }
+        }
+    }
+}
+
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
+#[test]
+fn test_range_spec_nth() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(
+        <core::ops::Range<Steppable> as Iterator>::nth(&mut x, 2),
+        None,
+    );
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
+#[test]
+#[should_panic = "`Step` invariants not upheld"]
+fn test_range_spec_nth_invariant() {
+    let mut x = core::ops::Range { start: SteppableBrokenStepsBetween::A, end: SteppableBrokenStepsBetween::C };
+    assert_eq!(
+        <core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::nth(&mut x, 0),
+        None,
+    );
+}

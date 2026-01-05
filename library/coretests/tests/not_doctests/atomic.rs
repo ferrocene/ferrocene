@@ -1,38 +1,30 @@
 use core::sync::atomic;
 
-#[test]
-#[expect(deprecated)]
-fn atomic_int_compare_and_swap() {
-    macro_rules! test_atomic_compare_and_swap {
-        ($atomic_t:ty) => {{
+macro_rules! test_atomic_compare_and_swap {
+    ($($fn:ident => $width:literal => $atomic_t:ty,)*) => { $(
+        #[test]
+        #[expect(deprecated)]
+        fn $fn() {
             let atomic = <$atomic_t>::new(5);
 
             assert_eq!(atomic.compare_and_swap(5, 10, atomic::Ordering::Relaxed), 5); // success
             assert_eq!(atomic.compare_and_swap(20, 30, atomic::Ordering::Relaxed), 10); // failure
-        }};
-    }
-
-    #[cfg(target_has_atomic = "8")]
-    test_atomic_compare_and_swap!(atomic::AtomicU8);
-    #[cfg(target_has_atomic = "16")]
-    test_atomic_compare_and_swap!(atomic::AtomicU16);
-    #[cfg(target_has_atomic = "32")]
-    test_atomic_compare_and_swap!(atomic::AtomicU32);
-    #[cfg(target_has_atomic = "64")]
-    test_atomic_compare_and_swap!(atomic::AtomicU64);
-    #[cfg(target_has_atomic = "ptr")]
-    test_atomic_compare_and_swap!(atomic::AtomicUsize);
-    #[cfg(target_has_atomic = "8")]
-    test_atomic_compare_and_swap!(atomic::AtomicI8);
-    #[cfg(target_has_atomic = "16")]
-    test_atomic_compare_and_swap!(atomic::AtomicI16);
-    #[cfg(target_has_atomic = "32")]
-    test_atomic_compare_and_swap!(atomic::AtomicI32);
-    #[cfg(target_has_atomic = "64")]
-    test_atomic_compare_and_swap!(atomic::AtomicI64);
-    #[cfg(target_has_atomic = "ptr")]
-    test_atomic_compare_and_swap!(atomic::AtomicIsize);
+        }
+    )*};
 }
+
+test_atomic_compare_and_swap!(
+    atomic_u8_compare_and_swap  => "8" => atomic::AtomicU8,
+    atomic_u16_compare_and_swap  =>"16" => atomic::AtomicU16,
+    atomic_u32_compare_and_swap =>"32" => atomic::AtomicU32,
+    atomic_u64_compare_and_swap => "64"=> atomic::AtomicU64,
+    atomic_usize_compare_and_swap => "ptr" => atomic::AtomicUsize,
+    atomic_i8_compare_and_swap => "8"=> atomic::AtomicI8,
+    atomic_i16_compare_and_swap => "16"=> atomic::AtomicI16,
+    atomic_i32_compare_and_swap => "32"=> atomic::AtomicI32,
+    atomic_i64_compare_and_swap => "64"=> atomic::AtomicI64,
+    atomic_isize_compare_and_swap => "ptr"=> atomic::AtomicIsize,
+);
 
 #[test]
 #[expect(deprecated)]

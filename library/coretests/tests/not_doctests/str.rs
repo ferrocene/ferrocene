@@ -77,7 +77,7 @@ fn str_slice_index_range() {
     assert_eq!("Hell", SliceIndex::index_mut(0..4, str_mut));
 
     assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked(0..4, str_ptr) }));
-    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked(0..4, str_mut_ptr) }));
+    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut(0..4, str_mut_ptr) }));
 }
 
 #[test]
@@ -101,7 +101,7 @@ fn str_slice_index_range_from() {
     assert_eq!("Hello, World!", SliceIndex::index_mut(0.., str_mut));
 
     assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked(0.., str_ptr) }));
-    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked(0.., str_mut_ptr) }));
+    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut(0.., str_mut_ptr) }));
 }
 
 #[test]
@@ -125,7 +125,7 @@ fn str_slice_index_range_to() {
     assert_eq!("Hell", SliceIndex::index_mut(..4, str_mut));
 
     assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked(..4, str_ptr) }));
-    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked(..4, str_mut_ptr) }));
+    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut(..4, str_mut_ptr) }));
 }
 
 #[test]

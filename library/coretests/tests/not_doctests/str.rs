@@ -56,167 +56,84 @@ fn str_utf8_error() {
 const STR_MUT_BYTES: [u8; 13] =
     [b'H', b'e', b'l', b'l', b'o', b',', b' ', b'W', b'o', b'r', b'l', b'd', b'!'];
 
-#[test]
-fn str_slice_index_range() {
-    use slice::SliceIndex;
+macro_rules! test_str_slice_index {
+    ($($fn:ident: $range_1:expr => $res:literal, $range_2:expr => None;)*) => { $(
+        #[test]
+        fn $fn() {
+            use slice::SliceIndex;
 
-    let str_ref = "Hello, World!";
-    let str_ptr = str_ref as *const str;
+            let str_ref = "Hello, World!";
+            let str_ptr = str_ref as *const str;
 
-    let mut str_mut_bytes = STR_MUT_BYTES;
-    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
-    let str_mut_ptr = str_mut as *mut str;
+            let mut str_mut_bytes = STR_MUT_BYTES;
+            let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
+            let str_mut_ptr = str_mut as *mut str;
 
-    assert_eq!(Some("Hell"), SliceIndex::get(0..4, str_ref));
-    assert_eq!(Some("Hell"), SliceIndex::get_mut(0..4, str_mut).as_deref());
+            assert_eq!(Some($res), SliceIndex::get($range_1, str_ref));
+            assert_eq!(Some($res), SliceIndex::get_mut($range_1, str_mut).as_deref());
 
-    assert_eq!(None, SliceIndex::get(100..100, str_ref));
-    assert_eq!(None, SliceIndex::get_mut(100..100, str_mut));
+            assert_eq!(None, SliceIndex::get($range_2, str_ref));
+            assert_eq!(None, SliceIndex::get_mut($range_2, str_mut));
 
-    assert_eq!("Hell", SliceIndex::index(0..4, str_ref));
-    assert_eq!("Hell", SliceIndex::index_mut(0..4, str_mut));
+            assert_eq!($res, SliceIndex::index($range_1, str_ref));
+            assert_eq!($res, SliceIndex::index_mut($range_1, str_mut));
 
-    assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked(0..4, str_ptr) }));
-    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut(0..4, str_mut_ptr) }));
+            assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked($range_1, str_ptr) }));
+            assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut($range_1, str_mut_ptr) }));
+        }
+    )*};
 }
+test_str_slice_index!(
+    str_slice_index_range: 0..4 => "Hell", 100..100 => None;
+    str_slice_index_range_from: 0.. => "Hello, World!", 100.. => None;
+    str_slice_index_range_to: ..4 => "Hell", ..100 => None;
+);
 
-#[test]
-fn str_slice_index_range_from() {
-    use slice::SliceIndex;
+macro_rules! test_str_slice_index_panic {
+    ( $($fn:ident => $range:expr,)*) => { $(
+        #[test]
+        #[cfg_attr(
+            not(feature = "ferrocene_certified_runtime"),
+            should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+        )]
+        #[cfg_attr(
+            feature = "ferrocene_certified_runtime",
+            should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+        )]
+        fn $fn() {
+            let str_ref = "Hello, World!";
+            slice::SliceIndex::index($range, str_ref);
+        }
+    )*};
 
-    let str_ref = "Hello, World!";
-    let str_ptr = str_ref as *const str;
-
-    let mut str_mut_bytes = STR_MUT_BYTES;
-    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
-    let str_mut_ptr = str_mut as *mut str;
-
-    assert_eq!(Some("Hello, World!"), SliceIndex::get(0.., str_ref));
-    assert_eq!(Some("Hello, World!"), SliceIndex::get_mut(0.., str_mut).as_deref());
-
-    assert_eq!(None, SliceIndex::get(100.., str_ref));
-    assert_eq!(None, SliceIndex::get_mut(100.., str_mut));
-
-    assert_eq!("Hello, World!", SliceIndex::index(0.., str_ref));
-    assert_eq!("Hello, World!", SliceIndex::index_mut(0.., str_mut));
-
-    assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked(0.., str_ptr) }));
-    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut(0.., str_mut_ptr) }));
 }
+test_str_slice_index_panic!(
+    str_slice_index_panic_range => 100..100,
+    str_slice_index_panic_range_to => ..100,
+    str_slice_index_panic_range_from => 100..,
+);
 
-#[test]
-fn str_slice_index_range_to() {
-    use slice::SliceIndex;
+macro_rules! test_str_slice_index_mut_panic {
+    ( $($fn:ident => $range:expr,)*) => { $(
+        #[test]
+        #[cfg_attr(
+            not(feature = "ferrocene_certified_runtime"),
+            should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+        )]
+        #[cfg_attr(
+            feature = "ferrocene_certified_runtime",
+            should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+        )]
+        fn $fn() {
+            let mut str_mut_bytes = STR_MUT_BYTES;
+            let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
+            slice::SliceIndex::index_mut($range, str_mut);
+        }
+    )*};
 
-    let str_ref = "Hello, World!";
-    let str_ptr = str_ref as *const str;
-
-    let mut str_mut_bytes = STR_MUT_BYTES;
-    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
-    let str_mut_ptr = str_mut as *mut str;
-
-    assert_eq!(Some("Hell"), SliceIndex::get(..4, str_ref));
-    assert_eq!(Some("Hell"), SliceIndex::get_mut(..4, str_mut).as_deref());
-
-    assert_eq!(None, SliceIndex::get(..100, str_ref));
-    assert_eq!(None, SliceIndex::get_mut(..100, str_mut));
-
-    assert_eq!("Hell", SliceIndex::index(..4, str_ref));
-    assert_eq!("Hell", SliceIndex::index_mut(..4, str_mut));
-
-    assert!(ptr::addr_eq(str_ptr, unsafe { SliceIndex::get_unchecked(..4, str_ptr) }));
-    assert!(ptr::addr_eq(str_mut_ptr, unsafe { SliceIndex::get_unchecked_mut(..4, str_mut_ptr) }));
 }
-
-#[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-)]
-fn str_slice_index_panic_range() {
-    let str_ref = "Hello, World!";
-
-    assert_eq!("Hell", slice::SliceIndex::index(100..100, str_ref));
-}
-
-#[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-)]
-fn str_slice_index_mut_panic_range() {
-    let mut str_mut_bytes = STR_MUT_BYTES;
-    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
-
-    assert_eq!("Hell", slice::SliceIndex::index_mut(100..100, str_mut));
-}
-
-#[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-)]
-fn str_slice_index_panic_range_to() {
-    let str_ref = "Hello, World!";
-
-    assert_eq!("Hell", slice::SliceIndex::index(..100, str_ref));
-}
-
-#[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-)]
-fn str_slice_index_mut_panic_range_to() {
-    let mut str_mut_bytes = STR_MUT_BYTES;
-    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
-
-    assert_eq!("Hell", slice::SliceIndex::index_mut(..100, str_mut));
-}
-
-#[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-)]
-fn str_slice_index_panic_range_from() {
-    let str_ref = "Hello, World!";
-
-    assert_eq!("Hell", slice::SliceIndex::index(100.., str_ref));
-}
-
-#[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-)]
-fn str_slice_index_mut_panic_range_from() {
-    let mut str_mut_bytes = STR_MUT_BYTES;
-    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
-
-    assert_eq!("Hell", slice::SliceIndex::index_mut(100.., str_mut));
-}
+test_str_slice_index_mut_panic!(
+    str_slice_index_mut_panic_range => 100..100,
+    str_slice_index_mut_panic_range_to => ..100,
+    str_slice_index_mut_panic_range_from => 100..,
+);

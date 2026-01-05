@@ -1,3 +1,5 @@
+use std::array::IntoIter;
+
 // <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::advance_by
 #[test]
 fn test_iterator_copied_advance_by() {
@@ -77,4 +79,16 @@ fn test_mut_ref_iterator_advance_by() {
     let x = &mut [1, 2, 3];
     let mut iter = x.iter();
     assert!(Iterator::advance_by(&mut &mut iter, 1).is_ok());
+}
+
+// <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+#[test]
+fn test_array_into_iter_double_ended_rfold() {
+    let x = [1_u16, 2, 3];
+    let mut iter = x.into_iter();
+    assert!(
+        <IntoIter<_, _> as DoubleEndedIterator>::try_rfold(&mut &mut iter, 0_u16, |a, b| a
+            .checked_add(b))
+        .is_some()
+    );
 }

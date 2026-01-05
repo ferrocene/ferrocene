@@ -563,7 +563,7 @@ s! {
         pub mode: mode_t,
         pub seq: c_uint,
         pub key: crate::key_t,
-        _reserved: [c_int; 4],
+        _reserved: Padding<[c_int; 4]>,
     }
 
     pub struct regex_t {
@@ -615,7 +615,7 @@ s! {
         pub bs_recv: u64,
         pub bs_drop: u64,
         pub bs_capt: u64,
-        bs_padding: [u64; 13],
+        bs_padding: Padding<[u64; 13]>,
     }
 
     #[cfg(target_env = "nto71_iosock")]

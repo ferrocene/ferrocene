@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Disable SC2086 as it confuses the docker command.
 # shellcheck disable=SC2086
@@ -27,10 +27,26 @@ if [ "${CI:-0}" != "0" ] && [ "$target" = "aarch64-linux-android" ]; then
 fi
 
 run() {
-    echo "Building docker container for target $target"
+    run_target="$1"
+    echo "Building docker container for target $run_target"
+
+    build_args=(
+        "--tag=libc-$run_target"
+        "--file=ci/docker/$run_target/Dockerfile"
+        "ci/"
+    )
+
+    if [[ "$run_target" = *"musl"* ]]; then
+        if [ -n "${RUST_LIBC_UNSTABLE_MUSL_V1_2_3:-}" ]; then
+            build_args+=("--build-arg=MUSL_VERSION=new")
+        else
+            build_args+=("--build-arg=MUSL_VERSION=old")
+        fi
+    fi
 
     # use -f so we can use ci/ as build context
-    docker build -t "libc-$target" -f "ci/docker/$target/Dockerfile" ci/
+    docker build "${build_args[@]}"
+
     mkdir -p target
     if [ -w /dev/kvm ]; then
         kvm="--volume /dev/kvm:/dev/kvm"
@@ -43,14 +59,19 @@ run() {
         --user "$(id -u)":"$(id -g)" \
         --env LIBC_CI \
         --env LIBC_CI_ZBUILD_STD \
+        --env RUSTFLAGS \
+        --env RUSTDOCFLAGS \
+        --env RUST_BACKTRACE \
         --env RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS \
         --env RUST_LIBC_UNSTABLE_GNU_TIME_BITS \
         --env RUST_LIBC_UNSTABLE_MUSL_V1_2_3 \
+        --env CARGO_TERM_COLOR \
+        --env CARGO_TERM_VERBOSE \
         --env CARGO_HOME=/cargo \
         --env CARGO_TARGET_DIR=/checkout/target \
-        --volume "$CARGO_HOME":/cargo \
-        --volume "$(rustc --print sysroot)":/rust:ro \
-        --volume "$PWD":/checkout:ro \
+        --volume "$CARGO_HOME":/cargo:Z \
+        --volume "$(rustc --print sysroot)":/rust:ro,Z \
+        --volume "$PWD":/checkout:ro,Z \
         --volume "$PWD"/target:/checkout/target \
         $kvm \
         --init \

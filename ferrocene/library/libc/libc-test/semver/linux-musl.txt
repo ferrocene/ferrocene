@@ -39,6 +39,7 @@ RWF_HIPRI
 RWF_NOAPPEND
 RWF_NOWAIT
 RWF_SYNC
+SUN_LEN
 USER_PROCESS
 UT_HOSTSIZE
 UT_LINESIZE
@@ -81,6 +82,7 @@ prlimit
 prlimit64
 process_vm_readv
 process_vm_writev
+pthread_timedjoin_np
 pututxline
 pwritev2
 pwritev64

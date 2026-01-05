@@ -40,13 +40,47 @@ There are four requirements for merging any change into the ``main`` and
    information about tickets.
 
 An independent Ferrocene Reviewer is any Ferrocene developer who has not
-committed code as part of the change being reviewed. The only exception occurs
-for automated PRs pulling code from upstream. In those cases, any Ferrocene
-developer is considered as an independent Reviewer, even if they contributed to
-the changes in the upstream Rust project that are being merged. This is
-acceptable since we can take credit from the upstream review process, which
-establishes confidence in the code.
+committed code as part of the change being reviewed.
 
+As a special case, commits which are entirely machine-generated may be approved
+by the PR author, even if the author committed those commits. Such
+self-approved commits must explicitly state how to reproduce them so they can
+be audited later.
+
+The following list of commits that can be self-approved is exhaustive; all
+other changes require independent review.
+
+- Automated upstream- and subtree-pulls. These can be reproduced using
+  ``gh workflow run automation-pull-upstream.yml`` or
+  ``gh workflow run automation-pull-subtrees.yml``, respectively.
+  This is acceptable since we can take credit from the upstream review process,
+  which establishes confidence in the code. Note that this does *not* apply to
+  commits that were written after the workflow ran, such as fixing merge
+  conflicts; those later commits must still have an independent Ferrocene Reviewer.
+
+- Merges without conflicts, such as ``git merge ferrocene/HEAD``.
+
+- Automated formatting commits, such as ``./x fmt`` or ``cargo fmt``.
+
+- Automated test output updates, such as ``./x test --bless`` or ``cargo insta bless``.
+  Note that not all tests can be updated automatically, and that any new test
+  that is automatically updated, or any new tooling for automated updates, must
+  first go through peer review.
+
+As a special case, changes to a PR which do not "materially" affect the code do
+not require the latest revision to be approved, only the immediately previous revision.
+Such "non-material" changes must explicitly state instructions for how to
+verify there were no material changes so they can be audited later.
+
+The following list of non-material changes is exhaustive; all other changes
+require the latest revision to be independently approved.
+
+- Rebases without conflicts, such as
+  ``git rebase ferrocene/HEAD author/feature-branch``.
+  These can be verified with ``git range-diff ferrocene/HEAD <commit-before-push> <commit-after-push>``.
+
+- Rebases or history editing that have no code changes, only changes to commit messages, order, or number of commits.
+  These can be verified with ``git range-diff ferrocene/HEAD <commit-before-push> <commit-after-push>``.
 
 Merge Strategy
 --------------

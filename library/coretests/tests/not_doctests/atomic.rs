@@ -71,7 +71,7 @@ fn atomic_compiler_fence() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "there is no such thing as a relaxed fence"]
 #[expect(invalid_atomic_ordering)]
 fn atomic_compiler_fence_relaxed() {
     atomic::compiler_fence(atomic::Ordering::Relaxed);

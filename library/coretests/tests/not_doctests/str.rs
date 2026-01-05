@@ -129,7 +129,7 @@ fn str_slice_index_range_to() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
 fn str_slice_index_panic_range() {
     let str_ref = "Hello, World!";
 
@@ -137,16 +137,16 @@ fn str_slice_index_panic_range() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
 fn str_slice_index_mut_panic_range() {
-    let mut str_mut_bytes = [b'H', b'e', b'l', b'l', b'o'];
+    let mut str_mut_bytes = STR_MUT_BYTES;
     let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
 
     assert_eq!("Hell", slice::SliceIndex::index_mut(100..100, str_mut));
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
 fn str_slice_index_panic_range_to() {
     let str_ref = "Hello, World!";
 
@@ -154,16 +154,16 @@ fn str_slice_index_panic_range_to() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
 fn str_slice_index_mut_panic_range_to() {
-    let mut str_mut_bytes = [b'H', b'e', b'l', b'l', b'o'];
+    let mut str_mut_bytes = STR_MUT_BYTES;
     let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
 
     assert_eq!("Hell", slice::SliceIndex::index_mut(..100, str_mut));
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
 fn str_slice_index_panic_range_from() {
     let str_ref = "Hello, World!";
 
@@ -171,9 +171,9 @@ fn str_slice_index_panic_range_from() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
 fn str_slice_index_mut_panic_range_from() {
-    let mut str_mut_bytes = [b'H', b'e', b'l', b'l', b'o'];
+    let mut str_mut_bytes = STR_MUT_BYTES;
     let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
 
     assert_eq!("Hell", slice::SliceIndex::index_mut(100.., str_mut));

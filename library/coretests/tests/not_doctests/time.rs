@@ -12,7 +12,10 @@ fn duration_checked_add() {
 // core::time::Duration::from_secs_f32
 #[test]
 #[cfg_attr(feature = "ferrocene_certified_runtime", should_panic = "{e}")]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "cannot convert float seconds to Duration: value is negative")]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "cannot convert float seconds to Duration: value is negative"
+)]
 fn duration_try_from_secs_f32() {
     let _nope = Duration::from_secs_f32(-1.0);
 }

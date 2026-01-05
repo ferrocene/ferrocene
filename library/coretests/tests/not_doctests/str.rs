@@ -129,7 +129,14 @@ fn str_slice_index_range_to() {
 }
 
 #[test]
-#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+)]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+)]
 fn str_slice_index_panic_range() {
     let str_ref = "Hello, World!";
 
@@ -137,7 +144,14 @@ fn str_slice_index_panic_range() {
 }
 
 #[test]
-#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+)]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+)]
 fn str_slice_index_mut_panic_range() {
     let mut str_mut_bytes = STR_MUT_BYTES;
     let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
@@ -146,7 +160,14 @@ fn str_slice_index_mut_panic_range() {
 }
 
 #[test]
-#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+)]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+)]
 fn str_slice_index_panic_range_to() {
     let str_ref = "Hello, World!";
 
@@ -154,7 +175,14 @@ fn str_slice_index_panic_range_to() {
 }
 
 #[test]
-#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+)]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+)]
 fn str_slice_index_mut_panic_range_to() {
     let mut str_mut_bytes = STR_MUT_BYTES;
     let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
@@ -163,7 +191,14 @@ fn str_slice_index_mut_panic_range_to() {
 }
 
 #[test]
-#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+)]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+)]
 fn str_slice_index_panic_range_from() {
     let str_ref = "Hello, World!";
 
@@ -171,7 +206,14 @@ fn str_slice_index_panic_range_from() {
 }
 
 #[test]
-#[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "byte index 100 is out of bounds of `Hello, World!`"
+)]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
+)]
 fn str_slice_index_mut_panic_range_from() {
     let mut str_mut_bytes = STR_MUT_BYTES;
     let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();

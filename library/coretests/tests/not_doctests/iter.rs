@@ -92,3 +92,15 @@ fn test_array_into_iter_double_ended_rfold() {
         .is_some()
     );
 }
+
+// <core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_nth
+#[test]
+fn test_iter_step_by_spec_try_fold() {
+    let x = 0_u16..100;
+    let iter = x.into_iter();
+    let mut step_by = iter.step_by(2);
+    assert_eq!(
+        step_by.nth(2),
+        Some(4),
+    );
+}

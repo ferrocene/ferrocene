@@ -352,3 +352,11 @@ fn test_iterator_spec_try_fold() {
     assert!(took.try_fold(0, |a, b| ControlFlow::<usize, _>::Continue(a + b)).is_continue());
     assert!(took.try_fold(0, |a, b| ControlFlow::Break(1)).is_continue());
 }
+
+// <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn test_iterator_windows_nth() {
+    let x = [1, 2, 3, 4, 5, 6];
+    let mut windows = x.windows(2);
+    assert_eq!(Iterator::nth(&mut windows, 55), None);
+}

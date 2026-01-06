@@ -308,6 +308,9 @@ pub const fn panic_display<T: fmt::Display>(x: &T) -> ! {
 #[track_caller]
 #[lang = "panic_bounds_check"] // needed by codegen for panic on OOB array/slice access
 fn panic_bounds_check(index: usize, len: usize) -> ! {
+    #[ferrocene::annotation(
+        "The `immediate-abort` behavior is not certified, we only support `abort`."
+    )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }
@@ -361,6 +364,9 @@ fn panic_null_pointer_dereference() -> ! {
 #[rustc_nounwind] // `CheckEnums` MIR pass requires this function to never unwind
 #[cfg(not(feature = "ferrocene_subset"))]
 fn panic_invalid_enum_construction(source: u128) -> ! {
+    #[ferrocene::annotation(
+        "The `immediate-abort` behavior is not certified, we only support `abort`."
+    )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }

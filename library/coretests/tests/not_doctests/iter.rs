@@ -297,3 +297,21 @@ fn test_range_spec_next() {
         None,
     );
 }
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_next
+#[test]
+fn test_range_spec_next_back() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
+        Some(Steppable::B),
+    );
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
+        Some(Steppable::A),
+    );
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
+        None,
+    );
+}

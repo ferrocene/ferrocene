@@ -1,6 +1,10 @@
+mod atomic;
 mod borrow;
+mod cell;
+mod intrinsics;
 mod iter;
 mod num;
+mod str;
 mod time;
 
 use core::cmp::Ordering;
@@ -520,7 +524,7 @@ macro_rules! nonpositive_ilog2 {
     ($($T:ty => $fn:ident,)*) => {
         $(
             #[test]
-            #[should_panic]
+            #[should_panic = "argument of integer logarithm must be positive"]
             fn $fn() {
                 let _ = (-1 as $T).ilog2();
             }

@@ -137,3 +137,23 @@ test_str_slice_index_mut_panic!(
     str_slice_index_mut_panic_range_to => ..100,
     str_slice_index_mut_panic_range_from => 100..,
 );
+
+#[test]
+
+fn pattern_is_prefix_of() {
+    use core::str::pattern::Pattern;
+
+    let haystack = "Hello, world!";
+
+    // char
+    assert!(Pattern::is_prefix_of('H', haystack));
+    assert!(!Pattern::is_prefix_of('w', haystack));
+
+    // &str
+    assert!(Pattern::is_prefix_of("Hell", haystack));
+    assert!(!Pattern::is_prefix_of("world", haystack));
+
+    // [char; N]
+    assert!(Pattern::is_prefix_of(['G', 'H', 'I'], haystack));
+    assert!(!Pattern::is_prefix_of(['A', 'B', 'C'], haystack));
+}

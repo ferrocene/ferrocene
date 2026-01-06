@@ -235,6 +235,20 @@ fn test_range_spec_nth() {
     );
 }
 
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back
+#[test]
+fn test_range_spec_nth_back() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 1),
+        Some(Steppable::A),
+    );
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 4),
+        None,
+    );
+}
+
 // <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
 #[test]
 #[should_panic = "`Step` invariants not upheld"]
@@ -257,7 +271,7 @@ fn test_range_spec_advance_by() {
     );
 }
 
-// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_by_back
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_back_by
 #[test]
 fn test_range_spec_advance_back_by() {
     let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };

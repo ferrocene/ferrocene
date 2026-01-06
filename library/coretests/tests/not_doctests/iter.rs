@@ -99,14 +99,11 @@ fn test_iter_step_by_spec_try_fold() {
     let x = 0_u16..100;
     let iter = x.into_iter();
     let mut step_by = iter.step_by(2);
-    assert_eq!(
-        step_by.nth(2),
-        Some(4),
-    );
+    assert_eq!(step_by.nth(2), Some(4),);
 }
 
 // Used to test Range bits.
-#[derive(Clone, PartialEq, PartialOrd)]
+#[derive(Clone, PartialEq, PartialOrd, Debug)]
 enum Steppable {
     A,
     B,
@@ -134,16 +131,16 @@ impl core::iter::Step for Steppable {
                 1 => Some(Self::B),
                 2 => Some(Self::C),
                 _ => None,
-            }
+            },
             Self::B => match count {
                 0 => Some(Self::B),
                 1 => Some(Self::C),
                 _ => None,
-            }
+            },
             Self::C => match count {
                 0 => Some(Self::C),
                 _ => None,
-            }
+            },
         }
     }
 
@@ -152,24 +149,24 @@ impl core::iter::Step for Steppable {
             Self::A => match count {
                 0 => Some(Self::A),
                 _ => None,
-            }
+            },
             Self::B => match count {
                 0 => Some(Self::B),
                 1 => Some(Self::A),
                 _ => None,
-            }
+            },
             Self::C => match count {
                 0 => Some(Self::C),
                 1 => Some(Self::B),
                 2 => Some(Self::A),
                 _ => None,
-            }
+            },
         }
     }
 }
 
 // Used to test Range bits.
-#[derive(Clone, PartialEq, PartialOrd)]
+#[derive(Clone, PartialEq, PartialOrd, Debug)]
 enum SteppableBrokenStepsBetween {
     A,
     B,
@@ -177,62 +174,62 @@ enum SteppableBrokenStepsBetween {
 }
 
 impl core::iter::Step for SteppableBrokenStepsBetween {
-    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+    fn steps_between(_start: &Self, _end: &Self) -> (usize, Option<usize>) {
         (1, None)
     }
 
     fn forward_checked(start: Self, count: usize) -> Option<Self> {
-        if count == 1 { return None }
+        if count == 1 {
+            return None;
+        }
         match start {
             Self::A => match count {
                 0 => Some(Self::A),
                 1 => Some(Self::B),
                 2 => Some(Self::C),
                 _ => None,
-            }
+            },
             Self::B => match count {
                 0 => Some(Self::B),
                 1 => Some(Self::C),
                 _ => None,
-            }
+            },
             Self::C => match count {
                 0 => Some(Self::C),
                 _ => None,
-            }
+            },
         }
     }
 
     fn backward_checked(start: Self, count: usize) -> Option<Self> {
-        if count == 1 { return None }
+        if count == 1 {
+            return None;
+        }
         match start {
             Self::A => match count {
                 0 => Some(Self::A),
                 _ => None,
-            }
+            },
             Self::B => match count {
                 0 => Some(Self::B),
                 1 => Some(Self::A),
                 _ => None,
-            }
+            },
             Self::C => match count {
                 0 => Some(Self::C),
                 1 => Some(Self::B),
                 2 => Some(Self::A),
                 _ => None,
-            }
+            },
         }
     }
 }
-
 
 // <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
 #[test]
 fn test_range_spec_nth() {
     let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
-    assert_eq!(
-        <core::ops::Range<Steppable> as Iterator>::nth(&mut x, 2),
-        None,
-    );
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::nth(&mut x, 2), None,);
 }
 
 // <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back
@@ -243,29 +240,28 @@ fn test_range_spec_nth_back() {
         <core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 1),
         Some(Steppable::A),
     );
-    assert_eq!(
-        <core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 4),
-        None,
-    );
+    assert_eq!(<core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 4), None,);
 }
 
 // <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
 #[test]
 #[should_panic = "`Step` invariants not upheld"]
 fn test_range_spec_nth_invariant() {
-    let mut x = core::ops::Range { start: SteppableBrokenStepsBetween::A, end: SteppableBrokenStepsBetween::C };
-    assert_eq!(
-        <core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::nth(&mut x, 0),
-        None,
-    );
+    let mut x = core::ops::Range {
+        start: SteppableBrokenStepsBetween::A,
+        end: SteppableBrokenStepsBetween::C,
+    };
+    assert_eq!(<core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::nth(&mut x, 0), None,);
 }
-
 
 // <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_by
 #[test]
 #[should_panic = "`Step` invariants not upheld"]
 fn test_range_spec_advance_by() {
-    let mut x = core::ops::Range { start: SteppableBrokenStepsBetween::A, end: SteppableBrokenStepsBetween::C };
+    let mut x = core::ops::Range {
+        start: SteppableBrokenStepsBetween::A,
+        end: SteppableBrokenStepsBetween::C,
+    };
     assert!(
         <core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::advance_by(&mut x, 4).is_err()
     );
@@ -284,21 +280,12 @@ fn test_range_spec_advance_back_by() {
 #[test]
 fn test_range_spec_next() {
     let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
-    assert_eq!(
-        <core::ops::Range<Steppable> as Iterator>::next(&mut x),
-        Some(Steppable::A),
-    );
-    assert_eq!(
-        <core::ops::Range<Steppable> as Iterator>::next(&mut x),
-        Some(Steppable::B),
-    );
-    assert_eq!(
-        <core::ops::Range<Steppable> as Iterator>::next(&mut x),
-        None,
-    );
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::next(&mut x), Some(Steppable::A),);
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::next(&mut x), Some(Steppable::B),);
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::next(&mut x), None,);
 }
 
-// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_next
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_next_back
 #[test]
 fn test_range_spec_next_back() {
     let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
@@ -310,8 +297,5 @@ fn test_range_spec_next_back() {
         <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
         Some(Steppable::A),
     );
-    assert_eq!(
-        <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
-        None,
-    );
+    assert_eq!(<core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x), None,);
 }

@@ -821,6 +821,9 @@ impl AtomicBool {
     #[rustc_should_not_be_called_on_const_items]
     pub fn swap(&self, val: bool, order: Ordering) -> bool {
         if EMULATE_ATOMIC_BOOL {
+            #[ferrocene::annotation(
+                "Cannot be covered as this code does not run in any of the platforms for which we track coverage"
+            )]
             if val { self.fetch_or(true, order) } else { self.fetch_and(false, order) }
         } else {
             // SAFETY: data races are prevented by atomic intrinsics.
@@ -958,30 +961,35 @@ impl AtomicBool {
         failure: Ordering,
     ) -> Result<bool, bool> {
         if EMULATE_ATOMIC_BOOL {
-            // Pick the strongest ordering from success and failure.
-            let order = match (success, failure) {
-                (SeqCst, _) => SeqCst,
-                (_, SeqCst) => SeqCst,
-                (AcqRel, _) => AcqRel,
-                (_, AcqRel) => {
-                    panic!("there is no such thing as an acquire-release failure ordering")
-                }
-                (Release, Acquire) => AcqRel,
-                (Acquire, _) => Acquire,
-                (_, Acquire) => Acquire,
-                (Release, Relaxed) => Release,
-                (_, Release) => panic!("there is no such thing as a release failure ordering"),
-                (Relaxed, Relaxed) => Relaxed,
-            };
-            let old = if current == new {
-                // This is a no-op, but we still need to perform the operation
-                // for memory ordering reasons.
-                self.fetch_or(false, order)
-            } else {
-                // This sets the value to the new one and returns the old one.
-                self.swap(new, order)
-            };
-            if old == current { Ok(old) } else { Err(old) }
+            #[ferrocene::annotation(
+                "Cannot be covered as this code does not run in any of the platforms for which we track coverage"
+            )]
+            {
+                // Pick the strongest ordering from success and failure.
+                let order = match (success, failure) {
+                    (SeqCst, _) => SeqCst,
+                    (_, SeqCst) => SeqCst,
+                    (AcqRel, _) => AcqRel,
+                    (_, AcqRel) => {
+                        panic!("there is no such thing as an acquire-release failure ordering")
+                    }
+                    (Release, Acquire) => AcqRel,
+                    (Acquire, _) => Acquire,
+                    (_, Acquire) => Acquire,
+                    (Release, Relaxed) => Release,
+                    (_, Release) => panic!("there is no such thing as a release failure ordering"),
+                    (Relaxed, Relaxed) => Relaxed,
+                };
+                let old = if current == new {
+                    // This is a no-op, but we still need to perform the operation
+                    // for memory ordering reasons.
+                    self.fetch_or(false, order)
+                } else {
+                    // This sets the value to the new one and returns the old one.
+                    self.swap(new, order)
+                };
+                if old == current { Ok(old) } else { Err(old) }
+            }
         } else {
             // SAFETY: data races are prevented by atomic intrinsics.
             match unsafe {

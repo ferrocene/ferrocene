@@ -41,6 +41,9 @@ Patterns
 A :t:`pattern` is a :t:`construct` that matches a :t:`value` which satisfies all
 the criteria of the :t:`pattern`.
 
+:dp:`fls_VQMmveZUfNTn`
+An :t:`or-pattern` is a :t:`pattern` that matches on one of two or more :t:`[pattern-without-alternation]s` and or-s them using character 0x7C (vertical line).
+
 :dp:`fls_mp6i4blzexnu`
 A :t:`pattern-without-alternation` is a :t:`pattern` that cannot be alternated.
 
@@ -66,27 +69,23 @@ of a :t:`pattern-without-range`, except for when the :t:`pattern` is ``&mut``
 with :t:`keyword` ``mut`` containing an :t:`identifier pattern`.
 
 :dp:`fls_72JHo343O7jp`
-An :t:`or pattern` is a :t:`pattern` that matches on one of two or more
-:t:`[pattern-without-alternation]s`. An :t:`or pattern` can nest arbitrarily.
-Syntactically, :t:`[or pattern]s` are allowed in any of the places where other
-:t:`[pattern]s` are allowed, with the exception of :t:`[let statement]s`,
-:t:`[function parameter]s`, and :t:`[closure parameter]s`.
-
-:dp:`fls_VQMmveZUfNTn`
-An :t:`or pattern` uses character 0x7C (vertical line) between the
-:t:`[pattern-without-alternation]s`.
+An or-pattern shall not appear in the :t:`pattern-without-alternation` of a
+:t:`closure parameter`, a :t:`function parameter`, or a :t:`let binding`.
 
 :dp:`fls_8luyomzppck`
-An :t:`or pattern` is subject to the following restrictions:
+Any two :t:`[subpattern]s` of an :t:`or-pattern` are subject to the following
+restrictions:
 
 * :dp:`fls_rpvdfmy3n05a`
   The :t:`[type]s` of the two :t:`[pattern-without-alternation]s` shall be
   :t:`unifiable`.
 
+* :dp:`fls_YDVgFaTQwcL8`
+  The set of :t:`[binding]s` introduced by the two :t:`[pattern-without-alternation]s` shall be the same.
+
 * :dp:`fls_kv533rntni1x`
-  The :t:`[binding]s` of the two :t:`[pattern-without-alternation]s` shall
-  be the same, shall have :t:`[unifiable type]s`, and shall have the same
-  :t:`[binding mode]s`.
+  Any two :t:`[binding]s` with the same name in the two :t:`[pattern-without-alternation]s` shall have
+  :t:`[unifiable type]s` and shall have the same :t:`[binding mode]s`.
 
 .. _fls_uh76pw6ykd57:
 
@@ -1306,6 +1305,9 @@ Pattern Matching
 :t:`Pattern matching` that involves a :t:`pattern` and a context :t:`value`
 proceeds as follows:
 
+#. :dp:`fls_tZJgZDWVChJV`
+   If the :t:`pattern` is an :t:`or-pattern`, then perform :t:`or-pattern matching`.
+
 #. :dp:`fls_67ajub7d2b4c`
    For each :t:`pattern-without-alternation` of the :t:`pattern`:
 
@@ -1359,6 +1361,25 @@ proceeds as follows:
 :dp:`fls_vstdqifqipbh`
 Only the :t:`[binding]s` of a matched :t:`pattern-without-alternation` are
 introduced into a :t:`binding scope`.
+
+
+.. _fls_VsBXBj4AqCj1:
+
+Or-pattern Matching
+~~~~~~~~~~~~~~~~~~~
+
+:dp:`fls_njpiXkgi8Ryb`
+:dt:`Or-pattern matching` of an :t:`or-pattern` of the form `constructor(or-pattern, rest)`,
+where `constructor` is an arbitrary constructor, `or-pattern` is the :t:`or-pattern`,
+and `rest` is optionally a remaining pattern, proceeds as follows:
+
+#. :dp:`fls_nE7qZpHy9TPu`
+   Perform pattern matching of the form `constructor(subpattern, rest)`, where
+   `subpattern` is a :t:`subpattern` of the :t:`or-pattern`, starting from the
+   first such :t:`subpattern` and proceeding in declarative order.
+
+#. :dp:`fls_P8yB2b5enpw7`
+   Otherwise pattern matching fails.
 
 .. _fls_vnai6ag4qrdb:
 

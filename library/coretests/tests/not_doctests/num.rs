@@ -45,3 +45,26 @@ niche_types! {
 fn default_nanoseconds() {
     assert_eq!(core::num::niche_types::Nanoseconds::new(0).unwrap(), Default::default());
 }
+
+// covers `core::num::<T>::overflowing_neg`.
+macro_rules! int_overflowing_neg {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                let (out, did_overflow) = <$T>::MIN.overflowing_neg();
+                assert!(did_overflow);
+                assert_eq!(out, <$T>::MIN)
+            }
+        )*
+    };
+}
+
+int_overflowing_neg! {
+    i8 => i8_overflowing_neg,
+    i16 => i16_overflowing_neg,
+    i32 => i32_overflowing_neg,
+    i64 => i64_overflowing_neg,
+    i128 => i128_overflowing_neg,
+    isize => isize_overflowing_neg,
+}

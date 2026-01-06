@@ -331,3 +331,24 @@ fn test_iterator_spec_advance_by() {
     let foo: &mut dyn FunNone = &mut foo;
     assert!(foo.advance_by(5).is_err());
 }
+
+// <&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_try_fold
+#[test]
+fn test_iterator_spec_try_fold() {
+    struct FooSome;
+    trait FunSome {}
+    impl FunSome for FooSome {}
+    impl Iterator for dyn FunSome {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(1)
+        }
+    }
+
+    use core::ops::ControlFlow;
+    let mut foo = FooSome;
+    let foo: &mut dyn FunSome = &mut foo;
+    let mut took = foo.take(10);
+    assert!(took.try_fold(0, |a, b| ControlFlow::<usize, _>::Continue(a + b)).is_continue());
+    assert!(took.try_fold(0, |a, b| ControlFlow::Break(1)).is_continue());
+}

@@ -368,3 +368,24 @@ fn test_iterator_windows_last() {
     let windows = x.windows(2);
     assert_eq!(windows.last(), None);
 }
+
+// <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_chars_iter_advance_by() {
+    macro_rules! repeat8 {
+        ($s:expr) => {
+            concat!($s, $s, $s, $s, $s, $s, $s, $s)
+        };
+    }
+    const CORPORA: &str = repeat8!("Сотни компаний по всему миру используют Rust в реальных\
+        проектах для быстрых кросс-платформенных решений с\
+        ограниченными ресурсами. Такие проекты, как Firefox,\
+        Dropbox и Cloudflare, используют Rust. Rust отлично\
+        подходит как для стартапов, так и для больших компаний,\
+        как для встраиваемых устройств, так и для масштабируемых\
+        web-сервисов. Мой самый большой комплимент Rust.");
+    for x in 0..1000 {
+        let mut chars = CORPORA.chars();
+        chars.advance_by(x).ok();
+    }
+}

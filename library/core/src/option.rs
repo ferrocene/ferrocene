@@ -585,9 +585,7 @@
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-use crate::panicking::panic;
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
-use crate::panicking::panic_display;
+use crate::panicking::{panic, panic_display};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::Pin;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -989,7 +987,7 @@ impl<T> Option<T> {
             #[cfg(not(feature = "ferrocene_certified_runtime"))]
             None => expect_failed(msg),
             #[cfg(feature = "ferrocene_certified_runtime")]
-            None => panic(msg),
+            None => panic_display(&msg),
         }
     }
 

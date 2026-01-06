@@ -360,3 +360,11 @@ fn test_iterator_windows_nth() {
     let mut windows = x.windows(2);
     assert_eq!(Iterator::nth(&mut windows, 55), None);
 }
+
+// <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn test_iterator_windows_last() {
+    let x: [usize; 0] = [];
+    let windows = x.windows(2);
+    assert_eq!(windows.last(), None);
+}

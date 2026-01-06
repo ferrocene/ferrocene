@@ -409,6 +409,9 @@ pub const unsafe fn unreachable() -> !;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
+#[ferrocene::annotation(
+    "Cannot be covered, since the purpose of the function is to never receive a `b` that is `false`, and if it does it will kill the process."
+)]
 pub const unsafe fn assume(b: bool) {
     if !b {
         // SAFETY: the caller must guarantee the argument is never `false`

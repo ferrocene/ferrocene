@@ -432,6 +432,9 @@ pub const unsafe fn assume(b: bool) {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
+#[ferrocene::annotation(
+    "The fact this is shown as uncovered is a known problem in our coverage tooling."
+)]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.

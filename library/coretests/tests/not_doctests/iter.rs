@@ -299,3 +299,35 @@ fn test_range_spec_next_back() {
     );
     assert_eq!(<core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x), None,);
 }
+
+// <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
+#[test]
+fn test_iterator_spec_advance_by() {
+    struct FooSome;
+    trait FunSome {}
+    impl FunSome for FooSome {}
+    impl Iterator for dyn FunSome {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(1)
+        }
+    }
+
+    let mut foo = FooSome;
+    let foo: &mut dyn FunSome = &mut foo;
+    assert!(foo.advance_by(5).is_ok());
+
+    struct FooNone;
+    trait FunNone {}
+    impl FunNone for FooNone {}
+    impl Iterator for dyn FunNone {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            None
+        }
+    }
+
+    let mut foo = FooNone;
+    let foo: &mut dyn FunNone = &mut foo;
+    assert!(foo.advance_by(5).is_err());
+}

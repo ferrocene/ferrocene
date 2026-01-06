@@ -40,6 +40,13 @@ niche_types! {
     Nanoseconds => nanoseconds(invalid_value: 1_000_000_000),
 }
 
+// covers `<core::num::nonzero::NonZero<T> as core::clone::Clone>::clone`.
+#[test]
+fn non_zero_clone() {
+    let val = core::num::NonZero::<u8>::new(1).unwrap();
+    assert_eq!(Clone::clone(&val), val);
+}
+
 // covers `<core::num::niche_types::Nanoseconds as core::default::Default>::default`.
 #[test]
 fn default_nanoseconds() {

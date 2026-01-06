@@ -257,6 +257,15 @@ fn test_range_spec_advance_by() {
     );
 }
 
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_by_back
+#[test]
+fn test_range_spec_advance_back_by() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::advance_back_by(&mut x, 4).is_err()
+    );
+}
+
 // <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_next
 #[test]
 fn test_range_spec_next() {

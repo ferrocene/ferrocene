@@ -455,6 +455,9 @@ where
     pub const unsafe fn new_unchecked(n: T) -> Self {
         match Self::new(n) {
             Some(n) => n,
+            #[ferrocene::annotation(
+                "This line cannot be covered as reaching `intrinsics::unreachable` is undefined behavior."
+            )]
             None => {
                 // SAFETY: The caller guarantees that `n` is non-zero, so this is unreachable.
                 unsafe {

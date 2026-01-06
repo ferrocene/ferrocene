@@ -2742,6 +2742,9 @@ pub const fn ub_checks() -> bool {
 /// user has overflow checks disabled, the checks will still get optimized out.
 #[inline(always)]
 #[rustc_intrinsic]
+#[ferrocene::annotation(
+    "This function cannot trivially be tested since it depends on the build configuration. It was manually reviewed."
+)]
 pub const fn overflow_checks() -> bool {
     cfg!(debug_assertions)
 }

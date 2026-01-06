@@ -1945,6 +1945,9 @@ pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering
 #[rustc_intrinsic]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec] // the fallbacks all `assume` to tell Miri
+#[ferrocene::annotation(
+    "This function only redirects to `intrinsics::fallback::DisjointBitOr::disjoint_bitor` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
+)]
 pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: T) -> T {
     // SAFETY: same preconditions as this function.
     unsafe { fallback::DisjointBitOr::disjoint_bitor(a, b) }

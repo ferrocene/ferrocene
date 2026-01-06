@@ -4,6 +4,7 @@ mod cell;
 mod intrinsics;
 mod iter;
 mod num;
+mod slice;
 mod str;
 mod time;
 

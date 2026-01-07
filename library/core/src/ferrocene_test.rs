@@ -43,3 +43,8 @@ pub fn test_index_range_slice_index_panic_mut() {
     let slice_mut = slice_bytes.as_mut_slice();
     SliceIndex::index_mut(range_none.clone(), slice_mut);
 }
+
+pub fn test_wrapped_call_once() {
+    let wrapped = core::ops::NeverShortCircuit::wrap_mut_1(|c| c + 10);
+    assert_eq!(25, wrapped.call_once((15,)).0);
+}

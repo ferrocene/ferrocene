@@ -135,6 +135,8 @@
 // Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
 // panics in the certified runtime
 #![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
+// Ferrocene addition: We enable `slice_index_methods` so we can cover them
+#![feature(slice_index_methods)]
 
 // Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
 #[cfg(all(ferrocene_coverage, not(panic = "abort")))]

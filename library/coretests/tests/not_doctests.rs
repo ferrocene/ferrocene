@@ -1,7 +1,14 @@
+mod atomic;
+mod borrow;
+mod cell;
+mod intrinsics;
+mod iter;
 mod num;
+mod slice;
+mod str;
+mod time;
 
 use core::cmp::Ordering;
-use core::mem::MaybeUninit;
 use core::ops::{Bound, ControlFlow};
 use core::panic::Location;
 use core::sync::atomic::AtomicU32;
@@ -115,15 +122,13 @@ fn option_methods() {
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "reached")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "reached"]
 fn filter_option() {
     let _ = Some("foo").filter(|_| panic!("reached"));
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "reached")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "reached"]
 fn inspect_option() {
     let _ = Some("foo").inspect(|_| panic!("reached"));
 }
@@ -180,15 +185,13 @@ fn result_methods() {
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "reached")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "reached"]
 fn inspect_result() {
     let _ = Ok::<&str, &str>("foo").inspect(|_| panic!("reached"));
 }
 
 #[test]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), should_panic = "reached")]
-#[cfg_attr(feature = "ferrocene_certified_runtime", should_panic)]
+#[should_panic = "reached"]
 fn inspect_result_err() {
     let _ = Err::<&str, &str>("foo").inspect_err(|_| panic!("reached"));
 }
@@ -358,24 +361,6 @@ fn abs_diff_vectorization() {
 }
 
 #[test]
-fn maybe_uninit() {
-    let mut maybe = MaybeUninit::new(u64::MIN);
-
-    let mut ptr = MaybeUninit::slice_as_ptr(maybe.as_bytes());
-
-    for _ in 0..core::mem::size_of::<u64>() {
-        assert_eq!(unsafe { ptr.read() }, u8::MIN);
-        ptr = unsafe { ptr.add(1) };
-    }
-
-    for byte in maybe.as_bytes_mut() {
-        byte.write(u8::MAX);
-    }
-
-    assert_eq!(*unsafe { maybe.assume_init_ref() }, u64::MAX);
-}
-
-#[test]
 fn slice_methods() {
     let mut arr = [0; 10];
     let slice = arr.as_mut_slice();
@@ -477,4 +462,477 @@ fn as_mut_array() {
 
     assert!(slice.as_mut_array::<2>().is_none());
     assert!(slice.as_mut_array::<1>().is_some());
+}
+
+#[test]
+fn exact_iterator_mut_ref_is_empty() {
+    assert!((&mut (0..0)).is_empty());
+    assert!(!(&mut (0..1)).is_empty());
+}
+
+#[test]
+fn chunks_exact_is_empty() {
+    assert!([0; 10].chunks_exact(11).is_empty());
+    assert!(![0; 10].chunks_exact(2).is_empty());
+
+    assert!([0; 10].chunks_exact_mut(11).is_empty());
+    assert!(![0; 10].chunks_exact_mut(2).is_empty());
+}
+macro_rules! ilog2_loop {
+    ($(($T:ty, $ilog2_max:expr) => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(<$T>::MAX.ilog2(), $ilog2_max);
+                for i in 0..=$ilog2_max {
+                    let p = (2 as $T).pow(i as u32);
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog2(), i - 1);
+                    }
+                    assert_eq!(p.ilog2(), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog2(), i);
+                    }
+
+                    // also check `x.ilog(2)`
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog(2), i - 1);
+                    }
+                    assert_eq!(p.ilog(2), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog(2), i);
+                    }
+                }
+            }
+        )*
+    };
+}
+
+ilog2_loop! {
+    (u8, 7) => ilog2_u8,
+    (u16, 15) => ilog2_u16,
+    (u32, 31) => ilog2_u32,
+    (u64, 63) => ilog2_u64,
+    (u128, 127) => ilog2_u128,
+    (i8, 6) => ilog2_i8,
+    (i16, 14) => ilog2_i16,
+    (i32, 30) => ilog2_i32,
+    (i64, 62) => ilog2_i64,
+    (i128, 126) => ilog2_i128,
+}
+
+macro_rules! nonpositive_ilog2 {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic = "argument of integer logarithm must be positive"]
+            fn $fn() {
+                let _ = (-1 as $T).ilog2();
+            }
+        )*
+    };
+}
+
+nonpositive_ilog2! {
+    i8 => nonpositive_ilog2_of_i8,
+    i16 => nonpositive_ilog2_of_i16,
+    i32 => nonpositive_ilog2_of_i32,
+    i64 => nonpositive_ilog2_of_i64,
+    i128 => nonpositive_ilog2_of_i128,
+}
+
+#[test]
+fn str_bytes() {
+    let s = "yellow submarine";
+
+    assert!(s.bytes().all(|b| b.is_ascii()));
+    assert!(s.bytes().any(|b| b.is_ascii_whitespace()));
+    assert!(s.bytes().find(|b| *b == b'i').is_some());
+    assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
+}
+
+#[test]
+fn step_default_forward_and_backward() {
+    use core::iter::Step;
+
+    #[derive(Debug, Clone, PartialOrd, PartialEq)]
+    struct Wrapper(usize);
+
+    impl Step for Wrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            usize::steps_between(&start.0, &end.0)
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::forward_checked(start.0, count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::backward_checked(start.0, count).map(Self)
+        }
+    }
+
+    assert_eq!(unsafe { Step::forward_unchecked(Wrapper(0), 10) }, Wrapper(10));
+    assert_eq!(unsafe { Step::backward_unchecked(Wrapper(10), 10) }, Wrapper(0));
+}
+
+macro_rules! int_step {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&<$T>::MIN, &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MAX / 2), &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MIN), &(<$T>::MIN + 1));
+                assert_eq!(1, lower_bound);
+                assert_eq!(Some(1), upper_bound);
+
+                assert_eq!(
+                    (0, None),
+                    <$T as core::iter::Step>::steps_between(&<$T>::MAX, &<$T>::MIN)
+                );
+
+                assert_eq!(
+                    <$T>::MAX,
+                    <$T as core::iter::Step>::backward(<$T>::MIN, 1)
+                );
+                let half_max = (<$T>::MAX / 2) as usize;
+                let expected = <$T>::MAX - half_max as $T;
+                assert_eq!(
+                    expected,
+                    <$T as core::iter::Step>::backward(<$T>::MAX, half_max)
+                );
+                assert_eq!(
+                    expected,
+                    unsafe { <$T as core::iter::Step>::backward_unchecked(<$T>::MAX, half_max) }
+                );
+                assert_eq!(
+                    Some(expected),
+                    <$T as core::iter::Step>::backward_checked(<$T>::MAX, half_max)
+                );
+                assert!(
+                    <$T as core::iter::Step>::backward_checked(<$T>::MIN, usize::MAX).is_none()
+                );
+
+                assert!(
+                    <$T as core::iter::Step>::forward_checked(<$T>::MAX, usize::MAX).is_none()
+                );
+                assert_eq!(
+                    Some(<$T>::MIN + <$T>::MAX as usize as $T),
+                    <$T as core::iter::Step>::forward_checked(<$T>::MIN, <$T>::MAX as usize)
+                );
+                assert_eq!(
+                    <$T>::MIN,
+                    <$T as core::iter::Step>::forward(<$T>::MAX, 1)
+                );
+                assert_eq!(
+                    <$T>::MIN + <$T>::MAX as usize as $T,
+                    <$T as core::iter::Step>::forward(<$T>::MIN, <$T>::MAX as usize)
+                );
+            }
+        )*
+    };
+}
+
+int_step! {
+    i8 => i8_step,
+    i16 => i16_step,
+    i32 => i32_step,
+    i64 => i64_step,
+    i128 => i128_step,
+    isize => isize_step,
+    u8 => u8_step,
+    u16 => u16_step,
+    u32 => u32_step,
+    u64 => u64_step,
+    u128 => u128_step,
+    usize => usize_step,
+}
+
+// covers:
+// - `<core::mem::Discriminant<T> as core::cmp::PartialEq>::eq`
+// - `core::mem::discriminant`
+#[test]
+fn discriminant() {
+    enum Foo {
+        A,
+        B,
+    }
+    assert_eq!(core::mem::discriminant(&Foo::A), core::mem::discriminant(&Foo::A));
+    assert_ne!(core::mem::discriminant(&Foo::A), core::mem::discriminant(&Foo::B));
+}
+
+// core::mem::maybe_uninit::MaybeUninit::<T>::slice_as_ptr
+#[test]
+fn maybe_uninit_slice_as_ptr() {
+    let mut maybe = core::mem::MaybeUninit::new(u64::MIN);
+
+    let mut ptr = core::mem::MaybeUninit::slice_as_ptr(maybe.as_bytes());
+
+    for _ in 0..core::mem::size_of::<u64>() {
+        assert_eq!(unsafe { ptr.read() }, u8::MIN);
+        ptr = unsafe { ptr.add(1) };
+    }
+
+    for byte in maybe.as_bytes_mut() {
+        byte.write(u8::MAX);
+    }
+
+    assert_eq!(*unsafe { maybe.assume_init_ref() }, u64::MAX);
+}
+
+// covers:
+// - `<core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone`
+// - `core::mem::maybe_uninit::MaybeUninit::<T>::as_bytes`
+// - `core::mem::maybe_uninit::MaybeUninit::<T>::as_bytes_mut`
+#[test]
+fn maybe_uninit() {
+    let mut source = core::mem::MaybeUninit::<u64>::uninit();
+    // This looks rather artificial but it guarantees that:
+    // - `Clone` implementation for `MaybeUninit` is covered.
+    // - `destination` is uninitialized.
+    let mut destination = source.clone();
+
+    // Initialize `source`
+    source.write(u64::MAX);
+
+    // Initialize `destination` by copying each byte of `source` into `destination`.
+    for (src, dst) in source.as_bytes().into_iter().zip(destination.as_bytes_mut()) {
+        let val = unsafe { src.assume_init_read() };
+        dst.write(val);
+    }
+
+    // SAFETY: This was initialized to `u64::MAX`
+    let source = unsafe { source.assume_init() };
+    // SAFETY: This was initialized by copying the initialized bytes of `source` into it.
+    let destination = unsafe { destination.assume_init() };
+
+    assert_eq!(source, u64::MAX);
+    assert_eq!(destination, u64::MAX);
+}
+
+// covers `core::ptr::const_ptr::<impl *const T>::align_offset`
+#[test]
+#[should_panic = "align_offset: align is not a power-of-two"]
+fn non_power_of_two_align_offset() {
+    let ptr: *const () = &();
+    let _ = ptr.align_offset(3);
+}
+
+// covers:
+// - `core::ptr::non_null::NonNull::<T>::sub`
+// - `core::ptr::mut_ptr::<impl *mut T>::sub`
+#[test]
+fn zst_sub_is_noop() {
+    let ptr = core::ptr::NonNull::from_ref(&());
+    // SAFETY: `ptr` is a pointer to a ZST so substracting anything from it is a noop.
+    assert_eq!(ptr, unsafe { ptr.sub(isize::MAX as usize) });
+    assert_eq!(ptr.as_ptr(), unsafe { ptr.as_ptr().sub(isize::MAX as usize) });
+}
+
+// covers:
+// - `core::ptr::const_ptr::<impl core::cmp::Ord for *const T>::cmp`
+// - `core::ptr::const_ptr::<impl core::cmp::PartialOrd for *const T>::ge`
+// - `core::ptr::const_ptr::<impl core::cmp::PartialOrd for *const T>::gt`
+// - `core::ptr::const_ptr::<impl core::cmp::PartialOrd for *const T>::le`
+// - `core::ptr::const_ptr::<impl core::cmp::PartialOrd for *const T>::lt`
+// - `core::ptr::const_ptr::<impl core::cmp::PartialOrd for *const T>::partial_cmp`
+#[test]
+fn ptr_partial_ord() {
+    let arr = [0, 1];
+
+    let fst = arr.as_ptr();
+    let snd = unsafe { fst.add(1) };
+
+    assert!(fst.le(&fst));
+    assert!(fst.le(&snd));
+    assert!(fst.lt(&snd));
+
+    assert!(snd.ge(&snd));
+    assert!(snd.ge(&fst));
+    assert!(snd.gt(&fst));
+
+    assert_eq!(fst.partial_cmp(&fst), Some(core::cmp::Ordering::Equal));
+    assert_eq!(fst.partial_cmp(&snd), Some(core::cmp::Ordering::Less));
+    assert_eq!(snd.partial_cmp(&fst), Some(core::cmp::Ordering::Greater));
+}
+
+// covers:
+// - `core::ptr::read_volatile`
+// - `core::ptr::write_volatile`
+#[test]
+fn volatile_ops() {
+    let mut x = 0;
+    let y = &mut x as *mut i32;
+
+    unsafe {
+        std::ptr::write_volatile(y, 12);
+        assert_eq!(std::ptr::read_volatile(y), 12);
+    }
+}
+
+#[test]
+fn chunks_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let chunk = vals.chunks(2).nth(10);
+    assert!(chunk.is_none());
+}
+
+// <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn take_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let nth = vals.iter().take(2).nth(10);
+    assert!(nth.is_none());
+}
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
+#[test]
+fn skip_as_iter_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).fold(0, |x, y| x + y);
+    assert_eq!(folded, 0);
+}
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold
+#[test]
+fn skip_as_iter_try_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).try_fold(0, |x, y| std::io::Result::Ok(x + y)).unwrap();
+    assert_eq!(folded, 0);
+}
+
+// <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
+#[test]
+fn spec_iter_eq() {
+    let inf_1 = 0..;
+    let inf_2 = 1..;
+    assert_eq!(inf_1.into_iter().eq(inf_2), false);
+}
+
+// <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
+// Basically `test_decode_utf16_size_hint` from `char.rs`
+#[test]
+fn decode_utf_16_as_iter_size_hint() {
+    fn check(s: &[u16]) {
+        let mut iter = char::decode_utf16(s.iter().cloned());
+
+        loop {
+            let count = iter.clone().count();
+            let (lower, upper) = iter.size_hint();
+
+            assert!(
+                lower <= count && count <= upper.unwrap(),
+                "lower = {lower}, count = {count}, upper = {upper:?}"
+            );
+
+            if let None = iter.next() {
+                break;
+            }
+        }
+    }
+
+    check(&[0xD801, 0xD800, 0xD801, 0xD801]);
+}
+
+// <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_iterator_chain_advance_by() {
+    let first = vec![1, 2];
+    let second = vec![4, 5];
+    let mut iter = first.into_iter().chain(second.into_iter());
+    iter.advance_back_by(3).unwrap(); // Make `self.b = None`
+    iter.advance_by(2).ok(); // Go past `self.a`
+    assert_eq!(iter.next(), None);
+}
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::size_hint
+#[test]
+fn iter_zip_size_hint() {
+    #[derive(Clone, Copy)]
+    struct MaybeUpper {
+        val: usize,
+        size_hint: (usize, Option<usize>),
+    }
+
+    impl Iterator for MaybeUpper {
+        type Item = usize;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(self.val)
+        }
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            self.size_hint
+        }
+    }
+
+    let none = MaybeUpper { val: 1, size_hint: (0, None) };
+
+    let some_1 = MaybeUpper { val: 1, size_hint: (1, Some(1)) };
+    let some_2 = MaybeUpper { val: 2, size_hint: (2, Some(2)) };
+
+    let none_none_zip = none.zip(none);
+    assert_eq!(none_none_zip.size_hint(), (0, None));
+
+    let some_some_zip = some_1.zip(some_2);
+    assert_eq!(some_some_zip.size_hint(), (1, Some(1)));
+
+    let some_none_zip = some_1.zip(none);
+    assert_eq!(some_none_zip.size_hint(), (0, Some(1)));
+
+    let none_some_zip = none.zip(some_2);
+    assert_eq!(none_some_zip.size_hint(), (0, Some(2)));
+}
+
+// <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_nth
+#[test]
+fn iter_step_by_spec_nth() {
+    let mut it = (0_u128..).step_by(1);
+    let _first = it.next();
+    let stepped = it.nth(usize::MAX);
+    assert_eq!(stepped, Some(usize::MAX as u128 + 1));
+}
+
+// <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_last() {
+    let buf: Vec<usize> = vec![];
+    let it = buf.chunks(5);
+    assert_eq!(it.last(), None)
+}
+
+// <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_nth() {
+    let slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact(2);
+    assert_eq!(iter.nth(55), None);
+}
+
+// <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact_mut(2);
+    assert_eq!(iter.nth(55), None);
+}
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_mut_last() {
+    let mut buf: Vec<usize> = vec![];
+    let it = buf.chunks_mut(5);
+    assert_eq!(it.last(), None)
+}
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_mut(2);
+    assert_eq!(iter.nth(55), None);
 }

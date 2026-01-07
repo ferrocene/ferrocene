@@ -28,7 +28,7 @@
     issue = "none"
 )]
 
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
 #[cfg(feature = "ferrocene_certified_runtime")]
@@ -303,7 +303,6 @@ pub const fn panic_display<T: fmt::Display>(x: &T) -> ! {
     panic_fmt(format_args!("{}", *x));
 }
 
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
@@ -315,7 +314,6 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
     panic!("index out of bounds: the len is {len} but the index is {index}")
 }
 
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
@@ -356,7 +354,6 @@ fn panic_null_pointer_dereference() -> ! {
     )
 }
 
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
@@ -431,7 +428,7 @@ pub const fn const_panic_fmt(fmt: PanicArguments<'_>) -> ! {
 
 #[derive(Debug)]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub enum AssertKind {
     Eq,
     Ne,
@@ -443,7 +440,7 @@ pub enum AssertKind {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub fn assert_failed<T, U>(
     kind: AssertKind,
     left: &T,
@@ -462,7 +459,7 @@ where
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub fn assert_matches_failed<T: fmt::Debug + ?Sized>(
     left: &T,
     right: &str,
@@ -479,11 +476,10 @@ pub fn assert_matches_failed<T: fmt::Debug + ?Sized>(
 }
 
 /// Non-generic version of the above functions, to avoid code bloat.
-#[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold, optimize(size))]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 fn assert_failed_inner(
     kind: AssertKind,
     left: &dyn fmt::Debug,

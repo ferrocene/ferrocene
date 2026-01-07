@@ -202,7 +202,8 @@ impl<'a> Arguments<'a> {
     /// This function should _not_ be const, to make sure we don't accept
     /// format_args!() and panic!() with arguments in const, even when not evaluated:
     ///
-    /// ```compile_fail,E0015
+    #[cfg_attr(feature = "ferrocene_certified_runtime", doc = "```")]
+    #[cfg_attr(not(feature = "ferrocene_certified_runtime"), doc = "```compile_fail,E0015")]
     /// const _: () = if false { panic!("a {}", "a") };
     /// ```
     #[inline]
@@ -224,7 +225,8 @@ impl<'a> Arguments<'a> {
     /// This function should _not_ be const, to make sure we don't accept
     /// format_args!() and panic!() with arguments in const, even when not evaluated:
     ///
-    /// ```compile_fail,E0015
+    #[cfg_attr(feature = "ferrocene_certified_runtime", doc= "```")]
+    #[cfg_attr(not(feature = "ferrocene_certified_runtime"), doc= "```compile_fail,E0015")]
     /// const _: () = if false { panic!("a {:1}", "a") };
     /// ```
     #[inline]

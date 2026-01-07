@@ -1,0 +1,393 @@
+use std::array::IntoIter;
+
+// <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_iterator_copied_advance_by() {
+    let first = vec![1, 2];
+    let mut iter = first.iter().copied();
+    iter.advance_by(1).ok();
+    assert_eq!(iter.next(), Some(2));
+}
+
+// <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn test_iterator_copied_last() {
+    let first = vec![1, 2];
+    let iter = first.iter().copied();
+    assert_eq!(iter.last(), Some(2));
+}
+
+// <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn test_iterator_copied_nth() {
+    let first = vec![1, 2];
+    let mut iter = first.iter().copied();
+    assert_eq!(iter.nth(1), Some(2));
+}
+
+// <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfind
+#[test]
+fn test_iter_rev_double_ended_rfind() {
+    let val = vec![1, 2, 3, 4];
+    let iter = val.iter();
+    let mut rev = iter.rev();
+    assert_eq!(*rev.rfind(|_| true).unwrap(), 1);
+}
+
+// <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+#[test]
+fn test_iter_rev_double_ended_rfold() {
+    let val = vec![1, 2, 3];
+    let iter = val.iter();
+    let rev = iter.rev();
+    assert_eq!(rev.rfold(0, |a, b| a + b), 6);
+}
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::fold
+#[test]
+fn test_iter_zip_fold() {
+    let first = vec![1, 2, 3];
+    let first_iter: Box<dyn Iterator<Item = i32>> = Box::new(first.into_iter());
+    let second = vec![1, 2, 3];
+    let second_iter: Box<dyn Iterator<Item = i32>> = Box::new(second.into_iter());
+    let zipped: core::iter::Zip<_, _> = first_iter.zip(second_iter);
+    assert_eq!(zipped.fold(0, |a, (b1, b2)| a + b1 + b2), 12);
+}
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::nth
+#[test]
+fn test_iter_zip_nth() {
+    let first = vec![1, 2, 3];
+    let first_iter: Box<dyn Iterator<Item = i32>> = Box::new(first.into_iter());
+    let second = vec![1, 2, 3];
+    let second_iter: Box<dyn Iterator<Item = i32>> = Box::new(second.into_iter());
+    let mut zipped: core::iter::Zip<_, _> = first_iter.zip(second_iter);
+    assert_eq!(zipped.nth(1), Some((2, 2)));
+}
+
+// <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::find
+#[test]
+fn test_iter_rev_find() {
+    let first = vec![1, 2, 3];
+    let mut reversed = first.iter().rev();
+    assert_eq!(*reversed.find(|_| true).unwrap(), 3);
+}
+
+// <&mut I as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_mut_ref_iterator_advance_by() {
+    let x = &mut [1, 2, 3];
+    let mut iter = x.iter();
+    assert!(Iterator::advance_by(&mut &mut iter, 1).is_ok());
+}
+
+// <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+#[test]
+fn test_array_into_iter_double_ended_rfold() {
+    let x = [1_u16, 2, 3];
+    let mut iter = x.into_iter();
+    assert!(
+        <IntoIter<_, _> as DoubleEndedIterator>::try_rfold(&mut &mut iter, 0_u16, |a, b| a
+            .checked_add(b))
+        .is_some()
+    );
+}
+
+// <core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_nth
+#[test]
+fn test_iter_step_by_spec_try_fold() {
+    let x = 0_u16..100;
+    let iter = x.into_iter();
+    let mut step_by = iter.step_by(2);
+    assert_eq!(step_by.nth(2), Some(4),);
+}
+
+// Used to test Range bits.
+#[derive(Clone, PartialEq, PartialOrd, Debug)]
+enum Steppable {
+    A,
+    B,
+    C,
+}
+impl core::iter::Step for Steppable {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        match (start, end) {
+            (Self::A, Self::A) => (0, Some(0)),
+            (Self::A, Self::B) => (1, Some(1)),
+            (Self::A, Self::C) => (2, Some(2)),
+            (Self::B, Self::B) => (0, Some(0)),
+            (Self::B, Self::C) => (1, Some(1)),
+            (Self::C, Self::C) => (0, Some(0)),
+            (Self::C, Self::B) => (1, Some(1)),
+            (Self::C, Self::A) => (2, Some(2)),
+            (Self::B, Self::A) => (1, Some(1)),
+        }
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                1 => Some(Self::B),
+                2 => Some(Self::C),
+                _ => None,
+            },
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::C),
+                _ => None,
+            },
+            Self::C => match count {
+                0 => Some(Self::C),
+                _ => None,
+            },
+        }
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                _ => None,
+            },
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::A),
+                _ => None,
+            },
+            Self::C => match count {
+                0 => Some(Self::C),
+                1 => Some(Self::B),
+                2 => Some(Self::A),
+                _ => None,
+            },
+        }
+    }
+}
+
+// Used to test Range bits.
+#[derive(Clone, PartialEq, PartialOrd, Debug)]
+enum SteppableBrokenStepsBetween {
+    A,
+    B,
+    C,
+}
+
+impl core::iter::Step for SteppableBrokenStepsBetween {
+    fn steps_between(_start: &Self, _end: &Self) -> (usize, Option<usize>) {
+        (1, None)
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        if count == 1 {
+            return None;
+        }
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                1 => Some(Self::B),
+                2 => Some(Self::C),
+                _ => None,
+            },
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::C),
+                _ => None,
+            },
+            Self::C => match count {
+                0 => Some(Self::C),
+                _ => None,
+            },
+        }
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        if count == 1 {
+            return None;
+        }
+        match start {
+            Self::A => match count {
+                0 => Some(Self::A),
+                _ => None,
+            },
+            Self::B => match count {
+                0 => Some(Self::B),
+                1 => Some(Self::A),
+                _ => None,
+            },
+            Self::C => match count {
+                0 => Some(Self::C),
+                1 => Some(Self::B),
+                2 => Some(Self::A),
+                _ => None,
+            },
+        }
+    }
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
+#[test]
+fn test_range_spec_nth() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::nth(&mut x, 2), None,);
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back
+#[test]
+fn test_range_spec_nth_back() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 1),
+        Some(Steppable::A),
+    );
+    assert_eq!(<core::ops::Range<Steppable> as DoubleEndedIterator>::nth_back(&mut x, 4), None,);
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
+#[test]
+#[should_panic = "`Step` invariants not upheld"]
+fn test_range_spec_nth_invariant() {
+    let mut x = core::ops::Range {
+        start: SteppableBrokenStepsBetween::A,
+        end: SteppableBrokenStepsBetween::C,
+    };
+    assert_eq!(<core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::nth(&mut x, 0), None,);
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_by
+#[test]
+#[should_panic = "`Step` invariants not upheld"]
+fn test_range_spec_advance_by() {
+    let mut x = core::ops::Range {
+        start: SteppableBrokenStepsBetween::A,
+        end: SteppableBrokenStepsBetween::C,
+    };
+    assert!(
+        <core::ops::Range<SteppableBrokenStepsBetween> as Iterator>::advance_by(&mut x, 4).is_err()
+    );
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_back_by
+#[test]
+fn test_range_spec_advance_back_by() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::advance_back_by(&mut x, 4).is_err()
+    );
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_next
+#[test]
+fn test_range_spec_next() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::next(&mut x), Some(Steppable::A),);
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::next(&mut x), Some(Steppable::B),);
+    assert_eq!(<core::ops::Range<Steppable> as Iterator>::next(&mut x), None,);
+}
+
+// <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_next_back
+#[test]
+fn test_range_spec_next_back() {
+    let mut x = core::ops::Range { start: Steppable::A, end: Steppable::C };
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
+        Some(Steppable::B),
+    );
+    assert_eq!(
+        <core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x),
+        Some(Steppable::A),
+    );
+    assert_eq!(<core::ops::Range<Steppable> as DoubleEndedIterator>::next_back(&mut x), None,);
+}
+
+// <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
+#[test]
+fn test_iterator_spec_advance_by() {
+    struct FooSome;
+    trait FunSome {}
+    impl FunSome for FooSome {}
+    impl Iterator for dyn FunSome {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(1)
+        }
+    }
+
+    let mut foo = FooSome;
+    let foo: &mut dyn FunSome = &mut foo;
+    assert!(foo.advance_by(5).is_ok());
+
+    struct FooNone;
+    trait FunNone {}
+    impl FunNone for FooNone {}
+    impl Iterator for dyn FunNone {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            None
+        }
+    }
+
+    let mut foo = FooNone;
+    let foo: &mut dyn FunNone = &mut foo;
+    assert!(foo.advance_by(5).is_err());
+}
+
+// <&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_try_fold
+#[test]
+fn test_iterator_spec_try_fold() {
+    struct FooSome;
+    trait FunSome {}
+    impl FunSome for FooSome {}
+    impl Iterator for dyn FunSome {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(1)
+        }
+    }
+
+    use core::ops::ControlFlow;
+    let mut foo = FooSome;
+    let foo: &mut dyn FunSome = &mut foo;
+    let mut took = foo.take(10);
+    assert!(took.try_fold(0, |a, b| ControlFlow::<usize, _>::Continue(a + b)).is_continue());
+    assert!(took.try_fold(0, |_, _| ControlFlow::Break(1)).is_continue());
+}
+
+// <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn test_iterator_windows_nth() {
+    let x = [1, 2, 3, 4, 5, 6];
+    let mut windows = x.windows(2);
+    assert_eq!(Iterator::nth(&mut windows, 55), None);
+}
+
+// <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn test_iterator_windows_last() {
+    let x: [usize; 0] = [];
+    let windows = x.windows(2);
+    assert_eq!(windows.last(), None);
+}
+
+// <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_chars_iter_advance_by() {
+    macro_rules! repeat8 {
+        ($s:expr) => {
+            concat!($s, $s, $s, $s, $s, $s, $s, $s)
+        };
+    }
+    const CORPORA: &str = repeat8!(
+        "Сотни компаний по всему миру используют Rust в реальных\
+        проектах для быстрых кросс-платформенных решений с\
+        ограниченными ресурсами. Такие проекты, как Firefox,\
+        Dropbox и Cloudflare, используют Rust. Rust отлично\
+        подходит как для стартапов, так и для больших компаний,\
+        как для встраиваемых устройств, так и для масштабируемых\
+        web-сервисов. Мой самый большой комплимент Rust."
+    );
+    for x in 0..1000 {
+        let mut chars = CORPORA.chars();
+        chars.advance_by(x).ok();
+    }
+}

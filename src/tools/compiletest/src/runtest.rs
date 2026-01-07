@@ -189,6 +189,7 @@ pub fn compute_stamp_hash(config: &Config) -> String {
     config.stage_id.hash(&mut hash);
     config.run.hash(&mut hash);
     config.edition.hash(&mut hash);
+    env::var_os("QEMU_CPU").hash(&mut hash);
 
     match config.debugger {
         Some(Debugger::Cdb) => {

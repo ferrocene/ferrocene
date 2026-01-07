@@ -974,7 +974,6 @@ impl Duration {
     /// let res = Duration::from_secs_f64(0.999e-9);
     /// assert_eq!(res, Duration::new(0, 1));
     /// ```
-    #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
@@ -1677,6 +1676,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
     #[inline]
+    #[ferrocene::annotation("`mantissa_bits` cannot be covered due to a coverage tooling bug")]
     pub fn try_from_secs_f32(secs: f32) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,

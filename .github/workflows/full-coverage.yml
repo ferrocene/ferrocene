@@ -95,14 +95,11 @@ jobs:
         with:
           container: ${{ inputs.container }}
           script: |
-            ./x.py test --coverage=library library/core library/std --no-doc
+            ./x.py test --coverage=library library/core library/alloc --no-doc
 
       - name: Upload artifacts to S3
         env:
           AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ env.ARTIFACT }}
-        run:
-          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
-
-
+        run: ./ferrocene/ci/scripts/upload-dist-artifacts.sh

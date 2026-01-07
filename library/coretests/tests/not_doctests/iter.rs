@@ -409,3 +409,15 @@ fn test_index_range_double_ended_iterator() {
 fn test_index_range_iterator() {
     core::ferrocene_test::test_index_range_iterator();
 }
+
+// covers `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::nth`.
+#[test]
+fn test_nth_for_chain() {
+    let a = vec![].into_iter();
+    let b = vec![1, 2, 3].into_iter();
+
+    let mut iter = a.chain(b);
+
+    assert_eq!(Some(1), iter.nth(0));
+    assert_eq!(Some(3), iter.nth(1));
+}

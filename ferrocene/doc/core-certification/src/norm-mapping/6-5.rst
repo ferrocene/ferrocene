@@ -1,0 +1,66 @@
+=============
+ISO 26262 6-5
+=============
+
+6-5 General Topics for the Product Development at the Software Level
+====================================================================
+
+5.4.1
+------
+
+Safety Plan    Responsibility split
+
+5.4.1.a
+~~~~~~~
+
+Safety Plan
+
+5.4.1.b
+~~~~~~~
+
+see 5.4.1
+
+5.4.1.c
+~~~~~~~
+
+Not applicable, only SW SEooC, assumptions on supported HW platforms
+
+5.4.2
+-----
+
+Safety Plan - Programming language
+
+5.4.2.a
+~~~~~~~
+
+see 5.4.2
+
+5.4.2.b
+~~~~~~~
+
+see 5.4.2
+
+5.4.2.c
+~~~~~~~
+
+see 5.4.2
+
+5.4.2.d
+~~~~~~~
+
+see 5.4.2
+
+5.4.3
+-----
+
+Reference to upstream process
+
+.. TODO
+   Apply the same justification as for IEC 61508-3 Annex A Table A.4
+   Method 5
+
+5.4.3.E2
+~~~~~~~~
+
+5.4.3.N1
+~~~~~~~~

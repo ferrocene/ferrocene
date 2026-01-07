@@ -1,0 +1,49 @@
+=============
+ISO 26262 8-7
+=============
+
+8-7 Configuration Management
+============================
+
+7.5.1
+------
+
+7.4.1
+-----
+
+Build and Testing Process    Development Process
+
+7.4.2
+-----
+
+Build and Testing Process    Development Process
+
+7.4.2.a
+~~~~~~~
+
+see 7.4.2
+
+7.4.2.b
+~~~~~~~
+
+see 7.4.2
+
+7.4.2.N2
+~~~~~~~~
+
+7.4.3
+-----
+
+Build and Testing Process    Development Process
+
+7.4.4
+-----
+
+Build and Testing Process    Development Process    Lifecycle Phases
+Overview
+
+7.4.5
+-----
+
+Build and Testing Process    Development Process    Lifecycle Phases
+Overview

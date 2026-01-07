@@ -8,9 +8,6 @@ ISO 26262 2-7
 7.4.1
 ------
 
-.. TODO
-   Check heading level
-
 Only partially applicable, as SW SEooC
 
 7.4.2
@@ -44,8 +41,9 @@ Not applicable, as SW SEooC
 7.4.2.3
 ~~~~~~~
 
-Qualification Plan - Known Problems Tracking    Safety Manual - Known
-Problems    Safety Manual
+- Qualification Plan - Known Problems Tracking
+- Safety Manual - Known Problems
+- Safety Manual
 
 7.4.2.4
 ~~~~~~~

@@ -8,7 +8,8 @@ ISO 26262 6-5
 5.4.1
 ------
 
-Safety Plan    Responsibility split
+- Safety Plan
+- Responsibility split
 
 5.4.1.a
 ~~~~~~~
@@ -58,9 +59,3 @@ Reference to upstream process
 .. TODO
    Apply the same justification as for IEC 61508-3 Annex A Table A.4
    Method 5
-
-5.4.3.E2
-~~~~~~~~
-
-5.4.3.N1
-~~~~~~~~

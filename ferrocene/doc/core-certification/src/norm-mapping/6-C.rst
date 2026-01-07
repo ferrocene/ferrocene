@@ -50,11 +50,6 @@ C.4.2.c
 
 Not applicable
 
-C.4.2.N1
-~~~~~~~~
-
-Not applicable
-
 C.4.3
 -----
 
@@ -65,18 +60,8 @@ C.4.4
 
 Not applicable
 
-C.4.4.N1
-~~~~~~~~
-
-Not applicable
-
 C.4.5
 -----
-
-Not applicable
-
-C.4.5.N1
-~~~~~~~~
 
 Not applicable
 
@@ -105,18 +90,8 @@ C.4.6.d
 
 Not applicable
 
-C.4.6.N1
-~~~~~~~~
-
-Not applicable
-
 C.4.6.e
 ~~~~~~~
-
-Not applicable
-
-C.4.6.N2
-~~~~~~~~
 
 Not applicable
 
@@ -160,11 +135,6 @@ C.4.9.b
 
 Not applicable
 
-C.4.9.N1
-~~~~~~~~
-
-Not applicable
-
 C.4.10
 ------
 
@@ -187,10 +157,5 @@ Not applicable
 
 C.4.11.c
 ~~~~~~~~
-
-Not applicable
-
-C.4.11.N1
-~~~~~~~~~
 
 Not applicable

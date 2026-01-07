@@ -8,23 +8,16 @@ ISO 26262 6-6
 6.4.1
 ------
 
-Safety Plan - Requirements Management    Requirements are directly on
-unit level, no overall safety requirements as these are independent
+- Safety Plan - Requirements Management
+- Requirements are directly on unit level, no overall safety requirements as these are independent
 library functionalities
-
-6.4.1.E1
-~~~~~~~~
-
-6.4.1.E2
-~~~~~~~~
-
-6.4.1.N2
-~~~~~~~~
 
 6.4.2
 -----
 
 Same as IEC 61508-3 7.2.2.3 argument
+
+.. TODO
 
 6.4.2.a
 ~~~~~~~

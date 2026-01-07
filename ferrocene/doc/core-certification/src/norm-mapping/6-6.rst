@@ -1,0 +1,110 @@
+=============
+ISO 26262 6-6
+=============
+
+6-6 Specification of Software Safety Requirements
+=================================================
+
+6.4.1
+------
+
+Safety Plan - Requirements Management    Requirements are directly on
+unit level, no overall safety requirements as these are independent
+library functionalities
+
+6.4.1.E1
+~~~~~~~~
+
+6.4.1.E2
+~~~~~~~~
+
+6.4.1.N2
+~~~~~~~~
+
+6.4.2
+-----
+
+Same as IEC 61508-3 7.2.2.3 argument
+
+6.4.2.a
+~~~~~~~
+
+see 6.4.2
+
+6.4.2.b
+~~~~~~~
+
+see 6.4.2
+
+6.4.2.c
+~~~~~~~
+
+see 6.4.2
+
+6.4.2.d
+~~~~~~~
+
+see 6.4.2
+
+6.4.2.e
+~~~~~~~
+
+see 6.4.2
+
+6.4.2.f
+~~~~~~~
+
+see 6.4.2
+
+6.4.2.g
+~~~~~~~
+
+see 6.4.2
+
+6.4.3
+-----
+
+Not applicable, all ASIL B, no decomposition
+
+6.4.4
+-----
+
+Not applicable, no hardware-software interface, SW only component, HW
+assumptions are clearly stated on Certification Scope
+
+6.4.5
+-----
+
+Not applicable, only safety related functions
+
+6.4.6
+-----
+
+Not applicable, no hardware-software interface, SW only component, HW
+assumptions are clearly stated on Certification Scope
+
+6.4.7
+-----
+
+Same as IEC 61508-3 7.2.2.3 argument, no real requirements on this
+level, more unit level specification/requirements, see 6-8
+
+6.4.7.a
+~~~~~~~
+
+See above
+
+6.4.7.b
+~~~~~~~
+
+Not applicable, SW SEooC, no technical safety requirements/concept
+
+6.4.7.c
+~~~~~~~
+
+Not applicable, SW SEooC, no system level
+
+6.4.7.d
+~~~~~~~
+
+Not applicable, SW SEooC, no HSI

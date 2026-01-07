@@ -38,6 +38,25 @@ Core Library Certification
    norm-mapping/iec-61508/iec-61508-3
    norm-mapping/iec-61508/iec-61508-3-annex-a
    norm-mapping/iec-61508/iec-61508-3-annex-b
+   norm-mapping/2-5
+   norm-mapping/2-6
+   norm-mapping/2-7
+   norm-mapping/6-5
+   norm-mapping/6-6
+   norm-mapping/6-7
+   norm-mapping/6-8
+   norm-mapping/6-9
+   norm-mapping/6-10
+   norm-mapping/6-11
+   norm-mapping/7-7
+   norm-mapping/8-6
+   norm-mapping/8-7
+   norm-mapping/8-8
+   norm-mapping/8-9
+   norm-mapping/8-10
+   norm-mapping/8-11
+   norm-mapping/9-6
+   norm-mapping/6-C
 
 .. appendices::
    :numbered:

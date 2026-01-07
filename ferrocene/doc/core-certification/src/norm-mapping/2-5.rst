@@ -1,0 +1,212 @@
+=============
+ISO 26262 2-5
+=============
+
+2-5 Overall Safety Management
+=============================
+
+5.4.1
+------
+
+Safety Plan - Lifecycle Phases Overview  IEC 61508-1:5.2.1
+
+5.4.2
+-----
+
+5.4.2.1
+~~~~~~~
+
+5.4.2.2
+~~~~~~~
+
+Safety Plan - Lifecycle Phases Overview  Safety Plan - Roles and
+Responsibilities  IEC 61508-1:5.2.2
+
+5.4.2.3
+~~~~~~~
+
+Customer Interactions.  IEC 61508-1:6.2.4
+
+5.4.2.3.E2
+++++++++++
+
+see 5.4.2.3
+
+5.4.2.3.E3
+++++++++++
+
+see 5.4.2.3
+
+5.4.2.3.N1
+++++++++++
+
+see 5.4.2.3
+
+5.4.2.4
+~~~~~~~
+
+Safety Plan - Lifecycle Phases Overview    Accordance to 26262-8:10 not
+explicitl stated
+
+.. TODO
+   Reference to Accordance to 26262-8:10
+
+5.4.2.5
+~~~~~~~
+
+Not explicitly stated - need clarification for provision of ressources
+
+.. TODO
+   Reference to ISO 9001 process?
+
+5.4.2.6
+~~~~~~~
+
+Not explicitly stated - need clarification for improvement process
+
+.. TODO
+   Reference to ISO 9001 process?
+
+5.4.2.6.a
++++++++++
+
+see 5.4.2.6
+
+.. TODO
+   Reference to ISO 9001 process?
+
+5.4.2.6.b
++++++++++
+
+see 5.4.2.6
+
+.. TODO
+   Reference to ISO 9001 process?
+
+5.4.2.7
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.  IEC 61508-1:6.2.1
+
+5.4.3
+-----
+
+5.4.3.1
+~~~~~~~
+
+Internal procedures
+
+5.4.3.2
+~~~~~~~
+
+Internal procedures
+
+5.4.3.2.N2
+++++++++++
+
+see 5.4.3.2
+
+5.4.3.2.N3
+++++++++++
+
+see 5.4.3.2
+
+5.4.3.2.N4
+++++++++++
+
+see 5.4.3.2
+
+5.4.3.3
+~~~~~~~
+
+Internal procedures
+
+5.4.3.3.a
++++++++++
+
+see 5.4.3.3
+
+5.4.3.3.b
++++++++++
+
+see 5.4.3.3
+
+5.4.3.4.
+++++++++
+
+Internal procedures
+
+5.4.3.5
+~~~~~~~
+
+Internal procedures
+
+5.4.4
+-----
+
+5.4.4.1
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.
+
+5.4.4.1.N2
+++++++++++
+
+Safety Plan - Roles and responsibilities.
+
+5.4.4.1.N3
+++++++++++
+
+Safety Plan - Roles and responsibilities.
+
+5.4.4.1.E1
+++++++++++
+
+Safety Plan - Roles and responsibilities.
+
+5.4.5
+-----
+
+5.4.5.1
+~~~~~~~
+
+Detailed in Ferrous Systems’s ISO 9001 managed internal handbook and
+re-checked for each renewal of certification.
+
+5.4.6
+-----
+
+5.4.6.1
+~~~~~~~
+
+Safety Plan - Lifecycle Phases Overview
+
+5.4.6.1.a
++++++++++
+
+see 5.4.6.1
+
+5.4.6.1.b
++++++++++
+
+see 5.4.6.1
+
+5.4.6.1.c
++++++++++
+
+see 5.4.6.1
+
+5.4.6.1.d
++++++++++
+
+see 5.4.6.1
+
+5.4.6.1.e
++++++++++
+
+see 5.4.6.1
+
+5.4.6.1.f
++++++++++
+
+see 5.4.6.1

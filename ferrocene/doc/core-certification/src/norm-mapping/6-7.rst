@@ -1,0 +1,328 @@
+=============
+ISO 26262 6-7
+=============
+
+6-7 Software Architectural Design
+=================================
+
+7.4.1
+------
+
+Not applicable  IEC 61508-3 7.4.3
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.1.a
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.b
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.c
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.d
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.e
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.f
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.g
+~~~~~~~
+
+see 7.4.1
+
+7.4.1.h
+~~~~~~~
+
+see 7.4.1
+
+7.4.2
+-----
+
+Not applicable  IEC 61508 7.4.3
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.2.a
+~~~~~~~
+
+see 7.4.2
+
+7.4.2.b
+~~~~~~~
+
+Not applicable  IEC 61508 7.2.2.11
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.2.c
+~~~~~~~
+
+see 7.4.2
+
+7.4.2.d
+~~~~~~~
+
+see 7.4.2
+
+7.4.2.e
+~~~~~~~
+
+see 7.4.2
+
+7.4.3
+-----
+
+Not applicable  IEC 61508 7.4.3
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.3.a
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.b
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.c
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.d
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.e
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.f
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.g
+~~~~~~~
+
+see 7.4.3
+
+7.4.3.N2
+~~~~~~~~
+
+see 7.4.3
+
+7.4.3.N3
+~~~~~~~~
+
+see 7.4.3
+
+7.4.4
+-----
+
+Not applicable  IEC 61508 7.4.3
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.5
+-----
+
+Not applicable  IEC 61508 7.4.3
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.5.a
+~~~~~~~
+
+see 7.4.5
+
+7.4.5.N2
+~~~~~~~~
+
+see 7.4.5
+
+7.4.5.b
+~~~~~~~
+
+see 7.4.5
+
+7.4.5.N4
+~~~~~~~~
+
+see 7.4.5
+
+7.4.5.N5
+~~~~~~~~
+
+see 7.4.5
+
+7.4.6
+-----
+
+Safety Plan - Requirements Management  IEC 61508 - 7.4.2.8-11
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.7
+-----
+
+Not applicable, no pre-existing SW element
+
+7.4.5.N2
+~~~~~~~~
+
+7.4.8
+-----
+
+IEC 61508-3 7.4.2.8-11
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.9
+-----
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.9.a
+~~~~~~~
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.9.N2
+~~~~~~~~
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.9.N3
+~~~~~~~~
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.9.b
+~~~~~~~
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.9.c
+~~~~~~~
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.9.d
+~~~~~~~
+
+Not applicable, no partitioning, all ASIL B
+
+7.4.10
+------
+
+Not applicable, only single component as SW SEooC, no further safety
+analysis required
+
+7.4.10.a
+~~~~~~~~
+
+Not applicable, only single component as SW SEooC
+
+7.4.10.N3
+~~~~~~~~~
+
+7.4.11
+------
+
+Not applicable, only single component as SW SEooC with single ASIL
+
+7.4.12
+------
+
+Not applicable, only single component as SW SEooC, integrator
+responsibility
+
+7.4.12.N2
+~~~~~~~~~
+
+7.4.12.N3
+~~~~~~~~~
+
+7.4.12.N4
+~~~~~~~~~
+
+7.4.13
+------
+
+Not applicable  IEC 61508 7.2.2.5
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.13.a
+~~~~~~~~
+
+see 7.4.13
+
+7.4.13.b
+~~~~~~~~
+
+see 7.4.13
+
+7.4.13.c
+~~~~~~~~
+
+see 7.4.13
+
+7.4.14
+------
+
+Not applicable  IEC 61508
+
+.. TODO
+   Add explanation as for 61508
+
+7.4.14.a
+~~~~~~~~
+
+see 7.4.14
+
+7.4.14.b
+~~~~~~~~
+
+see 7.4.14
+
+7.4.14.c
+~~~~~~~~
+
+see 7.4.14
+
+7.4.14.d
+~~~~~~~~
+
+see 7.4.14

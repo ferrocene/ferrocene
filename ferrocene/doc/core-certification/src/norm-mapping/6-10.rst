@@ -1,0 +1,125 @@
+==============
+ISO 26262 6-10
+==============
+
+6-10 Software Integration and Verification
+==========================================
+
+10.4.1
+-------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.1.a
+~~~~~~~~
+
+see 10.4.1
+
+10.4.1.b
+~~~~~~~~
+
+see 10.4.1
+
+10.4.1.c
+~~~~~~~~
+
+see 10.4.1
+
+10.4.2
+------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.2.a
+~~~~~~~~
+
+see 10.4.2
+
+10.4.2.b
+~~~~~~~~
+
+see 10.4.2
+
+10.4.2.c
+~~~~~~~~
+
+see 10.4.2
+
+10.4.2.d
+~~~~~~~~
+
+see 10.4.2
+
+10.4.2.e
+~~~~~~~~
+
+see 10.4.2
+
+10.4.2.f
+~~~~~~~~
+
+see 10.4.2
+
+10.4.2.N2
+~~~~~~~~~
+
+10.4.3
+------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.4
+------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.5
+------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.5.N1
+~~~~~~~~~
+
+10.4.5.N2
+~~~~~~~~~
+
+10.4.6
+------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.6.N1
+~~~~~~~~~
+
+10.4.7
+------
+
+Not applicable    Add missing explanation/justification
+
+.. TODO
+   Add explanation as for IEC 61508
+
+10.4.7.N2
+~~~~~~~~~
+
+10.4.7.N3
+~~~~~~~~~

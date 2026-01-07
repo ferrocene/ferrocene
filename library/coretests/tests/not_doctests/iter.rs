@@ -350,7 +350,7 @@ fn test_iterator_spec_try_fold() {
     let foo: &mut dyn FunSome = &mut foo;
     let mut took = foo.take(10);
     assert!(took.try_fold(0, |a, b| ControlFlow::<usize, _>::Continue(a + b)).is_continue());
-    assert!(took.try_fold(0, |a, b| ControlFlow::Break(1)).is_continue());
+    assert!(took.try_fold(0, |_, _| ControlFlow::Break(1)).is_continue());
 }
 
 // <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::nth

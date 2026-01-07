@@ -18,6 +18,45 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.92.0
+-------------------------------
+
+- `Document MaybeUninit representation and validity <https://github.com/rust-lang/rust/pull/140463>`_
+
+  - This is not a language change
+
+- `Allow "&raw [mut | const]" for union field in safe code <https://github.com/rust-lang/rust/pull/141469>`_
+
+  - This lifted restriction was not specified in the FLS
+
+- `Prefer item bounds of associated types over where-bounds for auto-traits and Sized <https://github.com/rust-lang/rust/pull/144064>`_
+
+  - This is a fix for a regression that only existed in development versions of Rust (Beta and Nightly)
+
+- `Do not materialize X in "[X; 0]" when X is unsizing a const <https://github.com/rust-lang/rust/pull/145277>`_
+
+  - This behavior was not documented in the FLS
+
+- `Support combining #[track_caller] and #[no_mangle] (requires every declaration specifying #[track_caller] as well) <https://github.com/rust-lang/rust/pull/145724>`_
+
+  - This lifted restriction was not documented in the FLS
+
+- `Make never type lints never_type_fallback_flowing_into_unsafe and dependency_on_unit_never_type_fallback deny-by-default <https://github.com/rust-lang/rust/pull/146167>`_
+
+  - Lints are not part of the FLS
+
+- `Allow specifying multiple bounds for same associated item, except in trait objects <https://github.com/rust-lang/rust/pull/146593>`_
+
+  - This lifted restriction was not documented in the FLS
+
+- `Slightly strengthen higher-ranked region handling in coherence <https://github.com/rust-lang/rust/pull/146725>`_
+
+  - The lifted restriction was not documented in the FLS
+
+- `The unused_must_use lint no longer warns on "Result<(), Uninhabited>" (for instance, "Result<(), !>"), or "ControlFlow<Uninhabited, ()>" <https://github.com/rust-lang/rust/pull/147382>`_. This avoids having to check for an error that can never happen.
+
+  - No change: lints are not part of the FLS
+
 Language changes in Rust 1.91.1
 -------------------------------
 
@@ -27,6 +66,27 @@ Language changes in Rust 1.91.0
 -------------------------------
 
 - `Lower pattern bindings in the order they're written and base drop order on primary bindings' order <https://github.com/rust-lang/rust/pull/143764>`_
+
+  - New section: :ref:`fls_VsBXBj4AqCj1`
+
+  - New paragraphs:
+
+    - :p:`fls_W2S2FrkuedYC`
+    - :p:`fls_THzA0QFdMMJB`
+    - :p:`fls_dhfIPP4yR3Tt`
+    - :p:`fls_zxFM7EoE2Xq8`
+    - :p:`fls_093YxG6YXQz2`
+    - :p:`fls_gNWXh61ZXXt8`
+    - :p:`fls_VQMmveZUfNTn`
+    - :p:`fls_72JHo343O7jp`
+    - :p:`fls_YDVgFaTQwcL8`
+    - :p:`fls_tZJgZDWVChJV`
+
+  - Changed paragraphs:
+
+    - :p:`fls_g07zq3n55094`
+    - :p:`fls_8luyomzppck`
+    - :p:`fls_kv533rntni1x`
 
 - `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
   This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
@@ -45,6 +105,8 @@ Language changes in Rust 1.91.0
     - :p:`fls_jOyZh9ujWWHQ`
     - :p:`fls_Xdr0bFwxhWiB`
     - :p:`fls_DpTFEHZAABdD`
+    - :p:`fls_6urL6fZ5cpaA`
+    - :p:`fls_TMOzb6cYIOlH`
     - :p:`fls_eHPWHrvs7ETl`
     - :p:`fls_mjCrvmikm58M`
     - :p:`fls_4EUb9zFatZ97`

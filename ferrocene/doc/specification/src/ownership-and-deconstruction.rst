@@ -695,12 +695,12 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
 :t:`drop scope` are :t:`dropped` as follows:
 
 * :dp:`fls_g07zq3n55094`
-  :t:`[Binding]s` are :t:`dropped` in reverse declaration order.
+  All other :t:`[binding]s` are :t:`dropped` in reverse declaration order.
 
 * :dp:`fls_W2S2FrkuedYC`
-  For the purpose of drop order, an :t:`[Or Pattern]` declares its
-  :t:`[Binding]s` in the order given by its first
-  :t:`[Pattern Without Alternation]`.
+  :t:`[Binding]s` introduced by an :t:`or-pattern` are dropped in reverse
+  declaration order, where the declaration order is defined by the first
+  :t:`pattern-without-alternation`.
 
 * :dp:`fls_a5tmilqxdb6f`
   :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.
@@ -754,37 +754,25 @@ proceeds as follows:
    let c = PrintOnDrop("2");
 
 :dp:`fls_THzA0QFdMMJB`
-When an :t:`or pattern` is used, the drop order of :t:`[Binding]s` is
-determined by the first :t:`pattern-without-alternation`, regardless of which
-alternative matches at runtime.
+When an :t:`or pattern` is used, the drop order of :t:`[binding]s` is determined by the first :t:`pattern-without-alternation`, regardless of which matches at runtime.
+
+:dp:`fls_dhfIPP4yR3Tt`
+In the following example, the drop order is ``b``, ``a`` for both calls.
+Dropping proceeds as follows:
+
+#. :dp:`fls_zxFM7EoE2Xq8`
+   The first :t:`pattern-without-alternation` ``Ok([a, b])`` declares ``a`` before ``b``.
+
+#. :dp:`fls_093YxG6YXQz2`
+   When the first call matches ``Ok([a, b])``, the :t:`[binding]s` are dropped in reverse declaration order: ``b`` then ``a``.
+
+#. :dp:`fls_gNWXh61ZXXt8`
+   When the second call matches ``Err([b, a])``, the drop order remains ``b`` then ``a``, determined by the first :t:`pattern-without-alternation`.
 
 .. code-block:: rust
 
-   // Drops `x` before `y`.
-   fn or_pattern_drop_order<T>(
-       (Ok([x, y]) | Err([y, x])): Result<[T; 2], [T; 2]>
-   //   ^^^^^^^^^^   ^^^^^^^^^^^ This is the second pattern-without-alternation.
-   //   |
-   //   This is the first pattern-without-alternation.
-   //
-   //   In the first pattern-without-alternation, `x` is declared before `y`.
-   //   Since it is the first pattern-without-alternation, that is the order
-   //   used even if the second pattern-without-alternation, where the bindings
-   //   are declared in the opposite order, is matched.
-   ) {}
+   fn drop_order<T>((Ok([a, b]) | Err([b, a])): Result<[T; 2], [T; 2]>) {}
 
-   // Here we match the first pattern-without-alternation, and the drops happen
-   // according to the declaration order in the first pattern-without-alternation.
-   or_pattern_drop_order(Ok([
-       PrintOnDrop("Declared first, dropped last"),
-       PrintOnDrop("Declared last, dropped first"),
-   ]));
+   drop_order(Ok([PrintOnDrop("1"), PrintOnDrop("2")]));
 
-   // Here we match the second pattern-without-alternation, and the drops still
-   // happen according to the declaration order in the first
-   // pattern-without-alternation.
-   or_pattern_drop_order(Err([
-       PrintOnDrop("Declared last, dropped first"),
-       PrintOnDrop("Declared first, dropped last"),
-   ]));
-
+   drop_order(Err([PrintOnDrop("2"), PrintOnDrop("1")]));

@@ -41,7 +41,8 @@ Developer usage is described in :doc:`internal-procedures:code-coverage`.
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool Classification: T2
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL1
 - Level of reliance: Low, it is not involved in ensuring correctness, but only a measure of quality of the test suite.
 
 The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard mechanism of collecting code coverage information in Rust. Since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
@@ -156,7 +157,8 @@ An example of such a intrinsic function is ``fn unaligned_volatile_load<T>(src: 
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool Classification: T3
+- IEC 61508-3 Tool Classification: T3
+- ISO 26262 Tool Classification: TCL3
 
 No assessment necessary, since the compiler is pre-qualified.
 
@@ -191,7 +193,9 @@ If we would start to come up with new rules from our coding standard we would ha
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool Classification: T1
+- IEC 61508-3 Tool Classification: T1
+- ISO 26262 Tool Classification: TCL1
+
 - Level of reliance: Low, the lints are not involved in ensuring correctness, but only a measure of quality of the source code. (Note: ``rustc`` is involved in ensuring correctness, but here we only look at it in its capacity of a linter, not a compiler.)
 
 ``clippy``, ``rustc`` and ``rustfmt`` are standard tools in the Rust ecosystem. There are used in virtually every Rust project. This gives high confidence in its quality.
@@ -229,7 +233,8 @@ The libtest test runner compiles all tests specified in the coretests test suite
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool classification: T2
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL2
 - Level of reliance: High, ensures correctness of the test results.
 
 ``libtest`` is used extensively by virtually every user of Rust, since it powers the common ``cargo test`` command.
@@ -270,7 +275,8 @@ The bootstrap build orchestrator compiles the compiler, core library, test runne
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool classification: T2
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL2
 - Level of reliance: High, ensures the safety plan is being adhered to.
 
 ``bootstrap`` is the build system used to build, package, and test the Rust compiler.
@@ -322,7 +328,8 @@ It schedules "jobs" that execute in a constrained order, saves the results of th
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool classification: T2
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL2
 - Level of reliance: High, ensures all tests are run.
 
 CircleCI itself is used extensively by many different open-source projects.
@@ -369,7 +376,8 @@ Usage
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool classification: T2
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL2
 - Level of reliance: Medium
 
 Git and GitHub are very very widely used tools. This gives us confidence in its quality.
@@ -407,7 +415,8 @@ Usage
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- Tool classification: T2
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL2
 - Level of reliance: Medium
 
 ``rustdoc`` is the standard tool to generate documentation of Rust libraries and is very widely used. Each version of each crate published on `<https://crates.io>`_ automatically gets its documentation build by ``rustdoc`` and published on `<https://doc.rs>`_. This means it is executed hundreds of times per day for a wide variety of crates and documentations. This wide and diverse usage gives high confidence in its quality and robustness.

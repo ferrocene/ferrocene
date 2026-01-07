@@ -10,9 +10,6 @@ ISO 26262 8-11
 
 Safety Plan - Tool safety assessments
 
-.. TODO
-   As discussed on FSM, add ISO 26262 and TCL, otherwise all addressed
-
 11.4.2
 ------
 

@@ -93,12 +93,6 @@ Not applicable    Add missing explanation/justification
 .. TODO
    Add explanation as for IEC 61508
 
-10.4.5.N1
-~~~~~~~~~
-
-10.4.5.N2
-~~~~~~~~~
-
 10.4.6
 ------
 
@@ -107,9 +101,6 @@ Not applicable    Add missing explanation/justification
 .. TODO
    Add explanation as for IEC 61508
 
-10.4.6.N1
-~~~~~~~~~
-
 10.4.7
 ------
 
@@ -117,9 +108,3 @@ Not applicable    Add missing explanation/justification
 
 .. TODO
    Add explanation as for IEC 61508
-
-10.4.7.N2
-~~~~~~~~~
-
-10.4.7.N3
-~~~~~~~~~

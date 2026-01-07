@@ -89,7 +89,8 @@ see 9.4.1.2
 9.4.2.1
 ~~~~~~~
 
-Testing Plan    Test results overview
+- Testing Plan
+- Test results overview
 
 9.4.2.1.a
 +++++++++
@@ -109,7 +110,8 @@ see 9.4.2.1
 9.4.2.2
 ~~~~~~~
 
-Testing Plan    Test results overview
+- Testing Plan
+- Test results overview
 
 9.4.2.2.a
 +++++++++
@@ -152,7 +154,8 @@ see 9.4.2.2
 9.4.2.3
 ~~~~~~~
 
-Testing Plan    Test results overview
+- Testing Plan
+- Test results overview
 
 9.4.2.3.a
 +++++++++
@@ -172,6 +175,8 @@ see 9.4.2.3
 9.4.2.4
 ~~~~~~~
 
+.. TODO
+
 Re-use the justification from IEC 61508 on test case completness/review
 from the upstream process
 
@@ -181,7 +186,8 @@ from the upstream process
 9.4.3.1
 ~~~~~~~
 
-Testing Plan    Test results overview
+- Testing Plan
+- Test results overview
 
 9.4.3.2
 ~~~~~~~

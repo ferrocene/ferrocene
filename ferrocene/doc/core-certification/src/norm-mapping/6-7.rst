@@ -163,23 +163,8 @@ Not applicable  IEC 61508 7.4.3
 
 see 7.4.5
 
-7.4.5.N2
-~~~~~~~~
-
-see 7.4.5
-
 7.4.5.b
 ~~~~~~~
-
-see 7.4.5
-
-7.4.5.N4
-~~~~~~~~
-
-see 7.4.5
-
-7.4.5.N5
-~~~~~~~~
 
 see 7.4.5
 
@@ -196,9 +181,6 @@ Safety Plan - Requirements Management  IEC 61508 - 7.4.2.8-11
 
 Not applicable, no pre-existing SW element
 
-7.4.5.N2
-~~~~~~~~
-
 7.4.8
 -----
 
@@ -214,16 +196,6 @@ Not applicable, no partitioning, all ASIL B
 
 7.4.9.a
 ~~~~~~~
-
-Not applicable, no partitioning, all ASIL B
-
-7.4.9.N2
-~~~~~~~~
-
-Not applicable, no partitioning, all ASIL B
-
-7.4.9.N3
-~~~~~~~~
 
 Not applicable, no partitioning, all ASIL B
 
@@ -253,9 +225,6 @@ analysis required
 
 Not applicable, only single component as SW SEooC
 
-7.4.10.N3
-~~~~~~~~~
-
 7.4.11
 ------
 
@@ -264,17 +233,7 @@ Not applicable, only single component as SW SEooC with single ASIL
 7.4.12
 ------
 
-Not applicable, only single component as SW SEooC, integrator
-responsibility
-
-7.4.12.N2
-~~~~~~~~~
-
-7.4.12.N3
-~~~~~~~~~
-
-7.4.12.N4
-~~~~~~~~~
+Not applicable, only single component as SW SEooC, integrator responsibility
 
 7.4.13
 ------

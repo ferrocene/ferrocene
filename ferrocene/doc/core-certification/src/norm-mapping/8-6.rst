@@ -71,24 +71,15 @@ see 6.4.2.4
 
 see 6.4.2.4
 
-6.4.2.4.N7
-++++++++++
-
 6.4.2.4.f
 +++++++++
 
 see 6.4.2.4
 
-6.4.2.4:N9
-~~~~~~~~~~
-
 6.4.2.4.g
 +++++++++
 
 see 6.4.2.4
-
-6.4.2.4.N11
-+++++++++++
 
 6.4.2.4.h
 +++++++++
@@ -163,11 +154,6 @@ Requirements Management
 
 Requirements Management
 
-6.4.3.1.N7
-++++++++++
-
-Requirements Management
-
 6.4.3.2
 ~~~~~~~
 
@@ -185,11 +171,6 @@ Requirements Management
 
 6.4.3.2.c
 +++++++++
-
-Requirements Management
-
-6.4.3.2.N2
-++++++++++
 
 Requirements Management
 

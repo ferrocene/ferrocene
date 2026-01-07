@@ -8,9 +8,6 @@ ISO 26262 8-10
 10.4
 +++++
 
-.. TODO
-   Check heading level
-
 10.4.1
 ------
 

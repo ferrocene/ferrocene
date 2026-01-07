@@ -8,12 +8,6 @@ ISO 26262 6-9
 9.4.1
 ------
 
-9.4.1.N2
-~~~~~~~~
-
-9.4.1.N3
-~~~~~~~~
-
 9.4.2
 -----
 
@@ -31,12 +25,6 @@ As all testing is done on the interface level
 
 Safety Plan - Responsibility split
 
-9.4.2.N2
-~~~~~~~~
-
-9.4.2.E1
-~~~~~~~~
-
 9.4.2.b
 ~~~~~~~
 
@@ -50,7 +38,8 @@ Not applicable
 9.4.2.d
 ~~~~~~~
 
-Safety Plan - Testing Plan  Safety-Plan - Uncertified and unused code
+- Safety Plan - Testing Plan
+- Safety-Plan - Uncertified and unused code
 
 9.4.2.e
 ~~~~~~~
@@ -80,27 +69,6 @@ justification IEC 61508  1c: Add missing justification IEC 61508
 
 Safety Plan - Code coverage report
 
-9.4.4.E1
-~~~~~~~~
-
-9.4.4.E2
-~~~~~~~~
-
-9.4.4.E3
-~~~~~~~~
-
-9.4.4.N2
-~~~~~~~~
-
-9.4.4.N3
-~~~~~~~~
-
-9.4.4.E4
-~~~~~~~~
-
-9.4.4.N4
-~~~~~~~~
-
 9.4.5
 -----
 
@@ -110,12 +78,3 @@ Qualification Plan - Build and Testing Process
    Are there more details on the test env.? Simulator, actual HW?    Add
    this to the compiler documentation    Adding the emulator/simulator
    to the tool safety analysis (currently missing)
-
-9.4.5.N2
-~~~~~~~~
-
-9.4.5.N3
-~~~~~~~~
-
-9.4.5.N4
-~~~~~~~~

@@ -666,6 +666,25 @@ fn discriminant() {
     assert_ne!(core::mem::discriminant(&Foo::A), core::mem::discriminant(&Foo::B));
 }
 
+// core::mem::maybe_uninit::MaybeUninit::<T>::slice_as_ptr
+#[test]
+fn maybe_uninit_slice_as_ptr() {
+    let mut maybe = core::mem::MaybeUninit::new(u64::MIN);
+
+    let mut ptr = core::mem::MaybeUninit::slice_as_ptr(maybe.as_bytes());
+
+    for _ in 0..core::mem::size_of::<u64>() {
+        assert_eq!(unsafe { ptr.read() }, u8::MIN);
+        ptr = unsafe { ptr.add(1) };
+    }
+
+    for byte in maybe.as_bytes_mut() {
+        byte.write(u8::MAX);
+    }
+
+    assert_eq!(*unsafe { maybe.assume_init_ref() }, u64::MAX);
+}
+
 // covers:
 // - `<core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone`
 // - `core::mem::maybe_uninit::MaybeUninit::<T>::as_bytes`

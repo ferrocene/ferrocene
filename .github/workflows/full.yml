@@ -7,8 +7,10 @@ defaults:
 env:
   # Do not try to break these up...
   LINUX_TARGETS: aarch64-unknown-linux-gnu,riscv64gc-unknown-linux-gnu
-  BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
-  CERTIFIED_TARGETS: aarch64-unknown-ferrocene.certified,x86_64-unknown-ferrocene.certified,thumbv7em-ferrocene.certified-eabi,thumbv7em-ferrocene.certified-eabihf
+  # Includes the certified panic targets
+  BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,x86_64-ferrocene-none,aarch64-ferrocene-none,thumbv7em-ferrocene-none-eabi,thumbv7em-ferrocene-none-eabihf
+  # The certified subset
+  SUBSET_TARGETS: aarch64-unknown-ferrocene.subset,thumbv7em-ferrocene.subset-eabi,thumbv7em-ferrocene.subset-eabihf,x86_64-unknown-ferrocene.subset
   QNX_TARGETS: aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710
   ARTIFACTS_BUCKET: ferrocene-ci-artifacts
   ARTIFACTS_PREFIX: gha-testing/ferrocene/dist
@@ -39,7 +41,7 @@ jobs:
       linux-targets: ${{ env.LINUX_TARGETS }}
       qnx-targets: ${{ env.QNX_TARGETS }}
       bare-metal-targets: ${{ env.BARE_METAL_TARGETS }}
-      certified-targets: ${{ env.CERTIFIED_TARGETS }}
+      subset-targets: ${{ env.SUBSET_TARGETS }}
       artifacts-bucket: ${{ env.ARTIFACTS_BUCKET }}
       artifacts-prefix: ${{ env.ARTIFACTS_PREFIX }}
       cache-bucket: ${{ env.CACHE_BUCKET }}
@@ -129,8 +131,10 @@ jobs:
           - test:library
           - test:library-std
         variant:
-          - "2021"
-          - "2021-certified-panic"
+          - name: "2021"
+            stage: 2
+          - name: "2021-certified-panic"
+            stage: 1
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -141,9 +145,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }}
+      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
       script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage ${{ matrix.variant.name }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant.name }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -164,8 +168,10 @@ jobs:
           - test:compiletest
           - test:library
         variant:
-          - "2021"
-          - "2021-cortex-a53-certified-panic"
+          - name: "2021"
+            stage: 2
+          - name: "2021-cortex-a53-certified-panic"
+            stage: 1
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -177,9 +183,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }}
+      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
       script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant.name }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -199,8 +205,10 @@ jobs:
           - test:compiletest
           - test:library
         variant:
-          - "2021"
-          - "2021-cortex-m4-certified-panic"
+          - name: "2021"
+            stage: 2
+          - name: "2021-cortex-m4-certified-panic"
+            stage: 1
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -212,9 +220,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }}
+      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
       script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant.name }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -235,8 +243,10 @@ jobs:
           - test:compiletest
           - test:library
         variant:
-          - "2021"
-          - "2021-cortex-m4-certified-panic"
+          - name: "2021"
+            stage: 2
+          - name: "2021-cortex-m4-certified-panic"
+            stage: 1
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -248,9 +258,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }}
+      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
       script: |
-        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant.name }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -590,7 +600,7 @@ jobs:
         ./x.py build --stage 2 library/core
         ./x.py doc   --stage 2 library/core
       host-triple: x86_64-unknown-linux-gnu
-      triples: ${{ needs.calculate-envs.outputs.certified-targets }}
+      triples: ${{ needs.calculate-envs.outputs.subset-targets }}
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -689,7 +699,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      triples: ${{ format('{0},{1},{2},{3}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets, needs.calculate-envs.outputs.certified-targets) }}
+      triples: ${{ format('{0},{1},{2},{3}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets, needs.calculate-envs.outputs.subset-targets) }}
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       qnx-version: "710-472"

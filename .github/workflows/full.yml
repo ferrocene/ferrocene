@@ -147,7 +147,7 @@ jobs:
     with:
       run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
       script: |
-        uv run ./x.py --stage ${{ matrix.variant.name }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant.name }}
+        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant.name }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true

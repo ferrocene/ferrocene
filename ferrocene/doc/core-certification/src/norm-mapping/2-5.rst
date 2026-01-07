@@ -8,7 +8,8 @@ ISO 26262 2-5
 5.4.1
 ------
 
-Safety Plan - Lifecycle Phases Overview  IEC 61508-1:5.2.1
+- Safety Plan - Lifecycle Phases Overview
+- IEC 61508-1:5.2.1
 
 5.4.2
 -----
@@ -19,13 +20,14 @@ Safety Plan - Lifecycle Phases Overview  IEC 61508-1:5.2.1
 5.4.2.2
 ~~~~~~~
 
-Safety Plan - Lifecycle Phases Overview  Safety Plan - Roles and
-Responsibilities  IEC 61508-1:5.2.2
+- Safety Plan - Lifecycle Phases Overview
+- Safety Plan - Roles and Responsibilities  IEC 61508-1:5.2.2
 
 5.4.2.3
 ~~~~~~~
 
-Customer Interactions.  IEC 61508-1:6.2.4
+- Customer Interactions.
+- IEC 61508-1:6.2.4
 
 5.4.2.3.E2
 ++++++++++
@@ -45,8 +47,8 @@ see 5.4.2.3
 5.4.2.4
 ~~~~~~~
 
-Safety Plan - Lifecycle Phases Overview    Accordance to 26262-8:10 not
-explicitl stated
+- Safety Plan - Lifecycle Phases Overview
+- Accordance to 26262-8:10 not explicitly stated
 
 .. TODO
    Reference to Accordance to 26262-8:10

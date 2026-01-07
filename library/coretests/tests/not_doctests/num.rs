@@ -40,8 +40,38 @@ niche_types! {
     Nanoseconds => nanoseconds(invalid_value: 1_000_000_000),
 }
 
+// covers `<core::num::nonzero::NonZero<T> as core::clone::Clone>::clone`.
+#[test]
+fn non_zero_clone() {
+    let val = core::num::NonZero::<u8>::new(1).unwrap();
+    assert_eq!(Clone::clone(&val), val);
+}
+
 // covers `<core::num::niche_types::Nanoseconds as core::default::Default>::default`.
 #[test]
 fn default_nanoseconds() {
     assert_eq!(core::num::niche_types::Nanoseconds::new(0).unwrap(), Default::default());
+}
+
+// covers `core::num::<T>::overflowing_neg`.
+macro_rules! int_overflowing_neg {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                let (out, did_overflow) = <$T>::MIN.overflowing_neg();
+                assert!(did_overflow);
+                assert_eq!(out, <$T>::MIN)
+            }
+        )*
+    };
+}
+
+int_overflowing_neg! {
+    i8 => i8_overflowing_neg,
+    i16 => i16_overflowing_neg,
+    i32 => i32_overflowing_neg,
+    i64 => i64_overflowing_neg,
+    i128 => i128_overflowing_neg,
+    isize => isize_overflowing_neg,
 }

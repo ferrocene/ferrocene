@@ -76,3 +76,22 @@ fn atomic_compiler_fence() {
 fn atomic_compiler_fence_relaxed() {
     atomic::compiler_fence(atomic::Ordering::Relaxed);
 }
+
+// covers `core::sync::atomic::fence`.
+#[test]
+fn atomic_fence() {
+    use atomic::Ordering::*;
+
+    atomic::fence(Acquire);
+    atomic::fence(Release);
+    atomic::fence(AcqRel);
+    atomic::fence(SeqCst);
+}
+
+// covers `core::sync::atomic::fence`.
+#[test]
+#[should_panic = "there is no such thing as a relaxed fence"]
+#[expect(invalid_atomic_ordering)]
+fn atomic_fence_relaxed() {
+    atomic::fence(atomic::Ordering::Relaxed);
+}

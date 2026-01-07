@@ -2134,7 +2134,6 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 1 <host> -> std 1 <host.certified> crates=[core]
         [build] rustc 0 <host> -> Linkchecker 1 <host>
         [test] link-check <host>
         [test] tier-check <host>
@@ -2319,7 +2318,6 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
         [build] rustc 0 <host> -> Linkchecker 1 <host>
         [test] link-check <host>
         [test] tier-check <host>

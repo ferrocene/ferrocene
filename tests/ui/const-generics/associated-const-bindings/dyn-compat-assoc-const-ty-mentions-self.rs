@@ -3,6 +3,7 @@
 
 //@ dont-require-annotations: NOTE
 
+#![feature(adt_const_params)]
 #![feature(generic_const_items)]
 #![feature(generic_const_parameter_types)]
 #![feature(min_generic_const_args)]

@@ -1,6 +1,7 @@
 // Detect and reject escaping late-bound generic params in
 // the type of assoc consts used in an equality bound.
 #![feature(
+    adt_const_params,
     min_generic_const_args,
     unsized_const_params,
     generic_const_parameter_types,

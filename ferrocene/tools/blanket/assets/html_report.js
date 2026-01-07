@@ -51,6 +51,21 @@ function main() {
             r.style.setProperty("--var-annotated-text", null);
         }
     });
+
+    let searchBar = document.querySelector("input[name=search-bar]");
+    searchBar.addEventListener("input", function(event) {
+        let text = event.target.value;
+        console.log(text);
+        for (elem of document.querySelectorAll(".path")) {
+            let target = elem.firstChild.innerText;
+            if (target.search(text) === -1) {
+                elem.style.display = "none";
+            } else {
+                elem.style.display = "block";
+            }
+        }
+
+    });
 }
 
 if (document.readyState === "loading") {

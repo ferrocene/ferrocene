@@ -56,8 +56,13 @@ pub(crate) fn generate(
     let percentile_lines_tested = (num_lines_tested / (total_lines)) * 100.0;
     let summary = maud::html!(
         header {
-            h1 { "Core library line coverage report" }
-            a href="../index.html" { "Go back to the documentation index" }
+            div class="header-title" {
+                h1 { "Core library line coverage report" }
+                a href="../index.html" { "Go back to the documentation index" }
+            }
+            div class="search-bar" {
+                    input type="text" name = "search-bar" placeholder = "Regex Search ...";
+            }
         }
         div class="coverage-summary" {
             h1 {
@@ -159,6 +164,7 @@ fn generate_function(
     let function_css_class = function.status.to_css_class();
 
     class_set.insert(function_css_class);
+    class_set.insert("path");
 
     let mut lines = Vec::with_capacity(line_coverage.len());
     for (linenum, line) in file.lines().enumerate() {

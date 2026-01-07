@@ -1,0 +1,49 @@
+=============
+ISO 26262 7-7
+=============
+
+7-7 Operation, Service and Decommissioning
+==========================================
+
+7.4.1
+------
+
+7.4.1.1
+~~~~~~~
+
+Qualification Plan - Known Problems Tracking    Safety Manual - Known
+Problems
+
+7.4.1.1.a
++++++++++
+
+see 7.4.1.1
+
+7.4.1.1.b
++++++++++
+
+see 7.4.1.1
+
+7.4.1.1.c
++++++++++
+
+see 7.4.1.1
+
+7.4.1.1.N2
+++++++++++
+
+7.4.1.2
+~~~~~~~
+
+Not applicable, only SW component
+
+7.4.1.2.N2
+++++++++++
+
+7.4.1.2.N3
+++++++++++
+
+7.4.1.3
+~~~~~~~
+
+Not applicable

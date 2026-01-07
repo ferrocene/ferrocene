@@ -138,6 +138,8 @@
 #![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 // Ferrocene addition: We enable `slice_index_methods` so we can cover them
 #![feature(slice_index_methods)]
+// Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
+#![feature(cfg_target_has_atomic)]
 
 // Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
 #[cfg(all(ferrocene_coverage, not(panic = "abort")))]

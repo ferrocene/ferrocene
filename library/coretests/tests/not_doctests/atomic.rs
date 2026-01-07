@@ -17,13 +17,17 @@ test_atomic_compare_and_swap!(
     atomic_u8_compare_and_swap  => "8" => atomic::AtomicU8,
     atomic_u16_compare_and_swap  =>"16" => atomic::AtomicU16,
     atomic_u32_compare_and_swap =>"32" => atomic::AtomicU32,
-    atomic_u64_compare_and_swap => "64"=> atomic::AtomicU64,
     atomic_usize_compare_and_swap => "ptr" => atomic::AtomicUsize,
     atomic_i8_compare_and_swap => "8"=> atomic::AtomicI8,
     atomic_i16_compare_and_swap => "16"=> atomic::AtomicI16,
     atomic_i32_compare_and_swap => "32"=> atomic::AtomicI32,
-    atomic_i64_compare_and_swap => "64"=> atomic::AtomicI64,
     atomic_isize_compare_and_swap => "ptr"=> atomic::AtomicIsize,
+);
+
+#[cfg(target_has_atomic_load_store = "64")]
+test_atomic_compare_and_swap!(
+    atomic_u64_compare_and_swap => "64"=> atomic::AtomicU64,
+    atomic_i64_compare_and_swap => "64"=> atomic::AtomicI64,
 );
 
 #[test]

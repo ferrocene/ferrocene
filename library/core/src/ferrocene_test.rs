@@ -48,3 +48,28 @@ pub fn test_wrapped_call_once() {
     let wrapped = core::ops::NeverShortCircuit::wrap_mut_1(|c| c + 10);
     assert_eq!(25, wrapped.call_once((15,)).0);
 }
+
+pub fn test_index_range_iterator() {
+    let mut ir = IndexRange::zero_to(5);
+
+    // size_hint
+    assert_eq!((5, Some(5)), ir.size_hint());
+
+    // advance_by
+    assert_eq!(Ok(()), ir.advance_by(2));
+    assert_eq!(2, ir.start());
+
+    // fold
+    assert_eq!((), ir.fold((), |_, _| ()));
+}
+
+pub fn test_index_range_double_ended_iterator() {
+    let mut ir = IndexRange::zero_to(5);
+
+    // advance_back_by
+    assert_eq!(Ok(()), ir.advance_back_by(2));
+    assert_eq!(3, ir.end());
+
+    // rfold
+    assert_eq!((), ir.rfold((), |_, _| ()));
+}

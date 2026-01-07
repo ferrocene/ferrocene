@@ -1,0 +1,121 @@
+=============
+ISO 26262 6-9
+=============
+
+6-9 Software Unit Verification
+==============================
+
+9.4.1
+------
+
+9.4.1.N2
+~~~~~~~~
+
+9.4.1.N3
+~~~~~~~~
+
+9.4.2
+-----
+
+Table 7:  - 1h: Safety Plan - Programming language  1j: Safety Plan -
+Requirements Management.  1k: also via Safety Plan - Requirements Mgmt.
+As all testing is done on the interface level
+
+.. TODO
+   1c - Inspection via contributing guidelines?  1f control flow -
+   symbol review via compiler outpout (subsetting)  1g data flow - N/A,
+   no state, all via paramater
+
+9.4.2.a
+~~~~~~~
+
+Safety Plan - Responsibility split
+
+9.4.2.N2
+~~~~~~~~
+
+9.4.2.E1
+~~~~~~~~
+
+9.4.2.b
+~~~~~~~
+
+Safety Plan - Responsibility split
+
+9.4.2.c
+~~~~~~~
+
+Not applicable
+
+9.4.2.d
+~~~~~~~
+
+Safety Plan - Testing Plan  Safety-Plan - Uncertified and unused code
+
+9.4.2.e
+~~~~~~~
+
+Safety Plan - Testing Plan
+
+9.4.2.f
+~~~~~~~
+
+Not applicable
+
+9.4.3
+-----
+
+Table 8:  - 1a: Add missing justification IEC 61508  1b: Add missing
+justification IEC 61508  1c: Add missing justification IEC 61508
+
+.. TODO
+   For 1a add explanation as for IEC 61508:  "Ferrous Systems certifies
+   core as a library, to be used in other systems whose requirements are
+   unknown. Users of the certified core library should consider their
+   specific system safety requirements when developing safety related
+   software with the certified core library."
+
+9.4.4
+-----
+
+Safety Plan - Code coverage report
+
+9.4.4.E1
+~~~~~~~~
+
+9.4.4.E2
+~~~~~~~~
+
+9.4.4.E3
+~~~~~~~~
+
+9.4.4.N2
+~~~~~~~~
+
+9.4.4.N3
+~~~~~~~~
+
+9.4.4.E4
+~~~~~~~~
+
+9.4.4.N4
+~~~~~~~~
+
+9.4.5
+-----
+
+Qualification Plan - Build and Testing Process
+
+.. TODO
+   Are there more details on the test env.? Simulator, actual HW?    Add
+   this to the compiler documentation    Adding the emulator/simulator
+   to the tool safety analysis (currently missing)
+
+9.4.5.N2
+~~~~~~~~
+
+9.4.5.N3
+~~~~~~~~
+
+9.4.5.N4
+~~~~~~~~

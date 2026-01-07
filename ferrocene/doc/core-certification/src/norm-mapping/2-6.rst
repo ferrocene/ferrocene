@@ -1,0 +1,814 @@
+=============
+ISO 26262 2-6
+=============
+
+2-6 Project Dependent Safety Management
+=======================================
+
+6.4.1
+------
+
+6.4.2
+-----
+
+6.4.2.1
+~~~~~~~
+
+Safety Plan - Roles and Responsibilities
+
+6.4.2.2
+~~~~~~~
+
+Safety Plan - Roles and Responsibilities IEC 61508-1:6.2.1
+
+6.4.2.2.a
++++++++++
+
+Safety Plan - Roles and Responsibilities IEC 61508-1:6.2.1
+
+6.4.2.2.b
++++++++++
+
+Safety Plan - Roles and Responsibilities IEC 61508-1:6.2.1
+
+6.4.2.3
+~~~~~~~
+
+Missing
+
+.. TODO
+   Is this the same for the lib as for the compiler (safety manager and
+   project amanger responsibility split? Etc. like in
+   https://public-docs.ferrocene.dev/main/qualification/plan/organization.html
+   ?
+
+6.4.2.4
+~~~~~~~
+
+Safety Plan - Roles and Responsibilities
+
+6.4.3
+-----
+
+6.4.3.1
+~~~~~~~
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.2
+~~~~~~~
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.2.a
++++++++++
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.2.b
++++++++++
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.2.c
++++++++++
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.3
+~~~~~~~
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.3.a
++++++++++
+
+Not applicable, as not at item level or modification, new development
+
+6.4.3.3.b
++++++++++
+
+Not applicable, as not at item level or modification, new development
+
+6.4.4
+-----
+
+6.4.4
+-----
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.4.a
+~~~~~~~
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.4.b
+~~~~~~~
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.4.c
+~~~~~~~
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.4.d
+~~~~~~~
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.4.N3
+~~~~~~~~
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.5
+-----
+
+6.4.5.1
+~~~~~~~
+
+See below, tailored as per SW SEooC guidance
+
+6.4.5.1.a
++++++++++
+
+See below, tailored as per SW SEooC guidance
+
+6.4.5.1.b
++++++++++
+
+See below, tailored as per SW SEooC guidance
+
+6.4.5.2
+~~~~~~~
+
+Not applicable, no modification/impact analysis
+
+6.4.5.3
+~~~~~~~
+
+Not applicable, no proven in use applied
+
+6.4.5.4
+~~~~~~~
+
+Not applicable, no HW in scope
+
+6.4.5.5
+~~~~~~~
+
+Not applicable, no SW qualification, handled as new development
+
+6.4.5.6
+~~~~~~~
+
+Not applicable, no tailoring based on specific tool usage
+
+6.4.5.7
+~~~~~~~
+
+.. TODO
+   Could be added in as a short explanation in the safety plan: This is
+   a SEooC SW Development, tailoring follows the standard (-2/-6/-8)
+   tailoring. As far as we see, high level /SEooC requirements should be
+   added (see below), then architecture is also tailored (justification:
+   just a simple library, already a single component, etc.), then unit
+   level requirements and design as stated are the doc-comments.
+
+6.3.5.7.a
++++++++++
+
+Safety Plan - Requirements Management  Requirement basis missing
+
+.. TODO
+   Add/Show some general assumption on the functionality the library
+   shall provide based on
+   https://public-docs.ferrocene.dev/main/certification/api-docs/core/index.html
+
+6.4.5.7.b
++++++++++
+
+.. TODO
+   Similar, add to the safety plan, referencing/including information
+   from
+   https://public-docs.ferrocene.dev/main/certification/api-docs/core/index.html
+
+6.4.5.8
+~~~~~~~
+
+Not applicable, T&B not in scope
+
+6.4.5.9
+~~~~~~~
+
+Not applicable, T&B not in scope
+
+6.4.6
+-----
+
+6.4.6.1
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.
+
+6.4.6.2
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.
+
+6.4.6.3
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.
+
+6.4.6.4
+~~~~~~~
+
+6.4.6.4.a
++++++++++
+
+6.4.6.4.b
++++++++++
+
+Safety Plan
+
+6.4.6.5
+~~~~~~~
+
+6.4.6.5.a
++++++++++
+
+see above
+
+6.4.6.5.b
++++++++++
+
+see above
+
+6.4.6.5.c
++++++++++
+
+see above
+
+6.4.6.5.d
++++++++++
+
+see above, no DIA
+
+6.4.6.5.e
++++++++++
+
+Testing Plan
+
+6.4.6.5.f
++++++++++
+
+Missing
+
+.. TODO
+   Add explanation in safety plan: We assume, safety plan and safety
+   case are reviewed by you? Adding that this also serves as the
+   confirmation review to the safety plan.  For audit/assessment
+   referring to TÜV SÜD
+
+6.4.6.5.g
++++++++++
+
+Link to HazOp, failure analysis:
+https://public-docs.ferrocene.dev/main/qualification/evaluation-report/rustc/tool-analysis.html
+
+6.4.6.5.h
++++++++++
+
+Not applicable, no proven in use applied
+
+6.4.6.5.i
++++++++++
+
+Tool safety assessments
+
+.. TODO
+   Add also ISO 26262 and TCL to the safety plan tool safety assessments
+   tool classification, TCL can be the same as the Tx class, arguments
+   are already there, no further changes required in first step
+
+6.4.6.6
+~~~~~~~
+
+6.4.6.6.a
++++++++++
+
+Safety Plan - Purpose of this document
+
+6.4.6.6.b
++++++++++
+
+Safety Plan - Lifecycle Phases Overview
+
+6.4.6.6.c
++++++++++
+
+Safety Plan - Roles and responsibilities.
+
+6.4.6.6.d
++++++++++
+
+Missing information (ressource planning, etc.)
+
+.. TODO
+   Are there other internal docs? Then maybe nothing needs to be added,
+   just referencing the safety plan -> Clickup
+
+6.4.6.6.e
++++++++++
+
+Missing information (time planing.)
+
+.. TODO
+   Are there other internal docs? Then maybe nothing needs to be added,
+   just referencing the safety plan
+
+6.4.6.6.f
++++++++++
+
+Safety Plan - Deliverables and documents
+
+6.4.6.7
+~~~~~~~
+
+Not applicable, no modification/impact analysis
+
+6.4.6.7.a
++++++++++
+
+Not applicable, no modification/impact analysis
+
+6.4.6.7.b
++++++++++
+
+Not applicable, no modification/impact analysis
+
+6.4.6.7.c
++++++++++
+
+Not applicable, no modification/impact analysis
+
+6.4.6.8
+~~~~~~~
+
+Explicit update plan documentation missing
+
+.. TODO
+   How are you keeping track of the progress? -> clickup
+
+6.4.6.9
+~~~~~~~
+
+Safety Plan - Deliverables and documents
+
+6.4.6.10
+~~~~~~~~
+
+Not applicable, no distributed development (upstream/open source not
+handled as distributed development)
+
+6.4.7
+-----
+
+6.4.7.1
+~~~~~~~
+
+Safety Plan Tracking of open activites in Clickup
+
+6.4.7.2
+~~~~~~~
+
+Safety Plan - Configuration  Development Process  Change Tracking
+Infrastructure
+
+6.4.8
+-----
+
+6.4.8.1
+~~~~~~~
+
+Missing
+
+.. TODO
+   Safety case (explicitly named as such) required. Is there any
+   document showing that all acitivites are done, full list of all
+   documents created and approval? Could this be named as the safety
+   case?  Also via task tracker
+
+6.4.8.2
+~~~~~~~
+
+Missing
+
+.. TODO
+   see above
+
+6.4.8.2.N2
+++++++++++
+
+Missing
+
+.. TODO
+   see above
+
+6.4.9
+-----
+
+6.4.9.1
+~~~~~~~
+
+Confirmation reviews documentation missing for:  - safety plan - safety
+case - (safety analysis) see Arch 6-7
+
+.. TODO
+   See above line 81/requirement 6.4.6.5.f  Please also consider the
+   required independency from Table 1 in ISO 26262-2. In preparation for
+   ASIL D, maybe define already now with I3 (independent department),
+   otherwise I1 independent persion would be enough.
+
+6.4.9.1.a
++++++++++
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.9.1.b
++++++++++
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.9.1.c
++++++++++
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.9.2
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.
+
+.. TODO
+   Add missing information
+
+6.4.9.3
+~~~~~~~
+
+Safety Plan - Roles and responsibilities.
+
+.. TODO
+   Add missing information
+
+6.4.10
+------
+
+6.4.10.1
+~~~~~~~~
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.10.2
+~~~~~~~~
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.10.3
+~~~~~~~~
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.10.4
+~~~~~~~~
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.10.5
+~~~~~~~~
+
+see 6.4.9.1
+
+.. TODO
+   see above
+
+6.4.11
+------
+
+6.4.11.1
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.11.2
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.11.3
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.11.4
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.11.4.a
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.b
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.c
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.d
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.e
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.f
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.N4
++++++++++++
+
+TÜV SÜD responsibility
+
+6.4.11.4.N5
++++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12
+------
+
+6.4.12.1
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.2
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.3
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.3.a
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.3.b
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.3.c
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.3.d
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.4
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.5
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.5.a
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.5.b
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.5.c
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.6
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.7
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.7.a
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.7.b
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.7.c
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.7.d
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.7.e
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.7.f
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.8
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.8.a
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.8.b
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.8.c
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.8.d
+++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.9
+~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.10
+~~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.11
+~~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.12
+~~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.13
+~~~~~~~~~
+
+TÜV SÜD responsibility
+
+6.4.12.13.a
++++++++++++
+
+TÜV SÜD responsibility
+
+6.4.12.13.b
++++++++++++
+
+TÜV SÜD responsibility
+
+6.4.13
+------
+
+6.4.13.1
+~~~~~~~~
+
+Missing
+
+.. TODO
+   Safety case (explicitly named as such) required, see above
+
+6.4.13.2
+~~~~~~~~
+
+Missing
+
+.. TODO
+   See above line 81/etc. regarding confirmation measures
+
+6.4.13.3
+~~~~~~~~
+
+Unsure, where the information regarding completness is to be found
+
+.. TODO
+   Make clear, where the release decision is to be found,
+   https://public-docs.ferrocene.dev/main/qualification/plan/release.html
+   and validiation release-validation do not really have something on
+   this for the library part (for tool cert. it is enough of course)
+   Visibility is via the Task Tracking
+
+6.4.13.4
+~~~~~~~~
+
+qualification report test results
+
+6.4.13.4.a
+++++++++++
+
+Currently not clear, the safety manager/Florian?
+
+.. TODO
+   Clarify approval of release decision  Task Tracker: Yes, we should go
+   ahead But afterwards there is still formal approval from Florian
+
+6.4.13.4.b
+++++++++++
+
+Safety Plan - Certification scope  qualification report test results
+
+6.4.13.4.c
+++++++++++
+
+Safety Plan - Certification scope  qualification report test results
+
+6.4.13.4.d
+++++++++++
+
+ qualification report test results
+
+6.4.13.5
+~~~~~~~~
+
+Safety Plan - Certification scope  qualification report test results

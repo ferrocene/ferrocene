@@ -32,7 +32,7 @@ pub unsafe fn svxar_n_s32<const IMM3: i32>(op1: svint32_t, op2: svint32_t) -> sv
 #[inline(never)]
 #[no_mangle]
 #[target_feature(enable = "sve,sve2")]
-// CHECK: define <vscale x 4 x i32> @pass_as_ref(ptr {{.*}}align 16{{.*}} %a, <vscale x 4 x i32> %b)
+// CHECK: define{{( dso_local)?}} <vscale x 4 x i32> @pass_as_ref(ptr {{.*}}align 16{{.*}} %a, <vscale x 4 x i32> %b)
 pub unsafe fn pass_as_ref(a: &svint32_t, b: svint32_t) -> svint32_t {
     // CHECK: load <vscale x 4 x i32>, ptr %a, align 16
     svxar_n_s32::<1>(*a, b)
@@ -40,7 +40,7 @@ pub unsafe fn pass_as_ref(a: &svint32_t, b: svint32_t) -> svint32_t {
 
 #[no_mangle]
 #[target_feature(enable = "sve,sve2")]
-// CHECK: define <vscale x 4 x i32> @test()
+// CHECK: define{{( dso_local)?}} <vscale x 4 x i32> @test()
 pub unsafe fn test() -> svint32_t {
     let a = svdup_n_s32(1);
     let b = svdup_n_s32(2);

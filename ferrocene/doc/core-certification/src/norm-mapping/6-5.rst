@@ -57,8 +57,6 @@ see 5.4.2
 5.4.3
 -----
 
-Reference to upstream process
+The Rust project has extensive measures (lints and tests) in place to assure quality and consistency of the codebase. The certified core library uses the same implicit standards as are ensured in the upstream codebase, to minimize divergence. Increased divergence from upstream leads to a higher maintenance burden and is a source of potential bugs.
 
-.. TODO
-   Apply the same justification as for IEC 61508-3 Annex A Table A.4
-   Method 5
+As such, the certified core library does not have a coding standard.

@@ -430,7 +430,6 @@ fn test_nth_for_chain() {
     assert_eq!(Some(3), iter.nth(1));
 }
 
-
 // covers `<core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold`.
 #[test]
 fn test_try_fold_for_skip() {
@@ -438,3 +437,26 @@ fn test_try_fold_for_skip() {
     assert!(iter.try_fold(0i32, |a, b| a.checked_add(b)).is_some());
 }
 
+// covers `<&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_mut_refs() {
+    struct Wrapper<I>(I);
+
+    impl<I: Iterator> Iterator for Wrapper<I> {
+        type Item = I::Item;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.0.next()
+        }
+    }
+
+    let x = [1_u16, 2, 3];
+    let mut iter = Wrapper(x.into_iter());
+    let mut iter_ref = &mut iter as &mut dyn Iterator<Item = u16>;
+
+    assert!(
+        <&mut dyn Iterator<Item = u16> as Iterator>::try_fold(&mut iter_ref, 0_u16, |a, b| a
+            .checked_add(b))
+        .is_some()
+    );
+}

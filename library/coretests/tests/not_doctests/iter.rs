@@ -508,3 +508,11 @@ fn test_spec_nth_back_for_range() {
     assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(10));
     assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(usize::MAX));
 }
+
+// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next`.
+#[test]
+fn test_spec_next_for_range_inclusive() {
+    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(1)).next());
+    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(2)).next());
+    assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next());
+}

@@ -18,7 +18,7 @@ Table A.2
 7
 "
 
-.. include:: ../partials/simple-design.rst
+.. include:: ../../partials/simple-design.rst
 
 8
 "
@@ -30,7 +30,7 @@ N/A; the core library does not use external software elements.
 
 N/A
 
-.. include:: ../partials/simple-design.rst
+.. include:: ../../partials/simple-design.rst
 
 13a
 """
@@ -53,7 +53,7 @@ Table A.4
 
 N/A
 
-.. include:: ../partials/simple-design.rst
+.. include:: ../../partials/simple-design.rst
 
 4
 "
@@ -65,7 +65,7 @@ The core library is highly modularized.
 
 N/A
 
-.. include:: ../partials/implicit-coding-standard.rst
+.. include:: ../../partials/implicit-coding-standard.rst
 
 As such, the certified core library does not have a coding standard.
 
@@ -90,12 +90,12 @@ N/A; core is a library.
 3
 "
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 4
 "
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 8
 "
@@ -113,7 +113,7 @@ Table A.7
 4
 "
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 Table A.8
 ~~~~~~~~~
@@ -144,7 +144,7 @@ Covered by :ref:`safety-plan/testing-plan:rustc lints`.
 4
 "
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 Table A.10
 ~~~~~~~~~~

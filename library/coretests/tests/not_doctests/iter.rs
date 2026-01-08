@@ -492,3 +492,28 @@ fn test_spec_nth_for_range() {
     assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth(10));
     assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth(usize::MAX));
 }
+
+//covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back`.
+#[test]
+fn test_spec_nth_back_for_range() {
+    #[derive(Clone, PartialOrd, PartialEq)]
+    struct Wrapper(u16);
+
+    impl core::iter::Step for Wrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            u16::steps_between(&start.0, &end.0)
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            u16::forward_checked(start.0, count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            u16::backward_checked(start.0, count).map(Self)
+        }
+    }
+
+    assert_eq!(Some(Wrapper(8)), (Wrapper(1)..Wrapper(10)).nth_back(1));
+    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth_back(10));
+    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth_back(usize::MAX));
+}

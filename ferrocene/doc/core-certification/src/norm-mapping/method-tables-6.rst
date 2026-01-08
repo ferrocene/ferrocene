@@ -108,7 +108,7 @@ Table 10 Methods for verification of software integration
 
 Not applicable, as there is no integration, left for integrators of the library.
 
-Table 11;Methods for deriving test cases for software integration testing
+Table 11 Methods for deriving test cases for software integration testing
 --------------------------------------------------------------------------
 
 Not applicable, as there is no integration, left for integrators of the library.

@@ -11,10 +11,9 @@ ISO 26262 6-7
 7.4.1
 ------
 
-Not applicable  IEC 61508-3 7.4.3
+N/A, therefore no architecture is needed
 
-.. TODO
-   Add explanation as for 61508
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
 
 7.4.1.a
 ~~~~~~~
@@ -59,10 +58,9 @@ see 7.4.1
 7.4.2
 -----
 
-Not applicable  IEC 61508 7.4.3
+N/A, therefore no architecture is needed
 
-.. TODO
-   Add explanation as for 61508
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
 
 7.4.2.a
 ~~~~~~~
@@ -72,10 +70,7 @@ see 7.4.2
 7.4.2.b
 ~~~~~~~
 
-Not applicable  IEC 61508 7.2.2.11
-
-.. TODO
-   Add explanation as for 61508
+N/A; There is no way to configure the core library binary after it is compiled.
 
 7.4.2.c
 ~~~~~~~
@@ -95,10 +90,9 @@ see 7.4.2
 7.4.3
 -----
 
-Not applicable  IEC 61508 7.4.3
+N/A, therefore no architecture is needed
 
-.. TODO
-   Add explanation as for 61508
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
 
 7.4.3.a
 ~~~~~~~
@@ -148,18 +142,16 @@ see 7.4.3
 7.4.4
 -----
 
-Not applicable  IEC 61508 7.4.3
+N/A, therefore no architecture is needed
 
-.. TODO
-   Add explanation as for 61508
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
 
 7.4.5
 -----
 
-Not applicable  IEC 61508 7.4.3
+N/A, therefore no architecture is needed
 
-.. TODO
-   Add explanation as for 61508
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
 
 7.4.5.a
 ~~~~~~~
@@ -174,10 +166,9 @@ see 7.4.5
 7.4.6
 -----
 
-Safety Plan - Requirements Management  IEC 61508 - 7.4.2.8-11
+Safety Plan - Requirements Management
 
-.. TODO
-   Add explanation as for 61508
+All functions in the certified core library are deemed to be of the same SIL.
 
 7.4.7
 -----
@@ -187,10 +178,7 @@ Not applicable, no pre-existing SW element
 7.4.8
 -----
 
-IEC 61508-3 7.4.2.8-11
-
-.. TODO
-   Add explanation as for 61508
+All functions in the certified core library are deemed to be of the same SIL.
 
 7.4.9
 -----
@@ -241,10 +229,7 @@ Not applicable, only single component as SW SEooC, integrator responsibility
 7.4.13
 ------
 
-Not applicable  IEC 61508 7.2.2.5
-
-.. TODO
-   Add explanation as for 61508
+Ferrous Systems certifies core as a library, to be used in other systems whose requirements are unknown. Users of the certified core library should consider their specific system safety requirements when developing safety related software with the certified core library.
 
 7.4.13.a
 ~~~~~~~~
@@ -264,10 +249,9 @@ see 7.4.13
 7.4.14
 ------
 
-Not applicable  IEC 61508
+The core library certification excludes the requirement of having an architecture.
 
-.. TODO
-   Add explanation as for 61508
+   .. include:: ../partials/simple-design.rst
 
 7.4.14.a
 ~~~~~~~~

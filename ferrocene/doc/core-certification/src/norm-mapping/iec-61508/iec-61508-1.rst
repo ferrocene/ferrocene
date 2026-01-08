@@ -37,7 +37,7 @@ Covered by
 5.2.5
 ~~~~~
 
-All docs available in the :doc:`Ferrocene documentation package <index>`.
+All docs available in the :doc:`Ferrocene documentation package <../index>`.
 
 5.2.6
 ~~~~~
@@ -47,7 +47,7 @@ Covered by :ref:`Qualification Plan - Documentation Validation <qualification-pl
 5.2.7
 ~~~~~
 
-The core library certification documentation follows the structure of the other documents in the :doc:`Ferrocene documentation package <index>`.
+The core library certification documentation follows the structure of the other documents in the :doc:`Ferrocene documentation package <../index>`.
 
 5.2.8
 ~~~~~

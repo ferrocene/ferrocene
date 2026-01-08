@@ -131,10 +131,7 @@ jobs:
           - test:library
           - test:library-std
         variant:
-          - name: "2021"
-            stage: 2
-          - name: "2021-certified-panic"
-            stage: 1
+          - "2021"
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -145,9 +142,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant.name }}
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -159,6 +156,37 @@ jobs:
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
       build-metrics-artifact: test-x86_64-unknown-linux-gnu-on-${{ matrix.host }}
 
+  test-x86_64-unknown-linux-gnu-certified-panic:
+    name: Test cert panic x86_64-unknown-linux-gnu on ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
+      host-triple: ${{ matrix.host }}
+      runner: ${{ matrix.runner }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-x86_64-unknown-linux-gnu-certified-panic-on-${{ matrix.host }}
+
   test-aarch64-unknown-none:
     strategy:
       fail-fast: false
@@ -168,10 +196,7 @@ jobs:
           - test:compiletest
           - test:library
         variant:
-          - name: "2021-cortex-a53"
-            stage: 2
-          - name: "2021-cortex-a53-certified-panic"
-            stage: 1
+          - "2021-cortex-a53"
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -183,9 +208,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant.name }}
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -196,6 +221,39 @@ jobs:
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
       build-metrics-artifact: test-aarch64-unknown-none-on-${{ matrix.host }}
+
+  # Interm job, this should get deleted when we certify fmt
+  test-aarch64-unknown-none-certified-panic:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-cortex-a53-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test cert panic aarch64-unknown-none on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+      host-triple: ${{ matrix.host }}
+      runner: ${{ matrix.runner }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-aarch64-unknown-none-certified-panic-on-${{ matrix.host }}
+
   test-thumbv7em-none-eabi:
     strategy:
       fail-fast: false
@@ -205,10 +263,7 @@ jobs:
           - test:compiletest
           - test:library
         variant:
-          - name: "2021-cortex-m4"
-            stage: 2
-          - name: "2021-cortex-m4-certified-panic"
-            stage: 1
+          - "2021-cortex-m4"
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -220,9 +275,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant.name }}
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -234,6 +289,38 @@ jobs:
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
       build-metrics-artifact: test-thumbv7em-none-eabi-on-${{ matrix.host }}
 
+  # Interm job, this should get deleted when we certify fmt
+  test-thumbv7em-none-eabi-certified-panic:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-cortex-m4-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test cert panic thumbv7em-none-eabi on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+      runner: ${{ matrix.runner }}
+      host-triple: ${{ matrix.host }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabi-certified-panic-on-${{ matrix.host }}
+
   test-thumbv7em-none-eabihf:
     strategy:
       fail-fast: false
@@ -243,10 +330,7 @@ jobs:
           - test:compiletest
           - test:library
         variant:
-          - name: "2021-cortex-m4"
-            stage: 2
-          - name: "2021-cortex-m4-certified-panic"
-            stage: 1
+          - "2021-cortex-m4"
         include:
           - host: x86_64-unknown-linux-gnu
             runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -258,9 +342,9 @@ jobs:
       # - targets
     secrets: inherit
     with:
-      run-name: ${{ matrix.suite }} (${{ matrix.variant.name }})
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage ${{ matrix.variant.stage }} test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant.name }}
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -271,6 +355,38 @@ jobs:
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
       build-metrics-artifact: test-thumbv7em-none-eabihf-on-${{ matrix.host }}
+
+  # Interm job, this should get deleted when we certify fmt
+  test-thumbv7em-none-eabihf-certified-panic:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-cortex-m4-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test cert panic thumbv7em-none-eabihf on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+      runner: ${{ matrix.runner }}
+      host-triple: ${{ matrix.host }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabihf-certified-panic-on-${{ matrix.host }}
 
   # test-x86_64-pc-nto-qnx710:
   #   name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
@@ -622,6 +738,10 @@ jobs:
       - test-aarch64-unknown-none
       - test-thumbv7em-none-eabi
       - test-thumbv7em-none-eabihf
+      - test-x86_64-unknown-linux-gnu-certified-panic
+      - test-aarch64-unknown-none-certified-panic
+      - test-thumbv7em-none-eabi-certified-panic
+      - test-thumbv7em-none-eabihf-certified-panic
       # - test-x86_64-pc-nto-qnx710
       # - test-aarch64-unknown-nto-qnx710
       # - test-x86_64-pc-windows-msvc

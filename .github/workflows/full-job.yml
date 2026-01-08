@@ -67,7 +67,7 @@ env:
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
   # AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
-        
+
 jobs:
   job:
     name: ${{ inputs.run-name }}
@@ -79,7 +79,7 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: false
-      
+
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
         with:
@@ -102,7 +102,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-east-1
-          role-to-assume:  ${{ github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-to-assume: ${{ github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
 
       - name: Run
@@ -116,6 +116,7 @@ jobs:
           script: ${{ inputs.script }}
 
       - name: Upload artifacts to S3
+        if: "!cancelled()"
         env:
           # AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}

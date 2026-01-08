@@ -79,7 +79,7 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: false
-      
+
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
         with:
@@ -109,28 +109,26 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-to-assume: ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
 
       - name: Run
         uses: ./.github/actions/run/
         # env:
-          # AWS_PROFILE: amazon # The self test artifacts are always on AWS
+        # AWS_PROFILE: amazon # The self test artifacts are always on AWS
         with:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             export QNX_LICENSE_FILE="qnx${{ inputs.qnx-version }}/license/licenses"
             source qnx${{ inputs.qnx-version }}/qnxsdp-env.sh
-            
+
             ./x.py --stage 2 dist rust-std
 
       - name: Upload artifacts to S3
+        if: "!cancelled()"
         env:
           AWS_PROFILE: amazon # Dist artifacts always go to AWS
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
-        run:
-          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
-
-
+        run: ./ferrocene/ci/scripts/upload-dist-artifacts.sh

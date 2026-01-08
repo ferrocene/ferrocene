@@ -72,7 +72,6 @@ env:
   AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
-
   test:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
@@ -105,7 +104,7 @@ jobs:
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
           minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-  
+
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         with:
@@ -152,9 +151,9 @@ jobs:
         run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Upload artifacts to S3
+        if: "!cancelled()"
         env:
           AWS_PROFILE: amazon # Dist artifacts always go to AWS
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ env.ARTIFACT }}
-        run:
-          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+        run: ./ferrocene/ci/scripts/upload-dist-artifacts.sh

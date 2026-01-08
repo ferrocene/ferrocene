@@ -98,6 +98,7 @@ jobs:
             ./x.py test --coverage=library library/core library/alloc --no-doc
 
       - name: Upload artifacts to S3
+        if: "!cancelled()"
         env:
           AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}

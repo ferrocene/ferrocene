@@ -460,3 +460,12 @@ fn test_spec_try_fold_for_mut_refs() {
         .is_some()
     );
 }
+
+// covers `<core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_fold`.
+#[test]
+fn test_spec_fold_for_step_by() {
+    assert_eq!(25, (1_u16..=10).step_by(2).fold(0_u16, |a, b| a + b));
+    assert_eq!(24, (1_u16..=10).step_by(2).skip(1).fold(0_u16, |a, b| a + b));
+
+    assert_eq!(0, Option::<u16>::None.into_iter().step_by(2).fold(0_u16, |a, b| a + b));
+}

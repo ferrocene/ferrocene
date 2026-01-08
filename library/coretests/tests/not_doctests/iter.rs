@@ -461,3 +461,9 @@ fn test_spec_fold_for_step_by() {
 
     assert_eq!(0, Option::<u16>::None.into_iter().step_by(2).fold(0_u16, |a, b| a + b));
 }
+
+// covers `<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_step_by_range_u16() {
+    assert_eq!(Some(25), (1_u16..10).step_by(2).try_fold(0_u16, |a, b| a.checked_add(b)));
+}

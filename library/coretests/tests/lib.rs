@@ -110,6 +110,7 @@
 #![feature(slice_from_ptr_range)]
 #![feature(slice_index_methods)]
 #![feature(slice_internals)]
+#![feature(slice_iter_mut_as_mut_slice)]
 #![feature(slice_partition_dedup)]
 #![feature(slice_split_once)]
 #![feature(sliceindex_wrappers)]

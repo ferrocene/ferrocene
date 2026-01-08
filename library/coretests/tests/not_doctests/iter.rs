@@ -391,3 +391,21 @@ fn test_chars_iter_advance_by() {
         chars.advance_by(x).ok();
     }
 }
+
+// core::slice::iter::IterMut::<'a, T>::as_mut_slice
+#[test]
+fn test_iter_mut_as_mut_slice() {
+    let mut x = [1, 2, 3];
+    let mut iter = x.iter_mut();
+    assert_eq!([1, 2, 3], iter.as_mut_slice());
+}
+
+#[test]
+fn test_index_range_double_ended_iterator() {
+    core::ferrocene_test::test_index_range_double_ended_iterator();
+}
+
+#[test]
+fn test_index_range_iterator() {
+    core::ferrocene_test::test_index_range_iterator();
+}

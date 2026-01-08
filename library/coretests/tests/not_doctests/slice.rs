@@ -115,3 +115,21 @@ fn index_range_slice_index_panic() {
 fn index_range_slice_index_panic_mut() {
     core::ferrocene_test::test_index_range_slice_index_panic_mut();
 }
+
+// Covers: <[T] as core::slice::specialize::SpecFill<T>>::spec_fill
+#[test]
+fn test_spec_fill_not_trivially_clone() {
+    {
+        let mut a = ["0".to_string(), "1".into(), "2".into()];
+        a.fill("1".to_string()); // T must not be TriviallyClone
+        assert_eq!(a, ["1".to_string(), "1".into(), "1".into()]);
+    }
+
+    // Following is necessary to make spec_fill fully covered:
+    {
+        let mut b: [String; 0] = [];
+        b.fill("1".to_string()); // T must not be TriviallyClone
+        let c: [String; 0] = [];
+        assert_eq!(b, c);
+    }
+}

@@ -1,3 +1,4 @@
+mod array;
 mod atomic;
 mod borrow;
 mod cell;
@@ -7,6 +8,7 @@ mod hash;
 mod intrinsics;
 mod iter;
 mod num;
+mod ops;
 mod slice;
 mod str;
 mod time;

@@ -468,52 +468,35 @@ fn test_spec_try_fold_for_step_by_range_u16() {
     assert_eq!(Some(25), (1_u16..10).step_by(2).try_fold(0_u16, |a, b| a.checked_add(b)));
 }
 
-//covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
-#[test]
-fn test_spec_nth_for_range() {
-    #[derive(Clone, PartialOrd, PartialEq)]
-    struct Wrapper(u16);
+#[derive(Clone, PartialOrd, PartialEq)]
+struct StepWrapper(u16);
 
-    impl core::iter::Step for Wrapper {
-        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
-            u16::steps_between(&start.0, &end.0)
-        }
-
-        fn forward_checked(start: Self, count: usize) -> Option<Self> {
-            u16::forward_checked(start.0, count).map(Self)
-        }
-
-        fn backward_checked(start: Self, count: usize) -> Option<Self> {
-            u16::backward_checked(start.0, count).map(Self)
-        }
+impl core::iter::Step for StepWrapper {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        u16::steps_between(&start.0, &end.0)
     }
 
-    assert_eq!(Some(Wrapper(2)), (Wrapper(1)..Wrapper(10)).nth(1));
-    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth(10));
-    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth(usize::MAX));
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::forward_checked(start.0, count).map(Self)
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::backward_checked(start.0, count).map(Self)
+    }
 }
 
-//covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back`.
+// covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
+#[test]
+fn test_spec_nth_for_range() {
+    assert_eq!(Some(StepWrapper(2)), (StepWrapper(1)..StepWrapper(10)).nth(1));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth(10));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth(usize::MAX));
+}
+
+// covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back`.
 #[test]
 fn test_spec_nth_back_for_range() {
-    #[derive(Clone, PartialOrd, PartialEq)]
-    struct Wrapper(u16);
-
-    impl core::iter::Step for Wrapper {
-        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
-            u16::steps_between(&start.0, &end.0)
-        }
-
-        fn forward_checked(start: Self, count: usize) -> Option<Self> {
-            u16::forward_checked(start.0, count).map(Self)
-        }
-
-        fn backward_checked(start: Self, count: usize) -> Option<Self> {
-            u16::backward_checked(start.0, count).map(Self)
-        }
-    }
-
-    assert_eq!(Some(Wrapper(8)), (Wrapper(1)..Wrapper(10)).nth_back(1));
-    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth_back(10));
-    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth_back(usize::MAX));
+    assert_eq!(Some(StepWrapper(8)), (StepWrapper(1)..StepWrapper(10)).nth_back(1));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(10));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(usize::MAX));
 }

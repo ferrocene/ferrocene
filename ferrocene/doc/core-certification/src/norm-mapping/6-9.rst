@@ -14,14 +14,7 @@ ISO 26262 6-9
 9.4.2
 -----
 
-Table 7:  - 1h: Safety Plan - Programming language  1j: Safety Plan -
-Requirements Management.  1k: also via Safety Plan - Requirements Mgmt.
-As all testing is done on the interface level
-
-.. TODO
-   1c - Inspection via contributing guidelines?  1f control flow -
-   symbol review via compiler outpout (subsetting)  1g data flow - N/A,
-   no state, all via paramater
+See Table 7 in Method Tables.
 
 9.4.2.a
 ~~~~~~~
@@ -57,15 +50,7 @@ Not applicable
 9.4.3
 -----
 
-Table 8:  - 1a: Add missing justification IEC 61508  1b: Add missing
-justification IEC 61508  1c: Add missing justification IEC 61508
-
-.. TODO
-   For 1a add explanation as for IEC 61508:  "Ferrous Systems certifies
-   core as a library, to be used in other systems whose requirements are
-   unknown. Users of the certified core library should consider their
-   specific system safety requirements when developing safety related
-   software with the certified core library."
+See Table 8 in Method Tables.
 
 9.4.4
 -----

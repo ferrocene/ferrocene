@@ -1,9 +1,9 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-================
-Method Tables 6
-================
+=========================
+ISO 26262 Method Tables 6
+=========================
 
 Table 1	Topics to be covered by modelling and coding guidelines
 ---------------------------------------------------------------

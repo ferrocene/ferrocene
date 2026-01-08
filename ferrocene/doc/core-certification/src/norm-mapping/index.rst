@@ -15,23 +15,23 @@ Norm mapping of IEC 61508 standard requirements
 Norm mapping of ISO 26262 standard requirements
 -----------------------------------------------
 
-- :doc:`method-tables-6`
-- :doc:`2-5`
-- :doc:`2-6`
-- :doc:`2-7`
-- :doc:`6-5`
-- :doc:`6-6`
-- :doc:`6-7`
-- :doc:`6-8`
-- :doc:`6-9`
-- :doc:`6-10`
-- :doc:`6-11`
-- :doc:`7-7`
-- :doc:`8-6`
-- :doc:`8-7`
-- :doc:`8-8`
-- :doc:`8-9`
-- :doc:`8-10`
-- :doc:`8-11`
-- :doc:`9-6`
-- :doc:`6-C`
+- :doc:`iso-26262/iso-26262-method-tables-6`
+- :doc:`iso-26262/iso-26262-2-5`
+- :doc:`iso-26262/iso-26262-2-6`
+- :doc:`iso-26262/iso-26262-2-7`
+- :doc:`iso-26262/iso-26262-6-5`
+- :doc:`iso-26262/iso-26262-6-6`
+- :doc:`iso-26262/iso-26262-6-7`
+- :doc:`iso-26262/iso-26262-6-8`
+- :doc:`iso-26262/iso-26262-6-9`
+- :doc:`iso-26262/iso-26262-6-10`
+- :doc:`iso-26262/iso-26262-6-11`
+- :doc:`iso-26262/iso-26262-7-7`
+- :doc:`iso-26262/iso-26262-8-6`
+- :doc:`iso-26262/iso-26262-8-7`
+- :doc:`iso-26262/iso-26262-8-8`
+- :doc:`iso-26262/iso-26262-8-9`
+- :doc:`iso-26262/iso-26262-8-10`
+- :doc:`iso-26262/iso-26262-8-11`
+- :doc:`iso-26262/iso-26262-9-6`
+- :doc:`iso-26262/iso-26262-6-C`

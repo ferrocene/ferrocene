@@ -10,7 +10,7 @@ IEC 61508-3
 1. The :doc:`core-certification:safety-plan/scope` specifies and justifies the SIL.
 2. The core library certification excludes the requirement of having an architecture.
 
-   .. include:: ../partials/simple-design.rst
+   .. include:: ../../partials/simple-design.rst
 
 5
 ~
@@ -71,14 +71,14 @@ Covered by :doc:`core-certification:safety-plan/requirements`.
 
 N/A
 
-.. include:: ../partials/simple-design.rst
+.. include:: ../../partials/simple-design.rst
 
 All functions included in the subset are certified SIL2.
 
 7.2.2.5
 ~~~~~~~
 
-.. include:: ../partials/no-system.rst
+.. include:: ../../partials/no-system.rst
 
 7.2.2.6-9
 ~~~~~~~~~
@@ -98,7 +98,7 @@ N/A; the core library does not use, and therefore does not configure, any pre-ex
 7.3.2.1-5
 ~~~~~~~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.4.2.1
 ~~~~~~~
@@ -113,7 +113,7 @@ Covered by :ref:`safety-plan/requirements:doc-comments in the core library`.
 7.4.2.7
 ~~~~~~~
 
-.. include:: ../partials/na-library.rst
+.. include:: ../../partials/na-library.rst
 
 7.4.2.8-11
 ~~~~~~~~~~
@@ -123,14 +123,14 @@ All functions in the certified core library are deemed to be of the same SIL.
 7.4.2.12-14
 ~~~~~~~~~~~
 
-.. include:: ../partials/na-library.rst
+.. include:: ../../partials/na-library.rst
 
 7.4.3
 ~~~~~
 
 N/A, therefore no architecture is needed
 
-.. include:: ../partials/simple-design.rst
+.. include:: ../../partials/simple-design.rst
 
 7.4.4.1-9
 ~~~~~~~~~
@@ -145,7 +145,7 @@ Covered by :doc:`core-certification:safety-plan/programming-language`.
 7.4.4.12-13
 ~~~~~~~~~~~
 
-.. include:: ../partials/implicit-coding-standard.rst
+.. include:: ../../partials/implicit-coding-standard.rst
 
 7.4.4.14
 ~~~~~~~~
@@ -170,7 +170,7 @@ Covered by :ref:`safety-plan/project-setup:responsibility split`.
 7.4.5.3-5
 ~~~~~~~~~
 
-.. include:: ../partials/simple-design.rst
+.. include:: ../../partials/simple-design.rst
 
 7.4.6
 ~~~~~
@@ -180,12 +180,12 @@ Covered by :ref:`safety-plan/project-setup:responsibility split`.
 7.4.7-8
 ~~~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.5
 ~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.6
 ~~~
@@ -200,7 +200,7 @@ Objective met.
 7.7.2.1-4
 ~~~~~~~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.7.2.5-6
 ~~~~~~~~~
@@ -210,7 +210,7 @@ Covered by :ref:`safety-plan/testing-plan:coretests`.
 7.7.2.7-9
 ~~~~~~~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.8
 ~~~
@@ -228,7 +228,7 @@ Objective met.
 7.9.2.1-7
 ~~~~~~~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.9.2.8
 ~~~~~~~
@@ -243,7 +243,7 @@ N/A; There is no architecture design.
 7.9.2.10-13
 ~~~~~~~~
 
-.. include:: ../partials/core-testing.rst
+.. include:: ../../partials/core-testing.rst
 
 7.9.2.14
 ~~~~~~~~

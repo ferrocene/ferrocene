@@ -1,0 +1,840 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "author": "Jonas Schievink <jonasschievink@gmail.com>, oyvindln <oyvindln@users.noreply.github.com>",
+      "bom-ref": "CycloneDxRef-Component-adler2-2.0.0",
+      "description": "A simple clean-room implementation of the Adler-32 checksum",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/adler2/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/oyvindln/adler2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "0BSD OR MIT OR Apache-2.0"
+        }
+      ],
+      "name": "adler2",
+      "purl": "pkg:cargo/adler2@2.0.0",
+      "type": "library",
+      "version": "2.0.0"
+    },
+    {
+      "author": "The Rust Project Developers",
+      "bom-ref": "CycloneDxRef-Component-backtrace-0.3.75",
+      "description": "A library to acquire a stack trace (backtrace) at runtime in a Rust program.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/backtrace"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/rust-lang/backtrace-rs"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/backtrace-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "backtrace",
+      "type": "library",
+      "version": "0.3.75"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_i686_gnu-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_i686_gnu",
+      "purl": "pkg:cargo/windows_i686_gnu@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Andrew Gallant <jamslam@gmail.com>, bluss",
+      "bom-ref": "CycloneDxRef-Component-memchr-2.7.5",
+      "description": "Provides extremely fast (uses SIMD on x86_64, aarch64 and wasm32) routines for\n1, 2 or 3 byte search and single substring search.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/memchr/"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/BurntSushi/memchr"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/BurntSushi/memchr"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Unlicense OR MIT"
+        }
+      ],
+      "name": "memchr",
+      "purl": "pkg:cargo/memchr@2.7.5",
+      "type": "library",
+      "version": "2.7.5"
+    },
+    {
+      "author": "Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-serde_derive-1.0.210",
+      "description": "Macros 1.1 implementation of #[derive(Serialize, Deserialize)]",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://serde.rs/derive.html"
+        },
+        {
+          "type": "website",
+          "url": "https://serde.rs"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/serde-rs/serde"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "serde_derive",
+      "purl": "pkg:cargo/serde_derive@1.0.210",
+      "type": "application",
+      "version": "1.0.210"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-object-0.37.1",
+      "description": "A unified interface for reading and writing object file formats.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/object"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "object",
+      "purl": "pkg:cargo/object@0.37.1",
+      "type": "library",
+      "version": "0.37.1"
+    },
+    {
+      "author": "The Rust Project Developers",
+      "bom-ref": "CycloneDxRef-Component-libc-0.2.171",
+      "description": "Raw FFI bindings to platform libraries like libc.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/libc/"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/rust-lang/libc"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/libc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "libc",
+      "purl": "pkg:cargo/libc@0.2.171",
+      "type": "library",
+      "version": "0.2.171"
+    },
+    {
+      "author": "Moritz Borcherding <moritz.borcherding@web.de>",
+      "bom-ref": "CycloneDxRef-Component-ruzstd-0.8.1",
+      "description": "A decoder for the zstd compression format",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/KillingSpark/zstd-rs"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/KillingSpark/zstd-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "ruzstd",
+      "purl": "pkg:cargo/ruzstd@0.8.1",
+      "type": "library",
+      "version": "0.8.1"
+    },
+    {
+      "author": "Frommi <daniil.liferenko@gmail.com>, oyvindln <oyvindln@users.noreply.github.com>, Rich Geldreich richgel99@gmail.com",
+      "bom-ref": "CycloneDxRef-Component-miniz_oxide-0.8.9",
+      "description": "DEFLATE compression and decompression library rewritten in Rust based on miniz",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/miniz_oxide"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Zlib OR Apache-2.0"
+        }
+      ],
+      "name": "miniz_oxide",
+      "purl": "pkg:cargo/miniz_oxide@0.8.9",
+      "type": "library",
+      "version": "0.8.9"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_x86_64_gnu-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_x86_64_gnu",
+      "purl": "pkg:cargo/windows_x86_64_gnu@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-rustc-demangle-0.1.24",
+      "description": "Rust compiler symbol demangling.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/rustc-demangle"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/rust-lang/rustc-demangle"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rustc-demangle"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustc-demangle",
+      "purl": "pkg:cargo/rustc-demangle@0.1.24",
+      "type": "library",
+      "version": "0.1.24"
+    },
+    {
+      "author": "David Tolnay <dtolnay@gmail.com>, Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-proc-macro2-1.0.86",
+      "description": "A substitute implementation of the compiler's `proc_macro` API to decouple token-based libraries from the procedural macro use case.",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/proc-macro2"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/dtolnay/proc-macro2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "proc-macro2",
+      "purl": "pkg:cargo/proc-macro2@1.0.86",
+      "type": "library",
+      "version": "1.0.86"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-gimli-0.32.0",
+      "description": "A library for reading and writing the DWARF debugging format.",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/gimli"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/gimli"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "gimli",
+      "purl": "pkg:cargo/gimli@0.32.0",
+      "type": "library",
+      "version": "0.32.0"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_i686_msvc-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_i686_msvc",
+      "purl": "pkg:cargo/windows_i686_msvc@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "David Tolnay <dtolnay@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-syn-2.0.79",
+      "description": "Parser for Rust source code",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/syn"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/dtolnay/syn"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "syn",
+      "purl": "pkg:cargo/syn@2.0.79",
+      "type": "library",
+      "version": "2.0.79"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows-targets-0.52.6",
+      "description": "Import libs for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows-targets",
+      "purl": "pkg:cargo/windows-targets@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_aarch64_gnullvm-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_aarch64_gnullvm",
+      "purl": "pkg:cargo/windows_aarch64_gnullvm@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_i686_gnullvm-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_i686_gnullvm",
+      "purl": "pkg:cargo/windows_i686_gnullvm@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_x86_64_gnullvm-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_x86_64_gnullvm",
+      "purl": "pkg:cargo/windows_x86_64_gnullvm@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-addr2line-0.25.0",
+      "description": "A cross-platform symbolication library written in Rust, using `gimli`",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/addr2line"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/addr2line"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "addr2line",
+      "purl": "pkg:cargo/addr2line@0.25.0",
+      "type": "library",
+      "version": "0.25.0"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_aarch64_msvc-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_aarch64_msvc",
+      "purl": "pkg:cargo/windows_aarch64_msvc@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Nick Fitzgerald <fitzgen@gmail.com>, Jim Blandy <jimb@red-bean.com>, Kyle Huey <khuey@kylehuey.com>",
+      "bom-ref": "CycloneDxRef-Component-cpp_demangle-0.4.4",
+      "description": "A crate for demangling C++ symbols",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/cpp_demangle"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/cpp_demangle"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cpp_demangle",
+      "purl": "pkg:cargo/cpp_demangle@0.4.4",
+      "type": "library",
+      "version": "0.4.4"
+    },
+    {
+      "author": "David Tolnay <dtolnay@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-unicode-ident-1.0.13",
+      "description": "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/unicode-ident"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/dtolnay/unicode-ident"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "(MIT OR Apache-2.0) AND Unicode-DFS-2016"
+        }
+      ],
+      "name": "unicode-ident",
+      "purl": "pkg:cargo/unicode-ident@1.0.13",
+      "type": "library",
+      "version": "1.0.13"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows_x86_64_msvc-0.52.6",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_x86_64_msvc",
+      "purl": "pkg:cargo/windows_x86_64_msvc@0.52.6",
+      "type": "library",
+      "version": "0.52.6"
+    },
+    {
+      "author": "Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-serde-1.0.210",
+      "description": "A generic serialization/deserialization framework",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/serde"
+        },
+        {
+          "type": "website",
+          "url": "https://serde.rs"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/serde-rs/serde"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "serde",
+      "purl": "pkg:cargo/serde@1.0.210",
+      "type": "library",
+      "version": "1.0.210"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-cfg-if-1.0.0",
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/cfg-if"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/alexcrichton/cfg-if"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/alexcrichton/cfg-if"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cfg-if",
+      "purl": "pkg:cargo/cfg-if@1.0.0",
+      "type": "library",
+      "version": "1.0.0"
+    },
+    {
+      "author": "David Tolnay <dtolnay@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-quote-1.0.37",
+      "description": "Quasi-quoting macro quote!(...)",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/quote/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/dtolnay/quote"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "quote",
+      "purl": "pkg:cargo/quote@1.0.37",
+      "type": "library",
+      "version": "1.0.37"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-adler2-2.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-miniz_oxide-0.8.9"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-demangle-0.1.24",
+        "CycloneDxRef-Component-ruzstd-0.8.1",
+        "CycloneDxRef-Component-miniz_oxide-0.8.9",
+        "CycloneDxRef-Component-addr2line-0.25.0",
+        "CycloneDxRef-Component-libc-0.2.171",
+        "CycloneDxRef-Component-object-0.37.1",
+        "CycloneDxRef-Component-windows-targets-0.52.6",
+        "CycloneDxRef-Component-cfg-if-1.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-as-if-std-0.1.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-gimli-0.32.0"
+      ],
+      "ref": "CycloneDxRef-Component-addr2line-0.25.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-demangle-0.1.24",
+        "CycloneDxRef-Component-cfg-if-1.0.0",
+        "CycloneDxRef-Component-libc-0.2.171",
+        "CycloneDxRef-Component-addr2line-0.25.0",
+        "CycloneDxRef-Component-windows-targets-0.52.6",
+        "CycloneDxRef-Component-cpp_demangle-0.4.4",
+        "CycloneDxRef-Component-object-0.37.1",
+        "CycloneDxRef-Component-serde-1.0.210",
+        "CycloneDxRef-Component-miniz_oxide-0.8.9",
+        "CycloneDxRef-Component-ruzstd-0.8.1"
+      ],
+      "ref": "CycloneDxRef-Component-backtrace-0.3.75"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-memchr-2.7.5"
+      ],
+      "ref": "CycloneDxRef-Component-object-0.37.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-cfg-if-1.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-cpp_demangle-0.4.4"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-serde_derive-1.0.210"
+      ],
+      "ref": "CycloneDxRef-Component-serde-1.0.210"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-unicode-ident-1.0.13"
+      ],
+      "ref": "CycloneDxRef-Component-proc-macro2-1.0.86"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-windows_x86_64_gnu-0.52.6",
+        "CycloneDxRef-Component-windows_x86_64_msvc-0.52.6",
+        "CycloneDxRef-Component-windows_i686_gnullvm-0.52.6",
+        "CycloneDxRef-Component-windows_aarch64_msvc-0.52.6",
+        "CycloneDxRef-Component-windows_i686_msvc-0.52.6",
+        "CycloneDxRef-Component-windows_aarch64_gnullvm-0.52.6",
+        "CycloneDxRef-Component-windows_i686_gnu-0.52.6",
+        "CycloneDxRef-Component-windows_x86_64_gnullvm-0.52.6"
+      ],
+      "ref": "CycloneDxRef-Component-windows-targets-0.52.6"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-syn-2.0.79",
+        "CycloneDxRef-Component-quote-1.0.37",
+        "CycloneDxRef-Component-proc-macro2-1.0.86"
+      ],
+      "ref": "CycloneDxRef-Component-serde_derive-1.0.210"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-proc-macro2-1.0.86"
+      ],
+      "ref": "CycloneDxRef-Component-quote-1.0.37"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-unicode-ident-1.0.13",
+        "CycloneDxRef-Component-proc-macro2-1.0.86",
+        "CycloneDxRef-Component-quote-1.0.37"
+      ],
+      "ref": "CycloneDxRef-Component-syn-2.0.79"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-backtrace-0.3.75"
+      ],
+      "ref": "CycloneDxRef-Component-cpp_smoke_test-0.1.0"
+    }
+  ],
+  "metadata": {
+    "authors": [
+      {
+        "name": "Manuel Hatzl"
+      }
+    ],
+    "component": {
+      "components": [
+        {
+          "author": "Alex Crichton <alex@alexcrichton.com>",
+          "bom-ref": "CycloneDxRef-Component-as-if-std-0.1.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "as-if-std",
+          "type": "library",
+          "version": "0.1.0"
+        },
+        {
+          "author": "The Rust Project Developers",
+          "bom-ref": "CycloneDxRef-Component-backtrace-0.3.75",
+          "description": "A library to acquire a stack trace (backtrace) at runtime in a Rust program.\n",
+          "externalReferences": [
+            {
+              "type": "documentation",
+              "url": "https://docs.rs/backtrace"
+            },
+            {
+              "type": "website",
+              "url": "https://github.com/rust-lang/backtrace-rs"
+            },
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/backtrace-rs"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "backtrace",
+          "type": "library",
+          "version": "0.3.75"
+        },
+        {
+          "author": "Nick Fitzgerald <fitzgen@gmail.com>",
+          "bom-ref": "CycloneDxRef-Component-cpp_smoke_test-0.1.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "cpp_smoke_test",
+          "type": "library",
+          "version": "0.1.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-dylib-dep-0.1.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "dylib-dep",
+          "type": "application",
+          "version": "0.1.0"
+        }
+      ],
+      "name": "backtrace-rs",
+      "type": "application"
+    },
+    "timestamp": "2026-01-08T15:41:03.987Z",
+    "tools": [
+      {
+        "name": "cargo-sbom",
+        "version": "0.10.0"
+      }
+    ]
+  },
+  "serialNumber": "urn:uuid:854d9620-7a41-416d-bfb4-42677f7d3c31",
+  "specVersion": "1.6",
+  "version": 1
+}

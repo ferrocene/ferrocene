@@ -409,6 +409,9 @@ pub const unsafe fn unreachable() -> !;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
+#[ferrocene::annotation(
+    "Cannot be covered, since the purpose of the function is to never receive a `b` that is `false`, and if it does it will kill the process."
+)]
 pub const unsafe fn assume(b: bool) {
     if !b {
         // SAFETY: the caller must guarantee the argument is never `false`
@@ -429,6 +432,9 @@ pub const unsafe fn assume(b: bool) {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
+#[ferrocene::annotation(
+    "The fact this is shown as uncovered is a known problem in our coverage tooling."
+)]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.
@@ -1942,6 +1948,9 @@ pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering
 #[rustc_intrinsic]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec] // the fallbacks all `assume` to tell Miri
+#[ferrocene::annotation(
+    "This function only redirects to `intrinsics::fallback::DisjointBitOr::disjoint_bitor` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
+)]
 pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: T) -> T {
     // SAFETY: same preconditions as this function.
     unsafe { fallback::DisjointBitOr::disjoint_bitor(a, b) }
@@ -2733,6 +2742,9 @@ pub const fn ub_checks() -> bool {
 /// user has overflow checks disabled, the checks will still get optimized out.
 #[inline(always)]
 #[rustc_intrinsic]
+#[ferrocene::annotation(
+    "This function cannot trivially be tested since it depends on the build configuration. It was manually reviewed."
+)]
 pub const fn overflow_checks() -> bool {
     cfg!(debug_assertions)
 }

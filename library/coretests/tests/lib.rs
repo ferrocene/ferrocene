@@ -57,6 +57,7 @@
 #![feature(extern_types)]
 #![feature(f16)]
 #![feature(f128)]
+#![feature(ferrocene_test)]
 #![feature(float_algebraic)]
 #![feature(float_gamma)]
 #![feature(float_minimum_maximum)]
@@ -137,6 +138,8 @@
 // Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
 // panics in the certified runtime
 #![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
+// Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
+#![feature(cfg_target_has_atomic)]
 
 // Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
 #[cfg(all(ferrocene_coverage, not(panic = "abort")))]

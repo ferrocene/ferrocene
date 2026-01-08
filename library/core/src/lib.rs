@@ -242,6 +242,12 @@ use prelude::rust_2024::*;
 #[macro_use]
 mod macros;
 
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod ferrocene_test;
+
 #[unstable(feature = "assert_matches", issue = "82775")]
 /// Unstable module containing the unstable `assert_matches` macro.
 #[cfg(not(feature = "ferrocene_subset"))]

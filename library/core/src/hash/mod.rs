@@ -966,6 +966,9 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + marker::PointeeSized + Hash> Hash for &mut T {
         #[inline]
+        #[ferrocene::annotation(
+            "This is tested in coretests::hash. The fact this is shown as uncovered is a known problem in our coverage tooling."
+        )]
         fn hash<H: Hasher>(&self, state: &mut H) {
             (**self).hash(state);
         }

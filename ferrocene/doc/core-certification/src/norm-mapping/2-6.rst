@@ -387,54 +387,38 @@ Each release is formally approved as described in :doc:`qualification-plan:relea
 6.4.9.1
 ~~~~~~~
 
-Confirmation reviews documentation missing for:  - safety plan - safety
-case - (safety analysis) see Arch 6-7
-
-.. TODO
-   See above line 81/requirement 6.4.6.5.f  Please also consider the
-   required independency from Table 1 in ISO 26262-2. In preparation for
-   ASIL D, maybe define already now with I3 (independent department),
-   otherwise I1 independent persion would be enough.
+All modifications to the qualification or safety documents undergo review by an independent reviewer (I1) as described in
+:doc:`qualification-plan:development` and subsequently each final release undergoes formal review and approval by the release manager (I3) as described in :doc:`qualification-plan:release`.
 
 6.4.9.1.a
 +++++++++
 
 see 6.4.9.1
 
-.. TODO
-   see above
-
 6.4.9.1.b
 +++++++++
 
 see 6.4.9.1
-
-.. TODO
-   see above
 
 6.4.9.1.c
 +++++++++
 
 see 6.4.9.1
 
-.. TODO
-   see above
-
 6.4.9.2
 ~~~~~~~
 
 Safety Plan - Roles and responsibilities.
 
-.. TODO
-   Add missing information
+The safety managers has full access to the safety documentation, development process and team, when reviewing and confirming the safety plan as described in :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
+
 
 6.4.9.3
 ~~~~~~~
 
 Safety Plan - Roles and responsibilities.
 
-.. TODO
-   Add missing information
+The safety managers has full access to the safety documentation, development process and team, when reviewing and confirming the safety plan as described in :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
 
 6.4.10
 ------
@@ -444,40 +428,25 @@ Safety Plan - Roles and responsibilities.
 
 see 6.4.9.1
 
-.. TODO
-   see above
-
 6.4.10.2
 ~~~~~~~~
 
 see 6.4.9.1
-
-.. TODO
-   see above
 
 6.4.10.3
 ~~~~~~~~
 
 see 6.4.9.1
 
-.. TODO
-   see above
-
 6.4.10.4
 ~~~~~~~~
 
 see 6.4.9.1
 
-.. TODO
-   see above
-
 6.4.10.5
 ~~~~~~~~
 
 see 6.4.9.1
-
-.. TODO
-   see above
 
 6.4.11
 ------

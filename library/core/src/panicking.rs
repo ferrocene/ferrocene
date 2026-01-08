@@ -119,7 +119,7 @@ pub const fn panic_fmt(fmt: PanicArguments<'_>) -> ! {
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-#[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 pub const fn panic_nounwind_fmt(fmt: PanicArguments<'_>, _force_no_backtrace: bool) -> ! {
     const_eval_select!(
         @capture { fmt: PanicArguments<'_>, _force_no_backtrace: bool } -> !:
@@ -250,7 +250,7 @@ pub mod panic_const {
 #[lang = "panic_nounwind"] // needed by codegen for non-unwinding panics
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     panic_nounwind_fmt(PanicArguments::from_str(expr), /* force_no_backtrace */ false);
 }
@@ -259,6 +259,7 @@ pub const fn panic_nounwind(expr: &'static str) -> ! {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[rustc_nounwind]
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
     panic_nounwind_fmt(PanicArguments::from_str(expr), /* force_no_backtrace */ true);
 }
@@ -307,6 +308,9 @@ pub const fn panic_display<T: fmt::Display>(x: &T) -> ! {
 #[track_caller]
 #[lang = "panic_bounds_check"] // needed by codegen for panic on OOB array/slice access
 fn panic_bounds_check(index: usize, len: usize) -> ! {
+    #[ferrocene::annotation(
+        "The `immediate-abort` behavior is not certified, we only support `abort`."
+    )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }
@@ -318,6 +322,7 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
 #[track_caller]
 #[lang = "panic_misaligned_pointer_dereference"] // needed by codegen for panic on misaligned pointer deref
 #[rustc_nounwind] // `CheckAlignment` MIR pass requires this function to never unwind
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
@@ -342,6 +347,7 @@ fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
 #[track_caller]
 #[lang = "panic_null_pointer_dereference"] // needed by codegen for panic on null pointer deref
 #[rustc_nounwind] // `CheckNull` MIR pass requires this function to never unwind
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 fn panic_null_pointer_dereference() -> ! {
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
@@ -360,6 +366,9 @@ fn panic_null_pointer_dereference() -> ! {
 #[rustc_nounwind] // `CheckEnums` MIR pass requires this function to never unwind
 #[cfg(not(feature = "ferrocene_subset"))]
 fn panic_invalid_enum_construction(source: u128) -> ! {
+    #[ferrocene::annotation(
+        "The `immediate-abort` behavior is not certified, we only support `abort`."
+    )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }
@@ -387,7 +396,7 @@ fn panic_invalid_enum_construction(source: u128) -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[lang = "panic_cannot_unwind"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
-#[ferrocene::annotation("Cannot be covered as it causes an unwinding panic")]
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 fn panic_cannot_unwind() -> ! {
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind("panic in a function that cannot unwind")
@@ -404,6 +413,7 @@ fn panic_cannot_unwind() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[lang = "panic_in_cleanup"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
+#[ferrocene::annotation("Cannot be covered as it causes a non-unwinding panic")]
 fn panic_in_cleanup() -> ! {
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.
     panic_nounwind_nobacktrace("panic in a destructor during cleanup")

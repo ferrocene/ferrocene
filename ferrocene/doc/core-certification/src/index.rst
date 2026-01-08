@@ -34,10 +34,10 @@ Core Library Certification
    :caption: Norm Mapping
 
    norm-mapping/index
-   norm-mapping/iec-61508-1
-   norm-mapping/iec-61508-3
-   norm-mapping/iec-61508-3-annex-a
-   norm-mapping/iec-61508-3-annex-b
+   norm-mapping/iec-61508/iec-61508-1
+   norm-mapping/iec-61508/iec-61508-3
+   norm-mapping/iec-61508/iec-61508-3-annex-a
+   norm-mapping/iec-61508/iec-61508-3-annex-b
 
 .. appendices::
    :numbered:

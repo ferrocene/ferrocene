@@ -15,12 +15,12 @@ IEC 61508-3
 5
 ~
 
-Covered by :ref:`5.2.1 to 5.2.11 of IEC 61508-1 <norm-mapping/iec-61508-1:5.2.1>`.
+Covered by :ref:`5.2.1 to 5.2.11 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:5.2.1>`.
 
 6.2.1
 ~~~~~
 
-Covered by :ref:`6.2 of IEC 61508-1 <norm-mapping/iec-61508-1:6.2>`.
+Covered by :ref:`6.2 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:6.2>`.
 
 6.2.2
 ~~~~~
@@ -49,7 +49,7 @@ Covered by :ref:`safety-plan/project-setup:v-model`.
 7.1.2.7
 ~~~~~~~
 
-Covered by :doc:`core-certification:norm-mapping/iec-61508-3-annex-a`.
+Covered by :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3-annex-a`.
 
 7.1.2.8-9
 ~~~~~~~~~

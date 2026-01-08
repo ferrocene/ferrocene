@@ -178,10 +178,10 @@ see 9.4.2.3
 9.4.2.4
 ~~~~~~~
 
-.. TODO
+Covered by
 
-Re-use the justification from IEC 61508 on test case completness/review
-from the upstream process
+- :doc:`qualification-plan:development`
+- :doc:`internal-procedures:upstream-pulls`
 
 9.4.3
 -----

@@ -475,3 +475,28 @@ fn test_spec_fold_for_step_by() {
 fn test_spec_try_fold_for_step_by_range_u16() {
     assert_eq!(Some(25), (1_u16..10).step_by(2).try_fold(0_u16, |a, b| a.checked_add(b)));
 }
+
+//covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
+#[test]
+fn test_spec_nth_for_range() {
+    #[derive(Clone, PartialOrd, PartialEq)]
+    struct Wrapper(u16);
+
+    impl core::iter::Step for Wrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            u16::steps_between(&start.0, &end.0)
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            u16::forward_checked(start.0, count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            u16::backward_checked(start.0, count).map(Self)
+        }
+    }
+
+    assert_eq!(Some(Wrapper(2)), (Wrapper(1)..Wrapper(10)).nth(1));
+    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth(10));
+    assert_eq!(None, (Wrapper(1)..Wrapper(10)).nth(usize::MAX));
+}

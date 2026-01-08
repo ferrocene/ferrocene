@@ -175,7 +175,7 @@ jobs:
     with:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage 1 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -242,7 +242,7 @@ jobs:
     with:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage 1 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -309,7 +309,7 @@ jobs:
     with:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage 1 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -376,7 +376,7 @@ jobs:
     with:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
-        uv run ./x.py --stage 2 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+        uv run ./x.py --stage 1 test library/core library/alloc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true

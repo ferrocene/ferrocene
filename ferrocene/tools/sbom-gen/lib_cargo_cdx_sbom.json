@@ -1,0 +1,1616 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "author": "Gary Guo <gary@garyguo.net>",
+      "bom-ref": "CycloneDxRef-Component-unwinding-0.2.8",
+      "description": "Unwinding library in Rust and for Rust",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/nbdd0121/unwinding/"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "unwinding",
+      "purl": "pkg:cargo/unwinding@0.2.8",
+      "type": "library",
+      "version": "0.2.8"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows-targets-0.53.5",
+      "description": "Import libs for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows-targets",
+      "purl": "pkg:cargo/windows-targets@0.53.5",
+      "type": "library",
+      "version": "0.53.5"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_i686_gnu-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_i686_gnu",
+      "purl": "pkg:cargo/windows_i686_gnu@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "The Rust Project Developers",
+      "bom-ref": "CycloneDxRef-Component-libc-0.2.178",
+      "description": "Raw FFI bindings to platform libraries like libc.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/libc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "libc",
+      "type": "library",
+      "version": "0.2.178"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-panic_abort-0.0.0",
+      "description": "Implementation of Rust panics via process aborts",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rust.git"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "panic_abort",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-alloc-0.0.0",
+      "description": "The Rust core allocation and collections library",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rust.git"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "alloc",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-rustc-demangle-0.1.26",
+      "description": "Rust compiler symbol demangling.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/rustc-demangle"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/rust-lang/rustc-demangle"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rustc-demangle"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustc-demangle",
+      "purl": "pkg:cargo/rustc-demangle@0.1.26",
+      "type": "library",
+      "version": "0.1.26"
+    },
+    {
+      "author": "Orson Peters <orsonpeters@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-foldhash-0.2.0",
+      "description": "A fast, non-cryptographic, minimally DoS-resistant hashing algorithm.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/orlp/foldhash"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Zlib"
+        }
+      ],
+      "name": "foldhash",
+      "purl": "pkg:cargo/foldhash@0.2.0",
+      "type": "library",
+      "version": "0.2.0"
+    },
+    {
+      "author": "Jonas Schievink <jonasschievink@gmail.com>, oyvindln <oyvindln@users.noreply.github.com>",
+      "bom-ref": "CycloneDxRef-Component-adler2-2.0.1",
+      "description": "A simple clean-room implementation of the Adler-32 checksum",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/adler2/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/oyvindln/adler2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "0BSD OR MIT OR Apache-2.0"
+        }
+      ],
+      "name": "adler2",
+      "purl": "pkg:cargo/adler2@2.0.1",
+      "type": "library",
+      "version": "2.0.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-object-0.37.2",
+      "description": "A unified interface for reading and writing object file formats.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/object"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "object",
+      "purl": "pkg:cargo/object@0.37.2",
+      "type": "library",
+      "version": "0.37.2"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>, Andrew Gallant <jamslam@gmail.com>, Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-std_detect-0.1.5",
+      "description": "`std::detect` - Rust's standard library run-time CPU feature detection.",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/rust-lang/stdarch"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/stdarch"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "std_detect",
+      "type": "library",
+      "version": "0.1.5"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-proc_macro-0.0.0",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "NOASSERTION"
+        }
+      ],
+      "name": "proc_macro",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-rustc-std-workspace-std-1.99.0",
+      "description": "Hack for the compiler's own build system\n",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustc-std-workspace-std",
+      "type": "library",
+      "version": "1.99.0"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-dlmalloc-0.2.11",
+      "description": "A Rust port of the dlmalloc allocator\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/dlmalloc"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/alexcrichton/dlmalloc-rs"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/alexcrichton/dlmalloc-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "dlmalloc",
+      "purl": "pkg:cargo/dlmalloc@0.2.11",
+      "type": "library",
+      "version": "0.2.11"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-core-0.0.0",
+      "description": "The Rust Core Library",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rust.git"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "core",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "Tropical",
+      "bom-ref": "CycloneDxRef-Component-vex-sdk-0.27.1",
+      "description": "FFI bindings to VEXos system APIs.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/vexide/vex-sdk/"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "vex-sdk",
+      "purl": "pkg:cargo/vex-sdk@0.27.1",
+      "type": "library",
+      "version": "0.27.1"
+    },
+    {
+      "author": "The Motor OS Project Developers",
+      "bom-ref": "CycloneDxRef-Component-moto-rt-0.15.2",
+      "description": "Motor OS Runtime.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/moturus/motor-os"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "moto-rt",
+      "purl": "pkg:cargo/moto-rt@0.15.2",
+      "type": "library",
+      "version": "0.15.2"
+    },
+    {
+      "author": "Stefan Lankes",
+      "bom-ref": "CycloneDxRef-Component-hermit-abi-0.5.2",
+      "description": "Hermit system calls definitions.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/hermit-os/hermit-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "hermit-abi",
+      "purl": "pkg:cargo/hermit-abi@0.5.2",
+      "type": "library",
+      "version": "0.5.2"
+    },
+    {
+      "author": "Frommi <daniil.liferenko@gmail.com>, oyvindln <oyvindln@users.noreply.github.com>, Rich Geldreich richgel99@gmail.com",
+      "bom-ref": "CycloneDxRef-Component-miniz_oxide-0.8.9",
+      "description": "DEFLATE compression and decompression library rewritten in Rust based on miniz",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/miniz_oxide"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Zlib OR Apache-2.0"
+        }
+      ],
+      "name": "miniz_oxide",
+      "purl": "pkg:cargo/miniz_oxide@0.8.9",
+      "type": "library",
+      "version": "0.8.9"
+    },
+    {
+      "author": "Amanieu d'Antras <amanieu@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-hashbrown-0.16.1",
+      "description": "A Rust port of Google's SwissTable hash map",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/hashbrown"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "hashbrown",
+      "purl": "pkg:cargo/hashbrown@0.16.1",
+      "type": "library",
+      "version": "0.16.1"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-cfg-if-1.0.4",
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/cfg-if"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cfg-if",
+      "purl": "pkg:cargo/cfg-if@1.0.4",
+      "type": "library",
+      "version": "1.0.4"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-profiler_builtins-0.0.0",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "NOASSERTION"
+        }
+      ],
+      "name": "profiler_builtins",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "The Rust Project Developers",
+      "bom-ref": "CycloneDxRef-Component-getopts-0.2.24",
+      "description": "getopts-like option parsing",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/getopts"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "getopts",
+      "purl": "pkg:cargo/getopts@0.2.24",
+      "type": "library",
+      "version": "0.2.24"
+    },
+    {
+      "author": "Microsoft",
+      "bom-ref": "CycloneDxRef-Component-windows-sys-0.60.2",
+      "description": "Rust for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows-sys",
+      "purl": "pkg:cargo/windows-sys@0.60.2",
+      "type": "library",
+      "version": "0.60.2"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-r-efi-alloc-2.1.0",
+      "description": "UEFI Memory Allocator Integration",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/r-efi/r-efi/wiki"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/r-efi/r-efi-alloc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0 OR LGPL-2.1-or-later"
+        }
+      ],
+      "name": "r-efi-alloc",
+      "purl": "pkg:cargo/r-efi-alloc@2.1.0",
+      "type": "library",
+      "version": "2.1.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_x86_64_gnu-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_x86_64_gnu",
+      "purl": "pkg:cargo/windows_x86_64_gnu@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-rustc-literal-escaper-0.0.5",
+      "description": "Provides code to unescape string literals",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/literal-escaper"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "rustc-literal-escaper",
+      "purl": "pkg:cargo/rustc-literal-escaper@0.0.5",
+      "type": "library",
+      "version": "0.0.5"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows-targets-0.0.0",
+      "description": "A drop-in replacement for the real windows-targets crate for use in std only.",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "NOASSERTION"
+        }
+      ],
+      "name": "windows-targets",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-test-0.0.0",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "NOASSERTION"
+        }
+      ],
+      "name": "test",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-addr2line-0.25.1",
+      "description": "A cross-platform symbolication library written in Rust, using `gimli`",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/addr2line"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/addr2line"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "addr2line",
+      "purl": "pkg:cargo/addr2line@0.25.1",
+      "type": "library",
+      "version": "0.25.1"
+    },
+    {
+      "author": "Jorge Aparicio <japaricious@gmail.com>",
+      "bom-ref": "CycloneDxRef-Component-compiler_builtins-0.1.160",
+      "description": "Compiler intrinsics used by the Rust compiler.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/compiler-builtins"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT AND Apache-2.0 AND (MIT OR Apache-2.0)"
+        }
+      ],
+      "name": "compiler_builtins",
+      "type": "library",
+      "version": "0.1.160"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_aarch64_gnullvm-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_aarch64_gnullvm",
+      "purl": "pkg:cargo/windows_aarch64_gnullvm@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-gimli-0.32.3",
+      "description": "A library for reading and writing the DWARF debugging format.",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/gimli"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/gimli-rs/gimli"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "gimli",
+      "purl": "pkg:cargo/gimli@0.32.3",
+      "type": "library",
+      "version": "0.32.3"
+    },
+    {
+      "author": "The Cranelift Project Developers",
+      "bom-ref": "CycloneDxRef-Component-wasi-0.14.4+wasi-0.2.4",
+      "description": "WASI API bindings for Rust",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/wasi"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/bytecodealliance/wasi-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "wasi",
+      "purl": "pkg:cargo/wasi@0.14.4%2Bwasi-0.2.4",
+      "type": "library",
+      "version": "0.14.4+wasi-0.2.4"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+      "description": "Hack for the compiler's own build system\n",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustc-std-workspace-alloc",
+      "type": "library",
+      "version": "1.99.0"
+    },
+    {
+      "author": "Andrew Gallant <jamslam@gmail.com>, bluss",
+      "bom-ref": "CycloneDxRef-Component-memchr-2.7.6",
+      "description": "Provides extremely fast (uses SIMD on x86_64, aarch64 and wasm32) routines for\n1, 2 or 3 byte search and single substring search.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/memchr/"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/BurntSushi/memchr"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/BurntSushi/memchr"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Unlicense OR MIT"
+        }
+      ],
+      "name": "memchr",
+      "purl": "pkg:cargo/memchr@2.7.6",
+      "type": "library",
+      "version": "2.7.6"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+      "description": "Hack for the compiler's own build system\n",
+      "externalReferences": [],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustc-std-workspace-core",
+      "type": "library",
+      "version": "1.99.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-panic_unwind-0.0.0",
+      "description": "Implementation of Rust panics via stack unwinding",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rust.git"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "panic_unwind",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-r-efi-5.3.0",
+      "description": "UEFI Reference Specification Protocol Constants and Definitions",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/r-efi/r-efi/wiki"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/r-efi/r-efi"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0 OR LGPL-2.1-or-later"
+        }
+      ],
+      "name": "r-efi",
+      "purl": "pkg:cargo/r-efi@5.3.0",
+      "type": "library",
+      "version": "5.3.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-unwind-0.0.0",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rust.git"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "unwind",
+      "type": "library",
+      "version": "0.0.0"
+    },
+    {
+      "author": "The Cranelift Project Developers",
+      "bom-ref": "CycloneDxRef-Component-wasi-0.11.1+wasi-snapshot-preview1",
+      "description": "Experimental WASI API bindings for Rust",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/wasi"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/bytecodealliance/wasi"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "wasi",
+      "purl": "pkg:cargo/wasi@0.11.1%2Bwasi-snapshot-preview1",
+      "type": "library",
+      "version": "0.11.1+wasi-snapshot-preview1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_x86_64_gnullvm-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_x86_64_gnullvm",
+      "purl": "pkg:cargo/windows_x86_64_gnullvm@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-std-0.0.0",
+      "description": "The Rust Standard Library",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-lang/rust.git"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "std",
+      "type": "application",
+      "version": "0.0.0"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_i686_msvc-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_i686_msvc",
+      "purl": "pkg:cargo/windows_i686_msvc@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_x86_64_msvc-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_x86_64_msvc",
+      "purl": "pkg:cargo/windows_x86_64_msvc@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_i686_gnullvm-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_i686_gnullvm",
+      "purl": "pkg:cargo/windows_i686_gnullvm@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    },
+    {
+      "author": "Fortanix, Inc.",
+      "bom-ref": "CycloneDxRef-Component-fortanix-sgx-abi-0.6.1",
+      "description": "An interface for Intel SGX enclaves. This is the interface for the\n`x86_64-fortanix-unknown-sgx` target.\n\nThis is a small yet functional interface suitable for writing larger enclaves.\nIn contrast to other enclave interfaces, this interface is primarly designed\nfor running entire applications in an enclave.\n\nThis crate fully describes the type-level interface complete with\ndocumentation. For implementors, this crate contains all the type definitions\nand a macro with the function definitions.\n",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://edp.fortanix.com/docs/api/fortanix_sgx_abi/"
+        },
+        {
+          "type": "website",
+          "url": "https://edp.fortanix.com/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/fortanix/rust-sgx"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ],
+      "name": "fortanix-sgx-abi",
+      "purl": "pkg:cargo/fortanix-sgx-abi@0.6.1",
+      "type": "library",
+      "version": "0.6.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows-link-0.2.1",
+      "description": "Linking for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows-link",
+      "purl": "pkg:cargo/windows-link@0.2.1",
+      "type": "library",
+      "version": "0.2.1"
+    },
+    {
+      "author": "Alex Crichton <alex@alexcrichton.com>",
+      "bom-ref": "CycloneDxRef-Component-wit-bindgen-0.45.1",
+      "description": "Rust bindings generator and runtime support for WIT and the component model.\nUsed when compiling Rust programs to the component model.\n",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/bytecodealliance/wit-bindgen"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/bytecodealliance/wit-bindgen"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "wit-bindgen",
+      "purl": "pkg:cargo/wit-bindgen@0.45.1",
+      "type": "library",
+      "version": "0.45.1"
+    },
+    {
+      "author": "",
+      "bom-ref": "CycloneDxRef-Component-windows_aarch64_msvc-0.53.1",
+      "description": "Import lib for Windows",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/microsoft/windows-rs"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows_aarch64_msvc",
+      "purl": "pkg:cargo/windows_aarch64_msvc@0.53.1",
+      "type": "library",
+      "version": "0.53.1"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-r-efi-5.3.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-adler2-2.0.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-alloc-0.0.0",
+        "CycloneDxRef-Component-unwind-0.0.0",
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-panic_unwind-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-std-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-rustc-literal-escaper-0.0.5"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-std_detect-0.1.5",
+        "CycloneDxRef-Component-moto-rt-0.15.2",
+        "CycloneDxRef-Component-r-efi-alloc-2.1.0",
+        "CycloneDxRef-Component-r-efi-5.3.0",
+        "CycloneDxRef-Component-vex-sdk-0.27.1",
+        "CycloneDxRef-Component-windows-targets-0.0.0",
+        "CycloneDxRef-Component-panic_unwind-0.0.0",
+        "CycloneDxRef-Component-panic_abort-0.0.0",
+        "CycloneDxRef-Component-wasi-0.14.4+wasi-0.2.4",
+        "CycloneDxRef-Component-object-0.37.2",
+        "CycloneDxRef-Component-hashbrown-0.16.1",
+        "CycloneDxRef-Component-hermit-abi-0.5.2",
+        "CycloneDxRef-Component-fortanix-sgx-abi-0.6.1",
+        "CycloneDxRef-Component-alloc-0.0.0",
+        "CycloneDxRef-Component-wasi-0.11.1+wasi-snapshot-preview1",
+        "CycloneDxRef-Component-cfg-if-1.0.4",
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-addr2line-0.25.1",
+        "CycloneDxRef-Component-miniz_oxide-0.8.9",
+        "CycloneDxRef-Component-core-0.0.0",
+        "CycloneDxRef-Component-rustc-demangle-0.1.26",
+        "CycloneDxRef-Component-unwind-0.0.0",
+        "CycloneDxRef-Component-dlmalloc-0.2.11"
+      ],
+      "ref": "CycloneDxRef-Component-std-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-hermit-abi-0.5.2"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-alloc-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-r-efi-5.3.0"
+      ],
+      "ref": "CycloneDxRef-Component-r-efi-alloc-2.1.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-wasi-0.11.1+wasi-snapshot-preview1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-moto-rt-0.15.2"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-cfg-if-1.0.4"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-rustc-demangle-0.1.26"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-libc-0.2.178"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-core-0.0.0",
+        "CycloneDxRef-Component-compiler_builtins-0.1.160"
+      ],
+      "ref": "CycloneDxRef-Component-alloc-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-gimli-0.32.3"
+      ],
+      "ref": "CycloneDxRef-Component-unwinding-0.2.8"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-std_detect-0.1.5"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-alloc-0.0.0",
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-panic_abort-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-adler2-2.0.1"
+      ],
+      "ref": "CycloneDxRef-Component-miniz_oxide-0.8.9"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-profiler_builtins-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-core-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-gimli-0.32.3",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-addr2line-0.25.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-fortanix-sgx-abi-0.6.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-memchr-2.7.6"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-core-0.0.0",
+        "CycloneDxRef-Component-test-0.0.0",
+        "CycloneDxRef-Component-std-0.0.0",
+        "CycloneDxRef-Component-proc_macro-0.0.0",
+        "CycloneDxRef-Component-profiler_builtins-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-sysroot-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-wit-bindgen-0.45.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-gimli-0.32.3"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-std-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-rustc-std-workspace-std-1.99.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-cfg-if-1.0.4",
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-windows-sys-0.60.2",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-dlmalloc-0.2.11"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-windows-targets-0.53.5"
+      ],
+      "ref": "CycloneDxRef-Component-windows-sys-0.60.2"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-foldhash-0.2.0",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-hashbrown-0.16.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-wit-bindgen-0.45.1",
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-wasi-0.14.4+wasi-0.2.4"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-core-0.0.0",
+        "CycloneDxRef-Component-getopts-0.2.24",
+        "CycloneDxRef-Component-std-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-test-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-std-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-getopts-0.2.24"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-rustc-std-workspace-alloc-1.99.0",
+        "CycloneDxRef-Component-memchr-2.7.6"
+      ],
+      "ref": "CycloneDxRef-Component-object-0.37.2"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-core-0.0.0",
+        "CycloneDxRef-Component-compiler_builtins-0.1.160"
+      ],
+      "ref": "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-core-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-compiler_builtins-0.1.160"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+        "CycloneDxRef-Component-libc-0.2.178",
+        "CycloneDxRef-Component-unwinding-0.2.8"
+      ],
+      "ref": "CycloneDxRef-Component-unwind-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-literal-escaper-0.0.5",
+        "CycloneDxRef-Component-std-0.0.0",
+        "CycloneDxRef-Component-core-0.0.0"
+      ],
+      "ref": "CycloneDxRef-Component-proc_macro-0.0.0"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0"
+      ],
+      "ref": "CycloneDxRef-Component-vex-sdk-0.27.1"
+    },
+    {
+      "dependsOn": [
+        "CycloneDxRef-Component-windows_aarch64_gnullvm-0.53.1",
+        "CycloneDxRef-Component-windows_x86_64_gnullvm-0.53.1",
+        "CycloneDxRef-Component-windows_i686_gnullvm-0.53.1",
+        "CycloneDxRef-Component-windows-link-0.2.1",
+        "CycloneDxRef-Component-windows_i686_msvc-0.53.1",
+        "CycloneDxRef-Component-windows_i686_gnu-0.53.1",
+        "CycloneDxRef-Component-windows_x86_64_gnu-0.53.1",
+        "CycloneDxRef-Component-windows_x86_64_msvc-0.53.1",
+        "CycloneDxRef-Component-windows_aarch64_msvc-0.53.1"
+      ],
+      "ref": "CycloneDxRef-Component-windows-targets-0.53.5"
+    }
+  ],
+  "metadata": {
+    "authors": [
+      {
+        "name": "Manuel Hatzl"
+      }
+    ],
+    "component": {
+      "components": [
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-alloc-0.0.0",
+          "description": "The Rust core allocation and collections library",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "alloc",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-alloctests-0.0.0",
+          "description": "Tests for the Rust Allocation Library",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "alloctests",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "Jorge Aparicio <japaricious@gmail.com>",
+          "bom-ref": "CycloneDxRef-Component-compiler_builtins-0.1.160",
+          "description": "Compiler intrinsics used by the Rust compiler.",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/compiler-builtins"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT AND Apache-2.0 AND (MIT OR Apache-2.0)"
+            }
+          ],
+          "name": "compiler_builtins",
+          "type": "library",
+          "version": "0.1.160"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-core-0.0.0",
+          "description": "The Rust Core Library",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "core",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-coretests-0.0.0",
+          "description": "Tests for the Rust Core Library",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "coretests",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-panic_abort-0.0.0",
+          "description": "Implementation of Rust panics via process aborts",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "panic_abort",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-panic_unwind-0.0.0",
+          "description": "Implementation of Rust panics via stack unwinding",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "panic_unwind",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-proc_macro-0.0.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "proc_macro",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-profiler_builtins-0.0.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "profiler_builtins",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-rustc-std-workspace-core-1.99.0",
+          "description": "Hack for the compiler's own build system\n",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "rustc-std-workspace-core",
+          "type": "library",
+          "version": "1.99.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-std-0.0.0",
+          "description": "The Rust Standard Library",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "std",
+          "type": "application",
+          "version": "0.0.0"
+        },
+        {
+          "author": "Alex Crichton <alex@alexcrichton.com>, Andrew Gallant <jamslam@gmail.com>, Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>",
+          "bom-ref": "CycloneDxRef-Component-std_detect-0.1.5",
+          "description": "`std::detect` - Rust's standard library run-time CPU feature detection.",
+          "externalReferences": [
+            {
+              "type": "website",
+              "url": "https://github.com/rust-lang/stdarch"
+            },
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/stdarch"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "std_detect",
+          "type": "library",
+          "version": "0.1.5"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-sysroot-0.0.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "sysroot",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-test-0.0.0",
+          "externalReferences": [],
+          "licenses": [
+            {
+              "expression": "NOASSERTION"
+            }
+          ],
+          "name": "test",
+          "type": "library",
+          "version": "0.0.0"
+        },
+        {
+          "author": "",
+          "bom-ref": "CycloneDxRef-Component-unwind-0.0.0",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/rust-lang/rust.git"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "name": "unwind",
+          "type": "library",
+          "version": "0.0.0"
+        }
+      ],
+      "name": "library",
+      "type": "application"
+    },
+    "timestamp": "2026-01-08T11:25:23.566Z",
+    "tools": [
+      {
+        "name": "cargo-sbom",
+        "version": "0.10.0"
+      }
+    ]
+  },
+  "serialNumber": "urn:uuid:779f912d-2aec-44cf-ba40-f3d553440d12",
+  "specVersion": "1.6",
+  "version": 1
+}

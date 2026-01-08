@@ -37,7 +37,7 @@ The requirements are:
 - No uncertified code is used from certified code
 - Every public function of the certified subset has a requirement with sufficient quality
 - The certified code adheres to the coding standard
-- The certified subset is tested with 100% statement coverage. 
+- The certified subset is tested with 100% statement coverage.
     - There are a few lines that cannot be covered by automatic tests. These are annotated with an explanation.
 
 Internal procedures
@@ -92,5 +92,7 @@ This component is available to all customers and contains everything necessary t
 
 Safety Assessment
 -----------------
+
+Any modifiction of the certification documentation or safety plan undergoes review as described in the :doc:`qualification-plan:development` which serves as confirmation of the safety plan.
 
 Certification is carried out by TÜV SÜD, an independent assessment body.

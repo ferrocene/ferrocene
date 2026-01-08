@@ -8,9 +8,6 @@ ISO 26262 2-6
 2-6 Project Dependent Safety Management
 =======================================
 
-6.4.1
-------
-
 6.4.2
 -----
 
@@ -37,13 +34,7 @@ Safety Plan - Roles and Responsibilities IEC 61508-1:6.2.1
 6.4.2.3
 ~~~~~~~
 
-Missing
-
-.. TODO
-   Is this the same for the lib as for the compiler (safety manager and
-   project amanger responsibility split? Etc. like in
-   https://public-docs.ferrocene.dev/main/qualification/plan/organization.html
-   ?
+The project manager and safety manager defined in :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>` make sure that sufficient resources are available.
 
 6.4.2.4
 ~~~~~~~
@@ -268,13 +259,7 @@ Testing Plan
 6.4.6.5.f
 +++++++++
 
-Missing
-
-.. TODO
-   Add explanation in safety plan: We assume, safety plan and safety
-   case are reviewed by you? Adding that this also serves as the
-   confirmation review to the safety plan.  For audit/assessment
-   referring to TÜV SÜD
+Covered by Safety Assessment in :ref:`Safety Plan <safety-plan/project-setup:safety assessment>`.
 
 6.4.6.5.g
 +++++++++
@@ -291,11 +276,6 @@ Not applicable, no proven in use applied
 +++++++++
 
 Tool safety assessments
-
-.. TODO
-   Add also ISO 26262 and TCL to the safety plan tool safety assessments
-   tool classification, TCL can be the same as the Tx class, arguments
-   are already there, no further changes required in first step
 
 6.4.6.6
 ~~~~~~~
@@ -318,20 +298,12 @@ Safety Plan - Roles and responsibilities.
 6.4.6.6.d
 +++++++++
 
-Missing information (ressource planning, etc.)
-
-.. TODO
-   Are there other internal docs? Then maybe nothing needs to be added,
-   just referencing the safety plan -> Clickup
+Resource planning is covered in the project manangement tool listed in :doc:`qualification-plan:development`.
 
 6.4.6.6.e
 +++++++++
 
-Missing information (time planing.)
-
-.. TODO
-   Are there other internal docs? Then maybe nothing needs to be added,
-   just referencing the safety plan
+Time planning is covered in the project manangement tool listed in :doc:`qualification-plan:development`.
 
 6.4.6.6.f
 +++++++++
@@ -361,10 +333,7 @@ Not applicable, no modification/impact analysis
 6.4.6.8
 ~~~~~~~
 
-Explicit update plan documentation missing
-
-.. TODO
-   How are you keeping track of the progress? -> clickup
+Safety plan updates are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
 
 6.4.6.9
 ~~~~~~~
@@ -388,8 +357,10 @@ Safety Plan Tracking of open activites in Clickup
 6.4.7.2
 ~~~~~~~
 
-Safety Plan - Configuration  Development Process  Change Tracking
-Infrastructure
+- Safety Plan - Configuration
+- Safety Plan - Development Process
+- Safety Plan - Change Tracking
+- Safety Plan - Infrastructure
 
 6.4.8
 -----
@@ -397,21 +368,18 @@ Infrastructure
 6.4.8.1
 ~~~~~~~
 
-Missing
+Safety activites are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Each release has a checklist of safety activities.
 
-.. TODO
-   Safety case (explicitly named as such) required. Is there any
-   document showing that all acitivites are done, full list of all
-   documents created and approval? Could this be named as the safety
-   case?  Also via task tracker
+Each release is formally approved as described in :doc:`qualification-plan:infrastructure`.
 
 6.4.8.2
 ~~~~~~~
 
-Missing
+Safety activites are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Each release has a checklist of safety activities.
 
-.. TODO
-   see above
+Each release is formally approved as described in :doc:`qualification-plan:release`.
 
 6.4.9
 -----

@@ -38,6 +38,7 @@ Core Library Certification
    norm-mapping/iec-61508/iec-61508-3
    norm-mapping/iec-61508/iec-61508-3-annex-a
    norm-mapping/iec-61508/iec-61508-3-annex-b
+   norm-mapping/method-tables-6
    norm-mapping/2-5
    norm-mapping/2-6
    norm-mapping/2-7

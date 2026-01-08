@@ -429,3 +429,12 @@ fn test_nth_for_chain() {
     assert_eq!(Some(1), iter.nth(0));
     assert_eq!(Some(3), iter.nth(1));
 }
+
+
+// covers `<core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold`.
+#[test]
+fn test_try_fold_for_skip() {
+    let mut iter = vec![1i32, 2, 3].into_iter().skip(0);
+    assert!(iter.try_fold(0i32, |a, b| a.checked_add(b)).is_some());
+}
+

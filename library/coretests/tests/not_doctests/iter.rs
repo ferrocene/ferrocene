@@ -509,11 +509,60 @@ fn test_spec_next_for_range_inclusive() {
     assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next());
 }
 
-
 // covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back`.
 #[test]
 fn test_spec_next_back_for_range_inclusive() {
     assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(1)).next_back());
     assert_eq!(Some(StepWrapper(2)), (StepWrapper(1)..=StepWrapper(2)).next_back());
     assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next_back());
+}
+
+// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_range_inclusive() {
+    assert_eq!(
+        Some(StepWrapper(55)),
+        (StepWrapper(1)..=StepWrapper(10))
+            .try_fold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert_eq!(
+        Some(StepWrapper(0)),
+        (StepWrapper(2)..=StepWrapper(1))
+            .try_fold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert_eq!(
+        Some(StepWrapper(1)),
+        (StepWrapper(1)..=StepWrapper(1))
+            .try_fold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    #[derive(Clone, PartialOrd, PartialEq)]
+    struct DoubleStepWrapper(u16);
+
+    impl core::iter::Step for DoubleStepWrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            if *start <= *end {
+                let steps = (end.0 - start.0) as usize / 2;
+                (steps, Some(steps))
+            } else {
+                (0, None)
+            }
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            u16::forward_checked(start.0, 2 * count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            u16::backward_checked(start.0, 2 * count).map(Self)
+        }
+    }
+
+    assert!(
+        (DoubleStepWrapper(1)..=DoubleStepWrapper(10))
+            .try_fold(DoubleStepWrapper(0), |a, b| a.0.checked_add(b.0).map(DoubleStepWrapper))
+            .is_some()
+    );
 }

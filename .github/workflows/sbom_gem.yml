@@ -1,0 +1,27 @@
+name: "Full"
+on:
+  workflow_dispatch
+
+jobs:
+  sbom-gen:
+    name: SBOM-Generation
+    runs-on: ubuntu-latest
+    container: cyclonedx/cyclonedx-cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup submodules and uv
+        uses: ./.github/actions/setup/
+        with:
+          llvm-subset: 'true'
+          build-dependencies: 'false'
+
+      - name: Generate SBOM
+        run: ./ferrocene/tools/sbom-gen/sbom_gen.sh
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ferrocene SBOM
+          path: target/sboms/ferrocene_cdx_sbom.json

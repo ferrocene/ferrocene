@@ -30,7 +30,7 @@ Covered by
 
 Covered by
 
-- `Certified core library API docs <../../api-docs/core/index.html>`_
+- `Certified core library API docs <../../../api-docs/core/index.html>`_
 - :doc:`Code coverage report <core-certification:safety-report/code-coverage>`
 - :ref:`safety-plan/requirements:quality of the doc-comments`
 

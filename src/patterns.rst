@@ -1348,7 +1348,7 @@ Pattern-without-alternation Matching
 
 .. rubric:: Legality Rules
 
-:dp:`fls_UzO6gTNd55d1`
+:dp:`fls_ERSSAOpYwghf`
 :dt:`Pattern-without-alternation matching` of a :t:`pattern-without-alternation`
 against a :t:`value` proceeds based on its kind:
 
@@ -1385,7 +1385,7 @@ against a :t:`value` proceeds based on its kind:
 #. :dp:`fls_uxysntb3u03j`
    If the :t:`pattern-without-alternation` is an :t:`underscore pattern`, then perform :t:`underscore pattern matching`.
 
-#. :dp:`fls_wh201rmh6u6d`
+#. :dp:`fls_VOfEVPdtTvPN`
    Otherwise :t:`Pattern-without-alternation matching` fails.
 
 

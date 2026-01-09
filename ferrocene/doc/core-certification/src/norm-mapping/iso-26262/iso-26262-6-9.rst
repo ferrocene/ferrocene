@@ -60,9 +60,8 @@ Safety Plan - Code coverage report
 9.4.5
 -----
 
-Qualification Plan - Build and Testing Process
+- Qualification Plan - Build and Testing Process
+- "Safety Manual - Project Setup - Configuration" describes how the build and test environment is being documented.
 
 .. TODO
-   Are there more details on the test env.? Simulator, actual HW?    Add
-   this to the compiler documentation    Adding the emulator/simulator
-   to the tool safety analysis (currently missing)
+   Adding the emulator/simulator to the tool safety analysis (currently missing)

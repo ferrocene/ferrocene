@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+#
 # Merges all generated SBOMs that end with '_sbom.json' into one.
 
 set -e

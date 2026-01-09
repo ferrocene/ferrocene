@@ -87,6 +87,7 @@ __pycache__/
 ## Node
 node_modules
 /src/doc/rustc-dev-guide/mermaid.min.js
+.yarn/install-sate.gz
 
 ## Rustdoc GUI tests
 tests/rustdoc-gui/src/**.lock

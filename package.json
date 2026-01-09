@@ -1,4 +1,7 @@
 {
+  "name": "rustdoc-js-helper",
+  "version": "0.0.0",
+  "description": "JS dependencies used for rustdoc.",
   "dependencies": {
     "browser-ui-test": "^0.22.2",
     "es-check": "^9.4.4",

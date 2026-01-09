@@ -767,7 +767,7 @@ Dropping proceeds as follows:
    When the first call matches ``Ok([a, b])``, the :t:`[binding]s` are dropped in reverse declaration order: ``b`` then ``a``.
 
 #. :dp:`fls_gNWXh61ZXXt8`
-   When the second call matches ``Err([b, a])``, the drop order remains ``b`` then ``a``, determined by the first :t:`pattern-without-alternation`.
+   When the second call matches ``Err([b, a])``, the drop order remains ``b`` then ``a`` since it is determined by the first :t:`pattern-without-alternation`.
 
 .. code-block:: rust
 

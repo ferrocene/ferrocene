@@ -163,6 +163,8 @@ Not applicable, no tailoring based on specific tool usage
 6.4.5.7
 ~~~~~~~
 
+TODO
+
 .. TODO
    Could be added in as a short explanation in the safety plan: This is
    a SEooC SW Development, tailoring follows the standard (-2/-6/-8)
@@ -174,15 +176,19 @@ Not applicable, no tailoring based on specific tool usage
 6.3.5.7.a
 +++++++++
 
-Safety Plan - Requirements Management  Requirement basis missing
+Safety Plan - Requirements Management
 
 .. TODO
    Add/Show some general assumption on the functionality the library
    shall provide based on
    https://public-docs.ferrocene.dev/main/certification/api-docs/core/index.html
 
+   Requirement basis missing
+
 6.4.5.7.b
 +++++++++
+
+TODO
 
 .. TODO
    Similar, add to the safety plan, referencing/including information

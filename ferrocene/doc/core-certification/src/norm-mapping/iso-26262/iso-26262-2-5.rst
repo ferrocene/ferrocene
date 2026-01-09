@@ -51,7 +51,6 @@ see 5.4.2.3
 ~~~~~~~
 
 - Safety Plan - Lifecycle Phases Overview
-- Accordance to 26262-8:10 not explicitly stated
 
 .. TODO
    Reference to Accordance to 26262-8:10
@@ -59,18 +58,21 @@ see 5.4.2.3
 5.4.2.5
 ~~~~~~~
 
-Not explicitly stated - need clarification for provision of ressources
+TODO
 
 .. TODO
    Reference to ISO 9001 process?
+   Not explicitly stated - need clarification for provision of ressources
 
 5.4.2.6
 ~~~~~~~
 
-Not explicitly stated - need clarification for improvement process
+TODO
 
 .. TODO
    Reference to ISO 9001 process?
+   Not explicitly stated - need clarification for improvement process
+
 
 5.4.2.6.a
 +++++++++

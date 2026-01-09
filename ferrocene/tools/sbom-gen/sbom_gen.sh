@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-set -e
+set -euo pipefail
 
 # Ensure that yarn lockfile is still up to date
 # Cargo and uv SBOM tools are able to resolve this themselves.
@@ -30,7 +30,7 @@ COMBINED_SBOM=ferrocene_cdx_sbom.json
 mkdir -p $DST_DIR
 
 cargo sbom --output-format=cyclone_dx_json_1_6 > $ROOT_CARGO_SBOM && mv $ROOT_CARGO_SBOM $DST_DIR/$ROOT_CARGO_SBOM
-yarn cyclonedx -o $ROOT_YARN_SBOM && mv $ROOT_YARN_SBOM $DST_DIR/$ROOT_YARN_SBOM
+yarn dlx -q @cyclonedx/yarn-plugin-cyclonedx -o $ROOT_YARN_SBOM && mv $ROOT_YARN_SBOM $DST_DIR/$ROOT_YARN_SBOM
 
 pushd ferrocene/doc
 uv export --format=cyclonedx1.5 --preview-features sbom-export --all-packages -o $FERROCENE_DOC_UV_SBOM && mv $FERROCENE_DOC_UV_SBOM ../../$DST_DIR/$FERROCENE_DOC_UV_SBOM

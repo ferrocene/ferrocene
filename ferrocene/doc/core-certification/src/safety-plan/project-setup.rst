@@ -40,6 +40,11 @@ The requirements are:
 - The certified subset is tested with 100% statement coverage.
     - There are a few lines that cannot be covered by automatic tests. These are annotated with an explanation.
 
+ISO 26262
+~~~~~~~~~
+
+The lifecycle is in accordance with ISO 26262-8:2018, Clause 10.
+
 Internal procedures
 -------------------
 

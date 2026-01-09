@@ -1725,17 +1725,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"root-workspace-0b6124@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "root-workspace-0b6124@workspace:."
-  dependencies:
-    browser-ui-test: "npm:^0.22.2"
-    es-check: "npm:^9.4.4"
-    eslint: "npm:^8.57.1"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
 "run-parallel@npm:^1.1.9":
   version: 1.2.0
   resolution: "run-parallel@npm:1.2.0"
@@ -1744,6 +1733,17 @@ __metadata:
   checksum: 10c0/200b5ab25b5b8b7113f9901bfe3afc347e19bb7475b267d55ad0eb86a62a46d77510cb0f232507c9e5d497ebda569a08a9867d0d14f57a82ad5564d991588b39
   languageName: node
   linkType: hard
+
+"rustc-js-helper@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "rustc-js-helper@workspace:."
+  dependencies:
+    browser-ui-test: "npm:^0.22.2"
+    es-check: "npm:^9.4.4"
+    eslint: "npm:^8.57.1"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
 
 "safe-buffer@npm:~5.2.0":
   version: 5.2.1

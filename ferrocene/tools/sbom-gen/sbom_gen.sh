@@ -68,19 +68,3 @@ popd
 pushd src/tools/rustc-perf
 cargo sbom --output-format=cyclone_dx_json_1_6 > $RUSTC_PERF_CARGO_SBOM && mv $RUSTC_PERF_CARGO_SBOM ../../../$DST_DIR/$RUSTC_PERF_CARGO_SBOM
 popd
-
-cd $DST_DIR
-cyclonedx merge --input-files \
-  $ROOT_CARGO_SBOM \
-  $ROOT_YARN_SBOM \
-  $FERROCENE_DOC_UV_SBOM \
-  $BACKTRACE_RS_CARGO_SBOM \
-  $FERROCENE_LIBC_CARGO_SBOM \
-  $FERROCENE_TOOLS_CARGO_SBOM \
-  $FERROCENE_AUTOMATIONS_COMMON_UV_SBOM \
-  $LIBRARY_CARGO_SBOM \
-  $STDARCH_CARGO_SBOM \
-  $BOOTSTRAP_CARGO_SBOM \
-  $LIBRUSTDOC_CARGO_SBOM \
-  $RUSTC_PERF_CARGO_SBOM \
-  --output-version=v1_6 --output-file $COMBINED_SBOM

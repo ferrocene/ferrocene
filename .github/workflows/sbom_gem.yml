@@ -1,4 +1,4 @@
-name: "Full"
+name: "SBOM"
 on:
   workflow_dispatch
 
@@ -16,6 +16,9 @@ jobs:
         with:
           llvm-subset: 'true'
           build-dependencies: 'false'
+
+      - name: Install cargo-sbom
+        run: cargo install cargo-sbom
 
       - name: Generate SBOM
         run: ./ferrocene/tools/sbom-gen/sbom_gen.sh

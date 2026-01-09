@@ -13,7 +13,36 @@
 
   **Note:** This may fail if installation would require the lockfile to change, which should only be the case if new packages were added. In this case, run the command without `--immutable` since changes are correctly expected.
 
+## Currently Excluded
+
+The SBOM does not include dependencies of the following packages:
+- `compiler/rustc_codegen_cranelift` ... likely not relevant for Ferrocene, because Cranelift as backend is not supported as of now
+- `compiler/rustc_codegen_gcc` ... likely not relevant for Ferrocene, because GCC as backend is not supported as of now
+- `ferrocene/tools/flip-link` ... external Rust tool for embedded projects. Best to generate an SBOM for flip-link separately
+- `library/backtrace` ... covered by `ferrocene/library/backtrace-rs`
+- `src/doc/book`
+- `src/gcc` ... likely not relevant for Ferrocene, because GCC as backend is not supported as of now
+- `src/llvm-project` ... No existing SBOM, but maybe used LLVM version is enough?
+- `src/tools/cargo`
+- `src/tools/enzyme` ... external CPP application. Couldn't find an existing SBOM 
+- `src/tools/error_index_generator` ... used by rustbook
+- `src/tools/rust-analyzer`
+- `src/tools/rustbook`
+
 ## Steps
+### Automatic Creation
+
+To automatically generate the SBOM file as done in the Manual Creation section,
+run the shell script `sbom_gen.sh` from the root of the repository.
+This will create the SBOM file in the `target/sboms` folder.
+
+```bash
+./ferrocene/tools/sbom-gen/sbom_gen.sh
+```
+
+**Note:** Requires prerequisites and bash to be installed.
+
+### Manual Creation
 
 1. At repository root: 
 
@@ -43,13 +72,13 @@
       This generates a SBOM file for the yarn.lock file located at root level.
       The packages must be installed using `yarn install --immutable` before running this command as mentioned in the prerequisite section.
 
-2. At `ferrocene/doc` run: `uv export --format=cyclonedx1.5 --all-packages -o ferrocene_doc_uv_cdx_sbom.json`
+2. At `ferrocene/doc` run: `uv export --format=cyclonedx1.5 --preview-features sbom-export --all-packages -o ferrocene_doc_uv_cdx_sbom.json`
 
    This generates a SBOM file for the uv.lock file located in the ferrocene/doc folder.
 
    **Note:** Needs uv version >= 0.9.x.
 
-3. At `ferrocene/library/backtrace-rs` run: `cargo sbom --output-format=cyclone_dx_json_1_6 > ferrocene_backtrace-rs_cargo_cdx_sbom.json`
+3. At `ferrocene/library/backtrace-rs` run: `cargo sbom --output-format=cyclone_dx_json_1_6 > backtrace-rs_cargo_cdx_sbom.json`
 
    **Note:** Might be replaced by the official submodule at `library/backtrace`. In that case, the submodule must be checked out and the SBOM must be generated for it instead.
 
@@ -57,7 +86,7 @@
 
 5. At `ferrocene/tools` run: `cargo sbom --output-format=cyclone_dx_json_1_6 > ferrocene_tools_cargo_cdx_sbom.json`
 
-6. At `ferrocene/tools/automations-common` run: `uv export --format=cyclonedx1.5 --all-packages -o ferrocene_automations-common_uv_cdx.json`
+6. At `ferrocene/tools/automations-common` run: `uv export --format=cyclonedx1.5 --all-packages -o ferrocene_automations-common_uv_cdx_sbom.json`
 
 7. At `library`:
 

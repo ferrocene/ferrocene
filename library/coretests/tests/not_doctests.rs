@@ -1,4 +1,3 @@
-mod array;
 mod atomic;
 mod borrow;
 mod cell;

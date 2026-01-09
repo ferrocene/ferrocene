@@ -23,12 +23,13 @@ jobs:
           build-dependencies: 'false'
           setup-uv: 'false'
 
-      - name: Install cargo-sbom
-        run: cargo install cargo-sbom
-
-      # Need version >0.9.x to get SBOM export feature
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/0.9.22/install.sh | sh
+      # Need uv version >0.9.x to get SBOM export feature
+      # Need yarn >v4.x for the cyclonedx plugin
+      - name: Install tools
+        run: |
+          cargo install cargo-sbom
+          curl -LsSf https://astral.sh/uv/0.9.22/install.sh | sh
+          yarn set version stable
 
       - name: Generate SBOMs
         run: ./ferrocene/tools/sbom-gen/sbom_gen.sh

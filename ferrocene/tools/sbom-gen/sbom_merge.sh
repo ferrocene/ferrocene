@@ -3,7 +3,7 @@
 #
 # Merges all generated SBOMs that end with '_sbom.json' into one.
 
-set -e
+set -euo pipefail
 
 DST_DIR=target/sboms
 COMBINED_SBOM=ferrocene_cdx_sbom.json

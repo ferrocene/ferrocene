@@ -9,6 +9,7 @@
 - npm
 - yarn (`npm install --global yarn`)
 
+  Switch to the new yarn version by running `yarn set version stable`.
   Then run `yarn install --immutable` to get the packages, but without changing the lockfile.
 
   **Note:** This may fail if installation would require the lockfile to change, which should only be the case if new packages were added. In this case, run the command without `--immutable` since changes are correctly expected.
@@ -67,7 +68,7 @@ This will create the SBOM file in the `target/sboms` folder.
         - `tools/rustbook`
         - `tools/rustc-perf`
         
-   2. Run: `yarn cyclonedx -o root_yarn_cdx_sbom.json`
+   2. Run: `yarn dlx -q @cyclonedx/yarn-plugin-cyclonedx -o root_yarn_cdx_sbom.json`
 
       This generates a SBOM file for the yarn.lock file located at root level.
       The packages must be installed using `yarn install --immutable` before running this command as mentioned in the prerequisite section.

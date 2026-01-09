@@ -2,7 +2,7 @@
    SPDX-FileCopyrightText: The Ferrocene Developers
 
 =========================
-ISO 26262 Method Tables 6
+ISO 26262 6-Method Tables
 =========================
 
 Table 1	Topics to be covered by modelling and coding guidelines

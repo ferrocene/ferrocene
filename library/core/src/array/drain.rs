@@ -29,7 +29,7 @@ pub(crate) fn drain_array_with<T, R, const N: usize>(
 /// See [`drain_array_with`] -- this is `pub(crate)` only so it's allowed to be
 /// mentioned in the signature of that method.  (Otherwise it hits `E0446`.)
 // INVARIANT: It's ok to drop the remainder of the inner iterator.
-pub(crate) struct Drain<'a, T>(slice::IterMut<'a, T>);
+pub(crate) struct Drain<'a, T>(pub(super) slice::IterMut<'a, T>);
 
 impl<T> Drop for Drain<'_, T> {
     fn drop(&mut self) {

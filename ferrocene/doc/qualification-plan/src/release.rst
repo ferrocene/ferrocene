@@ -6,6 +6,10 @@
 Release Process
 ===============
 
+Release List
+------------
+
+A record of all past releases is published to `releases.ferrocene.dev <https://releases.ferrocene.dev/ferrocene/index.html>`_. Access to this URL requires a customer account.
 
 Release Channels
 ----------------

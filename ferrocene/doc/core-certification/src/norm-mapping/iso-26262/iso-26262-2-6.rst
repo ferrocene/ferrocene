@@ -681,19 +681,22 @@ See "Release Validation" in :doc:`qualification-plan:validation`.
 6.4.13.4.b
 ++++++++++
 
-Safety Plan - Certification scope  qualification report test results
+- Safety Plan - Certification scope
+- Qualification report - Test results
 
 6.4.13.4.c
 ++++++++++
 
-Safety Plan - Certification scope  qualification report test results
+- Safety Plan - Certification scope
+- Qualification report - Test results
 
 6.4.13.4.d
 ++++++++++
 
- qualification report test results
+Qualification report - Test results
 
 6.4.13.5
 ~~~~~~~~
 
-Safety Plan - Certification scope  qualification report test results
+- Safety Plan - Certification scope
+- Qualification report - Test results

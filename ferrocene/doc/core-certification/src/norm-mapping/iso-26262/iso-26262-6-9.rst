@@ -1,0 +1,67 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 6-9
+=============
+
+6-9 Software Unit Verification
+==============================
+
+9.4.1
+------
+
+9.4.2
+-----
+
+See Table 7 in Method Tables.
+
+9.4.2.a
+~~~~~~~
+
+Safety Plan - Responsibility split
+
+9.4.2.b
+~~~~~~~
+
+Safety Plan - Responsibility split
+
+9.4.2.c
+~~~~~~~
+
+Not applicable
+
+9.4.2.d
+~~~~~~~
+
+- Safety Plan - Testing Plan
+- Safety-Plan - Uncertified and unused code
+
+9.4.2.e
+~~~~~~~
+
+Safety Plan - Testing Plan
+
+9.4.2.f
+~~~~~~~
+
+Not applicable
+
+9.4.3
+-----
+
+See Table 8 in Method Tables.
+
+9.4.4
+-----
+
+Safety Plan - Code coverage report
+
+9.4.5
+-----
+
+- Qualification Plan - Build and Testing Process
+- "Safety Manual - Project Setup - Configuration" describes how the build and test environment is being documented.
+
+.. TODO
+   Adding the emulator/simulator to the tool safety analysis (currently missing)

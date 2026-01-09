@@ -10,7 +10,7 @@ Table B.1 - Design and coding standards
 1
 "
 
-.. include:: ../partials/implicit-coding-standard.rst
+.. include:: ../../partials/implicit-coding-standard.rst
 
 2, 7, 8
 """""""
@@ -23,7 +23,7 @@ Table B.2 - Dynamic analysis and testing
 1
 "
 
-.. include:: ../partials/boundary-value-analysis.rst
+.. include:: ../../partials/boundary-value-analysis.rst
 
 7b
 ""
@@ -36,7 +36,7 @@ Table B.3 - Functional and black-box testing
 4
 "
 
-.. include:: ../partials/boundary-value-analysis.rst
+.. include:: ../../partials/boundary-value-analysis.rst
 
 Table B.4 - Failure analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +55,7 @@ Table B.5 - Modelling
 
 N/A
 
-.. include:: ../partials/no-system.rst
+.. include:: ../../partials/no-system.rst
 
 
 Table B.6 - Performance testing
@@ -66,7 +66,7 @@ Table B.6 - Performance testing
 
 N/A
 
-.. include:: ../partials/no-system.rst
+.. include:: ../../partials/no-system.rst
 
 Table B.7 - Semi-formal methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -30,14 +30,14 @@ Covered by
 
 Covered by
 
-- `Certified core library API docs <../../api-docs/core/index.html>`_
+- `Certified core library API docs <../../../api-docs/core/index.html>`_
 - :doc:`Code coverage report <core-certification:safety-report/code-coverage>`
 - :ref:`safety-plan/requirements:quality of the doc-comments`
 
 5.2.5
 ~~~~~
 
-All docs available in the :doc:`Ferrocene documentation package <index>`.
+All docs available in the `Ferrocene documentation package <../../../../index.html>`_.
 
 5.2.6
 ~~~~~
@@ -47,7 +47,7 @@ Covered by :ref:`Qualification Plan - Documentation Validation <qualification-pl
 5.2.7
 ~~~~~
 
-The core library certification documentation follows the structure of the other documents in the :doc:`Ferrocene documentation package <index>`.
+The core library certification documentation follows the structure of the other documents in the `Ferrocene documentation package <../../../../index.html>`_.
 
 5.2.8
 ~~~~~

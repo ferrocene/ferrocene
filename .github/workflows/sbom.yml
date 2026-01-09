@@ -7,6 +7,8 @@ jobs:
   sbom-gen:
     name: SBOM-Generation
     runs-on: ubuntu-latest
+    outputs:
+      ferrocene-version: ${{ steps.get-version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +31,10 @@ jobs:
           name: Generated-SBOMs
           path: target/sboms/*
 
+      - name: Output Ferrocene Version
+        id: get-version
+        run: echo "version=$(cat ferrocene/version)" >> "$GITHUB_OUTPUT"
+
   sbom-merge:
     name: SBOM-Merge
     runs-on: ubuntu-latest
@@ -42,7 +48,7 @@ jobs:
           name: Generated-SBOMs
 
       - name: Merge SBOMs
-        run: cyclonedx merge --input-files $(ls *"_sbom.json" 2>/dev/null | tr '\n' ' ') --output-version=v1_6 --output-file ferrocene_cdx_sbom.json
+        run: cyclonedx merge --name="Ferrocene" --version=${{ needs.sbom-gen.outputs.ferrocene-version }} --hierarchical --input-files $(ls *"_sbom.json" 2>/dev/null | tr '\n' ' ') --output-version=v1_6 --output-file ferrocene_cdx_sbom.json
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4

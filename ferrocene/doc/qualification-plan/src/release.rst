@@ -112,7 +112,7 @@ environment:
 * Everyday at 00:00 UTC, the tip of the branch with the Rust channel of
   ``beta`` is released on the pre-rolling channel.
 * Everyday at 00:00 UTC, the tip of the most recent branch with the Rust
-  channel of ``stable`` is released on the pre-rolling channel.
+  channel of ``stable`` is released on the rolling channel.
 * Everyday at 00:00 UTC, the tip of every branch with the Ferrocene channel of
   ``beta`` is released on the beta-${version} channel.
 

@@ -644,3 +644,13 @@ fn test_spec_try_rfold_for_trusted_range_inclusive() {
             .is_some()
     );
 }
+
+// covers `<core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back`.
+#[test]
+fn test_nth_back_for_slice_iter() {
+    let mut arr = [(); 10];
+    let slice = arr.as_mut_slice();
+
+    assert_eq!(None, slice.iter().nth_back(11));
+}
+

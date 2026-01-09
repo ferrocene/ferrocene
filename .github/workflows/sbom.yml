@@ -29,7 +29,8 @@ jobs:
         run: |
           cargo install cargo-sbom
           curl -LsSf https://astral.sh/uv/0.9.22/install.sh | sh
-          yarn set version stable
+          npm install -g corepack
+          corepack install
 
       - name: Generate SBOMs
         run: ./ferrocene/tools/sbom-gen/sbom_gen.sh

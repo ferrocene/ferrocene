@@ -1,9 +1,9 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-=============
-ISO 26262 6-C
-=============
+===================
+ISO 26262 6-Annex C
+===================
 
 6-C Software Configuration
 ==========================

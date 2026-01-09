@@ -50,10 +50,7 @@ see 5.4.2.3
 5.4.2.4
 ~~~~~~~
 
-- Safety Plan - Lifecycle Phases Overview
-
-.. TODO
-   Reference to Accordance to 26262-8:10
+Safety Plan - Lifecycle Phases Overview
 
 5.4.2.5
 ~~~~~~~

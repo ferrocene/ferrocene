@@ -676,11 +676,7 @@ Qualification report - Test results
 6.4.13.4.a
 ++++++++++
 
-Currently not clear, the safety manager/Florian?
-
-.. TODO
-   Clarify approval of release decision  Task Tracker: Yes, we should go
-   ahead But afterwards there is still formal approval from Florian
+See "Release Validation" in :doc:`qualification-plan:validation`.
 
 6.4.13.4.b
 ++++++++++

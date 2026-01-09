@@ -7,7 +7,6 @@ jobs:
   sbom-gen:
     name: SBOM-Generation
     runs-on: ubuntu-latest
-    container: cyclonedx/cyclonedx-cli
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,8 +20,29 @@ jobs:
       - name: Install cargo-sbom
         run: cargo install cargo-sbom
 
-      - name: Generate SBOM
+      - name: Generate SBOMs
         run: ./ferrocene/tools/sbom-gen/sbom_gen.sh
+
+      - name: Upload generated SBOMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Generated-SBOMs
+          path: target/sboms/*
+
+  sbom-merge:
+    name: SBOM-Merge
+    runs-on: ubuntu-latest
+    container: cyclonedx/cyclonedx-cli
+    needs: sbom-gen
+
+    steps:
+      - name: Get generated SBOMs from sbom-gen job
+        uses: actions/download-artifact@v4
+        with:
+          name: Generated-SBOMs
+
+      - name: Merge SBOMs
+        run: ./ferrocene/tools/sbom-gen/sbom_merge.sh
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4

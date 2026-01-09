@@ -7,7 +7,12 @@
 - `cargo install cargo-sbom`
 - uv
 - npm
-- yarn (`npm install --global yarn`)
+- yarn (`npm install -g corepack`)
+
+  According to the [installation guide](https://yarnpkg.com/getting-started/install),
+  you currently need to run `corepack enable` to get the correct yarn version.
+  Switch to the new yarn version by running `yarn set version stable`.
+  Alternatively, run `corepack install`, because the correct yarn version is already set in the package.json file.
 
   Then run `yarn install --immutable` to get the packages, but without changing the lockfile.
 
@@ -67,7 +72,7 @@ This will create the SBOM file in the `target/sboms` folder.
         - `tools/rustbook`
         - `tools/rustc-perf`
         
-   2. Run: `yarn cyclonedx -o root_yarn_cdx_sbom.json`
+   2. Run: `yarn dlx -q @cyclonedx/yarn-plugin-cyclonedx -o root_yarn_cdx_sbom.json`
 
       This generates a SBOM file for the yarn.lock file located at root level.
       The packages must be installed using `yarn install --immutable` before running this command as mentioned in the prerequisite section.

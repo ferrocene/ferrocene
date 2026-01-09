@@ -7,9 +7,13 @@
 - `cargo install cargo-sbom`
 - uv
 - npm
-- yarn (`npm install --global yarn`)
+- yarn (`npm install -g corepack`)
 
+  According to the [installation guide](https://yarnpkg.com/getting-started/install),
+  you currently need to run `corepack enable` to get the correct yarn version.
   Switch to the new yarn version by running `yarn set version stable`.
+  Alternatively, run `corepack install`, because the correct yarn version is already set in the package.json file.
+
   Then run `yarn install --immutable` to get the packages, but without changing the lockfile.
 
   **Note:** This may fail if installation would require the lockfile to change, which should only be the case if new packages were added. In this case, run the command without `--immutable` since changes are correctly expected.

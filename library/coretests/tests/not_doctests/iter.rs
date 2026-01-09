@@ -588,31 +588,59 @@ fn test_spec_try_rfold_for_range_inclusive() {
             .try_rfold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
     );
 
-    #[derive(Clone, PartialOrd, PartialEq)]
-    struct DoubleStepWrapper(u16);
-
-    impl core::iter::Step for DoubleStepWrapper {
-        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
-            if *start <= *end {
-                let steps = (end.0 - start.0) as usize / 2;
-                (steps, Some(steps))
-            } else {
-                (0, None)
-            }
-        }
-
-        fn forward_checked(start: Self, count: usize) -> Option<Self> {
-            u16::forward_checked(start.0, 2 * count).map(Self)
-        }
-
-        fn backward_checked(start: Self, count: usize) -> Option<Self> {
-            u16::backward_checked(start.0, 2 * count).map(Self)
-        }
-    }
-
     assert!(
         (DoubleStepWrapper(1)..=DoubleStepWrapper(10))
             .try_rfold(DoubleStepWrapper(0), |a, b| a.0.checked_add(b.0).map(DoubleStepWrapper))
+            .is_some()
+    );
+}
+
+#[derive(Clone, Copy, PartialOrd, PartialEq)]
+struct TrustedDoubleStepWrapper(u16);
+
+impl core::iter::Step for TrustedDoubleStepWrapper {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        if *start <= *end {
+            let steps = (end.0 - start.0) as usize / 2;
+            (steps, Some(steps))
+        } else {
+            (0, None)
+        }
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::forward_checked(start.0, 2 * count).map(Self)
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::backward_checked(start.0, 2 * count).map(Self)
+    }
+}
+
+unsafe impl core::iter::TrustedStep for TrustedDoubleStepWrapper {}
+
+// covers `<core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_trusted_range_inclusive() {
+    assert!(
+        (TrustedDoubleStepWrapper(1)..=TrustedDoubleStepWrapper(10))
+            .try_fold(TrustedDoubleStepWrapper(0), |a, b| a
+                .0
+                .checked_add(b.0)
+                .map(TrustedDoubleStepWrapper))
+            .is_some()
+    );
+}
+
+// covers `<core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold`.
+#[test]
+fn test_spec_try_rfold_for_trusted_range_inclusive() {
+    assert!(
+        (TrustedDoubleStepWrapper(1)..=TrustedDoubleStepWrapper(10))
+            .try_rfold(TrustedDoubleStepWrapper(0), |a, b| a
+                .0
+                .checked_add(b.0)
+                .map(TrustedDoubleStepWrapper))
             .is_some()
     );
 }

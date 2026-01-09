@@ -662,3 +662,9 @@ fn test_nth_back_for_slice_iter() {
     assert_eq!(None, slice.iter().nth_back(11));
 }
 
+// covers `core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::nth_back`.
+#[test]
+fn test_nth_back_for_range_inclusive() {
+    assert_eq!(None, (1..=0).nth_back(11));
+    assert_eq!(None, (DoubleStepWrapper(1)..=DoubleStepWrapper(1)).nth_back(1));
+}

@@ -55,37 +55,22 @@ Safety Plan - Lifecycle Phases Overview
 5.4.2.5
 ~~~~~~~
 
-TODO
-
-.. TODO
-   Reference to ISO 9001 process?
-   Not explicitly stated - need clarification for provision of ressources
+This is ensured by the QMS implemented according to ISO 9001.
 
 5.4.2.6
 ~~~~~~~
 
-TODO
-
-.. TODO
-   Reference to ISO 9001 process?
-   Not explicitly stated - need clarification for improvement process
-
+This is ensured by the QMS implemented according to ISO 9001.
 
 5.4.2.6.a
 +++++++++
 
-see 5.4.2.6
-
-.. TODO
-   Reference to ISO 9001 process?
+See 5.4.2.6.
 
 5.4.2.6.b
 +++++++++
 
-see 5.4.2.6
-
-.. TODO
-   Reference to ISO 9001 process?
+See 5.4.2.6.
 
 5.4.2.7
 ~~~~~~~

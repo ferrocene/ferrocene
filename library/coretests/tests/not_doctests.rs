@@ -1,9 +1,13 @@
 mod atomic;
 mod borrow;
 mod cell;
+mod cmp;
+mod floats;
+mod hash;
 mod intrinsics;
 mod iter;
 mod num;
+mod ops;
 mod slice;
 mod str;
 mod time;
@@ -182,6 +186,9 @@ fn result_methods() {
 
     assert!(Err::<&mut i32, i32>(x).cloned().is_err_and(|x| x == 5));
     assert!(Err::<&mut i32, i32>(x).copied().is_err_and(|x| x == 5));
+
+    assert!(ok.err().is_none());
+    assert!(err.err().is_some());
 }
 
 #[test]

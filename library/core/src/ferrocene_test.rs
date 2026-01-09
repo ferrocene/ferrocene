@@ -1,0 +1,75 @@
+use crate::ops::IndexRange;
+use crate::slice::SliceIndex;
+
+pub fn test_index_range_slice_index() {
+    let mut slice_bytes = [1, 2, 3, 4, 5];
+    let res = [1, 2].as_slice();
+
+    let range_some = IndexRange::zero_to(2);
+    // SAFETY: start==end
+    let range_none = unsafe { IndexRange::new_unchecked(100, 100) };
+
+    {
+        let slice_ref = slice_bytes.as_slice();
+
+        assert_eq!(Some(res), SliceIndex::get(range_some.clone(), slice_ref));
+        assert_eq!(None, SliceIndex::get(range_none.clone(), slice_ref));
+        assert_eq!(res, SliceIndex::index(range_some.clone(), slice_ref));
+    }
+
+    {
+        let slice_mut = slice_bytes.as_mut_slice();
+
+        assert_eq!(Some(res), SliceIndex::get_mut(range_some.clone(), slice_mut).as_deref());
+        assert_eq!(None, SliceIndex::get_mut(range_none.clone(), slice_mut));
+        assert_eq!(res, SliceIndex::index_mut(range_some.clone(), slice_mut));
+    }
+}
+
+pub fn test_index_range_slice_index_panic() {
+    let slice_bytes = [1, 2, 3, 4, 5];
+    // SAFETY: start==end
+    let range_none = unsafe { IndexRange::new_unchecked(100, 100) };
+
+    let slice_ref = slice_bytes.as_slice();
+    SliceIndex::index(range_none.clone(), slice_ref);
+}
+
+pub fn test_index_range_slice_index_panic_mut() {
+    let mut slice_bytes = [1, 2, 3, 4, 5];
+    // SAFETY: start==end
+    let range_none = unsafe { IndexRange::new_unchecked(100, 100) };
+
+    let slice_mut = slice_bytes.as_mut_slice();
+    SliceIndex::index_mut(range_none.clone(), slice_mut);
+}
+
+pub fn test_wrapped_call_once() {
+    let wrapped = core::ops::NeverShortCircuit::wrap_mut_1(|c| c + 10);
+    assert_eq!(25, wrapped.call_once((15,)).0);
+}
+
+pub fn test_index_range_iterator() {
+    let mut ir = IndexRange::zero_to(5);
+
+    // size_hint
+    assert_eq!((5, Some(5)), ir.size_hint());
+
+    // advance_by
+    assert_eq!(Ok(()), ir.advance_by(2));
+    assert_eq!(2, ir.start());
+
+    // fold
+    assert_eq!((), ir.fold((), |_, _| ()));
+}
+
+pub fn test_index_range_double_ended_iterator() {
+    let mut ir = IndexRange::zero_to(5);
+
+    // advance_back_by
+    assert_eq!(Ok(()), ir.advance_back_by(2));
+    assert_eq!(3, ir.end());
+
+    // rfold
+    assert_eq!((), ir.rfold((), |_, _| ()));
+}

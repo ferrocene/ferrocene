@@ -56,6 +56,7 @@
 #![feature(extern_types)]
 #![feature(f16)]
 #![feature(f128)]
+#![feature(ferrocene_test)]
 #![feature(float_algebraic)]
 #![feature(float_gamma)]
 #![feature(float_minimum_maximum)]
@@ -109,6 +110,7 @@
 #![feature(slice_as_array)]
 #![feature(slice_from_ptr_range)]
 #![feature(slice_internals)]
+#![feature(slice_iter_mut_as_mut_slice)]
 #![feature(slice_partition_dedup)]
 #![feature(slice_split_once)]
 #![feature(split_array)]
@@ -137,6 +139,8 @@
 #![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 // Ferrocene addition: We enable `slice_index_methods` so we can cover them
 #![feature(slice_index_methods)]
+// Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
+#![feature(cfg_target_has_atomic)]
 
 // Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
 #[cfg(all(ferrocene_coverage, not(panic = "abort")))]

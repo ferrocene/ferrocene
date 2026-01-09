@@ -114,6 +114,7 @@ const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
 }
 
 #[track_caller]
+#[ferrocene::annotation("Cannot be covered as this only runs during compilation.")]
 const fn slice_error_fail_ct(_: &str, _: usize, _: usize) -> ! {
     panic!("failed to slice string");
 }

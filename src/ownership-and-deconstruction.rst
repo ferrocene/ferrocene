@@ -753,9 +753,6 @@ proceeds as follows:
    }
    let c = PrintOnDrop("2");
 
-:dp:`fls_THzA0QFdMMJB`
-When an :t:`or-pattern` is used, the drop order of :t:`[binding]s` is determined by the first :t:`pattern-without-alternation`, regardless of which matches at runtime.
-
 :dp:`fls_dhfIPP4yR3Tt`
 In the following example, the drop order is ``b``, ``a`` for both calls.
 Dropping proceeds as follows:

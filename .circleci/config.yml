@@ -78,6 +78,11 @@ jobs:
       - run:
           name: Wait for continuation job to complete
           command: ferrocene/ci/wait-for-pipeline.sh
+  sbom:
+    steps:
+      - continuation/continue:
+          configuration_path: .circleci/workflows.yml
+          parameters: '{}'
 
 workflows:
   version: 2
@@ -87,4 +92,10 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
         - equal: [<< pipeline.trigger_source >>, "api"]
+    jobs: [setup]
+
+  sbom-test:
+    when:
+      or:
+        - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
     jobs: [setup]

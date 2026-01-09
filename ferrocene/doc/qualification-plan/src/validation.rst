@@ -109,6 +109,6 @@ manually verify that:
 
 * The :ref:`documentation-validation` has been performed.
 
-If any of the checks are not satisfactory, the release must be delayed until
-resolved. Once all checks are passed, the release can be published in the
-production environment.
+If any of the checks are not satisfactory, the release must be delayed until resolved.
+
+Once all checks are passed, the safety manager digitally signs the release and the release can be published in the production environment.

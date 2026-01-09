@@ -656,35 +656,22 @@ TÜV SÜD responsibility
 6.4.13.1
 ~~~~~~~~
 
-Missing
-
-.. TODO
-   Safety case (explicitly named as such) required, see above
+Safety Plan - Project Setup - Safety Case
 
 6.4.13.2
 ~~~~~~~~
 
-Missing
-
-.. TODO
-   See above line 81/etc. regarding confirmation measures
+Safety Plan - Project Setup - Safety Case
 
 6.4.13.3
 ~~~~~~~~
 
-Unsure, where the information regarding completness is to be found
-
-.. TODO
-   Make clear, where the release decision is to be found,
-   https://public-docs.ferrocene.dev/main/qualification/plan/release.html
-   and validiation release-validation do not really have something on
-   this for the library part (for tool cert. it is enough of course)
-   Visibility is via the Task Tracking
+Safety Plan - Project Setup - Safety Case
 
 6.4.13.4
 ~~~~~~~~
 
-qualification report test results
+Qualification report - Test results
 
 6.4.13.4.a
 ++++++++++

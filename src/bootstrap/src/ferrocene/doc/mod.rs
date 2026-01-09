@@ -126,6 +126,8 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.info(&format!("Documenting {} ({:?})", self.name, self.mode));
+
         let src = builder.src.join(P::SOURCE).join("src");
         let out = match self.mode {
             SphinxMode::Html => builder.out.join(self.target.triple).join("doc").join(P::DEST),

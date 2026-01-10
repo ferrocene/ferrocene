@@ -125,6 +125,7 @@
 #![feature(test)]
 #![feature(trusted_len)]
 #![feature(trusted_random_access)]
+#![feature(trusted_step)]
 #![feature(try_blocks)]
 #![feature(try_find)]
 #![feature(try_trait_v2)]

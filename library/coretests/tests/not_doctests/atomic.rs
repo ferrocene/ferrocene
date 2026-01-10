@@ -37,6 +37,18 @@ fn atomic_bool_compare_and_swap() {
 
     assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::Relaxed), false); // success
     assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::Relaxed), true); // failure
+
+    assert_eq!(atomic.compare_and_swap(true, false, atomic::Ordering::Release), true); // success
+    assert_eq!(atomic.compare_and_swap(true, false, atomic::Ordering::Release), false); // failure
+
+    assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::SeqCst), false); // success
+    assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::SeqCst), true); // failure
+
+    assert_eq!(atomic.compare_and_swap(true, false, atomic::Ordering::Acquire), true); // success
+    assert_eq!(atomic.compare_and_swap(true, false, atomic::Ordering::Acquire), false); // failure
+
+    assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::AcqRel), false); // success
+    assert_eq!(atomic.compare_and_swap(false, true, atomic::Ordering::AcqRel), true); // failure
 }
 
 #[test]

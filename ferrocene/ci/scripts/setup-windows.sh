@@ -5,6 +5,10 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::group::Install dependencies (Windows)"
+fi
+
 # All of our Python scripts have `#!/usr/bin/env python3` as their shebang,
 # but python3.exe does not exist on Windows by default. Thus we copy python.exe
 # to python3.exe if the latter is not present.
@@ -37,5 +41,9 @@ fi
 
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
-choco install -y cmake.portable ninja gcc-arm-embedded llvm
-choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
+choco install --quiet --yes cmake.portable ninja gcc-arm-embedded llvm
+choco install --quiet --yes zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
+
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::endgroup::"
+fi

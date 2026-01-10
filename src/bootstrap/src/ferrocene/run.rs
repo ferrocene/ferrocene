@@ -183,7 +183,7 @@ impl Step for CertifiedCoreSymbols {
         run_cargo(builder, cargo, tail_args, &check_stamp, vec![], true, false);
         drop(_guard);
 
-        println!("Generated report at {}", report.display());
+        builder.info(&format!("Generated report at {}", report.display()));
         report
     }
 }

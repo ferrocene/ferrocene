@@ -323,6 +323,7 @@ impl<'a> Subsetter<'a> {
         let relative = path.strip_prefix(root).unwrap();
         let file_type =
             if self.is_executable(&path) { FileType::Executable } else { FileType::Regular };
+        self.builder.info(&format!("Subsetter adding {} -> {}", path.display(), self.output_prefix.join(relative).parent().unwrap().display()));
         tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), file_type);
     }
 

@@ -1,0 +1,894 @@
+name: "Full"
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # Do not try to break these up...
+  LINUX_TARGETS: aarch64-unknown-linux-gnu,riscv64gc-unknown-linux-gnu
+  # Includes the certified panic targets
+  BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,x86_64-ferrocene-none,aarch64-ferrocene-none,thumbv7em-ferrocene-none-eabi,thumbv7em-ferrocene-none-eabihf
+  # The certified subset
+  SUBSET_TARGETS: aarch64-unknown-ferrocene.subset,thumbv7em-ferrocene.subset-eabi,thumbv7em-ferrocene.subset-eabihf,x86_64-unknown-ferrocene.subset
+  QNX_TARGETS: aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710
+  ARTIFACTS_BUCKET: ferrocene-ci-artifacts
+  ARTIFACTS_PREFIX: gha-testing/ferrocene/dist
+  CACHE_BUCKET: ferrocene-ci-caches
+  CACHE_PREFIX: gha-testing/
+
+on:
+  push:
+    branches:
+      - trying
+      - staging
+      - hoverbear/gha-migration
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+# One job per branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  # This job hacks around `env` not being available to be passed with `with:` structures.
+  calculate-envs:
+    name: Calculate Custom Environments
+    runs-on: ubuntu-latest
+    outputs:
+      linux-targets: ${{ env.LINUX_TARGETS }}
+      qnx-targets: ${{ env.QNX_TARGETS }}
+      bare-metal-targets: ${{ env.BARE_METAL_TARGETS }}
+      subset-targets: ${{ env.SUBSET_TARGETS }}
+      artifacts-bucket: ${{ env.ARTIFACTS_BUCKET }}
+      artifacts-prefix: ${{ env.ARTIFACTS_PREFIX }}
+      cache-bucket: ${{ env.CACHE_BUCKET }}
+      cache-prefix: ${{ env.CACHE_PREFIX }}
+    steps:
+      - run: exit 0
+
+  # x86_64 Linux
+
+  build-x86_64-unknown-linux-gnu:
+    name: Build (x86_64-unknown-linux-gnu)
+    needs:
+      - calculate-envs
+    uses: ./.github/workflows/full-host-build.yml
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      rust-runner: ferrocene-arc-runners-ubuntu-20-amd64
+      llvm-runner: ubuntu-20-llvm-20core-30gb-amd64
+      use-minio: true
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  dist-x86_64-unknown-linux-gnu:
+    name: Dist (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    strategy:
+      matrix:
+        include:
+          - run-name: dist
+            build-metrics-artifact: dist-aarch64-unknown-linux-gnu
+            script: |
+              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+              uv run x.py --stage 2 dist rust-std
+          - run-name: tools
+            build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
+            script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+    with:
+      run-name: ${{ matrix.run-name }}
+      script: ${{ matrix.script }}
+      host-triple: x86_64-unknown-linux-gnu
+      triples: "x86_64-unknown-linux-gnu"
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: dist-x86_64-unknown-linux-gnu
+
+  self-test-x86_64-unknown-linux-gnu:
+    name: Self-test (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-self-test.yml
+    needs:
+      - calculate-envs
+      - dist-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      triples: ${{ format('{0},{1},{2}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets) }}
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      qnx-version: "710-472"
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  test-x86_64-unknown-linux-gnu:
+    name: Test x86_64-unknown-linux-gnu on ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test
+          - test:compiletest
+          - test:library
+          - test:library-std
+        variant:
+          - "2021"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
+      host-triple: ${{ matrix.host }}
+      runner: ${{ matrix.runner }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-x86_64-unknown-linux-gnu-on-${{ matrix.host }}
+
+  test-x86_64-unknown-linux-gnu-certified-panic:
+    name: Test cert panic x86_64-unknown-linux-gnu on ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
+      host-triple: ${{ matrix.host }}
+      runner: ${{ matrix.runner }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-x86_64-unknown-linux-gnu-certified-panic-on-${{ matrix.host }}
+
+  test-aarch64-unknown-none:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest
+          - test:library
+        variant:
+          - "2021-cortex-a53"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test aarch64-unknown-none on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+      host-triple: ${{ matrix.host }}
+      runner: ${{ matrix.runner }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-aarch64-unknown-none-on-${{ matrix.host }}
+
+  # Interm job, this should get deleted when we certify fmt
+  test-aarch64-unknown-none-certified-panic:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-cortex-a53-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test cert panic aarch64-unknown-none on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+      host-triple: ${{ matrix.host }}
+      triples: ${{ matrix.host }}
+      runner: ${{ matrix.runner }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-aarch64-unknown-none-certified-panic-on-${{ matrix.host }}
+
+  test-thumbv7em-none-eabi:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest
+          - test:library
+        variant:
+          - "2021-cortex-m4"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test thumbv7em-none-eabi on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+      runner: ${{ matrix.runner }}
+      host-triple: ${{ matrix.host }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabi-on-${{ matrix.host }}
+
+  # Interm job, this should get deleted when we certify fmt
+  test-thumbv7em-none-eabi-certified-panic:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-cortex-m4-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test cert panic thumbv7em-none-eabi on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+      runner: ${{ matrix.runner }}
+      host-triple: ${{ matrix.host }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabi-certified-panic-on-${{ matrix.host }}
+
+  test-thumbv7em-none-eabihf:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Don't abstract the entire command here since they use different variants
+        suite:
+          - test:compiletest
+          - test:library
+        variant:
+          - "2021-cortex-m4"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test thumbv7em-none-eabihf on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: ${{ matrix.suite }} (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+      runner: ${{ matrix.runner }}
+      host-triple: ${{ matrix.host }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabihf-on-${{ matrix.host }}
+
+  # Interm job, this should get deleted when we certify fmt
+  test-thumbv7em-none-eabihf-certified-panic:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "2021-cortex-m4-certified-panic"
+        include:
+          - host: x86_64-unknown-linux-gnu
+            runner: ferrocene-arc-runners-ubuntu-20-amd64
+    name: Test cert panic thumbv7em-none-eabihf on ${{ matrix.host }}
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: core & alloc (${{ matrix.variant }})
+      script: |
+        uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+      runner: ${{ matrix.runner }}
+      host-triple: ${{ matrix.host }}
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: test-thumbv7em-none-eabihf-certified-panic-on-${{ matrix.host }}
+
+  # test-x86_64-pc-nto-qnx710:
+  #   name: Test x86_64-pc-nto-qnx710 on ${{ matrix.host }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # Don't abstract the entire command here since they use different variants
+  #       suite:
+  #         - test:compiletest
+  #         - test:library
+  #         - test:library-std
+  #       include:
+  #         - host: x86_64-unknown-linux-gnu
+  #           runner: ubuntu24-8core-x86-64-linux-gnu
+  #   uses: ./.github/workflows/full-test-remote.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-x86_64-unknown-linux-gnu
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     script: |
+  #       uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-pc-nto-qnx710 --test-variant 2021
+  #     host-triple: ${{ matrix.host }}
+  #     runner: ${{ matrix.runner }}
+  #     use-minio: true
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ferrocene-images/ci:ubuntu-20-main
+  #     # container: ferrocene-images/ci:ubuntu-20-main
+  #     test-device-addr: "172.31.1.11:12345"
+  #     # emulator-container: ferrocene-images/ci:ubuntu-24-main
+  #     emulator-prepare-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
+  #     emulator-start-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
+  #     qnx-version: "710-472"
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # test-aarch64-unknown-nto-qnx710:
+  #   name: Test aarch64-unknown-nto-qnx710 on ${{ matrix.host }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # Don't abstract the entire command here since they use different variants
+  #       suite:
+  #         - test:compiletest
+  #         - test:library
+  #         - test:library-std
+  #       include:
+  #         - host: x86_64-unknown-linux-gnu
+  #           runner: ubuntu24-8core-x86-64-linux-gnu
+  #   uses: ./.github/workflows/full-test-remote.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-x86_64-unknown-linux-gnu
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     script: |
+  #       uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call  --target aarch64-unknown-nto-qnx710 --test-variant 2021-cortex-a53
+  #     host-triple: ${{ matrix.host }}
+  #     runner: ${{ matrix.runner }}
+  #     use-minio: true
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ferrocene-images/ci:ubuntu-20-main
+  #     # container: ferrocene-images/ci:ubuntu-20-main
+  #     test-device-addr: "172.31.1.105:12345"
+  #     # emulator-container: ferrocene-images/ci:ubuntu-24-main
+  #     emulator-prepare-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
+  #     emulator-start-command: REMOTE_TEST_SERVER_STAGE=2 ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
+  #     qnx-version: "710-472"
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # aarch64 Linux
+
+  build-aarch64-unknown-linux-gnu:
+    name: Build (aarch64-unknown-linux-gnu)
+    needs:
+      - calculate-envs
+    uses: ./.github/workflows/full-host-build.yml
+    secrets: inherit
+    with:
+      host-triple: aarch64-unknown-linux-gnu
+      rust-runner: ferrocene-arc-runners-ubuntu-20-arm64
+      llvm-runner: ubuntu-20-llvm-20core-30gb-arm64
+      use-minio: true
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  dist-aarch64-unknown-linux-gnu:
+    name: Dist (aarch64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-aarch64-unknown-linux-gnu
+    secrets: inherit
+    strategy:
+      matrix:
+        include:
+          - run-name: Dist
+            build-metrics-artifact: dist-aarch64-unknown-linux-gnu
+            script: |
+              uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+              uv run x.py --stage 2 dist rust-std
+
+          - run-name: Tools
+            build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
+            script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+    with:
+      run-name: ${{ matrix.run-name }}
+      script: ${{ matrix.script }}
+      host-triple: aarch64-unknown-linux-gnu
+      triples: "aarch64-unknown-linux-gnu"
+      runner: ferrocene-arc-runners-ubuntu-20-arm64
+      use-minio: true
+      build-run-id: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: ${{ matrix.build-metrics-artifact }}
+
+  self-test-aarch64-unknown-linux-gnu:
+    name: Self-test (aarch64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-self-test.yml
+    needs:
+      - calculate-envs
+      - targets
+      - dist-aarch64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: aarch64-unknown-linux-gnu
+      triples: ${{ format('{0},{1},{2}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets) }}
+      runner: ferrocene-arc-runners-ubuntu-20-arm64
+      use-minio: true
+      qnx-version: "710-472"
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # x86_64 Windows
+
+  # build-x86_64-pc-windows-msvc:
+  #   name: Build (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/full-host-build.yml
+  #     - calculate-envs
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-pc-windows-msvc
+  #     runner: 8core-x86_64-pc-windows-msvc
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # dist-x86_64-pc-windows-msvc:
+  #   name: Dist (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/full-job.yml
+  #   needs:
+  #     - build-x86_64-pc-windows-msvc
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-pc-windows-msvc
+  #     triples: "x86_64-pc-windows-msvc"
+  #     runner: 8core-x86_64-pc-windows-msvc
+  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # self-test-x86_64-pc-windows-msvc:
+  #   name: Self-test (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/full-self-test.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-x86_64-pc-windows-msvc
+  #     - targets
+  #     - dist-x86_64-pc-windows-msvc
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-pc-windows-msvc
+  #     # This pulls from env
+  #     triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
+  #     runner: 8core-x86_64-pc-windows-msvc
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # TODO: Waiting for self hosted runners
+  # test-x86_64-pc-windows-msvc:
+  #   name: Test (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/full-test.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-x86_64-pc-windows-msvc
+  #   secrets: inherit
+  #   with:
+  #     triple: x86_64-pc-windows-msvc
+  #     host-triple: x86_64-pc-windows-msvc
+  #     test-variant: "2021"
+  #     runner: 8core-x86_64-pc-windows-msvc
+  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # aarch64 Mac
+
+  # build-aarch64-apple-darwin:
+  #   name: Build (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/full-host-build.yml
+  #   needs:
+  #     - calculate-envs
+  #   secrets: inherit
+  #   with:
+  #     host-triple: aarch64-apple-darwin
+  #     runner: macos-14-xlarge
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # dist-aarch64-apple-darwin:
+  #   name: Dist (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/full-job.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-aarch64-apple-darwin
+  #   secrets: inherit
+  #   with:
+  #     host-triple: aarch64-apple-darwin
+  #     triples: "aarch64-apple-darwin"
+  #     runner: macos-14-xlarge
+  #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # test-aarch64-apple-darwin:
+  #   name: Test (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/full-test.yml
+  #   needs:
+  #     - calulate-envs
+  #     - build-aarch64-apple-darwin
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     triple: aarch64-apple-darwin
+  #     host-triple: aarch64-apple-darwin
+  #     test-variant: "2021"
+  #     runner: macos-14-xlarge
+  #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # self-test-aarch64-apple-darwin:
+  #   name: Self-test (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/full-self-test.yml
+  #   needs:
+  #     - calculate-envs
+  #     - build-aarch64-apple-darwin
+  #     - targets
+  #     - dist-aarch64-apple-darwin
+  #     - test-aarch64-apple-darwin
+  #   secrets: inherit
+  #   with:
+  #     host-triple: aarch64-apple-darwin
+  #     # This pulls from env
+  #     triples: ${{ needs.calculate-envs.outputs.bare-metal-targets }}
+  #     runner: macos-14-xlarge
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  # # General
+  coverage:
+    name: Coverage
+    uses: ./.github/workflows/full-coverage.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      cache-llvm-uri: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.cache-llvm-uri }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  certified-subsets:
+    name: Certified target subset
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      run-name: Certified targets
+      script: |
+        ./x.py build --stage 2 library/core
+        ./x.py doc   --stage 2 library/core
+      host-triple: x86_64-unknown-linux-gnu
+      triples: ${{ needs.calculate-envs.outputs.subset-targets }}
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: certified-subsets
+
+  docs:
+    name: Dist (Docs)
+    uses: ./.github/workflows/full-docs.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - coverage
+      - test-x86_64-unknown-linux-gnu
+      - test-aarch64-unknown-none
+      - test-thumbv7em-none-eabi
+      - test-thumbv7em-none-eabihf
+      - test-x86_64-unknown-linux-gnu-certified-panic
+      - test-aarch64-unknown-none-certified-panic
+      - test-thumbv7em-none-eabi-certified-panic
+      - test-thumbv7em-none-eabihf-certified-panic
+      # - test-x86_64-pc-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
+      # - test-x86_64-pc-windows-msvc
+      # - test-aarch64-apple-darwin
+    secrets: inherit
+    with:
+      run-name: Dist (Docs)
+      script: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ferrocene/ci/scripts/fetch-coverage-outcomes.sh
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: docs
+
+  source:
+    name: Dist (source)
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      run-name: Dist (source)
+      script: ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
+      host-triple: x86_64-unknown-linux-gnu
+      triples: "x86_64-unknown-linux-gnu"
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: source
+
+  checks:
+    name: Checks (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      run-name: Checks (x86_64-unknown-linux-gnu)
+      script: |
+        uvx reuse@5.1.1 --include-submodules lint
+        ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: checks
+
+  targets:
+    name: Build additional targets
+    uses: ./.github/workflows/full-targets.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      triples: ${{ format('{0},{1},{2},{3}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets, needs.calculate-envs.outputs.subset-targets) }}
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      qnx-version: "710-472"
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  traceability-matrix:
+    name: Tracability Matrix
+    uses: ./.github/workflows/full-job.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - test-x86_64-unknown-linux-gnu
+      - test-aarch64-unknown-none
+      - test-thumbv7em-none-eabi
+      - test-thumbv7em-none-eabihf
+      # - test-x86_64-pc-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
+    secrets: inherit
+    with:
+      run-name: Traceability Matrix
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      script: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ferrocene/ci/scripts/fetch-coverage-outcomes.sh
+        ./x.py run ferrocene/tools/traceability-matrix
+      configure: |
+        --set
+        ferrocene.test-outcomes=custom
+        --set
+        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+      use-minio: true
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+      build-metrics-artifact: tracability-matrix
+
+  finish-build:
+    name: Finish build
+    uses: ./.github/workflows/full-finish-build.yml
+    needs:
+      - calculate-envs
+      - build-x86_64-unknown-linux-gnu
+      - dist-x86_64-unknown-linux-gnu
+      - dist-aarch64-unknown-linux-gnu
+      - targets
+      - docs
+      - traceability-matrix
+      - self-test-x86_64-unknown-linux-gnu
+      - self-test-aarch64-unknown-linux-gnu
+      - certified-subsets
+      # - self-test-x86_64-pc-windows-msvc
+      # - self-test-aarch64-apple-darwin
+    secrets: inherit
+    with:
+      triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}

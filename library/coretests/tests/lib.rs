@@ -92,6 +92,7 @@
 #![feature(maybe_uninit_slice)]
 #![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(maybe_uninit_write_slice)]
+#![feature(mem_conjure_zst)]
 #![feature(min_specialization)]
 #![feature(never_type)]
 #![feature(next_index)]

@@ -1041,3 +1041,17 @@ fn iter_next_chunk_erased<T>(
     mem::forget(guard);
     Ok(())
 }
+
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod ferrocene_test {
+    use super::*;
+
+    pub fn test_drain_next() {
+        let mut arr = [1, 2, 3, 4, 5];
+        let mut drain = drain::Drain(arr.as_mut_slice().iter_mut());
+        let _ = drain.next();
+    }
+}

@@ -437,6 +437,7 @@ fn test_try_fold_for_skip() {
     assert!(iter.try_fold(0i32, |a, b| a.checked_add(b)).is_some());
 }
 
+#[derive(Debug)]
 struct IterWrapper<I>(I);
 
 impl<I: Iterator> Iterator for IterWrapper<I> {
@@ -482,7 +483,7 @@ fn test_spec_try_fold_for_step_by_range_u16() {
     assert_eq!(Some(25), (1_u16..10).step_by(2).try_fold(0_u16, |a, b| a.checked_add(b)));
 }
 
-#[derive(Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
 struct StepWrapper(u16);
 
 impl core::iter::Step for StepWrapper {
@@ -531,7 +532,7 @@ fn test_spec_next_back_for_range_inclusive() {
     assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next_back());
 }
 
-#[derive(Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
 struct DoubleStepWrapper(u16);
 
 impl core::iter::Step for DoubleStepWrapper {
@@ -609,7 +610,7 @@ fn test_spec_try_rfold_for_range_inclusive() {
     );
 }
 
-#[derive(Clone, Copy, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 struct TrustedDoubleStepWrapper(u16);
 
 impl core::iter::Step for TrustedDoubleStepWrapper {

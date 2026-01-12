@@ -5,7 +5,7 @@ arch_cfgs:
 # Generate big endian shuffles
 auto_big_endian: true
 
-# Repeatedly used anchors 
+# Repeatedly used anchors
 # #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 neon-stable: &neon-stable
   FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
@@ -2098,7 +2098,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {neon_type[0]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls{type[1]}"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mls]]}]]
@@ -2932,7 +2931,6 @@ intrinsics:
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *enable-v7
       - *target-is-arm
       - *neon-arm-unstable
@@ -5183,7 +5181,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v8
       - *neon-aes
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [nop]]}]]
@@ -5204,7 +5201,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-is-arm
       - *enable-v7
       - *neon-arm-unstable
@@ -5230,7 +5226,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [nop]]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [nop]]}]]
@@ -5250,7 +5245,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-stable
     assert_instr: [nop]
@@ -5274,7 +5268,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-stable
     assert_instr: [st2]
@@ -5306,7 +5299,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-fp16
       - *neon-unstable-f16
@@ -5334,7 +5326,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vst2]]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [st2]]}]]
@@ -5363,7 +5354,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - FnCall: [rustc_legacy_const_generics, ['2']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [st2, 'LANE = 0']]}]]
@@ -5398,7 +5388,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - FnCall: [rustc_legacy_const_generics, ['2']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [st2, 'LANE = 0']]}]]
@@ -5430,7 +5419,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vst2, 'LANE = 0']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [st2, 'LANE = 0']]}]]
@@ -5460,7 +5448,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-is-arm
       - *enable-v7
       - *neon-arm-unstable
@@ -5494,7 +5481,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-is-arm
       - *neon-v7
       - *neon-fp16
@@ -5524,7 +5510,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-is-arm
       - *enable-v7
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [vst2, 'LANE = 0']]}]]
@@ -5561,7 +5546,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-is-arm
       - *neon-v7
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [vst2, 'LANE = 0']]}]]
@@ -11125,7 +11109,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {type[1]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.i16"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mla]]}]]
@@ -11149,7 +11132,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {type[1]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.i32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mla]]}]]
@@ -11173,7 +11155,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {type[1]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.f32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [fmul]]}]]
@@ -11191,7 +11172,6 @@ intrinsics:
     arguments: ["a: {neon_type[1]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.i16"', 'LANE = 1']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mla, 'LANE = 1']]}]]
@@ -11222,7 +11202,6 @@ intrinsics:
     arguments: ["a: {neon_type[1]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.i32"', 'LANE = 1']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mla, 'LANE = 1']]}]]
@@ -11253,7 +11232,6 @@ intrinsics:
     arguments: ["a: {neon_type[1]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.f32"', 'LANE = 1']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [fmul, 'LANE = 1']]}]]
@@ -11280,7 +11258,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {type[1]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.i16"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mls]]}]]
@@ -11304,7 +11281,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {type[1]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.i32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mls]]}]]
@@ -11328,7 +11304,6 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}", "c: {type[1]}"]
     return_type: "{neon_type[0]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.f32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [fmul]]}]]
@@ -11346,7 +11321,6 @@ intrinsics:
     arguments: ["a: {neon_type[1]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.i16"', 'LANE = 1']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mls, 'LANE = 1']]}]]
@@ -11377,7 +11351,6 @@ intrinsics:
     arguments: ["a: {neon_type[1]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.i32"', 'LANE = 1']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [mls, 'LANE = 1']]}]]
@@ -11408,7 +11381,6 @@ intrinsics:
     arguments: ["a: {neon_type[1]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.f32"', 'LANE = 1']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [fmul, 'LANE = 1']]}]]
@@ -12420,9 +12392,9 @@ intrinsics:
       - uint8x8_t
       - poly8x8_t
     compose:
-      - FnCall: 
+      - FnCall:
           - transmute
-          - - FnCall: 
+          - - FnCall:
                 - vtbx1
                 - - FnCall: [transmute, [a]]
                   - FnCall: [transmute, [b]]
@@ -12480,9 +12452,9 @@ intrinsics:
       - [uint8x8_t, uint8x8x2_t, uint8x8_t]
       - [poly8x8_t, poly8x8x2_t, uint8x8_t]
     compose:
-      - FnCall: 
+      - FnCall:
           - transmute
-          - - FnCall: 
+          - - FnCall:
                 - vtbx2
                 - - FnCall: [transmute, [a]]
                   - FnCall: [transmute, ['b.0']]
@@ -12541,9 +12513,9 @@ intrinsics:
       - [uint8x8_t, uint8x8x3_t, uint8x8_t]
       - [poly8x8_t, poly8x8x3_t, uint8x8_t]
     compose:
-      - FnCall: 
+      - FnCall:
           - transmute
-          - - FnCall: 
+          - - FnCall:
                 - vtbx3
                 - - FnCall: [transmute, [a]]
                   - FnCall: [transmute, ['b.0']]
@@ -12587,7 +12559,7 @@ intrinsics:
       - ["uint8x8_t", "uint8x8x4_t", "uint8x8_t"]
       - ["poly8x8_t", "poly8x8x4_t", "uint8x8_t"]
     compose:
-      - FnCall: 
+      - FnCall:
           - "transmute"
           - - FnCall:
                - vtbx4
@@ -13351,7 +13323,7 @@ intrinsics:
       - [u32, u64]
     compose:
       # As the call to `__crc32` does not get inlined, we define an LLVM binding
-      # here, which is the same as above, and call it directly which results 
+      # here, which is the same as above, and call it directly which results
       # in the correct instructions being generated
       - Let: [b, u32, '(data & 0xFFFFFFFF) as u32']
       - Let: [c, u32, '(data >> 32) as u32']
@@ -13565,9 +13537,9 @@ intrinsics:
       - *neon-cfg-arm-unstable
     safety: safe
     types:
-      - [int16x8_t, int8x8_t, 'vraddhn.i16'] 
-      - [int32x4_t, int16x4_t, 'vraddhn.i32'] 
-      - [int64x2_t, int32x2_t, 'vraddhn.i64'] 
+      - [int16x8_t, int8x8_t, 'vraddhn.i16']
+      - [int32x4_t, int16x4_t, 'vraddhn.i32']
+      - [int64x2_t, int32x2_t, 'vraddhn.i64']
     compose:
       - LLVMLink:
           name: "vraddhn{neon_type[0].noq}"
@@ -13590,9 +13562,9 @@ intrinsics:
       - *neon-cfg-arm-unstable
     safety: safe
     types:
-      - [uint16x8_t, uint8x8_t, 'vraddhn.i16', int16x8_t] 
-      - [uint32x4_t, uint16x4_t, 'vraddhn.i32', int32x4_t]  
-      - [uint64x2_t, uint32x2_t, 'vraddhn.i64', int64x2_t]  
+      - [uint16x8_t, uint8x8_t, 'vraddhn.i16', int16x8_t]
+      - [uint32x4_t, uint16x4_t, 'vraddhn.i32', int32x4_t]
+      - [uint64x2_t, uint32x2_t, 'vraddhn.i64', int64x2_t]
     compose:
       - FnCall:
           - transmute
@@ -13705,7 +13677,7 @@ intrinsics:
 
   # This was not publically exposed
   - name: "priv_vpadal{neon_type[1].no}"
-    visibility: private 
+    visibility: private
     doc: "Signed Add and Accumulate Long Pairwise."
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[0]}"
@@ -13732,7 +13704,7 @@ intrinsics:
 
   # This was not publically exposed
   - name: "priv_vpadal{neon_type[1].no}"
-    visibility: private 
+    visibility: private
     doc: "Signed Add and Accumulate Long Pairwise."
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[0]}"
@@ -13995,7 +13967,7 @@ intrinsics:
           links:
             - link: "llvm.arm.neon.vtbl1"
               arch: arm
-  
+
   - name: "vtbl1_s8"
     doc: "Table look-up"
     arguments: ["a: {neon_type}", "b: {neon_type}"]
@@ -14473,7 +14445,7 @@ intrinsics:
                 - - FnCall: [transmute, [a]]
                   - FnCall: [transmute, [b]]
                   - FnCall: ["{type[6]}", ["{type[7]}"]]
-  
+
   - name: "vsli{neon_type[0].N}"
     doc: "Shift Left and Insert (immediate)"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
@@ -15038,7 +15010,7 @@ intrinsics:
       - FnCall: [simd_cast, [a]]
 
   - name: "{type[0]}"
-    doc: "Vector long move." 
+    doc: "Vector long move."
     arguments: ['a: {neon_type[1]}']
     return_type: "{neon_type[2]}"
     attr:
@@ -15060,7 +15032,7 @@ intrinsics:
       - FnCall: [simd_cast, [a]]
 
   - name: "{type[0]}"
-    doc: "Vector bitwise not." 
+    doc: "Vector bitwise not."
     arguments: ['a: {neon_type[1]}']
     return_type: "{neon_type[1]}"
     attr:
@@ -15091,7 +15063,7 @@ intrinsics:
       - FnCall: [simd_xor, [a, b]]
 
   - name: "{type[0]}"
-    doc: "Vector bitwise bit clear." 
+    doc: "Vector bitwise bit clear."
     arguments: ['a: {neon_type[1]}', 'b: {neon_type[1]}']
     return_type: "{neon_type[1]}"
     attr:
@@ -15119,7 +15091,7 @@ intrinsics:
           - a
 
   - name: "{type[0]}"
-    doc: "Vector bitwise bit clear." 
+    doc: "Vector bitwise bit clear."
     arguments: ['a: {neon_type[1]}', 'b: {neon_type[1]}']
     return_type: "{neon_type[1]}"
     attr:

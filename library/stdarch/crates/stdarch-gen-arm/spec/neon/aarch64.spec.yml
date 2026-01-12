@@ -2797,7 +2797,6 @@ intrinsics:
     arguments: ["a: {neon_type}", "b: {neon_type}", "c: {neon_type}"]
     return_type: "{neon_type}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [fmul]]}]]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     safety: safe
@@ -3640,7 +3639,6 @@ intrinsics:
     arguments: ["a: {type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [ld2, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-stable
@@ -4619,7 +4617,6 @@ intrinsics:
     safety:
       unsafe: [neon]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-stable
     assert_instr: [st1]
     types:
@@ -4664,7 +4661,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [st2, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-stable
@@ -10970,7 +10966,6 @@ intrinsics:
     arguments: ["a: {neon_type}", "b: {neon_type}", "c: {neon_type}"]
     return_type: "{neon_type}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [fmul]]}]]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     safety: safe

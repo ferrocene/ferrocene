@@ -910,7 +910,6 @@ pub struct float32x2x4_t(
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct float32x4x2_t(pub float32x4_t, pub float32x4_t);
 /// Arm-specific type containing three `float32x4_t` vectors.
 #[repr(C)]

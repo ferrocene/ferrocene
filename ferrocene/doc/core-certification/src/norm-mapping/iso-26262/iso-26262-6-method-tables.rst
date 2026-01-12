@@ -45,17 +45,17 @@ Table 6	Design principles for software unit design and implementation
 .. csv-table::
     :delim: ;
 
-    No.;Principle;ASIL B;ASIL D;Justification;Todo
-    1a;One entry and one exit point in subprograms and functions;++;++;Applied, multiple returns only for specific error handling cases;
-    1b;No dynamic objects or variables, or else online test during their creation;++;++;Applied, no dynamic memory in library functions allocated;
-    1c;Initialization of variables ;++;++;Applied, compiler forbids use of uninitialized variable bindings;
-    1d;No multiple use of variable names;++;++;Applied, even though shadowing is possible, library functions are very short, no shadowing taking place as per community guidelines;
-    1e;Avoid global variables or else justify their usage;\+;++;Applied, core lib is not stateful, no global variables inside;
-    1f;Restricted use of pointers;++;++;Applied, for certain low level operations it might be necessary;
-    1g;No implicit type conversions;++;++;Applied, rust does not allow implicit type conversions ;
-    1h;No hidden data flow or control flow;++;++;Applied, no dependencies outside of the library, no hidden flows;
-    1i;No unconditional jumps;++;++;Applied, no unconditional jumps in rust;
-    1j;No recursions ;\+;++;Applied, no recursion used in core library;Is this true? Were there checks done? Some evidence for that?
+    No.;Principle;ASIL B;ASIL D;Justification
+    1a;One entry and one exit point in subprograms and functions;++;++;Applied, multiple returns only for specific error handling cases
+    1b;No dynamic objects or variables, or else online test during their creation;++;++;Applied, no dynamic memory in library functions allocated
+    1c;Initialization of variables ;++;++;Applied, compiler forbids use of uninitialized variable bindings
+    1d;No multiple use of variable names;++;++;Applied, even though shadowing is possible, library functions are very short, no shadowing taking place as per community guidelines
+    1e;Avoid global variables or else justify their usage;\+;++;Applied, core lib is not stateful, no global variables inside
+    1f;Restricted use of pointers;++;++;Applied, for certain low level operations it might be necessary
+    1g;No implicit type conversions;++;++;Applied, rust does not allow implicit type conversions
+    1h;No hidden data flow or control flow;++;++;Applied, no dependencies outside of the library, no hidden flows
+    1i;No unconditional jumps;++;++;Applied, no unconditional jumps in rust
+    1j;No recursions ;\+;++;Not applied, Unconditional recursion is denied (except for #[lang_item]s whose bodies are replaced by the compiler), Conditional recursion is allowed
 
 Table 7 Methods for software unit verification
 ----------------------------------------------

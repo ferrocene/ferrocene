@@ -2050,6 +2050,7 @@ pub trait Iterator {
         // accidentally noticed that some rustc iterators had malformed `size_hint`s,
         // so this will help catch such things in debug-assertions-std runners,
         // even if users won't actually ever see it.
+        #[ferrocene::annotation("We ship `core` with debug assertions enabled")]
         if cfg!(debug_assertions) {
             let hint = self.size_hint();
             assert!(hint.1.is_none_or(|high| high >= hint.0), "Malformed size_hint {hint:?}");

@@ -1498,12 +1498,17 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 /// [inhabited]: https://doc.rust-lang.org/reference/glossary.html#inhabited
 #[unstable(feature = "mem_conjure_zst", issue = "95383")]
 pub const unsafe fn conjure_zst<T>() -> T {
-    const_assert!(
-        size_of::<T>() == 0,
-        "mem::conjure_zst invoked on a nonzero-sized type",
-        "mem::conjure_zst invoked on type {t}, which is not zero-sized",
-        t: &str = stringify!(T)
-    );
+    #[ferrocene::annotation(
+        "This assertion only runs in compilation, meaning that it cannot be covered in runtime"
+    )]
+    {
+        const_assert!(
+            size_of::<T>() == 0,
+            "mem::conjure_zst invoked on a nonzero-sized type",
+            "mem::conjure_zst invoked on type {t}, which is not zero-sized",
+            t: &str = stringify!(T)
+        );
+    }
 
     // SAFETY: because the caller must guarantee that it's inhabited and zero-sized,
     // there's nothing in the representation that needs to be set.

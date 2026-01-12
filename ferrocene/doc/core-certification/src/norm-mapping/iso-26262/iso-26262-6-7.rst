@@ -18,42 +18,42 @@ The core library has a very simple design. It is a library of independent functi
 7.4.1.a
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.b
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.c
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.d
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.e
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.f
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.g
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.1.h
 ~~~~~~~
 
-see 7.4.1
+See 7.4.1.
 
 7.4.2
 -----
@@ -65,7 +65,7 @@ The core library has a very simple design. It is a library of independent functi
 7.4.2.a
 ~~~~~~~
 
-see 7.4.2
+See 7.4.2.
 
 7.4.2.b
 ~~~~~~~
@@ -75,17 +75,17 @@ N/A; There is no way to configure the core library binary after it is compiled.
 7.4.2.c
 ~~~~~~~
 
-see 7.4.2
+See 7.4.2.
 
 7.4.2.d
 ~~~~~~~
 
-see 7.4.2
+See 7.4.2.
 
 7.4.2.e
 ~~~~~~~
 
-see 7.4.2
+See 7.4.2.
 
 7.4.3
 -----
@@ -97,47 +97,47 @@ The core library has a very simple design. It is a library of independent functi
 7.4.3.a
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.b
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.c
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.d
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.e
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.f
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.g
 ~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.N2
 ~~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.3.N3
 ~~~~~~~~
 
-see 7.4.3
+See 7.4.3.
 
 7.4.4
 -----
@@ -156,12 +156,12 @@ The core library has a very simple design. It is a library of independent functi
 7.4.5.a
 ~~~~~~~
 
-see 7.4.5
+See 7.4.5.
 
 7.4.5.b
 ~~~~~~~
 
-see 7.4.5
+See 7.4.5.
 
 7.4.6
 -----
@@ -234,17 +234,17 @@ Ferrous Systems certifies core as a library, to be used in other systems whose r
 7.4.13.a
 ~~~~~~~~
 
-see 7.4.13
+See 7.4.13.
 
 7.4.13.b
 ~~~~~~~~
 
-see 7.4.13
+See 7.4.13.
 
 7.4.13.c
 ~~~~~~~~
 
-see 7.4.13
+See 7.4.13.
 
 7.4.14
 ------
@@ -256,19 +256,19 @@ The core library certification excludes the requirement of having an architectur
 7.4.14.a
 ~~~~~~~~
 
-see 7.4.14
+See 7.4.14.
 
 7.4.14.b
 ~~~~~~~~
 
-see 7.4.14
+See 7.4.14.
 
 7.4.14.c
 ~~~~~~~~
 
-see 7.4.14
+See 7.4.14.
 
 7.4.14.d
 ~~~~~~~~
 
-see 7.4.14
+See 7.4.14.

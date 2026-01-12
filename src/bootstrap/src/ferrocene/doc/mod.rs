@@ -226,6 +226,14 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 get_submodule_version("src/llvm-project", builder)
                     .as_deref()
                     .unwrap_or("not found")
+            ))
+            .arg(format!(
+                "-Dqemu_version={}",
+                fs::read_to_string(
+                    &builder.src.join("ferrocene/ci/docker-images/ubuntu-20/qemu-version")
+                )
+                .unwrap()
+                .trim()
             ));
 
         // Include the breadcrumbs in the generated documentation.

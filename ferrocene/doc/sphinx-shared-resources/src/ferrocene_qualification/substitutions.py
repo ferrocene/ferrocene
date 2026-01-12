@@ -44,6 +44,10 @@ class AddCustomSubstitutions(SphinxTransform):
             "llvm_version",
             self.app.config["llvm_version"],
         )
+        self.add_substitution(
+            "qemu_version",
+            self.app.config["qemu_version"],
+        )
 
     def add_substitution(self, name, value):
         substitution = nodes.substitution_definition()

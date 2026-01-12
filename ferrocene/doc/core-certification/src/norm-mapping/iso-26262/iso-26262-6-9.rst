@@ -62,6 +62,3 @@ Safety Plan - Code coverage report
 
 - Qualification Plan - Build and Testing Process
 - "Safety Manual - Project Setup - Configuration" describes how the build and test environment is being documented.
-
-.. TODO
-   Adding the emulator/simulator to the tool safety analysis (currently missing)

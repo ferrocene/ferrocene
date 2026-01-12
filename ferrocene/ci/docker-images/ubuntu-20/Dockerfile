@@ -20,11 +20,15 @@ FROM --platform=$TARGETPLATFORM ubuntu:24.04 AS noble
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
+COPY ferrocene/ci/docker-images/ubuntu-20/qemu-version /tmp/qemu-version
 RUN <<-EOF
     set -xe
 
     apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
+    QEMU_VERSION=$(cat /tmp/qemu-version)
+    echo "QEMU $QEMU_VERSION"
+    rm /tmp/qemu-version
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static=$QEMU_VERSION
 
     mkdir -p /ferrocene/packages
     dpkg -l qemu-user-static >> /ferrocene/packages/ubuntu-24.04

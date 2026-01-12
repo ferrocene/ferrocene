@@ -133,3 +133,13 @@ fn test_spec_fill_not_trivially_clone() {
         assert_eq!(b, c);
     }
 }
+
+// covers: `core::slice::index::into_slice_range`.
+#[test]
+#[should_panic]
+fn test_into_slice_range() {
+    let arr = [""; 10];
+    let slice = arr.as_slice();
+
+    let _ = slice[(core::ops::Bound::Included(0), core::ops::Bound::Excluded(20))];
+}

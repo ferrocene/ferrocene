@@ -417,3 +417,267 @@ fn test_iterator_chunksmut_nth() {
     let mut chunked = iter.chunks_mut(100);
     assert!(chunked.nth(usize::MAX / 100).unwrap().len() < 100);
 }
+
+// covers `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::nth`.
+#[test]
+fn test_nth_for_chain() {
+    let a = vec![].into_iter();
+    let b = vec![1, 2, 3].into_iter();
+
+    let mut iter = a.chain(b);
+
+    assert_eq!(Some(1), iter.nth(0));
+    assert_eq!(Some(3), iter.nth(1));
+}
+
+// covers `<core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold`.
+#[test]
+fn test_try_fold_for_skip() {
+    let mut iter = vec![1i32, 2, 3].into_iter().skip(0);
+    assert!(iter.try_fold(0i32, |a, b| a.checked_add(b)).is_some());
+}
+
+#[derive(Debug)]
+struct IterWrapper<I>(I);
+
+impl<I: Iterator> Iterator for IterWrapper<I> {
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
+}
+
+impl<I: DoubleEndedIterator> DoubleEndedIterator for IterWrapper<I> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back()
+    }
+}
+
+// covers `<&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_mut_refs() {
+    let x = [1_u16, 2, 3];
+    let mut iter = IterWrapper(x.into_iter());
+    let mut iter_ref = &mut iter as &mut dyn Iterator<Item = u16>;
+
+    assert!(
+        <&mut dyn Iterator<Item = u16> as Iterator>::try_fold(&mut iter_ref, 0_u16, |a, b| a
+            .checked_add(b))
+        .is_some()
+    );
+}
+
+// covers `<core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_fold`.
+#[test]
+fn test_spec_fold_for_step_by() {
+    assert_eq!(25, (1_u16..=10).step_by(2).fold(0_u16, |a, b| a + b));
+    assert_eq!(24, (1_u16..=10).step_by(2).skip(1).fold(0_u16, |a, b| a + b));
+
+    assert_eq!(0, Option::<u16>::None.into_iter().step_by(2).fold(0_u16, |a, b| a + b));
+}
+
+// covers `<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_step_by_range_u16() {
+    assert_eq!(Some(25), (1_u16..10).step_by(2).try_fold(0_u16, |a, b| a.checked_add(b)));
+}
+
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
+struct StepWrapper(u16);
+
+impl core::iter::Step for StepWrapper {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        u16::steps_between(&start.0, &end.0)
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::forward_checked(start.0, count).map(Self)
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::backward_checked(start.0, count).map(Self)
+    }
+}
+
+// covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
+#[test]
+fn test_spec_nth_for_range() {
+    assert_eq!(Some(StepWrapper(2)), (StepWrapper(1)..StepWrapper(10)).nth(1));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth(10));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth(usize::MAX));
+}
+
+// covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back`.
+#[test]
+fn test_spec_nth_back_for_range() {
+    assert_eq!(Some(StepWrapper(8)), (StepWrapper(1)..StepWrapper(10)).nth_back(1));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(10));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(usize::MAX));
+}
+
+// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next`.
+#[test]
+fn test_spec_next_for_range_inclusive() {
+    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(1)).next());
+    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(2)).next());
+    assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next());
+}
+
+// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back`.
+#[test]
+fn test_spec_next_back_for_range_inclusive() {
+    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(1)).next_back());
+    assert_eq!(Some(StepWrapper(2)), (StepWrapper(1)..=StepWrapper(2)).next_back());
+    assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next_back());
+}
+
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
+struct DoubleStepWrapper(u16);
+
+impl core::iter::Step for DoubleStepWrapper {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        if *start <= *end {
+            let steps = (end.0 - start.0) as usize / 2;
+            (steps, Some(steps))
+        } else {
+            (0, None)
+        }
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::forward_checked(start.0, 2 * count).map(Self)
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::backward_checked(start.0, 2 * count).map(Self)
+    }
+}
+
+// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_range_inclusive() {
+    assert_eq!(
+        Some(StepWrapper(55)),
+        (StepWrapper(1)..=StepWrapper(10))
+            .try_fold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert_eq!(
+        Some(StepWrapper(0)),
+        (StepWrapper(2)..=StepWrapper(1))
+            .try_fold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert_eq!(
+        Some(StepWrapper(1)),
+        (StepWrapper(1)..=StepWrapper(1))
+            .try_fold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert!(
+        (DoubleStepWrapper(1)..=DoubleStepWrapper(10))
+            .try_fold(DoubleStepWrapper(0), |a, b| a.0.checked_add(b.0).map(DoubleStepWrapper))
+            .is_some()
+    );
+}
+
+// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold`.
+#[test]
+fn test_spec_try_rfold_for_range_inclusive() {
+    assert_eq!(
+        Some(StepWrapper(55)),
+        (StepWrapper(1)..=StepWrapper(10))
+            .try_rfold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert_eq!(
+        Some(StepWrapper(0)),
+        (StepWrapper(2)..=StepWrapper(1))
+            .try_rfold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert_eq!(
+        Some(StepWrapper(1)),
+        (StepWrapper(1)..=StepWrapper(1))
+            .try_rfold(StepWrapper(0), |a, b| a.0.checked_add(b.0).map(StepWrapper))
+    );
+
+    assert!(
+        (DoubleStepWrapper(1)..=DoubleStepWrapper(10))
+            .try_rfold(DoubleStepWrapper(0), |a, b| a.0.checked_add(b.0).map(DoubleStepWrapper))
+            .is_some()
+    );
+}
+
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
+struct TrustedDoubleStepWrapper(u16);
+
+impl core::iter::Step for TrustedDoubleStepWrapper {
+    fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+        if *start <= *end {
+            let steps = (end.0 - start.0) as usize / 2;
+            (steps, Some(steps))
+        } else {
+            (0, None)
+        }
+    }
+
+    fn forward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::forward_checked(start.0, 2 * count).map(Self)
+    }
+
+    fn backward_checked(start: Self, count: usize) -> Option<Self> {
+        u16::backward_checked(start.0, 2 * count).map(Self)
+    }
+}
+
+unsafe impl core::iter::TrustedStep for TrustedDoubleStepWrapper {}
+
+// covers `<core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold`.
+#[test]
+fn test_spec_try_fold_for_trusted_range_inclusive() {
+    assert!(
+        (TrustedDoubleStepWrapper(1)..=TrustedDoubleStepWrapper(10))
+            .try_fold(TrustedDoubleStepWrapper(0), |a, b| a
+                .0
+                .checked_add(b.0)
+                .map(TrustedDoubleStepWrapper))
+            .is_some()
+    );
+}
+
+// covers `<core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold`.
+#[test]
+fn test_spec_try_rfold_for_trusted_range_inclusive() {
+    assert!(
+        (TrustedDoubleStepWrapper(1)..=TrustedDoubleStepWrapper(10))
+            .try_rfold(TrustedDoubleStepWrapper(0), |a, b| a
+                .0
+                .checked_add(b.0)
+                .map(TrustedDoubleStepWrapper))
+            .is_some()
+    );
+}
+
+// covers `<core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back`.
+#[test]
+fn test_nth_back_for_slice_iter() {
+    let mut arr = [(); 10];
+    let slice = arr.as_mut_slice();
+
+    assert_eq!(None, slice.iter().nth_back(11));
+}
+
+// covers `core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::nth_back`.
+#[test]
+fn test_nth_back_for_range_inclusive() {
+    assert_eq!(None, (1..=0).nth_back(11));
+    assert_eq!(None, (DoubleStepWrapper(1)..=DoubleStepWrapper(1)).nth_back(1));
+}
+
+// covers `core::iter::traits::double_ended::DoubleEndedIterator::nth_back`.
+#[test]
+fn test_double_ended_default_nth_back() {
+    assert_eq!(None, IterWrapper(0..0).nth_back(10));
+}

@@ -133,17 +133,15 @@ to report the execution results.
 To solve the issue, our approach is to create a new target based on the Rust
 target we need to test: this new "bare metal testing target" has the same
 configuration as the real target, with the only exception being enabling the
-operating system bindings for Linux. This new target won't be shipped to
-customers.
+operating system bindings for Linux.
 
 The bare metal testing target allows us to execute the test suite on Linux
 (running on the hardware needed by the real target), side-stepping the
 requirement to have an operating system.
 
 Since the only difference between the two targets is the implementation of the
-APIs in the ``std`` crate, and that crate is not shipped to customers for bare
-metal targets, we can conclude that the test results of the two targets are
-equivalent.
+APIs in the ``std`` crate, and the relevant certified targets do not include
+`std`, we can conclude that the test results of the two targets are equivalent.
 
 .. _test-variants:
 

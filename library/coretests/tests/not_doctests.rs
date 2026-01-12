@@ -1,3 +1,4 @@
+mod array;
 mod atomic;
 mod borrow;
 mod cell;
@@ -11,6 +12,7 @@ mod ops;
 mod slice;
 mod str;
 mod time;
+mod mem;
 
 use core::cmp::Ordering;
 use core::ops::{Bound, ControlFlow};

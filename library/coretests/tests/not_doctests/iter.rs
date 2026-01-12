@@ -409,3 +409,11 @@ fn test_index_range_double_ended_iterator() {
 fn test_index_range_iterator() {
     core::ferrocene_test::test_index_range_iterator();
 }
+
+// cover <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn test_iterator_chunksmut_nth() {
+    let iter = &mut [(); usize::MAX];
+    let mut chunked = iter.chunks_mut(100);
+    assert!(chunked.nth(usize::MAX / 100).unwrap().len() < 100);
+}

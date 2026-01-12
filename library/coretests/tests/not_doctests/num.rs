@@ -75,3 +75,24 @@ int_overflowing_neg! {
     i128 => i128_overflowing_neg,
     isize => isize_overflowing_neg,
 }
+
+// covers `core::num::<T>::wrapping_add_signed`.
+macro_rules! int_wrapping_add_signed {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(<$T>::MIN, <$T>::MAX.wrapping_add_signed(1))
+            }
+        )*
+    };
+}
+
+int_wrapping_add_signed! {
+    u8 => u8_wrapping_add_signed,
+    u16 => u16_wrapping_add_signed,
+    u32 => u32_wrapping_add_signed,
+    u64 => u64_wrapping_add_signed,
+    u128 => u128_wrapping_add_signed,
+    usize => usize_wrapping_add_signed,
+}

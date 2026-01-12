@@ -351,6 +351,45 @@ Failure modes
                 This script has an exhaustive list of all test suites required by our safety plan,
                 and ensures each suite is run in at least one job.
 
+Emulator
+--------
+
+Version
+~~~~~~~
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Tool
+     - Version
+   * - ``qemu``
+     - |qemu_version|
+
+Usage
+~~~~~
+
+The provided binaries (eg. ``qemu-aarch64``) are used to test the produced core library on the target architecture.
+
+Safety Assessment
+~~~~~~~~~~~~~~~~~
+
+- IEC 61508-3 Tool Classification: T2
+- ISO 26262 Tool Classification: TCL2
+- Level of reliance: High, ensures the correct architecture is tested
+
+Qemu is an industry tool that is widely used. We have used the tooling for several years and feel confident in its operation.
+
+Failure modes
+"""""""""""""
+
+- False-positive: A test fails that would succeed on real hardware
+   - Risk: Lost time invested.
+   - Mitigation: Attempt to reproduce on real hardware.
+- False-negative: A test passes that would fail on real hardware
+   - Risk: Code which produces unexpected results on real hardware is certified.
+   - Mitigation: Report issue upstream.
+
 Version control system
 ----------------------
 

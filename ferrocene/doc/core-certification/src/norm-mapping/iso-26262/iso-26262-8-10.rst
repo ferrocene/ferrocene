@@ -19,17 +19,17 @@ Safety Plan - Lifecycle Phases Overview
 10.4.1.a
 ~~~~~~~~
 
-see 10.4
+See 10.4.
 
 10.4.1.b
 ~~~~~~~~
 
-see 10.4
+See 10.4.
 
 10.4.1.c
 ~~~~~~~~
 
-see 10.4
+See 10.4.
 
 10.4.2
 ------
@@ -44,27 +44,27 @@ Qualification Plan - Documentation Validation
 10.4.3.a
 ~~~~~~~~
 
-see 10.4.3
+See 10.4.3.
 
 10.4.3.b
 ~~~~~~~~
 
-see 10.4.3
+See 10.4.3.
 
 10.4.3.c
 ~~~~~~~~
 
-see 10.4.3
+See 10.4.3.
 
 10.4.3.d
 ~~~~~~~~
 
-see 10.4.3
+See 10.4.3.
 
 10.4.3.e
 ~~~~~~~~
 
-see 10.4.3
+See 10.4.3.
 
 10.4.4
 ------

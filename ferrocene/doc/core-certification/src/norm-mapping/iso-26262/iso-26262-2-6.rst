@@ -137,22 +137,22 @@ Safety Plan
 6.4.6.5.a
 +++++++++
 
-see above
+See above.
 
 6.4.6.5.b
 +++++++++
 
-see above
+See above.
 
 6.4.6.5.c
 +++++++++
 
-see above
+See above.
 
 6.4.6.5.d
 +++++++++
 
-see above, no DIA
+See above, no DIA.
 
 6.4.6.5.e
 +++++++++
@@ -173,12 +173,12 @@ https://public-docs.ferrocene.dev/main/qualification/evaluation-report/rustc/too
 6.4.6.5.h
 +++++++++
 
-Not applicable, no proven in use applied
+Not applicable, no proven in use applied.
 
 6.4.6.5.i
 +++++++++
 
-Tool safety assessments
+Tool safety assessments.
 
 6.4.6.6
 ~~~~~~~
@@ -247,7 +247,7 @@ Safety Plan - Deliverables and documents
 ~~~~~~~~
 
 Not applicable, no distributed development (upstream/open source not
-handled as distributed development)
+handled as distributed development).
 
 6.4.7
 -----
@@ -296,17 +296,17 @@ All modifications to the qualification or safety documents undergo review by an 
 6.4.9.1.a
 +++++++++
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.9.1.b
 +++++++++
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.9.1.c
 +++++++++
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.9.2
 ~~~~~~~
@@ -329,27 +329,27 @@ The safety managers has full access to the safety documentation, development pro
 6.4.10.1
 ~~~~~~~~
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.10.2
 ~~~~~~~~
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.10.3
 ~~~~~~~~
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.10.4
 ~~~~~~~~
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.10.5
 ~~~~~~~~
 
-see 6.4.9.1
+See 6.4.9.1.
 
 6.4.11
 ------

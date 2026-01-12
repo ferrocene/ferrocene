@@ -29,7 +29,7 @@ Safety Plan - Responsibility split
 9.4.2.c
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 9.4.2.d
 ~~~~~~~
@@ -45,7 +45,7 @@ Safety Plan - Testing Plan
 9.4.2.f
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 9.4.3
 -----

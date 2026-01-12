@@ -16,149 +16,149 @@ Not applicable, delivered as pre-compiled library, no configuration
 C.4.1.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.1.b
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.1.c
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.1.d
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.2
 -----
 
-Not applicable
+Not applicable.
 
 C.4.2.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.2.b
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.2.c
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.3
 -----
 
-Not applicable
+Not applicable.
 
 C.4.4
 -----
 
-Not applicable
+Not applicable.
 
 C.4.5
 -----
 
-Not applicable
+Not applicable.
 
 C.4.6.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.6.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.6.b
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.6.c
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.6.d
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.6.e
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.7
 -----
 
-Not applicable
+Not applicable.
 
 C.4.8
 -----
 
-Not applicable
+Not applicable.
 
 C.4.8.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.8.b
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.8.c
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.9
 -----
 
-Not applicable
+Not applicable.
 
 C.4.9.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.9.b
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.10
 ------
 
-Not applicable
+Not applicable.
 
 C.4.11
 ------
 
-Not applicable
+Not applicable.
 
 C.4.11.a
 ~~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.11.b
 ~~~~~~~~
 
-Not applicable
+Not applicable.
 
 C.4.11.c
 ~~~~~~~~
 
-Not applicable
+Not applicable.

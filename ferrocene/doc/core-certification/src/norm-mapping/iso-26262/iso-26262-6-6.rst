@@ -23,37 +23,37 @@ Covered by :doc:`core-certification:safety-plan/requirements`.
 6.4.2.a
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.2.b
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.2.c
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.2.d
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.2.e
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.2.f
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.2.g
 ~~~~~~~
 
-see 6.4.2
+See 6.4.2.
 
 6.4.3
 -----
@@ -81,7 +81,7 @@ assumptions are clearly stated on Certification Scope
 -----
 
 Same as IEC 61508-3 7.2.2.3 argument, no real requirements on this
-level, more unit level specification/requirements, see 6-8
+level, more unit level specification/requirements, see 6-8.
 
 6.4.7.a
 ~~~~~~~

@@ -11,34 +11,34 @@ ISO 26262 9-6
 6.4.1
 ------
 
-Not applicable
+Not applicable.
 
 6.4.2
 -----
 
-Not applicable
+Not applicable.
 
 6.4.2.a
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 6.4.2.b
 ~~~~~~~
 
-Not applicable
+Not applicable.
 
 6.4.3
 -----
 
-Not applicable
+Not applicable.
 
 6.4.3.N2
 ~~~~~~~~
 
-Not applicable
+Not applicable.
 
 6.4.4
 -----
 
-Not applicable
+Not applicable.

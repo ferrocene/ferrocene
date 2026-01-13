@@ -317,7 +317,7 @@ Version
    * - Tool
      - Version
    * - ``circleci``
-     - |circleci_version|
+     - ``v5``
 
 Usage
 ~~~~~

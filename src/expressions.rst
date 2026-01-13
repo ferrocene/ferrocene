@@ -1001,6 +1001,65 @@ Mutable borrow.
 
    let ref_answer = &mut answer;
 
+.. _fls_vXGuvRWOLbEE:
+
+Raw Borrow Expression
+~~~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   RawBorrowExpression ::=
+       $$&$$ $$raw$$ ($$const$$ | $$mut$$) Operand
+
+.. rubric:: Legality Rules
+
+:dp:`fls_TS6DvMon5h27`
+A :t:`raw borrow expression` is an :t:`expression` that creates a :t:`raw pointer` to the memory location of its :t:`operand` without incurring a :t:`borrow`.
+
+:dp:`fls_UtjWrE2qeplQ`
+An :dt:`immutable raw borrow expression` is a :t:`raw borrow expression` that has :t:`keyword` ``const``.
+
+:dp:`fls_4e7EE4a8Yvmy`
+A :dt:`mutable raw borrow expression` is a :t:`raw borrow expression` that has :t:`keyword` ``mut``.
+
+:dp:`fls_gOXUWePymgGV`
+When the :t:`operand` of a :t:`raw borrow expression` is a :t:`place expression`, the :t:`raw borrow expression` produces a :t:`raw pointer` to the memory location indicated by the :t:`operand`.
+
+:dp:`fls_YBC8GrIBzZbi`
+It is a static error if the :t:`operand` of a :t:`raw borrow expression` is a :t:`temporary`.
+
+:dp:`fls_Twkre8IzUa8S`
+The :t:`type` of a :t:`raw borrow expression` is determined as follows:
+
+* :dp:`fls_Ki4FOzJMqtvJ`
+  If the :t:`raw borrow expression` denotes an :t:`immutable raw borrow expression`, then the :t:`type` is ``*const T``, where ``T`` is the :t:`type` of the :t:`operand`.
+
+* :dp:`fls_DJxQDBsO9hc7`
+  If the :t:`raw borrow expression` denotes a :t:`mutable raw borrow expression`, then the :t:`type` is ``*mut T``, where ``T`` is the :t:`type` of the :t:`operand`.
+
+:dp:`fls_WlXB0AHifCdd`
+The :t:`value` of a :t:`raw borrow expression` is the address of its :t:`operand`.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_qQrV8QuGGcVO`
+The :t:`evaluation` of a :t:`raw borrow expression` evaluates its :t:`operand`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   let mut answer = 42;
+
+:dp:`fls_dTABiwAPGhdZ`
+Mutable raw borrow.
+
+.. syntax::
+
+   let ref_answer = &raw mut answer;
+
 .. _fls_5cm4gkt55hjh:
 
 Dereference Expression
@@ -2053,65 +2112,6 @@ The :t:`evaluation` of a :t:`lazy or expression` proceeds as follows:
 
    false && panic!()
    this || that
-
-.. _fls_vXGuvRWOLbEE:
-
-Raw Borrow Expression
-~~~~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Syntax
-
-.. syntax::
-
-   RawBorrowExpression ::=
-       $$&$$ $$raw$$ ($$const$$ | $$mut$$) Operand
-
-.. rubric:: Legality Rules
-
-:dp:`fls_TS6DvMon5h27`
-A :t:`raw borrow expression` is an :t:`expression` that creates a :t:`raw pointer` to the memory location of its :t:`operand` without incurring a :t:`borrow`.
-
-:dp:`fls_UtjWrE2qeplQ`
-An :dt:`immutable raw borrow expression` is a :t:`raw borrow expression` that has :t:`keyword` ``const``.
-
-:dp:`fls_4e7EE4a8Yvmy`
-A :dt:`mutable raw borrow expression` is a :t:`raw borrow expression` that has :t:`keyword` ``mut``.
-
-:dp:`fls_gOXUWePymgGV`
-When the :t:`operand` of a :t:`raw borrow expression` is a :t:`place expression`, the :t:`raw borrow expression` produces a :t:`raw pointer` to the memory location indicated by the :t:`operand`.
-
-:dp:`fls_YBC8GrIBzZbi`
-It is a static error if the :t:`operand` of a :t:`raw borrow expression` is a :t:`temporary`.
-
-:dp:`fls_Twkre8IzUa8S`
-The :t:`type` of a :t:`raw borrow expression` is determined as follows:
-
-* :dp:`fls_Ki4FOzJMqtvJ`
-  If the :t:`raw borrow expression` denotes an :t:`immutable raw borrow expression`, then the :t:`type` is ``*const T``, where ``T`` is the :t:`type` of the :t:`operand`.
-
-* :dp:`fls_DJxQDBsO9hc7`
-  If the :t:`raw borrow expression` denotes a :t:`mutable raw borrow expression`, then the :t:`type` is ``*mut T``, where ``T`` is the :t:`type` of the :t:`operand`.
-
-:dp:`fls_WlXB0AHifCdd`
-The :t:`value` of a :t:`raw borrow expression` is the address of its :t:`operand`.
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_qQrV8QuGGcVO`
-The :t:`evaluation` of a :t:`raw borrow expression` evaluates its :t:`operand`.
-
-.. rubric:: Examples
-
-.. code-block:: rust
-
-   let mut answer = 42;
-
-:dp:`fls_dTABiwAPGhdZ`
-Mutable raw borrow.
-
-.. syntax::
-
-   let ref_answer = &raw mut answer;
 
 .. _fls_1qhsun1vyarz:
 

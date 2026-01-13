@@ -8,7 +8,7 @@
 
 .. note::
 
-   Currently the baseline target is qualified, without any specific
+   The baseline target is qualified, without any specific
    ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book
    <https://doc.rust-lang.org/1.86/rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
 

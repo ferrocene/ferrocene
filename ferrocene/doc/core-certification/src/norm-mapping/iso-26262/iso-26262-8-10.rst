@@ -14,7 +14,7 @@ ISO 26262 8-10
 10.4.1
 ------
 
-Safety Plan - Lifecycle Phases Overview
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 10.4.1.a
 ~~~~~~~~
@@ -34,12 +34,12 @@ See 10.4.
 10.4.2
 ------
 
-Safety Plan - Lifecycle Phases Overview
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 10.4.3
 ------
 
-Qualification Plan - Documentation Validation
+:ref:`qualification-plan:documentation-validation`
 
 10.4.3.a
 ~~~~~~~~
@@ -87,19 +87,19 @@ IEC 61508:1-5.2.7
 10.4.5.c
 ~~~~~~~~
 
-Change Tracking
+:ref:`qualification-plan:change-tracking:Change Tracking`.
 
 10.4.5.d
 ~~~~~~~~
 
-Change Tracking
+:ref:`qualification-plan:change-tracking:Change Tracking`.
 
 10.4.5.e
 ~~~~~~~~
 
-Change Tracking
+:ref:`qualification-plan:change-tracking:Change Tracking`.
 
 10.4.6
 ------
 
-Change Tracking
+:ref:`qualification-plan:change-tracking:Change Tracking`.

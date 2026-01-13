@@ -44,9 +44,9 @@ Not applicable, as SW SEooC
 7.4.2.3
 ~~~~~~~
 
-- Qualification Plan - Known Problems Tracking
-- Safety Manual - Known Problems
-- Safety Manual
+- :doc:`qualification-plan:kp-tracking`
+- :doc:`safety-manual:known-problems`
+- :doc:`safety-manual:index`
 
 7.4.2.4
 ~~~~~~~

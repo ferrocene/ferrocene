@@ -11,12 +11,12 @@ ISO 26262 6-8
 8.4.1
 ------
 
-Safety Plan - Requirements
+:doc:`core-certification:safety-plan/requirements`
 
 8.4.2
 -----
 
-Safety Plan - Requirements
+:doc:`core-certification:safety-plan/requirements`
 
 8.4.2.a
 ~~~~~~~
@@ -36,7 +36,7 @@ See 8.4.2.
 8.4.3
 -----
 
-Safety Plan - Requirements
+:doc:`core-certification:safety-plan/requirements`
 
 8.4.3.a
 ~~~~~~~
@@ -61,12 +61,12 @@ See 8.4.3.
 8.4.4
 -----
 
-Safety Plan - Requirements
+:doc:`core-certification:safety-plan/requirements`
 
 8.4.5
 -----
 
-Safety Plan - Requirements
+:doc:`core-certification:safety-plan/requirements`
 
 8.4.5.a
 ~~~~~~~

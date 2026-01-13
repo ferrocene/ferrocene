@@ -168,7 +168,7 @@ See 7.4.5.
 
 Safety Plan - Requirements Management
 
-All functions in the certified core library are deemed to be of the same SIL.
+All functions in the certified core library are deemed to be of the same ASIL.
 
 7.4.7
 -----
@@ -183,27 +183,27 @@ All functions in the certified core library are deemed to be of the same SIL.
 7.4.9
 -----
 
-Not applicable, no partitioning, all ASIL B
+Not applicable, no partitioning, all same ASIL
 
 7.4.9.a
 ~~~~~~~
 
-Not applicable, no partitioning, all ASIL B
+Not applicable, no partitioning, all same ASIL
 
 7.4.9.b
 ~~~~~~~
 
-Not applicable, no partitioning, all ASIL B
+Not applicable, no partitioning, all same ASIL
 
 7.4.9.c
 ~~~~~~~
 
-Not applicable, no partitioning, all ASIL B
+Not applicable, no partitioning, all same ASIL
 
 7.4.9.d
 ~~~~~~~
 
-Not applicable, no partitioning, all ASIL B
+Not applicable, no partitioning, all same ASIL
 
 7.4.10
 ------

@@ -24,7 +24,8 @@ ISO 26262 2-5
 ~~~~~~~
 
 - Safety Plan - Lifecycle Phases Overview
-- Safety Plan - Roles and Responsibilities  IEC 61508-1:5.2.2
+- Safety Plan - Roles and Responsibilities
+- IEC 61508-1:5.2.2
 
 5.4.2.3
 ~~~~~~~
@@ -75,7 +76,8 @@ See 5.4.2.6.
 5.4.2.7
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.  IEC 61508-1:6.2.1
+- Safety Plan - Roles and responsibilities
+- IEC 61508-1:6.2.1
 
 5.4.3
 -----

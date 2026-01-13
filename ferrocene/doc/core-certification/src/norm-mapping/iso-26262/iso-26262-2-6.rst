@@ -11,7 +11,7 @@ ISO 26262 2-6
 6.4.2
 -----
 
-Safety Plan - Roles and Responsibilities
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.2.3
 ~~~~~~~
@@ -21,7 +21,7 @@ The project manager and safety manager defined in :doc:`Qualification Plan - Fer
 6.4.2.4
 ~~~~~~~
 
-Safety Plan - Roles and Responsibilities
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.3
 -----
@@ -108,17 +108,17 @@ Not applicable, T&B not in scope
 6.4.6.1
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.6.2
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.6.3
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.6.4
 ~~~~~~~
@@ -131,7 +131,7 @@ Included in the project plan.
 6.4.6.4.b
 +++++++++
 
-Safety Plan
+:ref:`Safety Plan <safety-plan/purpose:Purpose of this document>`
 
 6.4.6.5
 ~~~~~~~
@@ -179,7 +179,7 @@ Not applicable, no proven in use applied.
 6.4.6.5.i
 +++++++++
 
-Tool safety assessments.
+:ref:`safety-plan/tools:Tool safety assessments`.
 
 6.4.6.6
 ~~~~~~~
@@ -187,17 +187,17 @@ Tool safety assessments.
 6.4.6.6.a
 +++++++++
 
-Safety Plan - Purpose of this document
+:ref:`safety-plan/purpose:Purpose of this document`
 
 6.4.6.6.b
 +++++++++
 
-Safety Plan - Lifecycle Phases Overview
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.6.6.c
 +++++++++
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 6.4.6.6.d
 +++++++++
@@ -212,7 +212,7 @@ Time planning is covered in the project manangement tool listed in :doc:`qualifi
 6.4.6.6.f
 +++++++++
 
-Safety Plan - Deliverables and documents
+:ref:`safety-plan/deliverables:Deliverables and documents`.
 
 6.4.6.7
 ~~~~~~~
@@ -242,7 +242,7 @@ Safety plan updates are tracked in the project manangement tool listed in :doc:`
 6.4.6.9
 ~~~~~~~
 
-Safety Plan - Deliverables and documents
+:ref:`safety-plan/deliverables:Deliverables and documents`.
 
 6.4.6.10
 ~~~~~~~~
@@ -256,15 +256,15 @@ handled as distributed development).
 6.4.7.1
 ~~~~~~~
 
-Safety Plan Tracking of open activites in Clickup
+Safety Plan Tracking of open activities in Clickup
 
 6.4.7.2
 ~~~~~~~
 
-- Safety Plan - Configuration
-- Safety Plan - Development Process
-- Safety Plan - Change Tracking
-- Safety Plan - Infrastructure
+- :ref:`safety-plan/project-setup:Configuration`
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
 
 6.4.8
 -----
@@ -312,7 +312,7 @@ See 6.4.9.1.
 6.4.9.2
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 The safety managers has full access to the safety documentation, development process and team, when reviewing and confirming the safety plan as described in :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
 
@@ -320,7 +320,7 @@ The safety managers has full access to the safety documentation, development pro
 6.4.9.3
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 The safety managers has full access to the safety documentation, development process and team, when reviewing and confirming the safety plan as described in :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
 
@@ -368,22 +368,22 @@ TÜV SÜD responsibility
 6.4.13.1
 ~~~~~~~~
 
-Safety Plan - Project Setup - Safety Case
+:ref:`safety-plan/project-setup:Safety Case`.
 
 6.4.13.2
 ~~~~~~~~
 
-Safety Plan - Project Setup - Safety Case
+:ref:`safety-plan/project-setup:Safety Case`.
 
 6.4.13.3
 ~~~~~~~~
 
-Safety Plan - Project Setup - Safety Case
+:ref:`safety-plan/project-setup:Safety Case`.
 
 6.4.13.4
 ~~~~~~~~
 
-Qualification report - Test results
+:doc:`qualification-report:rustc/index`
 
 6.4.13.4.a
 ++++++++++
@@ -393,22 +393,22 @@ See "Release Validation" in :doc:`qualification-plan:validation`.
 6.4.13.4.b
 ++++++++++
 
-- Safety Plan - Certification scope
-- Qualification report - Test results
+- :ref:`safety-plan/scope:Certification scope`
+- :doc:`qualification-report:rustc/index`
 
 6.4.13.4.c
 ++++++++++
 
-- Safety Plan - Certification scope
-- Qualification report - Test results
+- :ref:`safety-plan/scope:Certification scope`
+- :doc:`qualification-report:rustc/index`
 
 6.4.13.4.d
 ++++++++++
 
-Qualification report - Test results
+:doc:`qualification-report:rustc/index`
 
 6.4.13.5
 ~~~~~~~~
 
-- Safety Plan - Certification scope
-- Qualification report - Test results
+- :ref:`safety-plan/scope:Certification scope`
+- :doc:`qualification-report:rustc/index`

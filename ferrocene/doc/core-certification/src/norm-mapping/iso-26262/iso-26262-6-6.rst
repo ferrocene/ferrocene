@@ -11,9 +11,9 @@ ISO 26262 6-6
 6.4.1
 ------
 
-- Safety Plan - Requirements Management
+- :doc:`core-certification:safety-plan/requirements`
 - Requirements are directly on unit level, no overall safety requirements as these are independent
-library functionalities
+  library functionalities
 
 6.4.2
 -----

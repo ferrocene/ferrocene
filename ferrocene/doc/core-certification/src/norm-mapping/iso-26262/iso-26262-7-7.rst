@@ -14,8 +14,8 @@ ISO 26262 7-7
 7.4.1.1
 ~~~~~~~
 
-- Qualification Plan - Known Problems Tracking
-- Safety Manual - Known Problems
+- :doc:`qualification-plan:kp-tracking`
+- :doc:`safety-manual:known-problems`
 
 7.4.1.1.a
 +++++++++

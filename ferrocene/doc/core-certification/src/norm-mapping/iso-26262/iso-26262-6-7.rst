@@ -166,7 +166,7 @@ See 7.4.5.
 7.4.6
 -----
 
-Safety Plan - Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 All functions in the certified core library are deemed to be of the same ASIL.
 

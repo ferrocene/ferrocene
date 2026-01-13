@@ -11,13 +11,13 @@ ISO 26262 6-5
 5.4.1
 ------
 
-- Safety Plan
-- Responsibility split
+- :doc:`Safety Plan <core-certification:safety-plan/purpose>`
+- :ref:`safety-plan/project-setup:Responsibility split`
 
 5.4.1.a
 ~~~~~~~
 
-Safety Plan
+:doc:`Safety Plan <core-certification:safety-plan/purpose>`
 
 5.4.1.b
 ~~~~~~~
@@ -32,7 +32,7 @@ Not applicable, only SW SEooC, assumptions on supported HW platforms
 5.4.2
 -----
 
-Safety Plan - Programming language
+:ref:`safety-plan/programming-language:Rust`.
 
 5.4.2.a
 ~~~~~~~

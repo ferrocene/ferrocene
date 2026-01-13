@@ -11,7 +11,7 @@ ISO 26262 2-5
 5.4.1
 ------
 
-- Safety Plan - Lifecycle Phases Overview
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
 - IEC 61508-1:5.2.1
 
 5.4.2
@@ -23,8 +23,8 @@ ISO 26262 2-5
 5.4.2.2
 ~~~~~~~
 
-- Safety Plan - Lifecycle Phases Overview
-- Safety Plan - Roles and Responsibilities
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
+- :ref:`safety-plan/project-setup:roles and responsibilities`
 - IEC 61508-1:5.2.2
 
 5.4.2.3
@@ -51,7 +51,7 @@ See 5.4.2.3.
 5.4.2.4
 ~~~~~~~
 
-Safety Plan - Lifecycle Phases Overview
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 5.4.2.5
 ~~~~~~~
@@ -76,7 +76,7 @@ See 5.4.2.6.
 5.4.2.7
 ~~~~~~~
 
-- Safety Plan - Roles and responsibilities
+- :ref:`safety-plan/project-setup:roles and responsibilities`
 - IEC 61508-1:6.2.1
 
 5.4.3
@@ -85,12 +85,12 @@ See 5.4.2.6.
 5.4.3.1
 ~~~~~~~
 
-Internal procedures
+:doc:`internal-procedures:index`
 
 5.4.3.2
 ~~~~~~~
 
-Internal procedures
+:doc:`internal-procedures:index`
 
 5.4.3.2.N2
 ++++++++++
@@ -110,7 +110,7 @@ See 5.4.3.2.
 5.4.3.3
 ~~~~~~~
 
-Internal procedures
+:doc:`internal-procedures:index`
 
 5.4.3.3.a
 +++++++++
@@ -125,12 +125,12 @@ See 5.4.3.3.
 5.4.3.4.
 ++++++++
 
-Internal procedures
+:doc:`internal-procedures:index`
 
 5.4.3.5
 ~~~~~~~
 
-Internal procedures
+:doc:`internal-procedures:index`
 
 5.4.4
 -----
@@ -138,22 +138,22 @@ Internal procedures
 5.4.4.1
 ~~~~~~~
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:roles and responsibilities`.
 
 5.4.4.1.N2
 ++++++++++
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:roles and responsibilities`.
 
 5.4.4.1.N3
 ++++++++++
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:roles and responsibilities`.
 
 5.4.4.1.E1
 ++++++++++
 
-Safety Plan - Roles and responsibilities.
+:ref:`safety-plan/project-setup:roles and responsibilities`.
 
 5.4.5
 -----
@@ -170,7 +170,7 @@ re-checked for each renewal of certification.
 5.4.6.1
 ~~~~~~~
 
-Safety Plan - Lifecycle Phases Overview
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 5.4.6.1.a
 +++++++++

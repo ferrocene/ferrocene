@@ -20,6 +20,9 @@ mod mono_checks;
 mod partitioning;
 mod util;
 
+// Ferrocene addition
+pub use collector::ferrocene::collect_validated_roots;
+
 rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 fn custom_coerce_unsize_info<'tcx>(

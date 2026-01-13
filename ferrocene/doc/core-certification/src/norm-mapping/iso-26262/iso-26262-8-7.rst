@@ -8,9 +8,6 @@ ISO 26262 8-7
 8-7 Configuration Management
 ============================
 
-7.5.1
-------
-
 7.4.1
 -----
 
@@ -55,3 +52,8 @@ See 7.4.2.
 - Build and Testing Process
 - Development Process
 - Lifecycle Phases Overview
+
+7.5.1
+------
+
+See 7.4.1 to 7.4.5.

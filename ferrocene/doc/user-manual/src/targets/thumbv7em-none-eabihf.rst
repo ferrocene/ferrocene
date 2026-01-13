@@ -10,7 +10,7 @@
 
    The baseline target is qualified, without any specific
    ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book
-   <https://doc.rust-lang.org/1.86/rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
+   <../../rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
 
    Please contact support if your use case demands fully optimized builds for
    a specific CPU configuration, or double-precision FPU support.
@@ -27,7 +27,7 @@ single-precision operations will be executed on the FPU.
 On this target, functions accepting ``f32`` or ``f64`` will have those
 arguments passed via FPU registers. For more information on the
 differences between the *hard-float* and *soft-float* ABIs, see the
-`rustc book <https://doc.rust-lang.org/1.86/rustc/platform-support/arm-none-eabi.html#instruction-sets>`_.
+`rustc book <../../rustc/platform-support/arm-none-eabi.html#instruction-sets>`_.
 
 For the *soft-float* ABI, :ref:`thumbv7em-none-eabi` is also available.
 

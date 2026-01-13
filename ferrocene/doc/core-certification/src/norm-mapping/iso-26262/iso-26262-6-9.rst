@@ -61,4 +61,4 @@ Safety Plan - Code coverage report
 -----
 
 - Qualification Plan - Build and Testing Process
-- "Safety Manual - Project Setup - Configuration" describes how the build and test environment is being documented.
+- "Safety Manual - Project Setup - Configuration" describes how the build and test environment is documented.

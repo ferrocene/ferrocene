@@ -70,7 +70,7 @@ See 7.4.2.
 7.4.2.b
 ~~~~~~~
 
-N/A; There is no way to configure the core library binary after it is compiled.
+N/A; There is no way to configure the core library binary after it is compiled and linked on targets without dynamic loaders (currently, all certified targets).
 
 7.4.2.c
 ~~~~~~~

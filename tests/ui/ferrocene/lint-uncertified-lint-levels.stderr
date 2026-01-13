@@ -1,0 +1,77 @@
+warning: validated function uses an unvalidated function
+  --> $DIR/lint-uncertified-lint-levels.rs:51:5
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+...
+LL |     unvalidated();
+   |     ^^^^^^^^^^^
+   |
+note: `unreachable` is validated
+  --> $DIR/lint-uncertified-lint-levels.rs:48:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn unreachable() {
+   |    ^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-lint-levels.rs:49:12
+   |
+LL |     #[warn(ferrocene::uncertified)]
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: validated function calls an unvalidated function
+  --> $DIR/lint-uncertified-lint-levels.rs:51:5
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+...
+LL |     unvalidated();
+   |     ^^^^^^^^^^^
+
+warning: validated function calls an unvalidated method
+  --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
+   |
+  ::: $DIR/lint-uncertified-lint-levels.rs:16:8
+   |
+LL |     fn drop(&mut self) {}
+   |        ---- `<Unvalidated as Drop>::drop` is unvalidated
+   |
+note: `reachable` is validated
+  --> $DIR/lint-uncertified-lint-levels.rs:37:8
+   |
+LL | fn uninstantiated_generic_indirect<T>(val: T) {}
+   |                                                - generic function `std::ptr::drop_in_place` instantiated by `uninstantiated_generic_indirect::<Unvalidated>`
+...
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | pub fn reachable() {
+   |        ^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-lint-levels.rs:24:8
+   |
+LL | #[warn(ferrocene::uncertified)]
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-lint-levels.rs:30:5
+   |
+LL |     fn clone(&self) -> Self { Unvalidated }
+   |        ----- `<Unvalidated as Clone>::clone` is unvalidated
+...
+LL |     val.clone();
+   |     ^^^^^^^^^^^
+   |
+note: generic function `uninstantiated_generic_direct` instantiated by `reachable`, which is called from a validated entrypoint
+  --> $DIR/lint-uncertified-lint-levels.rs:40:5
+   |
+LL |     uninstantiated_generic_direct(Unvalidated);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-lint-levels.rs:29:12
+   |
+LL |     #[warn(ferrocene::uncertified)]
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: 4 warnings emitted
+

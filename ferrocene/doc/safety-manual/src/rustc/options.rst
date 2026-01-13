@@ -151,6 +151,9 @@ of Ferrocene executables and shared libraries:
    * - ``--fix-cortex-a53-843419``
      - The *Arm Cortex-A53 Errata fix* option
 
+   * - ``--codegen link-arg="--script=<script>"``
+     - The *linker script* to be provided for applications that need it specified manually
+
 Alternative forms of the above options are acceptable:
 
 - Using a single dash (``-``) instead of two dashes (``--``)

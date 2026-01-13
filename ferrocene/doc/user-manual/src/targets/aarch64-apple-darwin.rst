@@ -19,7 +19,7 @@ Apple Silicon.
 Prerequisites
 -------------
 
-This target uses the LLVM ``ld.lld`` linker. In order to locate the system C
+This target uses the LLVM ``ld.lld`` linker. To locate the system C
 libraries required to create a functional macOS binary, this target drives the
 ``ld.lld`` linker using your system's C compiler as a linker driver.
 

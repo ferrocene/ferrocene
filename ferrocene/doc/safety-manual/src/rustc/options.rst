@@ -60,9 +60,8 @@ system C compiler acting as a *linker driver*, depending on whether the target
 requires access to system-specific C libraries to correctly link an executable
 or shared library.
 
-The :doc:`Compilation Targets <user-manual:targets/index>` section of the User
-Manual specifies for each target whether the linker is used directly, or via a
-system C compiler as a linker driver.
+The targets that use a *linker driver* indicate this on their respective target pages.
+See :doc:`Compilation Targets <user-manual:targets/index>` for a list of targets.
 
 Where a C compiler is acting as a *linker driver*, the C compiler is given a
 path to a binary called ``ld.lld`` to use as its linker. The ``ld.lld`` binary
@@ -150,6 +149,9 @@ of Ferrocene executables and shared libraries:
 
    * - ``--fix-cortex-a53-843419``
      - The *Arm Cortex-A53 Errata fix* option
+
+   * - ``--codegen link-arg="--script=<script>"``
+     - The *linker script* to be provided for applications that need it specified manually
 
 Alternative forms of the above options are acceptable:
 

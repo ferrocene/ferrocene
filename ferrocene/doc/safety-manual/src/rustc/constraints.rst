@@ -124,3 +124,10 @@ Avoiding data races due to hardware interrupts
 
 The user shall structure their code such that hardware interrupts will
 not result in data race conditions.
+
+Verifying linker scripts
+------------------------
+
+.. id:: RUSTC_CSTR_0120_LINKER_SCRIPTS
+
+The user shall ensure that the linker scripts they use are interpreted correctly by ``rust-lld``.

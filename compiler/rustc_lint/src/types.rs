@@ -13,6 +13,8 @@ use {rustc_ast as ast, rustc_hir as hir};
 mod improper_ctypes; // these files do the implementation for ImproperCTypesDefinitions,ImproperCTypesDeclarations
 pub(crate) use improper_ctypes::ImproperCTypesLint;
 
+// Ferrocene addition
+pub(crate) use crate::ferrocene::LintUnvalidated;
 use crate::lints::{
     AmbiguousWidePointerComparisons, AmbiguousWidePointerComparisonsAddrMetadataSuggestion,
     AmbiguousWidePointerComparisonsAddrSuggestion, AmbiguousWidePointerComparisonsCastSuggestion,

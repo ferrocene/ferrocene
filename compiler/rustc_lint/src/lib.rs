@@ -81,6 +81,10 @@ mod unqualified_local_imports;
 mod unused;
 mod utils;
 
+// Ferrocene addition
+// NOTE: used by rustc_interface.
+pub mod ferrocene;
+
 use async_closures::AsyncClosureUsage;
 use async_fn_in_trait::AsyncFnInTrait;
 use autorefs::*;
@@ -249,6 +253,9 @@ late_lint_methods!(
             FunctionCastsAsInteger: FunctionCastsAsInteger,
             CheckTransmutes: CheckTransmutes,
             LifetimeSyntax: LifetimeSyntax,
+
+            // Ferrocene addition
+            LintUnvalidated: LintUnvalidated,
         ]
     ]
 );

@@ -21,7 +21,7 @@ bare-metal ARMv7E-M processors with the
 `T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
 using the *hard-float ABI* with a single precision FPU. This includes the Arm
 Cortex-M4F and the single-precision variant of the Arm Cortex-M7F. The
-double-precision variant of the Arm Cortex-M7F is also supported but only
+double-precision variant of the Arm Cortex-M7F is also supported, but only
 single-precision operations will be executed on the FPU.
 
 On this target, functions accepting ``f32`` or ``f64`` will have those

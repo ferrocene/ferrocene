@@ -12,22 +12,27 @@ ISO 26262 6-11
 -------
 
 Not applicable, SW SEooC, embedded software is integrator responsibility.
+
 11.4.2
 ------
 
 Not applicable, SW SEooC, embedded software is integrator responsibility.
+
 11.4.3
 ------
 
 Not applicable, SW SEooC, embedded software is integrator responsibility.
+
 11.4.4
 ------
 
 Not applicable, SW SEooC, embedded software is integrator responsibility.
+
 11.4.4.a
 ~~~~~~~~
 
 Not applicable, SW SEooC, embedded software is integrator responsibility.
+
 11.4.4.b
 ~~~~~~~~
 

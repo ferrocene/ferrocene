@@ -13,8 +13,8 @@ New features
   are now better described. For more information, see :doc:`user-manual:targets/index`.
 * The certified subset of the ``core`` library that is certified to IEC 61508 SIL 2 has been significantly expanded.
 * The subset of the core library has also been certified to ISO 26262 ASIL B.
-  For more information, see the [Core library overview](https://public-docs.ferrocene.dev/main/user-manual/core/index.html)
-  and [Core Library Certification](https://public-docs.ferrocene.dev/main/certification/core/index.html).
+  For more information, see the :doc:`Core library overview <user-manual:core/index>`
+  and :doc:`Core Library Certification <core-certification:index>`.
 * Targets with certified ``core`` libraries now have ``*-ferrocene-*`` equivalents, which contain a minimal certified panic implementation.
 * The core certification documentation has been expanded.
 

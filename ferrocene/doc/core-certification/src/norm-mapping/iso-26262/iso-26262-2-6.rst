@@ -167,8 +167,7 @@ Covered by Safety Assessment in :ref:`Safety Plan <safety-plan/project-setup:saf
 6.4.6.5.g
 +++++++++
 
-Link to HazOp, failure analysis:
-https://public-docs.ferrocene.dev/main/qualification/evaluation-report/rustc/tool-analysis.html
+Covered by :doc:`HazOp analysis <evaluation-report:rustc/tool-analysis>`.
 
 6.4.6.5.h
 +++++++++

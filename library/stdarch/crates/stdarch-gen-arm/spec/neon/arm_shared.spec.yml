@@ -2995,7 +2995,6 @@ intrinsics:
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-stable
     assert_instr: [ld2]

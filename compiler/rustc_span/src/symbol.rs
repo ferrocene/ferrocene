@@ -1746,6 +1746,7 @@ symbols! {
         prelude,
         prelude_import,
         preserves_flags,
+        prevalidated,
         prfchw_target_feature,
         print_macro,
         println_macro,

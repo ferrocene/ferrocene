@@ -1126,6 +1126,9 @@ fn collect_and_partition_mono_items(tcx: TyCtxt<'_>, (): ()) -> MonoItemPartitio
 
     let (items, usage_map) = collector::collect_crate_mono_items(tcx, collection_strategy);
 
+    // Ferrocene addition
+    // let roots =
+
     // If there was an error during collection (e.g. from one of the constants we evaluated),
     // then we stop here. This way codegen does not have to worry about failing constants.
     // (codegen relies on this and ICEs will happen if this is violated.)

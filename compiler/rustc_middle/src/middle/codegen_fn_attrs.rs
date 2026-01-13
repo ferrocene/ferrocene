@@ -1,5 +1,8 @@
+// Ferrocene addition
+pub mod ferrocene;
 use std::borrow::Cow;
 
+use ferrocene::Validated;
 use rustc_abi::Align;
 use rustc_hir::attrs::{InlineAttr, InstructionSetAttr, Linkage, OptimizeAttr, RtsanSetting};
 use rustc_macros::{HashStable, TyDecodable, TyEncodable};
@@ -108,6 +111,9 @@ pub struct CodegenFnAttrs {
     pub objc_class: Option<Symbol>,
     /// The `#[rustc_objc_selector = "..."]` attribute.
     pub objc_selector: Option<Symbol>,
+
+    // Ferrocene addition
+    pub validated: Option<Validated>,
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, HashStable, PartialEq, Eq)]
@@ -235,6 +241,9 @@ impl CodegenFnAttrs {
             patchable_function_entry: None,
             objc_class: None,
             objc_selector: None,
+
+            // Ferrocene addition
+            validated: None,
         }
     }
 

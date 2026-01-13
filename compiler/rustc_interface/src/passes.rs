@@ -961,6 +961,23 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
     let mut providers = *DEFAULT_QUERY_PROVIDERS;
     codegen_backend.provide(&mut providers);
 
+    // Ferrocene addition: Run our post-mono ferrocene::unvalidated lint pass.
+    // providers.check_mono_item = |tcx, instance| {
+    //     (DEFAULT_QUERY_PROVIDERS.check_mono_item)(tcx, instance);
+    //     rustc_lint::ferrocene::check_mono_item(tcx, instance);
+    // };
+    providers.collect_and_partition_mono_items = |tcx, ()| {
+        let items = (DEFAULT_QUERY_PROVIDERS.collect_and_partition_mono_items)(tcx, ());
+        // We do this here because it integrates with the query system to rerun whenever the items
+        // being monomorphized changes. We need to ensure that we never monomorphize an item without
+        // also checking if it's validated.
+        // We can't do this directly in `rustc_monomorphize::collect_and_partition_mono_items`
+        // because at that point we don't yet have access to rustc_lint.
+        let roots = rustc_monomorphize::collect_validated_roots(tcx);
+        rustc_lint::ferrocene::lint_validated_roots(tcx, roots);
+        items
+    };
+
     if let Some(callback) = compiler.override_queries {
         callback(sess, &mut providers);
     }

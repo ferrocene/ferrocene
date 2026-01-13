@@ -12,6 +12,9 @@ mod data_structures;
 mod encode_cross_crate;
 mod pretty_printing;
 
+// Ferrocene addition
+// mod ferrocene;
+
 /// Finds attributes in sequences of attributes by pattern matching.
 ///
 /// A little like `matches` but for attributes.

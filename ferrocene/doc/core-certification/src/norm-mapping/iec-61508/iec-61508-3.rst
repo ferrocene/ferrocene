@@ -88,7 +88,7 @@ N/A; the core library is a pure software library. Hardware constraints should be
 7.2.2.11
 ~~~~~~~~
 
-N/A; There is no way to configure the core library binary after it is compiled.
+N/A; There is no way to configure the core library binary after it is compiled and linked on targets without dynamic loaders (currently, all certified targets).
 
 7.2.2.12-13
 ~~~~~~~~~~~

@@ -122,6 +122,7 @@ The ``core`` library API docs state:
 
   The core library is minimal: it isn't even aware of heap allocation, nor does it provide concurrency or I/O. These things require platform integration, and this library is platform-agnostic.
 
-The Rust ``core`` library is developed as a general purpose library suitable to cater many different use cases. Therefore very few assumptions about the target platform and application are made.
+The Rust ``core`` library is developed as a general purpose library suitable to cater many different use cases. Therefore very few assumptions about the target platform and application are made that are not technically necessary to support the target. We test all our
+assumptions by running the test suite on each certified target.
 
 All assumptions on how the core library is to be used are stated in the :doc:`user-manual:core/index` and must be strictly followed by users.

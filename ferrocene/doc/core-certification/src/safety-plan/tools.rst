@@ -378,7 +378,7 @@ Safety Assessment
 - ISO 26262 Tool Classification: TCL2
 - Level of reliance: High, ensures the correct architecture is tested
 
-Qemu is an industry tool that is widely used. We have used the tooling for several years and feel confident in its operation.
+Qemu is an industry tool that is widely used. We have used the tooling for several years and are confident in its operation.
 
 Failure modes
 """""""""""""

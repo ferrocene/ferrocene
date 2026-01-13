@@ -5272,7 +5272,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-stable
     assert_instr: [st2]

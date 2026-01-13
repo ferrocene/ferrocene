@@ -11,7 +11,7 @@ ISO 26262 6-Annex C
 C.4.1
 ------
 
-Not applicable, delivered as pre-compiled library, no configuration
+Not applicable, delivered as pre-compiled library. There is no way to configure the core library binary after it is compiled and linked on targets without dynamic loaders (currently, all certified targets).
 
 C.4.1.a
 ~~~~~~~

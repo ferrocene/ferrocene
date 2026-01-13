@@ -119,9 +119,9 @@ Assumed Requirements
 The ``core`` library API docs state:
 
   The Rust Core Library is the dependency-free[^1] foundation of The Rust Standard Library. It is the portable glue between the language and its libraries, defining the intrinsic and primitive building blocks of all Rust code. It links to no upstream libraries, no system libraries, and no libc.
-  
+
   The core library is minimal: it isn't even aware of heap allocation, nor does it provide concurrency or I/O. These things require platform integration, and this library is platform-agnostic.
 
-The Rust ``core`` library is developed as a general purpose library suitable to cater many different use cases. Therefore very little assumptions about the target platform and application are made.
+The Rust ``core`` library is developed as a general purpose library suitable to cater many different use cases. Therefore very few assumptions about the target platform and application are made.
 
 All assumptions on how the core library is to be used are stated in the :doc:`user-manual:core/index` and must be strictly followed by users.

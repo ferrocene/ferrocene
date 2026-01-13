@@ -277,6 +277,7 @@ impl<T> Box<T> {
     /// let five = Box::new(5);
     /// ```
     #[cfg(not(no_global_oom_handling))]
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]

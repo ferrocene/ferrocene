@@ -235,8 +235,4 @@ See above.
 9.4.3.4
 ~~~~~~~
 
-See above.
-
-.. TODO
-   See discusions on other sheets regarding details on verification
-   environment
+"Safety Manual - Project Setup - Configuration" describes how the build and test environment is documented.

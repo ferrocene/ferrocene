@@ -14,7 +14,7 @@ ISO 26262 8-9
 9.4.1.1
 ~~~~~~~
 
-Testing Plan
+:doc:`core-certification:safety-plan/testing-plan`.
 
 9.4.1.1.a
 +++++++++
@@ -64,7 +64,7 @@ See 9.4.1.1.
 9.4.1.2
 ~~~~~~~
 
-Testing Plan
+:doc:`core-certification:safety-plan/testing-plan`.
 
 9.4.1.2.a
 +++++++++
@@ -92,8 +92,8 @@ See 9.4.1.2.
 9.4.2.1
 ~~~~~~~
 
-- Testing Plan
-- Test results overview
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
 
 9.4.2.1.a
 +++++++++
@@ -113,8 +113,8 @@ See 9.4.2.1.
 9.4.2.2
 ~~~~~~~
 
-- Testing Plan
-- Test results overview
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
 
 9.4.2.2.a
 +++++++++
@@ -157,8 +157,8 @@ See 9.4.2.2.
 9.4.2.3
 ~~~~~~~
 
-- Testing Plan
-- Test results overview
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
 
 9.4.2.3.a
 +++++++++
@@ -189,8 +189,8 @@ Covered by
 9.4.3.1
 ~~~~~~~
 
-- Testing Plan
-- Test results overview
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
 
 9.4.3.2
 ~~~~~~~
@@ -235,4 +235,4 @@ See above.
 9.4.3.4
 ~~~~~~~
 
-"Safety Manual - Project Setup - Configuration" describes how the build and test environment is documented.
+:ref:`safety-plan/project-setup:Configuration` describes how the build and test environment is documented.

@@ -11,14 +11,14 @@ ISO 26262 8-7
 7.4.1
 -----
 
-- Build and Testing Process
-- Development Process
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
 
 7.4.2
 -----
 
-- Build and Testing Process
-- Development Process
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
 
 7.4.2.a
 ~~~~~~~
@@ -36,22 +36,22 @@ See 7.4.2.
 7.4.3
 -----
 
-- Build and Testing Process
-- Development Process
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
 
 7.4.4
 -----
 
-- Build and Testing Process
-- Development Process
-- Lifecycle Phases Overview
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 7.4.5
 -----
 
-- Build and Testing Process
-- Development Process
-- Lifecycle Phases Overview
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 7.5.1
 ------

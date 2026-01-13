@@ -14,7 +14,7 @@ ISO 26262 8-6
 6.4.1.a
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.1.a.a
 +++++++++
@@ -32,22 +32,22 @@ See 6.4.1.a.
 6.4.2.1
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.2.2
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.2.3
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.2.4
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.2.4.a
 +++++++++
@@ -102,7 +102,7 @@ See 6.4.2.5.
 6.4.2.5
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.2.5.a
 +++++++++
@@ -117,7 +117,7 @@ See 6.4.2.6.
 6.4.2.5.c
 +++++++++
 
--
+- All functions same ASIL.
 
 6.4.3
 -----
@@ -125,64 +125,64 @@ See 6.4.2.6.
 6.4.3.1
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.1.a
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.1.b
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.1.c
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.1.d
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.1.e
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.1.f
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.2
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.2.a
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.2.b
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.2.c
 +++++++++
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.3
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`
 
 6.4.3.4
 ~~~~~~~
 
-Requirements Management
+:doc:`core-certification:safety-plan/requirements`

@@ -1,0 +1,68 @@
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-post-mono.rs:49:5
+   |
+LL |     fn clone(&self) -> Self { Unvalidated }
+   |        ----- `<Unvalidated as Clone>::clone` is unvalidated
+...
+LL |     x.clone();
+   |     ^^^^^^^^^
+   |
+note: `instantiation_reachable` is validated
+  --> $DIR/lint-uncertified-post-mono.rs:70:8
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | pub fn instantiation_reachable() {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^
+LL |     uninstantiated_generic(Unvalidated);
+   |     ----------------------------------- generic function `uninstantiated_generic` instantiated by `instantiation_reachable`
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-post-mono.rs:1:9
+   |
+LL | #![deny(ferrocene::uncertified)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function calls an unvalidated associated function
+  --> $DIR/lint-uncertified-post-mono.rs:51:17
+   |
+LL |     fn default() -> Self { Unvalidated }
+   |        ------- `<Unvalidated as Default>::default` is unvalidated
+...
+LL |     let mut y = fn_type();
+   |                 ^^^^^^^^^
+   |
+note: generic function `uninstantiated_generic` instantiated by `instantiation_reachable`, which is called from a validated entrypoint
+  --> $DIR/lint-uncertified-post-mono.rs:71:5
+   |
+LL |     uninstantiated_generic(Unvalidated);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function possibly calls an unvalidated method
+  --> $DIR/lint-uncertified-post-mono.rs:53:34
+   |
+LL |     fn clone_from(&mut self, other: &Self) {
+   |        ---------- `<Unvalidated as Clone>::clone_from` is unvalidated
+...
+LL |     let fn_ptr: fn(&mut T, &T) = T::clone_from;
+   |                                  ^^^^^^^^^^^^^
+   |
+   = note: once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call the function
+
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-post-mono.rs:23:17
+   |
+LL |     fn clone(&self) -> Self { Unvalidated }
+   |        ----- `<Unvalidated as Clone>::clone` is unvalidated
+...
+LL |         *self = other.clone();
+   |                 ^^^^^^^^^^^^^
+   |
+note: generic method `std::clone::Clone::clone_from` instantiated by `uninstantiated_generic::<Unvalidated>`, which is called from a validated entrypoint
+  --> $DIR/lint-uncertified-post-mono.rs:53:34
+   |
+LL |     let fn_ptr: fn(&mut T, &T) = T::clone_from;
+   |                                  ^^^^^^^^^^^^^
+
+error: aborting due to 4 previous errors
+

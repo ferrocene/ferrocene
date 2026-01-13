@@ -1,0 +1,194 @@
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:85:5
+   |
+LL |         | Add => type Output; fn add(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Add>::add` is unvalidated
+...
+LL |     x + x;
+   |     ^^^^^
+   |
+note: `ops` is validated
+  --> $DIR/lint-uncertified-trait-ops.rs:83:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn ops() {
+   |    ^^^
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-trait-ops.rs:12:9
+   |
+LL | #![deny(ferrocene::uncertified)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:87:5
+   |
+LL |         | AddAssign => fn add_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::AddAssign>::add_assign` is unvalidated
+...
+LL |     x += x;
+   |     ^^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:89:5
+   |
+LL |         | Sub => type Output; fn sub(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Sub>::sub` is unvalidated
+...
+LL |     x - x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:91:5
+   |
+LL |         | Mul => type Output; fn mul(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Mul>::mul` is unvalidated
+...
+LL |     x * x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:93:5
+   |
+LL |         | Div => type Output; fn div(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Div>::div` is unvalidated
+...
+LL |     x / x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:95:5
+   |
+LL |         | BitOr => type Output; fn bitor(self, Self) -> Self;
+   |                                    ----- `<Unvalidated as core::ops::BitOr>::bitor` is unvalidated
+...
+LL |     x | x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:97:5
+   |
+LL |         | BitAnd => type Output; fn bitand(self, Self) -> Self;
+   |                                     ------ `<Unvalidated as core::ops::BitAnd>::bitand` is unvalidated
+...
+LL |     x & x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:99:5
+   |
+LL |         | BitXor => type Output; fn bitxor(self, Self) -> Self;
+   |                                     ------ `<Unvalidated as core::ops::BitXor>::bitxor` is unvalidated
+...
+LL |     x ^ x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:101:5
+   |
+LL |         | Rem => type Output; fn rem(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Rem>::rem` is unvalidated
+...
+LL |     x % x;
+   |     ^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:103:5
+   |
+LL |         | Shl => type Output; fn shl(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Shl>::shl` is unvalidated
+...
+LL |     x << x;
+   |     ^^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:105:5
+   |
+LL |         | Shr => type Output; fn shr(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Shr>::shr` is unvalidated
+...
+LL |     x >> x;
+   |     ^^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:107:5
+   |
+LL |         | Neg => type Output; fn neg(self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Neg>::neg` is unvalidated
+...
+LL |     -x;
+   |     ^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:109:5
+   |
+LL |         | Not => type Output; fn not(self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Not>::not` is unvalidated
+...
+LL |     !x;
+   |     ^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:111:5
+   |
+LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
+   |                           -- `<Unvalidated as PartialEq>::eq` is unvalidated
+...
+LL |     x == x;
+   |     ^^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:113:5
+   |
+LL |         | Deref => type Target; fn deref(&self) -> &Self;
+   |                                    ----- `<Unvalidated as core::ops::Deref>::deref` is unvalidated
+...
+LL |     *x;
+   |     ^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:115:5
+   |
+LL |         | DerefMut => fn deref_mut(&mut self) -> &mut Self;
+   |                          --------- `<Unvalidated as core::ops::DerefMut>::deref_mut` is unvalidated
+...
+LL |     *x = Unvalidated;
+   |     ^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:118:5
+   |
+LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
+   |                                                        -- `<Unvalidated as PartialEq>::ne` is unvalidated
+...
+LL |     x != x;
+   |     ^^^^^^
+
+error: validated function uses an unvalidated method
+  --> $DIR/lint-uncertified-trait-ops.rs:138:5
+   |
+LL |     fn branch(self) -> ControlFlow<(), Self::Output> { ControlFlow::Continue(()) }
+   |        ------ `<Unvalidated as core::ops::Try>::branch` is unvalidated
+...
+LL |     x?;
+   |     ^^
+   |
+note: `ops2` is validated
+  --> $DIR/lint-uncertified-trait-ops.rs:136:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn ops2() -> Unvalidated {
+   |    ^^^^
+
+error: validated function uses an unvalidated associated function
+  --> $DIR/lint-uncertified-trait-ops.rs:138:6
+   |
+LL |     fn from_residual(_: ()) -> Self { Unvalidated }
+   |        ------------- `<Unvalidated as core::ops::FromResidual<()>>::from_residual` is unvalidated
+...
+LL |     x?;
+   |      ^
+
+error: aborting due to 19 previous errors
+

@@ -108,7 +108,7 @@ Safety Case
 The Safety case according to ISO 26262 consists of three steps:
 
 1. CI passes
-    CI runs all tests, builds all release artifacts and builds all the documentation for qualification and certification. It stores all evidence that prove safety, most notably the test results of all test suites, on AWS S3, which is available for the latest development version at ``public-docs.ferrocene.dev``. This evidence is being reviewed in order to make a release decision.
+    CI runs all tests listed in :doc:`qualification-report:rustc/index`, builds all release artifacts, and builds all the documentation for qualification and certification. It stores all evidence that prove safety, most notably the test results of all test suites, on AWS S3, which is available for the latest development version at ``public-docs.ferrocene.dev``. This evidence is being reviewed in order to make a release decision.
 2. Sufficient code coverage
     CI does not ensure sufficient code coverage but instead continuously measures it. This is to allow more flexibility during development, and focus on code coverage in a coordinated effort. Sufficient code coverage is ensured by the Release Manager before each release.
 3. Semantic diff

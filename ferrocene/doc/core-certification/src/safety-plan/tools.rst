@@ -317,7 +317,7 @@ Version
    * - Tool
      - Version
    * - ``circleci``
-     - |ferrocene_version|
+     - |circleci_version|
 
 Usage
 ~~~~~

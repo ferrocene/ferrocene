@@ -13,7 +13,7 @@ ISO 26262 6-7
 
 N/A, therefore no architecture is needed
 
-The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. The library has extensive safety comments documenting/describing the safety invariants of each module. All modules have a doc-comment describing the design and contents of the module.
 
 7.4.1.a
 ~~~~~~~

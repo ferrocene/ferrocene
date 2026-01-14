@@ -1,0 +1,39 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+==============
+ISO 26262 6-11
+==============
+
+6-11 Testing of the Embedded Software
+=====================================
+
+11.4.1
+-------
+
+Not applicable, SW SEooC, embedded software is integrator responsibility.
+
+11.4.2
+------
+
+Not applicable, SW SEooC, embedded software is integrator responsibility.
+
+11.4.3
+------
+
+Not applicable, SW SEooC, embedded software is integrator responsibility.
+
+11.4.4
+------
+
+Not applicable, SW SEooC, embedded software is integrator responsibility.
+
+11.4.4.a
+~~~~~~~~
+
+Not applicable, SW SEooC, embedded software is integrator responsibility.
+
+11.4.4.b
+~~~~~~~~
+
+Not applicable, SW SEooC, embedded software is integrator responsibility.

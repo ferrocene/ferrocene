@@ -12,8 +12,8 @@ x86_64 using glibc 2.31 or higher.
 Prerequisites
 -------------
 
-This target uses the LLVM ``ld.lld`` linker but to locate the system C libraries
-required to link a functional Linux binary, this target drives the ``ld.lld``
+This target uses the LLVM ``ld.lld`` linker. To locate the system C libraries
+required to create a functional Linux binary, this target drives the ``ld.lld``
 linker using your system's C compiler as a linker driver.
 
 You must have a C compiler which:

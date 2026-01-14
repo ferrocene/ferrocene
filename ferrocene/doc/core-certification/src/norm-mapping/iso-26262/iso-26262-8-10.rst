@@ -1,0 +1,105 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+==============
+ISO 26262 8-10
+==============
+
+8-10 Documentation Management
+=============================
+
+10.4
++++++
+
+10.4.1
+------
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+10.4.1.a
+~~~~~~~~
+
+See 10.4.
+
+10.4.1.b
+~~~~~~~~
+
+See 10.4.
+
+10.4.1.c
+~~~~~~~~
+
+See 10.4.
+
+10.4.2
+------
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+10.4.3
+------
+
+:ref:`qualification-plan:documentation-validation`
+
+10.4.3.a
+~~~~~~~~
+
+See 10.4.3.
+
+10.4.3.b
+~~~~~~~~
+
+See 10.4.3.
+
+10.4.3.c
+~~~~~~~~
+
+See 10.4.3.
+
+10.4.3.d
+~~~~~~~~
+
+See 10.4.3.
+
+10.4.3.e
+~~~~~~~~
+
+See 10.4.3.
+
+10.4.4
+------
+
+IEC 61508:1-5.2.5
+
+10.4.5
+------
+
+10.4.5.a
+~~~~~~~~
+
+IEC 61508:1-5.2.7
+
+10.4.5.b
+~~~~~~~~
+
+IEC 61508:1-5.2.7
+
+10.4.5.c
+~~~~~~~~
+
+:ref:`qualification-plan:change-tracking:Change Tracking`.
+
+10.4.5.d
+~~~~~~~~
+
+:ref:`qualification-plan:change-tracking:Change Tracking`.
+
+10.4.5.e
+~~~~~~~~
+
+:ref:`qualification-plan:change-tracking:Change Tracking`.
+
+10.4.6
+------
+
+:ref:`qualification-plan:change-tracking:Change Tracking`.

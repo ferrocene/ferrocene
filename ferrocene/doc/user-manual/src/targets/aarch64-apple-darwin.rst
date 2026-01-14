@@ -7,8 +7,8 @@
 ================================
 
 .. note::
-   
-   Quality managed targets are targets which are suitable for use in production 
+
+   Quality managed targets are targets which are suitable for use in production
    outside of safety critical contexts. Support is available. The Ferrocene test
    suite successfully executed on the target. Known problems are tracked and
    available.
@@ -19,8 +19,8 @@ Apple Silicon.
 Prerequisites
 -------------
 
-This target uses the LLVM ``ld.lld`` linker. In order to locate the system C
-libraries required to link a functional macOS binary, this target drives the
+This target uses the LLVM ``ld.lld`` linker. To locate the system C
+libraries required to create a functional macOS binary, this target drives the
 ``ld.lld`` linker using your system's C compiler as a linker driver.
 
 Install one of:

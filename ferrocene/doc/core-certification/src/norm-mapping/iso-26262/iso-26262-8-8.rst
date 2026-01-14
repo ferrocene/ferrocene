@@ -1,0 +1,204 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 8-8
+=============
+
+8-8 Change Management
+=====================
+
+8.4.1
+------
+
+8.4.1.1
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+
+8.4.1.2
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+
+8.4.1.3
+~~~~~~~
+
+:doc:`qualification-plan:development`
+
+8.4.1.4
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+
+8.4.1.4.a
++++++++++
+
+See 8.4.1.4.
+
+8.4.1.4.b
++++++++++
+
+See 8.4.1.4.
+
+8.4.1.4.c
++++++++++
+
+See 8.4.1.4.
+
+8.4.1.4.d
++++++++++
+
+See 8.4.1.4.
+
+8.4.1.4.e
++++++++++
+
+See 8.4.1.4.
+
+8.4.2
+-----
+
+8.4.2.1
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+
+8.4.2.2
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+
+8.4.2.2.a
++++++++++
+
+See 8.4.2.2.
+
+8.4.2.2.b
++++++++++
+
+See 8.4.2.2.
+
+8.4.2.2.c
++++++++++
+
+See 8.4.2.2.
+
+8.4.2.2.d
++++++++++
+
+See 8.4.2.2.
+
+8.4.3
+-----
+
+8.4.3.1
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+
+8.4.3.1.a
++++++++++
+
+See 8.4.3.1.
+
+8.4.3.1.b
++++++++++
+
+See 8.4.3.1.
+
+8.4.3.1.c
++++++++++
+
+See 8.4.3.1.
+
+8.4.3.1.d
++++++++++
+
+See 8.4.3.1.
+
+8.4.3.1.e
++++++++++
+
+See 8.4.3.1.
+
+8.4.3.2
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+8.4.4
+-----
+
+8.4.4.1
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+8.4.4.2
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+8.4.5
+-----
+
+8.4.5.1
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+8.4.5.2
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+8.4.5.3
+~~~~~~~
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+8.4.5.3.a
++++++++++
+
+See 8.4.5.3.
+
+8.4.5.3.b
++++++++++
+
+See 8.4.5.3.
+
+8.4.5.3.c
++++++++++
+
+See 8.4.5.3.

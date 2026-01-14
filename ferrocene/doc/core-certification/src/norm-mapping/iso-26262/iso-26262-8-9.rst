@@ -1,0 +1,238 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 8-9
+=============
+
+8-9 Verification
+================
+
+9.4.1
+------
+
+9.4.1.1
+~~~~~~~
+
+:doc:`core-certification:safety-plan/testing-plan`.
+
+9.4.1.1.a
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.b
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.c
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.d
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.e
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.f
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.g
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.h
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.1.i
++++++++++
+
+See 9.4.1.1.
+
+9.4.1.2
+~~~~~~~
+
+:doc:`core-certification:safety-plan/testing-plan`.
+
+9.4.1.2.a
++++++++++
+
+See 9.4.1.2.
+
+9.4.1.2.b
++++++++++
+
+See 9.4.1.2.
+
+9.4.1.2.c
++++++++++
+
+See 9.4.1.2.
+
+9.4.1.2.d
++++++++++
+
+See 9.4.1.2.
+
+9.4.2
+-----
+
+9.4.2.1
+~~~~~~~
+
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
+
+9.4.2.1.a
++++++++++
+
+See 9.4.2.1.
+
+9.4.2.1.b
++++++++++
+
+Not applicable
+
+9.4.2.1.c
++++++++++
+
+See 9.4.2.1.
+
+9.4.2.2
+~~~~~~~
+
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
+
+9.4.2.2.a
++++++++++
+
+See 9.4.2.2.
+
+9.4.2.2.b
++++++++++
+
+See 9.4.2.2.
+
+9.4.2.2.c
++++++++++
+
+See 9.4.2.2.
+
+9.4.2.2.d
++++++++++
+
+See 9.4.2.2, target test environment.
+
+9.4.2.2.e
++++++++++
+
+See 9.4.2.2.
+
+9.4.2.2.f
++++++++++
+
+See 9.4.2.2.
+
+9.4.2.2.N2
+++++++++++
+
+9.4.2.2.g
++++++++++
+
+See 9.4.2.2.
+
+9.4.2.3
+~~~~~~~
+
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
+
+9.4.2.3.a
++++++++++
+
+See 9.4.2.3.
+
+9.4.2.3.b
++++++++++
+
+See 9.4.2.3.
+
+9.4.2.3.c
++++++++++
+
+See 9.4.2.3.
+
+9.4.2.4
+~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:development`
+- :doc:`internal-procedures:upstream-pulls`
+
+9.4.3
+-----
+
+9.4.3.1
+~~~~~~~
+
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
+
+9.4.3.2
+~~~~~~~
+
+See above.
+
+9.4.3.3
+~~~~~~~
+
+See above.
+
+9.4.3.3.a
++++++++++
+
+See above.
+
+9.4.3.3.b
++++++++++
+
+See above.
+
+9.4.3.3.c
++++++++++
+
+See above.
+
+9.4.3.3.d
++++++++++
+
+See above.
+
+9.4.3.3.e
++++++++++
+
+See above.
+
+9.4.3.3.f
++++++++++
+
+See above.
+
+9.4.3.4
+~~~~~~~
+
+:ref:`safety-plan/project-setup:Configuration` describes how the build and test environment is documented.

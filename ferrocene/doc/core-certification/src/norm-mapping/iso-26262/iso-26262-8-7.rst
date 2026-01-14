@@ -1,0 +1,59 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 8-7
+=============
+
+8-7 Configuration Management
+============================
+
+7.4.1
+-----
+
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+
+7.4.2
+-----
+
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+
+7.4.2.a
+~~~~~~~
+
+See 7.4.2.
+
+7.4.2.b
+~~~~~~~
+
+See 7.4.2.
+
+7.4.2.N2
+~~~~~~~~
+
+7.4.3
+-----
+
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+
+7.4.4
+-----
+
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+7.4.5
+-----
+
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:development`
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+7.5.1
+------
+
+See 7.4.1 to 7.4.5.

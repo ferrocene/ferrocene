@@ -1,0 +1,414 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 2-6
+=============
+
+2-6 Project Dependent Safety Management
+=======================================
+
+6.4.2
+-----
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.2.3
+~~~~~~~
+
+The project manager and safety manager defined in :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>` make sure that sufficient resources are available.
+
+6.4.2.4
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.3
+-----
+
+Not applicable, as not at item level or modification, new development
+
+6.4.4
+-----
+
+Not applicable, as not a reuse of an existing element, handled as new
+development
+
+6.4.5
+-----
+
+6.4.5.1
+~~~~~~~
+
+See below, tailored as per SW SEooC guidance
+
+6.4.5.1.a
++++++++++
+
+See below, tailored as per SW SEooC guidance
+
+6.4.5.1.b
++++++++++
+
+See below, tailored as per SW SEooC guidance
+
+6.4.5.2
+~~~~~~~
+
+Not applicable, no modification/impact analysis
+
+6.4.5.3
+~~~~~~~
+
+Not applicable, no proven in use applied
+
+6.4.5.4
+~~~~~~~
+
+Not applicable, no HW in scope
+
+6.4.5.5
+~~~~~~~
+
+Not applicable, no SW qualification, handled as new development
+
+6.4.5.6
+~~~~~~~
+
+Not applicable, no tailoring based on specific tool usage
+
+6.4.5.7
+~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/scope`.
+
+6.3.5.7.a
++++++++++
+
+Covered by "Assumed Requirements" in :doc:`core-certification:safety-plan/requirements`.
+
+6.4.5.7.b
++++++++++
+
+Covered by "Assumed Requirements" in :doc:`core-certification:safety-plan/requirements`.
+
+6.4.5.8
+~~~~~~~
+
+Not applicable, T&B not in scope
+
+6.4.5.9
+~~~~~~~
+
+Not applicable, T&B not in scope
+
+6.4.6
+-----
+
+6.4.6.1
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.6.2
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.6.3
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.6.4
+~~~~~~~
+
+6.4.6.4.a
++++++++++
+
+Included in the project plan.
+
+6.4.6.4.b
++++++++++
+
+:ref:`Safety Plan <safety-plan/purpose:Purpose of this document>`
+
+6.4.6.5
+~~~~~~~
+
+6.4.6.5.a
++++++++++
+
+See above.
+
+6.4.6.5.b
++++++++++
+
+See above.
+
+6.4.6.5.c
++++++++++
+
+See above.
+
+6.4.6.5.d
++++++++++
+
+See above, no DIA.
+
+6.4.6.5.e
++++++++++
+
+Testing Plan
+
+6.4.6.5.f
++++++++++
+
+Covered by Safety Assessment in :ref:`Safety Plan <safety-plan/project-setup:safety assessment>`.
+
+6.4.6.5.g
++++++++++
+
+Covered by :doc:`HazOp analysis <evaluation-report:rustc/tool-analysis>`.
+
+6.4.6.5.h
++++++++++
+
+Not applicable, no proven in use applied.
+
+6.4.6.5.i
++++++++++
+
+:ref:`safety-plan/tools:Tool safety assessments`.
+
+6.4.6.6
+~~~~~~~
+
+6.4.6.6.a
++++++++++
+
+:ref:`safety-plan/purpose:Purpose of this document`
+
+6.4.6.6.b
++++++++++
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.6.6.c
++++++++++
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+6.4.6.6.d
++++++++++
+
+Resource planning is covered in the project manangement tool listed in :doc:`qualification-plan:development`.
+
+6.4.6.6.e
++++++++++
+
+Time planning is covered in the project manangement tool listed in :doc:`qualification-plan:development`.
+
+6.4.6.6.f
++++++++++
+
+:ref:`safety-plan/deliverables:Deliverables and documents`.
+
+6.4.6.7
+~~~~~~~
+
+Not applicable, no modification/impact analysis
+
+6.4.6.7.a
++++++++++
+
+Not applicable, no modification/impact analysis
+
+6.4.6.7.b
++++++++++
+
+Not applicable, no modification/impact analysis
+
+6.4.6.7.c
++++++++++
+
+Not applicable, no modification/impact analysis
+
+6.4.6.8
+~~~~~~~
+
+Safety plan updates are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+
+6.4.6.9
+~~~~~~~
+
+:ref:`safety-plan/deliverables:Deliverables and documents`.
+
+6.4.6.10
+~~~~~~~~
+
+Not applicable, no distributed development (upstream/open source not
+handled as distributed development).
+
+6.4.7
+-----
+
+6.4.7.1
+~~~~~~~
+
+Safety Plan Tracking of open activities in Clickup
+
+6.4.7.2
+~~~~~~~
+
+- :ref:`safety-plan/project-setup:Configuration`
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:infrastructure`
+
+6.4.8
+-----
+
+6.4.8.1
+~~~~~~~
+
+Safety activites are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Each release has a checklist of safety activities.
+
+Each release is formally approved as described in :doc:`qualification-plan:infrastructure`.
+
+6.4.8.2
+~~~~~~~
+
+Safety activites are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Each release has a checklist of safety activities.
+
+Each release is formally approved as described in :doc:`qualification-plan:release`.
+
+6.4.9
+-----
+
+6.4.9.1
+~~~~~~~
+
+All modifications to the qualification or safety documents undergo review by an independent reviewer (I1) as described in
+:doc:`qualification-plan:development` and subsequently each final release undergoes formal review and approval by the release manager (I3) as described in :doc:`qualification-plan:release`.
+
+6.4.9.1.a
++++++++++
+
+See 6.4.9.1.
+
+6.4.9.1.b
++++++++++
+
+See 6.4.9.1.
+
+6.4.9.1.c
++++++++++
+
+See 6.4.9.1.
+
+6.4.9.2
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+The safety managers has full access to the safety documentation, development process and team, when reviewing and confirming the safety plan as described in :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
+
+
+6.4.9.3
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+The safety managers has full access to the safety documentation, development process and team, when reviewing and confirming the safety plan as described in :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
+
+6.4.10
+------
+
+6.4.10.1
+~~~~~~~~
+
+See 6.4.9.1.
+
+6.4.10.2
+~~~~~~~~
+
+See 6.4.9.1.
+
+6.4.10.3
+~~~~~~~~
+
+See 6.4.9.1.
+
+6.4.10.4
+~~~~~~~~
+
+See 6.4.9.1.
+
+6.4.10.5
+~~~~~~~~
+
+See 6.4.9.1.
+
+6.4.11
+------
+
+TÜV SÜD responsibility
+
+6.4.12
+------
+
+TÜV SÜD responsibility
+
+6.4.13
+------
+
+6.4.13.1
+~~~~~~~~
+
+:ref:`safety-plan/project-setup:Safety Case`.
+
+6.4.13.2
+~~~~~~~~
+
+:ref:`safety-plan/project-setup:Safety Case`.
+
+6.4.13.3
+~~~~~~~~
+
+:ref:`safety-plan/project-setup:Safety Case`.
+
+6.4.13.4
+~~~~~~~~
+
+:doc:`qualification-report:rustc/index`
+
+6.4.13.4.a
+++++++++++
+
+See "Release Validation" in :doc:`qualification-plan:validation`.
+
+6.4.13.4.b
+++++++++++
+
+- :ref:`safety-plan/scope:Certification scope`
+- :doc:`qualification-report:rustc/index`
+
+6.4.13.4.c
+++++++++++
+
+- :ref:`safety-plan/scope:Certification scope`
+- :doc:`qualification-report:rustc/index`
+
+6.4.13.4.d
+++++++++++
+
+:doc:`qualification-report:rustc/index`
+
+6.4.13.5
+~~~~~~~~
+
+- :ref:`safety-plan/scope:Certification scope`
+- :doc:`qualification-report:rustc/index`

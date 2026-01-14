@@ -1,0 +1,203 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 2-5
+=============
+
+2-5 Overall Safety Management
+=============================
+
+5.4.1
+------
+
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
+- IEC 61508-1:5.2.1
+
+5.4.2
+-----
+
+5.4.2.1
+~~~~~~~
+
+5.4.2.2
+~~~~~~~
+
+- :ref:`safety-plan/project-setup:lifecycle phases overview`.
+- :ref:`safety-plan/project-setup:roles and responsibilities`
+- IEC 61508-1:5.2.2
+
+5.4.2.3
+~~~~~~~
+
+- Customer Interactions.
+- IEC 61508-1:6.2.4
+
+5.4.2.3.E2
+++++++++++
+
+See 5.4.2.3.
+
+5.4.2.3.E3
+++++++++++
+
+See 5.4.2.3.
+
+5.4.2.3.N1
+++++++++++
+
+See 5.4.2.3.
+
+5.4.2.4
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+5.4.2.5
+~~~~~~~
+
+This is ensured by the QMS implemented according to ISO 9001.
+
+5.4.2.6
+~~~~~~~
+
+This is ensured by the QMS implemented according to ISO 9001.
+
+5.4.2.6.a
++++++++++
+
+See 5.4.2.6.
+
+5.4.2.6.b
++++++++++
+
+See 5.4.2.6.
+
+5.4.2.7
+~~~~~~~
+
+- :ref:`safety-plan/project-setup:roles and responsibilities`
+- IEC 61508-1:6.2.1
+
+5.4.3
+-----
+
+5.4.3.1
+~~~~~~~
+
+:doc:`internal-procedures:index`
+
+5.4.3.2
+~~~~~~~
+
+:doc:`internal-procedures:index`
+
+5.4.3.2.N2
+++++++++++
+
+See 5.4.3.2.
+
+5.4.3.2.N3
+++++++++++
+
+See 5.4.3.2.
+
+5.4.3.2.N4
+++++++++++
+
+See 5.4.3.2.
+
+5.4.3.3
+~~~~~~~
+
+:doc:`internal-procedures:index`
+
+5.4.3.3.a
++++++++++
+
+See 5.4.3.3.
+
+5.4.3.3.b
++++++++++
+
+See 5.4.3.3.
+
+5.4.3.4.
+++++++++
+
+:doc:`internal-procedures:index`
+
+5.4.3.5
+~~~~~~~
+
+:doc:`internal-procedures:index`
+
+5.4.4
+-----
+
+5.4.4.1
+~~~~~~~
+
+:ref:`safety-plan/project-setup:roles and responsibilities`.
+
+5.4.4.1.N2
+++++++++++
+
+:ref:`safety-plan/project-setup:roles and responsibilities`.
+
+5.4.4.1.N3
+++++++++++
+
+:ref:`safety-plan/project-setup:roles and responsibilities`.
+
+5.4.4.1.E1
+++++++++++
+
+:ref:`safety-plan/project-setup:roles and responsibilities`.
+
+5.4.5
+-----
+
+5.4.5.1
+~~~~~~~
+
+Detailed in Ferrous Systems’s ISO 9001 managed internal handbook and
+re-checked for each renewal of certification.
+
+5.4.6
+-----
+
+5.4.6.1
+~~~~~~~
+
+:ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+5.4.6.1.a
++++++++++
+
+See 5.4.6.1.
+
+5.4.6.1.b
++++++++++
+
+See 5.4.6.1.
+
+5.4.6.1.c
++++++++++
+
+See 5.4.6.1.
+
+5.4.6.1.d
++++++++++
+
+See 5.4.6.1.
+
+5.4.6.1.e
++++++++++
+
+See 5.4.6.1.
+
+5.4.6.1.f
++++++++++
+
+See 5.4.6.1.

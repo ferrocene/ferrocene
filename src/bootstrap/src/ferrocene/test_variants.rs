@@ -51,7 +51,7 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
         VariantCondition::Edition("2021"),
     ]),
     ("2021-certified-panic", &[
-        VariantCondition::Edition("2015"),
+        VariantCondition::Edition("2021"),
         VariantCondition::PanicRuntime,
     ]),
     ("2021-cortex-a53", &[
@@ -59,7 +59,7 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
         VariantCondition::QemuCpu("cortex-a53"),
     ]),
     ("2021-cortex-a53-certified-panic", &[
-        VariantCondition::Edition("2015"),
+        VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-a53"),
         VariantCondition::PanicRuntime,
     ]),
@@ -68,7 +68,7 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
         VariantCondition::QemuCpu("cortex-m4"),
     ]),
     ("2021-cortex-m4-certified-panic", &[
-        VariantCondition::Edition("2015"),
+        VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-m4"),
         VariantCondition::PanicRuntime,
     ]),

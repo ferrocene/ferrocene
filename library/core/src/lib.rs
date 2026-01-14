@@ -114,11 +114,24 @@
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
 #![feature(internal_impls_macro)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ip))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(is_ascii_octdigit))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(lazy_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
+||||||| f41f40408d7
+#![feature(ip)]
+#![feature(is_ascii_octdigit)]
+#![feature(lazy_get)]
+#![feature(link_cfg)]
+#![feature(offset_of_enum)]
+=======
+#![feature(ip)]
+#![feature(is_ascii_octdigit)]
+#![feature(link_cfg)]
+#![feature(offset_of_enum)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(panic_internals)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_metadata))]

@@ -26,7 +26,15 @@ mod maybe_uninit;
 #[stable(feature = "maybe_uninit", since = "1.36.0")]
 pub use maybe_uninit::MaybeUninit;
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| f41f40408d7
+=======
+mod maybe_dangling;
+#[unstable(feature = "maybe_dangling", issue = "118166")]
+pub use maybe_dangling::MaybeDangling;
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod transmutability;
 #[unstable(feature = "transmutability", issue = "99571")]
 #[cfg(not(feature = "ferrocene_subset"))]

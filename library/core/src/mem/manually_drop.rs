@@ -1,4 +1,7 @@
-use crate::marker::Destruct;
+use crate::cmp::Ordering;
+use crate::hash::{Hash, Hasher};
+use crate::marker::{Destruct, StructuralPartialEq};
+use crate::mem::MaybeDangling;
 use crate::ops::{Deref, DerefMut, DerefPure};
 use crate::ptr;
 
@@ -152,13 +155,19 @@ use crate::ptr;
 /// [`MaybeUninit`]: crate::mem::MaybeUninit
 #[stable(feature = "manually_drop", since = "1.20.0")]
 #[lang = "manually_drop"]
+<<<<<<< HEAD
 #[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone, PartialEq))]
+||||||| f41f40408d7
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+=======
+#[derive(Copy, Clone, Debug, Default)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[repr(transparent)]
 #[rustc_pub_transparent]
 pub struct ManuallyDrop<T: ?Sized> {
-    value: T,
+    value: MaybeDangling<T>,
 }
 
 impl<T> ManuallyDrop<T> {
@@ -181,7 +190,7 @@ impl<T> ManuallyDrop<T> {
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
     #[inline(always)]
     pub const fn new(value: T) -> ManuallyDrop<T> {
-        ManuallyDrop { value }
+        ManuallyDrop { value: MaybeDangling::new(value) }
     }
 
     /// Extracts the value from the `ManuallyDrop` container.
@@ -199,7 +208,7 @@ impl<T> ManuallyDrop<T> {
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
     #[inline(always)]
     pub const fn into_inner(slot: ManuallyDrop<T>) -> T {
-        slot.value
+        slot.value.into_inner()
     }
 
     /// Takes the value from the `ManuallyDrop<T>` container out.
@@ -224,7 +233,7 @@ impl<T> ManuallyDrop<T> {
     pub const unsafe fn take(slot: &mut ManuallyDrop<T>) -> T {
         // SAFETY: we are reading from a reference, which is guaranteed
         // to be valid for reads.
-        unsafe { ptr::read(&slot.value) }
+        unsafe { ptr::read(slot.value.as_ref()) }
     }
 }
 
@@ -261,7 +270,7 @@ impl<T: ?Sized> ManuallyDrop<T> {
         // SAFETY: we are dropping the value pointed to by a mutable reference
         // which is guaranteed to be valid for writes.
         // It is up to the caller to make sure that `slot` isn't dropped again.
-        unsafe { ptr::drop_in_place(&mut slot.value) }
+        unsafe { ptr::drop_in_place(slot.value.as_mut()) }
     }
 }
 
@@ -271,7 +280,7 @@ impl<T: ?Sized> const Deref for ManuallyDrop<T> {
     type Target = T;
     #[inline(always)]
     fn deref(&self) -> &T {
-        &self.value
+        self.value.as_ref()
     }
 }
 
@@ -280,9 +289,43 @@ impl<T: ?Sized> const Deref for ManuallyDrop<T> {
 impl<T: ?Sized> const DerefMut for ManuallyDrop<T> {
     #[inline(always)]
     fn deref_mut(&mut self) -> &mut T {
-        &mut self.value
+        self.value.as_mut()
     }
 }
 
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
 unsafe impl<T: ?Sized> DerefPure for ManuallyDrop<T> {}
+
+#[stable(feature = "manually_drop", since = "1.20.0")]
+impl<T: ?Sized + Eq> Eq for ManuallyDrop<T> {}
+
+#[stable(feature = "manually_drop", since = "1.20.0")]
+impl<T: ?Sized + PartialEq> PartialEq for ManuallyDrop<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.value.as_ref().eq(other.value.as_ref())
+    }
+}
+
+#[stable(feature = "manually_drop", since = "1.20.0")]
+impl<T: ?Sized> StructuralPartialEq for ManuallyDrop<T> {}
+
+#[stable(feature = "manually_drop", since = "1.20.0")]
+impl<T: ?Sized + Ord> Ord for ManuallyDrop<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.value.as_ref().cmp(other.value.as_ref())
+    }
+}
+
+#[stable(feature = "manually_drop", since = "1.20.0")]
+impl<T: ?Sized + PartialOrd> PartialOrd for ManuallyDrop<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.as_ref().partial_cmp(other.value.as_ref())
+    }
+}
+
+#[stable(feature = "manually_drop", since = "1.20.0")]
+impl<T: ?Sized + Hash> Hash for ManuallyDrop<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.value.as_ref().hash(state);
+    }
+}

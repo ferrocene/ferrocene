@@ -863,7 +863,7 @@ const IBMZ_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("miscellaneous-extensions-3", Stable, &[]),
     ("miscellaneous-extensions-4", Stable, &[]),
     ("nnp-assist", Stable, &["vector"]),
-    ("soft-float", Forbidden { reason: "currently unsupported ABI-configuration feature" }, &[]),
+    ("soft-float", Forbidden { reason: "unsupported ABI-configuration feature" }, &[]),
     ("transactional-execution", Unstable(sym::s390x_target_feature), &[]),
     ("vector", Stable, &[]),
     ("vector-enhancements-1", Stable, &["vector"]),
@@ -1105,6 +1105,7 @@ impl Target {
                         // LLVM handles the rest.
                         FeatureConstraints { required: &["soft-float"], incompatible: &[] }
                     }
+                    Some(r) => panic!("invalid Rust ABI for x86: {r:?}"),
                 }
             }
             Arch::X86_64 => {
@@ -1218,11 +1219,27 @@ impl Target {
                 }
             }
             Arch::S390x => {
-                // We don't currently support a softfloat target on this architecture.
-                // As usual, we have to reject swapping the `soft-float` target feature.
-                // The "vector" target feature does not affect the ABI for floats
-                // because the vector and float registers overlap.
-                FeatureConstraints { required: &[], incompatible: &["soft-float"] }
+                // Same as x86, We use our own ABI indicator here;
+                // LLVM does not have anything native and will switch ABI based
+                // on the soft-float target feature.
+                // Every case should require or forbid `soft-float`!
+                // The "vector" target feature may only be used without soft-float
+                // because the float and vector registers overlap and the
+                // standard s390x C ABI may pass vectors via these registers.
+                match self.rustc_abi {
+                    None => {
+                        // Default hardfloat ABI.
+                        FeatureConstraints { required: &[], incompatible: &["soft-float"] }
+                    }
+                    Some(RustcAbi::S390xSoftFloat) => {
+                        // Softfloat ABI, requires corresponding target feature.
+                        // llvm will switch to soft-float ABI just based on this feature.
+                        FeatureConstraints { required: &["soft-float"], incompatible: &["vector"] }
+                    }
+                    Some(r) => {
+                        panic!("invalid Rust ABI for s390x: {r:?}");
+                    }
+                }
             }
             _ => NOTHING,
         }

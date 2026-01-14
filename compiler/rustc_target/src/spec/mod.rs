@@ -1007,6 +1007,8 @@ crate::target_spec_enum! {
         X86Sse2 = "x86-sse2",
         /// On x86-32/64 only: do not use any FPU or SIMD registers for the ABI.
         X86Softfloat = "x86-softfloat",
+        // On S390x only: do not use any FPU or Vector registers for the ABI.
+        S390xSoftFloat = "s390x-softfloat",
     }
 
     parse_error_type = "rustc abi";
@@ -1460,6 +1462,7 @@ supported_targets! {
     ("powerpc64le-unknown-linux-gnu", powerpc64le_unknown_linux_gnu),
     ("powerpc64le-unknown-linux-musl", powerpc64le_unknown_linux_musl),
     ("s390x-unknown-linux-gnu", s390x_unknown_linux_gnu),
+    ("s390x-unknown-none-softfloat", s390x_unknown_none_softfloat),
     ("s390x-unknown-linux-musl", s390x_unknown_linux_musl),
     ("sparc-unknown-linux-gnu", sparc_unknown_linux_gnu),
     ("sparc64-unknown-linux-gnu", sparc64_unknown_linux_gnu),
@@ -3208,6 +3211,11 @@ impl Target {
                     self.arch,
                     Arch::X86 | Arch::X86_64,
                     "`x86-softfloat` ABI is only valid for x86 targets"
+                ),
+                RustcAbi::S390xSoftFloat => check_matches!(
+                    self.arch,
+                    Arch::S390x,
+                    "`s390x-softfloat` ABI is only valid for s390x targets"
                 ),
             }
         }

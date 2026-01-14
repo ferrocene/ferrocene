@@ -1,4 +1,6 @@
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::{Destruct, StructuralPartialEq};
 use crate::mem::MaybeDangling;
@@ -302,6 +304,7 @@ impl<T: ?Sized + PartialEq> PartialEq for ManuallyDrop<T> {
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized> StructuralPartialEq for ManuallyDrop<T> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized + Ord> Ord for ManuallyDrop<T> {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -309,6 +312,7 @@ impl<T: ?Sized + Ord> Ord for ManuallyDrop<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized + PartialOrd> PartialOrd for ManuallyDrop<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -316,6 +320,7 @@ impl<T: ?Sized + PartialOrd> PartialOrd for ManuallyDrop<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized + Hash> Hash for ManuallyDrop<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {

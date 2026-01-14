@@ -3761,6 +3761,7 @@
 <usize as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut::precondition_check
 <usize as core::slice::index::SliceIndex<[T]>>::index
 <usize as core::slice::index::SliceIndex<[T]>>::index_mut
+core::alloc::layout::Layout
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
@@ -3771,6 +3772,7 @@ core::alloc::layout::Layout::is_size_alignment_valid
 core::alloc::layout::Layout::max_size_for_alignment
 core::alloc::layout::Layout::new
 core::alloc::layout::Layout::size
+core::any::TypeId
 core::any::TypeId::as_u128
 core::any::TypeId::of
 core::any::type_name
@@ -3790,9 +3792,12 @@ core::array::<impl core::iter::traits::collect::IntoIterator for &'a [T; N]>::in
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a mut [T; N]>::into_iter
 core::array::<impl core::ops::index::Index<I> for [T; N]>::index
 core::array::<impl core::ops::index::IndexMut<I> for [T; N]>::index_mut
+core::array::Guard
 core::array::Guard::<'_, T>::push_unchecked
+core::array::TryFromSliceError
 core::array::ascii::<impl [u8; N]>::as_ascii
 core::array::ascii::<impl [u8; N]>::as_ascii_unchecked
+core::array::drain::Drain
 core::array::drain::Drain::<'l, 'f, T, N, F>::new
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::eq
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::ne
@@ -3813,8 +3818,10 @@ core::array::from_mut
 core::array::from_ref
 core::array::from_trusted_iterator
 core::array::iter::<impl core::iter::traits::collect::IntoIterator for [T; N]>::into_iter
+core::array::iter::IntoIter
 core::array::iter::IntoIter::<T, N>::unsize
 core::array::iter::IntoIter::<T, N>::unsize_mut
+core::array::iter::iter_inner::PolymorphicIter
 core::array::iter::iter_inner::PolymorphicIter::<DATA>::len
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>; N]>::empty
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>; N]>::new_unchecked
@@ -3832,8 +3839,10 @@ core::array::try_from_fn
 core::array::try_from_fn_erased
 core::array::try_from_trusted_iterator
 core::array::try_from_trusted_iterator::next
+core::ascii::EscapeDefault
 core::ascii::EscapeDefault::empty
 core::ascii::EscapeDefault::new
+core::ascii::ascii_char::AsciiChar
 core::ascii::ascii_char::AsciiChar::as_str
 core::ascii::ascii_char::AsciiChar::from_u8_unchecked
 core::ascii::ascii_char::AsciiChar::to_u8
@@ -3842,13 +3851,21 @@ core::bool::<impl bool>::ok_or
 core::bool::<impl bool>::ok_or_else
 core::bool::<impl bool>::then
 core::bool::<impl bool>::then_some
+core::bstr::ByteStr
 core::bstr::ByteStr::from_bytes
+core::cell::BorrowError
+core::cell::BorrowMutError
+core::cell::BorrowRef
 core::cell::BorrowRef::<'b>::new
+core::cell::BorrowRefMut
 core::cell::BorrowRefMut::<'b>::new
+core::cell::Cell
 core::cell::Cell::<T>::get
 core::cell::Cell::<T>::new
 core::cell::Cell::<T>::replace
 core::cell::Cell::<T>::set
+core::cell::Ref
+core::cell::RefCell
 core::cell::RefCell::<T>::borrow
 core::cell::RefCell::<T>::borrow_mut
 core::cell::RefCell::<T>::new
@@ -3857,6 +3874,9 @@ core::cell::RefCell::<T>::replace_with
 core::cell::RefCell::<T>::take
 core::cell::RefCell::<T>::try_borrow
 core::cell::RefCell::<T>::try_borrow_mut
+core::cell::RefMut
+core::cell::SyncUnsafeCell
+core::cell::UnsafeCell
 core::cell::UnsafeCell::<T>::get
 core::cell::UnsafeCell::<T>::get_mut
 core::cell::UnsafeCell::<T>::into_inner
@@ -3872,13 +3892,17 @@ core::cell::panic_already_mutably_borrowed
 core::cell::panic_already_mutably_borrowed::do_panic
 core::cell::panic_already_mutably_borrowed::do_panic::compiletime
 core::cell::panic_already_mutably_borrowed::do_panic::runtime
+core::char::EscapeDebug
 core::char::EscapeDebug::backslash
 core::char::EscapeDebug::printable
 core::char::EscapeDebug::unicode
 core::char::convert::<impl core::convert::From<u8> for char>::from
+core::char::convert::CharTryFromError
 core::char::convert::char_try_from_u32
 core::char::convert::from_u32_unchecked
 core::char::convert::from_u32_unchecked::precondition_check
+core::char::decode::DecodeUtf16
+core::char::decode::DecodeUtf16Error
 core::char::decode::DecodeUtf16Error::unpaired_surrogate
 core::char::decode::decode_utf16
 core::char::methods::<impl char>::decode_utf16
@@ -3890,12 +3914,15 @@ core::char::methods::<impl char>::is_ascii
 core::char::methods::<impl char>::is_grapheme_extended
 core::char::methods::<impl char>::len_utf8
 core::char::methods::<impl char>::to_digit
+core::char::methods::EscapeDebugExtArgs
 core::char::methods::encode_utf8_raw
 core::char::methods::encode_utf8_raw::do_panic
 core::char::methods::encode_utf8_raw::do_panic::compiletime
 core::char::methods::encode_utf8_raw::do_panic::runtime
 core::char::methods::encode_utf8_raw_unchecked
 core::char::methods::len_utf8
+core::clone::AssertParamIsClone
+core::clone::AssertParamIsCopy
 core::clone::Clone::clone_from
 core::clone::impls::<impl core::clone::Clone for !>::clone
 core::clone::impls::<impl core::clone::Clone for &T>::clone
@@ -3919,10 +3946,12 @@ core::clone::impls::<impl core::clone::Clone for u32>::clone
 core::clone::impls::<impl core::clone::Clone for u64>::clone
 core::clone::impls::<impl core::clone::Clone for u8>::clone
 core::clone::impls::<impl core::clone::Clone for usize>::clone
+core::cmp::AssertParamIsEq
 core::cmp::Eq::assert_receiver_is_total_eq
 core::cmp::Ord::clamp
 core::cmp::Ord::max
 core::cmp::Ord::min
+core::cmp::Ordering
 core::cmp::Ordering::as_raw
 core::cmp::Ordering::is_eq
 core::cmp::Ordering::is_ge
@@ -4184,6 +4213,7 @@ core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::partial_cmp
 core::cmp::max
 core::cmp::max_by
 core::cmp::min
+core::convert::Infallible
 core::convert::identity
 core::convert::num::<impl core::convert::From<bool> for i128>::from
 core::convert::num::<impl core::convert::From<bool> for i16>::from
@@ -4260,6 +4290,8 @@ core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for 
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u32>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u64>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u8>::try_from
+core::escape::AlwaysEscaped
+core::escape::EscapeIterInner
 core::escape::EscapeIterInner::<N, ESCAPING>::advance_by
 core::escape::EscapeIterInner::<N, ESCAPING>::ascii
 core::escape::EscapeIterInner::<N, ESCAPING>::backslash
@@ -4273,6 +4305,7 @@ core::escape::EscapeIterInner::<N, core::escape::AlwaysEscaped>::next
 core::escape::EscapeIterInner::<N, core::escape::AlwaysEscaped>::next_back
 core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::next
 core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::printable
+core::escape::MaybeEscaped
 core::escape::backslash
 core::escape::escape_ascii
 core::escape::escape_unicode
@@ -4308,6 +4341,7 @@ core::f64::<impl f64>::is_sign_negative
 core::f64::<impl f64>::is_sign_positive
 core::f64::<impl f64>::to_bits
 core::f64::<impl f64>::to_le_bytes
+core::ffi::c_str::CStr
 core::ffi::c_str::CStr::from_bytes_with_nul
 core::ffi::c_str::CStr::from_bytes_with_nul_unchecked
 core::ffi::c_str::CStr::from_bytes_with_nul_unchecked::compiletime
@@ -4315,16 +4349,22 @@ core::ffi::c_str::CStr::from_bytes_with_nul_unchecked::runtime
 core::ffi::c_str::CStr::from_ptr
 core::ffi::c_str::CStr::to_bytes
 core::ffi::c_str::CStr::to_bytes_with_nul
+core::ffi::c_str::FromBytesWithNulError
 core::ffi::c_str::strlen
 core::ffi::c_str::strlen::compiletime
 core::ffi::c_str::strlen::runtime
-core::ffi::c_str::strlen::runtime::strlen
+core::ffi::c_void
+core::fmt::Alignment
+core::fmt::Arguments
 core::fmt::Arguments::<'a>::as_statically_known_str
 core::fmt::Arguments::<'a>::as_str
 core::fmt::Arguments::<'a>::estimated_capacity
 core::fmt::Arguments::<'a>::from_str
 core::fmt::Arguments::<'a>::from_str_nonconst
 core::fmt::Arguments::<'a>::new
+core::fmt::DebugAsHex
+core::fmt::Error
+core::fmt::Formatter
 core::fmt::Formatter::<'a>::align
 core::fmt::Formatter::<'a>::alternate
 core::fmt::Formatter::<'a>::debug_list
@@ -4367,6 +4407,7 @@ core::fmt::Formatter::<'a>::write_fmt
 core::fmt::Formatter::<'a>::write_formatted_parts
 core::fmt::Formatter::<'a>::write_formatted_parts::write_bytes
 core::fmt::Formatter::<'a>::write_str
+core::fmt::FormattingOptions
 core::fmt::FormattingOptions::align
 core::fmt::FormattingOptions::alternate
 core::fmt::FormattingOptions::create_formatter
@@ -4385,17 +4426,22 @@ core::fmt::FormattingOptions::precision
 core::fmt::FormattingOptions::sign
 core::fmt::FormattingOptions::sign_aware_zero_pad
 core::fmt::FormattingOptions::width
+core::fmt::PostPadding
 core::fmt::PostPadding::new
 core::fmt::PostPadding::write
+core::fmt::Sign
 core::fmt::Write::write_char
 core::fmt::Write::write_fmt
+core::fmt::builders::DebugInner
 core::fmt::builders::DebugInner::<'a, 'b>::entry_with
 core::fmt::builders::DebugInner::<'a, 'b>::is_pretty
+core::fmt::builders::DebugList
 core::fmt::builders::DebugList::<'a, 'b>::entries
 core::fmt::builders::DebugList::<'a, 'b>::entry
 core::fmt::builders::DebugList::<'a, 'b>::entry_with
 core::fmt::builders::DebugList::<'a, 'b>::finish
 core::fmt::builders::DebugList::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugMap
 core::fmt::builders::DebugMap::<'a, 'b>::entries
 core::fmt::builders::DebugMap::<'a, 'b>::entry
 core::fmt::builders::DebugMap::<'a, 'b>::finish
@@ -4405,22 +4451,28 @@ core::fmt::builders::DebugMap::<'a, 'b>::key
 core::fmt::builders::DebugMap::<'a, 'b>::key_with
 core::fmt::builders::DebugMap::<'a, 'b>::value
 core::fmt::builders::DebugMap::<'a, 'b>::value_with
+core::fmt::builders::DebugSet
 core::fmt::builders::DebugSet::<'a, 'b>::entries
 core::fmt::builders::DebugSet::<'a, 'b>::entry
 core::fmt::builders::DebugSet::<'a, 'b>::entry_with
 core::fmt::builders::DebugSet::<'a, 'b>::finish
 core::fmt::builders::DebugSet::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugStruct
 core::fmt::builders::DebugStruct::<'a, 'b>::field
 core::fmt::builders::DebugStruct::<'a, 'b>::field_with
 core::fmt::builders::DebugStruct::<'a, 'b>::finish
 core::fmt::builders::DebugStruct::<'a, 'b>::finish_non_exhaustive
 core::fmt::builders::DebugStruct::<'a, 'b>::is_pretty
+core::fmt::builders::DebugTuple
 core::fmt::builders::DebugTuple::<'a, 'b>::field
 core::fmt::builders::DebugTuple::<'a, 'b>::field_with
 core::fmt::builders::DebugTuple::<'a, 'b>::finish
 core::fmt::builders::DebugTuple::<'a, 'b>::finish_non_exhaustive
 core::fmt::builders::DebugTuple::<'a, 'b>::is_pretty
+core::fmt::builders::FromFn
+core::fmt::builders::PadAdapter
 core::fmt::builders::PadAdapter::<'buf, 'state>::wrap
+core::fmt::builders::PadAdapterState
 core::fmt::builders::debug_list_new
 core::fmt::builders::debug_map_new
 core::fmt::builders::debug_set_new
@@ -4571,9 +4623,11 @@ core::fmt::num::imp::<impl usize>::_fmt_inner
 core::fmt::num::imp::<impl usize>::format_into
 core::fmt::num::imp::exp_u64
 core::fmt::num::slice_buffer_to_str
+core::fmt::num_buffer::NumBuffer
 core::fmt::num_buffer::NumBuffer::<T>::capacity
 core::fmt::num_buffer::NumBuffer::<T>::new
 core::fmt::pointer_fmt_inner
+core::fmt::rt::Argument
 core::fmt::rt::Argument::<'_>::as_u16
 core::fmt::rt::Argument::<'_>::fmt
 core::fmt::rt::Argument::<'_>::from_usize
@@ -4587,6 +4641,7 @@ core::fmt::rt::Argument::<'_>::new_octal
 core::fmt::rt::Argument::<'_>::new_pointer
 core::fmt::rt::Argument::<'_>::new_upper_exp
 core::fmt::rt::Argument::<'_>::new_upper_hex
+core::fmt::rt::ArgumentType
 core::fmt::write
 core::hash::Hash::hash_slice
 core::hash::Hasher::write_i128
@@ -4652,8 +4707,10 @@ core::hash::impls::<impl core::hash::Hash for usize>::hash_slice
 core::hint::assert_unchecked
 core::hint::assert_unchecked::precondition_check
 core::hint::select_unpredictable
+core::hint::select_unpredictable::DropOnPanic
 core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
+core::intrinsics::AtomicOrdering
 core::intrinsics::assume
 core::intrinsics::carrying_mul_add
 core::intrinsics::carryless_mul
@@ -4677,33 +4734,48 @@ core::intrinsics::ub_checks
 core::intrinsics::unchecked_funnel_shl
 core::intrinsics::unchecked_funnel_shr
 core::intrinsics::unlikely
+core::iter::adapters::chain::Chain
 core::iter::adapters::chain::Chain::<A, B>::new
 core::iter::adapters::chain::and_then_or_clear
+core::iter::adapters::cloned::Cloned
 core::iter::adapters::cloned::Cloned::<I>::new
 core::iter::adapters::cloned::clone_try_fold
+core::iter::adapters::copied::Copied
 core::iter::adapters::copied::Copied::<I>::new
 core::iter::adapters::copied::copy_fold
 core::iter::adapters::copied::copy_try_fold
+core::iter::adapters::enumerate::Enumerate
 core::iter::adapters::enumerate::Enumerate::<I>::new
+core::iter::adapters::filter::Filter
 core::iter::adapters::filter::Filter::<I, P>::new
 core::iter::adapters::filter::filter_fold
 core::iter::adapters::filter::filter_try_fold
+core::iter::adapters::flatten::FlatMap
 core::iter::adapters::flatten::FlatMap::<I, U, F>::into_parts
 core::iter::adapters::flatten::FlatMap::<I, U, F>::new
+core::iter::adapters::flatten::FlattenCompat
 core::iter::adapters::flatten::FlattenCompat::<I, U>::new
+core::iter::adapters::fuse::Fuse
 core::iter::adapters::fuse::Fuse::<I>::into_inner
 core::iter::adapters::fuse::Fuse::<I>::new
+core::iter::adapters::map::Map
 core::iter::adapters::map::Map::<I, F>::into_inner
 core::iter::adapters::map::Map::<I, F>::new
 core::iter::adapters::map::map_fold
 core::iter::adapters::map::map_try_fold
+core::iter::adapters::rev::Rev
 core::iter::adapters::rev::Rev::<T>::new
+core::iter::adapters::skip::Skip
 core::iter::adapters::skip::Skip::<I>::new
+core::iter::adapters::step_by::StepBy
 core::iter::adapters::step_by::StepBy::<I>::new
 core::iter::adapters::step_by::StepBy::<I>::original_step
+core::iter::adapters::take::Take
 core::iter::adapters::take::Take::<I>::new
+core::iter::adapters::take_while::TakeWhile
 core::iter::adapters::take_while::TakeWhile::<I, P>::new
 core::iter::adapters::zip::TrustedRandomAccessNoCoerce::size
+core::iter::adapters::zip::Zip
 core::iter::adapters::zip::Zip::<A, B>::new
 core::iter::adapters::zip::Zip::<A, B>::super_nth
 core::iter::adapters::zip::zip
@@ -4731,6 +4803,7 @@ core::iter::range::Step::backward
 core::iter::range::Step::backward_unchecked
 core::iter::range::Step::forward
 core::iter::range::Step::forward_unchecked
+core::iter::sources::from_fn::FromFn
 core::iter::sources::from_fn::from_fn
 core::iter::traits::collect::Extend::extend_one
 core::iter::traits::collect::Extend::extend_one_unchecked
@@ -4794,6 +4867,8 @@ core::iter::traits::iterator::Iterator::zip
 core::iter::traits::iterator::iter_compare
 core::iter::traits::iterator::iter_compare::compare
 core::iter::traits::iterator::iter_eq
+core::marker::PhantomData
+core::mem::Discriminant
 core::mem::align_of
 core::mem::align_of_val
 core::mem::conjure_zst
@@ -4803,10 +4878,12 @@ core::mem::conjure_zst::do_panic::runtime
 core::mem::discriminant
 core::mem::drop
 core::mem::forget
+core::mem::manually_drop::ManuallyDrop
 core::mem::manually_drop::ManuallyDrop::<T>::drop
 core::mem::manually_drop::ManuallyDrop::<T>::into_inner
 core::mem::manually_drop::ManuallyDrop::<T>::new
 core::mem::manually_drop::ManuallyDrop::<T>::take
+core::mem::maybe_dangling::MaybeDangling
 core::mem::maybe_dangling::MaybeDangling::<P>::as_mut
 core::mem::maybe_dangling::MaybeDangling::<P>::as_ref
 core::mem::maybe_dangling::MaybeDangling::<P>::into_inner
@@ -5476,6 +5553,8 @@ core::num::<impl usize>::wrapping_neg
 core::num::<impl usize>::wrapping_shl
 core::num::<impl usize>::wrapping_shr
 core::num::<impl usize>::wrapping_sub
+core::num::FpCategory
+core::num::bignum::Big32x40
 core::num::bignum::Big32x40::add
 core::num::bignum::Big32x40::digits
 core::num::bignum::Big32x40::div_rem_small
@@ -5490,10 +5569,17 @@ core::num::bignum::Big32x40::sub
 core::num::can_not_overflow
 core::num::dec2flt::float::RawFloat::integer_decode
 core::num::dec2flt::float::pow2_to_pow10
+core::num::diy_float::Fp
 core::num::diy_float::Fp::mul
 core::num::diy_float::Fp::normalize
 core::num::diy_float::Fp::normalize_to
+core::num::error::IntErrorKind
+core::num::error::ParseIntError
 core::num::error::ParseIntError::kind
+core::num::error::TryFromIntError
+core::num::flt2dec::Sign
+core::num::flt2dec::decoder::Decoded
+core::num::flt2dec::decoder::FullDecoded
 core::num::flt2dec::decoder::decode
 core::num::flt2dec::determine_sign
 core::num::flt2dec::digits_to_dec_str
@@ -5518,7 +5604,9 @@ core::num::flt2dec::to_exact_exp_str
 core::num::flt2dec::to_exact_fixed_str
 core::num::flt2dec::to_shortest_exp_str
 core::num::flt2dec::to_shortest_str
+core::num::fmt::Formatted
 core::num::fmt::Formatted::<'a>::len
+core::num::fmt::Part
 core::num::fmt::Part::<'a>::len
 core::num::from_ascii_radix_panic
 core::num::from_ascii_radix_panic::do_panic
@@ -5537,48 +5625,63 @@ core::num::int_log10::u64_impl
 core::num::int_log10::u8
 core::num::int_log10::u8_impl
 core::num::int_log10::usize
+core::num::niche_types::Nanoseconds
 core::num::niche_types::Nanoseconds::as_inner
 core::num::niche_types::Nanoseconds::new
 core::num::niche_types::Nanoseconds::new_unchecked
+core::num::niche_types::NonZeroCharInner
 core::num::niche_types::NonZeroCharInner::as_inner
 core::num::niche_types::NonZeroCharInner::new
 core::num::niche_types::NonZeroCharInner::new_unchecked
+core::num::niche_types::NonZeroI128Inner
 core::num::niche_types::NonZeroI128Inner::as_inner
 core::num::niche_types::NonZeroI128Inner::new
 core::num::niche_types::NonZeroI128Inner::new_unchecked
+core::num::niche_types::NonZeroI16Inner
 core::num::niche_types::NonZeroI16Inner::as_inner
 core::num::niche_types::NonZeroI16Inner::new
 core::num::niche_types::NonZeroI16Inner::new_unchecked
+core::num::niche_types::NonZeroI32Inner
 core::num::niche_types::NonZeroI32Inner::as_inner
 core::num::niche_types::NonZeroI32Inner::new
 core::num::niche_types::NonZeroI32Inner::new_unchecked
+core::num::niche_types::NonZeroI64Inner
 core::num::niche_types::NonZeroI64Inner::as_inner
 core::num::niche_types::NonZeroI64Inner::new
 core::num::niche_types::NonZeroI64Inner::new_unchecked
+core::num::niche_types::NonZeroI8Inner
 core::num::niche_types::NonZeroI8Inner::as_inner
 core::num::niche_types::NonZeroI8Inner::new
 core::num::niche_types::NonZeroI8Inner::new_unchecked
+core::num::niche_types::NonZeroIsizeInner
 core::num::niche_types::NonZeroIsizeInner::as_inner
 core::num::niche_types::NonZeroIsizeInner::new
 core::num::niche_types::NonZeroIsizeInner::new_unchecked
+core::num::niche_types::NonZeroU128Inner
 core::num::niche_types::NonZeroU128Inner::as_inner
 core::num::niche_types::NonZeroU128Inner::new
 core::num::niche_types::NonZeroU128Inner::new_unchecked
+core::num::niche_types::NonZeroU16Inner
 core::num::niche_types::NonZeroU16Inner::as_inner
 core::num::niche_types::NonZeroU16Inner::new
 core::num::niche_types::NonZeroU16Inner::new_unchecked
+core::num::niche_types::NonZeroU32Inner
 core::num::niche_types::NonZeroU32Inner::as_inner
 core::num::niche_types::NonZeroU32Inner::new
 core::num::niche_types::NonZeroU32Inner::new_unchecked
+core::num::niche_types::NonZeroU64Inner
 core::num::niche_types::NonZeroU64Inner::as_inner
 core::num::niche_types::NonZeroU64Inner::new
 core::num::niche_types::NonZeroU64Inner::new_unchecked
+core::num::niche_types::NonZeroU8Inner
 core::num::niche_types::NonZeroU8Inner::as_inner
 core::num::niche_types::NonZeroU8Inner::new
 core::num::niche_types::NonZeroU8Inner::new_unchecked
+core::num::niche_types::NonZeroUsizeInner
 core::num::niche_types::NonZeroUsizeInner::as_inner
 core::num::niche_types::NonZeroUsizeInner::new
 core::num::niche_types::NonZeroUsizeInner::new_unchecked
+core::num::niche_types::UsizeNoHighBit
 core::num::niche_types::UsizeNoHighBit::as_inner
 core::num::niche_types::UsizeNoHighBit::new
 core::num::niche_types::UsizeNoHighBit::new_unchecked
@@ -5588,6 +5691,7 @@ core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<u32>
 core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<u64>> for u64>::div
 core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<u8>> for u8>::div
 core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<usize>> for usize>::div
+core::num::nonzero::NonZero
 core::num::nonzero::NonZero::<T>::get
 core::num::nonzero::NonZero::<T>::new
 core::num::nonzero::NonZero::<T>::new_unchecked
@@ -5616,6 +5720,7 @@ core::num::nonzero::NonZero::<usize>::ilog10
 core::num::nonzero::NonZero::<usize>::ilog2
 core::num::nonzero::NonZero::<usize>::leading_zeros
 core::num::nonzero::NonZero::<usize>::trailing_zeros
+core::ops::control_flow::ControlFlow
 core::ops::control_flow::ControlFlow::<B, C>::break_ok
 core::ops::control_flow::ControlFlow::<B, C>::break_value
 core::ops::control_flow::ControlFlow::<B, C>::continue_ok
@@ -5632,6 +5737,7 @@ core::ops::function::impls::<impl core::ops::function::FnMut<A> for &F>::call_mu
 core::ops::function::impls::<impl core::ops::function::FnMut<A> for &mut F>::call_mut
 core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
 core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &mut F>::call_once
+core::ops::index_range::IndexRange
 core::ops::index_range::IndexRange::assume_range
 core::ops::index_range::IndexRange::end
 core::ops::index_range::IndexRange::len
@@ -5643,13 +5749,19 @@ core::ops::index_range::IndexRange::start
 core::ops::index_range::IndexRange::take_prefix
 core::ops::index_range::IndexRange::take_suffix
 core::ops::index_range::IndexRange::zero_to
+core::ops::range::Bound
 core::ops::range::Bound::<&T>::cloned
 core::ops::range::Bound::<&T>::copied
 core::ops::range::Bound::<T>::as_mut
 core::ops::range::Bound::<T>::as_ref
 core::ops::range::Bound::<T>::map
+core::ops::range::OneSidedRangeBound
+core::ops::range::Range
 core::ops::range::Range::<Idx>::contains
 core::ops::range::RangeBounds::contains
+core::ops::range::RangeFrom
+core::ops::range::RangeFull
+core::ops::range::RangeInclusive
 core::ops::range::RangeInclusive::<Idx>::contains
 core::ops::range::RangeInclusive::<Idx>::end
 core::ops::range::RangeInclusive::<Idx>::into_inner
@@ -5657,9 +5769,19 @@ core::ops::range::RangeInclusive::<Idx>::is_empty
 core::ops::range::RangeInclusive::<Idx>::new
 core::ops::range::RangeInclusive::<Idx>::start
 core::ops::range::RangeInclusive::<usize>::into_slice_range
+core::ops::range::RangeTo
+core::ops::range::RangeToInclusive
+core::ops::try_trait::NeverShortCircuit
 core::ops::try_trait::NeverShortCircuit::<T>::wrap_mut_1
 core::ops::try_trait::NeverShortCircuit::<T>::wrap_mut_2
+core::ops::try_trait::NeverShortCircuitResidual
+core::ops::try_trait::Wrapped
 core::ops::try_trait::residual_into_try_type
+core::option::IntoIter
+core::option::Item
+core::option::Iter
+core::option::IterMut
+core::option::Option
 core::option::Option::<&T>::cloned
 core::option::Option::<&T>::copied
 core::option::Option::<&mut T>::cloned
@@ -5704,17 +5826,22 @@ core::option::Option::<core::option::Option<T>>::flatten
 core::option::Option::<core::result::Result<T, E>>::transpose
 core::option::expect_failed
 core::option::unwrap_failed
+core::panic::location::Location
 core::panic::location::Location::<'a>::caller
 core::panic::location::Location::<'a>::column
 core::panic::location::Location::<'a>::file
 core::panic::location::Location::<'a>::line
+core::panic::panic_info::PanicInfo
 core::panic::panic_info::PanicInfo::<'a>::location
 core::panic::panic_info::PanicInfo::<'a>::message
 core::panic::panic_info::PanicInfo::<'a>::new
+core::panic::panic_info::PanicMessage
 core::panic::panic_info::PanicMessage::<'a>::as_str
+core::panicking::AssertKind
 core::panicking::assert_failed
 core::panicking::assert_failed_inner
 core::panicking::assert_matches_failed
+core::panicking::assert_matches_failed::Pattern
 core::panicking::panic
 core::panicking::panic_bounds_check
 core::panicking::panic_cannot_unwind
@@ -5742,14 +5869,12 @@ core::panicking::panic_const::panic_const_shr_overflow
 core::panicking::panic_const::panic_const_sub_overflow
 core::panicking::panic_display
 core::panicking::panic_fmt
-core::panicking::panic_fmt::panic_impl
 core::panicking::panic_in_cleanup
 core::panicking::panic_misaligned_pointer_dereference
 core::panicking::panic_nounwind
 core::panicking::panic_nounwind_fmt
 core::panicking::panic_nounwind_fmt::compiletime
 core::panicking::panic_nounwind_fmt::runtime
-core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
 core::panicking::panic_str_2015
@@ -5758,12 +5883,14 @@ core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset
 core::ptr::align_offset::mod_inv
+core::ptr::alignment::Alignment
 core::ptr::alignment::Alignment::as_nonzero
 core::ptr::alignment::Alignment::as_usize
 core::ptr::alignment::Alignment::log2
 core::ptr::alignment::Alignment::new
 core::ptr::alignment::Alignment::new_unchecked
 core::ptr::alignment::Alignment::new_unchecked::precondition_check
+core::ptr::alignment::AlignmentEnum
 core::ptr::const_ptr::<impl *const T>::add
 core::ptr::const_ptr::<impl *const T>::add::precondition_check
 core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap
@@ -5814,6 +5941,7 @@ core::ptr::copy_nonoverlapping
 core::ptr::copy_nonoverlapping::precondition_check
 core::ptr::drop_in_place
 core::ptr::from_ref
+core::ptr::metadata::DynMetadata
 core::ptr::metadata::DynMetadata::<Dyn>::vtable_ptr
 core::ptr::metadata::from_raw_parts
 core::ptr::metadata::from_raw_parts_mut
@@ -5856,6 +5984,7 @@ core::ptr::mut_ptr::<impl *mut [T]>::len
 core::ptr::mut_ptr::<impl *mut [T]>::split_at_mut
 core::ptr::mut_ptr::<impl *mut [T]>::split_at_mut_unchecked
 core::ptr::mut_ptr::<impl core::cmp::PartialEq for *mut T>::eq
+core::ptr::non_null::NonNull
 core::ptr::non_null::NonNull::<T>::add
 core::ptr::non_null::NonNull::<T>::as_mut
 core::ptr::non_null::NonNull::<T>::as_ptr
@@ -5900,6 +6029,7 @@ core::ptr::write_bytes::precondition_check
 core::ptr::write_unaligned
 core::ptr::write_volatile
 core::ptr::write_volatile::precondition_check
+core::result::Result
 core::result::Result::<&T, E>::cloned
 core::result::Result::<&T, E>::copied
 core::result::Result::<&mut T, E>::cloned
@@ -5989,6 +6119,8 @@ core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_simple
 core::slice::ascii::<impl [u8]>::escape_ascii
 core::slice::ascii::<impl [u8]>::is_ascii
+core::slice::ascii::EscapeAscii
+core::slice::ascii::EscapeByte
 core::slice::ascii::is_ascii
 core::slice::ascii::is_ascii::compiletime
 core::slice::ascii::is_ascii::runtime
@@ -6022,24 +6154,31 @@ core::slice::index::slice_index_fail::do_panic::runtime
 core::slice::index::try_into_slice_range
 core::slice::iter::<impl core::iter::traits::collect::IntoIterator for &'a [T]>::into_iter
 core::slice::iter::<impl core::iter::traits::collect::IntoIterator for &'a mut [T]>::into_iter
+core::slice::iter::Chunks
 core::slice::iter::Chunks::<'a, T>::new
+core::slice::iter::ChunksExact
 core::slice::iter::ChunksExact::<'a, T>::new
 core::slice::iter::ChunksExact::<'a, T>::remainder
+core::slice::iter::ChunksExactMut
 core::slice::iter::ChunksExactMut::<'a, T>::into_remainder
 core::slice::iter::ChunksExactMut::<'a, T>::new
+core::slice::iter::ChunksMut
 core::slice::iter::ChunksMut::<'a, T>::new
+core::slice::iter::Iter
 core::slice::iter::Iter::<'a, T>::as_slice
 core::slice::iter::Iter::<'a, T>::make_slice
 core::slice::iter::Iter::<'a, T>::new
 core::slice::iter::Iter::<'a, T>::next_back_unchecked
 core::slice::iter::Iter::<'a, T>::post_inc_start
 core::slice::iter::Iter::<'a, T>::pre_dec_end
+core::slice::iter::IterMut
 core::slice::iter::IterMut::<'a, T>::as_mut_slice
 core::slice::iter::IterMut::<'a, T>::make_slice
 core::slice::iter::IterMut::<'a, T>::new
 core::slice::iter::IterMut::<'a, T>::next_back_unchecked
 core::slice::iter::IterMut::<'a, T>::post_inc_start
 core::slice::iter::IterMut::<'a, T>::pre_dec_end
+core::slice::iter::Windows
 core::slice::iter::Windows::<'a, T>::new
 core::slice::memchr::contains_zero_byte
 core::slice::memchr::memchr
@@ -6095,22 +6234,39 @@ core::str::count::contains_non_continuation_byte
 core::str::count::count_chars
 core::str::count::do_count_chars
 core::str::count::sum_bytes_in_usize
+core::str::error::Utf8Error
 core::str::error::Utf8Error::error_len
 core::str::error::Utf8Error::valid_up_to
+core::str::iter::Bytes
+core::str::iter::CharIndices
 core::str::iter::CharIndices::<'a>::as_str
 core::str::iter::CharIndices::<'a>::offset
+core::str::iter::Chars
 core::str::iter::Chars::<'a>::as_str
+core::str::iter::SplitInclusive
+core::str::iter::SplitInternal
 core::str::iter::SplitInternal::<'a, P>::get_end
 core::str::iter::SplitInternal::<'a, P>::next_inclusive
 core::str::lossy::<impl [u8]>::utf8_chunks
+core::str::lossy::Debug
+core::str::lossy::Utf8Chunk
 core::str::lossy::Utf8Chunk::<'a>::invalid
 core::str::lossy::Utf8Chunk::<'a>::valid
+core::str::lossy::Utf8Chunks
 core::str::lossy::Utf8Chunks::<'a>::debug
+core::str::pattern::CharSearcher
 core::str::pattern::CharSearcher::<'_>::utf8_size
+core::str::pattern::EmptyNeedle
+core::str::pattern::MatchOnly
 core::str::pattern::Pattern::is_prefix_of
 core::str::pattern::Pattern::is_suffix_of
+core::str::pattern::RejectAndMatch
+core::str::pattern::SearchStep
 core::str::pattern::Searcher::next_match
+core::str::pattern::StrSearcher
 core::str::pattern::StrSearcher::<'a, 'b>::new
+core::str::pattern::StrSearcherImpl
+core::str::pattern::TwoWaySearcher
 core::str::pattern::TwoWaySearcher::byteset_contains
 core::str::pattern::TwoWaySearcher::byteset_create
 core::str::pattern::TwoWaySearcher::maximal_suffix
@@ -6153,6 +6309,7 @@ core::str::validations::utf8_acc_cont_byte
 core::str::validations::utf8_char_width
 core::str::validations::utf8_first_byte
 core::str::validations::utf8_is_cont_byte
+core::sync::atomic::AtomicBool
 core::sync::atomic::AtomicBool::compare_exchange
 core::sync::atomic::AtomicBool::fetch_and
 core::sync::atomic::AtomicBool::fetch_or
@@ -6160,6 +6317,7 @@ core::sync::atomic::AtomicBool::load
 core::sync::atomic::AtomicBool::new
 core::sync::atomic::AtomicBool::store
 core::sync::atomic::AtomicBool::swap
+core::sync::atomic::AtomicU16
 core::sync::atomic::AtomicU16::as_ptr
 core::sync::atomic::AtomicU16::compare_and_swap
 core::sync::atomic::AtomicU16::compare_exchange
@@ -6185,6 +6343,7 @@ core::sync::atomic::AtomicU16::store
 core::sync::atomic::AtomicU16::swap
 core::sync::atomic::AtomicU16::try_update
 core::sync::atomic::AtomicU16::update
+core::sync::atomic::AtomicU32
 core::sync::atomic::AtomicU32::as_ptr
 core::sync::atomic::AtomicU32::compare_and_swap
 core::sync::atomic::AtomicU32::compare_exchange
@@ -6210,6 +6369,7 @@ core::sync::atomic::AtomicU32::store
 core::sync::atomic::AtomicU32::swap
 core::sync::atomic::AtomicU32::try_update
 core::sync::atomic::AtomicU32::update
+core::sync::atomic::AtomicU64
 core::sync::atomic::AtomicU64::as_ptr
 core::sync::atomic::AtomicU64::compare_and_swap
 core::sync::atomic::AtomicU64::compare_exchange
@@ -6235,6 +6395,7 @@ core::sync::atomic::AtomicU64::store
 core::sync::atomic::AtomicU64::swap
 core::sync::atomic::AtomicU64::try_update
 core::sync::atomic::AtomicU64::update
+core::sync::atomic::AtomicU8
 core::sync::atomic::AtomicU8::as_ptr
 core::sync::atomic::AtomicU8::compare_and_swap
 core::sync::atomic::AtomicU8::compare_exchange
@@ -6260,6 +6421,7 @@ core::sync::atomic::AtomicU8::store
 core::sync::atomic::AtomicU8::swap
 core::sync::atomic::AtomicU8::try_update
 core::sync::atomic::AtomicU8::update
+core::sync::atomic::AtomicUsize
 core::sync::atomic::AtomicUsize::as_ptr
 core::sync::atomic::AtomicUsize::compare_and_swap
 core::sync::atomic::AtomicUsize::compare_exchange
@@ -6285,6 +6447,7 @@ core::sync::atomic::AtomicUsize::store
 core::sync::atomic::AtomicUsize::swap
 core::sync::atomic::AtomicUsize::try_update
 core::sync::atomic::AtomicUsize::update
+core::sync::atomic::Ordering
 core::sync::atomic::atomic_add
 core::sync::atomic::atomic_and
 core::sync::atomic::atomic_compare_exchange
@@ -6301,6 +6464,7 @@ core::sync::atomic::atomic_xor
 core::sync::atomic::compiler_fence
 core::sync::atomic::fence
 core::sync::atomic::strongest_failure_ordering
+core::time::Duration
 core::time::Duration::as_micros
 core::time::Duration::as_millis
 core::time::Duration::as_millis_f32
@@ -6329,6 +6493,8 @@ core::time::Duration::subsec_micros
 core::time::Duration::subsec_millis
 core::time::Duration::subsec_nanos
 core::time::Duration::try_from_secs_f32
+core::time::TryFromFloatSecsError
+core::time::TryFromFloatSecsErrorKind
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::eq
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::ne
 core::tuple::<impl core::cmp::PartialEq for (B, A, Z, Y, X, W, V, U, T)>::eq
@@ -6366,6 +6532,7 @@ core::ub_checks::maybe_is_nonoverlapping::compiletime
 core::ub_checks::maybe_is_nonoverlapping::runtime
 core::unicode::printable::check
 core::unicode::printable::is_printable
+core::unicode::unicode_data::ShortOffsetRunHeader
 core::unicode::unicode_data::ShortOffsetRunHeader::new
 core::unicode::unicode_data::ShortOffsetRunHeader::prefix_sum
 core::unicode::unicode_data::ShortOffsetRunHeader::start_index

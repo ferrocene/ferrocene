@@ -1,6 +1,7 @@
 #![feature(rustc_private)]
 
 extern crate rustc_driver;
+extern crate rustc_errors;
 extern crate rustc_hir;
 extern crate rustc_interface;
 extern crate rustc_middle;
@@ -17,10 +18,12 @@ use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
+use rustc_errors::Applicability;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{
-    AttrId, Attribute, HirId, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
+    AttrId, Attribute, ForeignItem, ForeignItemKind, HirId, Item, ItemKind, Node, TraitFn,
+    TraitItem, TraitItemKind,
 };
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
@@ -147,10 +150,21 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         let qualified_name = get_qualified_name(tcx, def);
 
         if should_filter_out(&qualified_name) {
+            // TODO: suggest exported_constraint
             continue;
         }
 
         let (filename, mut start_line, end_line) = get_span(tcx, &mut vis, def);
+
+        let header = tcx.def_span(def);
+        let mut diag = tcx.dcx().struct_span_warn(header, "mark this item as prevalidated");
+        diag.span_suggestion_verbose(
+            header.shrink_to_lo(),
+            "here",
+            format!("#[ferrocene::prevalidated]\n"),
+            Applicability::MachineApplicable,
+        );
+        diag.emit();
 
         // We don't check for annotations those inside the `Visitor` implementation so we do it
         // here.
@@ -173,12 +187,15 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
 /// and will be removed once `#[ferrocene::certified] is implemented.
 fn should_skip_item(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
     let kind = tcx.def_kind(def);
-    if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {
+    if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure, DefKind::Struct, DefKind::Enum]
+        .contains(&kind)
+    {
         return true;
     }
-    // Skip intrinsics, extern functions, and associated default functions provided by the trait.
+    // Skip intrinsics, extern functions, and associated functions with no default.
     match tcx.hir_node_by_def_id(def) {
         Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
+        | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
         | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
             info!("skipping item {def:?}");
             true

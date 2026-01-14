@@ -16,6 +16,8 @@ use crate::core::builder::{
     self, Alias, Builder, Cargo, Kind, RunConfig, ShouldRun, Step, StepMetadata, crate_description,
 };
 use crate::core::config::TargetSelection;
+// Ferrocene addition
+use crate::ferrocene::tool::SymbolReport;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::{CodegenBackendKind, Compiler, Mode, Subcommand, t};
 
@@ -94,6 +96,10 @@ impl Step for Std {
         if matches!(builder.config.cmd, Subcommand::Fix) {
             // By default, cargo tries to fix all targets. Tell it not to fix tests until we've added `test` to the sysroot.
             cargo.arg("--lib");
+
+            let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
+            cargo.env("RUSTC_REAL", symbol_report);
+            cargo.arg("--allow-dirty");
         }
 
         let _guard = builder.msg(

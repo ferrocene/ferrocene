@@ -2,6 +2,7 @@
 
 #![allow(non_camel_case_types)]
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
 pub(crate) const unsafe fn simd_imax<T: Copy>(a: T, b: T) -> T {
@@ -9,6 +10,7 @@ pub(crate) const unsafe fn simd_imax<T: Copy>(a: T, b: T) -> T {
     crate::intrinsics::simd::simd_select(mask, a, b)
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
 pub(crate) const unsafe fn simd_imin<T: Copy>(a: T, b: T) -> T {

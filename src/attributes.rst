@@ -176,6 +176,9 @@ The following :t:`[built-in attribute]s` are :dt:`[code generation attribute]s`:
 * :dp:`fls_tvn08dtuilue`
   :t:`Attribute` :c:`inline`.
 
+* :dp:`fls_eOJS3mxa9xgu`
+  :t:`Attribute` :c:`naked`.
+
 * :dp:`fls_q4c023zdsfgn`
   :t:`Attribute` :c:`no_builtins`.
 
@@ -184,9 +187,6 @@ The following :t:`[built-in attribute]s` are :dt:`[code generation attribute]s`:
 
 * :dp:`fls_gxxbf6eag3et`
   :t:`Attribute` :c:`track_caller`.
-
-* :dp:`fls_eOJS3mxa9xgu`
-  :t:`Attribute` :c:`naked`.
 
 :dp:`fls_87o6n9et9jio`
 The following :t:`[built-in attribute]s` are
@@ -219,20 +219,20 @@ The following :t:`[built-in attribute]s` are :dt:`[diagnostics attribute]s`:
 * :dp:`fls_s5z2q5pl14p4`
   :t:`Attribute` ``deprecated``.
 
+* :dp:`fls_NrTL2FruARAv`
+  :t:`Attribute` ``expect``.
+
 * :dp:`fls_5ko0q9jnxv5a`
   :t:`Attribute` ``forbid``.
 
 * :dp:`fls_rgjf5ibhurda`
   :t:`Attribute` ``must_use``.
 
-* :dp:`fls_29y8icoou1gx`
-  :t:`Attribute` ``warn``.
-
-* :dp:`fls_NrTL2FruARAv`
-  :t:`Attribute` ``expect``.
-
 * :dp:`fls_4d2ArC50kNWL`
   :t:`Attribute` ``unsafe``.
+
+* :dp:`fls_29y8icoou1gx`
+  :t:`Attribute` ``warn``.
 
 :dp:`fls_3fxhz0olhbcy`
 The following :t:`[built-in attribute]s` are :dt:`[documentation attribute]s`:

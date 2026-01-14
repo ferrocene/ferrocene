@@ -1,0 +1,103 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+==============
+ISO 26262 6-10
+==============
+
+6-10 Software Integration and Verification
+==========================================
+
+10.4.1
+-------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.
+
+10.4.1.a
+~~~~~~~~
+
+See 10.4.1.
+
+10.4.1.b
+~~~~~~~~
+
+See 10.4.1.
+
+10.4.1.c
+~~~~~~~~
+
+See 10.4.1.
+
+10.4.2
+------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.
+
+10.4.2.a
+~~~~~~~~
+
+See 10.4.2.
+
+10.4.2.b
+~~~~~~~~
+
+See 10.4.2.
+
+10.4.2.c
+~~~~~~~~
+
+See 10.4.2.
+
+10.4.2.d
+~~~~~~~~
+
+See 10.4.2.
+
+10.4.2.e
+~~~~~~~~
+
+See 10.4.2.
+
+10.4.2.f
+~~~~~~~~
+
+See 10.4.2.
+
+10.4.3
+------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.
+
+10.4.4
+------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.
+
+10.4.5
+------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.
+
+10.4.6
+------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.
+
+10.4.7
+------
+
+The core library is tested as laid out in the :doc:`core-certification:safety-plan/testing-plan`, and those test results, for all qualified targets, are available in the :doc:`qualification-report:rustc/index`.
+
+Integration testing is performed as outline in scope for the qualified targets in terms of architecture, but final integration is user/integrator responsibility.

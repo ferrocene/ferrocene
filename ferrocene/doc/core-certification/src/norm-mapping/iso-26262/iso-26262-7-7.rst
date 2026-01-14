@@ -1,0 +1,43 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 7-7
+=============
+
+7-7 Operation, Service and Decommissioning
+==========================================
+
+7.4.1
+------
+
+7.4.1.1
+~~~~~~~
+
+- :doc:`qualification-plan:kp-tracking`
+- :doc:`safety-manual:known-problems`
+
+7.4.1.1.a
++++++++++
+
+See 7.4.1.1.
+
+7.4.1.1.b
++++++++++
+
+See 7.4.1.1.
+
+7.4.1.1.c
++++++++++
+
+See 7.4.1.1.
+
+7.4.1.2
+~~~~~~~
+
+Not applicable, only SW component
+
+7.4.1.3
+~~~~~~~
+
+Not applicable

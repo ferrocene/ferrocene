@@ -1,0 +1,55 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 2-7
+=============
+
+2-7 Safety Management Regarding Production, Operation, Service and Decommissioning
+==================================================================================
+
+7.4.1
+------
+
+Only partially applicable, as SW SEooC
+
+7.4.2
+-----
+
+7.4.2.1
+~~~~~~~
+
+Not applicable, no "production"
+
+7.4.2.2
+~~~~~~~
+
+Not applicable, as SW SEooC
+
+7.4.2.2.a
++++++++++
+
+Not applicable, as SW SEooC
+
+7.4.2.2.b
++++++++++
+
+Not applicable, as SW SEooC
+
+7.4.2.2.c
++++++++++
+
+Not applicable, as SW SEooC
+
+7.4.2.3
+~~~~~~~
+
+- :doc:`qualification-plan:kp-tracking`
+- :doc:`safety-manual:known-problems`
+- :doc:`safety-manual:index`
+
+7.4.2.4
+~~~~~~~
+
+No changes during these lifecycle phases, other modifictions handled via
+Safety Plan

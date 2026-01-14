@@ -1,0 +1,188 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 8-6
+=============
+
+8-6 Specification and Management of Safety Requirements
+=======================================================
+
+6.4.1
+------
+
+6.4.1.a
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.1.a.a
++++++++++
+
+See 6.4.1.a.
+
+6.4.1.b.b
++++++++++
+
+See 6.4.1.a.
+
+6.4.2
+-----
+
+6.4.2.1
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.2.2
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.2.3
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.2.4
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.2.4.a
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.b
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.c
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.d
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.e
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.f
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.g
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.h
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.i
++++++++++
+
+See 6.4.2.4.
+
+6.4.2.4.j
++++++++++
+
+See 6.4.2.5.
+
+6.4.2.5
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.2.5.a
++++++++++
+
+See 6.4.2.5.
+
+6.4.2.5.b
++++++++++
+
+See 6.4.2.6.
+
+6.4.2.5.c
++++++++++
+
+- All functions same ASIL.
+
+6.4.3
+-----
+
+6.4.3.1
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.1.a
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.1.b
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.1.c
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.1.d
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.1.e
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.1.f
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.2
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.2.a
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.2.b
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.2.c
++++++++++
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.3
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`
+
+6.4.3.4
+~~~~~~~
+
+:doc:`core-certification:safety-plan/requirements`

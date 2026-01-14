@@ -37,8 +37,13 @@ The requirements are:
 - No uncertified code is used from certified code
 - Every public function of the certified subset has a requirement with sufficient quality
 - The certified code adheres to the coding standard
-- The certified subset is tested with 100% statement coverage. 
+- The certified subset is tested with 100% statement coverage.
     - There are a few lines that cannot be covered by automatic tests. These are annotated with an explanation.
+
+ISO 26262
+~~~~~~~~~
+
+The lifecycle is in accordance with ISO 26262-8:2018, Clause 10.
 
 Internal procedures
 -------------------
@@ -93,4 +98,18 @@ This component is available to all customers and contains everything necessary t
 Safety Assessment
 -----------------
 
+Any modifiction of the certification documentation or safety plan undergoes review as described in the :doc:`qualification-plan:development` which serves as confirmation of the safety plan.
+
 Certification is carried out by TÜV SÜD, an independent assessment body.
+
+Safety Case
+-----------
+
+The Safety case according to ISO 26262 consists of three steps:
+
+1. CI passes
+    CI runs all tests listed in :doc:`qualification-report:rustc/index`, builds all release artifacts, and builds all the documentation for qualification and certification. It stores all evidence that prove safety, most notably the test results of all test suites, on AWS S3, which is available for the latest development version at ``public-docs.ferrocene.dev``. This evidence is being reviewed in order to make a release decision.
+2. Sufficient code coverage
+    CI does not ensure sufficient code coverage but instead continuously measures it. This is to allow more flexibility during development, and focus on code coverage in a coordinated effort. Sufficient code coverage is ensured by the Release Manager before each release.
+3. Semantic diff
+    For each release the Release Manager creates a semantic diff between the current and previous release. During the creation all changes to the documentation are validated to be complete and correct.

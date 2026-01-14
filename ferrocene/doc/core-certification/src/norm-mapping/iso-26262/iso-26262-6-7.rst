@@ -1,0 +1,274 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+=============
+ISO 26262 6-7
+=============
+
+6-7 Software Architectural Design
+=================================
+
+7.4.1
+------
+
+N/A, therefore no architecture is needed
+
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. The library has extensive safety comments documenting/describing the safety invariants of each module. All modules have a doc-comment describing the design and contents of the module.
+
+7.4.1.a
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.b
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.c
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.d
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.e
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.f
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.g
+~~~~~~~
+
+See 7.4.1.
+
+7.4.1.h
+~~~~~~~
+
+See 7.4.1.
+
+7.4.2
+-----
+
+N/A, therefore no architecture is needed
+
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
+
+7.4.2.a
+~~~~~~~
+
+See 7.4.2.
+
+7.4.2.b
+~~~~~~~
+
+N/A; There is no way to configure the core library binary after it is compiled and linked on targets without dynamic loaders (currently, all certified targets).
+
+7.4.2.c
+~~~~~~~
+
+See 7.4.2.
+
+7.4.2.d
+~~~~~~~
+
+See 7.4.2.
+
+7.4.2.e
+~~~~~~~
+
+See 7.4.2.
+
+7.4.3
+-----
+
+N/A, therefore no architecture is needed
+
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
+
+7.4.3.a
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.b
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.c
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.d
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.e
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.f
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.g
+~~~~~~~
+
+See 7.4.3.
+
+7.4.3.N2
+~~~~~~~~
+
+See 7.4.3.
+
+7.4.3.N3
+~~~~~~~~
+
+See 7.4.3.
+
+7.4.4
+-----
+
+N/A, therefore no architecture is needed
+
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
+
+7.4.5
+-----
+
+N/A, therefore no architecture is needed
+
+The core library has a very simple design. It is a library of independent functions with no internal state management. Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.
+
+7.4.5.a
+~~~~~~~
+
+See 7.4.5.
+
+7.4.5.b
+~~~~~~~
+
+See 7.4.5.
+
+7.4.6
+-----
+
+:doc:`core-certification:safety-plan/requirements`
+
+All functions in the certified core library are deemed to be of the same ASIL.
+
+7.4.7
+-----
+
+Not applicable, no pre-existing SW element
+
+7.4.8
+-----
+
+All functions in the certified core library are deemed to be of the same SIL.
+
+7.4.9
+-----
+
+Not applicable, no partitioning, all same ASIL
+
+7.4.9.a
+~~~~~~~
+
+Not applicable, no partitioning, all same ASIL
+
+7.4.9.b
+~~~~~~~
+
+Not applicable, no partitioning, all same ASIL
+
+7.4.9.c
+~~~~~~~
+
+Not applicable, no partitioning, all same ASIL
+
+7.4.9.d
+~~~~~~~
+
+Not applicable, no partitioning, all same ASIL
+
+7.4.10
+------
+
+Not applicable, only single component as SW SEooC, no further safety
+analysis required
+
+7.4.10.a
+~~~~~~~~
+
+Not applicable, only single component as SW SEooC
+
+7.4.11
+------
+
+Not applicable, only single component as SW SEooC with single ASIL
+
+7.4.12
+------
+
+Not applicable, only single component as SW SEooC, integrator responsibility
+
+7.4.13
+------
+
+Ferrous Systems certifies core as a library, to be used in other systems whose requirements are unknown. Users of the certified core library should consider their specific system safety requirements when developing safety related software with the certified core library.
+
+7.4.13.a
+~~~~~~~~
+
+See 7.4.13.
+
+7.4.13.b
+~~~~~~~~
+
+See 7.4.13.
+
+7.4.13.c
+~~~~~~~~
+
+See 7.4.13.
+
+7.4.14
+------
+
+The core library certification excludes the requirement of having an architecture.
+
+   .. include:: ../partials/simple-design.rst
+
+7.4.14.a
+~~~~~~~~
+
+See 7.4.14.
+
+7.4.14.b
+~~~~~~~~
+
+See 7.4.14.
+
+7.4.14.c
+~~~~~~~~
+
+See 7.4.14.
+
+7.4.14.d
+~~~~~~~~
+
+See 7.4.14.

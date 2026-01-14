@@ -1,4 +1,7 @@
+#![allow(dead_code)]
+
 use std::any::{Any, TypeId};
+use std::mem::offset_of;
 use std::mem::type_info::{Type, TypeKind};
 
 #[test]
@@ -63,6 +66,54 @@ fn test_tuples() {
             }
             _ => unreachable!(),
         }
+    }
+}
+
+#[test]
+fn test_structs() {
+    use TypeKind::*;
+
+    const {
+        struct TestStruct {
+            first: u8,
+            second: u16,
+            reference: &'static u16,
+        }
+
+        let Type { kind: Struct(ty), size, .. } = Type::of::<TestStruct>() else { panic!() };
+        assert!(size == Some(size_of::<TestStruct>()));
+        assert!(!ty.non_exhaustive);
+        assert!(ty.fields.len() == 3);
+        assert!(ty.fields[0].name == "first");
+        assert!(ty.fields[0].ty == TypeId::of::<u8>());
+        assert!(ty.fields[0].offset == offset_of!(TestStruct, first));
+        assert!(ty.fields[1].name == "second");
+        assert!(ty.fields[1].ty == TypeId::of::<u16>());
+        assert!(ty.fields[1].offset == offset_of!(TestStruct, second));
+        assert!(ty.fields[2].name == "reference");
+        assert!(ty.fields[2].ty != TypeId::of::<&'static u16>()); // FIXME(type_info): should be ==
+        assert!(ty.fields[2].offset == offset_of!(TestStruct, reference));
+    }
+
+    const {
+        #[non_exhaustive]
+        struct NonExhaustive {
+            a: u8,
+        }
+
+        let Type { kind: Struct(ty), .. } = Type::of::<NonExhaustive>() else { panic!() };
+        assert!(ty.non_exhaustive);
+    }
+
+    const {
+        struct TupleStruct(u8, u16);
+
+        let Type { kind: Struct(ty), .. } = Type::of::<TupleStruct>() else { panic!() };
+        assert!(ty.fields.len() == 2);
+        assert!(ty.fields[0].name == "0");
+        assert!(ty.fields[0].ty == TypeId::of::<u8>());
+        assert!(ty.fields[1].name == "1");
+        assert!(ty.fields[1].ty == TypeId::of::<u16>());
     }
 }
 

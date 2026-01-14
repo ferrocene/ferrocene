@@ -49,6 +49,8 @@ pub enum TypeKind {
     Slice(Slice),
     /// Dynamic Traits.
     DynTrait(DynTrait),
+    /// Structs.
+    Struct(Struct),
     /// Primitive boolean type.
     Bool(Bool),
     /// Primitive character type.
@@ -81,6 +83,8 @@ pub struct Tuple {
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Field {
+    /// The name of the field.
+    pub name: &'static str,
     /// The field's type.
     pub ty: TypeId,
     /// Offset in bytes from the parent type
@@ -135,6 +139,17 @@ pub struct Trait {
     pub ty: TypeId,
     /// Whether the trait is an auto trait
     pub is_auto: bool,
+}
+
+/// Compile-time type information about arrays.
+#[derive(Debug)]
+#[non_exhaustive]
+#[unstable(feature = "type_info", issue = "146922")]
+pub struct Struct {
+    /// All fields of the struct.
+    pub fields: &'static [Field],
+    /// Whether the struct field list is non-exhaustive.
+    pub non_exhaustive: bool,
 }
 
 /// Compile-time type information about `bool`.

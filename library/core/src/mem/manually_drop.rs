@@ -155,15 +155,8 @@ use crate::ptr;
 /// [`MaybeUninit`]: crate::mem::MaybeUninit
 #[stable(feature = "manually_drop", since = "1.20.0")]
 #[lang = "manually_drop"]
-<<<<<<< HEAD
-#[rustfmt::skip] // Ferrocene addition: avoid multi-line cfg_attr
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone, PartialEq))]
-||||||| f41f40408d7
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-=======
-#[derive(Copy, Clone, Debug, Default)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Default))]
+#[derive(Copy, Clone)]
 #[repr(transparent)]
 #[rustc_pub_transparent]
 pub struct ManuallyDrop<T: ?Sized> {

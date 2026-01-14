@@ -74,15 +74,9 @@ cfg_select! {
         unsafe extern "C" {}
     }
     _ => {
-        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
-<<<<<<< HEAD
-        #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
         #[cfg(not(ferrocene_facade_secretsauce))] // ferrocene addition: don't link to libgcc_s
-||||||| f41f40408d7
-        #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
-=======
+        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
         #[link(name = "gcc_s", cfg(all(not(target_feature = "crt-static"), not(target_arch = "hexagon"))))]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         unsafe extern "C" {}
     }
 }

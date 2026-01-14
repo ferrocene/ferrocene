@@ -7571,12 +7571,8 @@ pub fn vcvtq_f64_u64(a: uint64x2_t) -> float64x2_t {
 #[doc = "Floating-point convert to lower precision"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_high_f16_f32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fcvtn2))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
@@ -7586,12 +7582,8 @@ pub fn vcvt_high_f16_f32(a: float16x4_t, b: float32x4_t) -> float16x8_t {
 #[doc = "Floating-point convert to higher precision"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_high_f32_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(fcvtl2))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
@@ -28268,14 +28260,8 @@ pub fn vsubq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[cfg_attr(test, assert_instr(nop))]
-||||||| f41f40408d7
-#[cfg_attr(test, assert_instr(nop))]
-=======
 #[cfg_attr(test, assert_instr(sub))]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub fn vsubd_s64(a: i64, b: i64) -> i64 {
     a.wrapping_sub(b)
 }
@@ -28284,14 +28270,8 @@ pub fn vsubd_s64(a: i64, b: i64) -> i64 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[cfg_attr(test, assert_instr(nop))]
-||||||| f41f40408d7
-#[cfg_attr(test, assert_instr(nop))]
-=======
 #[cfg_attr(test, assert_instr(sub))]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub fn vsubd_u64(a: u64, b: u64) -> u64 {
     a.wrapping_sub(b)
 }

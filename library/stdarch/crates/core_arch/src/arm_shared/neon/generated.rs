@@ -7890,12 +7890,8 @@ pub fn vcntq_p8(a: poly8x16_t) -> poly8x16_t {
 #[doc = "Join two smaller vectors into a single larger vector"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcombine_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -8112,12 +8108,8 @@ pub fn vcombine_p64(a: poly64x1_t, b: poly64x1_t) -> poly64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcreate_f16)"]
 #[inline]
 #[cfg(target_endian = "little")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
@@ -8134,12 +8126,8 @@ pub fn vcreate_f16(a: u64) -> float16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcreate_f16)"]
 #[inline]
 #[cfg(target_endian = "big")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
@@ -8665,12 +8653,8 @@ pub fn vcreate_p64(a: u64) -> poly64x1_t {
 #[doc = "Floating-point convert to lower precision narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_f16_f32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -8750,12 +8734,8 @@ pub fn vcvtq_f16_u16(a: uint16x8_t) -> float16x8_t {
 #[doc = "Floating-point convert to higher precision long"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_f32_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -9595,12 +9575,8 @@ pub fn vcvtq_u32_f32(a: float32x4_t) -> uint32x4_t {
 #[doc = "Dot product arithmetic (indexed)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdot_lane_s32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsdot, LANE = 0))]
@@ -9629,6 +9605,7 @@ pub fn vdot_lane_s32<const LANE: i32>(a: int32x2_t, b: int8x8_t, c: int8x8_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdot_lane_s32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsdot, LANE = 0))]
@@ -9660,12 +9637,8 @@ pub fn vdot_lane_s32<const LANE: i32>(a: int32x2_t, b: int8x8_t, c: int8x8_t) ->
 #[doc = "Dot product arithmetic (indexed)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdotq_lane_s32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsdot, LANE = 0))]
@@ -9695,6 +9668,7 @@ pub fn vdotq_lane_s32<const LANE: i32>(a: int32x4_t, b: int8x16_t, c: int8x8_t) 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdotq_lane_s32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsdot, LANE = 0))]
@@ -9728,12 +9702,8 @@ pub fn vdotq_lane_s32<const LANE: i32>(a: int32x4_t, b: int8x16_t, c: int8x8_t) 
 #[doc = "Dot product arithmetic (indexed)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdot_lane_u32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vudot, LANE = 0))]
@@ -9762,6 +9732,7 @@ pub fn vdot_lane_u32<const LANE: i32>(a: uint32x2_t, b: uint8x8_t, c: uint8x8_t)
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdot_lane_u32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vudot, LANE = 0))]
@@ -9793,12 +9764,8 @@ pub fn vdot_lane_u32<const LANE: i32>(a: uint32x2_t, b: uint8x8_t, c: uint8x8_t)
 #[doc = "Dot product arithmetic (indexed)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdotq_lane_u32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vudot, LANE = 0))]
@@ -9828,6 +9795,7 @@ pub fn vdotq_lane_u32<const LANE: i32>(a: uint32x4_t, b: uint8x16_t, c: uint8x8_
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdotq_lane_u32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vudot, LANE = 0))]
@@ -9981,12 +9949,8 @@ pub fn vdotq_u32(a: uint32x4_t, b: uint8x16_t, c: uint8x16_t) -> uint32x4_t {
 #[doc = "Set all vector lanes to the same value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdup_lane_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16", N = 2))]
 #[cfg_attr(
@@ -10004,12 +9968,8 @@ pub fn vdup_lane_f16<const N: i32>(a: float16x4_t) -> float16x4_t {
 #[doc = "Set all vector lanes to the same value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdupq_lane_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16", N = 2))]
 #[cfg_attr(
@@ -10576,12 +10536,8 @@ pub fn vdup_lane_u64<const N: i32>(a: uint64x1_t) -> uint64x1_t {
 #[doc = "Set all vector lanes to the same value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdup_laneq_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16", N = 4))]
 #[cfg_attr(
@@ -10599,12 +10555,8 @@ pub fn vdup_laneq_f16<const N: i32>(a: float16x8_t) -> float16x4_t {
 #[doc = "Set all vector lanes to the same value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdupq_laneq_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vdup.16", N = 4))]
 #[cfg_attr(
@@ -13369,12 +13321,8 @@ pub fn vfmsq_n_f32(a: float32x4_t, b: float32x4_t, c: f32) -> float32x4_t {
 #[doc = "Duplicate vector element to vector"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vget_high_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -13386,12 +13334,8 @@ pub fn vget_high_f16(a: float16x8_t) -> float16x4_t {
 #[doc = "Duplicate vector element to vector"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vget_low_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -13636,12 +13580,8 @@ pub fn vget_high_u64(a: uint64x2_t) -> uint64x1_t {
 #[doc = "Duplicate vector element to scalar"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vget_lane_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -13659,12 +13599,8 @@ pub fn vget_lane_f16<const LANE: i32>(a: float16x4_t) -> f16 {
 #[doc = "Duplicate vector element to scalar"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vgetq_lane_f16)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -15073,12 +15009,8 @@ pub fn vhsubq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15097,12 +15029,8 @@ pub unsafe fn vld1_dup_f16(ptr: *const f16) -> float16x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15758,12 +15686,8 @@ pub unsafe fn vld1q_f16(ptr: *const f16) -> float16x8_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15789,12 +15713,8 @@ pub unsafe fn vld1_f16_x2(a: *const f16) -> float16x4x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15820,12 +15740,8 @@ pub unsafe fn vld1_f16_x3(a: *const f16) -> float16x4x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15851,12 +15767,8 @@ pub unsafe fn vld1_f16_x4(a: *const f16) -> float16x4x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15882,12 +15794,8 @@ pub unsafe fn vld1q_f16_x2(a: *const f16) -> float16x8x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15913,12 +15821,8 @@ pub unsafe fn vld1q_f16_x3(a: *const f16) -> float16x8x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
@@ -15944,544 +15848,112 @@ pub unsafe fn vld1q_f16_x4(a: *const f16) -> float16x8x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
-pub unsafe fn vld1_f32(ptr: *const f32) -> float32x2_t {
-<<<<<<< HEAD
-    transmute(vld1_v2f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
 pub unsafe fn vld1_f32(ptr: *const f32) -> float32x2_t {
-    let ret_val: float32x2_t = transmute(vld1_v2f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-||||||| f41f40408d7
-    transmute(vld1_v2f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
-pub unsafe fn vld1_f32(ptr: *const f32) -> float32x2_t {
-    let ret_val: float32x2_t = transmute(vld1_v2f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<f32>() as i32;
     transmute(vld1_v2f32::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
-pub unsafe fn vld1q_f32(ptr: *const f32) -> float32x4_t {
-<<<<<<< HEAD
-    transmute(vld1q_v4f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 pub unsafe fn vld1q_f32(ptr: *const f32) -> float32x4_t {
-    let ret_val: float32x4_t = transmute(vld1q_v4f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1q_v4f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
-pub unsafe fn vld1q_f32(ptr: *const f32) -> float32x4_t {
-    let ret_val: float32x4_t = transmute(vld1q_v4f32(
-        ptr as *const i8,
-        crate::mem::align_of::<f32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<f32>() as i32;
     transmute(vld1q_v4f32::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1_u8(ptr: *const u8) -> uint8x8_t {
-<<<<<<< HEAD
-    transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 pub unsafe fn vld1_u8(ptr: *const u8) -> uint8x8_t {
-    let ret_val: uint8x8_t = transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1_u8(ptr: *const u8) -> uint8x8_t {
-    let ret_val: uint8x8_t = transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<u8>() as i32;
     transmute(vld1_v8i8::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1q_u8(ptr: *const u8) -> uint8x16_t {
-<<<<<<< HEAD
-    transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 pub unsafe fn vld1q_u8(ptr: *const u8) -> uint8x16_t {
-    let ret_val: uint8x16_t = transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ));
-    simd_shuffle!(
-        ret_val,
-        ret_val,
-        [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-    )
-||||||| f41f40408d7
-    transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1q_u8(ptr: *const u8) -> uint8x16_t {
-    let ret_val: uint8x16_t = transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<u8>() as i32,
-    ));
-    simd_shuffle!(
-        ret_val,
-        ret_val,
-        [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-    )
-=======
     const ALIGN: i32 = crate::mem::align_of::<u8>() as i32;
     transmute(vld1q_v16i8::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1_u16(ptr: *const u16) -> uint16x4_t {
-<<<<<<< HEAD
-    transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 pub unsafe fn vld1_u16(ptr: *const u16) -> uint16x4_t {
-    let ret_val: uint16x4_t = transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1_u16(ptr: *const u16) -> uint16x4_t {
-    let ret_val: uint16x4_t = transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<u16>() as i32;
     transmute(vld1_v4i16::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1q_u16(ptr: *const u16) -> uint16x8_t {
-<<<<<<< HEAD
-    transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 pub unsafe fn vld1q_u16(ptr: *const u16) -> uint16x8_t {
-    let ret_val: uint16x8_t = transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1q_u16(ptr: *const u16) -> uint16x8_t {
-    let ret_val: uint16x8_t = transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<u16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<u16>() as i32;
     transmute(vld1q_v8i16::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
-pub unsafe fn vld1_u32(ptr: *const u32) -> uint32x2_t {
-<<<<<<< HEAD
-    transmute(vld1_v2i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
 pub unsafe fn vld1_u32(ptr: *const u32) -> uint32x2_t {
-    let ret_val: uint32x2_t = transmute(vld1_v2i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-||||||| f41f40408d7
-    transmute(vld1_v2i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
-pub unsafe fn vld1_u32(ptr: *const u32) -> uint32x2_t {
-    let ret_val: uint32x2_t = transmute(vld1_v2i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<u32>() as i32;
     transmute(vld1_v2i32::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
-pub unsafe fn vld1q_u32(ptr: *const u32) -> uint32x4_t {
-<<<<<<< HEAD
-    transmute(vld1q_v4i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
 pub unsafe fn vld1q_u32(ptr: *const u32) -> uint32x4_t {
-    let ret_val: uint32x4_t = transmute(vld1q_v4i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1q_v4i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.32"))]
-pub unsafe fn vld1q_u32(ptr: *const u32) -> uint32x4_t {
-    let ret_val: uint32x4_t = transmute(vld1q_v4i32(
-        ptr as *const i8,
-        crate::mem::align_of::<u32>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<u32>() as i32;
     transmute(vld1q_v4i32::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u64)"]
@@ -16502,410 +15974,84 @@ pub unsafe fn vld1_u64(ptr: *const u64) -> uint64x1_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.64"))]
-pub unsafe fn vld1q_u64(ptr: *const u64) -> uint64x2_t {
-<<<<<<< HEAD
-    transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<u64>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.64"))]
 pub unsafe fn vld1q_u64(ptr: *const u64) -> uint64x2_t {
-    let ret_val: uint64x2_t = transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<u64>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-||||||| f41f40408d7
-    transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<u64>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.64"))]
-pub unsafe fn vld1q_u64(ptr: *const u64) -> uint64x2_t {
-    let ret_val: uint64x2_t = transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<u64>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<u64>() as i32;
     transmute(vld1q_v2i64::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1_p8(ptr: *const p8) -> poly8x8_t {
-<<<<<<< HEAD
-    transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 pub unsafe fn vld1_p8(ptr: *const p8) -> poly8x8_t {
-    let ret_val: poly8x8_t = transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1_p8(ptr: *const p8) -> poly8x8_t {
-    let ret_val: poly8x8_t = transmute(vld1_v8i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<p8>() as i32;
     transmute(vld1_v8i8::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1q_p8(ptr: *const p8) -> poly8x16_t {
-<<<<<<< HEAD
-    transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
 pub unsafe fn vld1q_p8(ptr: *const p8) -> poly8x16_t {
-    let ret_val: poly8x16_t = transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ));
-    simd_shuffle!(
-        ret_val,
-        ret_val,
-        [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-    )
-||||||| f41f40408d7
-    transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8"))]
-pub unsafe fn vld1q_p8(ptr: *const p8) -> poly8x16_t {
-    let ret_val: poly8x16_t = transmute(vld1q_v16i8(
-        ptr as *const i8,
-        crate::mem::align_of::<p8>() as i32,
-    ));
-    simd_shuffle!(
-        ret_val,
-        ret_val,
-        [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-    )
-=======
     const ALIGN: i32 = crate::mem::align_of::<p8>() as i32;
     transmute(vld1q_v16i8::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1_p16(ptr: *const p16) -> poly16x4_t {
-<<<<<<< HEAD
-    transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 pub unsafe fn vld1_p16(ptr: *const p16) -> poly16x4_t {
-    let ret_val: poly16x4_t = transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1_p16(ptr: *const p16) -> poly16x4_t {
-    let ret_val: poly16x4_t = transmute(vld1_v4i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<p16>() as i32;
     transmute(vld1_v4i16::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1q_p16(ptr: *const p16) -> poly16x8_t {
-<<<<<<< HEAD
-    transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
 pub unsafe fn vld1q_p16(ptr: *const p16) -> poly16x8_t {
-    let ret_val: poly16x8_t = transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-||||||| f41f40408d7
-    transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,v7")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.16"))]
-pub unsafe fn vld1q_p16(ptr: *const p16) -> poly16x8_t {
-    let ret_val: poly16x8_t = transmute(vld1q_v8i16(
-        ptr as *const i8,
-        crate::mem::align_of::<p16>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<p16>() as i32;
     transmute(vld1q_v8i16::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(target_endian = "little")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-#[cfg(target_endian = "little")]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,aes")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.64"))]
-pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
-<<<<<<< HEAD
-    transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<p64>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,aes")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.64"))]
 pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
-    let ret_val: poly64x2_t = transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<p64>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-||||||| f41f40408d7
-    transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<p64>() as i32,
-    ))
-}
-#[doc = "Load multiple single-element structures to one, two, three, or four registers."]
-#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64)"]
-#[doc = "## Safety"]
-#[doc = "  * Neon instrinsic unsafe"]
-#[inline]
-#[cfg(target_endian = "big")]
-#[cfg(target_arch = "arm")]
-#[target_feature(enable = "neon,aes")]
-#[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.64"))]
-pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
-    let ret_val: poly64x2_t = transmute(vld1q_v2i64(
-        ptr as *const i8,
-        crate::mem::align_of::<p64>() as i32,
-    ));
-    simd_shuffle!(ret_val, ret_val, [1, 0])
-=======
     const ALIGN: i32 = crate::mem::align_of::<p64>() as i32;
     transmute(vld1q_v2i64::<ALIGN>(ptr as *const i8))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32_x2)"]
@@ -17104,12 +16250,8 @@ pub unsafe fn vld1q_f32_x4(a: *const f32) -> float32x4x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1, LANE = 0))]
 #[cfg_attr(
@@ -17129,12 +16271,8 @@ pub unsafe fn vld1_lane_f16<const LANE: i32>(ptr: *const f16, src: float16x4_t) 
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1, LANE = 0))]
 #[cfg_attr(
@@ -20847,12 +19985,8 @@ pub unsafe fn vld1q_p16_x4(a: *const p16) -> poly16x8x4_t {
     ret_val
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20865,12 +19999,8 @@ unsafe fn vld1_v1i64<const ALIGN: i32>(a: *const i8) -> int64x1_t {
     _vld1_v1i64(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20883,12 +20013,8 @@ unsafe fn vld1_v2f32<const ALIGN: i32>(a: *const i8) -> float32x2_t {
     _vld1_v2f32(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20901,12 +20027,8 @@ unsafe fn vld1_v2i32<const ALIGN: i32>(a: *const i8) -> int32x2_t {
     _vld1_v2i32(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20919,12 +20041,8 @@ unsafe fn vld1_v4i16<const ALIGN: i32>(a: *const i8) -> int16x4_t {
     _vld1_v4i16(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20937,12 +20055,8 @@ unsafe fn vld1_v8i8<const ALIGN: i32>(a: *const i8) -> int8x8_t {
     _vld1_v8i8(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20955,12 +20069,8 @@ unsafe fn vld1q_v16i8<const ALIGN: i32>(a: *const i8) -> int8x16_t {
     _vld1q_v16i8(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20973,12 +20083,8 @@ unsafe fn vld1q_v2i64<const ALIGN: i32>(a: *const i8) -> int64x2_t {
     _vld1q_v2i64(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -20991,12 +20097,8 @@ unsafe fn vld1q_v4f32<const ALIGN: i32>(a: *const i8) -> float32x4_t {
     _vld1q_v4f32(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -21009,12 +20111,8 @@ unsafe fn vld1q_v4i32<const ALIGN: i32>(a: *const i8) -> int32x4_t {
     _vld1q_v4i32(a, ALIGN)
 }
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[rustc_legacy_const_generics(1)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vld1.8", ALIGN = 0))]
@@ -21086,12 +20184,8 @@ pub unsafe fn vld1q_dup_p64(ptr: *const p64) -> poly64x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -21110,12 +20204,8 @@ pub unsafe fn vld2_dup_f16(a: *const f16) -> float16x4x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -21134,12 +20224,8 @@ pub unsafe fn vld2q_dup_f16(a: *const f16) -> float16x8x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -21163,12 +20249,8 @@ pub unsafe fn vld2_dup_f16(a: *const f16) -> float16x4x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -22127,12 +21209,8 @@ pub unsafe fn vld2q_dup_p16(a: *const p16) -> poly16x8x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld2))]
@@ -22151,12 +21229,8 @@ pub unsafe fn vld2_f16(a: *const f16) -> float16x4x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld2))]
@@ -22175,12 +21249,8 @@ pub unsafe fn vld2q_f16(a: *const f16) -> float16x8x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -22204,12 +21274,8 @@ pub unsafe fn vld2_f16(a: *const f16) -> float16x4x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -22583,12 +21649,8 @@ pub unsafe fn vld2q_lane_f16<const LANE: i32>(a: *const f16, b: float16x8x2_t) -
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -22615,12 +21677,8 @@ pub unsafe fn vld2_lane_f16<const LANE: i32>(a: *const f16, b: float16x4x2_t) ->
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -23823,12 +22881,8 @@ pub unsafe fn vld2q_p16(a: *const p16) -> poly16x8x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld3))]
@@ -23847,12 +22901,8 @@ pub unsafe fn vld3_dup_f16(a: *const f16) -> float16x4x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld3))]
@@ -23871,12 +22921,8 @@ pub unsafe fn vld3q_dup_f16(a: *const f16) -> float16x8x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -23900,12 +22946,8 @@ pub unsafe fn vld3_dup_f16(a: *const f16) -> float16x4x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -24886,12 +23928,8 @@ pub unsafe fn vld3q_dup_p16(a: *const p16) -> poly16x8x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld3))]
@@ -24910,12 +23948,8 @@ pub unsafe fn vld3_f16(a: *const f16) -> float16x4x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld3))]
@@ -24934,12 +23968,8 @@ pub unsafe fn vld3q_f16(a: *const f16) -> float16x8x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -24963,12 +23993,8 @@ pub unsafe fn vld3_f16(a: *const f16) -> float16x4x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -25344,12 +24370,8 @@ pub unsafe fn vld3q_lane_f16<const LANE: i32>(a: *const f16, b: float16x8x3_t) -
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -25381,12 +24403,8 @@ pub unsafe fn vld3_lane_f16<const LANE: i32>(a: *const f16, b: float16x4x3_t) ->
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -66564,12 +65582,8 @@ pub unsafe fn vst1q_f16_x3(a: *mut f16, b: float16x8x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -66594,12 +65608,8 @@ pub unsafe fn vst1_f16_x4(a: *mut f16, b: float16x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -67250,12 +66260,8 @@ pub unsafe fn vst1q_f32_x4(a: *mut f32, b: float32x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -67275,12 +66281,8 @@ pub unsafe fn vst1_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -70008,12 +69010,8 @@ pub unsafe fn vst1q_lane_p64<const LANE: i32>(a: *mut p64, b: poly64x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -70034,12 +69032,8 @@ pub unsafe fn vst2_f16(a: *mut f16, b: float16x4x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -70060,12 +69054,8 @@ pub unsafe fn vst2q_f16(a: *mut f16, b: float16x8x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -70084,12 +69074,8 @@ pub unsafe fn vst2_f16(a: *mut f16, b: float16x4x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -70404,12 +69390,8 @@ pub unsafe fn vst2q_s32(a: *mut i32, b: int32x4x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(st2, LANE = 0))]
@@ -70432,12 +69414,8 @@ pub unsafe fn vst2_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(st2, LANE = 0))]
@@ -70460,12 +69438,8 @@ pub unsafe fn vst2q_lane_f16<const LANE: i32>(a: *mut f16, b: float16x8x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -70486,12 +69460,8 @@ pub unsafe fn vst2_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -71332,12 +70302,8 @@ pub unsafe fn vst2q_p16(a: *mut p16, b: poly16x8x2_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -71356,12 +70322,8 @@ pub unsafe fn vst3_f16(a: *mut f16, b: float16x4x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -71380,12 +70342,8 @@ pub unsafe fn vst3q_f16(a: *mut f16, b: float16x8x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -71406,12 +70364,8 @@ pub unsafe fn vst3_f16(a: *mut f16, b: float16x4x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -71728,12 +70682,8 @@ pub unsafe fn vst3q_s32(a: *mut i32, b: int32x4x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -71761,12 +70711,8 @@ pub unsafe fn vst3_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -71794,12 +70740,8 @@ pub unsafe fn vst3q_lane_f16<const LANE: i32>(a: *mut f16, b: float16x8x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(st3, LANE = 0))]
@@ -71822,12 +70764,8 @@ pub unsafe fn vst3_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(st3, LANE = 0))]
@@ -72712,12 +71650,8 @@ pub unsafe fn vst3q_p16(a: *mut p16, b: poly16x8x3_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -72743,12 +71677,8 @@ pub unsafe fn vst4_f16(a: *mut f16, b: float16x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
@@ -72774,12 +71704,8 @@ pub unsafe fn vst4q_f16(a: *mut f16, b: float16x8x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -72800,12 +71726,8 @@ pub unsafe fn vst4_f16(a: *mut f16, b: float16x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
@@ -73171,12 +72093,8 @@ pub unsafe fn vst4q_s32(a: *mut i32, b: int32x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -73205,12 +72123,8 @@ pub unsafe fn vst4_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -73239,12 +72153,8 @@ pub unsafe fn vst4q_lane_f16<const LANE: i32>(a: *mut f16, b: float16x8x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(st4, LANE = 0))]
@@ -73274,12 +72184,8 @@ pub unsafe fn vst4_lane_f16<const LANE: i32>(a: *mut f16, b: float16x4x4_t) {
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[target_feature(enable = "neon")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(st4, LANE = 0))]
@@ -75228,12 +74134,8 @@ pub fn vsubw_u32(a: uint64x2_t, b: uint32x2_t) -> uint64x2_t {
 #[doc = "Dot product index form with signed and unsigned integers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsudot_lane_s32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsudot, LANE = 0))]
@@ -75262,6 +74164,7 @@ pub fn vsudot_lane_s32<const LANE: i32>(a: int32x2_t, b: int8x8_t, c: uint8x8_t)
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsudot_lane_s32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsudot, LANE = 0))]
@@ -75293,12 +74196,8 @@ pub fn vsudot_lane_s32<const LANE: i32>(a: int32x2_t, b: int8x8_t, c: uint8x8_t)
 #[doc = "Dot product index form with signed and unsigned integers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsudotq_lane_s32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsudot, LANE = 0))]
@@ -75328,6 +74227,7 @@ pub fn vsudotq_lane_s32<const LANE: i32>(a: int32x4_t, b: int8x16_t, c: uint8x8_
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsudotq_lane_s32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsudot, LANE = 0))]
@@ -77311,12 +76211,8 @@ pub fn vtstq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 #[doc = "Dot product index form with unsigned and signed integers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusdot_lane_s32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vusdot, LANE = 0))]
@@ -77345,6 +76241,7 @@ pub fn vusdot_lane_s32<const LANE: i32>(a: int32x2_t, b: uint8x8_t, c: int8x8_t)
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusdot_lane_s32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vusdot, LANE = 0))]
@@ -77376,12 +76273,8 @@ pub fn vusdot_lane_s32<const LANE: i32>(a: int32x2_t, b: uint8x8_t, c: int8x8_t)
 #[doc = "Dot product index form with unsigned and signed integers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusdotq_lane_s32)"]
 #[inline]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f41f40408d7
-=======
 #[cfg(target_endian = "little")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vusdot, LANE = 0))]
@@ -77411,6 +76304,7 @@ pub fn vusdotq_lane_s32<const LANE: i32>(a: int32x4_t, b: uint8x16_t, c: int8x8_
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusdotq_lane_s32)"]
 #[inline]
 #[cfg(target_endian = "big")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vusdot, LANE = 0))]

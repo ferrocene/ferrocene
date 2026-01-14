@@ -12218,12 +12218,8 @@ intrinsics:
     static_defs: ["const ALIGN: i32"]
     return_type: "{neon_type[2]}"
     attr:
-<<<<<<< HEAD
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
-||||||| f41f40408d7
-=======
       - FnCall: [rustc_legacy_const_generics, ['1']]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
       - *target-is-arm
       - *enable-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vld1.8"', "ALIGN = 0"]]}]]

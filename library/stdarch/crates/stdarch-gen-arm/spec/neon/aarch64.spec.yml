@@ -5919,16 +5919,8 @@ intrinsics:
     doc: "Subtract"
     arguments: ["a: {type[1]}", "b: {type[1]}"]
     return_type: "{type[1]}"
-<<<<<<< HEAD
     attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
-    assert_instr: [nop]
-||||||| f41f40408d7
-    attr: [*neon-stable]
-    assert_instr: [nop]
-=======
-    attr: [*neon-stable]
     assert_instr: [sub]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     safety: safe
     types:
       - ['d_s64', 'i64']

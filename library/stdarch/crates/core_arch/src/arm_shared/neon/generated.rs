@@ -21587,7 +21587,6 @@ pub unsafe fn vld2q_s32(a: *const i32) -> int32x4x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21607,7 +21606,6 @@ pub unsafe fn vld2_f32(a: *const f32) -> float32x2x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21627,7 +21625,6 @@ pub unsafe fn vld2q_f32(a: *const f32) -> float32x4x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21647,7 +21644,6 @@ pub unsafe fn vld2_s8(a: *const i8) -> int8x8x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21667,7 +21663,6 @@ pub unsafe fn vld2q_s8(a: *const i8) -> int8x16x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21687,7 +21682,6 @@ pub unsafe fn vld2_s16(a: *const i16) -> int16x4x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21707,7 +21701,6 @@ pub unsafe fn vld2q_s16(a: *const i16) -> int16x8x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -21727,7 +21720,6 @@ pub unsafe fn vld2_s32(a: *const i32) -> int32x2x2_t {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(ld2))]
@@ -29667,7 +29659,6 @@ pub fn vminnmq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmla_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmla.f32"))]
 #[cfg_attr(
@@ -29689,7 +29680,6 @@ pub fn vmla_f32(a: float32x2_t, b: float32x2_t, c: float32x2_t) -> float32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmlaq_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmla.f32"))]
 #[cfg_attr(
@@ -31263,7 +31253,6 @@ pub fn vmlal_u32(a: uint64x2_t, b: uint32x2_t, c: uint32x2_t) -> uint64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmls_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmls.f32"))]
 #[cfg_attr(
@@ -31285,7 +31274,6 @@ pub fn vmls_f32(a: float32x2_t, b: float32x2_t, c: float32x2_t) -> float32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmlsq_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vmls.f32"))]
 #[cfg_attr(
@@ -61955,7 +61943,6 @@ pub fn vsetq_lane_f16<const LANE: i32>(a: f16, b: float16x8_t) -> float16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -61979,7 +61966,6 @@ pub fn vset_lane_f32<const LANE: i32>(a: f32, b: float32x2_t) -> float32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_f32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62003,7 +61989,6 @@ pub fn vsetq_lane_f32<const LANE: i32>(a: f32, b: float32x4_t) -> float32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_s8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62027,7 +62012,6 @@ pub fn vset_lane_s8<const LANE: i32>(a: i8, b: int8x8_t) -> int8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_s8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62051,7 +62035,6 @@ pub fn vsetq_lane_s8<const LANE: i32>(a: i8, b: int8x16_t) -> int8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_s16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62075,7 +62058,6 @@ pub fn vset_lane_s16<const LANE: i32>(a: i16, b: int16x4_t) -> int16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_s16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62099,7 +62081,6 @@ pub fn vsetq_lane_s16<const LANE: i32>(a: i16, b: int16x8_t) -> int16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_s32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62123,7 +62104,6 @@ pub fn vset_lane_s32<const LANE: i32>(a: i32, b: int32x2_t) -> int32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_s32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62147,7 +62127,6 @@ pub fn vsetq_lane_s32<const LANE: i32>(a: i32, b: int32x4_t) -> int32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_s64)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62171,7 +62150,6 @@ pub fn vsetq_lane_s64<const LANE: i32>(a: i64, b: int64x2_t) -> int64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_u8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62195,7 +62173,6 @@ pub fn vset_lane_u8<const LANE: i32>(a: u8, b: uint8x8_t) -> uint8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_u8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62219,7 +62196,6 @@ pub fn vsetq_lane_u8<const LANE: i32>(a: u8, b: uint8x16_t) -> uint8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_u16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62243,7 +62219,6 @@ pub fn vset_lane_u16<const LANE: i32>(a: u16, b: uint16x4_t) -> uint16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_u16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62267,7 +62242,6 @@ pub fn vsetq_lane_u16<const LANE: i32>(a: u16, b: uint16x8_t) -> uint16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_u32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62291,7 +62265,6 @@ pub fn vset_lane_u32<const LANE: i32>(a: u32, b: uint32x2_t) -> uint32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_u32)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62315,7 +62288,6 @@ pub fn vsetq_lane_u32<const LANE: i32>(a: u32, b: uint32x4_t) -> uint32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_u64)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62339,7 +62311,6 @@ pub fn vsetq_lane_u64<const LANE: i32>(a: u64, b: uint64x2_t) -> uint64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_p8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62363,7 +62334,6 @@ pub fn vset_lane_p8<const LANE: i32>(a: p8, b: poly8x8_t) -> poly8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_p8)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62387,7 +62357,6 @@ pub fn vsetq_lane_p8<const LANE: i32>(a: p8, b: poly8x16_t) -> poly8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_p16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -62411,7 +62380,6 @@ pub fn vset_lane_p16<const LANE: i32>(a: p16, b: poly16x4_t) -> poly16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_p16)"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -69326,7 +69294,6 @@ pub unsafe fn vst2q_f16(a: *mut f16, b: float16x8x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69346,7 +69313,6 @@ pub unsafe fn vst2_f32(a: *mut f32, b: float32x2x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69366,7 +69332,6 @@ pub unsafe fn vst2q_f32(a: *mut f32, b: float32x4x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69386,7 +69351,6 @@ pub unsafe fn vst2_s8(a: *mut i8, b: int8x8x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69406,7 +69370,6 @@ pub unsafe fn vst2q_s8(a: *mut i8, b: int8x16x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69426,7 +69389,6 @@ pub unsafe fn vst2_s16(a: *mut i16, b: int16x4x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69446,7 +69408,6 @@ pub unsafe fn vst2q_s16(a: *mut i16, b: int16x8x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]
@@ -69466,7 +69427,6 @@ pub unsafe fn vst2_s32(a: *mut i32, b: int32x2x2_t) {
 #[doc = "  * Neon instrinsic unsafe"]
 #[inline]
 #[target_feature(enable = "neon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_arch = "arm"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(st2))]

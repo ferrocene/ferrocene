@@ -1941,7 +1941,6 @@ intrinsics:
     arguments: ["a: {neon_type}", "b: {neon_type}", "c: {neon_type}"]
     return_type: "{neon_type}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmla.f32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [fmul]]}]]
@@ -2995,7 +2994,6 @@ intrinsics:
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-stable
     assert_instr: [ld2]
@@ -5274,7 +5272,6 @@ intrinsics:
     doc: "Store multiple 2-element structures from two registers"
     arguments: ["a: *mut {type[0]}", "b: {neon_type[1]}"]
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *target-not-arm
       - *neon-stable
     assert_instr: [st2]
@@ -9474,7 +9471,6 @@ intrinsics:
     arguments: ["a: {type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[1]}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [nop, LANE = 0]]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [nop, 'LANE = 0']]}]]
@@ -10741,7 +10737,6 @@ intrinsics:
     arguments: ["a: {neon_type}", "b: {neon_type}", "c: {neon_type}"]
     return_type: "{neon_type}"
     attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, ['"vmls.f32"']]}]]
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [fmul]]}]]

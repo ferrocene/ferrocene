@@ -2921,7 +2921,6 @@ impl Display for Error {
 
 // Implementations of the core formatting traits
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! fmt_refs {
     ($($tr:ident),*) => {
         $(
@@ -2937,7 +2936,6 @@ macro_rules! fmt_refs {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperExp }
 
 #[unstable(feature = "never_type", issue = "35121")]

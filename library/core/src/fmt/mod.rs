@@ -306,7 +306,6 @@ pub enum DebugAsHex {
 /// It is mainly used to construct `Formatter` instances.
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///
@@ -336,7 +335,6 @@ pub struct FormattingOptions {
 }
 
 // This needs to match with compiler/rustc_ast_lowering/src/format.rs.
-#[cfg(not(feature = "ferrocene_subset"))]
 mod flags {
     pub(super) const SIGN_PLUS_FLAG: u32 = 1 << 21;
     pub(super) const SIGN_MINUS_FLAG: u32 = 1 << 22;
@@ -353,7 +351,6 @@ mod flags {
     pub(super) const ALIGN_UNKNOWN: u32 = 3 << 29;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl FormattingOptions {
     /// Construct a new `FormatterBuilder` with the supplied `Write` trait
     /// object for output that is equivalent to the `{}` formatting

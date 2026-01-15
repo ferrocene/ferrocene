@@ -306,9 +306,9 @@ pub enum DebugAsHex {
 ///
 /// `FormattingOptions` is a [`Formatter`] without an attached [`Write`] trait.
 /// It is mainly used to construct `Formatter` instances.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///

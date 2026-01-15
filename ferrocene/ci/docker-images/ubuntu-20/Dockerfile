@@ -99,7 +99,7 @@ RUN <<-EOF
       --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
       --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
       --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
-    
+
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
     # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
     apt-install gcc-arm-none-eabi
@@ -140,6 +140,7 @@ EOF
 # These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
 # image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
 RUN <<-EOF
+    set -xe
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         mkdir /opt/riscv-toolchain
         PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
@@ -340,4 +341,3 @@ WORKDIR /home/ci
 # We prefer uv over other solutions, it's in Rust and fast
 ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"
 RUN curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
-

@@ -1,7 +1,17 @@
+<! as core::fmt::Debug>::fmt
+<! as core::fmt::Display>::fmt
 <&'b str as core::str::pattern::Pattern>::into_searcher
 <&'b str as core::str::pattern::Pattern>::is_prefix_of
 <&T as core::borrow::Borrow<T>>::borrow
 <&T as core::convert::AsRef<U>>::as_ref
+<&T as core::fmt::Binary>::fmt
+<&T as core::fmt::Debug>::fmt
+<&T as core::fmt::Display>::fmt
+<&T as core::fmt::LowerExp>::fmt
+<&T as core::fmt::LowerHex>::fmt
+<&T as core::fmt::Octal>::fmt
+<&T as core::fmt::UpperExp>::fmt
+<&T as core::fmt::UpperHex>::fmt
 <&T as core::ops::deref::Deref>::deref
 <&bool as core::ops::bit::BitAnd<&bool>>::bitand
 <&bool as core::ops::bit::BitAnd<bool>>::bitand
@@ -462,8 +472,21 @@
 <&mut T as core::borrow::BorrowMut<T>>::borrow_mut
 <&mut T as core::convert::AsMut<U>>::as_mut
 <&mut T as core::convert::AsRef<U>>::as_ref
+<&mut T as core::fmt::Binary>::fmt
+<&mut T as core::fmt::Debug>::fmt
+<&mut T as core::fmt::Display>::fmt
+<&mut T as core::fmt::LowerExp>::fmt
+<&mut T as core::fmt::LowerHex>::fmt
+<&mut T as core::fmt::Octal>::fmt
+<&mut T as core::fmt::UpperExp>::fmt
+<&mut T as core::fmt::UpperHex>::fmt
 <&mut T as core::ops::deref::Deref>::deref
 <&mut T as core::ops::deref::DerefMut>::deref_mut
+<&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt
+<&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt
+<&mut W as core::fmt::Write>::write_char
+<&mut W as core::fmt::Write>::write_fmt
+<&mut W as core::fmt::Write>::write_str
 <&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnMut<(usize,)>>::call_mut
 <&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnOnce<(usize,)>>::call_once
 <&u128 as core::ops::arith::Add<&u128>>::add
@@ -931,6 +954,12 @@
 <core::array::iter::iter_inner::PolymorphicIter<DATA> as core::ops::drop::Drop>::drop
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone::clone_into_new
+<core::ascii::ascii_char::AsciiChar as core::clone::Clone>::clone
+<core::ascii::ascii_char::AsciiChar as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ascii::ascii_char::AsciiChar as core::cmp::Ord>::cmp
+<core::ascii::ascii_char::AsciiChar as core::cmp::PartialEq>::eq
+<core::ascii::ascii_char::AsciiChar as core::cmp::PartialOrd>::partial_cmp
+<core::ascii::ascii_char::AsciiChar as core::hash::Hash>::hash
 <core::cell::BorrowRef<'_> as core::ops::drop::Drop>::drop
 <core::cell::BorrowRefMut<'_> as core::ops::drop::Drop>::drop
 <core::cell::Ref<'_, T> as core::ops::deref::Deref>::deref
@@ -945,6 +974,12 @@
 <core::cmp::Ordering as core::cmp::PartialOrd>::partial_cmp
 <core::convert::Infallible as core::clone::Clone>::clone
 <core::convert::Infallible as core::cmp::PartialEq>::eq
+<core::fmt::Arguments<'a> as core::clone::Clone>::clone
+<core::fmt::Formatter<'_> as core::fmt::Write>::write_char
+<core::fmt::Formatter<'_> as core::fmt::Write>::write_fmt
+<core::fmt::Formatter<'_> as core::fmt::Write>::write_str
+<core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
+<core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
 <core::intrinsics::AtomicOrdering as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::intrinsics::AtomicOrdering as core::cmp::PartialEq>::eq
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
@@ -3706,6 +3741,48 @@ core::ffi::c_str::strlen
 core::ffi::c_str::strlen::compiletime
 core::ffi::c_str::strlen::runtime
 core::ffi::c_str::strlen::runtime::strlen
+core::fmt::Arguments::<'a>::as_statically_known_str
+core::fmt::Arguments::<'a>::as_str
+core::fmt::Arguments::<'a>::estimated_capacity
+core::fmt::Arguments::<'a>::from_str
+core::fmt::Arguments::<'a>::from_str_nonconst
+core::fmt::Arguments::<'a>::new
+core::fmt::Formatter::<'a>::new
+core::fmt::Formatter::<'a>::with_options
+core::fmt::FormattingOptions::align
+core::fmt::FormattingOptions::alternate
+core::fmt::FormattingOptions::create_formatter
+core::fmt::FormattingOptions::debug_as_hex
+core::fmt::FormattingOptions::fill
+core::fmt::FormattingOptions::get_align
+core::fmt::FormattingOptions::get_alternate
+core::fmt::FormattingOptions::get_debug_as_hex
+core::fmt::FormattingOptions::get_fill
+core::fmt::FormattingOptions::get_precision
+core::fmt::FormattingOptions::get_sign
+core::fmt::FormattingOptions::get_sign_aware_zero_pad
+core::fmt::FormattingOptions::get_width
+core::fmt::FormattingOptions::new
+core::fmt::FormattingOptions::precision
+core::fmt::FormattingOptions::sign
+core::fmt::FormattingOptions::sign_aware_zero_pad
+core::fmt::FormattingOptions::width
+core::fmt::Write::write_char
+core::fmt::Write::write_fmt
+core::fmt::rt::Argument::<'_>::as_u16
+core::fmt::rt::Argument::<'_>::fmt
+core::fmt::rt::Argument::<'_>::from_usize
+core::fmt::rt::Argument::<'_>::new_binary
+core::fmt::rt::Argument::<'_>::new_debug
+core::fmt::rt::Argument::<'_>::new_debug_noop
+core::fmt::rt::Argument::<'_>::new_display
+core::fmt::rt::Argument::<'_>::new_lower_exp
+core::fmt::rt::Argument::<'_>::new_lower_hex
+core::fmt::rt::Argument::<'_>::new_octal
+core::fmt::rt::Argument::<'_>::new_pointer
+core::fmt::rt::Argument::<'_>::new_upper_exp
+core::fmt::rt::Argument::<'_>::new_upper_hex
+core::fmt::write
 core::hash::Hash::hash_slice
 core::hash::Hasher::write_i128
 core::hash::Hasher::write_i16
@@ -3775,6 +3852,7 @@ core::intrinsics::assume
 core::intrinsics::cold_path
 core::intrinsics::const_make_global
 core::intrinsics::disjoint_bitor
+core::intrinsics::is_val_statically_known
 core::intrinsics::likely
 core::intrinsics::overflow_checks
 core::intrinsics::ptr_guaranteed_cmp
@@ -4788,6 +4866,7 @@ core::ptr::non_null::NonNull::<T>::as_mut
 core::ptr::non_null::NonNull::<T>::as_ptr
 core::ptr::non_null::NonNull::<T>::as_ref
 core::ptr::non_null::NonNull::<T>::cast
+core::ptr::non_null::NonNull::<T>::cast_array
 core::ptr::non_null::NonNull::<T>::from_mut
 core::ptr::non_null::NonNull::<T>::from_ref
 core::ptr::non_null::NonNull::<T>::new_unchecked
@@ -4994,6 +5073,8 @@ core::str::<impl str>::is_empty
 core::str::<impl str>::len
 core::str::<impl str>::parse
 core::str::<impl str>::starts_with
+core::str::converts::from_raw_parts
+core::str::converts::from_raw_parts_mut
 core::str::converts::from_utf8
 core::str::converts::from_utf8_mut
 core::str::converts::from_utf8_unchecked

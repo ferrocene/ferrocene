@@ -164,7 +164,6 @@ const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>
 }
 
 #[derive(Clone, Copy)]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 union MaybeEscapedCharacter<const N: usize> {
     pub escape_seq: [ascii::Char; N],
     pub literal: char,
@@ -328,7 +327,6 @@ impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
     // the `literal` variant of its `self.data`, meaning the `AlwaysEscaped` marker
     // guarantees that `self.data` contains printable ASCII characters in its
     // `escape_seq` variant.
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn printable(c: char) -> Self {
         Self {
             data: MaybeEscapedCharacter { literal: c },

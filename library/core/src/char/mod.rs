@@ -342,7 +342,6 @@ pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 impl EscapeDebug {
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     const fn printable(chr: char) -> Self {
         Self(EscapeIterInner::printable(chr))
     }

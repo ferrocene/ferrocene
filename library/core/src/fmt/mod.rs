@@ -281,9 +281,8 @@ impl<W: Write + ?Sized> Write for &mut W {
 }
 
 /// The signedness of a [`Formatter`] (or of a [`FormattingOptions`]).
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum Sign {
     /// Represents the `+` flag.
     Plus,
@@ -293,9 +292,8 @@ pub enum Sign {
 
 /// Specifies whether the [`Debug`] trait should use lower-/upper-case
 /// hexadecimal or normal integers.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum DebugAsHex {
     /// Use lower-case hexadecimal integers for the `Debug` trait (like [the `x?` type](../../std/fmt/index.html#formatting-traits)).
     Lower,

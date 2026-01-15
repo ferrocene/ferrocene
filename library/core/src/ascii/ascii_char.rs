@@ -3,7 +3,9 @@
 //! suggestions from rustc if you get anything slightly wrong in here, and overall
 //! helps with clarity as we're also referring to `char` intentionally in here.
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::transmute;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{assert_unsafe_precondition, fmt};
 
 /// One of the 128 Unicode characters from U+0000 through U+007F,
@@ -58,6 +60,7 @@ use crate::{assert_unsafe_precondition, fmt};
 #[derive_const(Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[unstable(feature = "ascii_char", issue = "110998")]
 #[repr(u8)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub enum AsciiChar {
     /// U+0000 (The default variant)
     #[unstable(feature = "ascii_char_variants", issue = "110998")]
@@ -445,6 +448,7 @@ pub enum AsciiChar {
     Delete = 127,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl AsciiChar {
     /// The character with the lowest ASCII code.
     #[unstable(feature = "ascii_char", issue = "110998")]
@@ -1153,6 +1157,7 @@ impl AsciiChar {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! into_int_impl {
     ($($ty:ty)*) => {
         $(
@@ -1168,8 +1173,10 @@ macro_rules! into_int_impl {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 into_int_impl!(u8 u16 u32 u64 u128 char);
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl [AsciiChar] {
     /// Views this slice of ASCII characters as a UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
@@ -1191,6 +1198,7 @@ impl [AsciiChar] {
 }
 
 #[unstable(feature = "ascii_char", issue = "110998")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for AsciiChar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <str as fmt::Display>::fmt(self.as_str(), f)
@@ -1198,6 +1206,7 @@ impl fmt::Display for AsciiChar {
 }
 
 #[unstable(feature = "ascii_char", issue = "110998")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for AsciiChar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use AsciiChar::{Apostrophe, Null, ReverseSolidus as Backslash};

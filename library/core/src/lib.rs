@@ -338,7 +338,6 @@ pub mod ops;
 
 pub mod any;
 pub mod array;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ascii;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod asserting;

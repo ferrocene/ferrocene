@@ -9,14 +9,19 @@
 
 #![stable(feature = "core_ascii", since = "1.26.0")]
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::escape::{AlwaysEscaped, EscapeIterInner};
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::FusedIterator;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
 mod ascii_char;
 #[doc(alias("AsciiChar"))]
 #[unstable(feature = "ascii_char", issue = "110998")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use ascii_char::AsciiChar as Char;
 
 /// An iterator over the escaped version of a byte.
@@ -26,6 +31,7 @@ pub use ascii_char::AsciiChar as Char;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Clone)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeDefault(EscapeIterInner<4, AlwaysEscaped>);
 
 /// Returns an iterator that produces an escaped version of a `u8`.
@@ -91,10 +97,12 @@ pub struct EscapeDefault(EscapeIterInner<4, AlwaysEscaped>);
 /// assert_eq!(b'd', escaped.next().unwrap());
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn escape_default(c: u8) -> EscapeDefault {
     EscapeDefault::new(c)
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeDefault {
     #[inline]
     pub(crate) const fn new(c: u8) -> Self {
@@ -108,6 +116,7 @@ impl EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for EscapeDefault {
     type Item = u8;
 
@@ -139,6 +148,7 @@ impl Iterator for EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl DoubleEndedIterator for EscapeDefault {
     #[inline]
     fn next_back(&mut self) -> Option<u8> {
@@ -152,6 +162,7 @@ impl DoubleEndedIterator for EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDefault {
     #[inline]
     fn len(&self) -> usize {
@@ -160,9 +171,11 @@ impl ExactSizeIterator for EscapeDefault {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for EscapeDefault {}
 
 #[stable(feature = "ascii_escape_display", since = "1.39.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for EscapeDefault {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.0, f)
@@ -170,6 +183,7 @@ impl fmt::Display for EscapeDefault {
 }
 
 #[stable(feature = "std_debug", since = "1.16.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for EscapeDefault {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EscapeDefault").finish_non_exhaustive()

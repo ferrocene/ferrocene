@@ -58,6 +58,9 @@ use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomA
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
+#[cfg(feature = "ferrocene_subset")]
+use crate::escape::{EscapeIterInner, MaybeEscaped};
+
 // UTF-8 ranges and tags for encoding characters
 const TAG_CONT: u8 = 0b1000_0000;
 const TAG_TWO_B: u8 = 0b1100_0000;
@@ -333,8 +336,8 @@ impl fmt::Display for EscapeDefault {
 ///
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[derive(Clone, Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
 #[cfg(not(feature = "ferrocene_subset"))]

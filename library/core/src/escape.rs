@@ -1,14 +1,11 @@
 //! Helper code for character escaping.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Write};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::PhantomData;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Range;
 
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -170,7 +167,7 @@ const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>
 }
 
 #[derive(Clone, Copy)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 union MaybeEscapedCharacter<const N: usize> {
     pub escape_seq: [ascii::Char; N],
     pub literal: char,
@@ -187,12 +184,11 @@ pub(crate) struct AlwaysEscaped;
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
 #[non_exhaustive]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct MaybeEscaped;
 
 /// An iterator over a possibly escaped character.
 #[derive(Clone)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub(crate) struct EscapeIterInner<const N: usize, ESCAPING> {
     // Invariant:
     //

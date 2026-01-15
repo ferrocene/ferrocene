@@ -588,7 +588,6 @@ pub struct Formatter<'a> {
     buf: &'a mut (dyn Write + 'a),
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Formatter<'a> {
     /// Creates a new formatter with given [`FormattingOptions`].
     ///

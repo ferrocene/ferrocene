@@ -1,17 +1,24 @@
 //! Helper code for character escaping.
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Write};
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::PhantomData;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Range;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 const HEX_DIGITS: [ascii::Char; 16] = *b"0123456789abcdef".as_ascii().unwrap();
 
 /// Escapes a character with `\x` representation.
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
 #[inline]
+#[cfg(not(feature = "ferrocene_subset"))]
 const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 2) };
 
@@ -27,6 +34,7 @@ const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
 #[inline]
+#[cfg(not(feature = "ferrocene_subset"))]
 const fn hex_escape<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 4) };
 
@@ -45,6 +53,7 @@ const fn hex_escape<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
 
 /// Returns a buffer with the verbatim character and its corresponding range.
 #[inline]
+#[cfg(not(feature = "ferrocene_subset"))]
 const fn verbatim<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 1) };
 
@@ -58,6 +67,7 @@ const fn verbatim<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8
 /// Escapes an ASCII character.
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
+#[cfg(not(feature = "ferrocene_subset"))]
 const fn escape_ascii<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 4) };
 
@@ -134,6 +144,7 @@ const fn escape_ascii<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>)
 /// Escapes a character with `\u{NNNN}` representation.
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
+#[cfg(not(feature = "ferrocene_subset"))]
 const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 10 && N < u8::MAX as usize) };
 
@@ -159,6 +170,7 @@ const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>
 }
 
 #[derive(Clone, Copy)]
+#[cfg(not(feature = "ferrocene_subset"))]
 union MaybeEscapedCharacter<const N: usize> {
     pub escape_seq: [ascii::Char; N],
     pub literal: char,
@@ -168,16 +180,19 @@ union MaybeEscapedCharacter<const N: usize> {
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
 #[non_exhaustive]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct AlwaysEscaped;
 
 /// Marker type to indicate that the character may be escaped,
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
 #[non_exhaustive]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct MaybeEscaped;
 
 /// An iterator over a possibly escaped character.
 #[derive(Clone)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct EscapeIterInner<const N: usize, ESCAPING> {
     // Invariant:
     //
@@ -192,6 +207,7 @@ pub(crate) struct EscapeIterInner<const N: usize, ESCAPING> {
     escaping: PhantomData<ESCAPING>,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     const LITERAL_ESCAPE_START: u8 = 128;
 
@@ -285,6 +301,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> EscapeIterInner<N, AlwaysEscaped> {
     pub(crate) fn next(&mut self) -> Option<u8> {
         let i = self.alive.next()?;
@@ -307,6 +324,7 @@ impl<const N: usize> EscapeIterInner<N, AlwaysEscaped> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
     // This is the only way to create any `EscapeIterInner` containing a `char` in
     // the `literal` variant of its `self.data`, meaning the `AlwaysEscaped` marker
@@ -336,6 +354,7 @@ impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Display for EscapeIterInner<N, AlwaysEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // SAFETY: The `AlwaysEscaped` marker guarantees that `self.data`
@@ -345,6 +364,7 @@ impl<const N: usize> fmt::Display for EscapeIterInner<N, AlwaysEscaped> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Display for EscapeIterInner<N, MaybeEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(c) = self.to_char() {
@@ -358,12 +378,14 @@ impl<const N: usize> fmt::Display for EscapeIterInner<N, MaybeEscaped> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Debug for EscapeIterInner<N, AlwaysEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("EscapeIterInner").field(&format_args!("'{}'", self)).finish()
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Debug for EscapeIterInner<N, MaybeEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("EscapeIterInner").field(&format_args!("'{}'", self)).finish()

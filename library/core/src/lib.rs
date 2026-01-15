@@ -402,7 +402,6 @@ pub mod alloc;
 
 // note: does not need to be public
 mod bool;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod escape;
 mod tuple;
 #[cfg(not(feature = "ferrocene_subset"))]

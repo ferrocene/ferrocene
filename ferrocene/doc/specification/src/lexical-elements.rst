@@ -1384,7 +1384,7 @@ extend exactly one :t:`line`.
 :t:`[Inner block doc]s` and :t:`[inner line doc]s` are equivalent to
 :t:`attribute` :c:`doc` of the form ``#![doc = content]``, where ``content``
 is a :t:`string literal` form of the :t:`comment` without the leading ``//!``,
-``/*!`` amd trailing ``*/`` characters.
+``/*!`` and trailing ``*/`` characters.
 
 :dp:`fls_nWtKuPi8Fw6v`
 :t:`[Outer block doc]s` and :t:`[outer line doc]s` are equivalent to

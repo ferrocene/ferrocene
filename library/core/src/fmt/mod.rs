@@ -19,7 +19,7 @@ use crate::ptr::NonNull;
 use crate::{iter, mem, result, str};
 
 #[cfg(feature = "ferrocene_subset")]
-use crate::marker::PhantomData;
+use crate::{marker::PhantomData, result};
 
 #[cfg(not(feature = "ferrocene_subset"))]
 mod builders;
@@ -88,7 +88,6 @@ pub use self::builders::{FromFn, from_fn};
 /// assert_eq!(format!("{pythagorean_triple}"), "(3, 4, 5)");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub type Result = result::Result<(), Error>;
 
 /// The error type which is returned from formatting a message into a stream.
@@ -125,8 +124,10 @@ pub type Result = result::Result<(), Error>;
 /// }
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(
+    not(feature = "ferrocene_subset"),
+    derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)
+)]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -139,7 +140,6 @@ pub struct Error;
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "FmtWrite"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.
@@ -231,6 +231,7 @@ pub trait Write {
     /// # std::fmt::Result::Ok(())
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         // We use a specialization for `Sized` types to avoid an indirection
         // through `&mut self`

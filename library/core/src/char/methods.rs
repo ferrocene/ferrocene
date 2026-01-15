@@ -11,6 +11,9 @@ use crate::unicode::printable::is_printable;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::{self, conversions};
 
+#[cfg(feature = "ferrocene_subset")]
+use crate::unicode;
+
 impl char {
     /// The lowest valid code point a `char` can have, `'\0'`.
     ///
@@ -987,7 +990,7 @@ impl char {
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
+    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     pub(crate) fn is_grapheme_extended(self) -> bool {
         !self.is_ascii() && unicode::Grapheme_Extend(self)
     }
@@ -1251,7 +1254,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_is_ascii", since = "1.32.0")]
     #[rustc_diagnostic_item = "char_is_ascii"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii(&self) -> bool {
         *self as u32 <= 0x7F
     }

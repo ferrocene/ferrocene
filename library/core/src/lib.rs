@@ -109,7 +109,7 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_select_unpredictable))]
+#![feature(const_select_unpredictable)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]

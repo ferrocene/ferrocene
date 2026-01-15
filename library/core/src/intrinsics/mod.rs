@@ -56,10 +56,7 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ffi::va_list::{VaArgSafe, VaList};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{ConstParamTy, Destruct, DiscriminantKind, PointeeSized, Tuple};
-#[cfg(feature = "ferrocene_subset")]
-use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
 use crate::{mem, ptr};
 
 mod bounds;
@@ -500,7 +497,6 @@ pub const fn unlikely(b: bool) -> bool {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T
 where
     T: [const] Destruct,

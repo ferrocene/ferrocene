@@ -14,7 +14,6 @@ pub use unicode_data::conversions;
 #[rustfmt::skip]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::alphabetic::lookup as Alphabetic;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::grapheme_extend::lookup as Grapheme_Extend;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::lowercase::lookup as Lowercase;

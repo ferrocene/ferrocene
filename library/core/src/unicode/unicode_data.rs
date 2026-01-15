@@ -60,10 +60,8 @@ const fn bitset_search<
 }
 
 #[repr(transparent)]
-#[cfg(not(feature = "ferrocene_subset"))]
 struct ShortOffsetRunHeader(u32);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ShortOffsetRunHeader {
     const fn new(start_index: usize, prefix_sum: u32) -> Self {
         assert!(start_index < (1 << 11));
@@ -88,7 +86,6 @@ impl ShortOffsetRunHeader {
 /// - The last element of `short_offset_runs` must be greater than `std::char::MAX`.
 /// - The start indices of all elements in `short_offset_runs` must be less than `OFFSETS`.
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe fn skip_search<const SOR: usize, const OFFSETS: usize>(
     needle: char,
     short_offset_runs: &[ShortOffsetRunHeader; SOR],
@@ -398,7 +395,6 @@ pub mod cased {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod grapheme_extend {
     use super::ShortOffsetRunHeader;
 

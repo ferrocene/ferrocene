@@ -17,7 +17,7 @@ use crate::ptr::NonNull;
 use crate::{iter, mem, result, str};
 
 #[cfg(feature = "ferrocene_subset")]
-use crate::{mem, result};
+use crate::{mem, result, str};
 
 #[cfg(not(feature = "ferrocene_subset"))]
 mod builders;

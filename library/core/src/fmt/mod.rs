@@ -37,8 +37,7 @@ mod rt;
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
 #[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
 pub enum Alignment {
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
     /// Indication that contents should be left-aligned.

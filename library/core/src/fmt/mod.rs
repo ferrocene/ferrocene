@@ -8,7 +8,6 @@ use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 use crate::char::EscapeDebugExtArgs;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::assert_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{PhantomData, PointeeSized};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::fmt as numfmt;
@@ -19,7 +18,7 @@ use crate::ptr::NonNull;
 use crate::{iter, mem, result, str};
 
 #[cfg(feature = "ferrocene_subset")]
-use crate::{marker::PhantomData, result};
+use crate::result;
 
 #[cfg(not(feature = "ferrocene_subset"))]
 mod builders;
@@ -1087,7 +1086,6 @@ impl Display for Arguments<'_> {
 #[doc(alias = "{:?}")]
 #[rustc_diagnostic_item = "Debug"]
 #[rustc_trivial_field_reads]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Debug: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1123,7 +1121,6 @@ pub trait Debug: PointeeSized {
 }
 
 // Separate module to reexport the macro `Debug` from prelude without the trait `Debug`.
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod macros {
     /// Derive macro generating an impl of the trait `Debug`.
     #[rustc_builtin_macro]
@@ -1135,7 +1132,6 @@ pub(crate) mod macros {
 }
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(inline)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use macros::Debug;
 
 /// Format trait for an empty format, `{}`.

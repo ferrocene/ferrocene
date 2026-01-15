@@ -39,7 +39,6 @@ enum ArgumentType<'a> {
 #[derive(Copy, Clone)]
 #[repr(align(2))] // To ensure pointers to this struct always have their lowest bit cleared.
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
-#[cfg_attr(feature = "ferrocene_subset", expect(unreachable_pub))]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }

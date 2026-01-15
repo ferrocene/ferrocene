@@ -743,7 +743,6 @@ pub struct Arguments<'a> {
 #[doc(hidden)]
 #[rustc_diagnostic_item = "FmtArgumentsNew"]
 #[unstable(feature = "fmt_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Arguments<'a> {
     // SAFETY: The caller must ensure that the provided template and args encode a valid
     // fmt::Arguments, as documented above.
@@ -767,7 +766,6 @@ impl<'a> Arguments<'a> {
 
 #[doc(hidden)]
 #[unstable(feature = "fmt_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Arguments<'a> {
     /// Estimates the length of the formatted text.
     ///

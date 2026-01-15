@@ -6,11 +6,15 @@
 //!
 //! Do not modify them without understanding the consequences for the format_args!() macro.
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use super::*;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::unreachable_unchecked;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::NonNull;
 
 #[derive(Copy, Clone)]
+#[cfg(not(feature = "ferrocene_subset"))]
 enum ArgumentType<'a> {
     Placeholder {
         // INVARIANT: `formatter` has type `fn(&T, _) -> _` for some `T`, and `value`
@@ -35,10 +39,12 @@ enum ArgumentType<'a> {
 #[lang = "format_argument"]
 #[derive(Copy, Clone)]
 #[repr(align(2))] // To ensure pointers to this struct always have their lowest bit cleared.
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! argument_new {
     ($t:ty, $x:expr, $f:expr) => {
         Argument {
@@ -84,6 +90,7 @@ macro_rules! argument_new {
     };
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Argument<'_> {
     #[inline]
     pub const fn new_display<T: Display>(x: &T) -> Argument<'_> {

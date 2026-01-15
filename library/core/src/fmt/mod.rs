@@ -31,7 +31,6 @@ mod nofloat;
 mod num;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod num_buffer;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]

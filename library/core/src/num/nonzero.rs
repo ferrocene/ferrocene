@@ -1730,7 +1730,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn ilog10(self) -> u32 {
             super::int_log10::$Int(self)
         }

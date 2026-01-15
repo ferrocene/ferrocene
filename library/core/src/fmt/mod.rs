@@ -18,7 +18,7 @@ use crate::ptr::NonNull;
 use crate::{iter, mem, result, str};
 
 #[cfg(feature = "ferrocene_subset")]
-use crate::result;
+use crate::{mem, result};
 
 #[cfg(not(feature = "ferrocene_subset"))]
 mod builders;
@@ -737,7 +737,6 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct Arguments<'a> {
     template: NonNull<u8>,
     args: NonNull<rt::Argument<'a>>,
@@ -833,7 +832,6 @@ impl<'a> Arguments<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Arguments<'a> {
     /// Create a `fmt::Arguments` object for a single static string.
     ///

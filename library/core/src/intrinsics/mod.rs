@@ -2667,7 +2667,6 @@ pub(crate) macro const_eval_select {
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
     false
 }

@@ -21,7 +21,6 @@ use crate::num::NonZero;
 mod ascii_char;
 #[doc(alias("AsciiChar"))]
 #[unstable(feature = "ascii_char", issue = "110998")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use ascii_char::AsciiChar as Char;
 
 /// An iterator over the escaped version of a byte.

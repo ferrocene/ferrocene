@@ -60,7 +60,6 @@ use crate::{assert_unsafe_precondition, fmt};
 #[derive_const(Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[unstable(feature = "ascii_char", issue = "110998")]
 #[repr(u8)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum AsciiChar {
     /// U+0000 (The default variant)
     #[unstable(feature = "ascii_char_variants", issue = "110998")]

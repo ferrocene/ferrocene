@@ -179,7 +179,6 @@ impl const TryFrom<char> for u16 {
 /// `ascii`, `iso-8859-1`, and `windows-1252` are all aliases
 /// for a superset of Windows-1252 that fills the remaining blanks with corresponding
 /// C0 and C1 control codes.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "char_convert", since = "1.13.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const From<u8> for char {

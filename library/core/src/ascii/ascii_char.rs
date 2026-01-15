@@ -447,20 +447,22 @@ pub enum AsciiChar {
     Delete = 127,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl AsciiChar {
     /// The character with the lowest ASCII code.
     #[unstable(feature = "ascii_char", issue = "110998")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const MIN: Self = Self::Null;
 
     /// The character with the highest ASCII code.
     #[unstable(feature = "ascii_char", issue = "110998")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const MAX: Self = Self::Delete;
 
     /// Creates an ASCII character from the byte `b`,
     /// or returns `None` if it's too large.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_u8(b: u8) -> Option<Self> {
         if b <= 127 {
             // SAFETY: Just checked that `b` is in-range
@@ -478,6 +480,7 @@ impl AsciiChar {
     /// `b` must be in `0..=127`, or else this is UB.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn from_u8_unchecked(b: u8) -> Self {
         // SAFETY: Our safety precondition is that `b` is in-range.
         unsafe { transmute(b) }
@@ -489,6 +492,7 @@ impl AsciiChar {
     /// If `d >= 10`, returns `None`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn digit(d: u8) -> Option<Self> {
         if d < 10 {
             // SAFETY: Just checked it's in-range.
@@ -516,6 +520,7 @@ impl AsciiChar {
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn digit_unchecked(d: u8) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -542,6 +547,7 @@ impl AsciiChar {
     /// Gets this ASCII character as a `char` Unicode Scalar Value.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_char(self) -> char {
         self as u8 as char
     }
@@ -549,6 +555,7 @@ impl AsciiChar {
     /// Views this ASCII character as a one-code-unit UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_str(&self) -> &str {
         crate::slice::from_ref(self).as_str()
     }
@@ -577,6 +584,7 @@ impl AsciiChar {
     #[must_use = "to uppercase the value in-place, use `make_uppercase()`"]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_uppercase(self) -> Self {
         let uppercase_byte = self.to_u8().to_ascii_uppercase();
         // SAFETY: Toggling the 6th bit won't convert ASCII to non-ASCII.
@@ -607,6 +615,7 @@ impl AsciiChar {
     #[must_use = "to lowercase the value in-place, use `make_lowercase()`"]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_lowercase(self) -> Self {
         let lowercase_byte = self.to_u8().to_ascii_lowercase();
         // SAFETY: Setting the 6th bit won't convert ASCII to non-ASCII.
@@ -630,6 +639,7 @@ impl AsciiChar {
     /// ```
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn eq_ignore_case(self, other: Self) -> bool {
         // FIXME(const-hack) `arg.to_u8().to_ascii_lowercase()` -> `arg.to_lowercase()`
         // once `PartialEq` is const for `Self`.
@@ -659,6 +669,7 @@ impl AsciiChar {
     /// [`to_uppercase`]: Self::to_uppercase
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn make_uppercase(&mut self) {
         *self = self.to_uppercase();
     }
@@ -686,6 +697,7 @@ impl AsciiChar {
     /// [`to_lowercase`]: Self::to_lowercase
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn make_lowercase(&mut self) {
         *self = self.to_lowercase();
     }
@@ -724,6 +736,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_alphabetic(self) -> bool {
         self.to_u8().is_ascii_alphabetic()
     }
@@ -760,6 +773,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_uppercase(self) -> bool {
         self.to_u8().is_ascii_uppercase()
     }
@@ -796,6 +810,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_lowercase(self) -> bool {
         self.to_u8().is_ascii_lowercase()
     }
@@ -835,6 +850,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_alphanumeric(self) -> bool {
         self.to_u8().is_ascii_alphanumeric()
     }
@@ -871,6 +887,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_digit(self) -> bool {
         self.to_u8().is_ascii_digit()
     }
@@ -909,6 +926,7 @@ impl AsciiChar {
     #[unstable(feature = "ascii_char", issue = "110998")]
     // #[unstable(feature = "is_ascii_octdigit", issue = "101288")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_octdigit(self) -> bool {
         self.to_u8().is_ascii_octdigit()
     }
@@ -948,6 +966,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_hexdigit(self) -> bool {
         self.to_u8().is_ascii_hexdigit()
     }
@@ -988,6 +1007,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_punctuation(self) -> bool {
         self.to_u8().is_ascii_punctuation()
     }
@@ -1024,6 +1044,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_graphic(self) -> bool {
         self.to_u8().is_ascii_graphic()
     }
@@ -1077,6 +1098,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_whitespace(self) -> bool {
         self.to_u8().is_ascii_whitespace()
     }
@@ -1115,6 +1137,7 @@ impl AsciiChar {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_control(self) -> bool {
         self.to_u8().is_ascii_control()
     }
@@ -1151,6 +1174,7 @@ impl AsciiChar {
                   without modifying the original"]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_ascii(self) -> super::EscapeDefault {
         super::escape_default(self.to_u8())
     }
@@ -1175,7 +1199,6 @@ macro_rules! into_int_impl {
 #[cfg(not(feature = "ferrocene_subset"))]
 into_int_impl!(u8 u16 u32 u64 u128 char);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl [AsciiChar] {
     /// Views this slice of ASCII characters as a UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]

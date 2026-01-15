@@ -481,7 +481,6 @@ impl char {
     /// at the start of a string, and allows escaping single quotes in
     /// characters, and double quotes in strings.
     #[inline]
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     pub(crate) fn escape_debug_ext(self, args: EscapeDebugExtArgs) -> EscapeDebug {
         match self {
             '\0' => EscapeDebug::backslash(ascii::Char::Digit0),

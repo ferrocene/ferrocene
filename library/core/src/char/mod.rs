@@ -44,7 +44,6 @@ pub use self::methods::{encode_utf8_raw, encode_utf8_raw_unchecked}; // perma-un
 
 #[rustfmt::skip]
 use crate::ascii;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use self::methods::EscapeDebugExtArgs;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
@@ -58,7 +57,10 @@ use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomA
 use crate::num::NonZero;
 
 #[cfg(feature = "ferrocene_subset")]
-use crate::escape::{EscapeIterInner, MaybeEscaped};
+use crate::{
+    escape::{EscapeIterInner, MaybeEscaped},
+    fmt,
+};
 
 // UTF-8 ranges and tags for encoding characters
 const TAG_CONT: u8 = 0b1000_0000;
@@ -336,7 +338,6 @@ impl fmt::Display for EscapeDefault {
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
 impl EscapeDebug {
@@ -357,7 +358,6 @@ impl EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for EscapeDebug {
     type Item = char;
 
@@ -373,13 +373,13 @@ impl Iterator for EscapeDebug {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDebug {
     fn len(&self) -> usize {
         self.0.len()
@@ -391,7 +391,6 @@ impl ExactSizeIterator for EscapeDebug {
 impl FusedIterator for EscapeDebug {}
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for EscapeDebug {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -3015,7 +3015,6 @@ impl Debug for str {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for str {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.pad(self)

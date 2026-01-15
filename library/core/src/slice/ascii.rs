@@ -9,7 +9,6 @@ use crate::fmt::{self, Write};
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "loongarch64", target_feature = "lsx")
 )))]
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ascii, iter, ops};
@@ -18,7 +17,6 @@ impl [u8] {
     /// Checks if all bytes in this slice are within the ASCII range.
     ///
     /// An empty slice returns `true`.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
@@ -357,7 +355,6 @@ impl<'a> fmt::Debug for EscapeAscii<'a> {
 /// This is carefully structured to produce nice small code -- it's smaller in
 /// `-O` than what the "obvious" ways produces under `-C opt-level=s`.  If you
 /// touch it, be sure to run (and update if needed) the assembly test.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
 #[inline]
@@ -383,7 +380,6 @@ pub const fn is_ascii_simple(mut bytes: &[u8]) -> bool {
 ///
 /// If any of these loads produces something for which `contains_nonascii`
 /// (above) returns true, then we know the answer is false.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "loongarch64", target_feature = "lsx")
@@ -490,7 +486,6 @@ const fn is_ascii(s: &[u8]) -> bool {
 ///
 /// Other platforms are not likely to benefit from this code structure, so they
 /// use SWAR techniques to test for ASCII in `usize`-sized chunks.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "loongarch64", target_feature = "lsx")

@@ -516,7 +516,6 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_u8_is_ascii", since = "1.43.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii(&self) -> bool {
         *self <= 127
     }

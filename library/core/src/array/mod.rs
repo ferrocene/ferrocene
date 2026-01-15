@@ -36,7 +36,6 @@ use crate::slice::{Iter, IterMut};
 #[rustfmt::skip]
 use crate::iter::UncheckedIterator;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod ascii;
 mod drain;
 mod equality;

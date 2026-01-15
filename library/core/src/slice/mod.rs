@@ -59,7 +59,6 @@ mod specialize;
 pub use ascii::EscapeAscii;
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use ascii::is_ascii_simple;
 #[stable(feature = "slice_get_slice", since = "1.28.0")]
 pub use index::SliceIndex;

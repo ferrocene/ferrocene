@@ -93,7 +93,7 @@ pub use validations::{next_code_point, utf8_char_width};
 #[rustfmt::skip]
 pub use {
     error::Utf8Error,
-    iter::{Bytes, Chars},
+    iter::{Bytes, CharIndices, Chars},
 };
 
 #[inline(never)]
@@ -1154,7 +1154,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn char_indices(&self) -> CharIndices<'_> {
         CharIndices { front_offset: 0, iter: self.chars() }
     }

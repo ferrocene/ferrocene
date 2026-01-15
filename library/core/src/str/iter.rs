@@ -186,8 +186,7 @@ impl<'a> Chars<'a> {
 ///
 /// [`char`]: prim@char
 /// [`char_indices`]: str::char_indices
-#[cfg(not(feature = "ferrocene_subset"))]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct CharIndices<'a> {
@@ -195,7 +194,6 @@ pub struct CharIndices<'a> {
     pub(super) iter: Chars<'a>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for CharIndices<'a> {
     type Item = (usize, char);
@@ -231,7 +229,6 @@ impl<'a> Iterator for CharIndices<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for CharIndices<'a> {
     #[inline]
@@ -247,7 +244,6 @@ impl<'a> DoubleEndedIterator for CharIndices<'a> {
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for CharIndices<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> CharIndices<'a> {
     /// Views the underlying data as a subslice of the original data.
     ///

@@ -577,7 +577,6 @@ impl Default for FormattingOptions {
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct Formatter<'a> {
     options: FormattingOptions,
 
@@ -1762,13 +1761,11 @@ pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
 
 /// Padding after the end of something. Returned by `Formatter::padding`.
 #[must_use = "don't forget to write the post padding"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct PostPadding {
     fill: char,
     padding: u16,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl PostPadding {
     fn new(fill: char, padding: u16) -> PostPadding {
         PostPadding { fill, padding }
@@ -1932,7 +1929,6 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{Foo:0>4}"), "0Foo");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn pad(&mut self, s: &str) -> Result {
         // Make sure there's a fast path up front.
         if self.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
@@ -1975,7 +1971,6 @@ impl<'a> Formatter<'a> {
     ///
     /// Callers are responsible for ensuring post-padding is written after the
     /// thing that is being padded.
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn padding(
         &mut self,
         padding: u16,

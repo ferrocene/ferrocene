@@ -353,7 +353,6 @@ impl EscapeDebug {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     const fn unicode(c: char) -> Self {
         Self(EscapeIterInner::unicode(c))
     }

@@ -8,7 +8,6 @@ use crate::marker::PhantomData;
 use crate::num::NonZero;
 use crate::ops::Range;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 const HEX_DIGITS: [ascii::Char; 16] = *b"0123456789abcdef".as_ascii().unwrap();
 
 /// Escapes a character with `\x` representation.
@@ -140,7 +139,6 @@ const fn escape_ascii<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>)
 /// Escapes a character with `\u{NNNN}` representation.
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 10 && N < u8::MAX as usize) };
 
@@ -234,7 +232,6 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq }, alive) }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn unicode(c: char) -> Self {
         let (escape_seq, alive) = escape_unicode(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.

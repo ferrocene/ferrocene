@@ -1577,7 +1577,6 @@ intrinsics:
     attr:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [fcvtn2]]}]]
-      - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
     safety: safe
@@ -1596,7 +1595,6 @@ intrinsics:
     attr:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [fcvtl2]]}]]
-      - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
     safety: safe
@@ -5295,13 +5293,13 @@ intrinsics:
     static_defs: ["const LANE: i32"]
     safety: safe
     types:
-      - [int32x2_t, uint8x8_t, int8x16_t, '[LANE as u32, LANE as u32]']
-      - [int32x4_t, uint8x16_t, int8x16_t, '[LANE as u32, LANE as u32, LANE as u32, LANE as u32]']
+      - [int32x2_t, uint8x8_t, int8x16_t, '[LANE as u32, LANE as u32]','']
+      - [int32x4_t, uint8x16_t, int8x16_t, '[LANE as u32, LANE as u32, LANE as u32, LANE as u32]','q']
     compose:
       - FnCall: [static_assert_uimm_bits!, [LANE, '2']]
-      - Let: [c, int32x4_t, {FnCall: [transmute, [c]]}]
+      - Let: [c, int32x4_t, {FnCall: ['vreinterpretq_s32_s8', [c]]}]
       - Let: [c, "{neon_type[0]}", {FnCall: [simd_shuffle!, [c, c, "{type[3]}"]]}]
-      - FnCall: ["vusdot{neon_type[0].no}", [a, b, {FnCall: [transmute, [c]]}]]
+      - FnCall: ["vusdot{neon_type[0].no}", [a, b, {FnCall: ['vreinterpret{type[4]}_s8_s32', [c]]}]]
 
   - name: "vsudot{neon_type[0].laneq_nox}"
     doc: "Dot product index form with signed and unsigned integers"
@@ -5328,7 +5326,11 @@ intrinsics:
           - c
           - "{type[4]}"
           - FnCall: [simd_shuffle!, [c, c, "{type[3]}"]]
-      - FnCall: ["vusdot{neon_type[0].no}", [a, {FnCall: [transmute, [c]]}, b]]
+      - FnCall: 
+          - "vusdot{neon_type[0].no}"
+          - - a
+            - FnCall: [transmute, [c]]
+            - b
 
   - name: "vmul{neon_type.no}"
     doc: Multiply
@@ -5893,7 +5895,7 @@ intrinsics:
       - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
-    assert_instr: [nop]
+    assert_instr: [fdiv]
     safety: safe
     types:
       - [f16, 'h']
@@ -5918,7 +5920,7 @@ intrinsics:
     arguments: ["a: {type[1]}", "b: {type[1]}"]
     return_type: "{type[1]}"
     attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
-    assert_instr: [nop]
+    assert_instr: [sub]
     safety: safe
     types:
       - ['d_s64', 'i64']
@@ -5935,7 +5937,7 @@ intrinsics:
       - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
-    assert_instr: [nop]
+    assert_instr: [fsub]
     safety: safe
     types:
       - ['h_f16', 'f16']
@@ -6839,14 +6841,14 @@ intrinsics:
       - FnCall: [unstable, ['feature = "stdarch_neon_dotprod"', 'issue = "117224"']]
     safety: safe
     types:
-      - [int32x2_t, int8x8_t, int8x16_t, int32x4_t, '[LANE as u32, LANE as u32]']
-      - [int32x4_t, int8x16_t, int8x16_t, int32x4_t, '[LANE as u32, LANE as u32, LANE as u32, LANE as u32]']
+      - [int32x2_t, int8x8_t, int8x16_t, int32x4_t, '[LANE as u32, LANE as u32]', '']
+      - [int32x4_t, int8x16_t, int8x16_t, int32x4_t, '[LANE as u32, LANE as u32, LANE as u32, LANE as u32]','q']
     compose:
       - FnCall: [static_assert_uimm_bits!, [LANE, '2']]
       - Let:
           - c
           - "{neon_type[3]}"
-          - FnCall: [transmute, [c]]
+          - FnCall: ['vreinterpretq_{neon_type[0]}_{neon_type[1]}', [c]]
       - Let:
           - c
           - "{neon_type[0]}"
@@ -6855,7 +6857,7 @@ intrinsics:
           - "vdot{neon_type[0].no}"
           - - a
             - b
-            - FnCall: [transmute, [c]]
+            - FnCall: ['vreinterpret{type[5]}_{neon_type[1]}_{neon_type[0]}', [c]]
 
   - name: "vdot{neon_type[0].laneq_nox}"
     doc: Dot product arithmetic (indexed)
@@ -6870,14 +6872,14 @@ intrinsics:
       - FnCall: [unstable, ['feature = "stdarch_neon_dotprod"', 'issue = "117224"']]
     safety: safe
     types:
-      - [uint32x2_t, uint8x8_t, uint8x16_t, uint32x4_t, '[LANE as u32, LANE as u32]']
-      - [uint32x4_t, uint8x16_t, uint8x16_t, uint32x4_t, '[LANE as u32, LANE as u32, LANE as u32, LANE as u32]']
+      - [uint32x2_t, uint8x8_t, uint8x16_t, uint32x4_t, '[LANE as u32, LANE as u32]','']
+      - [uint32x4_t, uint8x16_t, uint8x16_t, uint32x4_t, '[LANE as u32, LANE as u32, LANE as u32, LANE as u32]','q']
     compose:
       - FnCall: [static_assert_uimm_bits!, [LANE, '2']]
       - Let:
           - c
           - "{neon_type[3]}"
-          - FnCall: [transmute, [c]]
+          - FnCall: ['vreinterpretq_{neon_type[0]}_{neon_type[1]}', [c]]
       - Let:
           - c
           - "{neon_type[0]}"
@@ -6886,7 +6888,7 @@ intrinsics:
           - "vdot{neon_type[0].no}"
           - - a
             - b
-            - FnCall: [transmute, [c]]
+            - FnCall: ['vreinterpret{type[5]}_{neon_type[1]}_{neon_type[0]}', [c]]
 
   - name: "vmax{neon_type.no}"
     doc: Maximum (vector)
@@ -9151,7 +9153,6 @@ intrinsics:
     arguments: ["a: {type[0]}"]
     return_type: "{type[1]}"
     attr:
-      - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
     assert_instr: [nop]
@@ -11743,7 +11744,7 @@ intrinsics:
       - *neon-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
-    assert_instr: [nop]
+    assert_instr: [fmul]
     safety: safe
     types:
       - [f16, 'h']
@@ -13822,7 +13823,7 @@ intrinsics:
     types:
       - [int64x2_t, i64]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vpaddd_u64"
     doc: "Add pairwise"
@@ -13836,7 +13837,7 @@ intrinsics:
     types:
       - [uint64x2_t, u64]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddv{neon_type[0].no}"
     doc: "Add across vector"
@@ -13854,7 +13855,7 @@ intrinsics:
       - [int16x8_t, i16]
       - [int32x4_t, i32]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddv{neon_type[0].no}"
     doc: "Add across vector"
@@ -13868,7 +13869,7 @@ intrinsics:
     types:
       - [int32x2_t, i32]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddv{neon_type[0].no}"
     doc: "Add across vector"
@@ -13882,7 +13883,7 @@ intrinsics:
     types:
       - [int64x2_t, i64]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddv{neon_type[0].no}"
     doc: "Add across vector"
@@ -13900,7 +13901,7 @@ intrinsics:
       - [uint16x8_t, u16]
       - [uint32x4_t, u32]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddv{neon_type[0].no}"
     doc: "Add across vector"
@@ -13914,7 +13915,7 @@ intrinsics:
     types:
       - [uint32x2_t, u32, i32]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddv{neon_type[0].no}"
     doc: "Add across vector"
@@ -13928,7 +13929,7 @@ intrinsics:
     types:
       - [uint64x2_t, u64, i64]
     compose:
-      - FnCall: [simd_reduce_add_unordered, [a]]
+      - FnCall: [simd_reduce_add_ordered, [a, 0]]
 
   - name: "vaddlv{neon_type[0].no}"
     doc: "Signed Add Long across Vector"

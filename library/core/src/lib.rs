@@ -116,7 +116,6 @@
 #![feature(internal_impls_macro)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ip))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(is_ascii_octdigit))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(lazy_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
 #![feature(panic_internals)]

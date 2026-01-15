@@ -19,6 +19,7 @@ use crate::attributes::allow_unstable::{
     AllowConstFnUnstableParser, AllowInternalUnstableParser, UnstableFeatureBoundParser,
 };
 use crate::attributes::body::CoroutineParser;
+use crate::attributes::cfi_encoding::CfiEncodingParser;
 use crate::attributes::codegen_attrs::{
     ColdParser, CoverageParser, EiiExternItemParser, ExportNameParser, ForceTargetFeatureParser,
     NakedParser, NoMangleParser, ObjcClassParser, ObjcSelectorParser, OptimizeParser,
@@ -63,8 +64,9 @@ use crate::attributes::rustc_internal::{
     RustcLayoutScalarValidRangeEndParser, RustcLayoutScalarValidRangeStartParser,
     RustcLegacyConstGenericsParser, RustcLintDiagnosticsParser, RustcLintOptDenyFieldAccessParser,
     RustcLintOptTyParser, RustcLintQueryInstabilityParser,
-    RustcLintUntrackedQueryInformationParser, RustcMainParser, RustcNeverReturnsNullPointerParser,
-    RustcNoImplicitAutorefsParser, RustcObjectLifetimeDefaultParser, RustcScalableVectorParser,
+    RustcLintUntrackedQueryInformationParser, RustcMainParser, RustcMustImplementOneOfParser,
+    RustcNeverReturnsNullPointerParser, RustcNoImplicitAutorefsParser,
+    RustcObjectLifetimeDefaultParser, RustcScalableVectorParser,
     RustcSimdMonomorphizeLaneLimitParser,
 };
 use crate::attributes::semantics::MayDangleParser;
@@ -187,6 +189,7 @@ attribute_parsers!(
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
+        Single<CfiEncodingParser>,
         Single<CoverageParser>,
         Single<CrateNameParser>,
         Single<CustomMirParser>,
@@ -215,6 +218,7 @@ attribute_parsers!(
         Single<RustcLayoutScalarValidRangeStartParser>,
         Single<RustcLegacyConstGenericsParser>,
         Single<RustcLintOptDenyFieldAccessParser>,
+        Single<RustcMustImplementOneOfParser>,
         Single<RustcObjectLifetimeDefaultParser>,
         Single<RustcScalableVectorParser>,
         Single<RustcSimdMonomorphizeLaneLimitParser>,
@@ -490,12 +494,27 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
         self.emit_parse_error(span, AttributeParseErrorReason::ExpectedList)
     }
 
+    pub(crate) fn expected_list_with_num_args_or_more(
+        &self,
+        args: usize,
+        span: Span,
+    ) -> ErrorGuaranteed {
+        self.emit_parse_error(
+            span,
+            AttributeParseErrorReason::ExpectedListWithNumArgsOrMore { args },
+        )
+    }
+
     pub(crate) fn expected_list_or_no_args(&self, span: Span) -> ErrorGuaranteed {
         self.emit_parse_error(span, AttributeParseErrorReason::ExpectedListOrNoArgs)
     }
 
     pub(crate) fn expected_nv_or_no_args(&self, span: Span) -> ErrorGuaranteed {
         self.emit_parse_error(span, AttributeParseErrorReason::ExpectedNameValueOrNoArgs)
+    }
+
+    pub(crate) fn expected_non_empty_string_literal(&self, span: Span) -> ErrorGuaranteed {
+        self.emit_parse_error(span, AttributeParseErrorReason::ExpectedNonEmptyStringLiteral)
     }
 
     pub(crate) fn expected_no_args(&self, span: Span) -> ErrorGuaranteed {

@@ -1076,6 +1076,7 @@
 <core::mem::manually_drop::ManuallyDrop<T> as core::cmp::PartialEq>::eq
 <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::Deref>::deref
 <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::DerefMut>::deref_mut
+<core::mem::maybe_dangling::MaybeDangling<P> as core::clone::Clone>::clone
 <core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone
 <core::num::niche_types::Nanoseconds as core::clone::Clone>::clone
 <core::num::niche_types::Nanoseconds as core::cmp::Eq>::assert_receiver_is_total_eq
@@ -3896,6 +3897,10 @@ core::mem::manually_drop::ManuallyDrop::<T>::drop
 core::mem::manually_drop::ManuallyDrop::<T>::into_inner
 core::mem::manually_drop::ManuallyDrop::<T>::new
 core::mem::manually_drop::ManuallyDrop::<T>::take
+core::mem::maybe_dangling::MaybeDangling::<P>::as_mut
+core::mem::maybe_dangling::MaybeDangling::<P>::as_ref
+core::mem::maybe_dangling::MaybeDangling::<P>::into_inner
+core::mem::maybe_dangling::MaybeDangling::<P>::new
 core::mem::maybe_uninit::MaybeUninit::<T>::array_assume_init
 core::mem::maybe_uninit::MaybeUninit::<T>::as_bytes
 core::mem::maybe_uninit::MaybeUninit::<T>::as_bytes_mut

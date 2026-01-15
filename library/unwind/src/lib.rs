@@ -74,10 +74,27 @@ cfg_select! {
         unsafe extern "C" {}
     }
     _ => {
-        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
-        #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
         #[cfg(not(ferrocene_facade_secretsauce))] // ferrocene addition: don't link to libgcc_s
+        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
+        #[link(name = "gcc_s", cfg(all(not(target_feature = "crt-static"), not(target_arch = "hexagon"))))]
         unsafe extern "C" {}
+    }
+}
+
+// Hexagon with musl uses llvm-libunwind by default
+#[cfg(all(target_env = "musl", target_arch = "hexagon"))]
+cfg_select! {
+    feature = "llvm-libunwind" => {
+        #[link(name = "unwind", kind = "static", modifiers = "-bundle")]
+        unsafe extern "C" {}
+    }
+    feature = "system-llvm-libunwind" => {
+        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
+        #[link(name = "unwind", cfg(not(target_feature = "crt-static")))]
+        unsafe extern "C" {}
+    }
+    _ => {
+        // Fallback: should not happen since hexagon defaults to llvm-libunwind
     }
 }
 

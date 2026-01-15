@@ -24,7 +24,6 @@ pub(crate) use unicode_data::uppercase::lookup as Uppercase;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::white_space::lookup as White_Space;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod printable;
 
 #[allow(unreachable_pub)]

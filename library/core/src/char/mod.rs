@@ -339,7 +339,6 @@ impl fmt::Display for EscapeDefault {
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 impl EscapeDebug {
     #[inline]
     const fn printable(chr: char) -> Self {

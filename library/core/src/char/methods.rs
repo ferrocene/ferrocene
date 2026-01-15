@@ -6,7 +6,6 @@ use crate::slice;
 use crate::str::from_utf8_unchecked_mut;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::printable::is_printable;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::{self, conversions};
@@ -482,7 +481,7 @@ impl char {
     /// at the start of a string, and allows escaping single quotes in
     /// characters, and double quotes in strings.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
+    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     pub(crate) fn escape_debug_ext(self, args: EscapeDebugExtArgs) -> EscapeDebug {
         match self {
             '\0' => EscapeDebug::backslash(ascii::Char::Digit0),
@@ -990,7 +989,6 @@ impl char {
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     #[must_use]
     #[inline]
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     pub(crate) fn is_grapheme_extended(self) -> bool {
         !self.is_ascii() && unicode::Grapheme_Extend(self)
     }
@@ -1864,7 +1862,6 @@ impl char {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct EscapeDebugExtArgs {
     /// Escape Extended Grapheme codepoints?
     pub(crate) escape_grapheme_extended: bool,

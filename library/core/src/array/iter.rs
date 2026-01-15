@@ -274,7 +274,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -350,7 +349,6 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {
     #[inline]
     fn len(&self) -> usize {

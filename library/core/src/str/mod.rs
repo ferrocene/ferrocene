@@ -7,7 +7,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 mod converts;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod count;
 mod error;
 mod iter;

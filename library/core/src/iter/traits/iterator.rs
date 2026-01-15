@@ -235,7 +235,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize
     where
         Self: Sized,

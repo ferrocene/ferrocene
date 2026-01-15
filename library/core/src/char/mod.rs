@@ -373,7 +373,6 @@ impl Iterator for EscapeDebug {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }

@@ -57,7 +57,6 @@ impl<'a> Iterator for Chars<'a> {
         unsafe { next_code_point(&mut self.iter).map(|ch| char::from_u32_unchecked(ch)) }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         super::count::count_chars(self.as_str())
@@ -323,7 +322,6 @@ impl Iterator for Bytes<'_> {
         self.0.size_hint()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         self.0.count()

@@ -877,7 +877,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end).1.expect("count overflowed usize")
@@ -1294,7 +1293,6 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         (hint.0.saturating_add(1), hint.1.and_then(|steps| steps.checked_add(1)))
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         if self.is_empty() {

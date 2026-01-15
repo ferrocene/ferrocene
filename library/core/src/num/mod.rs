@@ -1357,7 +1357,6 @@ impl usize {
 
     /// Returns an `usize` where every byte pair is equal to `x`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn repeat_u16(x: u16) -> usize {
         let mut r = 0usize;
         let mut i = 0;

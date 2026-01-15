@@ -77,7 +77,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(mut self) -> usize {
         if self.n > 0 {
             // nth(n) skips n+1

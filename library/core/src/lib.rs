@@ -387,7 +387,6 @@ pub mod time;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod wtf8;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod unicode;
 
 /* Async */

@@ -14,10 +14,12 @@ use crate::marker::{PhantomData, PointeeSized};
 use crate::num::fmt as numfmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Deref;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::NonNull;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{iter, mem, result, str};
+
+#[cfg(feature = "ferrocene_subset")]
+use crate::marker::PhantomData;
 
 #[cfg(not(feature = "ferrocene_subset"))]
 mod builders;
@@ -742,7 +744,7 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct Arguments<'a> {
     template: NonNull<u8>,
     args: NonNull<rt::Argument<'a>>,
@@ -934,10 +936,8 @@ impl<'a> Arguments<'a> {
 
 // Manually implementing these results in better error messages.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl !Send for Arguments<'_> {}
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl !Sync for Arguments<'_> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]

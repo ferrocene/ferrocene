@@ -6,20 +6,20 @@
 //!
 //! Do not modify them without understanding the consequences for the format_args!() macro.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::*;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::unreachable_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::NonNull;
 
 #[derive(Copy, Clone)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 enum ArgumentType<'a> {
     Placeholder {
         // INVARIANT: `formatter` has type `fn(&T, _) -> _` for some `T`, and `value`
         // was derived from a `&'a T`.
         value: NonNull<()>,
+        // FIXME: remove cfg as soon as Formatter is in subset
+        #[cfg(not(feature = "ferrocene_subset"))]
         formatter: unsafe fn(NonNull<()>, &mut Formatter<'_>) -> Result,
         _lifetime: PhantomData<&'a ()>,
     },
@@ -39,7 +39,8 @@ enum ArgumentType<'a> {
 #[lang = "format_argument"]
 #[derive(Copy, Clone)]
 #[repr(align(2))] // To ensure pointers to this struct always have their lowest bit cleared.
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
+#[cfg_attr(feature = "ferrocene_subset", expect(unreachable_pub))]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }

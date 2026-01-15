@@ -7,7 +7,6 @@
 //! Do not modify them without understanding the consequences for the format_args!() macro.
 
 use super::*;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::unreachable_unchecked;
 use crate::ptr::NonNull;
 
@@ -38,7 +37,6 @@ enum ArgumentType<'a> {
 #[lang = "format_argument"]
 #[derive(Copy, Clone)]
 #[repr(align(2))] // To ensure pointers to this struct always have their lowest bit cleared.
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }
@@ -156,7 +154,6 @@ impl Argument<'_> {
     ///
     /// This argument must actually be a placeholder argument.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(super) unsafe fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self.ty {
             // SAFETY:
@@ -173,7 +170,6 @@ impl Argument<'_> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(super) const fn as_u16(&self) -> Option<u16> {
         match self.ty {
             ArgumentType::Count(count) => Some(count),

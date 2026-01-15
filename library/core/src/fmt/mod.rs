@@ -6,7 +6,6 @@
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::char::EscapeDebugExtArgs;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::assert_unchecked;
 use crate::marker::{PhantomData, PointeeSized};
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -230,6 +229,7 @@ pub trait Write {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    //
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         // We use a specialization for `Sized` types to avoid an indirection
         // through `&mut self`
@@ -1654,7 +1654,6 @@ pub trait UpperExp: PointeeSized {
 /// ```
 ///
 /// [`write!`]: crate::write!
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
     if let Some(s) = fmt.as_str() {

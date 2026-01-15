@@ -15,7 +15,6 @@ const HEX_DIGITS: [ascii::Char; 16] = *b"0123456789abcdef".as_ascii().unwrap();
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 2) };
 
@@ -204,14 +203,12 @@ pub(crate) struct EscapeIterInner<const N: usize, ESCAPING> {
 }
 
 impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
-    #[cfg(not(feature = "ferrocene_subset"))]
     const LITERAL_ESCAPE_START: u8 = 128;
 
     /// # Safety
     ///
     /// `data.escape_seq` must contain an escape sequence in the range given by `alive`.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     const unsafe fn new(data: MaybeEscapedCharacter<N>, alive: Range<u8>) -> Self {
         // Longer escape sequences are not useful given `alive.end` is at most
         // `Self::LITERAL_ESCAPE_START`.
@@ -224,7 +221,6 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
         Self { data, alive, escaping: PhantomData }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn backslash(c: ascii::Char) -> Self {
         let (escape_seq, alive) = backslash(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.

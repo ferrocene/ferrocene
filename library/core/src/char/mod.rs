@@ -43,7 +43,6 @@ pub use self::methods::encode_utf16_raw; // perma-unstable
 pub use self::methods::{encode_utf8_raw, encode_utf8_raw_unchecked}; // perma-unstable
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use self::methods::EscapeDebugExtArgs;
@@ -340,9 +339,10 @@ impl fmt::Display for EscapeDefault {
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 impl EscapeDebug {
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     const fn printable(chr: char) -> Self {
         Self(EscapeIterInner::printable(chr))
     }
@@ -353,6 +353,7 @@ impl EscapeDebug {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     const fn unicode(c: char) -> Self {
         Self(EscapeIterInner::unicode(c))
     }

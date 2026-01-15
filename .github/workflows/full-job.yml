@@ -1,0 +1,125 @@
+# A generic Ferrocene job, when in doubt, start with this workflow for any new jobs.
+
+name: Ferrocene Job
+run-name: ${{ inputs.run-name }}
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      run-name:
+        type: string
+        description: The `run-name` to use
+      script:
+        type: string
+        description: The script to run.
+      configure:
+        type: string
+        description: Any extra configure args to pass to the `ferrocene/ci/configure.sh` script.
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
+      environment:
+        type: string
+      build-metrics-artifact:
+        type: string
+        description: The name of the build-metrics report artifact
+
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  FERROCENE_HOST: ${{ inputs.host-triple }}
+  FERROCENE_TARGETS: ${{ inputs.triples }}
+  # AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+
+jobs:
+  job:
+    name: ${{ inputs.run-name }}
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: false
+
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
+        with:
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
+        with:
+          configure: ${{ inputs.configure }}
+          container: ${{ inputs.container }}
+          script: ${{ inputs.script }}
+
+      - name: Upload artifacts to S3
+        if: "!cancelled()"
+        env:
+          # AWS_PROFILE: amazon
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
+        run: |
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh

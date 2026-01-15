@@ -18,6 +18,23 @@ def parse_s3_url(s3_url):
     return [bucket, key]
 
 
+def exists(path):
+    """
+    Determine if a specific cache entry exists.
+    """
+
+    if path.startswith("s3://"):
+        [bucket, key] = parse_s3_url(path)
+
+        s3 = boto3.client("s3")
+        try:
+            response = s3.get_object(Bucket=bucket, Key=key)
+            return True
+        except s3.exceptions.NoSuchKey:
+            return False
+    else:
+        return os.path.isfile(path)
+
 def retrieve(path, out_dir):
     """
     Retrieve a zstd compressed tarball from `path` (an `s3://` url or local path) and unpack it into `out_dir`.

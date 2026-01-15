@@ -1,0 +1,24 @@
+name: "Generate usage report"
+description: "Generate and store the usage report for use in the traceability matrix."
+inputs:
+  artifact:
+    description: The artifact name
+  name:
+    description: The name of the usage file, generally the Github Job ID
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate usage report
+      shell: bash
+      run: |
+        mkdir -p tmp/metrics
+        uv run ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > tmp/metrics/${{ inputs.name }}.html
+        cp build/metrics.json tmp/metrics/${{ inputs.name }}.json
+
+    - uses: actions/upload-artifact@v4
+      id: artifact
+      with:
+        name: ${{ inputs.artifact }}
+        path:  tmp/metrics/
+        retention-days: 1

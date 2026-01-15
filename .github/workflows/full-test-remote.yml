@@ -1,0 +1,159 @@
+name: Remote Test
+run-name: Remote Test (${{inputs.host-triple}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triple:
+        type: string
+        description: The target triple to test on
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      emulator-container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      emulator-prepare-command:
+        type: string
+        description: The command to prepare the emulator
+      emulator-start-command:
+        type: string
+        description: The command to start the emulator
+      test-device-addr:
+        type: string
+        description: The test device address used by the emulator script
+      qnx-version:
+        type: string
+        default: ""
+        description: The QNX version (if any) and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
+      environment:
+        type: string
+      script:
+        type: string
+        description: The script to execute
+
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
+  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+
+jobs:
+  test:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: test-${{inputs.triple}}
+      ARTIFACT_USAGE: usage-test-${{inputs.triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: false
+
+      - name: Log into registry
+        if: ${{ inputs.emulator-container != '' || inputs.container != '' }}
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
+        with:
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: ${{ inputs.qnx-version }}
+
+      - name: Start emulator
+        id: start-emulator
+        uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
+        with:
+          container-prepare: ${{ inputs.container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.container) || ''}}
+          container-run: ${{ inputs.emulator-container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.emulator-container) || ''}}
+          command-prepare: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ inputs.emulator-prepare-command }}
+          command-start: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ inputs.emulator-start-command }}
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          test-device-addr: ${{ inputs.test-device-addr }}
+          container: ${{ inputs.container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.container) || ''}}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
+            ${{ inputs.script }}
+
+      - name: Output container logs
+        if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
+
+      - name: Upload artifacts to S3
+        if: "!cancelled()"
+        env:
+          AWS_PROFILE: amazon # Dist artifacts always go to AWS
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run: ./ferrocene/ci/scripts/upload-dist-artifacts.sh

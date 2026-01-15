@@ -4,9 +4,21 @@
 
 set -xeuo pipefail
 
-curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::group::Setup uv"
+fi
+
+if ! command -v uv >/dev/null 2>&1; then
+    curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+fi
 
 export PATH="$HOME/.local/bin:$PATH"
+
+set +e
+if [ ! -z ${GITHUB_PATH+x} ]; then
+    echo "$HOME/.local/bin" >> $GITHUB_PATH
+fi
+set -e
 
 set +e
 if [ ! -z ${BASH_ENV+x} ]; then
@@ -16,3 +28,7 @@ set -e
 
 uv python install 3.12
 uv python pin 3.12
+
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::endgroup::"
+fi

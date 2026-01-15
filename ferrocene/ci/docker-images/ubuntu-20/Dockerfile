@@ -151,6 +151,7 @@ EOF
 # These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
 # image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
 RUN <<-EOF
+    set -xe
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         mkdir /opt/riscv-toolchain
         PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"

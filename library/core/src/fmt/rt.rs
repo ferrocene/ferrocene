@@ -19,7 +19,6 @@ enum ArgumentType<'a> {
         // was derived from a `&'a T`.
         value: NonNull<()>,
         // FIXME: remove cfg as soon as Formatter is in subset
-        #[cfg(not(feature = "ferrocene_subset"))]
         formatter: unsafe fn(NonNull<()>, &mut Formatter<'_>) -> Result,
         _lifetime: PhantomData<&'a ()>,
     },

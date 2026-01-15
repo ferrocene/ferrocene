@@ -1784,8 +1784,8 @@ impl PostPadding {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Formatter<'a> {
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn wrap_buf<'b, 'c, F>(&'b mut self, wrap: F) -> Formatter<'c>
     where
         'b: 'c,
@@ -1848,6 +1848,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{:0>#8}", Foo::new(-1)), "00-Foo 1");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn pad_integral(&mut self, is_nonnegative: bool, prefix: &str, buf: &str) -> Result {
         let mut width = buf.len();
 
@@ -1932,6 +1933,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{Foo:0>4}"), "0Foo");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn pad(&mut self, s: &str) -> Result {
         // Make sure there's a fast path up front.
         if self.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
@@ -1974,6 +1976,7 @@ impl<'a> Formatter<'a> {
     ///
     /// Callers are responsible for ensuring post-padding is written after the
     /// thing that is being padded.
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn padding(
         &mut self,
         padding: u16,
@@ -2003,6 +2006,7 @@ impl<'a> Formatter<'a> {
     /// # Safety
     ///
     /// Any `numfmt::Part::Copy` parts in `formatted` must contain valid UTF-8.
+    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn pad_formatted_parts(&mut self, formatted: &numfmt::Formatted<'_>) -> Result {
         if self.options.width == 0 {
             // this is the common case and we take a shortcut
@@ -2047,6 +2051,7 @@ impl<'a> Formatter<'a> {
     /// # Safety
     ///
     /// Any `numfmt::Part::Copy` parts in `formatted` must contain valid UTF-8.
+    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn write_formatted_parts(&mut self, formatted: &numfmt::Formatted<'_>) -> Result {
         unsafe fn write_bytes(buf: &mut dyn Write, s: &[u8]) -> Result {
             // SAFETY: This is used for `numfmt::Part::Num` and `numfmt::Part::Copy`.
@@ -2115,6 +2120,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{Foo:0>8}"), "Foo");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write_str(&mut self, data: &str) -> Result {
         self.buf.write_str(data)
     }
@@ -2144,6 +2150,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result {
         if let Some(s) = fmt.as_statically_known_str() {
             self.buf.write_str(s)
@@ -2160,6 +2167,7 @@ impl<'a> Formatter<'a> {
         note = "use the `sign_plus`, `sign_minus`, `alternate`, \
                 or `sign_aware_zero_pad` methods instead"
     )]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn flags(&self) -> u32 {
         // Extract the debug upper/lower hex, zero pad, alternate, and plus/minus flags
         // to stay compatible with older versions of Rust.
@@ -2195,6 +2203,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn fill(&self) -> char {
         self.options.get_fill()
     }
@@ -2230,6 +2239,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn align(&self) -> Option<Alignment> {
         self.options.get_align()
     }
@@ -2260,6 +2270,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn width(&self) -> Option<usize> {
         if self.options.flags & flags::WIDTH_FLAG == 0 {
             None
@@ -2295,6 +2306,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn precision(&self) -> Option<usize> {
         if self.options.flags & flags::PRECISION_FLAG == 0 {
             None
@@ -2331,6 +2343,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn sign_plus(&self) -> bool {
         self.options.flags & flags::SIGN_PLUS_FLAG != 0
     }
@@ -2360,6 +2373,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn sign_minus(&self) -> bool {
         self.options.flags & flags::SIGN_MINUS_FLAG != 0
     }
@@ -2388,6 +2402,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn alternate(&self) -> bool {
         self.options.flags & flags::ALTERNATE_FLAG != 0
     }
@@ -2414,15 +2429,18 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn sign_aware_zero_pad(&self) -> bool {
         self.options.flags & flags::SIGN_AWARE_ZERO_PAD_FLAG != 0
     }
 
     // FIXME: Decide what public API we want for these two flags.
     // https://github.com/rust-lang/rust/issues/48584
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn debug_lower_hex(&self) -> bool {
         self.options.flags & flags::DEBUG_LOWER_HEX_FLAG != 0
     }
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn debug_upper_hex(&self) -> bool {
         self.options.flags & flags::DEBUG_UPPER_HEX_FLAG != 0
     }
@@ -2464,6 +2482,7 @@ impl<'a> Formatter<'a> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct<'b>(&'b mut self, name: &str) -> DebugStruct<'b, 'a> {
         builders::debug_struct_new(self, name)
     }
@@ -2473,6 +2492,7 @@ impl<'a> Formatter<'a> {
     /// faster for 1 field.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field1_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2489,6 +2509,7 @@ impl<'a> Formatter<'a> {
     /// faster for 2 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field2_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2508,6 +2529,7 @@ impl<'a> Formatter<'a> {
     /// faster for 3 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field3_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2530,6 +2552,7 @@ impl<'a> Formatter<'a> {
     /// faster for 4 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field4_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2555,6 +2578,7 @@ impl<'a> Formatter<'a> {
     /// faster for 5 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field5_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2582,6 +2606,7 @@ impl<'a> Formatter<'a> {
     /// For the cases not covered by `debug_struct_field[12345]_finish`.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_fields_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2623,6 +2648,7 @@ impl<'a> Formatter<'a> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple<'b>(&'b mut self, name: &str) -> DebugTuple<'b, 'a> {
         builders::debug_tuple_new(self, name)
     }
@@ -2632,6 +2658,7 @@ impl<'a> Formatter<'a> {
     /// for 1 field.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field1_finish<'b>(&'b mut self, name: &str, value1: &dyn Debug) -> Result {
         let mut builder = builders::debug_tuple_new(self, name);
         builder.field(value1);
@@ -2643,6 +2670,7 @@ impl<'a> Formatter<'a> {
     /// for 2 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field2_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2660,6 +2688,7 @@ impl<'a> Formatter<'a> {
     /// for 3 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field3_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2679,6 +2708,7 @@ impl<'a> Formatter<'a> {
     /// for 4 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field4_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2700,6 +2730,7 @@ impl<'a> Formatter<'a> {
     /// for 5 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field5_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2722,6 +2753,7 @@ impl<'a> Formatter<'a> {
     /// binaries. For the cases not covered by `debug_tuple_field[12345]_finish`.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_fields_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2753,6 +2785,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{:?}", Foo(vec![10, 11])), "[10, 11]");
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_list<'b>(&'b mut self) -> DebugList<'b, 'a> {
         builders::debug_list_new(self)
     }
@@ -2811,6 +2844,7 @@ impl<'a> Formatter<'a> {
     /// }
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_set<'b>(&'b mut self) -> DebugSet<'b, 'a> {
         builders::debug_set_new(self)
     }
@@ -2837,18 +2871,21 @@ impl<'a> Formatter<'a> {
     ///  );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_map<'b>(&'b mut self) -> DebugMap<'b, 'a> {
         builders::debug_map_new(self)
     }
 
     /// Returns the sign of this formatter (`+` or `-`).
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn sign(&self) -> Option<Sign> {
         self.options.get_sign()
     }
 
     /// Returns the formatting options this formatter corresponds to.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn options(&self) -> FormattingOptions {
         self.options
     }

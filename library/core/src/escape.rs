@@ -203,14 +203,15 @@ pub(crate) struct EscapeIterInner<const N: usize, ESCAPING> {
     escaping: PhantomData<ESCAPING>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
+    #[cfg(not(feature = "ferrocene_subset"))]
     const LITERAL_ESCAPE_START: u8 = 128;
 
     /// # Safety
     ///
     /// `data.escape_seq` must contain an escape sequence in the range given by `alive`.
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     const unsafe fn new(data: MaybeEscapedCharacter<N>, alive: Range<u8>) -> Self {
         // Longer escape sequences are not useful given `alive.end` is at most
         // `Self::LITERAL_ESCAPE_START`.
@@ -223,18 +224,21 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
         Self { data, alive, escaping: PhantomData }
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn backslash(c: ascii::Char) -> Self {
         let (escape_seq, alive) = backslash(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq }, alive) }
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn ascii(c: u8) -> Self {
         let (escape_seq, alive) = escape_ascii(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq }, alive) }
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn unicode(c: char) -> Self {
         let (escape_seq, alive) = escape_unicode(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.
@@ -242,28 +246,33 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn empty() -> Self {
         // SAFETY: `0..0` ensures an empty escape sequence.
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq: [ascii::Char::Null; N] }, 0..0) }
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn len(&self) -> usize {
         usize::from(self.alive.end - self.alive.start)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.alive.advance_by(n)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.alive.advance_back_by(n)
     }
 
     /// Returns a `char` if `self.data` contains one in its `literal` variant.
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     const fn to_char(&self) -> Option<char> {
         if self.alive.end > Self::LITERAL_ESCAPE_START {
             // SAFETY: We just checked that `self.data` contains a `char` in
@@ -282,6 +291,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     /// - `self.data` must contain printable ASCII characters in its `escape_seq` variant.
     /// - `self.alive` must be a valid range for `self.data.escape_seq`.
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn to_str_unchecked(&self) -> &str {
         debug_assert!(self.alive.end <= Self::LITERAL_ESCAPE_START);
 
@@ -320,12 +330,12 @@ impl<const N: usize> EscapeIterInner<N, AlwaysEscaped> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
     // This is the only way to create any `EscapeIterInner` containing a `char` in
     // the `literal` variant of its `self.data`, meaning the `AlwaysEscaped` marker
     // guarantees that `self.data` contains printable ASCII characters in its
     // `escape_seq` variant.
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn printable(c: char) -> Self {
         Self {
             data: MaybeEscapedCharacter { literal: c },
@@ -336,6 +346,7 @@ impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
         }
     }
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn next(&mut self) -> Option<char> {
         let i = self.alive.next()?;
 

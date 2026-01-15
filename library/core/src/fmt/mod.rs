@@ -2939,7 +2939,6 @@ macro_rules! fmt_refs {
 fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperExp }
 
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for ! {
     #[inline]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
@@ -2948,7 +2947,6 @@ impl Debug for ! {
 }
 
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for ! {
     #[inline]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {

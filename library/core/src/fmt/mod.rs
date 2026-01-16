@@ -8,14 +8,16 @@ use crate::char::EscapeDebugExtArgs;
 use crate::hint::assert_unchecked;
 use crate::marker::{PhantomData, PointeeSized};
 use crate::num::fmt as numfmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Deref;
 use crate::ptr::NonNull;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{iter, mem, result, str};
 
 #[cfg(feature = "ferrocene_subset")]
-use crate::{mem, result, str};
+use crate::{
+    cell::{Ref, RefMut},
+    mem, result, str,
+};
 
 #[cfg(not(feature = "ferrocene_subset"))]
 mod builders;
@@ -3201,7 +3203,6 @@ impl<T: ?Sized + Debug> Debug for RefCell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&**self, f)
@@ -3209,7 +3210,6 @@ impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&*(self.deref()), f)

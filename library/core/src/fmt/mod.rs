@@ -38,7 +38,7 @@ mod rt;
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
 #[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Alignment {
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
     /// Indication that contents should be left-aligned.
@@ -123,10 +123,7 @@ pub type Result = result::Result<(), Error>;
 /// }
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(
-    not(feature = "ferrocene_subset"),
-    derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)
-)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -279,7 +276,7 @@ impl<W: Write + ?Sized> Write for &mut W {
 }
 
 /// The signedness of a [`Formatter`] (or of a [`FormattingOptions`]).
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
 pub enum Sign {
     /// Represents the `+` flag.
@@ -290,7 +287,7 @@ pub enum Sign {
 
 /// Specifies whether the [`Debug`] trait should use lower-/upper-case
 /// hexadecimal or normal integers.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
 pub enum DebugAsHex {
     /// Use lower-case hexadecimal integers for the `Debug` trait (like [the `x?` type](../../std/fmt/index.html#formatting-traits)).

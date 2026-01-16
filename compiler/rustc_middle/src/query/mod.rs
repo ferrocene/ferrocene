@@ -1312,8 +1312,9 @@ rustc_queries! {
         return_result_from_ensure_ok
     }
 
-    /// Return the set of (transitive) callees that may result in a recursive call to `key`.
-    query mir_callgraph_cyclic(key: LocalDefId) -> &'tcx UnordSet<LocalDefId> {
+    /// Return the set of (transitive) callees that may result in a recursive call to `key`,
+    /// if we were able to walk all callees.
+    query mir_callgraph_cyclic(key: LocalDefId) -> &'tcx Option<UnordSet<LocalDefId>> {
         fatal_cycle
         arena_cache
         desc { |tcx|
@@ -1406,12 +1407,6 @@ rustc_queries! {
     /// Converts a type-level constant value into a MIR constant value.
     query valtree_to_const_val(key: ty::Value<'tcx>) -> mir::ConstValue {
         desc { "converting type-level constant value to MIR constant value"}
-    }
-
-    /// Destructures array, ADT or tuple constants into the constants
-    /// of their fields.
-    query destructure_const(key: ty::Const<'tcx>) -> ty::DestructuredConst<'tcx> {
-        desc { "destructuring type level constant"}
     }
 
     // FIXME get rid of this with valtrees

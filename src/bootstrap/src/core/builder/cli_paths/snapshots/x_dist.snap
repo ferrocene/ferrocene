@@ -24,6 +24,19 @@ expression: dist
 [Dist] dist::RustDev
     targets: [x86_64-unknown-linux-gnu]
     - Set({dist::rust-dev})
+<<<<<<< HEAD
+||||||| 08509492139
+[Dist] dist::PlainSourceTarball
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({dist::rustc-src})
+=======
+[Dist] dist::PlainSourceTarball
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({dist::rustc-src})
+[Dist] dist::PlainSourceTarballGpl
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({dist::rustc-src-gpl})
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 [Dist] dist::ReproducibleArtifacts
     targets: [x86_64-unknown-linux-gnu]
     - Set({dist::reproducible-artifacts})

@@ -57,6 +57,7 @@ mod int_macros; // import int_impl!
 mod uint_macros; // import uint_impl!
 
 mod error;
+mod int_bits;
 mod int_log10;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod int_sqrt;

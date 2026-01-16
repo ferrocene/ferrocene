@@ -690,8 +690,9 @@ static RISCV_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("zimop", Unstable(sym::riscv_target_feature), &[]),
     ("zk", Stable, &["zkn", "zkr", "zkt"]),
     ("zkn", Stable, &["zbkb", "zbkc", "zbkx", "zkne", "zknd", "zknh"]),
-    ("zknd", Stable, &[]),
-    ("zkne", Stable, &[]),
+    ("zknd", Stable, &["zkne_or_zknd"]),
+    ("zkne", Stable, &["zkne_or_zknd"]),
+    ("zkne_or_zknd", Unstable(sym::riscv_target_feature), &[]), // Not an extension
     ("zknh", Stable, &[]),
     ("zkr", Stable, &[]),
     ("zks", Stable, &["zbkb", "zbkc", "zbkx", "zksed", "zksh"]),
@@ -1140,7 +1141,7 @@ impl Target {
             Arch::AArch64 | Arch::Arm64EC => {
                 // Aarch64 has no sane ABI specifier, and LLVM doesn't even have a way to force
                 // the use of soft-float, so all we can do here is some crude hacks.
-                if matches!(self.abi, Abi::SoftFloat) {
+                if self.abi == Abi::SoftFloat {
                     // LLVM will use float registers when `fp-armv8` is available, e.g. for
                     // calls to built-ins. The only way to ensure a consistent softfloat ABI
                     // on aarch64 is to never enable `fp-armv8`, so we enforce that.

@@ -20,7 +20,7 @@ use tracing::{debug, instrument};
 
 use crate::builder::Builder;
 use crate::builder::matches::{
-    MatchPairTree, PatConstKind, Test, TestBranch, TestKind, TestableCase,
+    MatchPairTree, PatConstKind, SliceLenOp, Test, TestBranch, TestKind, TestableCase,
 };
 
 impl<'a, 'tcx> Builder<'a, 'tcx> {
@@ -50,10 +50,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 TestKind::Range(Arc::clone(range))
             }
 
-            TestableCase::Slice { len, variable_length } => {
-                let op = if variable_length { BinOp::Ge } else { BinOp::Eq };
-                TestKind::Len { len, op }
-            }
+            TestableCase::Slice { len, op } => TestKind::SliceLen { len, op },
 
             TestableCase::Deref { temp, mutability } => TestKind::Deref { temp, mutability },
 
@@ -153,7 +150,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 let mut expect = self.literal_operand(test.span, Const::from_ty_value(tcx, value));
 
                 let mut place = place;
-                let mut block = block;
+
                 match cast_ty.kind() {
                     ty::Str => {
                         // String literal patterns may have type `str` if `deref_patterns` is
@@ -176,34 +173,6 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                             Rvalue::Ref(re_erased, BorrowKind::Shared, place),
                         );
                         place = ref_place;
-                        cast_ty = ref_str_ty;
-                    }
-                    ty::Adt(def, _) if tcx.is_lang_item(def.did(), LangItem::String) => {
-                        if !tcx.features().string_deref_patterns() {
-                            span_bug!(
-                                test.span,
-                                "matching on `String` went through without enabling string_deref_patterns"
-                            );
-                        }
-                        let re_erased = tcx.lifetimes.re_erased;
-                        let ref_str_ty = Ty::new_imm_ref(tcx, re_erased, tcx.types.str_);
-                        let ref_str = self.temp(ref_str_ty, test.span);
-                        let eq_block = self.cfg.start_new_block();
-                        // `let ref_str: &str = <String as Deref>::deref(&place);`
-                        self.call_deref(
-                            block,
-                            eq_block,
-                            place,
-                            Mutability::Not,
-                            cast_ty,
-                            ref_str,
-                            test.span,
-                        );
-                        // Since we generated a `ref_str = <String as Deref>::deref(&place) -> eq_block` terminator,
-                        // we need to add all further statements to `eq_block`.
-                        // Similarly, the normal test code should be generated for the `&str`, instead of the `String`.
-                        block = eq_block;
-                        place = ref_str;
                         cast_ty = ref_str_ty;
                     }
                     &ty::Pat(base, _) => {
@@ -312,7 +281,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 }
             }
 
-            TestKind::Len { len, op } => {
+            TestKind::SliceLen { len, op } => {
                 let usize_ty = self.tcx.types.usize;
                 let actual = self.temp(usize_ty, test.span);
 
@@ -332,7 +301,10 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     success_block,
                     fail_block,
                     source_info,
-                    op,
+                    match op {
+                        SliceLenOp::Equal => BinOp::Eq,
+                        SliceLenOp::GreaterOrEqual => BinOp::Ge,
+                    },
                     Operand::Move(actual),
                     Operand::Move(expected),
                 );

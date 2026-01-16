@@ -10,7 +10,9 @@ use crate::unicode::printable::is_printable;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::{self, conversions};
 
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
 use crate::unicode;
 
 impl char {

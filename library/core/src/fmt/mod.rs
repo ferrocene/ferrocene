@@ -13,7 +13,9 @@ use crate::ptr::NonNull;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{iter, mem, result, str};
 
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
 use crate::{
     cell::{Ref, RefMut},
     mem, result, str,

@@ -56,7 +56,9 @@ use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomA
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
+// Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
 use crate::{
     escape::{EscapeIterInner, MaybeEscaped},
     fmt,

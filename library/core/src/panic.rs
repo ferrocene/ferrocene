@@ -217,43 +217,6 @@ pub unsafe trait PanicPayload: crate::fmt::Display {
 // All uses of this macro are FIXME(const-hack).
 #[unstable(feature = "panic_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
-pub macro const_panic {
-    ($const_msg:literal, $runtime_msg:literal, $($arg:ident : $ty:ty = $val:expr),* $(,)?) => {{
-        // Wrap call to `const_eval_select` in a function so that we can
-        // add the `rustc_allow_const_fn_unstable`. This is okay to do
-        // because both variants will panic, just with different messages.
-        #[rustc_allow_const_fn_unstable(const_eval_select)]
-        #[inline(always)] // inline the wrapper
-        #[track_caller]
-        const fn do_panic($($arg: $ty),*) -> ! {
-            $crate::intrinsics::const_eval_select!(
-                @capture { $($arg: $ty = $arg),* } -> !:
-                #[noinline]
-                if const #[track_caller] #[inline] { // Inline this, to prevent codegen
-                    $crate::panic!($const_msg)
-                } else #[track_caller] { // Do not inline this, it makes perf worse
-                    $crate::panic!($runtime_msg)
-                }
-            )
-        }
-
-        do_panic($($val),*)
-    }},
-    // We support leaving away the `val` expressions for *all* arguments
-    // (but not for *some* arguments, that's too tricky).
-    ($const_msg:literal, $runtime_msg:literal, $($arg:ident : $ty:ty),* $(,)?) => {
-        $crate::panic::const_panic!(
-            $const_msg,
-            $runtime_msg,
-            $($arg: $ty = $arg),*
-        )
-    },
-}
-
-#[unstable(feature = "panic_internals", issue = "none")]
-#[doc(hidden)]
-#[cfg(feature = "ferrocene_certified_runtime")]
 pub macro const_panic {
     ($const_msg:literal, $runtime_msg:literal, $($arg:ident : $ty:ty = $val:expr),* $(,)?) => {{
         // Wrap call to `const_eval_select` in a function so that we can

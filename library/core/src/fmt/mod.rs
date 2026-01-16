@@ -556,7 +556,6 @@ impl FormattingOptions {
 }
 
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Default for FormattingOptions {
     /// Same as [`FormattingOptions::new()`].
     fn default() -> Self {

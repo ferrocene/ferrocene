@@ -1061,6 +1061,7 @@ symbols! {
         feature,
         fence,
         ferris: "🦀",
+        ferrocene,
         fetch_update,
         ffi,
         ffi_const,

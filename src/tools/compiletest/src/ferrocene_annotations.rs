@@ -226,6 +226,7 @@ fn sample_config() -> Config {
         compare_mode: Default::default(),
         rustfix_coverage: Default::default(),
         has_enzyme: Default::default(),
+        has_offload: Default::default(),
         channel: Default::default(),
         git_hash: Default::default(),
         cc: Default::default(),

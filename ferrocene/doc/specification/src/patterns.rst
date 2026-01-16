@@ -127,7 +127,7 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 .. _fls_7bxv8lybxm18:
 
 Identifier Patterns
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 .. rubric:: Syntax
 
@@ -244,7 +244,7 @@ An identifier pattern with a bound pattern in the context of a match expression.
 .. _fls_2krxnq8q9ef1:
 
 Literal Patterns
-~~~~~~~~~~~~~~~~
+----------------
 
 .. rubric:: Syntax
 
@@ -294,7 +294,7 @@ See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 .. _fls_1xit18et4ohh:
 
 Parenthesized Patterns
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 .. rubric:: Syntax
 
@@ -340,7 +340,7 @@ expression.
 .. _fls_uloyjbaso8pz:
 
 Path Patterns
-~~~~~~~~~~~~~
+-------------
 
 .. rubric:: Syntax
 
@@ -427,7 +427,7 @@ See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 .. _fls_6tl1fx99yn6c:
 
 Range Patterns
-~~~~~~~~~~~~~~
+--------------
 
 .. rubric:: Syntax
 
@@ -557,7 +557,7 @@ See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 .. _fls_d2sc9hl3v0mk:
 
 Reference Patterns
-~~~~~~~~~~~~~~~~~~
+------------------
 
 .. rubric:: Syntax
 
@@ -606,7 +606,7 @@ See :p:`fls_2xq8852gihn9` for the declaration of ``ref_x``.
 .. _fls_7wpgnp4kjq82:
 
 Rest Patterns
-~~~~~~~~~~~~~
+-------------
 
 .. rubric:: Syntax
 
@@ -671,7 +671,7 @@ Rest patterns in tuple patterns.
 .. _fls_qte70mgzpras:
 
 Slice Patterns
-~~~~~~~~~~~~~~
+--------------
 
 .. rubric:: Syntax
 
@@ -1167,7 +1167,7 @@ A tuple pattern in the context of a let statement.
 .. _fls_qfsfnql1t7m:
 
 Underscore Patterns
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 .. rubric:: Syntax
 

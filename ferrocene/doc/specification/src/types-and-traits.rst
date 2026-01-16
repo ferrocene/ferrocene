@@ -1125,8 +1125,8 @@ Impl Trait Types
        UseCapturesGenericArg ($$,$$ UseCapturesGenericArg)* $$,$$?
 
    UseCapturesGenericArg ::=
-       Lifetime
-     | Identifier
+       Identifier
+     | Lifetime
 
 .. rubric:: Legality Rules
 
@@ -1143,13 +1143,13 @@ An :t:`anonymous return type` is an :t:`impl trait type` ascribed to a
 :t:`function` :t:`return type`.
 
 :dp:`fls_Xo1ODwOyX7Vm`
-An :t:`anonymous return type` behaves as if it contained all declared :t:`[type
+An :t:`anonymous return type` behaves as if it contains all declared :t:`[type
 parameter]s` of the :t:`return type`'s :t:`function` and its parent :t:`trait`
 or :t:`implementation`.
 
 :dp:`fls_kTGFLFymTWch`
 An :t:`anonymous return type` derived from an :t:`async function` behaves as if
-it contained all declared :t:`[type parameter]s` and :t:`[lifetime parameter]s`
+it contains all declared :t:`[type parameter]s` and :t:`[lifetime parameter]s`
 of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
 :t:`implementation`.
 
@@ -1163,7 +1163,7 @@ An :t:`use capture` is a :t:`generic parameter` referenced within an :t:`anonymo
 An :t:`anonymous return type` that does not specify a list of :t:`[use capture]s` implicitly :t:`[use capture]s` all :t:`[type parameter]s` and :t:`[constant parameter]s` that are in :t:`scope`.
 
 :dp:`fls_iT9WCNfUZQnC`
-An :t:`anonymous return type` behaves as if it contained all its :t:`[use capture]s`.
+An :t:`anonymous return type` behaves as if it contains all its :t:`[use capture]s`.
 
 .. rubric:: Examples
 
@@ -3018,7 +3018,7 @@ A :t:`lifetime bound` shall apply to :t:`[type]s` and other :t:`[lifetime]s`.
    &'static Shape
 
 :dp:`fls_gcszhqg6hnva`
-See :p:`fls_85vx1qfa061i` for the declaration of ``Shape``.
+See :p:`fls_mjg7yrq66hh0` for the declaration of ``Shape``.
 
 .. _fls_ikfvbeewame7:
 

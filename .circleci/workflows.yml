@@ -115,6 +115,37 @@ jobs:
             uvx reuse@5.1.1 --include-submodules lint
       - ferrocene-ci
 
+  sbom-gen:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: medium
+    steps:
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Generate SBOMs
+          command: |
+            cargo install cargo-sbom
+            curl -LsSf https://astral.sh/uv/0.9.22/install.sh | sh
+            npm install -g corepack
+            corepack install
+            ./ferrocene/tools/sbom-gen/sbom_gen.sh
+      - run:
+          name: Store SBOMs
+          command: ferrocene/ci/scripts/persist-between-jobs.sh upload target/sboms
+
+  sbom-merge:
+    executor: docker-cyclonedx
+    resource_class: medium
+    steps:
+      - run:
+          name: Get generated SBOMs
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore sbom-gen
+      - run:
+          name: Combine SBOMs
+          command: |
+            cyclonedx merge --name="Ferrocene" --version=rolling --hierarchical --input-files $(ls *"_sbom.json" 2>/dev/null | tr '\n' ' ') --output-version=v1_6 --output-file ferrocene_cdx_sbom.json
+      
+
   # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
@@ -1258,6 +1289,15 @@ workflows:
     jobs:
       - skip
 
+  sbom:
+    when:
+      or:
+        - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
+        - equal: [<< pipeline.git.branch >>, "trying"]
+    jobs:
+      - sbom-gen
+      - sbom-merge
+
 commands:
   ferrocene-job-build:
     description: Collection of steps for build jobs
@@ -1646,3 +1686,6 @@ executors:
   linux-vm:
     machine:
       image: default
+  docker-cyclonedx:
+    docker:
+      - image: cyclonedx/cyclonedx-cli:latest

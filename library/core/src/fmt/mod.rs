@@ -925,7 +925,6 @@ impl !Send for Arguments<'_> {}
 impl !Sync for Arguments<'_> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Display::fmt(self, fmt)
@@ -933,7 +932,6 @@ impl Debug for Arguments<'_> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         write(fmt.buf, *self)

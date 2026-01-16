@@ -1289,15 +1289,6 @@ workflows:
     jobs:
       - skip
 
-  sbom:
-    when:
-      or:
-        - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
-        - equal: [<< pipeline.git.branch >>, "trying"]
-    jobs:
-      - sbom-gen
-      - sbom-merge
-
 commands:
   ferrocene-job-build:
     description: Collection of steps for build jobs

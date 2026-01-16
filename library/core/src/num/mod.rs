@@ -48,7 +48,6 @@ pub mod diy_float;
 #[cfg(not(no_fp_fmt_parse))]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod flt2dec;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod fmt;
 
 #[macro_use]

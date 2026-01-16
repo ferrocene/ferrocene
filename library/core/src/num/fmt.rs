@@ -7,7 +7,7 @@
 )]
 
 /// Formatted parts.
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, PartialEq, Eq, Debug))]
 pub enum Part<'a> {
     /// Given number of zero digits.
     Zero(usize),
@@ -30,6 +30,7 @@ impl<'a> Part<'a> {
     /// Writes a part into the supplied buffer.
     /// Returns the number of written bytes, or `None` if the buffer is not enough.
     /// (It may still leave partially written bytes in the buffer; do not rely on that.)
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write(&self, out: &mut [u8]) -> Option<usize> {
         let len = self.len();
         if out.len() >= len {
@@ -76,6 +77,7 @@ impl<'a> Formatted<'a> {
     /// Writes all formatted parts into the supplied buffer.
     /// Returns the number of written bytes, or `None` if the buffer is not enough.
     /// (It may still leave partially written bytes in the buffer; do not rely on that.)
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write(&self, out: &mut [u8]) -> Option<usize> {
         out.get_mut(..self.sign.len())?.copy_from_slice(self.sign.as_bytes());
 

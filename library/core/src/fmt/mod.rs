@@ -3166,7 +3166,6 @@ impl<T: Debug> Debug for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for () {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

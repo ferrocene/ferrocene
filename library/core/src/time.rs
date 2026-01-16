@@ -1167,6 +1167,7 @@ impl Duration {
     /// assert_eq!(dur.div_duration_floor(Duration::new(1, 000_000_000)), 2);
     /// assert_eq!(dur.div_duration_floor(Duration::new(0, 999_999_999)), 2);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "duration_integer_division", issue = "149573")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
@@ -1187,6 +1188,7 @@ impl Duration {
     /// assert_eq!(dur.div_duration_ceil(Duration::new(1, 000_000_000)), 2);
     /// assert_eq!(dur.div_duration_ceil(Duration::new(0, 999_999_999)), 3);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "duration_integer_division", issue = "149573")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]

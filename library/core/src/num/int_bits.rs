@@ -64,6 +64,7 @@
 
 macro_rules! uint_impl {
     ($U:ident) => {
+        #[cfg(not(feature = "ferrocene_subset"))]
         pub(super) mod $U {
             const STAGES: usize = $U::BITS.ilog2() as usize;
             #[inline]

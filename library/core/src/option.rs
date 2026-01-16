@@ -2914,6 +2914,7 @@ impl<'a, T> Option<&'a mut Option<T>> {
     /// let x: Option<&mut Option<u32>> = None;
     /// assert_eq!(None, x.flatten_ref());
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "option_reference_flattening", issue = "149221")]
     pub const fn flatten_ref(self) -> Option<&'a T> {
@@ -2943,6 +2944,7 @@ impl<'a, T> Option<&'a mut Option<T>> {
     /// let x: Option<&mut Option<u32>> = None;
     /// assert_eq!(None, x.flatten_mut());
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "option_reference_flattening", issue = "149221")]
     pub const fn flatten_mut(self) -> Option<&'a mut T> {

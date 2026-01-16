@@ -172,6 +172,7 @@ impl const TryFrom<char> for u16 {
 ///
 /// Generally speaking, this conversion can be seen as obtaining the character's corresponding
 /// UTF-32 code point to the extent representable by pointer addresses.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "usize_try_from_char", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const TryFrom<char> for usize {

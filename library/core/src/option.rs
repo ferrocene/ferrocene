@@ -2863,10 +2863,7 @@ impl<T> Option<Option<T>> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 08509492139
-=======
 impl<'a, T> Option<&'a Option<T>> {
     /// Converts from `Option<&Option<T>>` to `Option<&T>`.
     ///
@@ -2956,7 +2953,7 @@ impl<'a, T> Option<&'a mut Option<T>> {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> [Option<T>; N] {
     /// Transposes a `[Option<T>; N]` into a `Option<[T; N]>`.
     ///

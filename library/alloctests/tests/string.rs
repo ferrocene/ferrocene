@@ -639,14 +639,28 @@ fn test_replace_range_inclusive_range() {
 }
 
 #[test]
-#[should_panic = "range end index 6 out of range for slice of length 5"]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "range end index {end} out of range for slice of length {len}"
+)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "range end index 6 out of range for slice of length 5"
+)]
 fn test_replace_range_out_of_bounds() {
     let mut s = String::from("12345");
     s.replace_range(5..6, "789");
 }
 
 #[test]
-#[should_panic = "range end index 5 out of range for slice of length 5"]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "range end index {end} out of range for slice of length {len}"
+)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "range end index 5 out of range for slice of length 5"
+)]
 fn test_replace_range_inclusive_out_of_bounds() {
     let mut s = String::from("12345");
     s.replace_range(5..=5, "789");
@@ -655,7 +669,14 @@ fn test_replace_range_inclusive_out_of_bounds() {
 // The overflowed index value is target-dependent,
 // so we don't check for its exact value in the panic message
 #[test]
-#[should_panic = "out of range for slice of length 3"]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "out of range for slice of length {len}"
+)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "out of range for slice of length 3"
+)]
 fn test_replace_range_start_overflow() {
     let mut s = String::from("123");
     s.replace_range((Excluded(usize::MAX), Included(0)), "");
@@ -664,7 +685,14 @@ fn test_replace_range_start_overflow() {
 // The overflowed index value is target-dependent,
 // so we don't check for its exact value in the panic message
 #[test]
-#[should_panic = "out of range for slice of length 3"]
+#[cfg_attr(
+    feature = "ferrocene_certified_runtime",
+    should_panic = "out of range for slice of length {len}"
+)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified_runtime"),
+    should_panic = "out of range for slice of length 3"
+)]
 fn test_replace_range_end_overflow() {
     let mut s = String::from("456");
     s.replace_range((Included(0), Included(usize::MAX)), "");

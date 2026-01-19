@@ -83,7 +83,6 @@ where
 }
 
 #[stable(feature = "iter_cloned", since = "1.1.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, I, T: 'a> DoubleEndedIterator for Cloned<I>
 where
     I: DoubleEndedIterator<Item = &'a T>,

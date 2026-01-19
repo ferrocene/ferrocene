@@ -13,10 +13,8 @@ use crate::{iter, mem, result, str};
 
 mod builders;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod float;
 #[cfg(no_fp_fmt_parse)]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod nofloat;
 mod num;
 mod num_buffer;

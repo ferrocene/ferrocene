@@ -46,6 +46,7 @@ pub trait DecodableFloat: RawFloat + Copy {
 }
 
 #[cfg(target_has_reliable_f16)]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl DecodableFloat for f16 {
     fn min_pos_norm_value() -> Self {
         f16::MIN_POSITIVE

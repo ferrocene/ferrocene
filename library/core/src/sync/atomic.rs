@@ -249,13 +249,7 @@ use crate::cell::UnsafeCell;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::spin_loop;
 use crate::intrinsics::AtomicOrdering as AO;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, intrinsics};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::intrinsics;
 
 trait Sealed {}
 
@@ -4660,7 +4654,6 @@ pub fn compiler_fence(order: Ordering) {
 
 #[cfg(target_has_atomic_load_store = "8")]
 #[stable(feature = "atomic_debug", since = "1.3.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for AtomicBool {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.load(Ordering::Relaxed), f)

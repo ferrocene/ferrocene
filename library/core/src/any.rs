@@ -153,7 +153,6 @@ impl<T: 'static + ?Sized> Any for T {
 ///////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for dyn Any {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
@@ -164,7 +163,6 @@ impl fmt::Debug for dyn Any {
 // hence used with `unwrap`. May eventually no longer be needed if
 // dispatch works with upcasting.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for dyn Any + Send {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
@@ -172,7 +170,6 @@ impl fmt::Debug for dyn Any + Send {
 }
 
 #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for dyn Any + Send + Sync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()

@@ -20,7 +20,6 @@
 //! assert_eq!(total, Duration::new(10, 7));
 //! ```
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::Sum;
@@ -1341,7 +1340,6 @@ impl<'a> Sum<&'a Duration> for Duration {
 }
 
 #[stable(feature = "duration_debug_impl", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Duration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         /// Formats a floating point number in decimal notation.
@@ -1570,7 +1568,6 @@ pub struct TryFromFloatSecsError {
 }
 
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromFloatSecsError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {

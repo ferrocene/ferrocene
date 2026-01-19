@@ -950,7 +950,6 @@ impl fmt::Debug for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}

@@ -197,7 +197,6 @@ pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
 pub struct TryFromSliceError(());
 
 #[stable(feature = "core_array", since = "1.35.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

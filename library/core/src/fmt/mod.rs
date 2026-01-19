@@ -10,16 +10,12 @@ use crate::marker::{PhantomData, PointeeSized};
 use crate::num::fmt as numfmt;
 use crate::ops::Deref;
 use crate::ptr::NonNull;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{iter, mem, result, str};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{
-    cell::{Ref, RefMut},
-    mem, result, str,
-};
+use crate::cell::{Ref, RefMut};
 
 mod builders;
 #[cfg(not(no_fp_fmt_parse))]
@@ -2472,7 +2468,6 @@ impl<'a> Formatter<'a> {
     /// faster for 1 field.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field1_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2489,7 +2484,6 @@ impl<'a> Formatter<'a> {
     /// faster for 2 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field2_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2509,7 +2503,6 @@ impl<'a> Formatter<'a> {
     /// faster for 3 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field3_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2532,7 +2525,6 @@ impl<'a> Formatter<'a> {
     /// faster for 4 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field4_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2558,7 +2550,6 @@ impl<'a> Formatter<'a> {
     /// faster for 5 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_field5_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2586,7 +2577,6 @@ impl<'a> Formatter<'a> {
     /// For the cases not covered by `debug_struct_field[12345]_finish`.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct_fields_finish<'b>(
         &'b mut self,
         name: &str,

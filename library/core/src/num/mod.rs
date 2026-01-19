@@ -15,7 +15,6 @@ use crate::{ascii, intrinsics, mem};
 use crate::{intrinsics, mem};
 
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! try_opt {
     ($e:expr) => {
         match $e {
@@ -714,7 +713,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_alphabetic(&self) -> bool {
         matches!(*self, b'A'..=b'Z' | b'a'..=b'z')
     }

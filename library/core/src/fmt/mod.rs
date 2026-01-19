@@ -24,9 +24,7 @@ mod float;
 #[cfg(no_fp_fmt_parse)]
 #[cfg(not(feature = "ferrocene_subset"))]
 mod nofloat;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod num;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod num_buffer;
 mod rt;
 
@@ -47,7 +45,6 @@ pub enum Alignment {
 }
 
 #[unstable(feature = "int_format_into", issue = "138215")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
@@ -1771,7 +1768,6 @@ impl PostPadding {
     }
 }
 
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 impl<'a> Formatter<'a> {
     fn wrap_buf<'b, 'c, F>(&'b mut self, wrap: F) -> Formatter<'c>
     where
@@ -3135,7 +3131,6 @@ macro_rules! maybe_tuple_doc {
 tuple! { E, D, C, B, A, Z, Y, X, W, V, U, T, }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Debug> Debug for [T] {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_list().entries(self.iter()).finish()

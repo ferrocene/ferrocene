@@ -1,15 +1,8 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::any::type_name;
 use crate::clone::TrivialClone;
 use crate::marker::Destruct;
 use crate::mem::ManuallyDrop;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, intrinsics, ptr, slice};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{intrinsics, ptr, slice};
 
 /// A wrapper type to construct uninitialized instances of `T`.
 ///
@@ -369,7 +362,6 @@ impl<T: Copy> Clone for MaybeUninit<T> {
 unsafe impl<T> TrivialClone for MaybeUninit<T> where MaybeUninit<T>: Clone {}
 
 #[stable(feature = "maybe_uninit_debug", since = "1.41.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> fmt::Debug for MaybeUninit<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // NB: there is no `.pad_fmt` so we can't use a simpler `format_args!("MaybeUninit<{..}>").

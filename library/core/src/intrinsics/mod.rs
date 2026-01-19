@@ -2018,7 +2018,6 @@ pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn carrying_mul_add<T: [const] fallback::CarryingMulAdd<Unsigned = U>, U>(
     multiplier: T,
     multiplicand: T,

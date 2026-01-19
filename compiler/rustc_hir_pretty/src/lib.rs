@@ -22,7 +22,7 @@ use rustc_hir::{
     TyPatKind,
 };
 use rustc_span::source_map::SourceMap;
-use rustc_span::{FileName, Ident, Span, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, FileName, Ident, Span, Symbol, kw, sym};
 use {rustc_ast as ast, rustc_hir as hir};
 
 pub fn id_to_string(cx: &dyn rustc_hir::intravisit::HirTyCtxt<'_>, hir_id: HirId) -> String {
@@ -136,7 +136,11 @@ impl<'a> State<'a> {
                 .path
                 .segments
                 .iter()
-                .map(|i| ast::PathSegment { ident: *i, args: None, id: DUMMY_NODE_ID })
+                .map(|i| ast::PathSegment {
+                    ident: Ident { name: *i, span: DUMMY_SP },
+                    args: None,
+                    id: DUMMY_NODE_ID,
+                })
                 .collect(),
             tokens: None,
         };
@@ -1139,6 +1143,7 @@ impl<'a> State<'a> {
         match &const_arg.kind {
             // FIXME(mgca): proper printing for struct exprs
             ConstArgKind::Struct(..) => self.word("/* STRUCT EXPR */"),
+            ConstArgKind::TupleCall(..) => self.word("/* TUPLE CALL */"),
             ConstArgKind::Path(qpath) => self.print_qpath(qpath, true),
             ConstArgKind::Anon(anon) => self.print_anon_const(anon),
             ConstArgKind::Error(_, _) => self.word("/*ERROR*/"),

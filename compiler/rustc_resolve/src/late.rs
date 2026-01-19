@@ -44,8 +44,8 @@ use tracing::{debug, instrument, trace};
 
 use crate::{
     BindingError, BindingKey, Finalize, LexicalScopeBinding, Module, ModuleOrUniformRoot,
-    NameBinding, ParentScope, PathResult, ResolutionError, Resolver, Segment, TyCtxt, UseError,
-    Used, errors, path_names_to_string, rustdoc,
+    NameBinding, ParentScope, PathResult, ResolutionError, Resolver, Segment, Stage, TyCtxt,
+    UseError, Used, errors, path_names_to_string, rustdoc,
 };
 
 mod diagnostics;
@@ -1514,7 +1514,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             opt_ns,
             &self.parent_scope,
             Some(source),
-            finalize,
+            finalize.map(|finalize| Finalize { stage: Stage::Late, ..finalize }),
             Some(&self.ribs),
             None,
             None,
@@ -2655,11 +2655,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 |this| {
                     let item_def_id = this.r.local_def_id(item.id).to_def_id();
                     this.with_self_rib(
-                        Res::SelfTyAlias {
-                            alias_to: item_def_id,
-                            forbid_generic: false,
-                            is_trait_impl: false,
-                        },
+                        Res::SelfTyAlias { alias_to: item_def_id, is_trait_impl: false },
                         |this| {
                             visit::walk_item(this, item);
                         },
@@ -2855,6 +2851,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 ref define_opaque,
                 ..
             }) => {
+                let is_type_const = attr::contains_name(&item.attrs, sym::type_const);
                 self.with_generic_param_rib(
                     &generics.params,
                     RibKind::Item(
@@ -2873,7 +2870,22 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
 
                         this.with_lifetime_rib(
                             LifetimeRibKind::Elided(LifetimeRes::Static),
-                            |this| this.visit_ty(ty),
+                            |this| {
+                                if is_type_const
+                                    && !this.r.tcx.features().generic_const_parameter_types()
+                                {
+                                    this.with_rib(TypeNS, RibKind::ConstParamTy, |this| {
+                                        this.with_rib(ValueNS, RibKind::ConstParamTy, |this| {
+                                            this.with_lifetime_rib(
+                                                LifetimeRibKind::ConstParamTy,
+                                                |this| this.visit_ty(ty),
+                                            )
+                                        })
+                                    });
+                                } else {
+                                    this.visit_ty(ty);
+                                }
+                            },
                         );
 
                         if let Some(rhs) = rhs {
@@ -3213,6 +3225,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     define_opaque,
                     ..
                 }) => {
+                    let is_type_const = attr::contains_name(&item.attrs, sym::type_const);
                     self.with_generic_param_rib(
                         &generics.params,
                         RibKind::AssocItem,
@@ -3227,7 +3240,20 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                 },
                                 |this| {
                                     this.visit_generics(generics);
-                                    this.visit_ty(ty);
+                                    if is_type_const
+                                        && !this.r.tcx.features().generic_const_parameter_types()
+                                    {
+                                        this.with_rib(TypeNS, RibKind::ConstParamTy, |this| {
+                                            this.with_rib(ValueNS, RibKind::ConstParamTy, |this| {
+                                                this.with_lifetime_rib(
+                                                    LifetimeRibKind::ConstParamTy,
+                                                    |this| this.visit_ty(ty),
+                                                )
+                                            })
+                                        });
+                                    } else {
+                                        this.visit_ty(ty);
+                                    }
 
                                     // Only impose the restrictions of `ConstRibKind` for an
                                     // actual constant expression in a provided default.
@@ -3368,8 +3394,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                     let item_def_id = item_def_id.to_def_id();
                                     let res = Res::SelfTyAlias {
                                         alias_to: item_def_id,
-                                        forbid_generic: false,
-                                        is_trait_impl: trait_id.is_some()
+                                        is_trait_impl: trait_id.is_some(),
                                     };
                                     this.with_self_rib(res, |this| {
                                         if let Some(of_trait) = of_trait {
@@ -3422,6 +3447,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 ..
             }) => {
                 debug!("resolve_implementation AssocItemKind::Const");
+                let is_type_const = attr::contains_name(&item.attrs, sym::type_const);
                 self.with_generic_param_rib(
                     &generics.params,
                     RibKind::AssocItem,
@@ -3458,7 +3484,28 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                         );
 
                                         this.visit_generics(generics);
-                                        this.visit_ty(ty);
+                                        if is_type_const
+                                            && !this
+                                                .r
+                                                .tcx
+                                                .features()
+                                                .generic_const_parameter_types()
+                                        {
+                                            this.with_rib(TypeNS, RibKind::ConstParamTy, |this| {
+                                                this.with_rib(
+                                                    ValueNS,
+                                                    RibKind::ConstParamTy,
+                                                    |this| {
+                                                        this.with_lifetime_rib(
+                                                            LifetimeRibKind::ConstParamTy,
+                                                            |this| this.visit_ty(ty),
+                                                        )
+                                                    },
+                                                )
+                                            });
+                                        } else {
+                                            this.visit_ty(ty);
+                                        }
                                         if let Some(rhs) = rhs {
                                             // We allow arbitrary const expressions inside of associated consts,
                                             // even if they are potentially not const evaluatable.

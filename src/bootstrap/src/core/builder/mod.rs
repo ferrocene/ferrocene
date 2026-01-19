@@ -1035,6 +1035,7 @@ impl<'a> Builder<'a> {
                 dist::PlainSourceTarballGpl,
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
+<<<<<<< HEAD
                 dist::Gcc,
                 crate::ferrocene::dist::Docs,
                 crate::ferrocene::dist::DocsDoctrees,
@@ -1045,6 +1046,11 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::dist::CoverageOutcomes,
                 crate::ferrocene::dist::GenerateBuildMetadata,
                 crate::ferrocene::partners::oxidos::DistOxidOs,
+||||||| 6e48b44e77d
+                dist::Gcc
+=======
+                dist::GccDev
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             ),
             Kind::Install => describe!(
                 // Ferrocene annotation

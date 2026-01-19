@@ -1,6 +1,5 @@
 //! Comparison traits for `[T]`.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::{from_raw_parts, memchr};
 use crate::ascii;
 use crate::cmp::{self, BytewiseEq, Ordering};
@@ -363,12 +362,10 @@ impl<A: [const] PartialOrd + [const] UnsignedBytewiseOrd> const SliceChain for A
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) trait SliceContains: Sized {
     fn slice_contains(&self, x: &[Self]) -> bool;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> SliceContains for T
 where
     T: PartialEq,
@@ -378,7 +375,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl SliceContains for u8 {
     #[inline]
     fn slice_contains(&self, x: &[Self]) -> bool {
@@ -386,7 +382,6 @@ impl SliceContains for u8 {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl SliceContains for i8 {
     #[inline]
     fn slice_contains(&self, x: &[Self]) -> bool {
@@ -400,7 +395,6 @@ impl SliceContains for i8 {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_slice_contains {
     ($($t:ty),*) => {
         $(
@@ -425,5 +419,4 @@ macro_rules! impl_slice_contains {
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_slice_contains!(u16, u32, u64, i16, i32, i64, f32, f64, usize, isize, char);

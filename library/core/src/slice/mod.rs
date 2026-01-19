@@ -2650,7 +2650,6 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn contains(&self, x: &T) -> bool
     where
         T: PartialEq,

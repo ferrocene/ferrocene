@@ -14,7 +14,6 @@ import argparse
 import boto3
 import fnmatch
 import io
-import os
 import subprocess
 import sys
 import tomllib
@@ -57,7 +56,7 @@ def packages_from_toml(commit):
 
     if toml["manifest-version"] != SUPPORTED_MANIFEST_VERSION:
         print(
-            f"error: manifest version {toml["manifest-version"]} is not supported by this script"
+            f"error: manifest version {toml['manifest-version']} is not supported by this script"
         )
         exit(1)
 
@@ -70,7 +69,7 @@ def packages_from_toml(commit):
                         target_str = ""
                     else:
                         target_str = f"-{target}"
-                    yield f"{package["name"]}{target_str}-{version}.tar.{compression}"
+                    yield f"{package['name']}{target_str}-{version}.tar.{compression}"
 
 
 class Checker:

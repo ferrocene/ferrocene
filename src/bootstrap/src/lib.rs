@@ -1025,6 +1025,10 @@ impl Build {
         self.out.join(&*target.triple).join("enzyme")
     }
 
+    fn offload_out(&self, target: TargetSelection) -> PathBuf {
+        self.out.join(&*target.triple).join("offload")
+    }
+
     fn lld_out(&self, target: TargetSelection) -> PathBuf {
         self.out.join(target).join("lld")
     }

@@ -11,18 +11,16 @@ use rustc_abi::{FieldIdx, Integer};
 use rustc_errors::codes::*;
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
-use rustc_hir::{self as hir, LangItem, RangeEnd};
+use rustc_hir::{self as hir, RangeEnd};
 use rustc_index::Idx;
-use rustc_infer::infer::TyCtxtInferExt;
 use rustc_middle::mir::interpret::LitToConstInput;
 use rustc_middle::thir::{
     Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, Pat, PatKind, PatRange, PatRangeBoundary,
 };
 use rustc_middle::ty::adjustment::{PatAdjust, PatAdjustment};
 use rustc_middle::ty::layout::IntegerExt;
-use rustc_middle::ty::{self, CanonicalUserTypeAnnotation, Ty, TyCtxt, TypingMode};
+use rustc_middle::ty::{self, CanonicalUserTypeAnnotation, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
-use rustc_span::def_id::DefId;
 use rustc_span::{ErrorGuaranteed, Span};
 use tracing::{debug, instrument};
 
@@ -132,9 +130,8 @@ impl<'tcx> PatCtxt<'tcx> {
     fn lower_pattern_range_endpoint(
         &mut self,
         expr: Option<&'tcx hir::PatExpr<'tcx>>,
-        // Out-parameters collecting extra data to be reapplied by the caller
+        // Out-parameter collecting extra data to be reapplied by the caller
         ascriptions: &mut Vec<Ascription<'tcx>>,
-        expanded_consts: &mut Vec<DefId>,
     ) -> Result<Option<PatRangeBoundary<'tcx>>, ErrorGuaranteed> {
         let Some(expr) = expr else { return Ok(None) };
 
@@ -149,8 +146,10 @@ impl<'tcx> PatCtxt<'tcx> {
                     ascriptions.push(ascription);
                     kind = subpattern.kind;
                 }
-                PatKind::ExpandedConstant { def_id, subpattern } => {
-                    expanded_consts.push(def_id);
+                PatKind::ExpandedConstant { def_id: _, subpattern } => {
+                    // Expanded-constant nodes are currently only needed by
+                    // diagnostics that don't apply to range patterns, so we
+                    // can just discard them here.
                     kind = subpattern.kind;
                 }
                 _ => break,
@@ -228,10 +227,7 @@ impl<'tcx> PatCtxt<'tcx> {
 
         // Collect extra data while lowering the endpoints, to be reapplied later.
         let mut ascriptions = vec![];
-        let mut expanded_consts = vec![];
-
-        let mut lower_endpoint =
-            |expr| self.lower_pattern_range_endpoint(expr, &mut ascriptions, &mut expanded_consts);
+        let mut lower_endpoint = |expr| self.lower_pattern_range_endpoint(expr, &mut ascriptions);
 
         let lo = lower_endpoint(lo_expr)?.unwrap_or(PatRangeBoundary::NegInfinity);
         let hi = lower_endpoint(hi_expr)?.unwrap_or(PatRangeBoundary::PosInfinity);
@@ -283,10 +279,11 @@ impl<'tcx> PatCtxt<'tcx> {
             let subpattern = Box::new(Pat { span, ty, kind });
             kind = PatKind::AscribeUserType { ascription, subpattern };
         }
-        for def_id in expanded_consts {
-            let subpattern = Box::new(Pat { span, ty, kind });
-            kind = PatKind::ExpandedConstant { def_id, subpattern };
-        }
+        // `PatKind::ExpandedConstant` wrappers from range endpoints used to
+        // also be preserved here, but that was only needed for unsafeck of
+        // inline `const { .. }` patterns, which were removed by
+        // <https://github.com/rust-lang/rust/pull/138492>.
+
         Ok(kind)
     }
 
@@ -613,54 +610,8 @@ impl<'tcx> PatCtxt<'tcx> {
         pattern
     }
 
-    /// Lowers an inline const block (e.g. `const { 1 + 1 }`) to a pattern.
-    fn lower_inline_const(
-        &mut self,
-        block: &'tcx hir::ConstBlock,
-        id: hir::HirId,
-        span: Span,
-    ) -> PatKind<'tcx> {
-        let tcx = self.tcx;
-        let def_id = block.def_id;
-        let ty = tcx.typeck(def_id).node_type(block.hir_id);
-
-        let typeck_root_def_id = tcx.typeck_root_def_id(def_id.to_def_id());
-        let parent_args = ty::GenericArgs::identity_for_item(tcx, typeck_root_def_id);
-        let args = ty::InlineConstArgs::new(tcx, ty::InlineConstArgsParts { parent_args, ty }).args;
-
-        let ct = ty::UnevaluatedConst { def: def_id.to_def_id(), args };
-        let c = ty::Const::new_unevaluated(self.tcx, ct);
-        let pattern = self.const_to_pat(c, ty, id, span);
-
-        // Apply a type ascription for the inline constant.
-        let annotation = {
-            let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
-            let args = ty::InlineConstArgs::new(
-                tcx,
-                ty::InlineConstArgsParts { parent_args, ty: infcx.next_ty_var(span) },
-            )
-            .args;
-            infcx.canonicalize_user_type_annotation(ty::UserType::new(ty::UserTypeKind::TypeOf(
-                def_id.to_def_id(),
-                ty::UserArgs { args, user_self_ty: None },
-            )))
-        };
-        let annotation =
-            CanonicalUserTypeAnnotation { user_ty: Box::new(annotation), span, inferred_ty: ty };
-        PatKind::AscribeUserType {
-            subpattern: pattern,
-            ascription: Ascription {
-                annotation,
-                // Note that we use `Contravariant` here. See the `variance` field documentation
-                // for details.
-                variance: ty::Contravariant,
-            },
-        }
-    }
-
     /// Lowers the kinds of "expression" that can appear in a HIR pattern:
     /// - Paths (e.g. `FOO`, `foo::BAR`, `Option::None`)
-    /// - Inline const blocks (e.g. `const { 1 + 1 }`)
     /// - Literals, possibly negated (e.g. `-128u8`, `"hello"`)
     fn lower_pat_expr(
         &mut self,
@@ -669,32 +620,13 @@ impl<'tcx> PatCtxt<'tcx> {
     ) -> PatKind<'tcx> {
         match &expr.kind {
             hir::PatExprKind::Path(qpath) => self.lower_path(qpath, expr.hir_id, expr.span).kind,
-            hir::PatExprKind::ConstBlock(anon_const) => {
-                self.lower_inline_const(anon_const, expr.hir_id, expr.span)
-            }
             hir::PatExprKind::Lit { lit, negated } => {
                 // We handle byte string literal patterns by using the pattern's type instead of the
                 // literal's type in `const_to_pat`: if the literal `b"..."` matches on a slice reference,
                 // the pattern's type will be `&[u8]` whereas the literal's type is `&[u8; 3]`; using the
                 // pattern's type means we'll properly translate it to a slice reference pattern. This works
                 // because slices and arrays have the same valtree representation.
-                // HACK: As an exception, use the literal's type if `pat_ty` is `String`; this can happen if
-                // `string_deref_patterns` is enabled. There's a special case for that when lowering to MIR.
-                // FIXME(deref_patterns): This hack won't be necessary once `string_deref_patterns` is
-                // superseded by a more general implementation of deref patterns.
                 let ct_ty = match pat_ty {
-                    Some(pat_ty)
-                        if let ty::Adt(def, _) = *pat_ty.kind()
-                            && self.tcx.is_lang_item(def.did(), LangItem::String) =>
-                    {
-                        if !self.tcx.features().string_deref_patterns() {
-                            span_bug!(
-                                expr.span,
-                                "matching on `String` went through without enabling string_deref_patterns"
-                            );
-                        }
-                        self.typeck_results.node_type(expr.hir_id)
-                    }
                     Some(pat_ty) => pat_ty,
                     None => self.typeck_results.node_type(expr.hir_id),
                 };

@@ -153,7 +153,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<B, I: DoubleEndedIterator, F> DoubleEndedIterator for Map<I, F>
 where
     F: FnMut(I::Item) -> B,

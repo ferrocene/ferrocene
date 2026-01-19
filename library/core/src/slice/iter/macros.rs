@@ -402,7 +402,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
                 P: FnMut(Self::Item) -> bool,
                 Self: Sized + ExactSizeIterator + DoubleEndedIterator

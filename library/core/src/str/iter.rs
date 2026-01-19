@@ -368,7 +368,6 @@ impl Iterator for Bytes<'_> {
         self.0.position(predicate)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where

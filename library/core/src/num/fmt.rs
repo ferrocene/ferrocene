@@ -7,7 +7,7 @@
 )]
 
 /// Formatted parts.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, PartialEq, Eq, Debug))]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Part<'a> {
     /// Given number of zero digits.
     Zero(usize),

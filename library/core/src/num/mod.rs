@@ -36,16 +36,12 @@ macro_rules! sign_dependent_expr {
 
 // All these modules are technically private and only exposed for coretests:
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bignum;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod dec2flt;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod diy_float;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod flt2dec;
 pub mod fmt;
 
@@ -1391,7 +1387,6 @@ impl usize {
 /// ```
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum FpCategory {
     /// NaN (not a number): this value results from calculations like `(-1.0).sqrt()`.
     ///

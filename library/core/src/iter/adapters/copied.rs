@@ -116,7 +116,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> DoubleEndedIterator for Copied<I>
 where
@@ -149,7 +148,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> ExactSizeIterator for Copied<I>
 where

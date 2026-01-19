@@ -20,6 +20,7 @@ macro_rules! impl_general_format {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_has_reliable_f16)]
 impl_general_format! { f16 }
 impl_general_format! { f32 f64 }
@@ -233,12 +234,14 @@ macro_rules! floating {
 
 floating! { f32 f64 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_has_reliable_f16)]
 floating! { f16 }
 
 // FIXME(f16): A fallback is used when the backend+target does not support f16 well, in order
 // to avoid ICEs.
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for f16 {
@@ -248,6 +251,7 @@ impl Debug for f16 {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for f16 {
@@ -257,6 +261,7 @@ impl Display for f16 {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl LowerExp for f16 {
@@ -266,6 +271,7 @@ impl LowerExp for f16 {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl UpperExp for f16 {
@@ -275,6 +281,7 @@ impl UpperExp for f16 {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for f128 {
     #[inline]

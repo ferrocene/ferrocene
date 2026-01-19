@@ -1,5 +1,4 @@
 use super::*;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -2070,7 +2069,6 @@ impl<T: PointeeSized> PartialEq for *mut T {
 impl<T: PointeeSized> Eq for *mut T {}
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[diagnostic::on_const(
     message = "pointers cannot be reliably compared during const eval",
@@ -2091,7 +2089,6 @@ impl<T: PointeeSized> Ord for *mut T {
 }
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[diagnostic::on_const(
     message = "pointers cannot be reliably compared during const eval",

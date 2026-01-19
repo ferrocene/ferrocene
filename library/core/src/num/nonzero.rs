@@ -4,7 +4,6 @@
 use super::{IntErrorKind, ParseIntError};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::{TrivialClone, UseCloned};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
 use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -21,7 +20,7 @@ use crate::{fmt, intrinsics, ptr, ub_checks};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{fmt, intrinsics, ops::Div, ub_checks};
+use crate::{fmt, intrinsics, marker::Destruct, ops::Div, ub_checks};
 
 /// A marker trait for primitive types which can be zero.
 ///
@@ -226,7 +225,6 @@ impl<T> Copy for NonZero<T> where T: ZeroablePrimitive {}
 unsafe impl<T> TrivialClone for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T> const PartialEq for NonZero<T>
 where
@@ -249,12 +247,10 @@ impl<T> StructuralPartialEq for NonZero<T> where T: ZeroablePrimitive + Structur
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const Eq for NonZero<T> where T: ZeroablePrimitive + [const] Eq {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const PartialOrd for NonZero<T>
 where
     T: ZeroablePrimitive + [const] PartialOrd,
@@ -287,7 +283,6 @@ where
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const Ord for NonZero<T>
 where
     // FIXME(const_hack): the T: ~const Destruct should be inferred from the Self: ~const Destruct.

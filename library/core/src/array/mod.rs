@@ -7,7 +7,6 @@
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::borrow::{Borrow, BorrowMut};
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::Infallible;
@@ -428,7 +427,6 @@ where
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
 // blocked by PartialOrd
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
     #[inline]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {
@@ -454,7 +452,6 @@ impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
 
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Ord, const N: usize> Ord for [T; N] {
     #[inline]
     fn cmp(&self, other: &[T; N]) -> Ordering {

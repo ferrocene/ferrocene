@@ -106,7 +106,7 @@
 #![feature(cfg_select)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(const_carrying_mul_add)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
+#![feature(const_cmp)]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(const_select_unpredictable)]

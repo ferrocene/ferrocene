@@ -595,7 +595,7 @@ use crate::{cmp, convert, hint, mem, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{convert, hint, mem};
+use crate::{cmp, convert, hint, mem};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -2433,7 +2433,6 @@ impl<T: [const] PartialEq> const PartialEq for Option<T> {
 // not optimal.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] PartialOrd> const PartialOrd for Option<T> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
@@ -2448,7 +2447,6 @@ impl<T: [const] PartialOrd> const PartialOrd for Option<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Ord> const Ord for Option<T> {
     #[inline]
     fn cmp(&self, other: &Self) -> cmp::Ordering {

@@ -25,9 +25,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod bytewise;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use bytewise::BytewiseEq;
 
 use self::Ordering::*;
@@ -2178,7 +2176,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl<A: PointeeSized> const Ord for &A
     where
         A: [const] Ord,
@@ -2211,7 +2208,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialOrd<&mut B> for &mut A
     where
         A: [const] PartialOrd<B>,
@@ -2255,7 +2251,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl<A: PointeeSized> const Ord for &mut A
     where
         A: [const] Ord,

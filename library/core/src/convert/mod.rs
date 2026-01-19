@@ -37,7 +37,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
@@ -944,7 +943,6 @@ impl const Clone for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}

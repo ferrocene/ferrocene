@@ -30,7 +30,7 @@ use crate::{ascii, mem};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use {
-    self::pattern::{Pattern, ReverseSearcher},
+    self::pattern::{Pattern, ReverseSearcher, Searcher},
     crate::{mem, slice::SliceIndex},
 };
 
@@ -1521,7 +1521,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
         pat.into_searcher(self).next_match().map(|(i, _)| i)
     }

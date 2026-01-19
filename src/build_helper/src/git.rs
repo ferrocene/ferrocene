@@ -162,6 +162,17 @@ pub fn has_changed_since(git_dir: &Path, base: &str, paths: &[&str]) -> bool {
     })
 }
 
+// Temporary e-mail used by new bors for merge commits for a few days, until it learned how to reuse
+// the original homu e-mail
+// FIXME: remove in Q2 2026
+const TEMPORARY_BORS_EMAIL: &str = "122020455+rust-bors[bot]@users.noreply.github.com";
+
+/// Escape characters from the git user e-mail, so that git commands do not interpret it as regex
+/// special characters.
+fn escape_email_git_regex(text: &str) -> String {
+    text.replace("[", "\\[").replace("]", "\\]").replace(".", "\\.")
+}
+
 /// Returns the latest upstream commit that modified `target_paths`, or `None` if no such commit
 /// was found.
 fn get_latest_upstream_commit_that_modified_files(
@@ -192,8 +203,19 @@ fn get_latest_upstream_commit_that_modified_files(
         "-n1",
         &upstream,
         "--author",
+<<<<<<< HEAD
         &git_config.author_email(),
+||||||| 72b6488ba48
+        git_config.git_merge_commit_email,
+=======
+        &escape_email_git_regex(git_config.git_merge_commit_email),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ]);
+
+    // Also search for temporary bors account
+    if git_config.git_merge_commit_email != TEMPORARY_BORS_EMAIL {
+        git.args(["--author", &escape_email_git_regex(TEMPORARY_BORS_EMAIL)]);
+    }
 
     if !target_paths.is_empty() {
         git.arg("--").args(target_paths);
@@ -239,10 +261,21 @@ pub fn get_closest_upstream_commit(
     git.args([
         "rev-list",
         "--author-date-order",
+<<<<<<< HEAD
         &format!("--author={}", config.author_email()),
+||||||| 72b6488ba48
+        &format!("--author={}", config.git_merge_commit_email),
+=======
+        &format!("--author={}", &escape_email_git_regex(config.git_merge_commit_email),),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         "-n1",
         base,
     ]);
+
+    // Also search for temporary bors account
+    if config.git_merge_commit_email != TEMPORARY_BORS_EMAIL {
+        git.args(["--author", &escape_email_git_regex(TEMPORARY_BORS_EMAIL)]);
+    }
 
     let output = output_result(&mut git)?.trim().to_owned();
     if output.is_empty() { Ok(None) } else { Ok(Some(output)) }

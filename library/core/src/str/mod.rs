@@ -58,7 +58,6 @@ pub use iter::LinesAny;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use iter::SplitAsciiWhitespace;
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use iter::SplitInclusive;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -95,6 +94,10 @@ pub use {
     error::Utf8Error,
     iter::{Bytes, CharIndices, Chars},
 };
+
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+use iter::SplitInternal;
 
 #[inline(never)]
 #[cold]
@@ -1737,7 +1740,6 @@ impl str {
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn split_inclusive<P: Pattern>(&self, pat: P) -> SplitInclusive<'_, P> {
         SplitInclusive(SplitInternal {
             start: 0,

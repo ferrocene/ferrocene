@@ -227,7 +227,6 @@ pub unsafe trait Searcher<'a> {
     /// Getter for the underlying string to be searched in
     ///
     /// Will always return the same [`&str`][str].
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn haystack(&self) -> &'a str;
 
     /// Performs the next search step starting from the front.
@@ -260,7 +259,6 @@ pub unsafe trait Searcher<'a> {
     /// `(start_match, end_match)`, where start_match is the index of where
     /// the match begins, and end_match is the index after the end of the match.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         loop {
             match self.next() {
@@ -1176,7 +1174,6 @@ impl<'a, 'b> StrSearcher<'a, 'b> {
 
 unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn haystack(&self) -> &'a str {
         self.haystack
     }
@@ -1234,7 +1231,6 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         match self.searcher {
             StrSearcherImpl::Empty(..) => loop {
@@ -1793,10 +1789,8 @@ trait TwoWayStrategy {
 }
 
 /// Skip to match intervals as quickly as possible
-#[cfg(not(feature = "ferrocene_subset"))]
 enum MatchOnly {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl TwoWayStrategy for MatchOnly {
     type Output = Option<(usize, usize)>;
 

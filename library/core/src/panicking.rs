@@ -40,6 +40,7 @@ use crate::panic::{Location, PanicInfo};
 pub(crate) type PanicArguments<'a> = fmt::Arguments<'a>;
 #[cfg(feature = "ferrocene_certified_runtime")]
 #[allow(missing_debug_implementations)]
+#[derive(Debug)]
 pub struct PanicArguments<'a> {
     pub(crate) inner: &'static str,
     _marker: PhantomData<&'a ()>,

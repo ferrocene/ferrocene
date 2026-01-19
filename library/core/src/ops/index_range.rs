@@ -10,9 +10,8 @@ use crate::ub_checks;
 ///
 /// (Normal `Range` code needs to handle degenerate ranges like `10..0`,
 ///  which takes extra checks compared to only handling the canonical form.)
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(Clone, Eq, PartialEq))]
-#[cfg_attr(feature = "ferrocene_subset", derive_const(Clone, PartialEq))]
+#[derive(Debug)]
+#[derive_const(Clone, Eq, PartialEq)]
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,

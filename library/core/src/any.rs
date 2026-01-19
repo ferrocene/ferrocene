@@ -92,7 +92,7 @@ use crate::{fmt, hash, intrinsics, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::intrinsics;
+use crate::{fmt, intrinsics};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Any trait
@@ -803,7 +803,6 @@ impl TypeId {
         const { intrinsics::type_id::<T>() }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn as_u128(self) -> u128 {
         let mut bytes = [0; 16];
 
@@ -844,7 +843,6 @@ impl hash::Hash for TypeId {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for TypeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "TypeId({:#034x})", self.as_u128())

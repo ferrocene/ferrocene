@@ -12,14 +12,13 @@ use crate::panicking::PanicArguments;
 /// [`std::panic::PanicHookInfo`]: ../../std/panic/struct.PanicHookInfo.html
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(not(feature = "ferrocene_certified_runtime"), derive(Debug))]
+#[derive(Debug)]
 #[cfg_attr(feature = "ferrocene_certified_runtime", allow(missing_debug_implementations))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub struct PanicInfo<'a> {
     message: &'a PanicArguments<'a>,
     location: &'a Location<'a>,
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     can_unwind: bool,
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     force_no_backtrace: bool,
 }
 

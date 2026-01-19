@@ -99,7 +99,7 @@ use crate::slice;
 /// ```
 ///
 /// [str]: prim@str "str"
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq, Hash))]
+#[derive(PartialEq, Eq, Hash)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
 #[rustc_diagnostic_item = "cstr_type"]
 #[rustc_has_incoherent_inherent_impls]
@@ -133,7 +133,7 @@ pub struct CStr {
 ///
 /// let _: FromBytesWithNulError = CStr::from_bytes_with_nul(b"f\0oo").unwrap_err();
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Copy, PartialEq, Eq, Debug))]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
 pub enum FromBytesWithNulError {
     /// Data provided contains an interior nul byte at byte `position`.

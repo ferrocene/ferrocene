@@ -74,8 +74,7 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 /// A type for atomic ordering parameters for intrinsics. This is a separate type from
 /// `atomic::Ordering` so that we can make it `ConstParamTy` and fix the values used here without a
 /// risk of leaking that to stable code.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, ConstParamTy, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(ConstParamTy, PartialEq, Eq))]
+#[derive(Debug, ConstParamTy, PartialEq, Eq)]
 pub enum AtomicOrdering {
     // These values must match the compiler's `AtomicOrdering` defined in
     // `rustc_middle/src/ty/consts/int.rs`!

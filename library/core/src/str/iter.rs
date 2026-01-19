@@ -31,7 +31,7 @@ use {
         from_utf8_unchecked,
         pattern::{Pattern, Searcher},
     },
-    crate::{iter::Copied, slice},
+    crate::{fmt, iter::Copied, slice},
 };
 
 /// An iterator over the [`char`]s of a string slice.
@@ -42,7 +42,7 @@ use {
 ///
 /// [`char`]: prim@char
 /// [`chars`]: str::chars
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone))]
+#[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Chars<'a> {
@@ -130,7 +130,6 @@ impl<'a> Iterator for Chars<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "chars_debug_impl", since = "1.38.0")]
 impl fmt::Debug for Chars<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -189,7 +188,7 @@ impl<'a> Chars<'a> {
 ///
 /// [`char`]: prim@char
 /// [`char_indices`]: str::char_indices
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct CharIndices<'a> {
@@ -304,7 +303,7 @@ impl<'a> CharIndices<'a> {
 /// [`bytes`]: str::bytes
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct Bytes<'a>(pub(super) Copied<slice::Iter<'a, u8>>);
 
 #[stable(feature = "rust1", since = "1.0.0")]

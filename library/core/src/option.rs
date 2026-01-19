@@ -599,9 +599,8 @@ use crate::{convert, hint, mem};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy))]
+#[derive(Copy, Debug, Hash)]
+#[derive_const(Eq)]
 #[rustc_diagnostic_item = "Option"]
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -2466,7 +2465,7 @@ impl<T: [const] Ord> const Ord for Option<T> {
 // The Option Iterators
 /////////////////////////////////////////////////////////////////////////////
 
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 struct Item<A> {
     #[allow(dead_code)]
     opt: Option<A>,
@@ -2512,7 +2511,7 @@ unsafe impl<A> TrustedLen for Item<A> {}
 ///
 /// This `struct` is created by the [`Option::iter`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct Iter<'a, A: 'a> {
     #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a A>,
@@ -2569,7 +2568,7 @@ impl<A> Clone for Iter<'_, A> {
 ///
 /// This `struct` is created by the [`Option::iter_mut`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct IterMut<'a, A: 'a> {
     #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a mut A>,
@@ -2615,7 +2614,7 @@ unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 /// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
 ///
 /// This `struct` is created by the [`Option::into_iter`] function.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct IntoIter<A> {
     inner: Item<A>,

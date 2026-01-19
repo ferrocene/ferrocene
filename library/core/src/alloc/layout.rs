@@ -35,7 +35,7 @@ use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, mem::Siz
 /// like this are met, use specific allocators with looser
 /// requirements, or use the more lenient `Allocator` interface.)
 #[stable(feature = "alloc_layout", since = "1.28.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq, Hash))]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[lang = "alloc_layout"]
 pub struct Layout {
     // size of the requested block of memory, measured in bytes.

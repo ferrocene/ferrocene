@@ -884,7 +884,7 @@ pub struct RefCell<T: ?Sized> {
 /// An error returned by [`RefCell::try_borrow`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct BorrowError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
@@ -911,7 +911,7 @@ impl Display for BorrowError {
 /// An error returned by [`RefCell::try_borrow_mut`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct BorrowMutError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,

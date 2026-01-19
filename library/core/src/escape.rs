@@ -375,7 +375,6 @@ impl<const N: usize> fmt::Debug for EscapeIterInner<N, AlwaysEscaped> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Debug for EscapeIterInner<N, MaybeEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("EscapeIterInner").field(&format_args!("'{}'", self)).finish()

@@ -1,6 +1,5 @@
 //! Error types for conversion to integral types.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::Infallible;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
@@ -24,7 +23,6 @@ impl Error for TryFromIntError {}
 
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl const From<Infallible> for TryFromIntError {
     fn from(x: Infallible) -> TryFromIntError {
         match x {}
@@ -33,7 +31,6 @@ impl const From<Infallible> for TryFromIntError {
 
 #[unstable(feature = "never_type", issue = "35121")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl const From<!> for TryFromIntError {
     #[inline]
     fn from(never: !) -> TryFromIntError {
@@ -65,10 +62,9 @@ impl const From<!> for TryFromIntError {
 ///     println!("Failed conversion to i32: {e}");
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, PartialEq, Eq))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct ParseIntError {
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     pub(super) kind: IntErrorKind,
 }
 
@@ -84,7 +80,7 @@ pub struct ParseIntError {
 /// # }
 /// ```
 #[stable(feature = "int_error_matching", since = "1.55.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, PartialEq, Eq, Copy, Hash))]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
 #[non_exhaustive]
 pub enum IntErrorKind {
     /// Value being parsed is empty.
@@ -115,7 +111,6 @@ pub enum IntErrorKind {
     Zero,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ParseIntError {
     /// Outputs the detailed cause of parsing an integer failing.
     #[must_use]
@@ -127,7 +122,6 @@ impl ParseIntError {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for ParseIntError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {

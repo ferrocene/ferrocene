@@ -387,7 +387,7 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 ///
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
+#[derive(Copy, Debug, Hash)]
 #[derive_const(Clone, Eq, PartialOrd, Ord, PartialEq)]
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.

@@ -72,8 +72,7 @@ use crate::{mem, ptr};
 /// [`ManuallyDrop`]: crate::mem::ManuallyDrop
 #[repr(transparent)]
 #[rustc_pub_transparent]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Default))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct MaybeDangling<P: ?Sized>(P);
 
 impl<P: ?Sized> MaybeDangling<P> {

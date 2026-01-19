@@ -20,7 +20,7 @@ use crate::{array, ptr};
 /// [`Iterator`]: trait.Iterator.html
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct Copied<I> {
     it: I,
 }

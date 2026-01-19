@@ -331,7 +331,7 @@ impl const TryFrom<u32> for char {
 /// This `struct` is created by the [`char::try_from<u32>`](char#impl-TryFrom<u32>-for-char) method.
 /// See its documentation for more.
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct CharTryFromError(());
 
 #[cfg(not(feature = "ferrocene_subset"))]

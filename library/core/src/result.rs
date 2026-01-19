@@ -550,8 +550,7 @@ use crate::{convert, fmt, hint};
 ///
 /// See the [module documentation](self) for details.
 #[doc(search_unbox)]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Hash))]
+#[derive(Copy, Debug, Hash)]
 #[derive_const(PartialEq, PartialOrd, Eq, Ord)]
 #[must_use = "this `Result` may be an `Err` variant, which should be handled"]
 #[rustc_diagnostic_item = "Result"]

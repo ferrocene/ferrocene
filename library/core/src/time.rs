@@ -1563,7 +1563,7 @@ impl fmt::Debug for Duration {
 ///     println!("Failed conversion to Duration: {e}");
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, PartialEq, Eq))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
 pub struct TryFromFloatSecsError {
     kind: TryFromFloatSecsErrorKind,
@@ -1585,7 +1585,7 @@ impl fmt::Display for TryFromFloatSecsError {
     }
 }
 
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, PartialEq, Eq))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum TryFromFloatSecsErrorKind {
     // Value is negative.
     Negative,

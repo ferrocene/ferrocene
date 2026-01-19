@@ -2,7 +2,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
@@ -72,13 +71,7 @@ pub trait Pointee: PointeeSized {
     // in sync with those here:
     // NOTE: The metadata of `dyn Trait + 'a` is `DynMetadata<dyn Trait + 'a>`
     // so a `'static` bound must not be added.
-    #[cfg(not(feature = "ferrocene_subset"))]
     type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
-    /// The type for metadata in pointers and references to `Self`.
-    #[lang = "metadata_type"]
-    #[cfg(feature = "ferrocene_subset")]
-    #[rustfmt::skip]
-    type Metadata: /* fmt::Debug */ Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.

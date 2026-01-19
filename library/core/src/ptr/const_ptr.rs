@@ -191,7 +191,6 @@ impl<T: PointeeSized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }

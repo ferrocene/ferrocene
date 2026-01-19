@@ -2672,13 +2672,11 @@ impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<UnsafeCell<U>> for UnsafeCell<T> 
 #[repr(transparent)]
 #[rustc_diagnostic_item = "SyncUnsafeCell"]
 #[rustc_pub_transparent]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SyncUnsafeCell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: ?Sized + Sync> Sync for SyncUnsafeCell<T> {}
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]

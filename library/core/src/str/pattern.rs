@@ -42,7 +42,6 @@
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::TryInto as _;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::slice::memchr;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{cmp, fmt};
@@ -128,7 +127,6 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the back of the haystack
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -301,7 +299,6 @@ pub unsafe trait Searcher<'a> {
 ///
 /// For the reason why this trait is marked unsafe, see the
 /// parent trait [`Searcher`].
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait ReverseSearcher<'a>: Searcher<'a> {
     /// Performs the next search step starting from the back.
     ///
@@ -329,6 +326,7 @@ pub unsafe trait ReverseSearcher<'a>: Searcher<'a> {
     /// Finds the next [`Match`][SearchStep::Match] result.
     /// See [`next_back()`][ReverseSearcher::next_back].
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_match_back(&mut self) -> Option<(usize, usize)> {
         loop {
             match self.next_back() {
@@ -342,6 +340,7 @@ pub unsafe trait ReverseSearcher<'a>: Searcher<'a> {
     /// Finds the next [`Reject`][SearchStep::Reject] result.
     /// See [`next_back()`][ReverseSearcher::next_back].
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_reject_back(&mut self) -> Option<(usize, usize)> {
         loop {
             match self.next_back() {
@@ -382,8 +381,7 @@ pub trait DoubleEndedSearcher<'a>: ReverseSearcher<'a> {}
 /////////////////////////////////////////////////////////////////////////////
 
 /// Associated type for `<char as Pattern>::Searcher<'a>`.
-#[derive(Clone, Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
 pub struct CharSearcher<'a> {
     haystack: &'a str,
     // safety invariant: `finger`/`finger_back` must be a valid utf8 byte index of `haystack`
@@ -409,14 +407,12 @@ pub struct CharSearcher<'a> {
     utf8_encoded: [u8; 4],
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl CharSearcher<'_> {
     fn utf8_size(&self) -> usize {
         self.utf8_size.into()
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
     #[inline]
     fn haystack(&self) -> &'a str {
@@ -495,7 +491,6 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
     // let next_reject use the default implementation from the Searcher trait
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a> ReverseSearcher<'a> for CharSearcher<'a> {
     #[inline]
     fn next_back(&mut self) -> SearchStep {
@@ -518,6 +513,7 @@ unsafe impl<'a> ReverseSearcher<'a> for CharSearcher<'a> {
         }
     }
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_match_back(&mut self) -> Option<(usize, usize)> {
         let haystack = self.haystack.as_bytes();
         loop {
@@ -580,7 +576,6 @@ impl<'a> DoubleEndedSearcher<'a> for CharSearcher<'a> {}
 /// ```
 /// assert_eq!("Hello world".find('o'), Some(4));
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Pattern for char {
     type Searcher<'a> = CharSearcher<'a>;
 
@@ -604,6 +599,7 @@ impl Pattern for char {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_contained_in(self, haystack: &str) -> bool {
         if (self as u32) < 128 {
             haystack.as_bytes().contains(&(self as u8))
@@ -619,6 +615,7 @@ impl Pattern for char {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn strip_prefix_of(self, haystack: &str) -> Option<&str> {
         self.encode_utf8(&mut [0u8; 4]).strip_prefix_of(haystack)
     }
@@ -632,6 +629,7 @@ impl Pattern for char {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -640,6 +638,7 @@ impl Pattern for char {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn as_utf8_pattern(&self) -> Option<Utf8Pattern<'_>> {
         Some(Utf8Pattern::CharPattern(*self))
     }
@@ -1085,7 +1084,6 @@ impl<'b> Pattern for &'b str {
 
     /// Checks whether the pattern matches at the back of the haystack.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -1135,7 +1133,6 @@ enum StrSearcherImpl {
     TwoWay(TwoWaySearcher),
 }
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 struct EmptyNeedle {
     position: usize,
     end: usize,
@@ -1262,7 +1259,6 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
     #[inline]
     fn next_back(&mut self) -> SearchStep {
@@ -1311,6 +1307,7 @@ unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_match_back(&mut self) -> Option<(usize, usize)> {
         match self.searcher {
             StrSearcherImpl::Empty(..) => loop {
@@ -1343,7 +1340,6 @@ unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
 
 /// The internal state of the two-way substring search algorithm.
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 struct TwoWaySearcher {
     // constants
     /// critical factorization index
@@ -1606,7 +1602,6 @@ impl TwoWaySearcher {
     // To search in reverse through the haystack, we search forward through
     // a reversed haystack with a reversed needle, matching first u' and then v'.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_back<S>(&mut self, haystack: &[u8], needle: &[u8], long_period: bool) -> S::Output
     where
         S: TwoWayStrategy,

@@ -21,7 +21,6 @@ use crate::{
     mem, result, str,
 };
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod builders;
 #[cfg(not(no_fp_fmt_parse))]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -61,6 +60,12 @@ pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple}
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 pub use self::builders::{FromFn, from_fn};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+#[stable(feature = "debug_builders", since = "1.2.0")]
+pub use self::builders::DebugStruct;
 
 /// The type returned by formatter methods.
 ///
@@ -2458,7 +2463,6 @@ impl<'a> Formatter<'a> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_struct<'b>(&'b mut self, name: &str) -> DebugStruct<'b, 'a> {
         builders::debug_struct_new(self, name)
     }

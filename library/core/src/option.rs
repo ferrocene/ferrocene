@@ -1742,7 +1742,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn insert(&mut self, value: T) -> &mut T
     where
         T: [const] Destruct,

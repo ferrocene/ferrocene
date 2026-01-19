@@ -2712,7 +2712,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn ends_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,

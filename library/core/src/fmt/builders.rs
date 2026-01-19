@@ -286,6 +286,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugTuple<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -293,6 +294,7 @@ pub struct DebugTuple<'a, 'b: 'a> {
     empty_name: bool,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_tuple_new<'a, 'b>(
     fmt: &'a mut fmt::Formatter<'b>,
     name: &str,
@@ -301,6 +303,7 @@ pub(super) fn debug_tuple_new<'a, 'b>(
     DebugTuple { fmt, result, fields: 0, empty_name: name.is_empty() }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// Adds a new field to the generated tuple struct output.
     ///
@@ -446,12 +449,14 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
 }
 
 /// A helper used to print list-like items with no special formatting.
+#[cfg(not(feature = "ferrocene_subset"))]
 struct DebugInner<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
     has_fields: bool,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugInner<'a, 'b> {
     fn entry_with<F>(&mut self, entry_fmt: F)
     where
@@ -511,15 +516,18 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugSet<'a, 'b: 'a> {
     inner: DebugInner<'a, 'b>,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_set_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugSet<'a, 'b> {
     let result = fmt.write_str("{");
     DebugSet { inner: DebugInner { fmt, result, has_fields: false } }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// Adds a new entry to the set output.
     ///
@@ -703,15 +711,18 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugList<'a, 'b: 'a> {
     inner: DebugInner<'a, 'b>,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_list_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugList<'a, 'b> {
     let result = fmt.write_str("[");
     DebugList { inner: DebugInner { fmt, result, has_fields: false } }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// Adds a new entry to the list output.
     ///
@@ -894,6 +905,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugMap<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -903,11 +915,13 @@ pub struct DebugMap<'a, 'b: 'a> {
     state: PadAdapterState,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_map_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugMap<'a, 'b> {
     let result = fmt.write_str("{");
     DebugMap { fmt, result, has_fields: false, has_key: false, state: Default::default() }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// Adds a new entry to the map output.
     ///
@@ -1228,6 +1242,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
 /// ```
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 #[must_use = "returns a type implementing Debug and Display, which do not have any effects unless they are used"]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn from_fn<F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result>(f: F) -> FromFn<F> {
     FromFn(f)
 }
@@ -1236,9 +1251,11 @@ pub fn from_fn<F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result>(f: F) -> FromFn<F>
 ///
 /// Created with [`from_fn`].
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct FromFn<F>(F);
 
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<F> fmt::Debug for FromFn<F>
 where
     F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -1249,6 +1266,7 @@ where
 }
 
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<F> fmt::Display for FromFn<F>
 where
     F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,

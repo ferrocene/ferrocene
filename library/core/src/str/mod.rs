@@ -30,7 +30,7 @@ use crate::{ascii, mem};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use {
-    self::pattern::Pattern,
+    self::pattern::{Pattern, ReverseSearcher},
     crate::{mem, slice::SliceIndex},
 };
 
@@ -1470,7 +1470,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_ends_with"]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn ends_with<P: Pattern>(&self, pat: P) -> bool
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,

@@ -1279,11 +1279,8 @@ impl Step for PlainSourceTarballGpl {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.alias("rustc-src-gpl")
-    }
-
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        builder.config.rust_dist_src
+        // Disabled by Ferrocene, as we have our own alternative for it.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {

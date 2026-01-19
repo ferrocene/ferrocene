@@ -25,5 +25,17 @@ warning: unknown and unstable feature specified for `-Ctarget-feature`: `baz`
 '-foo' is not a recognized feature for this target (ignoring feature)
 '-bar' is not a recognized feature for this target (ignoring feature)
 '+baz' is not a recognized feature for this target (ignoring feature)
+'-foo' is not a recognized feature for this target (ignoring feature)
+'-bar' is not a recognized feature for this target (ignoring feature)
+'+baz' is not a recognized feature for this target (ignoring feature)
+'-foo' is not a recognized feature for this target (ignoring feature)
+'-bar' is not a recognized feature for this target (ignoring feature)
+'+baz' is not a recognized feature for this target (ignoring feature)
+'-foo' is not a recognized feature for this target (ignoring feature)
+'-bar' is not a recognized feature for this target (ignoring feature)
+'+baz' is not a recognized feature for this target (ignoring feature)
+'-foo' is not a recognized feature for this target (ignoring feature)
+'-bar' is not a recognized feature for this target (ignoring feature)
+'+baz' is not a recognized feature for this target (ignoring feature)
 warning: 3 warnings emitted
 

@@ -6,7 +6,7 @@ tests = [
     "tests/codegen-llvm/enum/enum-match.rs",
     "tests/codegen-llvm/enum/enum-transparent-extract.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade"]
+targets = ["aarch64v8r-unknown-ferrocene.facade", "aarch64-unknown-ferrocene.facade"]
 reason = "TODO: to be investigated"
 
 [["tests/ui"]]
@@ -59,7 +59,7 @@ reason = "Fails with linker errors on `-lpthread`, `-ldl`, and `-lrt`"
 tests = [
     "tests/run-make/c-link-to-rust-va-list-fn",
 ]
-targets = ["aarch64-unknown-ferrocene.facade"]
+targets = ["aarch64v8r-unknown-ferrocene.facade", "aarch64-unknown-ferrocene.facade"]
 reason = "libcheckrust includes symbols which cannot be used without `-fPIC` on this platform"
 
 [["tests/ui"]]
@@ -74,7 +74,7 @@ tests = [
     "tests/ui/process/no-stdio.rs",
     "tests/ui/process/nofile-limit.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation behaves differently when spawning processes fails"
 
 [["tests/ui"]]
@@ -97,7 +97,7 @@ tests = [
     "tests/ui/test-attrs/test-panic-abort-nocapture.rs",
     "tests/ui/test-attrs/test-panic-abort.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
 [["tests/debuginfo"]]
@@ -112,7 +112,7 @@ reason = "The test does not pass on CI, to be revisited later. https://github.co
 
 [["tests/debuginfo"]]
 tests = ["tests/debuginfo"]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64v8r-unknown-ferrocene.facade", "aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "Running these tests require changes to bootstrap"
 
 [["tests/ui"]]
@@ -131,5 +131,19 @@ reason = "Currently output of these tests experiences multiple stdout writers co
 tests = [
     "tests/ui/alloc-error/alloc-error-backtrace.rs"
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "These targets cannot unwind"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/asm/aarch64/ttbr0_el2.rs"
+]
+targets = ["aarch64v8r-unknown-ferrocene.facade"]
+reason = "TTBR0_EL2 is not present on Armv8-R AArch64, where EL2 only supports PMSA"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/fix-cortex-a53-843419"
+]
+targets = ["aarch64v8r-unknown-ferrocene.facade"]
+reason = "This errata does not affect Armv8-R AArch64 processors"

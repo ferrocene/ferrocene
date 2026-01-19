@@ -2,6 +2,7 @@
 <! as core::fmt::Display>::fmt
 <&'b str as core::str::pattern::Pattern>::into_searcher
 <&'b str as core::str::pattern::Pattern>::is_prefix_of
+<&'b str as core::str::pattern::Pattern>::is_suffix_of
 <&T as core::borrow::Borrow<T>>::borrow
 <&T as core::convert::AsRef<U>>::as_ref
 <&T as core::fmt::Binary>::fmt
@@ -944,6 +945,7 @@
 <char as core::fmt::Display>::fmt
 <char as core::str::pattern::Pattern>::into_searcher
 <char as core::str::pattern::Pattern>::is_prefix_of
+<char as core::str::pattern::Pattern>::is_suffix_of
 <core::any::TypeId as core::clone::Clone>::clone
 <core::any::TypeId as core::cmp::PartialEq>::eq
 <core::any::TypeId as core::cmp::PartialEq>::eq::compiletime
@@ -1000,10 +1002,26 @@
 <core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Display>::fmt
 <core::escape::MaybeEscaped as core::clone::Clone>::clone
 <core::escape::MaybeEscapedCharacter<N> as core::clone::Clone>::clone
+<core::fmt::Alignment as core::clone::Clone>::clone
+<core::fmt::Alignment as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Alignment as core::cmp::PartialEq>::eq
+<core::fmt::Alignment as core::fmt::Debug>::fmt
 <core::fmt::Arguments<'_> as core::fmt::Debug>::fmt
 <core::fmt::Arguments<'_> as core::fmt::Display>::fmt
 <core::fmt::Arguments<'a> as core::clone::Clone>::clone
+<core::fmt::DebugAsHex as core::clone::Clone>::clone
+<core::fmt::DebugAsHex as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::DebugAsHex as core::cmp::PartialEq>::eq
+<core::fmt::DebugAsHex as core::fmt::Debug>::fmt
+<core::fmt::Error as core::clone::Clone>::clone
+<core::fmt::Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Error as core::cmp::Ord>::cmp
+<core::fmt::Error as core::cmp::PartialEq>::eq
+<core::fmt::Error as core::cmp::PartialOrd>::partial_cmp
+<core::fmt::Error as core::default::Default>::default
+<core::fmt::Error as core::fmt::Debug>::fmt
 <core::fmt::Error as core::fmt::Display>::fmt
+<core::fmt::Error as core::hash::Hash>::hash
 <core::fmt::Formatter<'_> as core::fmt::Write>::write_char
 <core::fmt::Formatter<'_> as core::fmt::Write>::write_fmt
 <core::fmt::Formatter<'_> as core::fmt::Write>::write_str
@@ -1011,6 +1029,12 @@
 <core::fmt::FormattingOptions as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::fmt::FormattingOptions as core::cmp::PartialEq>::eq
 <core::fmt::FormattingOptions as core::default::Default>::default
+<core::fmt::Sign as core::clone::Clone>::clone
+<core::fmt::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Sign as core::cmp::PartialEq>::eq
+<core::fmt::Sign as core::fmt::Debug>::fmt
+<core::fmt::builders::FromFn<F> as core::fmt::Debug>::fmt
+<core::fmt::builders::FromFn<F> as core::fmt::Display>::fmt
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_str
 <core::fmt::builders::PadAdapterState as core::default::Default>::default
@@ -1489,12 +1513,17 @@
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::size_hint
 <core::str::iter::SplitInclusive<'a, P> as core::iter::traits::iterator::Iterator>::next
+<core::str::pattern::CharSearcher<'a> as core::str::pattern::ReverseSearcher<'a>>::next_back
 <core::str::pattern::CharSearcher<'a> as core::str::pattern::Searcher<'a>>::haystack
 <core::str::pattern::CharSearcher<'a> as core::str::pattern::Searcher<'a>>::next
 <core::str::pattern::CharSearcher<'a> as core::str::pattern::Searcher<'a>>::next_match
+<core::str::pattern::MatchOnly as core::str::pattern::TwoWayStrategy>::matching
+<core::str::pattern::MatchOnly as core::str::pattern::TwoWayStrategy>::rejecting
+<core::str::pattern::MatchOnly as core::str::pattern::TwoWayStrategy>::use_early_reject
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::matching
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::rejecting
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::use_early_reject
+<core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::ReverseSearcher<'a>>::next_back
 <core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::Searcher<'a>>::haystack
 <core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::Searcher<'a>>::next
 <core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::Searcher<'a>>::next_match
@@ -3845,9 +3874,24 @@ core::fmt::Arguments::<'a>::from_str_nonconst
 core::fmt::Arguments::<'a>::new
 core::fmt::Formatter::<'a>::align
 core::fmt::Formatter::<'a>::alternate
+core::fmt::Formatter::<'a>::debug_list
 core::fmt::Formatter::<'a>::debug_lower_hex
+core::fmt::Formatter::<'a>::debug_map
+core::fmt::Formatter::<'a>::debug_set
 core::fmt::Formatter::<'a>::debug_struct
 core::fmt::Formatter::<'a>::debug_struct_field1_finish
+core::fmt::Formatter::<'a>::debug_struct_field2_finish
+core::fmt::Formatter::<'a>::debug_struct_field3_finish
+core::fmt::Formatter::<'a>::debug_struct_field4_finish
+core::fmt::Formatter::<'a>::debug_struct_field5_finish
+core::fmt::Formatter::<'a>::debug_struct_fields_finish
+core::fmt::Formatter::<'a>::debug_tuple
+core::fmt::Formatter::<'a>::debug_tuple_field1_finish
+core::fmt::Formatter::<'a>::debug_tuple_field2_finish
+core::fmt::Formatter::<'a>::debug_tuple_field3_finish
+core::fmt::Formatter::<'a>::debug_tuple_field4_finish
+core::fmt::Formatter::<'a>::debug_tuple_field5_finish
+core::fmt::Formatter::<'a>::debug_tuple_fields_finish
 core::fmt::Formatter::<'a>::debug_upper_hex
 core::fmt::Formatter::<'a>::fill
 core::fmt::Formatter::<'a>::flags
@@ -3892,12 +3936,44 @@ core::fmt::PostPadding::new
 core::fmt::PostPadding::write
 core::fmt::Write::write_char
 core::fmt::Write::write_fmt
+core::fmt::builders::DebugInner::<'a, 'b>::entry_with
+core::fmt::builders::DebugInner::<'a, 'b>::is_pretty
+core::fmt::builders::DebugList::<'a, 'b>::entries
+core::fmt::builders::DebugList::<'a, 'b>::entry
+core::fmt::builders::DebugList::<'a, 'b>::entry_with
+core::fmt::builders::DebugList::<'a, 'b>::finish
+core::fmt::builders::DebugList::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugMap::<'a, 'b>::entries
+core::fmt::builders::DebugMap::<'a, 'b>::entry
+core::fmt::builders::DebugMap::<'a, 'b>::finish
+core::fmt::builders::DebugMap::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugMap::<'a, 'b>::is_pretty
+core::fmt::builders::DebugMap::<'a, 'b>::key
+core::fmt::builders::DebugMap::<'a, 'b>::key_with
+core::fmt::builders::DebugMap::<'a, 'b>::value
+core::fmt::builders::DebugMap::<'a, 'b>::value_with
+core::fmt::builders::DebugSet::<'a, 'b>::entries
+core::fmt::builders::DebugSet::<'a, 'b>::entry
+core::fmt::builders::DebugSet::<'a, 'b>::entry_with
+core::fmt::builders::DebugSet::<'a, 'b>::finish
+core::fmt::builders::DebugSet::<'a, 'b>::finish_non_exhaustive
 core::fmt::builders::DebugStruct::<'a, 'b>::field
 core::fmt::builders::DebugStruct::<'a, 'b>::field_with
 core::fmt::builders::DebugStruct::<'a, 'b>::finish
+core::fmt::builders::DebugStruct::<'a, 'b>::finish_non_exhaustive
 core::fmt::builders::DebugStruct::<'a, 'b>::is_pretty
+core::fmt::builders::DebugTuple::<'a, 'b>::field
+core::fmt::builders::DebugTuple::<'a, 'b>::field_with
+core::fmt::builders::DebugTuple::<'a, 'b>::finish
+core::fmt::builders::DebugTuple::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugTuple::<'a, 'b>::is_pretty
 core::fmt::builders::PadAdapter::<'buf, 'state>::wrap
+core::fmt::builders::debug_list_new
+core::fmt::builders::debug_map_new
+core::fmt::builders::debug_set_new
 core::fmt::builders::debug_struct_new
+core::fmt::builders::debug_tuple_new
+core::fmt::builders::from_fn
 core::fmt::rt::Argument::<'_>::as_u16
 core::fmt::rt::Argument::<'_>::fmt
 core::fmt::rt::Argument::<'_>::from_usize
@@ -5123,6 +5199,7 @@ core::slice::<impl [T]>::chunks_exact_mut
 core::slice::<impl [T]>::chunks_mut
 core::slice::<impl [T]>::clone_from_slice
 core::slice::<impl [T]>::copy_from_slice
+core::slice::<impl [T]>::ends_with
 core::slice::<impl [T]>::fill
 core::slice::<impl [T]>::first
 core::slice::<impl [T]>::first_chunk
@@ -5272,6 +5349,7 @@ core::str::iter::SplitInternal::<'a, P>::get_end
 core::str::iter::SplitInternal::<'a, P>::next_inclusive
 core::str::pattern::CharSearcher::<'_>::utf8_size
 core::str::pattern::Pattern::is_prefix_of
+core::str::pattern::Pattern::is_suffix_of
 core::str::pattern::Searcher::next_match
 core::str::pattern::StrSearcher::<'a, 'b>::new
 core::str::pattern::TwoWaySearcher::byteset_contains
@@ -5279,6 +5357,7 @@ core::str::pattern::TwoWaySearcher::byteset_create
 core::str::pattern::TwoWaySearcher::maximal_suffix
 core::str::pattern::TwoWaySearcher::new
 core::str::pattern::TwoWaySearcher::next
+core::str::pattern::TwoWaySearcher::next_back
 core::str::pattern::TwoWaySearcher::reverse_maximal_suffix
 core::str::slice_error_fail
 core::str::slice_error_fail_ct

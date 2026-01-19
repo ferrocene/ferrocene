@@ -1228,7 +1228,6 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
 /// ```
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 #[must_use = "returns a type implementing Debug and Display, which do not have any effects unless they are used"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn from_fn<F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result>(f: F) -> FromFn<F> {
     FromFn(f)
 }
@@ -1237,11 +1236,9 @@ pub fn from_fn<F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result>(f: F) -> FromFn<F>
 ///
 /// Created with [`from_fn`].
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct FromFn<F>(F);
 
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F> fmt::Debug for FromFn<F>
 where
     F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -1252,7 +1249,6 @@ where
 }
 
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F> fmt::Display for FromFn<F>
 where
     F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,

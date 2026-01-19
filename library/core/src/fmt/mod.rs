@@ -52,7 +52,6 @@ pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 pub use self::builders::{FromFn, from_fn};
 

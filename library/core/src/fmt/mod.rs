@@ -3076,12 +3076,10 @@ impl<T: PointeeSized> Debug for *mut T {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! peel {
     ($name:ident, $($other:ident,)*) => (tuple! { $($other,)* })
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! tuple {
     () => ();
     ( $($name:ident,)+ ) => (
@@ -3105,7 +3103,6 @@ macro_rules! tuple {
     )
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! maybe_tuple_doc {
     ($a:ident @ #[$meta:meta] $item:item) => {
         #[doc(fake_variadic)]
@@ -3120,7 +3117,6 @@ macro_rules! maybe_tuple_doc {
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 tuple! { E, D, C, B, A, Z, Y, X, W, V, U, T, }
 
 #[stable(feature = "rust1", since = "1.0.0")]

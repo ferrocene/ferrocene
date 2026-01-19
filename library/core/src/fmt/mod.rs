@@ -2996,7 +2996,6 @@ impl Display for char {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Pointer for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if <<T as core::ptr::Pointee>::Metadata as core::unit::IsUnit>::is_unit() {
@@ -3018,7 +3017,6 @@ impl<T: PointeeSized> Pointer for *const T {
 /// `fn(...) -> ...` without using [problematic] "Oxford Casts".
 ///
 /// [problematic]: https://github.com/rust-lang/rust/issues/95489
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Result {
     let old_options = f.options;
 
@@ -3043,7 +3041,6 @@ pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Resul
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Pointer for *mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
@@ -3051,7 +3048,6 @@ impl<T: PointeeSized> Pointer for *mut T {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Pointer for &T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
@@ -3059,7 +3055,6 @@ impl<T: PointeeSized> Pointer for &T {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Pointer for &mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(&**self as *const T), f)
@@ -3069,14 +3064,12 @@ impl<T: PointeeSized> Pointer for &mut T {
 // Implementation of Display/Debug for various core types
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Debug for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Debug for *mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)

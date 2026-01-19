@@ -400,7 +400,6 @@ pub mod alloc;
 mod bool;
 mod escape;
 mod tuple;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]

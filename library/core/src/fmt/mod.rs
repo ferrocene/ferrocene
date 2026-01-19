@@ -51,17 +51,10 @@ pub enum Alignment {
 pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 pub use self::builders::{FromFn, from_fn};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-#[stable(feature = "debug_builders", since = "1.2.0")]
-pub use self::builders::{DebugStruct, DebugTuple};
 
 /// The type returned by formatter methods.
 ///
@@ -2748,7 +2741,6 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{:?}", Foo(vec![10, 11])), "[10, 11]");
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_list<'b>(&'b mut self) -> DebugList<'b, 'a> {
         builders::debug_list_new(self)
     }
@@ -2807,7 +2799,6 @@ impl<'a> Formatter<'a> {
     /// }
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_set<'b>(&'b mut self) -> DebugSet<'b, 'a> {
         builders::debug_set_new(self)
     }
@@ -2834,7 +2825,6 @@ impl<'a> Formatter<'a> {
     ///  );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_map<'b>(&'b mut self) -> DebugMap<'b, 'a> {
         builders::debug_map_new(self)
     }

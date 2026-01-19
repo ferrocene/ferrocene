@@ -446,14 +446,12 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
 }
 
 /// A helper used to print list-like items with no special formatting.
-#[cfg(not(feature = "ferrocene_subset"))]
 struct DebugInner<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
     has_fields: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugInner<'a, 'b> {
     fn entry_with<F>(&mut self, entry_fmt: F)
     where
@@ -513,18 +511,15 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugSet<'a, 'b: 'a> {
     inner: DebugInner<'a, 'b>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_set_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugSet<'a, 'b> {
     let result = fmt.write_str("{");
     DebugSet { inner: DebugInner { fmt, result, has_fields: false } }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// Adds a new entry to the set output.
     ///
@@ -708,18 +703,15 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugList<'a, 'b: 'a> {
     inner: DebugInner<'a, 'b>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_list_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugList<'a, 'b> {
     let result = fmt.write_str("[");
     DebugList { inner: DebugInner { fmt, result, has_fields: false } }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// Adds a new entry to the list output.
     ///
@@ -902,7 +894,6 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugMap<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -912,13 +903,11 @@ pub struct DebugMap<'a, 'b: 'a> {
     state: PadAdapterState,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_map_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugMap<'a, 'b> {
     let result = fmt.write_str("{");
     DebugMap { fmt, result, has_fields: false, has_key: false, state: Default::default() }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// Adds a new entry to the map output.
     ///

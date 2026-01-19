@@ -2,7 +2,6 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 use crate::char::EscapeDebugExtArgs;
 use crate::hint::assert_unchecked;
@@ -11,11 +10,6 @@ use crate::num::fmt as numfmt;
 use crate::ops::Deref;
 use crate::ptr::NonNull;
 use crate::{iter, mem, result, str};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::cell::{Ref, RefMut};
 
 mod builders;
 #[cfg(not(no_fp_fmt_parse))]
@@ -3141,7 +3135,6 @@ impl<T: ?Sized> Debug for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Copy + Debug> Debug for Cell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("Cell").field("value", &self.get()).finish()
@@ -3149,7 +3142,6 @@ impl<T: Copy + Debug> Debug for Cell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Debug> Debug for RefCell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let mut d = f.debug_struct("RefCell");
@@ -3176,7 +3168,6 @@ impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> Debug for UnsafeCell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("UnsafeCell").finish_non_exhaustive()
@@ -3184,7 +3175,6 @@ impl<T: ?Sized> Debug for UnsafeCell<T> {
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> Debug for SyncUnsafeCell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("SyncUnsafeCell").finish_non_exhaustive()

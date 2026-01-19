@@ -61,7 +61,7 @@ pub use self::builders::{FromFn, from_fn};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 #[stable(feature = "debug_builders", since = "1.2.0")]
-pub use self::builders::DebugStruct;
+pub use self::builders::{DebugStruct, DebugTuple};
 
 /// The type returned by formatter methods.
 ///
@@ -2618,7 +2618,6 @@ impl<'a> Formatter<'a> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple<'b>(&'b mut self, name: &str) -> DebugTuple<'b, 'a> {
         builders::debug_tuple_new(self, name)
     }
@@ -2628,7 +2627,6 @@ impl<'a> Formatter<'a> {
     /// for 1 field.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field1_finish<'b>(&'b mut self, name: &str, value1: &dyn Debug) -> Result {
         let mut builder = builders::debug_tuple_new(self, name);
         builder.field(value1);
@@ -2640,7 +2638,6 @@ impl<'a> Formatter<'a> {
     /// for 2 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field2_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2658,7 +2655,6 @@ impl<'a> Formatter<'a> {
     /// for 3 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field3_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2678,7 +2674,6 @@ impl<'a> Formatter<'a> {
     /// for 4 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field4_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2700,7 +2695,6 @@ impl<'a> Formatter<'a> {
     /// for 5 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_field5_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2723,7 +2717,6 @@ impl<'a> Formatter<'a> {
     /// binaries. For the cases not covered by `debug_tuple_field[12345]_finish`.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn debug_tuple_fields_finish<'b>(
         &'b mut self,
         name: &str,

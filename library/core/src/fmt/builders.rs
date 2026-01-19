@@ -286,7 +286,6 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct DebugTuple<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -294,7 +293,6 @@ pub struct DebugTuple<'a, 'b: 'a> {
     empty_name: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn debug_tuple_new<'a, 'b>(
     fmt: &'a mut fmt::Formatter<'b>,
     name: &str,
@@ -303,7 +301,6 @@ pub(super) fn debug_tuple_new<'a, 'b>(
     DebugTuple { fmt, result, fields: 0, empty_name: name.is_empty() }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// Adds a new field to the generated tuple struct output.
     ///

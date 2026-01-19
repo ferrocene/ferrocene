@@ -11,6 +11,7 @@
 <&T as core::fmt::LowerExp>::fmt
 <&T as core::fmt::LowerHex>::fmt
 <&T as core::fmt::Octal>::fmt
+<&T as core::fmt::Pointer>::fmt
 <&T as core::fmt::UpperExp>::fmt
 <&T as core::fmt::UpperHex>::fmt
 <&T as core::ops::deref::Deref>::deref
@@ -479,6 +480,7 @@
 <&mut T as core::fmt::LowerExp>::fmt
 <&mut T as core::fmt::LowerHex>::fmt
 <&mut T as core::fmt::Octal>::fmt
+<&mut T as core::fmt::Pointer>::fmt
 <&mut T as core::fmt::UpperExp>::fmt
 <&mut T as core::fmt::UpperHex>::fmt
 <&mut T as core::ops::deref::Deref>::deref
@@ -882,6 +884,19 @@
 <&usize as core::ops::bit::Shr<usize>>::shr
 <() as core::default::Default>::default
 <() as core::fmt::Debug>::fmt
+<() as core::unit::IsUnit>::is_unit
+<(A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(D, C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(E, D, C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(T,) as core::fmt::Debug>::fmt
+<(U, T) as core::fmt::Debug>::fmt
+<(V, U, T) as core::fmt::Debug>::fmt
+<(W, V, U, T) as core::fmt::Debug>::fmt
+<(X, W, V, U, T) as core::fmt::Debug>::fmt
+<(Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
 <(core::ops::range::Bound<T>, core::ops::range::Bound<T>) as core::ops::range::IntoBounds<T>>::into_bounds
 <(core::ops::range::Bound<T>, core::ops::range::Bound<T>) as core::ops::range::RangeBounds<T>>::end_bound
 <(core::ops::range::Bound<T>, core::ops::range::Bound<T>) as core::ops::range::RangeBounds<T>>::start_bound
@@ -891,6 +906,10 @@
 <(core::ops::range::Bound<usize>, core::ops::range::Bound<usize>) as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut
 <(core::ops::range::Bound<usize>, core::ops::range::Bound<usize>) as core::slice::index::SliceIndex<[T]>>::index
 <(core::ops::range::Bound<usize>, core::ops::range::Bound<usize>) as core::slice::index::SliceIndex<[T]>>::index_mut
+<*const T as core::fmt::Debug>::fmt
+<*const T as core::fmt::Pointer>::fmt
+<*mut T as core::fmt::Debug>::fmt
+<*mut T as core::fmt::Pointer>::fmt
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
@@ -909,9 +928,11 @@
 <T as core::convert::TryFrom<U>>::try_from
 <T as core::convert::TryInto<U>>::try_into
 <T as core::iter::adapters::step_by::SpecRangeSetup<T>>::setup
+<T as core::unit::IsUnit>::is_unit
 <[A] as core::slice::cmp::SlicePartialEq<B>>::equal
 <[T] as core::convert::AsMut<[T]>>::as_mut
 <[T] as core::convert::AsRef<[T]>>::as_ref
+<[T] as core::fmt::Debug>::fmt
 <[T] as core::slice::CloneFromSpec<T>>::spec_clone_from
 <[T] as core::slice::specialize::SpecFill<T>>::spec_fill
 <[T] as core::slice::specialize::SpecFill<T>>::spec_fill
@@ -978,11 +999,15 @@
 <core::ascii::ascii_char::AsciiChar as core::hash::Hash>::hash
 <core::cell::BorrowRef<'_> as core::ops::drop::Drop>::drop
 <core::cell::BorrowRefMut<'_> as core::ops::drop::Drop>::drop
+<core::cell::Cell<T> as core::fmt::Debug>::fmt
 <core::cell::Ref<'_, T> as core::fmt::Debug>::fmt
 <core::cell::Ref<'_, T> as core::ops::deref::Deref>::deref
+<core::cell::RefCell<T> as core::fmt::Debug>::fmt
 <core::cell::RefMut<'_, T> as core::fmt::Debug>::fmt
 <core::cell::RefMut<'_, T> as core::ops::deref::Deref>::deref
 <core::cell::RefMut<'_, T> as core::ops::deref::DerefMut>::deref_mut
+<core::cell::SyncUnsafeCell<T> as core::fmt::Debug>::fmt
+<core::cell::UnsafeCell<T> as core::fmt::Debug>::fmt
 <core::char::EscapeDebug as core::fmt::Display>::fmt
 <core::char::EscapeDebug as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::char::EscapeDebug as core::iter::traits::iterator::Iterator>::count
@@ -997,6 +1022,7 @@
 <core::cmp::Ordering as core::cmp::PartialOrd>::partial_cmp
 <core::convert::Infallible as core::clone::Clone>::clone
 <core::convert::Infallible as core::cmp::PartialEq>::eq
+<core::convert::Infallible as core::fmt::Debug>::fmt
 <core::escape::AlwaysEscaped as core::clone::Clone>::clone
 <core::escape::EscapeIterInner<N, ESCAPING> as core::clone::Clone>::clone
 <core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Display>::fmt
@@ -1029,6 +1055,7 @@
 <core::fmt::FormattingOptions as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::fmt::FormattingOptions as core::cmp::PartialEq>::eq
 <core::fmt::FormattingOptions as core::default::Default>::default
+<core::fmt::FormattingOptions as core::fmt::Debug>::fmt
 <core::fmt::Sign as core::clone::Clone>::clone
 <core::fmt::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::fmt::Sign as core::cmp::PartialEq>::eq
@@ -1038,6 +1065,7 @@
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_str
 <core::fmt::builders::PadAdapterState as core::default::Default>::default
+<core::fmt::num_buffer::NumBuffer<T> as core::fmt::Debug>::fmt
 <core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
 <core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
 <core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>::drop
@@ -1053,11 +1081,20 @@
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::cloned::Cloned<I> as core::clone::Clone>::clone
+<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::advance_by
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::count
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::fold
@@ -1083,6 +1120,9 @@
 <core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::map::Map<I, F> as core::clone::Clone>::clone
+<core::iter::adapters::map::Map<I, F> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::map::Map<I, F> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::map::Map<I, F> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::size_hint
@@ -1101,6 +1141,12 @@
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::nth
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold::check
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::advance_by
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::count
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
@@ -1181,12 +1227,43 @@
 <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::DerefMut>::deref_mut
 <core::mem::maybe_dangling::MaybeDangling<P> as core::clone::Clone>::clone
 <core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone
+<core::mem::maybe_uninit::MaybeUninit<T> as core::fmt::Debug>::fmt
+<core::num::FpCategory as core::clone::Clone>::clone
+<core::num::FpCategory as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::FpCategory as core::cmp::PartialEq>::eq
+<core::num::FpCategory as core::fmt::Debug>::fmt
+<core::num::bignum::Big32x40 as core::clone::Clone>::clone
+<core::num::bignum::Big32x40 as core::cmp::Ord>::cmp
+<core::num::bignum::Big32x40 as core::cmp::PartialEq>::eq
+<core::num::bignum::Big32x40 as core::cmp::PartialOrd>::partial_cmp
+<core::num::bignum::tests::Big8x3 as core::clone::Clone>::clone
+<core::num::bignum::tests::Big8x3 as core::cmp::Ord>::cmp
+<core::num::bignum::tests::Big8x3 as core::cmp::PartialEq>::eq
+<core::num::bignum::tests::Big8x3 as core::cmp::PartialOrd>::partial_cmp
+<core::num::diy_float::Fp as core::clone::Clone>::clone
+<core::num::diy_float::Fp as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::clone::Clone>::clone
 <core::num::error::TryFromIntError as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::error::TryFromIntError as core::cmp::PartialEq>::eq
 <core::num::error::TryFromIntError as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::fmt::Display>::fmt
+<core::num::flt2dec::Sign as core::clone::Clone>::clone
+<core::num::flt2dec::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::Sign as core::cmp::PartialEq>::eq
+<core::num::flt2dec::Sign as core::fmt::Debug>::fmt
+<core::num::flt2dec::decoder::Decoded as core::clone::Clone>::clone
+<core::num::flt2dec::decoder::Decoded as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::decoder::Decoded as core::cmp::PartialEq>::eq
+<core::num::flt2dec::decoder::Decoded as core::fmt::Debug>::fmt
+<core::num::flt2dec::decoder::FullDecoded as core::clone::Clone>::clone
+<core::num::flt2dec::decoder::FullDecoded as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::decoder::FullDecoded as core::cmp::PartialEq>::eq
+<core::num::flt2dec::decoder::FullDecoded as core::fmt::Debug>::fmt
 <core::num::fmt::Formatted<'a> as core::clone::Clone>::clone
+<core::num::fmt::Part<'a> as core::clone::Clone>::clone
+<core::num::fmt::Part<'a> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::fmt::Part<'a> as core::cmp::PartialEq>::eq
+<core::num::fmt::Part<'a> as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::clone::Clone>::clone
 <core::num::niche_types::Nanoseconds as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::Nanoseconds as core::cmp::Ord>::cmp
@@ -1474,6 +1551,7 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::position
+<core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::Iter<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::IterMut<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -1490,6 +1568,7 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::position
+<core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
@@ -1504,6 +1583,7 @@
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::nth
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::position
+<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::rposition
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::size_hint
 <core::str::iter::CharIndices<'a> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::count
@@ -1601,8 +1681,15 @@
 <f16 as core::ops::arith::SubAssign<&f16>>::sub_assign
 <f16 as core::ops::arith::SubAssign>::sub_assign
 <f32 as core::default::Default>::default
+<f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
+<f32 as core::num::dec2flt::float::RawFloat>::classify
+<f32 as core::num::dec2flt::float::RawFloat>::from_u64
+<f32 as core::num::dec2flt::float::RawFloat>::from_u64_bits
+<f32 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
+<f32 as core::num::dec2flt::float::RawFloat>::to_bits
+<f32 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f32 as core::ops::arith::Add<&f32>>::add
 <f32 as core::ops::arith::Add>::add
 <f32 as core::ops::arith::AddAssign<&f32>>::add_assign
@@ -1625,8 +1712,15 @@
 <f32 as core::ops::arith::SubAssign<&f32>>::sub_assign
 <f32 as core::ops::arith::SubAssign>::sub_assign
 <f64 as core::default::Default>::default
+<f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
+<f64 as core::num::dec2flt::float::RawFloat>::classify
+<f64 as core::num::dec2flt::float::RawFloat>::from_u64
+<f64 as core::num::dec2flt::float::RawFloat>::from_u64_bits
+<f64 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
+<f64 as core::num::dec2flt::float::RawFloat>::to_bits
+<f64 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f64 as core::ops::arith::Add<&f64>>::add
 <f64 as core::ops::arith::Add>::add
 <f64 as core::ops::arith::AddAssign<&f64>>::add_assign
@@ -1649,6 +1743,7 @@
 <f64 as core::ops::arith::SubAssign<&f64>>::sub_assign
 <f64 as core::ops::arith::SubAssign>::sub_assign
 <i128 as core::default::Default>::default
+<i128 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i128 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i128 as core::iter::range::Step>::backward
 <i128 as core::iter::range::Step>::backward_checked
@@ -1790,6 +1885,7 @@
 <i128 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i128 as core::ops::bit::ShrAssign>::shr_assign
 <i16 as core::default::Default>::default
+<i16 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i16 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i16 as core::iter::range::Step>::backward
 <i16 as core::iter::range::Step>::backward_checked
@@ -1931,6 +2027,7 @@
 <i16 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i16 as core::ops::bit::ShrAssign>::shr_assign
 <i32 as core::default::Default>::default
+<i32 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i32 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i32 as core::iter::range::Step>::backward
 <i32 as core::iter::range::Step>::backward_checked
@@ -2072,6 +2169,7 @@
 <i32 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i32 as core::ops::bit::ShrAssign>::shr_assign
 <i64 as core::default::Default>::default
+<i64 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i64 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i64 as core::iter::range::Step>::backward
 <i64 as core::iter::range::Step>::backward_checked
@@ -2213,6 +2311,7 @@
 <i64 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i64 as core::ops::bit::ShrAssign>::shr_assign
 <i8 as core::default::Default>::default
+<i8 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i8 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i8 as core::iter::range::Step>::backward
 <i8 as core::iter::range::Step>::backward_checked
@@ -2354,6 +2453,7 @@
 <i8 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i8 as core::ops::bit::ShrAssign>::shr_assign
 <isize as core::default::Default>::default
+<isize as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <isize as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <isize as core::iter::range::Step>::backward
 <isize as core::iter::range::Step>::backward_checked
@@ -2499,6 +2599,7 @@
 <str as core::fmt::Debug>::fmt::needs_escape
 <str as core::fmt::Display>::fmt
 <u128 as core::default::Default>::default
+<u128 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u128 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u128 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u128 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2641,6 +2742,7 @@
 <u128 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u128 as core::ops::bit::ShrAssign>::shr_assign
 <u16 as core::default::Default>::default
+<u16 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u16 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u16 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u16 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2653,6 +2755,9 @@
 <u16 as core::iter::range::Step>::steps_between
 <u16 as core::iter::traits::accum::Sum<&'a u16>>::sum
 <u16 as core::iter::traits::accum::Sum>::sum
+<u16 as core::num::bignum::FullOps>::full_div_rem
+<u16 as core::num::bignum::FullOps>::full_mul_add
+<u16 as core::num::dec2flt::float::CastInto<i16>>::cast
 <u16 as core::ops::arith::Add<&u16>>::add
 <u16 as core::ops::arith::Add>::add
 <u16 as core::ops::arith::AddAssign<&u16>>::add_assign
@@ -2783,6 +2888,7 @@
 <u16 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u16 as core::ops::bit::ShrAssign>::shr_assign
 <u32 as core::default::Default>::default
+<u32 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u32 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u32 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u32 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2795,6 +2901,9 @@
 <u32 as core::iter::range::Step>::steps_between
 <u32 as core::iter::traits::accum::Sum<&'a u32>>::sum
 <u32 as core::iter::traits::accum::Sum>::sum
+<u32 as core::num::bignum::FullOps>::full_div_rem
+<u32 as core::num::bignum::FullOps>::full_mul_add
+<u32 as core::num::dec2flt::float::CastInto<i16>>::cast
 <u32 as core::ops::arith::Add<&u32>>::add
 <u32 as core::ops::arith::Add>::add
 <u32 as core::ops::arith::AddAssign<&u32>>::add_assign
@@ -2925,6 +3034,7 @@
 <u32 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u32 as core::ops::bit::ShrAssign>::shr_assign
 <u64 as core::default::Default>::default
+<u64 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u64 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u64 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u64 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2937,6 +3047,9 @@
 <u64 as core::iter::range::Step>::steps_between
 <u64 as core::iter::traits::accum::Sum<&'a u64>>::sum
 <u64 as core::iter::traits::accum::Sum>::sum
+<u64 as core::num::bignum::FullOps>::full_div_rem
+<u64 as core::num::bignum::FullOps>::full_mul_add
+<u64 as core::num::dec2flt::float::CastInto<i16>>::cast
 <u64 as core::ops::arith::Add<&u64>>::add
 <u64 as core::ops::arith::Add>::add
 <u64 as core::ops::arith::AddAssign<&u64>>::add_assign
@@ -3067,6 +3180,7 @@
 <u64 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u64 as core::ops::bit::ShrAssign>::shr_assign
 <u8 as core::default::Default>::default
+<u8 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u8 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u8 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u8 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3079,6 +3193,8 @@
 <u8 as core::iter::range::Step>::steps_between
 <u8 as core::iter::traits::accum::Sum<&'a u8>>::sum
 <u8 as core::iter::traits::accum::Sum>::sum
+<u8 as core::num::bignum::FullOps>::full_div_rem
+<u8 as core::num::bignum::FullOps>::full_mul_add
 <u8 as core::ops::arith::Add<&u8>>::add
 <u8 as core::ops::arith::Add>::add
 <u8 as core::ops::arith::AddAssign<&u8>>::add_assign
@@ -3209,6 +3325,7 @@
 <u8 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u8 as core::ops::bit::ShrAssign>::shr_assign
 <usize as core::default::Default>::default
+<usize as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <usize as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <usize as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <usize as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3378,6 +3495,7 @@ core::array::<impl core::convert::TryFrom<&'a [T]> for &'a [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&'a mut [T]> for &'a mut [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&[T]> for [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&mut [T]> for [T; N]>::try_from
+core::array::<impl core::fmt::Debug for [T; N]>::fmt
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a [T; N]>::into_iter
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a mut [T; N]>::into_iter
 core::array::<impl core::ops::index::Index<I> for [T; N]>::index
@@ -3807,6 +3925,11 @@ core::convert::num::<impl core::convert::From<u8> for u16>::from
 core::convert::num::<impl core::convert::From<u8> for u32>::from
 core::convert::num::<impl core::convert::From<u8> for u64>::from
 core::convert::num::<impl core::convert::From<u8> for usize>::from
+core::convert::num::<impl core::convert::TryFrom<i32> for u128>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u16>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u32>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u64>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u8>::try_from
 core::convert::num::<impl core::convert::TryFrom<u128> for u16>::try_from
 core::convert::num::<impl core::convert::TryFrom<u128> for u32>::try_from
 core::convert::num::<impl core::convert::TryFrom<u128> for u64>::try_from
@@ -3818,6 +3941,10 @@ core::convert::num::<impl core::convert::TryFrom<u64> for u16>::try_from
 core::convert::num::<impl core::convert::TryFrom<u64> for u32>::try_from
 core::convert::num::<impl core::convert::TryFrom<u64> for u8>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i128> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i16> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i32> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i64> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i8> for usize>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u128> for usize>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u32> for usize>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u64> for usize>::try_from
@@ -3837,6 +3964,7 @@ core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::printable
 core::escape::backslash
 core::escape::escape_unicode
 core::f32::<impl f32>::abs
+core::f32::<impl f32>::classify
 core::f32::<impl f32>::copysign
 core::f32::<impl f32>::from_bits
 core::f32::<impl f32>::from_le_bytes
@@ -3849,6 +3977,7 @@ core::f32::<impl f32>::signum
 core::f32::<impl f32>::to_bits
 core::f32::<impl f32>::to_le_bytes
 core::f64::<impl f64>::abs
+core::f64::<impl f64>::classify
 core::f64::<impl f64>::copysign
 core::f64::<impl f64>::from_bits
 core::f64::<impl f64>::from_le_bytes
@@ -3978,6 +4107,149 @@ core::fmt::builders::debug_set_new
 core::fmt::builders::debug_struct_new
 core::fmt::builders::debug_tuple_new
 core::fmt::builders::from_fn
+core::fmt::float::<impl core::fmt::Debug for f32>::fmt
+core::fmt::float::<impl core::fmt::Debug for f64>::fmt
+core::fmt::float::<impl core::fmt::Display for f32>::fmt
+core::fmt::float::<impl core::fmt::Display for f64>::fmt
+core::fmt::float::<impl core::fmt::LowerExp for f32>::fmt
+core::fmt::float::<impl core::fmt::LowerExp for f64>::fmt
+core::fmt::float::<impl core::fmt::UpperExp for f32>::fmt
+core::fmt::float::<impl core::fmt::UpperExp for f64>::fmt
+core::fmt::float::float_to_decimal_common_exact
+core::fmt::float::float_to_decimal_common_shortest
+core::fmt::float::float_to_decimal_display
+core::fmt::float::float_to_exponential_common
+core::fmt::float::float_to_exponential_common_exact
+core::fmt::float::float_to_exponential_common_shortest
+core::fmt::float::float_to_general_debug
+core::fmt::num::<impl core::fmt::Binary for i128>::fmt
+core::fmt::num::<impl core::fmt::Binary for i16>::fmt
+core::fmt::num::<impl core::fmt::Binary for i32>::fmt
+core::fmt::num::<impl core::fmt::Binary for i64>::fmt
+core::fmt::num::<impl core::fmt::Binary for i8>::fmt
+core::fmt::num::<impl core::fmt::Binary for isize>::fmt
+core::fmt::num::<impl core::fmt::Binary for u128>::fmt
+core::fmt::num::<impl core::fmt::Binary for u16>::fmt
+core::fmt::num::<impl core::fmt::Binary for u32>::fmt
+core::fmt::num::<impl core::fmt::Binary for u64>::fmt
+core::fmt::num::<impl core::fmt::Binary for u8>::fmt
+core::fmt::num::<impl core::fmt::Binary for usize>::fmt
+core::fmt::num::<impl core::fmt::Debug for i128>::fmt
+core::fmt::num::<impl core::fmt::Debug for i16>::fmt
+core::fmt::num::<impl core::fmt::Debug for i32>::fmt
+core::fmt::num::<impl core::fmt::Debug for i64>::fmt
+core::fmt::num::<impl core::fmt::Debug for i8>::fmt
+core::fmt::num::<impl core::fmt::Debug for isize>::fmt
+core::fmt::num::<impl core::fmt::Debug for u128>::fmt
+core::fmt::num::<impl core::fmt::Debug for u16>::fmt
+core::fmt::num::<impl core::fmt::Debug for u32>::fmt
+core::fmt::num::<impl core::fmt::Debug for u64>::fmt
+core::fmt::num::<impl core::fmt::Debug for u8>::fmt
+core::fmt::num::<impl core::fmt::Debug for usize>::fmt
+core::fmt::num::<impl core::fmt::Display for i128>::fmt
+core::fmt::num::<impl core::fmt::Display for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerExp for i128>::fmt
+core::fmt::num::<impl core::fmt::LowerExp for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i16>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i32>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i64>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i8>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for isize>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u16>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u32>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u64>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u8>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for usize>::fmt
+core::fmt::num::<impl core::fmt::Octal for i128>::fmt
+core::fmt::num::<impl core::fmt::Octal for i16>::fmt
+core::fmt::num::<impl core::fmt::Octal for i32>::fmt
+core::fmt::num::<impl core::fmt::Octal for i64>::fmt
+core::fmt::num::<impl core::fmt::Octal for i8>::fmt
+core::fmt::num::<impl core::fmt::Octal for isize>::fmt
+core::fmt::num::<impl core::fmt::Octal for u128>::fmt
+core::fmt::num::<impl core::fmt::Octal for u16>::fmt
+core::fmt::num::<impl core::fmt::Octal for u32>::fmt
+core::fmt::num::<impl core::fmt::Octal for u64>::fmt
+core::fmt::num::<impl core::fmt::Octal for u8>::fmt
+core::fmt::num::<impl core::fmt::Octal for usize>::fmt
+core::fmt::num::<impl core::fmt::UpperExp for i128>::fmt
+core::fmt::num::<impl core::fmt::UpperExp for u128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i16>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i32>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i64>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i8>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for isize>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u16>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u32>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u64>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u8>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for usize>::fmt
+core::fmt::num::<impl i128>::format_into
+core::fmt::num::<impl u128>::_fmt
+core::fmt::num::<impl u128>::_fmt_inner
+core::fmt::num::<impl u128>::format_into
+core::fmt::num::div_rem_1e16
+core::fmt::num::enc_16lsd
+core::fmt::num::exp_u128
+core::fmt::num::imp::<impl core::fmt::Display for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for usize>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for usize>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for usize>::fmt
+core::fmt::num::imp::<impl i16>::format_into
+core::fmt::num::imp::<impl i32>::format_into
+core::fmt::num::imp::<impl i64>::format_into
+core::fmt::num::imp::<impl i8>::format_into
+core::fmt::num::imp::<impl isize>::format_into
+core::fmt::num::imp::<impl u16>::_fmt
+core::fmt::num::imp::<impl u16>::_fmt_inner
+core::fmt::num::imp::<impl u16>::format_into
+core::fmt::num::imp::<impl u32>::_fmt
+core::fmt::num::imp::<impl u32>::_fmt_inner
+core::fmt::num::imp::<impl u32>::format_into
+core::fmt::num::imp::<impl u64>::_fmt
+core::fmt::num::imp::<impl u64>::_fmt_inner
+core::fmt::num::imp::<impl u64>::format_into
+core::fmt::num::imp::<impl u8>::_fmt
+core::fmt::num::imp::<impl u8>::_fmt_inner
+core::fmt::num::imp::<impl u8>::format_into
+core::fmt::num::imp::<impl usize>::_fmt
+core::fmt::num::imp::<impl usize>::_fmt_inner
+core::fmt::num::imp::<impl usize>::format_into
+core::fmt::num::imp::exp_u64
+core::fmt::num::slice_buffer_to_str
+core::fmt::num_buffer::NumBuffer::<T>::capacity
+core::fmt::num_buffer::NumBuffer::<T>::new
+core::fmt::pointer_fmt_inner
 core::fmt::rt::Argument::<'_>::as_u16
 core::fmt::rt::Argument::<'_>::fmt
 core::fmt::rt::Argument::<'_>::from_usize
@@ -4059,9 +4331,14 @@ core::hint::select_unpredictable
 core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
 core::intrinsics::assume
+core::intrinsics::carrying_mul_add
 core::intrinsics::cold_path
 core::intrinsics::const_make_global
 core::intrinsics::disjoint_bitor
+core::intrinsics::fallback::wide_mul_u128
+core::intrinsics::fallback::wide_mul_u128::from_low_high
+core::intrinsics::fallback::wide_mul_u128::scalar_mul
+core::intrinsics::fallback::wide_mul_u128::to_low_high
 core::intrinsics::is_val_statically_known
 core::intrinsics::likely
 core::intrinsics::overflow_checks
@@ -4141,6 +4418,9 @@ core::iter::traits::iterator::Iterator::any::check
 core::iter::traits::iterator::Iterator::by_ref
 core::iter::traits::iterator::Iterator::chain
 core::iter::traits::iterator::Iterator::cloned
+core::iter::traits::iterator::Iterator::cmp
+core::iter::traits::iterator::Iterator::cmp_by
+core::iter::traits::iterator::Iterator::cmp_by::compare
 core::iter::traits::iterator::Iterator::collect
 core::iter::traits::iterator::Iterator::copied
 core::iter::traits::iterator::Iterator::count
@@ -4164,6 +4444,8 @@ core::iter::traits::iterator::Iterator::position
 core::iter::traits::iterator::Iterator::position::check
 core::iter::traits::iterator::Iterator::reduce
 core::iter::traits::iterator::Iterator::rev
+core::iter::traits::iterator::Iterator::rposition
+core::iter::traits::iterator::Iterator::rposition::check
 core::iter::traits::iterator::Iterator::size_hint
 core::iter::traits::iterator::Iterator::skip
 core::iter::traits::iterator::Iterator::step_by
@@ -4219,8 +4501,10 @@ core::mem::transmute_copy
 core::mem::zeroed
 core::num::<impl i128>::abs
 core::num::<impl i128>::abs_diff
+core::num::<impl i128>::cast_unsigned
 core::num::<impl i128>::checked_add
 core::num::<impl i128>::checked_add_unsigned
+core::num::<impl i128>::checked_ilog
 core::num::<impl i128>::checked_ilog2
 core::num::<impl i128>::checked_mul
 core::num::<impl i128>::checked_sub
@@ -4230,6 +4514,7 @@ core::num::<impl i128>::count_zeros
 core::num::<impl i128>::from_le
 core::num::<impl i128>::from_le_bytes
 core::num::<impl i128>::from_ne_bytes
+core::num::<impl i128>::ilog
 core::num::<impl i128>::ilog2
 core::num::<impl i128>::is_negative
 core::num::<impl i128>::leading_zeros
@@ -4259,8 +4544,10 @@ core::num::<impl i128>::wrapping_shr
 core::num::<impl i128>::wrapping_sub
 core::num::<impl i16>::abs
 core::num::<impl i16>::abs_diff
+core::num::<impl i16>::cast_unsigned
 core::num::<impl i16>::checked_add
 core::num::<impl i16>::checked_add_unsigned
+core::num::<impl i16>::checked_ilog
 core::num::<impl i16>::checked_ilog2
 core::num::<impl i16>::checked_mul
 core::num::<impl i16>::checked_sub
@@ -4270,6 +4557,7 @@ core::num::<impl i16>::count_zeros
 core::num::<impl i16>::from_le
 core::num::<impl i16>::from_le_bytes
 core::num::<impl i16>::from_ne_bytes
+core::num::<impl i16>::ilog
 core::num::<impl i16>::ilog2
 core::num::<impl i16>::is_negative
 core::num::<impl i16>::leading_zeros
@@ -4299,8 +4587,10 @@ core::num::<impl i16>::wrapping_shr
 core::num::<impl i16>::wrapping_sub
 core::num::<impl i32>::abs
 core::num::<impl i32>::abs_diff
+core::num::<impl i32>::cast_unsigned
 core::num::<impl i32>::checked_add
 core::num::<impl i32>::checked_add_unsigned
+core::num::<impl i32>::checked_ilog
 core::num::<impl i32>::checked_ilog2
 core::num::<impl i32>::checked_mul
 core::num::<impl i32>::checked_sub
@@ -4310,6 +4600,7 @@ core::num::<impl i32>::count_zeros
 core::num::<impl i32>::from_le
 core::num::<impl i32>::from_le_bytes
 core::num::<impl i32>::from_ne_bytes
+core::num::<impl i32>::ilog
 core::num::<impl i32>::ilog2
 core::num::<impl i32>::is_negative
 core::num::<impl i32>::leading_zeros
@@ -4339,8 +4630,10 @@ core::num::<impl i32>::wrapping_shr
 core::num::<impl i32>::wrapping_sub
 core::num::<impl i64>::abs
 core::num::<impl i64>::abs_diff
+core::num::<impl i64>::cast_unsigned
 core::num::<impl i64>::checked_add
 core::num::<impl i64>::checked_add_unsigned
+core::num::<impl i64>::checked_ilog
 core::num::<impl i64>::checked_ilog2
 core::num::<impl i64>::checked_mul
 core::num::<impl i64>::checked_sub
@@ -4350,6 +4643,7 @@ core::num::<impl i64>::count_zeros
 core::num::<impl i64>::from_le
 core::num::<impl i64>::from_le_bytes
 core::num::<impl i64>::from_ne_bytes
+core::num::<impl i64>::ilog
 core::num::<impl i64>::ilog2
 core::num::<impl i64>::is_negative
 core::num::<impl i64>::leading_zeros
@@ -4379,8 +4673,10 @@ core::num::<impl i64>::wrapping_shr
 core::num::<impl i64>::wrapping_sub
 core::num::<impl i8>::abs
 core::num::<impl i8>::abs_diff
+core::num::<impl i8>::cast_unsigned
 core::num::<impl i8>::checked_add
 core::num::<impl i8>::checked_add_unsigned
+core::num::<impl i8>::checked_ilog
 core::num::<impl i8>::checked_ilog2
 core::num::<impl i8>::checked_mul
 core::num::<impl i8>::checked_sub
@@ -4390,6 +4686,7 @@ core::num::<impl i8>::count_zeros
 core::num::<impl i8>::from_le
 core::num::<impl i8>::from_le_bytes
 core::num::<impl i8>::from_ne_bytes
+core::num::<impl i8>::ilog
 core::num::<impl i8>::ilog2
 core::num::<impl i8>::is_negative
 core::num::<impl i8>::leading_zeros
@@ -4419,8 +4716,10 @@ core::num::<impl i8>::wrapping_shr
 core::num::<impl i8>::wrapping_sub
 core::num::<impl isize>::abs
 core::num::<impl isize>::abs_diff
+core::num::<impl isize>::cast_unsigned
 core::num::<impl isize>::checked_add
 core::num::<impl isize>::checked_add_unsigned
+core::num::<impl isize>::checked_ilog
 core::num::<impl isize>::checked_ilog2
 core::num::<impl isize>::checked_mul
 core::num::<impl isize>::checked_sub
@@ -4430,6 +4729,7 @@ core::num::<impl isize>::count_zeros
 core::num::<impl isize>::from_le
 core::num::<impl isize>::from_le_bytes
 core::num::<impl isize>::from_ne_bytes
+core::num::<impl isize>::ilog
 core::num::<impl isize>::ilog2
 core::num::<impl isize>::is_negative
 core::num::<impl isize>::leading_zeros
@@ -4458,10 +4758,15 @@ core::num::<impl isize>::wrapping_shl
 core::num::<impl isize>::wrapping_shr
 core::num::<impl isize>::wrapping_sub
 core::num::<impl u128>::abs_diff
+core::num::<impl u128>::carrying_add
+core::num::<impl u128>::carrying_mul
+core::num::<impl u128>::carrying_mul_add
 core::num::<impl u128>::checked_add
+core::num::<impl u128>::checked_ilog
 core::num::<impl u128>::checked_ilog10
 core::num::<impl u128>::checked_ilog2
 core::num::<impl u128>::checked_mul
+core::num::<impl u128>::checked_pow
 core::num::<impl u128>::checked_sub
 core::num::<impl u128>::count_ones
 core::num::<impl u128>::count_zeros
@@ -4473,6 +4778,8 @@ core::num::<impl u128>::from_le
 core::num::<impl u128>::from_le_bytes
 core::num::<impl u128>::from_ne_bytes
 core::num::<impl u128>::from_str_radix
+core::num::<impl u128>::ilog
+core::num::<impl u128>::ilog10
 core::num::<impl u128>::ilog2
 core::num::<impl u128>::is_multiple_of
 core::num::<impl u128>::is_power_of_two
@@ -4482,6 +4789,7 @@ core::num::<impl u128>::overflowing_add
 core::num::<impl u128>::overflowing_add_signed
 core::num::<impl u128>::overflowing_mul
 core::num::<impl u128>::overflowing_sub
+core::num::<impl u128>::pow
 core::num::<impl u128>::reverse_bits
 core::num::<impl u128>::rotate_left
 core::num::<impl u128>::rotate_right
@@ -4503,6 +4811,7 @@ core::num::<impl u128>::unchecked_shr
 core::num::<impl u128>::unchecked_shr::precondition_check
 core::num::<impl u128>::unchecked_sub
 core::num::<impl u128>::unchecked_sub::precondition_check
+core::num::<impl u128>::widening_mul
 core::num::<impl u128>::wrapping_add
 core::num::<impl u128>::wrapping_add_signed
 core::num::<impl u128>::wrapping_mul
@@ -4511,10 +4820,15 @@ core::num::<impl u128>::wrapping_shl
 core::num::<impl u128>::wrapping_shr
 core::num::<impl u128>::wrapping_sub
 core::num::<impl u16>::abs_diff
+core::num::<impl u16>::carrying_add
+core::num::<impl u16>::carrying_mul
+core::num::<impl u16>::carrying_mul_add
 core::num::<impl u16>::checked_add
+core::num::<impl u16>::checked_ilog
 core::num::<impl u16>::checked_ilog10
 core::num::<impl u16>::checked_ilog2
 core::num::<impl u16>::checked_mul
+core::num::<impl u16>::checked_pow
 core::num::<impl u16>::checked_sub
 core::num::<impl u16>::count_ones
 core::num::<impl u16>::count_zeros
@@ -4526,6 +4840,8 @@ core::num::<impl u16>::from_le
 core::num::<impl u16>::from_le_bytes
 core::num::<impl u16>::from_ne_bytes
 core::num::<impl u16>::from_str_radix
+core::num::<impl u16>::ilog
+core::num::<impl u16>::ilog10
 core::num::<impl u16>::ilog2
 core::num::<impl u16>::is_multiple_of
 core::num::<impl u16>::is_power_of_two
@@ -4536,6 +4852,7 @@ core::num::<impl u16>::overflowing_add
 core::num::<impl u16>::overflowing_add_signed
 core::num::<impl u16>::overflowing_mul
 core::num::<impl u16>::overflowing_sub
+core::num::<impl u16>::pow
 core::num::<impl u16>::reverse_bits
 core::num::<impl u16>::rotate_left
 core::num::<impl u16>::rotate_right
@@ -4557,6 +4874,7 @@ core::num::<impl u16>::unchecked_shr
 core::num::<impl u16>::unchecked_shr::precondition_check
 core::num::<impl u16>::unchecked_sub
 core::num::<impl u16>::unchecked_sub::precondition_check
+core::num::<impl u16>::widening_mul
 core::num::<impl u16>::wrapping_add
 core::num::<impl u16>::wrapping_add_signed
 core::num::<impl u16>::wrapping_mul
@@ -4565,10 +4883,15 @@ core::num::<impl u16>::wrapping_shl
 core::num::<impl u16>::wrapping_shr
 core::num::<impl u16>::wrapping_sub
 core::num::<impl u32>::abs_diff
+core::num::<impl u32>::carrying_add
+core::num::<impl u32>::carrying_mul
+core::num::<impl u32>::carrying_mul_add
 core::num::<impl u32>::checked_add
+core::num::<impl u32>::checked_ilog
 core::num::<impl u32>::checked_ilog10
 core::num::<impl u32>::checked_ilog2
 core::num::<impl u32>::checked_mul
+core::num::<impl u32>::checked_pow
 core::num::<impl u32>::checked_sub
 core::num::<impl u32>::count_ones
 core::num::<impl u32>::count_zeros
@@ -4580,6 +4903,8 @@ core::num::<impl u32>::from_le
 core::num::<impl u32>::from_le_bytes
 core::num::<impl u32>::from_ne_bytes
 core::num::<impl u32>::from_str_radix
+core::num::<impl u32>::ilog
+core::num::<impl u32>::ilog10
 core::num::<impl u32>::ilog2
 core::num::<impl u32>::is_multiple_of
 core::num::<impl u32>::is_power_of_two
@@ -4589,6 +4914,7 @@ core::num::<impl u32>::overflowing_add
 core::num::<impl u32>::overflowing_add_signed
 core::num::<impl u32>::overflowing_mul
 core::num::<impl u32>::overflowing_sub
+core::num::<impl u32>::pow
 core::num::<impl u32>::reverse_bits
 core::num::<impl u32>::rotate_left
 core::num::<impl u32>::rotate_right
@@ -4610,6 +4936,7 @@ core::num::<impl u32>::unchecked_shr
 core::num::<impl u32>::unchecked_shr::precondition_check
 core::num::<impl u32>::unchecked_sub
 core::num::<impl u32>::unchecked_sub::precondition_check
+core::num::<impl u32>::widening_mul
 core::num::<impl u32>::wrapping_add
 core::num::<impl u32>::wrapping_add_signed
 core::num::<impl u32>::wrapping_mul
@@ -4618,10 +4945,15 @@ core::num::<impl u32>::wrapping_shl
 core::num::<impl u32>::wrapping_shr
 core::num::<impl u32>::wrapping_sub
 core::num::<impl u64>::abs_diff
+core::num::<impl u64>::carrying_add
+core::num::<impl u64>::carrying_mul
+core::num::<impl u64>::carrying_mul_add
 core::num::<impl u64>::checked_add
+core::num::<impl u64>::checked_ilog
 core::num::<impl u64>::checked_ilog10
 core::num::<impl u64>::checked_ilog2
 core::num::<impl u64>::checked_mul
+core::num::<impl u64>::checked_pow
 core::num::<impl u64>::checked_sub
 core::num::<impl u64>::count_ones
 core::num::<impl u64>::count_zeros
@@ -4633,6 +4965,8 @@ core::num::<impl u64>::from_le
 core::num::<impl u64>::from_le_bytes
 core::num::<impl u64>::from_ne_bytes
 core::num::<impl u64>::from_str_radix
+core::num::<impl u64>::ilog
+core::num::<impl u64>::ilog10
 core::num::<impl u64>::ilog2
 core::num::<impl u64>::is_multiple_of
 core::num::<impl u64>::is_power_of_two
@@ -4642,6 +4976,7 @@ core::num::<impl u64>::overflowing_add
 core::num::<impl u64>::overflowing_add_signed
 core::num::<impl u64>::overflowing_mul
 core::num::<impl u64>::overflowing_sub
+core::num::<impl u64>::pow
 core::num::<impl u64>::reverse_bits
 core::num::<impl u64>::rotate_left
 core::num::<impl u64>::rotate_right
@@ -4663,6 +4998,7 @@ core::num::<impl u64>::unchecked_shr
 core::num::<impl u64>::unchecked_shr::precondition_check
 core::num::<impl u64>::unchecked_sub
 core::num::<impl u64>::unchecked_sub::precondition_check
+core::num::<impl u64>::widening_mul
 core::num::<impl u64>::wrapping_add
 core::num::<impl u64>::wrapping_add_signed
 core::num::<impl u64>::wrapping_mul
@@ -4671,10 +5007,15 @@ core::num::<impl u64>::wrapping_shl
 core::num::<impl u64>::wrapping_shr
 core::num::<impl u64>::wrapping_sub
 core::num::<impl u8>::abs_diff
+core::num::<impl u8>::carrying_add
+core::num::<impl u8>::carrying_mul
+core::num::<impl u8>::carrying_mul_add
 core::num::<impl u8>::checked_add
+core::num::<impl u8>::checked_ilog
 core::num::<impl u8>::checked_ilog10
 core::num::<impl u8>::checked_ilog2
 core::num::<impl u8>::checked_mul
+core::num::<impl u8>::checked_pow
 core::num::<impl u8>::checked_sub
 core::num::<impl u8>::count_ones
 core::num::<impl u8>::count_zeros
@@ -4687,8 +5028,11 @@ core::num::<impl u8>::from_le
 core::num::<impl u8>::from_le_bytes
 core::num::<impl u8>::from_ne_bytes
 core::num::<impl u8>::from_str_radix
+core::num::<impl u8>::ilog
+core::num::<impl u8>::ilog10
 core::num::<impl u8>::ilog2
 core::num::<impl u8>::is_ascii
+core::num::<impl u8>::is_ascii_alphabetic
 core::num::<impl u8>::is_ascii_uppercase
 core::num::<impl u8>::is_multiple_of
 core::num::<impl u8>::is_power_of_two
@@ -4699,6 +5043,7 @@ core::num::<impl u8>::overflowing_add
 core::num::<impl u8>::overflowing_add_signed
 core::num::<impl u8>::overflowing_mul
 core::num::<impl u8>::overflowing_sub
+core::num::<impl u8>::pow
 core::num::<impl u8>::reverse_bits
 core::num::<impl u8>::rotate_left
 core::num::<impl u8>::rotate_right
@@ -4721,6 +5066,7 @@ core::num::<impl u8>::unchecked_shr
 core::num::<impl u8>::unchecked_shr::precondition_check
 core::num::<impl u8>::unchecked_sub
 core::num::<impl u8>::unchecked_sub::precondition_check
+core::num::<impl u8>::widening_mul
 core::num::<impl u8>::wrapping_add
 core::num::<impl u8>::wrapping_add_signed
 core::num::<impl u8>::wrapping_mul
@@ -4729,10 +5075,15 @@ core::num::<impl u8>::wrapping_shl
 core::num::<impl u8>::wrapping_shr
 core::num::<impl u8>::wrapping_sub
 core::num::<impl usize>::abs_diff
+core::num::<impl usize>::carrying_add
+core::num::<impl usize>::carrying_mul
+core::num::<impl usize>::carrying_mul_add
 core::num::<impl usize>::checked_add
+core::num::<impl usize>::checked_ilog
 core::num::<impl usize>::checked_ilog10
 core::num::<impl usize>::checked_ilog2
 core::num::<impl usize>::checked_mul
+core::num::<impl usize>::checked_pow
 core::num::<impl usize>::checked_sub
 core::num::<impl usize>::count_ones
 core::num::<impl usize>::count_zeros
@@ -4744,6 +5095,8 @@ core::num::<impl usize>::from_le
 core::num::<impl usize>::from_le_bytes
 core::num::<impl usize>::from_ne_bytes
 core::num::<impl usize>::from_str_radix
+core::num::<impl usize>::ilog
+core::num::<impl usize>::ilog10
 core::num::<impl usize>::ilog2
 core::num::<impl usize>::is_multiple_of
 core::num::<impl usize>::is_power_of_two
@@ -4753,6 +5106,7 @@ core::num::<impl usize>::overflowing_add
 core::num::<impl usize>::overflowing_add_signed
 core::num::<impl usize>::overflowing_mul
 core::num::<impl usize>::overflowing_sub
+core::num::<impl usize>::pow
 core::num::<impl usize>::repeat_u16
 core::num::<impl usize>::repeat_u8
 core::num::<impl usize>::reverse_bits
@@ -4776,6 +5130,7 @@ core::num::<impl usize>::unchecked_shr
 core::num::<impl usize>::unchecked_shr::precondition_check
 core::num::<impl usize>::unchecked_sub
 core::num::<impl usize>::unchecked_sub::precondition_check
+core::num::<impl usize>::widening_mul
 core::num::<impl usize>::wrapping_add
 core::num::<impl usize>::wrapping_add_signed
 core::num::<impl usize>::wrapping_mul
@@ -4783,7 +5138,58 @@ core::num::<impl usize>::wrapping_neg
 core::num::<impl usize>::wrapping_shl
 core::num::<impl usize>::wrapping_shr
 core::num::<impl usize>::wrapping_sub
+core::num::bignum::Big32x40::add
+core::num::bignum::Big32x40::digits
+core::num::bignum::Big32x40::div_rem_small
+core::num::bignum::Big32x40::from_small
+core::num::bignum::Big32x40::from_u64
+core::num::bignum::Big32x40::is_zero
+core::num::bignum::Big32x40::mul_digits
+core::num::bignum::Big32x40::mul_digits::mul_inner
+core::num::bignum::Big32x40::mul_pow2
+core::num::bignum::Big32x40::mul_small
+core::num::bignum::Big32x40::sub
+core::num::bignum::tests::Big8x3::add
+core::num::bignum::tests::Big8x3::digits
+core::num::bignum::tests::Big8x3::div_rem_small
+core::num::bignum::tests::Big8x3::from_small
+core::num::bignum::tests::Big8x3::from_u64
+core::num::bignum::tests::Big8x3::is_zero
+core::num::bignum::tests::Big8x3::mul_digits
+core::num::bignum::tests::Big8x3::mul_digits::mul_inner
+core::num::bignum::tests::Big8x3::mul_pow2
+core::num::bignum::tests::Big8x3::mul_small
+core::num::bignum::tests::Big8x3::sub
 core::num::can_not_overflow
+core::num::dec2flt::float::RawFloat::integer_decode
+core::num::dec2flt::float::pow2_to_pow10
+core::num::diy_float::Fp::mul
+core::num::diy_float::Fp::normalize
+core::num::diy_float::Fp::normalize_to
+core::num::flt2dec::decoder::decode
+core::num::flt2dec::determine_sign
+core::num::flt2dec::digits_to_dec_str
+core::num::flt2dec::digits_to_exp_str
+core::num::flt2dec::estimate_max_buf_len
+core::num::flt2dec::estimator::estimate_scaling_factor
+core::num::flt2dec::round_up
+core::num::flt2dec::strategy::dragon::div_2pow10
+core::num::flt2dec::strategy::dragon::div_rem_upto_16
+core::num::flt2dec::strategy::dragon::format_exact
+core::num::flt2dec::strategy::dragon::format_shortest
+core::num::flt2dec::strategy::dragon::mul_pow10
+core::num::flt2dec::strategy::grisu::cached_power
+core::num::flt2dec::strategy::grisu::format_exact
+core::num::flt2dec::strategy::grisu::format_exact_opt
+core::num::flt2dec::strategy::grisu::format_exact_opt::possibly_round
+core::num::flt2dec::strategy::grisu::format_shortest
+core::num::flt2dec::strategy::grisu::format_shortest_opt
+core::num::flt2dec::strategy::grisu::format_shortest_opt::round_and_weed
+core::num::flt2dec::strategy::grisu::max_pow10_no_more_than
+core::num::flt2dec::to_exact_exp_str
+core::num::flt2dec::to_exact_fixed_str
+core::num::flt2dec::to_shortest_exp_str
+core::num::flt2dec::to_shortest_str
 core::num::fmt::Formatted::<'a>::len
 core::num::fmt::Part::<'a>::len
 core::num::from_ascii_radix_panic
@@ -5028,6 +5434,7 @@ core::ptr::const_ptr::<impl *const T>::align_offset
 core::ptr::const_ptr::<impl *const T>::byte_add
 core::ptr::const_ptr::<impl *const T>::cast
 core::ptr::const_ptr::<impl *const T>::cast_array
+core::ptr::const_ptr::<impl *const T>::expose_provenance
 core::ptr::const_ptr::<impl *const T>::guaranteed_eq
 core::ptr::const_ptr::<impl *const T>::is_aligned_to
 core::ptr::const_ptr::<impl *const T>::is_null
@@ -5321,6 +5728,7 @@ core::str::<impl str>::char_indices
 core::str::<impl str>::chars
 core::str::<impl str>::ends_with
 core::str::<impl str>::eq_ignore_ascii_case
+core::str::<impl str>::find
 core::str::<impl str>::floor_char_boundary
 core::str::<impl str>::from_utf8
 core::str::<impl str>::from_utf8_mut
@@ -5617,3 +6025,4 @@ core::unicode::unicode_data::ShortOffsetRunHeader::start_index
 core::unicode::unicode_data::grapheme_extend::lookup
 core::unicode::unicode_data::grapheme_extend::lookup_slow
 core::unicode::unicode_data::skip_search
+core::unit::<impl core::iter::traits::collect::FromIterator<()> for ()>::from_iter

@@ -3,12 +3,11 @@
 //! suggestions from rustc if you get anything slightly wrong in here, and overall
 //! helps with clarity as we're also referring to `char` intentionally in here.
 
+#[cfg(feature = "ferrocene_subset")]
+use crate::fmt;
 use crate::mem::transmute;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{assert_unsafe_precondition, fmt};
-
-#[cfg(feature = "ferrocene_subset")]
-use crate::fmt;
 
 /// One of the 128 Unicode characters from U+0000 through U+007F,
 /// often known as the [ASCII] subset.

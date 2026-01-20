@@ -411,7 +411,6 @@ pub use self::adapters::StepBy;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_chain", since = "1.91.0")]
 #[cfg(not(feature = "ferrocene_subset"))]

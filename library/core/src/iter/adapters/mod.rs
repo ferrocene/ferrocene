@@ -74,7 +74,6 @@ pub use self::step_by::StepBy;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::zip::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::zip::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_zip", since = "1.59.0")]
 pub use self::zip::zip;

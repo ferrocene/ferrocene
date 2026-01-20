@@ -15,7 +15,10 @@ use crate::{array, fmt, option, result};
 // Ferrocene addition: imports for the certified subset
 #[rustfmt::skip]
 #[cfg(feature = "ferrocene_subset")]
-use crate::iter::{Fuse, Map};
+use crate::{
+    fmt,
+    iter::{Fuse, Map},
+};
 
 /// An iterator that maps each element to an iterator, and yields the elements
 /// of the produced iterators.
@@ -52,7 +55,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<I: fmt::Debug, U, F> fmt::Debug for FlatMap<I, U, F>
 where

@@ -13,7 +13,6 @@ use crate::cmp::Ordering;
 use crate::convert::Infallible;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{self, Hash};
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -25,10 +24,10 @@ use crate::mem::{self, ManuallyDrop, MaybeUninit};
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
-use crate::ptr;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
+use crate::{fmt, ptr};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]

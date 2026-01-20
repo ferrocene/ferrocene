@@ -5,7 +5,6 @@ use core::mem::MaybeUninit;
 #[cfg(not(feature = "ferrocene_subset"))]
 use core::ops::ControlFlow;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
@@ -78,7 +77,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<I: fmt::Debug, P> fmt::Debug for Filter<I, P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

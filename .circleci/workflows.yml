@@ -959,6 +959,9 @@ workflows:
             - aarch64-none-test-library
             - aarch64-none-test-library-certified-panic
             - aarch64-none-compiletest
+            - aarch64v8r-none-test-library
+            - aarch64v8r-none-test-library-certified-panic
+            - aarch64v8r-none-test-compiletest
             - thumbv7em-eabihf-test-library
             - thumbv7em-eabihf-test-library-certified-panic
             - thumbv7em-eabihf-test-compiletest
@@ -1034,6 +1037,33 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: cortex-a53
           qemu-arch: qemu-aarch64
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64v8r-none-compiletest
+          target: aarch64v8r-unknown-ferrocene.facade
+          test-variant: 2021-neoverse-v1
+          qemu-arch: neoverse-v1
+          job: qnx:compiletest-no-only-hosts
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - facade-generic-test:
+          name: aarch64v8r-none-test-library
+          target: aarch64v8r-unknown-ferrocene.facade
+          test-variant: 2021-neoverse-v1
+          qemu-arch: neoverse-v1
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - facade-certified-panic-test:
+          name: aarch64v8r-none-test-library-certified-panic
+          target: aarch64v8r-unknown-ferrocene.facade
+          test-variant: neoverse-v1
+          qemu-arch: neoverse-v1
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

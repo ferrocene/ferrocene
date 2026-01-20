@@ -373,7 +373,6 @@ macro_rules! define_bignum {
         #[cfg(not(feature = "ferrocene_subset"))]
         impl crate::clone::UseCloned for $name {}
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl crate::fmt::Debug for $name {
             fn fmt(&self, f: &mut crate::fmt::Formatter<'_>) -> crate::fmt::Result {
                 let sz = if self.size < 1 { 1 } else { self.size };

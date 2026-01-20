@@ -9,16 +9,6 @@ pub struct GitConfig<'a> {
     pub git_merge_commit_email: &'a str,
 }
 
-impl GitConfig<'_> {
-    // prepares `git_merge_commit_email` before it gets passed to `git rev-list`'s `--author` flag
-    //
-    // the `--author` flag takes a "pattern" (regular expression) not a substring so any
-    // square bracket in the original email needs to be escaped
-    fn author_email(&self) -> String {
-        self.git_merge_commit_email.replace('[', "\\[").replace(']', "\\]")
-    }
-}
-
 /// Runs a command and returns the output
 pub fn output_result(cmd: &mut Command) -> Result<String, String> {
     let output = match cmd.stderr(Stdio::inherit()).output() {
@@ -203,7 +193,7 @@ fn get_latest_upstream_commit_that_modified_files(
         "-n1",
         &upstream,
         "--author",
-        &escape_email_git_regex(&git_config.author_email()),
+        &escape_email_git_regex(git_config.git_merge_commit_email),
     ]);
 
     // Also search for temporary bors account
@@ -255,7 +245,7 @@ pub fn get_closest_upstream_commit(
     git.args([
         "rev-list",
         "--author-date-order",
-        &format!("--author={}", &escape_email_git_regex(&config.author_email()),),
+        &format!("--author={}", &escape_email_git_regex(&config.git_merge_commit_email)),
         "-n1",
         base,
     ]);

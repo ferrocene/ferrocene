@@ -1299,6 +1299,9 @@ follows:
 Pattern Matching
 ----------------
 
+:dp:`fls_zv73CR8rplIa`
+:dt:`Pattern matching` is the process of matching a :t:`pattern` against a :t:`value`.
+
 .. rubric:: Legality Rules
 
 :dp:`fls_tlwr4u7bjhh5`

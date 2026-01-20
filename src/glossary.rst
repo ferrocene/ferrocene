@@ -4990,8 +4990,7 @@ pattern matching
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_y3oputy9e0sz`
-:dt:`Pattern matching` is the process of matching a :t:`pattern` against a
-:t:`value`.
+:t:`Pattern matching` is the process of matching a :t:`pattern` against a :t:`value`.
 
 .. _fls_cptagvgpgnze:
 

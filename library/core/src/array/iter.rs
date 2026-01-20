@@ -13,7 +13,10 @@ use crate::{fmt, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::ops::{Deref as _, DerefMut as _, IndexRange, Try};
+use crate::{
+    fmt,
+    ops::{Deref as _, DerefMut as _, IndexRange, Try},
+};
 
 mod iter_inner;
 
@@ -395,7 +398,6 @@ where
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for IntoIter<T, N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.unsize().fmt(f)

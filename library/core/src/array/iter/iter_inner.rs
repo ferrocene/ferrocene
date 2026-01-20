@@ -3,13 +3,7 @@
 use crate::mem::MaybeUninit;
 use crate::num::NonZero;
 use crate::ops::{IndexRange, NeverShortCircuit, Try};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, iter};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter;
 
 #[allow(private_bounds)]
 trait PartialDrop {
@@ -150,7 +144,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug> fmt::Debug for PolymorphicIter<[MaybeUninit<T>]> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

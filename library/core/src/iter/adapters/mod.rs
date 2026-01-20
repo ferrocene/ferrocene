@@ -18,9 +18,7 @@ mod enumerate;
 mod filter;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod filter_map;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod flatten;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod fuse;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod inspect;
@@ -41,7 +39,6 @@ mod skip;
 mod skip_while;
 mod step_by;
 mod take;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod take_while;
 mod zip;
 
@@ -94,8 +91,8 @@ pub use self::{
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 pub use self::{
-    chain::Chain, enumerate::Enumerate, filter::Filter, map::Map, rev::Rev, skip::Skip,
-    step_by::StepBy, take::Take, zip::Zip,
+    chain::Chain, enumerate::Enumerate, filter::Filter, flatten::FlatMap, fuse::Fuse, map::Map,
+    rev::Rev, skip::Skip, step_by::StepBy, take::Take, take_while::TakeWhile, zip::Zip,
 };
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline

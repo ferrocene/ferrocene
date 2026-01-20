@@ -36,7 +36,6 @@ use {
 
 pub mod pattern;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod lossy;
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
 pub use converts::{from_raw_parts, from_raw_parts_mut};

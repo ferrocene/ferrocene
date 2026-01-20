@@ -79,7 +79,6 @@ impl<I, F> Map<I, F> {
         Map { iter, f }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn into_inner(self) -> I {
         self.iter
     }

@@ -495,7 +495,9 @@ pub use self::traits::{
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 pub use self::{
-    adapters::{Chain, Enumerate, Filter, Map, Rev, Skip, StepBy, Take, Zip},
+    adapters::{
+        Chain, Enumerate, Filter, FlatMap, Fuse, Map, Rev, Skip, StepBy, Take, TakeWhile, Zip,
+    },
     traits::{
         DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator, Sum,
     },

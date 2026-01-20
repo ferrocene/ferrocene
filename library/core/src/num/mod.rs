@@ -6,13 +6,7 @@ use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::str::FromStr;
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ascii, intrinsics, mem};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{intrinsics, mem};
 
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.
 macro_rules! try_opt {
@@ -1111,7 +1105,6 @@ impl u8 {
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_ascii(self) -> ascii::EscapeDefault {
         ascii::escape_default(self)
     }

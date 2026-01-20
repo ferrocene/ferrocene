@@ -18,8 +18,8 @@ use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 #[rustfmt::skip]
 use {
     super::super::{
-        Chain, Cloned, Copied, DoubleEndedIterator, Enumerate, Filter, Map, Rev, Skip, StepBy, Sum,
-        Take, Zip,
+        Chain, Cloned, Copied, DoubleEndedIterator, Enumerate, Filter, FlatMap, Fuse, Map, Rev,
+        Skip, StepBy, Sum, Take, TakeWhile, Zip,
     },
     crate::ops::{ControlFlow, Try},
 };
@@ -1221,7 +1221,6 @@ pub trait Iterator {
     /// the iteration should stop, but wasn't placed back into the iterator.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn take_while<P>(self, predicate: P) -> TakeWhile<Self, P>
     where
         Self: Sized,
@@ -1498,7 +1497,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>
     where
         Self: Sized,
@@ -1803,7 +1801,6 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn fuse(self) -> Fuse<Self>
     where
         Self: Sized,

@@ -500,7 +500,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "default_iters", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl<T> Default for $name<'_, T> {
             /// Creates an empty slice iterator.
             ///

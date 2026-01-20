@@ -538,7 +538,6 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "char_escape_debug", since = "1.20.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_debug(self) -> EscapeDebug {
         self.escape_debug_ext(EscapeDebugExtArgs::ESCAPE_ALL)
     }
@@ -1875,7 +1874,6 @@ pub(crate) struct EscapeDebugExtArgs {
     pub(crate) escape_double_quote: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeDebugExtArgs {
     pub(crate) const ESCAPE_ALL: Self = Self {
         escape_grapheme_extended: true,

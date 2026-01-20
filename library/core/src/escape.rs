@@ -3,7 +3,6 @@
 use crate::ascii;
 use crate::fmt::{self, Write};
 use crate::marker::PhantomData;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ops::Range;
 
@@ -28,7 +27,6 @@ const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn hex_escape<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 4) };
 
@@ -47,7 +45,6 @@ const fn hex_escape<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
 
 /// Returns a buffer with the verbatim character and its corresponding range.
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn verbatim<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 1) };
 
@@ -61,7 +58,6 @@ const fn verbatim<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8
 /// Escapes an ASCII character.
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn escape_ascii<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 4) };
 
@@ -221,7 +217,6 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq }, alive) }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn ascii(c: u8) -> Self {
         let (escape_seq, alive) = escape_ascii(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.
@@ -235,7 +230,6 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn empty() -> Self {
         // SAFETY: `0..0` ensures an empty escape sequence.
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq: [ascii::Char::Null; N] }, 0..0) }
@@ -247,7 +241,6 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.alive.advance_by(n)
     }
@@ -293,7 +286,6 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> EscapeIterInner<N, AlwaysEscaped> {
     pub(crate) fn next(&mut self) -> Option<u8> {
         let i = self.alive.next()?;
@@ -345,7 +337,6 @@ impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Display for EscapeIterInner<N, AlwaysEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // SAFETY: The `AlwaysEscaped` marker guarantees that `self.data`
@@ -368,7 +359,6 @@ impl<const N: usize> fmt::Display for EscapeIterInner<N, MaybeEscaped> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<const N: usize> fmt::Debug for EscapeIterInner<N, AlwaysEscaped> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("EscapeIterInner").field(&format_args!("'{}'", self)).finish()

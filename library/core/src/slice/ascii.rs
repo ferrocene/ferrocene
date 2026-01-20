@@ -1,14 +1,17 @@
 //! Operations on ASCII `[u8]`.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::ascii::EscapeDefault;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Write};
 #[cfg(not(all(target_arch = "loongarch64", target_feature = "lsx")))]
 use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ascii, iter, ops};
+
+// Ferrocene addition: imports for the certified subset
+#[rustfmt::skip]
+#[cfg(feature = "ferrocene_subset")]
+use crate::{ascii, iter};
 
 impl [u8] {
     /// Checks if all bytes in this slice are within the ASCII range.
@@ -141,7 +144,6 @@ impl [u8] {
     /// let escaped = s.escape_ascii().to_string();
     /// assert_eq!(escaped, "0\\t\\r\\n\\'\\\"\\\\\\x9d");
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "this returns the escaped bytes as an iterator, \
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
@@ -231,7 +233,6 @@ impl [u8] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_fn_for_zst! {
     #[derive(Clone)]
     struct EscapeByte impl Fn = |byte: &u8| -> ascii::EscapeDefault {
@@ -246,7 +247,6 @@ impl_fn_for_zst! {
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeAscii<'a> {
     inner: iter::FlatMap<super::Iter<'a, u8>, ascii::EscapeDefault, EscapeByte>,
 }
@@ -294,7 +294,6 @@ impl<'a> iter::DoubleEndedIterator for EscapeAscii<'a> {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::FusedIterator for EscapeAscii<'a> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> fmt::Display for EscapeAscii<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -339,7 +338,6 @@ impl<'a> fmt::Display for EscapeAscii<'a> {
         Ok(())
     }
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> fmt::Debug for EscapeAscii<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

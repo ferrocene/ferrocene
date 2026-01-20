@@ -342,7 +342,6 @@ pub mod asserting;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bstr;
 pub mod cell;
 pub mod char;

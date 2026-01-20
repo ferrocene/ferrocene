@@ -23,7 +23,7 @@ use crate::{fmt, hash, intrinsics, mem, ptr};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::{
-    intrinsics,
+    fmt, intrinsics,
     marker::PointeeSized,
     mem::{self, SizedTypeProperties},
     ptr,
@@ -1728,7 +1728,6 @@ impl<T: PointeeSized, U: PointeeSized> DispatchFromDyn<NonNull<U>> for NonNull<T
 unsafe impl<T: PointeeSized> PinCoerceUnsized for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> fmt::Debug for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1736,7 +1735,6 @@ impl<T: PointeeSized> fmt::Debug for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> fmt::Pointer for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)

@@ -203,13 +203,7 @@ fn get_latest_upstream_commit_that_modified_files(
         "-n1",
         &upstream,
         "--author",
-<<<<<<< HEAD
-        &git_config.author_email(),
-||||||| 72b6488ba48
-        git_config.git_merge_commit_email,
-=======
-        &escape_email_git_regex(git_config.git_merge_commit_email),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        &escape_email_git_regex(&git_config.author_email()),
     ]);
 
     // Also search for temporary bors account
@@ -261,13 +255,7 @@ pub fn get_closest_upstream_commit(
     git.args([
         "rev-list",
         "--author-date-order",
-<<<<<<< HEAD
-        &format!("--author={}", config.author_email()),
-||||||| 72b6488ba48
-        &format!("--author={}", config.git_merge_commit_email),
-=======
-        &format!("--author={}", &escape_email_git_regex(config.git_merge_commit_email),),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        &format!("--author={}", &escape_email_git_regex(&config.author_email()),),
         "-n1",
         base,
     ]);

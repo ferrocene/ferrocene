@@ -16,7 +16,6 @@ enum ArgumentType<'a> {
         // INVARIANT: `formatter` has type `fn(&T, _) -> _` for some `T`, and `value`
         // was derived from a `&'a T`.
         value: NonNull<()>,
-        // FIXME: remove cfg as soon as Formatter is in subset
         formatter: unsafe fn(NonNull<()>, &mut Formatter<'_>) -> Result,
         _lifetime: PhantomData<&'a ()>,
     },

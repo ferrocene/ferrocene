@@ -91,7 +91,6 @@ pub struct Range<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -205,7 +204,6 @@ pub struct RangeFrom<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -291,7 +289,6 @@ pub struct RangeTo<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")?;
@@ -482,7 +479,6 @@ impl RangeInclusive<usize> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -623,7 +619,6 @@ pub struct RangeToInclusive<Idx> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..=")?;

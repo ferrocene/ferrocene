@@ -63,6 +63,15 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
         VariantCondition::QemuCpu("cortex-a53"),
         VariantCondition::PanicRuntime,
     ]),
+    ("2021-neoverse-v1", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::QemuCpu("neoverse-v1"),
+    ]),
+    ("2021-neoverse-v1-certified-panic", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::QemuCpu("neoverse-v1"),
+        VariantCondition::PanicRuntime,
+    ]),
     ("2021-cortex-m4", &[
         VariantCondition::Edition("2015"),
         VariantCondition::QemuCpu("cortex-m4"),

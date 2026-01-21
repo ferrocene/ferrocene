@@ -7,6 +7,7 @@ mod floats;
 mod hash;
 mod intrinsics;
 mod iter;
+mod macros;
 mod num;
 mod ops;
 mod slice;

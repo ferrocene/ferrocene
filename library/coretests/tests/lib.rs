@@ -127,6 +127,7 @@
 #![feature(ferrocene_test)]
 // Ferrocene addition: Features required for tests
 // tidy-alphabetical-start
+#![feature(assert_matches)]
 #![feature(atomic_from_mut)]
 #![feature(atomic_try_update)]
 #![feature(bound_as_ref)]

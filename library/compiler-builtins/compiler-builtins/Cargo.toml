@@ -68,4 +68,3 @@ unstable-public-internals = []
 
 # Ferrocene addition
 ferrocene_subset = []
-ferrocene_certified_runtime = []

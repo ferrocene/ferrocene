@@ -219,7 +219,6 @@ const fn pow2_to_pow10(a: i64) -> i64 {
 }
 
 #[cfg(target_has_reliable_f16)]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl RawFloat for f16 {
     type Int = u16;
 

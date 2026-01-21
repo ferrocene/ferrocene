@@ -20,7 +20,6 @@ macro_rules! impl_general_format {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_has_reliable_f16)]
 impl_general_format! { f16 }
 impl_general_format! { f32 f64 }
@@ -234,7 +233,6 @@ macro_rules! floating {
 
 floating! { f32 f64 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_has_reliable_f16)]
 floating! { f16 }
 

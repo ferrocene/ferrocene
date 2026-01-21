@@ -3433,7 +3433,6 @@ pub const fn maximumf128(x: f128, y: f128) -> f128 {
 /// [`f16::abs`](../../std/primitive.f16.html#method.abs)
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fabsf16(x: f16) -> f16;
 
 /// Returns the absolute value of an `f32`.

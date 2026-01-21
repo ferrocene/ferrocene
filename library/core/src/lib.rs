@@ -295,7 +295,6 @@ pub use legacy_int_modules::{i128, u128};
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod f128;
 #[path = "num/f16.rs"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod f16;
 #[path = "num/f32.rs"]
 pub mod f32;

@@ -128,7 +128,6 @@ macro_rules! types {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         $(#[$stability])+
         impl crate::fmt::Debug for $name {
             #[inline]

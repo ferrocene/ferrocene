@@ -10,22 +10,15 @@ use crate::iter::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, UncheckedIterator,
 };
 use crate::marker::PhantomData;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{self, SizedTypeProperties};
 use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{cmp, fmt};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{
-    cmp, fmt,
-    iter::{TrustedLen, UncheckedIterator},
-    mem,
-    mem::SizedTypeProperties,
-};
+use crate::iter::{TrustedLen, UncheckedIterator};
 
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
 impl<T> !Iterator for [T] {}
@@ -220,7 +213,6 @@ pub struct IterMut<'a, T: 'a> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug> fmt::Debug for IterMut<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("IterMut").field(&self.make_slice()).finish()

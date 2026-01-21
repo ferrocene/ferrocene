@@ -485,7 +485,7 @@ fn copy_self_contained_objects(
         // ferrocene addition
         let srcdir = builder.ensure(SecretSauceArtifacts { target });
 
-        for &obj in &["libc.a", "crt1.o", "COPYRIGHT"] {
+        for &obj in &["libc.a", "crt1.o", "rcrt1.o", "COPYRIGHT"] {
             copy_and_stamp(
                 builder,
                 &libdir_self_contained,

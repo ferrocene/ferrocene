@@ -129,3 +129,13 @@ fn test_into_slice_range() {
 
     let _ = slice[(core::ops::Bound::Included(0), core::ops::Bound::Excluded(20))];
 }
+
+// covers: `core::slice::ascii::is_ascii_simple`
+#[test]
+fn slice_ascii_simple() {
+    let hello = [b'H', b'e', b'l', b'l', b'o'];
+    assert!(core::slice::is_ascii_simple(&hello));
+
+    let sparkle_heart = [240, 159, 146, 150];
+    assert!(!core::slice::is_ascii_simple(&sparkle_heart));
+}

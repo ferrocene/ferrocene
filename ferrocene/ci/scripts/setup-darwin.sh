@@ -3,9 +3,8 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeuo pipefail
 
-# Unlike Windows/Linux executors, Macs do not come with awscli by default
 # On Mac, XCode's LLVM cannot build for WASM.
-brew install awscli cmake ninja zstd llvm tidy-html5
+brew install cmake ninja zstd llvm tidy-html5
 
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
 # brew install --cask  gcc-arm-embedded

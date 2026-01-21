@@ -139,9 +139,6 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
-// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
-// panics in the certified runtime
-#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 // Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
 #![feature(cfg_target_has_atomic)]
 

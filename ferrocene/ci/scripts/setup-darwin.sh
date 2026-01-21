@@ -11,9 +11,6 @@ fi
 # On Mac, XCode's LLVM cannot build for WASM.
 brew install --quiet awscli cmake ninja zstd llvm tidy-html5
 
-# Install Azure tools
-brew install --quiet azure-cli azcopy
-
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
 # brew install --cask  gcc-arm-embedded
 mkdir -p /tmp/ferrocene

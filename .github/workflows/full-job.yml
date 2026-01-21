@@ -41,6 +41,10 @@ on:
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
+      qnx-version:
+        type: string
+        default: ""
+        description: The QNX version (if any) and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
       artifacts-bucket:
         type: string
         description: The artifact bucket
@@ -97,6 +101,13 @@ jobs:
           build-run-id: ${{ inputs.build-run-id }}
           bucket: ${{ inputs.cache-bucket }}
           prefix: ${{ inputs.cache-prefix }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+        with:
+          version: ${{ inputs.qnx-version }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

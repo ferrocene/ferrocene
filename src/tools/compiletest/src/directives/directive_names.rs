@@ -290,7 +290,6 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     // tidy-alphabetical-end
 
     // Ferrocene additions
-    "compare-output-lines-by-subset",
     "ferrocene-execute-in-temp",
     "ignore-ferrocene.facade",
     "only-ferrocene.facade",

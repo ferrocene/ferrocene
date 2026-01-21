@@ -526,9 +526,13 @@ jobs:
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
-      - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
-      - setup-uv
+      # Darwin does not come with awscli, setup it before aws steps
+      - run:
+          name: Install AWSCLIv2
+          command: brew install awscli
       - aws-oidc-auth
+      - ferrocene-setup-darwin
+      - setup-uv
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -1272,6 +1276,14 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
+            - run:
+                name: Install AWSCLIv2
+                command: brew install awscli
+      - aws-oidc-auth
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
             - ferrocene-setup-darwin
       - when:
           condition:
@@ -1279,7 +1291,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-uv
-      - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
@@ -1313,6 +1324,14 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
+            - run:
+                name: Install AWSCLIv2
+                command: brew install awscli
+      - aws-oidc-auth
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
             - ferrocene-setup-darwin
       - when:
           condition:
@@ -1320,7 +1339,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-uv
-      - aws-oidc-auth
       - when:
           condition: <<parameters.restore-from-job>>
           steps:
@@ -1349,9 +1367,16 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+            - run:
+                name: Install AWSCLIv2
+                command: brew install awscli
       - setup-uv
       - aws-oidc-auth
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>

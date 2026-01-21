@@ -226,7 +226,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn count(self) -> usize {
                 len!(self)
             }

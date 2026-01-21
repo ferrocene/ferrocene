@@ -102,7 +102,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.iter.count()
     }

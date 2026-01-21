@@ -15,6 +15,11 @@ use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
 
+// Ferrocene addition: imports for the certified subset
+#[rustfmt::skip]
+#[cfg(feature = "ferrocene_subset")]
+use crate::iter::TrustedLen;
+
 /// An iterator that filters the elements of `iter` with `predicate`.
 ///
 /// This `struct` is created by the [`filter`] method on [`Iterator`]. See its
@@ -141,7 +146,6 @@ where
     //
     // Using the branchless version will also simplify the LLVM byte code, thus
     // leaving more budget for LLVM optimizations.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         #[inline]
@@ -237,7 +241,6 @@ unsafe impl<I: InPlaceIterable, P> InPlaceIterable for Filter<I, P> {
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait SpecAssumeCount {
     /// # Safety
     ///
@@ -249,7 +252,6 @@ trait SpecAssumeCount {
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator> SpecAssumeCount for I {
     #[inline]
     #[rustc_inherit_overflow_checks]
@@ -262,7 +264,6 @@ impl<I: Iterator> SpecAssumeCount for I {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: TrustedLen> SpecAssumeCount for I {
     #[inline]
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {

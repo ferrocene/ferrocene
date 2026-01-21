@@ -96,7 +96,6 @@ where
         self.it.last().copied()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.it.count()
     }

@@ -4,16 +4,24 @@
 
 // for use in alloc, not re-exported in std.
 #[rustfmt::skip]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use unicode_data::case_ignorable::lookup as Case_Ignorable;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use unicode_data::cased::lookup as Cased;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use unicode_data::conversions;
 
 #[rustfmt::skip]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::alphabetic::lookup as Alphabetic;
 pub(crate) use unicode_data::grapheme_extend::lookup as Grapheme_Extend;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::lowercase::lookup as Lowercase;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::n::lookup as N;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::uppercase::lookup as Uppercase;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use unicode_data::white_space::lookup as White_Space;
 
 pub(crate) mod printable;
@@ -31,4 +39,5 @@ mod unicode_data;
 ///
 /// The version numbering scheme is explained in
 /// [Unicode 11.0 or later, Section 3.1 Versions of the Unicode Standard](https://www.unicode.org/versions/Unicode11.0.0/ch03.pdf#page=4).
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const UNICODE_VERSION: (u8, u8, u8) = unicode_data::UNICODE_VERSION;

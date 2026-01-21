@@ -4,16 +4,14 @@
 use crate::convert::Infallible;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 
 /// The error type returned when a checked integral type conversion fails.
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Copy, Clone, PartialEq, Eq))]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct TryFromIntError(pub(crate) ());
 
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromIntError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         "out of range integral type conversion attempted".fmt(f)

@@ -1458,7 +1458,6 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1522,7 +1521,6 @@ impl<'a, T> DoubleEndedIterator for Windows<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for Windows<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
@@ -1617,7 +1615,6 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1711,7 +1708,6 @@ impl<'a, T> DoubleEndedIterator for Chunks<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for Chunks<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
@@ -1802,7 +1798,6 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -1895,7 +1890,6 @@ impl<'a, T> DoubleEndedIterator for ChunksMut<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for ChunksMut<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
@@ -2019,7 +2013,6 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -2181,7 +2174,6 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }

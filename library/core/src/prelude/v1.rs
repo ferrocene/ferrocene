@@ -53,7 +53,6 @@ pub use crate::result::Result::{self, Err, Ok};
 // Re-exported built-in macros
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::fmt::macros::Debug;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]

@@ -802,7 +802,6 @@ macro_rules! r#try {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "write_macro"]
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! write {
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args!($($arg)*))
@@ -838,7 +837,6 @@ macro_rules! write {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "writeln_macro"]
 #[allow_internal_unstable(format_args_nl)]
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! writeln {
     ($dst:expr $(,)?) => {
         $crate::write!($dst, "\n")

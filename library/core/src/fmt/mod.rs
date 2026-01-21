@@ -4,22 +4,19 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::char::EscapeDebugExtArgs;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::assert_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{PhantomData, PointeeSized};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::fmt as numfmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Deref;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::NonNull;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{iter, mem, result, str};
 
-#[cfg(not(feature = "ferrocene_subset"))]
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+use crate::cell::{Ref, RefMut};
+
 mod builders;
 #[cfg(not(no_fp_fmt_parse))]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -31,14 +28,12 @@ mod nofloat;
 mod num;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod num_buffer;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
 #[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum Alignment {
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
     /// Indication that contents should be left-aligned.
@@ -56,9 +51,7 @@ pub enum Alignment {
 pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 pub use self::builders::{FromFn, from_fn};
 
@@ -87,7 +80,6 @@ pub use self::builders::{FromFn, from_fn};
 /// assert_eq!(format!("{pythagorean_triple}"), "(3, 4, 5)");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub type Result = result::Result<(), Error>;
 
 /// The error type which is returned from formatting a message into a stream.
@@ -125,7 +117,6 @@ pub type Result = result::Result<(), Error>;
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -138,7 +129,6 @@ pub struct Error;
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "FmtWrite"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.
@@ -264,7 +254,6 @@ pub trait Write {
 }
 
 #[stable(feature = "fmt_write_blanket_impl", since = "1.4.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<W: Write + ?Sized> Write for &mut W {
     fn write_str(&mut self, s: &str) -> Result {
         (**self).write_str(s)
@@ -282,7 +271,6 @@ impl<W: Write + ?Sized> Write for &mut W {
 /// The signedness of a [`Formatter`] (or of a [`FormattingOptions`]).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum Sign {
     /// Represents the `+` flag.
     Plus,
@@ -294,7 +282,6 @@ pub enum Sign {
 /// hexadecimal or normal integers.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum DebugAsHex {
     /// Use lower-case hexadecimal integers for the `Debug` trait (like [the `x?` type](../../std/fmt/index.html#formatting-traits)).
     Lower,
@@ -306,9 +293,9 @@ pub enum DebugAsHex {
 ///
 /// `FormattingOptions` is a [`Formatter`] without an attached [`Write`] trait.
 /// It is mainly used to construct `Formatter` instances.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone, PartialEq, Eq))]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///
@@ -338,7 +325,6 @@ pub struct FormattingOptions {
 }
 
 // This needs to match with compiler/rustc_ast_lowering/src/format.rs.
-#[cfg(not(feature = "ferrocene_subset"))]
 mod flags {
     pub(super) const SIGN_PLUS_FLAG: u32 = 1 << 21;
     pub(super) const SIGN_MINUS_FLAG: u32 = 1 << 22;
@@ -355,7 +341,6 @@ mod flags {
     pub(super) const ALIGN_UNKNOWN: u32 = 3 << 29;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl FormattingOptions {
     /// Construct a new `FormatterBuilder` with the supplied `Write` trait
     /// object for output that is equivalent to the `{}` formatting
@@ -565,7 +550,6 @@ impl FormattingOptions {
 }
 
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Default for FormattingOptions {
     /// Same as [`FormattingOptions::new()`].
     fn default() -> Self {
@@ -586,14 +570,12 @@ impl Default for FormattingOptions {
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Formatter<'a> {
     options: FormattingOptions,
 
     buf: &'a mut (dyn Write + 'a),
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Formatter<'a> {
     /// Creates a new formatter with given [`FormattingOptions`].
     ///
@@ -743,7 +725,6 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Arguments<'a> {
     template: NonNull<u8>,
     args: NonNull<rt::Argument<'a>>,
@@ -753,7 +734,6 @@ pub struct Arguments<'a> {
 #[doc(hidden)]
 #[rustc_diagnostic_item = "FmtArgumentsNew"]
 #[unstable(feature = "fmt_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Arguments<'a> {
     // SAFETY: The caller must ensure that the provided template and args encode a valid
     // fmt::Arguments, as documented above.
@@ -777,7 +757,6 @@ impl<'a> Arguments<'a> {
 
 #[doc(hidden)]
 #[unstable(feature = "fmt_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Arguments<'a> {
     /// Estimates the length of the formatted text.
     ///
@@ -839,7 +818,6 @@ impl<'a> Arguments<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Arguments<'a> {
     /// Create a `fmt::Arguments` object for a single static string.
     ///
@@ -935,14 +913,11 @@ impl<'a> Arguments<'a> {
 
 // Manually implementing these results in better error messages.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl !Send for Arguments<'_> {}
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl !Sync for Arguments<'_> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Display::fmt(self, fmt)
@@ -950,7 +925,6 @@ impl Debug for Arguments<'_> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         write(fmt.buf, *self)
@@ -1087,7 +1061,6 @@ impl Display for Arguments<'_> {
 #[doc(alias = "{:?}")]
 #[rustc_diagnostic_item = "Debug"]
 #[rustc_trivial_field_reads]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Debug: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1123,7 +1096,6 @@ pub trait Debug: PointeeSized {
 }
 
 // Separate module to reexport the macro `Debug` from prelude without the trait `Debug`.
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod macros {
     /// Derive macro generating an impl of the trait `Debug`.
     #[rustc_builtin_macro]
@@ -1135,7 +1107,6 @@ pub(crate) mod macros {
 }
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(inline)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use macros::Debug;
 
 /// Format trait for an empty format, `{}`.
@@ -1224,7 +1195,6 @@ pub use macros::Debug;
 #[doc(alias = "{}")]
 #[rustc_diagnostic_item = "Display"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Display: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1301,7 +1271,6 @@ pub trait Display: PointeeSized {
 /// assert_eq!(format!("l as octal is: {l:#06o}"), "l as octal is: 0o0011");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Octal: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1361,7 +1330,6 @@ pub trait Octal: PointeeSized {
 /// );
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Binary: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1417,7 +1385,6 @@ pub trait Binary: PointeeSized {
 /// assert_eq!(format!("l as hex is: {l:#010x}"), "l as hex is: 0x00000009");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait LowerHex: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1473,7 +1440,6 @@ pub trait LowerHex: PointeeSized {
 /// assert_eq!(format!("l as hex is: {l:#010X}"), "l as hex is: 0x7FFFFFFF");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait UpperHex: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1533,7 +1499,6 @@ pub trait UpperHex: PointeeSized {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Pointer"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait Pointer: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1585,7 +1550,6 @@ pub trait Pointer: PointeeSized {
 /// );
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait LowerExp: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1637,7 +1601,6 @@ pub trait LowerExp: PointeeSized {
 /// );
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait UpperExp: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1675,7 +1638,6 @@ pub trait UpperExp: PointeeSized {
 /// ```
 ///
 /// [`write!`]: crate::write!
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
     if let Some(s) = fmt.as_str() {
@@ -1790,13 +1752,11 @@ pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
 
 /// Padding after the end of something. Returned by `Formatter::padding`.
 #[must_use = "don't forget to write the post padding"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct PostPadding {
     fill: char,
     padding: u16,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl PostPadding {
     fn new(fill: char, padding: u16) -> PostPadding {
         PostPadding { fill, padding }
@@ -1811,7 +1771,7 @@ impl PostPadding {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 impl<'a> Formatter<'a> {
     fn wrap_buf<'b, 'c, F>(&'b mut self, wrap: F) -> Formatter<'c>
     where
@@ -2882,7 +2842,6 @@ impl<'a> Formatter<'a> {
 }
 
 #[stable(since = "1.2.0", feature = "formatter_write")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Write for Formatter<'_> {
     fn write_str(&mut self, s: &str) -> Result {
         self.buf.write_str(s)
@@ -2903,7 +2862,6 @@ impl Write for Formatter<'_> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt("an error occurred when formatting an argument", f)
@@ -2912,7 +2870,6 @@ impl Display for Error {
 
 // Implementations of the core formatting traits
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! fmt_refs {
     ($($tr:ident),*) => {
         $(
@@ -2928,11 +2885,9 @@ macro_rules! fmt_refs {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperExp }
 
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for ! {
     #[inline]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
@@ -2941,7 +2896,6 @@ impl Debug for ! {
 }
 
 #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for ! {
     #[inline]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
@@ -2950,7 +2904,6 @@ impl Display for ! {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for bool {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -2959,7 +2912,6 @@ impl Debug for bool {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for bool {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(if *self { "true" } else { "false" }, f)
@@ -2967,7 +2919,6 @@ impl Display for bool {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for str {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_char('"')?;
@@ -3017,7 +2968,6 @@ impl Debug for str {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for str {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.pad(self)
@@ -3025,7 +2975,6 @@ impl Display for str {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for char {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_char('\'')?;
@@ -3040,7 +2989,6 @@ impl Debug for char {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for char {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if f.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
@@ -3195,7 +3143,6 @@ impl<T: Debug> Debug for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Debug for () {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -3203,7 +3150,6 @@ impl Debug for () {
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> Debug for PhantomData<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "PhantomData<{}>", crate::any::type_name::<T>())
@@ -3232,7 +3178,6 @@ impl<T: ?Sized + Debug> Debug for RefCell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&**self, f)
@@ -3240,7 +3185,6 @@ impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&*(self.deref()), f)

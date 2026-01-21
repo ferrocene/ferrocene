@@ -1430,7 +1430,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn drop_in_place(self)
     where
         T: [const] Destruct,

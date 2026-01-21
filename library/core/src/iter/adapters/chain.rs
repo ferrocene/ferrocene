@@ -84,7 +84,6 @@ where
         and_then_or_clear(&mut self.a, Iterator::next).or_else(|| self.b.as_mut()?.next())
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[rustc_inherit_overflow_checks]
     fn count(self) -> usize {

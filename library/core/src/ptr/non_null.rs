@@ -108,7 +108,6 @@ impl<T: PointeeSized> !Send for NonNull<T> {}
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> !Sync for NonNull<T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Sized> NonNull<T> {
     /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
     ///
@@ -119,6 +118,7 @@ impl<T: Sized> NonNull<T> {
     #[rustc_const_stable(feature = "nonnull_provenance", since = "1.89.0")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn without_provenance(addr: NonZero<usize>) -> Self {
         let pointer = crate::ptr::without_provenance(addr.get());
         // SAFETY: we know `addr` is non-zero.
@@ -148,6 +148,7 @@ impl<T: Sized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_dangling", since = "1.36.0")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn dangling() -> Self {
         let align = crate::ptr::Alignment::of::<T>();
         NonNull::without_provenance(align.as_nonzero())
@@ -161,6 +162,7 @@ impl<T: Sized> NonNull<T> {
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     #[stable(feature = "nonnull_provenance", since = "1.89.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn with_exposed_provenance(addr: NonZero<usize>) -> Self {
         // SAFETY: we know `addr` is non-zero.
         unsafe {
@@ -186,6 +188,7 @@ impl<T: Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn as_uninit_ref<'a>(self) -> &'a MaybeUninit<T> {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -209,6 +212,7 @@ impl<T: Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn as_uninit_mut<'a>(self) -> &'a mut MaybeUninit<T> {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.

@@ -8,7 +8,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
 use crate::intrinsics::{exact_div, unchecked_sub};
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -26,7 +25,7 @@ use crate::{fmt, hint, ptr, range, slice};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{mem::SizedTypeProperties, ptr};
+use crate::{hint, mem::SizedTypeProperties, ptr};
 
 #[unstable(
     feature = "slice_internals",
@@ -59,7 +58,6 @@ mod specialize;
 pub use ascii::EscapeAscii;
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use ascii::is_ascii_simple;
 #[stable(feature = "slice_get_slice", since = "1.28.0")]
 pub use index::SliceIndex;
@@ -2714,7 +2712,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn ends_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,
@@ -3041,7 +3038,6 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> Ordering,
@@ -3143,7 +3139,6 @@ impl<T> [T] {
     #[allow(rustdoc::broken_intra_doc_links)]
     #[stable(feature = "slice_binary_search_by_key", since = "1.10.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> B,

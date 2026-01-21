@@ -27,7 +27,10 @@ use crate::{char as char_mod, option};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use {
-    super::from_utf8_unchecked,
+    super::{
+        from_utf8_unchecked,
+        pattern::{Pattern, Searcher},
+    },
     crate::{iter::Copied, slice},
 };
 
@@ -57,7 +60,6 @@ impl<'a> Iterator for Chars<'a> {
         unsafe { next_code_point(&mut self.iter).map(|ch| char::from_u32_unchecked(ch)) }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         super::count::count_chars(self.as_str())
@@ -187,8 +189,7 @@ impl<'a> Chars<'a> {
 ///
 /// [`char`]: prim@char
 /// [`char_indices`]: str::char_indices
-#[cfg(not(feature = "ferrocene_subset"))]
-#[derive(Clone, Debug)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct CharIndices<'a> {
@@ -196,7 +197,6 @@ pub struct CharIndices<'a> {
     pub(super) iter: Chars<'a>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for CharIndices<'a> {
     type Item = (usize, char);
@@ -232,7 +232,6 @@ impl<'a> Iterator for CharIndices<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for CharIndices<'a> {
     #[inline]
@@ -248,7 +247,6 @@ impl<'a> DoubleEndedIterator for CharIndices<'a> {
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for CharIndices<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> CharIndices<'a> {
     /// Views the underlying data as a subslice of the original data.
     ///
@@ -323,7 +321,6 @@ impl Iterator for Bytes<'_> {
         self.0.size_hint()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         self.0.count()
@@ -652,7 +649,6 @@ derive_pattern_clone! {
     with |s| SplitInternal { matcher: s.matcher.clone(), ..*s }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) struct SplitInternal<'a, P: Pattern> {
     pub(super) start: usize,
     pub(super) end: usize,
@@ -677,7 +673,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> SplitInternal<'a, P> {
     #[inline]
     fn get_end(&mut self) -> Option<&'a str> {
@@ -695,6 +690,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next(&mut self) -> Option<&'a str> {
         if self.finished {
             return None;
@@ -733,6 +729,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_back(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -770,6 +767,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_back_inclusive(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -813,6 +811,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     fn remainder(&self) -> Option<&'a str> {
         // `Self::get_end` doesn't change `self.start`
         if self.finished {
@@ -1367,7 +1366,6 @@ pub struct SplitAsciiWhitespace<'a> {
 /// See its documentation for more.
 ///
 /// [`split_inclusive`]: str::split_inclusive
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 pub struct SplitInclusive<'a, P: Pattern>(pub(super) SplitInternal<'a, P>);
 
@@ -1498,7 +1496,6 @@ impl<'a> SplitAsciiWhitespace<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 impl<'a, P: Pattern> Iterator for SplitInclusive<'a, P> {
     type Item = &'a str;

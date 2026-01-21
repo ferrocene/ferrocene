@@ -1,11 +1,9 @@
 //! These functions compute the integer logarithm of their type, assuming
 //! that someone has already checked that the value is strictly positive.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
 // 0 < val <= u8::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn u8_impl(val: u8) -> u32 {
     let val = val as u32;
@@ -27,7 +25,6 @@ const fn u8_impl(val: u8) -> u32 {
 }
 
 // 0 < val < 100_000
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn less_than_5(val: u32) -> u32 {
     // Similar to u8, when adding one of these constants to val,
@@ -49,14 +46,12 @@ const fn less_than_5(val: u32) -> u32 {
 }
 
 // 0 < val <= u16::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn u16_impl(val: u16) -> u32 {
     less_than_5(val as u32)
 }
 
 // 0 < val <= u32::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn u32_impl(mut val: u32) -> u32 {
     let mut log = 0;
@@ -68,7 +63,6 @@ const fn u32_impl(mut val: u32) -> u32 {
 }
 
 // 0 < val <= u64::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn u64_impl(mut val: u64) -> u32 {
     let mut log = 0;
@@ -84,7 +78,6 @@ const fn u64_impl(mut val: u64) -> u32 {
 }
 
 // 0 < val <= u128::MAX
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 const fn u128_impl(mut val: u128) -> u32 {
     let mut log = 0;
@@ -100,7 +93,6 @@ const fn u128_impl(mut val: u128) -> u32 {
     log + u64_impl(val as u64)
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! define_unsigned_ilog10 {
     ($($ty:ident => $impl_fn:ident,)*) => {$(
         #[inline]
@@ -116,7 +108,6 @@ macro_rules! define_unsigned_ilog10 {
     )*};
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 define_unsigned_ilog10! {
     u8 => u8_impl,
     u16 => u16_impl,
@@ -125,7 +116,6 @@ define_unsigned_ilog10! {
     u128 => u128_impl,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 pub(super) const fn usize(val: NonZero<usize>) -> u32 {
     #[cfg(target_pointer_width = "16")]

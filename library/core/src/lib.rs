@@ -109,7 +109,7 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_select_unpredictable))]
+#![feature(const_select_unpredictable)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
@@ -140,7 +140,7 @@
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_sanitize))]
+#![feature(cfg_sanitize)]
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
@@ -212,6 +212,7 @@
 // Ferrocene lints/features:
 #![cfg_attr(
     feature = "ferrocene_subset",
+    expect(missing_debug_implementations),
     expect(rustdoc::broken_intra_doc_links),
     expect(rustdoc::private_intra_doc_links)
 )]
@@ -337,7 +338,6 @@ pub mod ops;
 
 pub mod any;
 pub mod array;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ascii;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod asserting;
@@ -387,7 +387,6 @@ pub mod time;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod wtf8;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod unicode;
 
 /* Async */
@@ -402,7 +401,6 @@ pub mod alloc;
 
 // note: does not need to be public
 mod bool;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod escape;
 mod tuple;
 #[cfg(not(feature = "ferrocene_subset"))]

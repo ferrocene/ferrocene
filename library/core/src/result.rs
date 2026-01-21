@@ -544,20 +544,15 @@
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{convert, fmt, hint};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{convert, hint};
 
 /// `Result` is a type that represents either success ([`Ok`]) or failure ([`Err`]).
 ///
 /// See the [module documentation](self) for details.
 #[doc(search_unbox)]
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(PartialEq, PartialOrd, Eq, Ord))]
+#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Hash))]
+#[derive_const(PartialEq, PartialOrd, Eq, Ord)]
 #[must_use = "this `Result` may be an `Err` variant, which should be handled"]
 #[rustc_diagnostic_item = "Result"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -1187,8 +1182,6 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
-    // Ferrocene: blocked on Debug
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn expect(
         self,
         #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
@@ -1933,7 +1926,6 @@ const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, E> Clone for Result<T, E>
 where
     T: Clone,

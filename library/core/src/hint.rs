@@ -4,9 +4,7 @@
 //!
 //! Hints may be compile time or runtime.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::Destruct;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::MaybeUninit;
 use crate::{intrinsics, ub_checks};
 
@@ -790,7 +788,6 @@ pub const fn cold_path() {
 /// ```
 #[inline(always)]
 #[stable(feature = "select_unpredictable", since = "1.88.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
 pub const fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T
 where

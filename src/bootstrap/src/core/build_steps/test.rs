@@ -3190,16 +3190,9 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut ferrocene_certified_runtime = builder
-            .config
-            .rust_std_features
-            .contains("ferrocene_certified_runtime")
-            || builder.config.cmd.test_variant().map_or(false, |x| x.contains("certified-panic"));
-
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {
                 instrument_coverage(builder, &mut cargo, build_compiler);
-                ferrocene_certified_runtime = true;
             }
 
             measure_coverage(builder, cargo.as_mut(), build_compiler, target, coverage_for);
@@ -3212,15 +3205,9 @@ impl Step for Crate {
         // alloc themself for doctests
         if crates.iter().any(|crate_| crate_ == "core") {
             crates.push("coretests".to_owned());
-            if ferrocene_certified_runtime {
-                cargo.arg("--features=coretests/ferrocene_certified_runtime");
-            }
         }
         if crates.iter().any(|crate_| crate_ == "alloc") {
             crates.push("alloctests".to_owned());
-            if ferrocene_certified_runtime {
-                cargo.arg("--features=alloctests/ferrocene_certified_runtime");
-            }
         }
 
         // Ferrocene annotation:

@@ -1,5 +1,4 @@
 #![stable(feature = "duration_core", since = "1.25.0")]
-#![cfg_attr(feature = "ferrocene_subset", allow(dead_code))]
 
 //! Temporal quantification.
 //!
@@ -1009,7 +1008,6 @@ impl Duration {
     /// let res = Duration::from_secs_f32(0.999e-9);
     /// assert_eq!(res, Duration::new(0, 1));
     /// ```
-    #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]

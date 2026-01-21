@@ -131,6 +131,7 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(iter_next_chunk))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(layout_for_ptr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(legacy_receiver_trait))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(likely_unlikely))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(local_waker))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(maybe_uninit_uninit_array_transpose))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(panic_internals))]

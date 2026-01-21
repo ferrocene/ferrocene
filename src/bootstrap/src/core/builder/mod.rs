@@ -1035,7 +1035,7 @@ impl<'a> Builder<'a> {
                 dist::PlainSourceTarballGpl,
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
-                dist::Gcc,
+                dist::GccDev,
                 crate::ferrocene::dist::Docs,
                 crate::ferrocene::dist::DocsDoctrees,
                 crate::ferrocene::dist::flip_link::FlipLink,

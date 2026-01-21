@@ -563,14 +563,8 @@ pub mod __alloc_error_handler {
     // `#[alloc_error_handler]`.
     #[rustc_std_internal_symbol]
     pub unsafe fn __rdl_alloc_error_handler(size: usize, _align: usize) -> ! {
-        #[cfg(not(feature = "ferrocene_certified_runtime"))]
         core::panicking::panic_nounwind_fmt(
             format_args!("memory allocation of {size} bytes failed"),
-            /* force_no_backtrace */ false,
-        );
-        #[cfg(feature = "ferrocene_certified_runtime")]
-        core::panicking::panic_nounwind_fmt(
-            core::panicking::PanicArguments::from_str("memory allocation failed"),
             /* force_no_backtrace */ false,
         );
     }

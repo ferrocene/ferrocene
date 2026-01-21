@@ -41,4 +41,3 @@ llvm_enzyme = ["std/llvm_enzyme"]
 
 # Ferrocene addition: enable "ferrocene_subset" feature in the core library
 ferrocene_subset = ["std/ferrocene_subset"]
-ferrocene_certified_runtime = ["std/ferrocene_certified_runtime"]

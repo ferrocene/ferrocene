@@ -1,3 +1,4 @@
+use core::str::pattern::Pattern;
 use core::{ptr, slice};
 
 #[test]
@@ -125,10 +126,7 @@ test_str_slice_index_mut_panic!(
 );
 
 #[test]
-
 fn pattern_is_prefix_of() {
-    use core::str::pattern::Pattern;
-
     let haystack = "Hello, world!";
 
     // char
@@ -142,4 +140,21 @@ fn pattern_is_prefix_of() {
     // [char; N]
     assert!(Pattern::is_prefix_of(['G', 'H', 'I'], haystack));
     assert!(!Pattern::is_prefix_of(['A', 'B', 'C'], haystack));
+}
+
+#[test]
+fn pattern_is_suffix_of() {
+    let haystack = "Hello, world!";
+
+    // char
+    assert!(Pattern::is_suffix_of('!', haystack));
+    assert!(!Pattern::is_suffix_of('H', haystack));
+
+    // &str
+    assert!(Pattern::is_suffix_of("ld!", haystack));
+    assert!(!Pattern::is_suffix_of("llo", haystack));
+
+    // [char; N]
+    assert!(Pattern::is_suffix_of(['.', '!', ','], haystack));
+    assert!(!Pattern::is_suffix_of(['A', 'B', 'C'], haystack));
 }

@@ -1181,20 +1181,13 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
-    pub fn expect(
-        self,
-        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
-    ) -> T
+    pub fn expect(self, msg: &str) -> T
     where
         E: fmt::Debug,
     {
         match self {
             Ok(t) => t,
-            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             Err(e) => unwrap_failed(msg, &e),
-            #[cfg(feature = "ferrocene_certified_runtime")]
-            Err(_) => crate::panicking::panic(msg),
         }
     }
 
@@ -1306,19 +1299,12 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_expect_err", since = "1.17.0")]
     // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub fn expect_err(
-        self,
-        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
-    ) -> E
+    pub fn expect_err(self, msg: &str) -> E
     where
         T: fmt::Debug,
     {
         match self {
-            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             Ok(t) => unwrap_failed(msg, &t),
-            #[cfg(feature = "ferrocene_certified_runtime")]
-            Ok(_) => crate::panicking::panic(msg),
             Err(e) => e,
         }
     }
@@ -1900,8 +1886,6 @@ impl<T, E> Result<Result<T, E>, E> {
 #[inline(never)]
 #[cold]
 #[track_caller]
-// Ferrocene: blocked on Debug
-#[cfg(not(feature = "ferrocene_subset"))]
 fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
     panic!("{msg}: {error:?}");
 }
@@ -1914,8 +1898,6 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 #[inline]
 #[cold]
 #[track_caller]
-// Ferrocene: blocked on Debug
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
     panic!()
 }

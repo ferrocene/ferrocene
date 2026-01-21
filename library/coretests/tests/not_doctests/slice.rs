@@ -88,14 +88,7 @@ fn index_range_slice_index() {
 //
 // FIXME: With `#[ferrocene::certified]` this test case will not be necessary, because the tested methods are dead code and are only included due to the cfg-approach.
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "range start index 100 out of range for slice of length 5"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "range start index {start} out of range for slice of length {len}"
-)]
+#[should_panic = "range start index 100 out of range for slice of length 5"]
 fn index_range_slice_index_panic() {
     core::ferrocene_test::test_index_range_slice_index_panic();
 }
@@ -104,14 +97,7 @@ fn index_range_slice_index_panic() {
 //
 // FIXME: With `#[ferrocene::certified]` this test case will not be necessary, because the tested methods are dead code and are only included due to the cfg-approach.
 #[test]
-#[cfg_attr(
-    not(feature = "ferrocene_certified_runtime"),
-    should_panic = "range start index 100 out of range for slice of length 5"
-)]
-#[cfg_attr(
-    feature = "ferrocene_certified_runtime",
-    should_panic = "range start index {start} out of range for slice of length {len}"
-)]
+#[should_panic = "range start index 100 out of range for slice of length 5"]
 fn index_range_slice_index_panic_mut() {
     core::ferrocene_test::test_index_range_slice_index_panic_mut();
 }

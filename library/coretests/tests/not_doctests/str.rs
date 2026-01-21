@@ -92,14 +92,7 @@ test_str_slice_index!(
 macro_rules! test_str_slice_index_panic {
     ( $($fn:ident => $range:expr,)*) => { $(
         #[test]
-        #[cfg_attr(
-            not(feature = "ferrocene_certified_runtime"),
-            should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-        )]
-        #[cfg_attr(
-            feature = "ferrocene_certified_runtime",
-            should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-        )]
+        #[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
         fn $fn() {
             let str_ref = "Hello, World!";
             slice::SliceIndex::index($range, str_ref);
@@ -116,14 +109,7 @@ test_str_slice_index_panic!(
 macro_rules! test_str_slice_index_mut_panic {
     ( $($fn:ident => $range:expr,)*) => { $(
         #[test]
-        #[cfg_attr(
-            not(feature = "ferrocene_certified_runtime"),
-            should_panic = "byte index 100 is out of bounds of `Hello, World!`"
-        )]
-        #[cfg_attr(
-            feature = "ferrocene_certified_runtime",
-            should_panic = "byte index {oob_index} is out of bounds of `{s_trunc}`{ellipsis}"
-        )]
+        #[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
         fn $fn() {
             let mut str_mut_bytes = STR_MUT_BYTES;
             let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();

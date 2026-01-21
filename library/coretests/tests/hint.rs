@@ -32,7 +32,6 @@ fn select_unpredictable_drop() {
 
 #[test]
 #[should_panic = "message canary"]
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 fn select_unpredictable_drop_on_panic() {
     use core::cell::Cell;
 

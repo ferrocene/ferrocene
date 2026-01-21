@@ -87,14 +87,3 @@ To use the target, the following additional flags must be provided to
 .. _aarch64-ferrocene-nto-qnx710:
 
 .. NOTE: this is a std target so we redirect to a no-std equivalent for certified core.
-
-Certified equivalent
---------------------
-
-This :ref:`qualified <qualified-targets>` target's certified equivalent is
-``aarch64-ferrocene-none``. To use the certified core library, the
-following additional flags must be provided to ``rustc``:
-
-* ``--target=aarch64-ferrocene-none``
-
-Refer to :ref:`certified-core-targets` for more information about certified targets.

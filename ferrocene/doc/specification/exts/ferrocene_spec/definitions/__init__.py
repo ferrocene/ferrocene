@@ -9,7 +9,6 @@ from sphinx.roles import SphinxRole
 from sphinx.transforms import SphinxTransform
 import sphinx
 
-
 KINDS = [
     paragraphs,
     syntax,

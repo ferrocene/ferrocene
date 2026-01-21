@@ -3,7 +3,6 @@
 
 from docutils import nodes
 
-
 ROLE = "codeterm"
 NAME = "code_terms"
 PRETTY_NAME = "programmatic construct"

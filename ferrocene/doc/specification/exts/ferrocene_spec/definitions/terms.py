@@ -3,7 +3,6 @@
 
 from docutils import nodes
 
-
 ROLE = "term"
 NAME = "term"
 PRETTY_NAME = "term"

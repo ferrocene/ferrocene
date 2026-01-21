@@ -7,7 +7,6 @@ from docutils import nodes
 import hashlib
 import sphinx
 
-
 ROLE = "p"
 NAME = "paragraph"
 PRETTY_NAME = "paragraph"

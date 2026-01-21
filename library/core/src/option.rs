@@ -977,17 +977,10 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_expect"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    pub const fn expect(
-        self,
-        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
-    ) -> T {
+    pub const fn expect(self, msg: &str) -> T {
         match self {
             Some(val) => val,
-            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             None => expect_failed(msg),
-            #[cfg(feature = "ferrocene_certified_runtime")]
-            None => panic_display(&msg),
         }
     }
 
@@ -2226,7 +2219,6 @@ const fn unwrap_failed() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 const fn expect_failed(msg: &str) -> ! {
     panic_display(&msg)
 }

@@ -1026,7 +1026,9 @@
 <core::bstr::ByteStr as core::ops::deref::Deref>::deref
 <core::bstr::ByteStr as core::ops::deref::DerefMut>::deref_mut
 <core::cell::BorrowError as core::fmt::Debug>::fmt
+<core::cell::BorrowError as core::fmt::Display>::fmt
 <core::cell::BorrowMutError as core::fmt::Debug>::fmt
+<core::cell::BorrowMutError as core::fmt::Display>::fmt
 <core::cell::BorrowRef<'_> as core::ops::drop::Drop>::drop
 <core::cell::BorrowRefMut<'_> as core::ops::drop::Drop>::drop
 <core::cell::Cell<T> as core::fmt::Debug>::fmt
@@ -1674,8 +1676,12 @@
 <core::panic::location::Location<'_> as core::fmt::Debug>::fmt
 <core::panic::location::Location<'_> as core::fmt::Display>::fmt
 <core::panic::location::Location<'a> as core::clone::Clone>::clone
+<core::panic::panic_info::PanicInfo<'_> as core::fmt::Display>::fmt
 <core::panic::panic_info::PanicInfo<'a> as core::fmt::Debug>::fmt
-<core::panicking::PanicArguments<'a> as core::fmt::Debug>::fmt
+<core::panic::panic_info::PanicMessage<'_> as core::fmt::Debug>::fmt
+<core::panic::panic_info::PanicMessage<'_> as core::fmt::Display>::fmt
+<core::panicking::AssertKind as core::fmt::Debug>::fmt
+<core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>::fmt
 <core::ptr::alignment::Alignment as core::clone::Clone>::clone
 <core::ptr::alignment::Alignment as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::ptr::alignment::Alignment as core::cmp::PartialEq>::eq
@@ -5679,6 +5685,7 @@ core::option::Option::<T>::xor
 core::option::Option::<T>::zip
 core::option::Option::<core::option::Option<T>>::flatten
 core::option::Option::<core::result::Result<T, E>>::transpose
+core::option::expect_failed
 core::option::unwrap_failed
 core::panic::location::Location::<'a>::caller
 core::panic::location::Location::<'a>::column
@@ -5688,8 +5695,9 @@ core::panic::panic_info::PanicInfo::<'a>::location
 core::panic::panic_info::PanicInfo::<'a>::message
 core::panic::panic_info::PanicInfo::<'a>::new
 core::panic::panic_info::PanicMessage::<'a>::as_str
-core::panicking::PanicArguments::<'a>::as_str
-core::panicking::PanicArguments::<'a>::from_str
+core::panicking::assert_failed
+core::panicking::assert_failed_inner
+core::panicking::assert_matches_failed
 core::panicking::panic
 core::panicking::panic_bounds_check
 core::panicking::panic_cannot_unwind
@@ -5727,6 +5735,8 @@ core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
+core::panicking::panic_str_2015
+core::panicking::unreachable_display
 core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset
@@ -5905,6 +5915,7 @@ core::result::Result::<T, E>::unwrap_or_default
 core::result::Result::<T, E>::unwrap_or_else
 core::result::Result::<T, E>::unwrap_unchecked
 core::result::Result::<core::option::Option<T>, E>::transpose
+core::result::unwrap_failed
 core::slice::<impl [T]>::align_to
 core::slice::<impl [T]>::align_to_mut
 core::slice::<impl [T]>::align_to_offsets

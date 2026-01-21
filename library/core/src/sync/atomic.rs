@@ -2723,7 +2723,6 @@ macro_rules! atomic_int {
         }
 
         #[$stable_debug]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl fmt::Debug for $atomic_type {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 fmt::Debug::fmt(&self.load(Ordering::Relaxed), f)

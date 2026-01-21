@@ -1,6 +1,5 @@
 //@ build-pass
 //@ compile-flags: -Ctarget-feature=+foo,+bar,-baz
-//@ compare-output-lines-by-subset
 //~? RAW not a recognized feature for this target
 //~? WARN unknown and unstable feature specified
 //~? WARN unknown and unstable feature specified

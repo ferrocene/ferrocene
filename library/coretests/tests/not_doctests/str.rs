@@ -158,3 +158,14 @@ fn pattern_is_suffix_of() {
     assert!(Pattern::is_suffix_of(['.', '!', ','], haystack));
     assert!(!Pattern::is_suffix_of(['A', 'B', 'C'], haystack));
 }
+
+#[test]
+fn str_from_raw_parts_mut() {
+    let mut str_mut_bytes = STR_MUT_BYTES;
+    let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();
+    let ptr = str_mut as *mut str as *mut _;
+
+    let c = unsafe { core::str::from_raw_parts_mut(ptr, 4) };
+
+    assert_eq!(c, "Hell");
+}

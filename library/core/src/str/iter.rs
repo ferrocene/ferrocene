@@ -655,7 +655,6 @@ pub(super) struct SplitInternal<'a, P: Pattern> {
     pub(super) finished: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P> fmt::Debug for SplitInternal<'a, P>
 where
     P: Pattern<Searcher<'a>: fmt::Debug>,
@@ -1504,7 +1503,6 @@ impl<'a, P: Pattern> Iterator for SplitInclusive<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 impl<'a, P: Pattern<Searcher<'a>: fmt::Debug>> fmt::Debug for SplitInclusive<'a, P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

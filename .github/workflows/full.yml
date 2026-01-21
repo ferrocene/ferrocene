@@ -813,7 +813,7 @@ jobs:
 
   targets:
     name: Build additional targets
-    uses: ./.github/workflows/full-targets.yml
+    uses: ./.github/workflows/full-job.yml
     needs:
       - calculate-envs
       - build-x86_64-unknown-linux-gnu
@@ -822,6 +822,11 @@ jobs:
       host-triple: x86_64-unknown-linux-gnu
       triples: ${{ format('{0},{1},{2},{3}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets, needs.calculate-envs.outputs.subset-targets) }}
       runner: ferrocene-arc-runners-ubuntu-20-amd64
+      script: |
+        export QNX_LICENSE_FILE="qnx710-472/license/licenses"
+        source qnx710-472/qnxsdp-env.sh
+
+        ./x.py --stage 2 dist rust-std
       use-minio: true
       qnx-version: "710-472"
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}

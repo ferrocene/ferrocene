@@ -15,7 +15,6 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use std::{env, fs, str};
 
-use build_helper::ferrocene_targets::has_certified_runtime;
 use serde_derive::Deserialize;
 #[cfg(feature = "tracing")]
 use tracing::span;
@@ -34,7 +33,6 @@ use crate::core::config::{
 };
 use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
-use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;
@@ -728,13 +726,6 @@ pub fn std_cargo(
     // Ferrocene additions
     if target.contains("ferrocene.subset") {
         cargo.arg("--features=ferrocene_subset");
-    }
-    let is_panic_test_variant = TestVariant::current(builder, target)
-        .condititions()
-        .any(|v| matches!(v.get(), VariantCondition::PanicRuntime))
-        && cargo.compiler().stage == builder.top_stage;
-    if has_certified_runtime(target.triple) || is_panic_test_variant {
-        cargo.arg("--features=ferrocene_certified_runtime");
     }
 
     if builder.config.rust_lto == RustcLto::Off {

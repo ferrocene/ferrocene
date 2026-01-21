@@ -18,8 +18,6 @@ pub(crate) fn generate(
         functions.push(fragment);
     }
 
-    let mut num_lines_tested: f64 = 0.0;
-    let mut num_lines_untested: f64 = 0.0;
     let mut fully_tested = vec![];
     let mut partially_tested = vec![];
     let mut fully_untested = vec![];
@@ -31,29 +29,13 @@ pub(crate) fn generate(
             FunctionCoverageStatus::FullyUntested => fully_untested.push(function),
             FunctionCoverageStatus::FullyIgnored => fully_ignored.push(function),
         };
-
-        for (_, status) in &function.lines.lines {
-            match status {
-                LineCoverageStatus::Tested => num_lines_tested += 1.0,
-                LineCoverageStatus::Untested | LineCoverageStatus::Annotated => {
-                    num_lines_untested += 1.0
-                }
-                LineCoverageStatus::Ignored => (),
-            }
-        }
     }
-    assert_eq!(
-        fully_tested.len() + partially_tested.len() + fully_untested.len() + fully_ignored.len(),
-        coverage.len()
-    );
 
     let fully_tested_class = FunctionCoverageStatus::FullyTested.to_css_class();
     let partially_tested_class = FunctionCoverageStatus::PartiallyTested.to_css_class();
     let fully_untested_class = FunctionCoverageStatus::FullyUntested.to_css_class();
     let fully_ignored_class = FunctionCoverageStatus::FullyIgnored.to_css_class();
 
-    let total_lines = num_lines_tested + num_lines_untested;
-    let percentile_lines_tested = (num_lines_tested / (total_lines)) * 100.0;
     let summary = maud::html!(
         header {
             div class="header-title" {
@@ -62,11 +44,13 @@ pub(crate) fn generate(
             }
             div class="search-bar" {
                     input type="text" name = "search-bar" placeholder = "Regex Search ...";
+                    " "
+                    button name="search-button" { "Search" }
             }
         }
         div class="coverage-summary" {
             h1 {
-                (format!("{percentile_lines_tested:.2}% ({num_lines_tested}/{total_lines} lines)"))
+                "Unknown"
             }
         }
         div class="instructions" {
@@ -141,7 +125,7 @@ fn generate_section(
     let human = status.to_human();
     let section = maud::html!(
         section class=(class) data-status=(class)  {
-            h1 { (functions.len()) " " (human) }
+            h1 { span class="count" { "" } " " (human) }
             div class="list" {
                 @for fragment in fragments {
                     (fragment)
@@ -164,15 +148,24 @@ fn generate_function(
     let function_css_class = function.status.to_css_class();
 
     class_set.insert(function_css_class);
-    class_set.insert("path");
 
     let mut lines = Vec::with_capacity(line_coverage.len());
+    let mut tested_lines = 0;
+    let mut untested_lines = 0;
+    let mut annotated_lines = 0;
+    let mut ignored_lines = 0;
     for (linenum, line) in file.lines().enumerate() {
         let linenum = linenum + 1; // `enumerate()` starts at 0, lines start at 1.
         let maybe_line =
             line_coverage.iter().find(|(covered_linenum, _)| linenum == *covered_linenum);
         if let Some((actual_linenum, status)) = maybe_line {
             lines.push((actual_linenum, line, status));
+            match status {
+                LineCoverageStatus::Tested => tested_lines += 1,
+                LineCoverageStatus::Untested => untested_lines += 1,
+                LineCoverageStatus::Annotated => annotated_lines += 1,
+                LineCoverageStatus::Ignored => ignored_lines += 1,
+            }
         }
     }
 
@@ -189,7 +182,7 @@ fn generate_function(
     let filename = function.relative_path.display();
     let html = maud::html!(
         details class=(class_set.into_iter().collect::<Vec<_>>().join(" ")) data-status=(function_css_class) {
-            summary {
+            summary tested-lines=(tested_lines) untested-lines=(untested_lines) annotated-lines=(annotated_lines) ignored-lines=(ignored_lines) {
                 code {
                     (function.source_name)
                 }

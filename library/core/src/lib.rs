@@ -219,13 +219,6 @@
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
 #![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
-// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
-// panics in the certified runtime
-#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
-
-// Ferrocene addition: ensure we don't instrument core without the certified panic
-#[cfg(all(ferrocene_coverage, not(feature = "ferrocene_certified_runtime")))]
-compile_error!("Cannot instrument core without the \"ferrocene_certified_runtime\" feature");
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

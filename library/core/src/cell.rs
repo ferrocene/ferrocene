@@ -251,7 +251,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Debug, Display};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, PhantomData, Unsize};
@@ -891,7 +890,6 @@ pub struct BorrowError {
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
@@ -918,7 +916,6 @@ pub struct BorrowMutError {
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]

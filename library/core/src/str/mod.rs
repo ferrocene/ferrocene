@@ -31,7 +31,7 @@ use crate::{ascii, mem};
 #[rustfmt::skip]
 use {
     self::pattern::{Pattern, ReverseSearcher, Searcher},
-    crate::{mem, slice::SliceIndex},
+    crate::{char, mem, slice::SliceIndex},
 };
 
 pub mod pattern;

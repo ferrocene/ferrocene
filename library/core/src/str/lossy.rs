@@ -1,10 +1,7 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::char::EscapeDebugExtArgs;
 use super::from_utf8_unchecked;
 use super::validations::utf8_char_width;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{Formatter, Write};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::FusedIterator;
@@ -110,12 +107,10 @@ impl<'a> Utf8Chunk<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "str_internals", issue = "none")]
 pub struct Debug<'a>(&'a [u8]);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "str_internals", issue = "none")]
 impl fmt::Debug for Debug<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -193,7 +188,6 @@ pub struct Utf8Chunks<'a> {
     source: &'a [u8],
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Utf8Chunks<'a> {
     #[doc(hidden)]
     #[unstable(feature = "str_internals", issue = "none")]
@@ -305,7 +299,6 @@ impl<'a> Iterator for Utf8Chunks<'a> {
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 impl FusedIterator for Utf8Chunks<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 impl fmt::Debug for Utf8Chunks<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {

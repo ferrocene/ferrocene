@@ -1460,6 +1460,7 @@ impl Step for RustAnalyzer {
         tarball.is_preview(true);
         tarball.add_file(&rust_analyzer.tool_path, "bin", FileType::Executable);
         tarball.add_legal_and_readme_to("share/doc/rust-analyzer");
+        tarball.ferrocene_proxied_binary("bin/rust-analyzer");
         Some(tarball.generate())
     }
 

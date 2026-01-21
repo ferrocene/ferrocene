@@ -75,3 +75,10 @@ int_overflowing_neg! {
     i128 => i128_overflowing_neg,
     isize => isize_overflowing_neg,
 }
+
+// Covers core::num::int_log10::usize
+#[test]
+fn int_log10_usize() {
+    let a = core::num::NonZeroUsize::new(100).unwrap();
+    assert_eq!(a.ilog10(), 2);
+}

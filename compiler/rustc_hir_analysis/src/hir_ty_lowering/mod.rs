@@ -22,6 +22,7 @@ pub mod generics;
 use std::assert_matches::assert_matches;
 use std::slice;
 
+use rustc_ast::LitKind;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_errors::codes::*;
 use rustc_errors::{
@@ -259,17 +260,26 @@ impl AssocItemQSelf {
 /// Use this enum with `<dyn HirTyLowerer>::lower_const_arg` to instruct it with the
 /// desired behavior.
 #[derive(Debug, Clone, Copy)]
-pub enum FeedConstTy<'a, 'tcx> {
-    /// Feed the type.
-    ///
+pub enum FeedConstTy<'tcx> {
+    /// Feed the type to the (anno) const arg.
+    WithTy(Ty<'tcx>),
+    /// Don't feed the type.
+    No,
+}
+
+impl<'tcx> FeedConstTy<'tcx> {
     /// The `DefId` belongs to the const param that we are supplying
     /// this (anon) const arg to.
     ///
     /// The list of generic args is used to instantiate the parameters
     /// used by the type of the const param specified by `DefId`.
-    Param(DefId, &'a [ty::GenericArg<'tcx>]),
-    /// Don't feed the type.
-    No,
+    pub fn with_type_of(
+        tcx: TyCtxt<'tcx>,
+        def_id: DefId,
+        generic_args: &[ty::GenericArg<'tcx>],
+    ) -> Self {
+        Self::WithTy(tcx.type_of(def_id).instantiate(tcx, generic_args))
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -723,7 +733,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         // Ambig portions of `ConstArg` are handled in the match arm below
                         .lower_const_arg(
                             ct.as_unambig_ct(),
-                            FeedConstTy::Param(param.def_id, preceding_args),
+                            FeedConstTy::with_type_of(tcx, param.def_id, preceding_args),
                         )
                         .into(),
                     (&GenericParamDefKind::Const { .. }, GenericArg::Infer(inf)) => {
@@ -1415,9 +1425,15 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 let ct = self.check_param_uses_if_mcg(ct, span, false);
                 Ok(ct)
             }
-            TypeRelativePath::Ctor { ctor_def_id, args } => {
-                return Ok(ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, ctor_def_id, args)));
-            }
+            TypeRelativePath::Ctor { ctor_def_id, args } => match tcx.def_kind(ctor_def_id) {
+                DefKind::Ctor(_, CtorKind::Fn) => {
+                    Ok(ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, ctor_def_id, args)))
+                }
+                DefKind::Ctor(ctor_of, CtorKind::Const) => {
+                    Ok(self.construct_const_ctor_value(ctor_def_id, ctor_of, args))
+                }
+                _ => unreachable!(),
+            },
             // FIXME(mgca): implement support for this once ready to support all adt ctor expressions,
             // not just const ctors
             TypeRelativePath::Variant { .. } => {
@@ -1452,7 +1468,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     // FIXME(mgca): do we want constructor resolutions to take priority over
                     // other possible resolutions?
                     if matches!(mode, LowerTypeRelativePathMode::Const)
-                        && let Some((CtorKind::Fn, ctor_def_id)) = variant_def.ctor
+                        && let Some((_, ctor_def_id)) = variant_def.ctor
                     {
                         tcx.check_stability(variant_def.def_id, Some(qpath_hir_id), span, None);
                         let _ = self.prohibit_generic_args(
@@ -2297,15 +2313,13 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     pub fn lower_const_arg(
         &self,
         const_arg: &hir::ConstArg<'tcx>,
-        feed: FeedConstTy<'_, 'tcx>,
+        feed: FeedConstTy<'tcx>,
     ) -> Const<'tcx> {
         let tcx = self.tcx();
 
-        if let FeedConstTy::Param(param_def_id, args) = feed
+        if let FeedConstTy::WithTy(anon_const_type) = feed
             && let hir::ConstArgKind::Anon(anon) = &const_arg.kind
         {
-            let anon_const_type = tcx.type_of(param_def_id).instantiate(tcx, args);
-
             // FIXME(generic_const_parameter_types): Ideally we remove these errors below when
             // we have the ability to intermix typeck of anon const const args with the parent
             // bodies typeck.
@@ -2318,7 +2332,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 && (anon_const_type.has_free_regions() || anon_const_type.has_erased_regions())
             {
                 let e = self.dcx().span_err(
-                    const_arg.span(),
+                    const_arg.span,
                     "anonymous constants with lifetimes in their type are not yet supported",
                 );
                 tcx.feed_anon_const_type(anon.def_id, ty::EarlyBinder::bind(Ty::new_error(tcx, e)));
@@ -2329,7 +2343,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             // variables otherwise we will ICE.
             if anon_const_type.has_non_region_infer() {
                 let e = self.dcx().span_err(
-                    const_arg.span(),
+                    const_arg.span,
                     "anonymous constants with inferred types are not yet supported",
                 );
                 tcx.feed_anon_const_type(anon.def_id, ty::EarlyBinder::bind(Ty::new_error(tcx, e)));
@@ -2339,21 +2353,19 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             // give the anon const any of the generics from the parent.
             if anon_const_type.has_non_region_param() {
                 let e = self.dcx().span_err(
-                    const_arg.span(),
+                    const_arg.span,
                     "anonymous constants referencing generics are not yet supported",
                 );
                 tcx.feed_anon_const_type(anon.def_id, ty::EarlyBinder::bind(Ty::new_error(tcx, e)));
                 return ty::Const::new_error(tcx, e);
             }
 
-            tcx.feed_anon_const_type(
-                anon.def_id,
-                ty::EarlyBinder::bind(tcx.type_of(param_def_id).instantiate(tcx, args)),
-            );
+            tcx.feed_anon_const_type(anon.def_id, ty::EarlyBinder::bind(anon_const_type));
         }
 
         let hir_id = const_arg.hir_id;
         match const_arg.kind {
+            hir::ConstArgKind::Tup(exprs) => self.lower_const_arg_tup(exprs, feed, const_arg.span),
             hir::ConstArgKind::Path(hir::QPath::Resolved(maybe_qself, path)) => {
                 debug!(?maybe_qself, ?path);
                 let opt_self_ty = maybe_qself.as_ref().map(|qself| self.lower_ty(qself));
@@ -2367,19 +2379,26 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     hir_self_ty,
                     segment,
                     hir_id,
-                    const_arg.span(),
+                    const_arg.span,
                 )
                 .unwrap_or_else(|guar| Const::new_error(tcx, guar))
             }
             hir::ConstArgKind::Struct(qpath, inits) => {
-                self.lower_const_arg_struct(hir_id, qpath, inits, const_arg.span())
+                self.lower_const_arg_struct(hir_id, qpath, inits, const_arg.span)
             }
             hir::ConstArgKind::TupleCall(qpath, args) => {
-                self.lower_const_arg_tuple_call(hir_id, qpath, args, const_arg.span())
+                self.lower_const_arg_tuple_call(hir_id, qpath, args, const_arg.span)
             }
             hir::ConstArgKind::Anon(anon) => self.lower_const_arg_anon(anon),
-            hir::ConstArgKind::Infer(span, ()) => self.ct_infer(None, span),
-            hir::ConstArgKind::Error(_, e) => ty::Const::new_error(tcx, e),
+            hir::ConstArgKind::Infer(()) => self.ct_infer(None, const_arg.span),
+            hir::ConstArgKind::Error(e) => ty::Const::new_error(tcx, e),
+            hir::ConstArgKind::Literal(kind) if let FeedConstTy::WithTy(anon_const_type) = feed => {
+                self.lower_const_arg_literal(&kind, anon_const_type, const_arg.span)
+            }
+            hir::ConstArgKind::Literal(..) => {
+                let e = self.dcx().span_err(const_arg.span, "literal of unknown type");
+                ty::Const::new_error(tcx, e)
+            }
         }
     }
 
@@ -2458,7 +2477,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             .iter()
             .zip(args)
             .map(|(field_def, arg)| {
-                self.lower_const_arg(arg, FeedConstTy::Param(field_def.did, adt_args))
+                self.lower_const_arg(arg, FeedConstTy::with_type_of(tcx, field_def.did, adt_args))
             })
             .collect::<Vec<_>>();
 
@@ -2472,6 +2491,32 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let valtree = ty::ValTree::from_branches(tcx, opt_discr_const.into_iter().chain(fields));
         let adt_ty = Ty::new_adt(tcx, adt_def, adt_args);
         ty::Const::new_value(tcx, valtree, adt_ty)
+    }
+
+    fn lower_const_arg_tup(
+        &self,
+        exprs: &'tcx [&'tcx hir::ConstArg<'tcx>],
+        feed: FeedConstTy<'tcx>,
+        span: Span,
+    ) -> Const<'tcx> {
+        let tcx = self.tcx();
+
+        let FeedConstTy::WithTy(ty) = feed else {
+            return Const::new_error_with_message(tcx, span, "unsupported const tuple");
+        };
+
+        let ty::Tuple(tys) = ty.kind() else {
+            return Const::new_error_with_message(tcx, span, "const tuple must have a tuple type");
+        };
+
+        let exprs = exprs
+            .iter()
+            .zip(tys.iter())
+            .map(|(expr, ty)| self.lower_const_arg(expr, FeedConstTy::WithTy(ty)))
+            .collect::<Vec<_>>();
+
+        let valtree = ty::ValTree::from_branches(tcx, exprs);
+        ty::Const::new_value(tcx, valtree, ty)
     }
 
     fn lower_const_arg_struct(
@@ -2552,7 +2597,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                             return ty::Const::new_error(tcx, e);
                         }
 
-                        self.lower_const_arg(expr.expr, FeedConstTy::Param(field_def.did, adt_args))
+                        self.lower_const_arg(
+                            expr.expr,
+                            FeedConstTy::with_type_of(tcx, field_def.did, adt_args),
+                        )
                     }
                     None => {
                         let e = tcx.dcx().span_err(
@@ -2597,13 +2645,28 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 );
                 self.lower_const_param(def_id, hir_id)
             }
-            Res::Def(DefKind::Const | DefKind::Ctor(_, CtorKind::Const), did) => {
+            Res::Def(DefKind::Const, did) => {
                 assert_eq!(opt_self_ty, None);
                 let [leading_segments @ .., segment] = path.segments else { bug!() };
                 let _ = self
                     .prohibit_generic_args(leading_segments.iter(), GenericsArgsErrExtend::None);
                 let args = self.lower_generic_args_of_path_segment(span, did, segment);
                 ty::Const::new_unevaluated(tcx, ty::UnevaluatedConst::new(did, args))
+            }
+            Res::Def(DefKind::Ctor(ctor_of, CtorKind::Const), did) => {
+                assert_eq!(opt_self_ty, None);
+                let [leading_segments @ .., segment] = path.segments else { bug!() };
+                let _ = self
+                    .prohibit_generic_args(leading_segments.iter(), GenericsArgsErrExtend::None);
+
+                let parent_did = tcx.parent(did);
+                let generics_did = match ctor_of {
+                    CtorOf::Variant => tcx.parent(parent_did),
+                    CtorOf::Struct => parent_did,
+                };
+                let args = self.lower_generic_args_of_path_segment(span, generics_did, segment);
+
+                self.construct_const_ctor_value(did, ctor_of, args)
             }
             Res::Def(DefKind::Ctor(_, CtorKind::Fn), did) => {
                 assert_eq!(opt_self_ty, None);
@@ -2716,6 +2779,13 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 },
             ),
         }
+    }
+
+    #[instrument(skip(self), level = "debug")]
+    fn lower_const_arg_literal(&self, kind: &LitKind, ty: Ty<'tcx>, span: Span) -> Const<'tcx> {
+        let tcx = self.tcx();
+        let input = LitToConstInput { lit: *kind, ty, neg: false };
+        tcx.at(span).lit_to_const(input)
     }
 
     #[instrument(skip(self), level = "debug")]
@@ -3173,5 +3243,32 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             self.dcx().emit_err(AmbiguousLifetimeBound { span });
         }
         Some(r)
+    }
+
+    fn construct_const_ctor_value(
+        &self,
+        ctor_def_id: DefId,
+        ctor_of: CtorOf,
+        args: GenericArgsRef<'tcx>,
+    ) -> Const<'tcx> {
+        let tcx = self.tcx();
+        let parent_did = tcx.parent(ctor_def_id);
+
+        let adt_def = tcx.adt_def(match ctor_of {
+            CtorOf::Variant => tcx.parent(parent_did),
+            CtorOf::Struct => parent_did,
+        });
+
+        let variant_idx = adt_def.variant_index_with_id(parent_did);
+
+        let valtree = if adt_def.is_enum() {
+            let discr = ty::ValTree::from_scalar_int(tcx, variant_idx.as_u32().into());
+            ty::ValTree::from_branches(tcx, [ty::Const::new_value(tcx, discr, tcx.types.u32)])
+        } else {
+            ty::ValTree::zst(tcx)
+        };
+
+        let adt_ty = Ty::new_adt(tcx, adt_def, args);
+        ty::Const::new_value(tcx, valtree, adt_ty)
     }
 }

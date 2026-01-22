@@ -55,10 +55,6 @@ passes_change_fields_to_be_of_unit_type =
      *[other] fields
     }
 
-passes_collapse_debuginfo =
-    `collapse_debuginfo` attribute should be applied to macro definitions
-    .label = not a macro definition
-
 passes_const_continue_attr =
     `#[const_continue]` should be applied to a break expression
     .label = not a break expression
@@ -243,10 +239,6 @@ passes_function_not_have_default_implementation = function doesn't have a defaul
 
 passes_functions_names_duplicated = functions names are duplicated
     .note = all `#[rustc_must_implement_one_of]` arguments must be unique
-
-passes_has_incoherent_inherent_impl =
-    `rustc_has_incoherent_inherent_impls` attribute should be applied to types or traits
-    .label = only adts, extern types and traits are supported
 
 passes_ignored_derived_impls =
     `{$name}` has {$trait_list_len ->

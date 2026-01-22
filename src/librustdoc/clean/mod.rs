@@ -51,7 +51,7 @@ use rustc_middle::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypeVisitableE
 use rustc_middle::{bug, span_bug};
 use rustc_span::ExpnKind;
 use rustc_span::hygiene::{AstPass, MacroKind};
-use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::symbol::{Ident, Symbol, kw};
 use rustc_trait_selection::traits::wf::object_region_bounds;
 use tracing::{debug, instrument};
 use utils::*;
@@ -326,8 +326,15 @@ pub(crate) fn clean_const<'tcx>(constant: &hir::ConstArg<'tcx>) -> ConstantKind 
         hir::ConstArgKind::TupleCall(..) => {
             ConstantKind::Path { path: "/* TUPLE CALL */".to_string().into() }
         }
+        hir::ConstArgKind::Tup(..) => {
+            // FIXME(mgca): proper printing :3
+            ConstantKind::Path { path: "/* TUPLE EXPR */".to_string().into() }
+        }
         hir::ConstArgKind::Anon(anon) => ConstantKind::Anonymous { body: anon.body },
         hir::ConstArgKind::Infer(..) | hir::ConstArgKind::Error(..) => ConstantKind::Infer,
+        hir::ConstArgKind::Literal(..) => {
+            ConstantKind::Path { path: "/* LITERAL */".to_string().into() }
+        }
     }
 }
 
@@ -1809,7 +1816,9 @@ pub(crate) fn clean_ty<'tcx>(ty: &hir::Ty<'tcx>, cx: &mut DocContext<'tcx>) -> T
                 }
                 hir::ConstArgKind::Struct(..)
                 | hir::ConstArgKind::Path(..)
-                | hir::ConstArgKind::TupleCall(..) => {
+                | hir::ConstArgKind::TupleCall(..)
+                | hir::ConstArgKind::Tup(..)
+                | hir::ConstArgKind::Literal(..) => {
                     let ct = lower_const_arg_for_rustdoc(cx.tcx, const_arg, FeedConstTy::No);
                     print_const(cx, ct)
                 }
@@ -2682,17 +2691,13 @@ fn add_without_unwanted_attributes<'hir>(
                     import_parent,
                 ));
             }
-            hir::Attribute::Unparsed(normal) if let [name] = &*normal.path.segments => {
-                if is_inline || *name != sym::cfg_trace {
-                    // If it's not a `cfg()` attribute, we keep it.
-                    attrs.push((Cow::Borrowed(attr), import_parent));
-                }
-            }
-            // FIXME: make sure to exclude `#[cfg_trace]` here when it is ported to the new parsers
-            hir::Attribute::Parsed(..) => {
+
+            // We discard `#[cfg(...)]` attributes unless we're inlining
+            hir::Attribute::Parsed(AttributeKind::CfgTrace(..)) if !is_inline => {}
+            // We keep all other attributes
+            _ => {
                 attrs.push((Cow::Borrowed(attr), import_parent));
             }
-            _ => {}
         }
     }
 }

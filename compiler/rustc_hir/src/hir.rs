@@ -423,7 +423,7 @@ impl<'hir> ConstItemRhs<'hir> {
     pub fn span<'tcx>(&self, tcx: impl crate::intravisit::HirTyCtxt<'tcx>) -> Span {
         match self {
             ConstItemRhs::Body(body_id) => tcx.hir_body(*body_id).value.span,
-            ConstItemRhs::TypeConst(ct_arg) => ct_arg.span(),
+            ConstItemRhs::TypeConst(ct_arg) => ct_arg.span,
         }
     }
 }
@@ -447,6 +447,7 @@ pub struct ConstArg<'hir, Unambig = ()> {
     #[stable_hasher(ignore)]
     pub hir_id: HirId,
     pub kind: ConstArgKind<'hir, Unambig>,
+    pub span: Span,
 }
 
 impl<'hir> ConstArg<'hir, AmbigArg> {
@@ -475,7 +476,7 @@ impl<'hir> ConstArg<'hir> {
     /// Functions accepting ambiguous consts will not handle the [`ConstArgKind::Infer`] variant, if
     /// infer consts are relevant to you then care should be taken to handle them separately.
     pub fn try_as_ambig_ct(&self) -> Option<&ConstArg<'hir, AmbigArg>> {
-        if let ConstArgKind::Infer(_, ()) = self.kind {
+        if let ConstArgKind::Infer(()) = self.kind {
             return None;
         }
 
@@ -494,23 +495,13 @@ impl<'hir, Unambig> ConstArg<'hir, Unambig> {
             _ => None,
         }
     }
-
-    pub fn span(&self) -> Span {
-        match self.kind {
-            ConstArgKind::Struct(path, _) => path.span(),
-            ConstArgKind::Path(path) => path.span(),
-            ConstArgKind::TupleCall(path, _) => path.span(),
-            ConstArgKind::Anon(anon) => anon.span,
-            ConstArgKind::Error(span, _) => span,
-            ConstArgKind::Infer(span, _) => span,
-        }
-    }
 }
 
 /// See [`ConstArg`].
 #[derive(Clone, Copy, Debug, HashStable_Generic)]
 #[repr(u8, C)]
 pub enum ConstArgKind<'hir, Unambig = ()> {
+    Tup(&'hir [&'hir ConstArg<'hir, Unambig>]),
     /// **Note:** Currently this is only used for bare const params
     /// (`N` where `fn foo<const N: usize>(...)`),
     /// not paths to any const (`N` where `const N: usize = ...`).
@@ -523,10 +514,11 @@ pub enum ConstArgKind<'hir, Unambig = ()> {
     /// Tuple constructor variant
     TupleCall(QPath<'hir>, &'hir [&'hir ConstArg<'hir>]),
     /// Error const
-    Error(Span, ErrorGuaranteed),
+    Error(ErrorGuaranteed),
     /// This variant is not always used to represent inference consts, sometimes
     /// [`GenericArg::Infer`] is used instead.
-    Infer(Span, Unambig),
+    Infer(Unambig),
+    Literal(LitKind),
 }
 
 #[derive(Clone, Copy, Debug, HashStable_Generic)]
@@ -572,7 +564,7 @@ impl GenericArg<'_> {
         match self {
             GenericArg::Lifetime(l) => l.ident.span,
             GenericArg::Type(t) => t.span,
-            GenericArg::Const(c) => c.span(),
+            GenericArg::Const(c) => c.span,
             GenericArg::Infer(i) => i.span,
         }
     }
@@ -1371,6 +1363,7 @@ impl AttributeExt for Attribute {
             // FIXME: should not be needed anymore when all attrs are parsed
             Attribute::Parsed(AttributeKind::DocComment { span, .. }) => *span,
             Attribute::Parsed(AttributeKind::Deprecation { span, .. }) => *span,
+            Attribute::Parsed(AttributeKind::CfgTrace(cfgs)) => cfgs[0].1,
             a => panic!("can't get the span of an arbitrary parsed attribute: {a:?}"),
         }
     }
@@ -1404,6 +1397,14 @@ impl AttributeExt for Attribute {
     fn doc_str(&self) -> Option<Symbol> {
         match &self {
             Attribute::Parsed(AttributeKind::DocComment { comment, .. }) => Some(*comment),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    fn deprecation_note(&self) -> Option<Symbol> {
+        match &self {
+            Attribute::Parsed(AttributeKind::Deprecation { deprecation, .. }) => deprecation.note,
             _ => None,
         }
     }
@@ -2624,6 +2625,12 @@ impl Expr<'_> {
                 // them being used only for its side-effects.
                 base.can_have_side_effects()
             }
+            ExprKind::Binary(_, lhs, rhs) => {
+                // This isn't exactly true for all `Binary`, but we are using this
+                // method exclusively for diagnostics and there's a *cultural* pressure against
+                // them being used only for its side-effects.
+                lhs.can_have_side_effects() || rhs.can_have_side_effects()
+            }
             ExprKind::Struct(_, fields, init) => {
                 let init_side_effects = match init {
                     StructTailExpr::Base(init) => init.can_have_side_effects(),
@@ -2646,13 +2653,13 @@ impl Expr<'_> {
                 },
                 args,
             ) => args.iter().any(|arg| arg.can_have_side_effects()),
+            ExprKind::Repeat(arg, _) => arg.can_have_side_effects(),
             ExprKind::If(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::Call(..)
             | ExprKind::Closure { .. }
             | ExprKind::Block(..)
-            | ExprKind::Repeat(..)
             | ExprKind::Break(..)
             | ExprKind::Continue(..)
             | ExprKind::Ret(..)
@@ -2663,7 +2670,6 @@ impl Expr<'_> {
             | ExprKind::InlineAsm(..)
             | ExprKind::AssignOp(..)
             | ExprKind::ConstBlock(..)
-            | ExprKind::Binary(..)
             | ExprKind::Yield(..)
             | ExprKind::DropTemps(..)
             | ExprKind::Err(_) => true,

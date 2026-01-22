@@ -32,8 +32,14 @@ pub macro panic_2015($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 #[unstable(feature = "edition_panic", issue = "none", reason = "use panic!() instead")]
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2015_macro"]
+<<<<<<< HEAD
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified_runtime"))]
+||||||| 7c04f5d216b
+#[rustc_macro_transparency = "semitransparent"]
+=======
+#[rustc_macro_transparency = "semiopaque"]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro panic_2015 {
     () => (
         $crate::panicking::panic("explicit panic")
@@ -61,6 +67,7 @@ pub macro panic_2015 {
 #[unstable(feature = "edition_panic", issue = "none", reason = "use panic!() instead")]
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
+<<<<<<< HEAD
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(feature = "ferrocene_certified_runtime")]
 pub macro panic_2021 {
@@ -81,6 +88,11 @@ pub macro panic_2021 {
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified_runtime"))]
+||||||| 7c04f5d216b
+#[rustc_macro_transparency = "semitransparent"]
+=======
+#[rustc_macro_transparency = "semiopaque"]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro panic_2021 {
     () => (
         $crate::panicking::panic("explicit panic")
@@ -101,6 +113,7 @@ pub macro panic_2021 {
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_diagnostic_item = "unreachable_2015_macro"]
+<<<<<<< HEAD
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(feature = "ferrocene_certified_runtime")]
 pub macro unreachable_2015 {
@@ -115,6 +128,11 @@ pub macro unreachable_2015 {
 #[rustc_diagnostic_item = "unreachable_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified_runtime"))]
+||||||| 7c04f5d216b
+#[rustc_macro_transparency = "semitransparent"]
+=======
+#[rustc_macro_transparency = "semiopaque"]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro unreachable_2015 {
     () => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -133,6 +151,7 @@ pub macro unreachable_2015 {
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
+<<<<<<< HEAD
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(feature = "ferrocene_certified_runtime")]
 pub macro unreachable_2021 {
@@ -146,6 +165,11 @@ pub macro unreachable_2021 {
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified_runtime"))]
+||||||| 7c04f5d216b
+#[rustc_macro_transparency = "semitransparent"]
+=======
+#[rustc_macro_transparency = "semiopaque"]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro unreachable_2021 {
     () => (
         $crate::panicking::panic("internal error: entered unreachable code")

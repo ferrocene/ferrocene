@@ -134,7 +134,7 @@ impl Step for ToolBuild {
                 RustcLto::ThinLocal => None,
             };
             if let Some(lto) = lto {
-                cargo.env(cargo_profile_var("LTO", &builder.config), lto);
+                cargo.env(cargo_profile_var("LTO", &builder.config, self.mode), lto);
             }
         }
 

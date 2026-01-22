@@ -382,8 +382,14 @@ macro_rules! impl_fold_via_try_fold {
     };
 }
 
+<<<<<<< HEAD
 #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
+=======
+#[unstable(feature = "iter_array_chunks", issue = "100450")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::adapters::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -398,8 +404,14 @@ pub use self::adapters::Flatten;
 #[stable(feature = "iter_map_while", since = "1.57.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::MapWhile;
+<<<<<<< HEAD
 #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
+=======
+#[unstable(feature = "iter_map_windows", issue = "87155")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::adapters::MapWindows;
 #[unstable(feature = "inplace_iteration", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -426,8 +438,14 @@ pub use self::adapters::{
     Chain, Cycle, Enumerate, Filter, FilterMap, FlatMap, Fuse, Inspect, Map, Peekable, Rev, Scan,
     Skip, SkipWhile, Take, TakeWhile, Zip,
 };
+<<<<<<< HEAD
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
+=======
+#[unstable(feature = "iter_intersperse", issue = "79524")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::adapters::{Intersperse, IntersperseWith};
 #[unstable(
     feature = "step_trait",

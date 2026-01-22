@@ -17,6 +17,7 @@ pub unsafe extern "C" fn c_variadic_no_use(fmt: *const i8, mut ap: ...) -> i32 {
     vprintf(fmt, ap)
     // CHECK: call void @llvm.va_end
 }
+<<<<<<< HEAD
 
 // Check that `VaList::clone` gets inlined into a direct call to `llvm.va_copy`
 #[no_mangle]
@@ -30,3 +31,17 @@ pub unsafe extern "C" fn c_variadic_clone(fmt: *const i8, mut ap: ...) -> i32 {
 }
 
 // ferrocene-annotations: um_rustc_C_opt_level
+||||||| 7c04f5d216b
+
+// Check that `VaList::clone` gets inlined into a direct call to `llvm.va_copy`
+#[no_mangle]
+pub unsafe extern "C" fn c_variadic_clone(fmt: *const i8, mut ap: ...) -> i32 {
+    // CHECK: call void @llvm.va_start
+    let mut ap2 = ap.clone();
+    // CHECK: call void @llvm.va_copy
+    let res = vprintf(fmt, ap2);
+    res
+    // CHECK: call void @llvm.va_end
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

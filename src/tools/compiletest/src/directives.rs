@@ -8,8 +8,8 @@ use tracing::*;
 
 use crate::common::{CodegenBackend, Config, Debugger, FailMode, PassMode, RunFailMode, TestMode};
 use crate::debuggers::{extract_cdb_version, extract_gdb_version};
-pub(crate) use crate::directives::auxiliary::AuxProps;
 use crate::directives::auxiliary::parse_and_update_aux;
+pub(crate) use crate::directives::auxiliary::{AuxCrate, AuxProps};
 use crate::directives::directive_names::{
     KNOWN_DIRECTIVE_NAMES_SET, KNOWN_HTMLDOCCK_DIRECTIVE_NAMES, KNOWN_JSONDOCCK_DIRECTIVE_NAMES,
 };
@@ -556,7 +556,7 @@ fn check_directive<'a>(
 
     let is_known_directive = KNOWN_DIRECTIVE_NAMES_SET.contains(&directive_name)
         || match mode {
-            TestMode::Rustdoc => KNOWN_HTMLDOCCK_DIRECTIVE_NAMES.contains(&directive_name),
+            TestMode::RustdocHtml => KNOWN_HTMLDOCCK_DIRECTIVE_NAMES.contains(&directive_name),
             TestMode::RustdocJson => KNOWN_JSONDOCCK_DIRECTIVE_NAMES.contains(&directive_name),
             _ => false,
         };

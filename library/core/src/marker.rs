@@ -160,7 +160,7 @@ unsafe impl<T: Sync + PointeeSized> Send for &T {}
 #[fundamental] // for Default, for example, which requires that `[T]: !Default` be evaluatable
 #[rustc_specialization_trait]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 // `Sized` being coinductive, despite having supertraits, is okay as there are no user-written impls,
 // and we know that the supertraits are always implemented if the subtrait is just by looking at
 // the builtin impls.
@@ -179,7 +179,6 @@ pub trait Sized: MetaSized {
 #[fundamental]
 #[rustc_specialization_trait]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
 // `MetaSized` being coinductive, despite having supertraits, is okay for the same reasons as
 // `Sized` above.
 #[rustc_coinductive]
@@ -197,7 +196,6 @@ pub trait MetaSized: PointeeSized {
 #[fundamental]
 #[rustc_specialization_trait]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
 #[rustc_coinductive]
 pub trait PointeeSized {
     // Empty
@@ -243,7 +241,7 @@ pub trait PointeeSized {
 #[unstable(feature = "unsize", issue = "18598")]
 #[lang = "unsize"]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 pub trait Unsize<T: PointeeSized>: PointeeSized {
     // Empty.
 }
@@ -462,9 +460,6 @@ marker_impls! {
 /// [impls]: #implementors
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "copy"]
-// This is unsound, but required by `hashbrown`
-// FIXME(joboet): change `hashbrown` to use `TrivialClone`
-#[rustc_unsafe_specialization_marker]
 #[rustc_diagnostic_item = "Copy"]
 pub trait Copy: Clone {
     // Empty.
@@ -473,7 +468,7 @@ pub trait Copy: Clone {
 /// Derive macro generating an impl of the trait `Copy`.
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
+#[allow_internal_unstable(core_intrinsics, derive_clone_copy_internals)]
 pub macro Copy($item:item) {
     /* compiler built-in */
 }
@@ -519,7 +514,7 @@ impl<T: PointeeSized> Copy for &T {}
 #[unstable(feature = "bikeshed_guaranteed_no_drop", issue = "none")]
 #[lang = "bikeshed_guaranteed_no_drop"]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 #[doc(hidden)]
 pub trait BikeshedGuaranteedNoDrop {}
 
@@ -904,7 +899,7 @@ impl<T: PointeeSized> StructuralPartialEq for PhantomData<T> {}
 )]
 #[lang = "discriminant_kind"]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 pub trait DiscriminantKind {
     /// The type of the discriminant, which must satisfy the trait
     /// bounds required by `mem::Discriminant`.
@@ -1092,7 +1087,7 @@ marker_impls! {
 #[lang = "destruct"]
 #[rustc_on_unimplemented(message = "can't drop `{Self}`", append_const_msg)]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 pub const trait Destruct: PointeeSized {}
 
 /// A marker for tuple types.
@@ -1103,7 +1098,7 @@ pub const trait Destruct: PointeeSized {}
 #[lang = "tuple_trait"]
 #[diagnostic::on_unimplemented(message = "`{Self}` is not a tuple")]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 pub trait Tuple {}
 
 /// A marker for types which can be used as types of `const` generic parameters.
@@ -1162,8 +1157,14 @@ marker_impls! {
 )]
 #[lang = "fn_ptr_trait"]
 #[rustc_deny_explicit_impl]
+<<<<<<< HEAD
 #[rustc_do_not_implement_via_object]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[rustc_do_not_implement_via_object]
+=======
+#[rustc_dyn_incompatible_trait]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]

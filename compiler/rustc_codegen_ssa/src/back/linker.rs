@@ -839,6 +839,11 @@ impl<'a> Linker for GccLinker<'a> {
                 self.sess.dcx().emit_fatal(errors::LibDefWriteFailure { error });
             }
             self.link_arg(path);
+        } else if self.sess.target.is_like_wasm {
+            self.link_arg("--no-export-dynamic");
+            for (sym, _) in symbols {
+                self.link_arg("--export").link_arg(sym);
+            }
         } else if crate_type == CrateType::Executable && !self.sess.target.is_like_solaris {
             let res: io::Result<()> = try {
                 let mut f = File::create_buffered(&path)?;
@@ -853,11 +858,6 @@ impl<'a> Linker for GccLinker<'a> {
                 self.sess.dcx().emit_fatal(errors::VersionScriptWriteFailure { error });
             }
             self.link_arg("--dynamic-list").link_arg(path);
-        } else if self.sess.target.is_like_wasm {
-            self.link_arg("--no-export-dynamic");
-            for (sym, _) in symbols {
-                self.link_arg("--export").link_arg(sym);
-            }
         } else {
             // Write an LD version script
             let res: io::Result<()> = try {
@@ -1857,7 +1857,7 @@ pub(crate) fn linked_symbols(
         | CrateType::Cdylib
         | CrateType::Dylib
         | CrateType::Sdylib => (),
-        CrateType::Staticlib | CrateType::Rlib => {
+        CrateType::StaticLib | CrateType::Rlib => {
             // These are not linked, so no need to generate symbols.o for them.
             return Vec::new();
         }
@@ -2075,7 +2075,7 @@ impl<'a> Linker for BpfLinker<'a> {
     }
 
     fn link_staticlib_by_name(&mut self, _name: &str, _verbatim: bool, _whole_archive: bool) {
-        panic!("staticlibs not supported")
+        self.sess.dcx().emit_fatal(errors::BpfStaticlibNotSupported)
     }
 
     fn link_staticlib_by_path(&mut self, path: &Path, _whole_archive: bool) {

@@ -2078,14 +2078,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
-<<<<<<< HEAD
-                .render_steps(), @r"
-        [build] rustdoc 0 <host>
-||||||| 7c04f5d216b
-                .render_steps(), @r"
-=======
                 .render_steps(), @"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
         [build] llvm <host>
@@ -2262,14 +2255,7 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .stage(2)
-<<<<<<< HEAD
-                .render_steps(), @r"
-        [build] rustdoc 0 <host>
-||||||| 7c04f5d216b
-                .render_steps(), @r"
-=======
                 .render_steps(), @"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
         [build] llvm <host>

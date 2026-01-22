@@ -286,14 +286,8 @@ macro_rules! assert_ne {
 /// ```
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
-<<<<<<< HEAD
-#[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
-||||||| 7c04f5d216b
-#[rustc_macro_transparency = "semitransparent"]
-=======
 #[rustc_macro_transparency = "semiopaque"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         match $left {
@@ -365,7 +359,7 @@ pub macro assert_matches {
 /// ```
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_macro_transparency = "semiopaque"]
 #[cfg(feature = "ferrocene_certified_runtime")]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) =>{
@@ -600,14 +594,8 @@ macro_rules! debug_assert_ne {
 /// ```
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(assert_matches)]
-<<<<<<< HEAD
-#[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[rustc_macro_transparency = "semitransparent"]
-=======
 #[rustc_macro_transparency = "semiopaque"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 pub macro debug_assert_matches($($arg:tt)*) {
     if $crate::cfg!(debug_assertions) {
         $crate::assert_matches::assert_matches!($($arg)*);

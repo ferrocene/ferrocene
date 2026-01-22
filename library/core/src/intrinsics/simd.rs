@@ -38,22 +38,8 @@ pub const unsafe fn simd_extract<T, U>(x: T, idx: u32) -> U;
 /// `idx` must be in-bounds of the vector.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn simd_insert_dyn<T, U>(mut x: T, idx: u32, val: U) -> T {
-    // SAFETY: `idx` must be in-bounds
-    unsafe { (&raw mut x).cast::<U>().add(idx as usize).write(val) }
-    x
-}
-||||||| 7c04f5d216b
-pub unsafe fn simd_insert_dyn<T, U>(mut x: T, idx: u32, val: U) -> T {
-    // SAFETY: `idx` must be in-bounds
-    unsafe { (&raw mut x).cast::<U>().add(idx as usize).write(val) }
-    x
-}
-=======
 pub const unsafe fn simd_insert_dyn<T, U>(x: T, idx: u32, val: U) -> T;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Extracts an element from a vector.
 ///
@@ -66,20 +52,8 @@ pub const unsafe fn simd_insert_dyn<T, U>(x: T, idx: u32, val: U) -> T;
 /// `idx` must be in-bounds of the vector.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U {
-    // SAFETY: `idx` must be in-bounds
-    unsafe { (&raw const x).cast::<U>().add(idx as usize).read() }
-}
-||||||| 7c04f5d216b
-pub unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U {
-    // SAFETY: `idx` must be in-bounds
-    unsafe { (&raw const x).cast::<U>().add(idx as usize).read() }
-}
-=======
 pub const unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Adds two simd vectors elementwise.
 ///

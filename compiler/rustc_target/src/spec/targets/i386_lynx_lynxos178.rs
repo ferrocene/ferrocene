@@ -19,7 +19,7 @@ pub(crate) fn target() -> Target {
         llvm_target: "i686-unknown-linux-gnu".into(),
         metadata: crate::spec::TargetMetadata {
             description: None,
-            tier: None,
+            tier: Some(3),
             host_tools: None,
             std: None,
         },

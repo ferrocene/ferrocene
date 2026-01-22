@@ -4,6 +4,7 @@ pub(crate) fn target() -> Target {
     let mut target = super::thumbv7em_none_eabihf::target();
 
     target.metadata = TargetMetadata::default();
+    target.metadata.tier = Some(3);
 
     // libstd port
     target.families = cvs!["unix"];

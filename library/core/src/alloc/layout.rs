@@ -235,14 +235,8 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[must_use]
     #[inline]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub const fn dangling(&self) -> NonNull<u8> {
-||||||| 7c04f5d216b
-    pub const fn dangling(&self) -> NonNull<u8> {
-=======
     pub const fn dangling_ptr(&self) -> NonNull<u8> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         NonNull::without_provenance(self.align.as_nonzero())
     }
 
@@ -288,21 +282,9 @@ impl Layout {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[must_use = "this returns the padding needed, without modifying the `Layout`"]
     #[inline]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub const fn padding_needed_for(&self, align: usize) -> usize {
-        // FIXME: Can we just change the type on this to `Alignment`?
-        let Some(align) = Alignment::new(align) else { return usize::MAX };
-        let len_rounded_up = self.size_rounded_up_to_custom_align(align);
-||||||| 7c04f5d216b
-    pub const fn padding_needed_for(&self, align: usize) -> usize {
-        // FIXME: Can we just change the type on this to `Alignment`?
-        let Some(align) = Alignment::new(align) else { return usize::MAX };
-        let len_rounded_up = self.size_rounded_up_to_custom_align(align);
-=======
     pub const fn padding_needed_for(&self, alignment: Alignment) -> usize {
         let len_rounded_up = self.size_rounded_up_to_custom_align(alignment);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // SAFETY: Cannot overflow because the rounded-up value is never less
         unsafe { unchecked_sub(len_rounded_up, self.size) }
     }

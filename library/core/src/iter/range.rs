@@ -458,14 +458,8 @@ step_integer_impls! {
     wider than usize: [u32 i32], [u64 i64], [u128 i128];
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-=======
 #[unstable(feature = "step_trait", issue = "42168")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Step for char {
     #[inline]
     fn steps_between(&start: &char, &end: &char) -> (usize, Option<usize>) {
@@ -552,14 +546,8 @@ impl Step for char {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-=======
 #[unstable(feature = "step_trait", issue = "42168")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Step for AsciiChar {
     #[inline]
     fn steps_between(&start: &AsciiChar, &end: &AsciiChar) -> (usize, Option<usize>) {
@@ -601,14 +589,8 @@ impl Step for AsciiChar {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-=======
 #[unstable(feature = "step_trait", issue = "42168")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl Step for Ipv4Addr {
     #[inline]
     fn steps_between(&start: &Ipv4Addr, &end: &Ipv4Addr) -> (usize, Option<usize>) {
@@ -640,14 +622,8 @@ impl Step for Ipv4Addr {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
-=======
 #[unstable(feature = "step_trait", issue = "42168")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Step for Ipv6Addr {
     #[inline]
     fn steps_between(&start: &Ipv6Addr, &end: &Ipv6Addr) -> (usize, Option<usize>) {

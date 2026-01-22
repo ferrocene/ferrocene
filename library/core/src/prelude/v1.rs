@@ -61,10 +61,17 @@ pub use crate::hash::macros::Hash;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
 #[expect(deprecated)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::{
     assert, assert_eq, assert_ne, cfg, column, compile_error, concat, debug_assert, debug_assert_eq,
     debug_assert_ne, file, format_args, include, include_bytes, include_str, line, matches,
     module_path, option_env, stringify, todo, r#try, unimplemented, unreachable, write, writeln,
+};
+#[cfg(feature = "ferrocene_subset")]
+pub use crate::{
+    assert, assert_eq, assert_ne, cfg, column, compile_error, concat, debug_assert,
+    file, format_args, include, include_bytes, include_str, line, matches,
+    module_path, option_env, stringify, unreachable, write, writeln,
 };
 
 // These macros need special handling, so that we don't export them *and* the modules of the same
@@ -108,6 +115,7 @@ pub use crate::log_syntax;
 
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
 #[doc(no_inline)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::pattern_type;
 
 #[unstable(

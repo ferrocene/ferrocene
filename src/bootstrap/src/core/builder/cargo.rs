@@ -682,36 +682,7 @@ impl Builder<'_> {
                 // std follows the flag's default, which per compiler-team#938 is v0 on nightly
                 None
             }
-<<<<<<< HEAD
-            // Per compiler-team#938, v0 mangling is used on nightly
-            None if self.config.channel == "dev" || self.config.channel == "nightly" => true,
-            None => {
-                // Second condition is specific to Ferrocene
-                if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() {
-                    // The standard library defaults to the legacy scheme
-                    false
-                } else {
-                    // The compiler and tools default to the new scheme
-                    true
-                }
-            }
-        };
-||||||| 7c04f5d216b
-            // Per compiler-team#938, v0 mangling is used on nightly
-            None if self.config.channel == "dev" || self.config.channel == "nightly" => true,
-            None => {
-                if mode == Mode::Std {
-                    // The standard library defaults to the legacy scheme
-                    false
-                } else {
-                    // The compiler and tools default to the new scheme
-                    true
-                }
-            }
-        };
-=======
         });
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         // By default, windows-rs depends on a native library that doesn't get copied into the
         // sysroot. Passing this cfg enables raw-dylib support instead, which makes the native
@@ -1509,7 +1480,7 @@ impl Builder<'_> {
             allow_features,
             build_compiler_stage,
             extra_rustflags,
-<<<<<<< HEAD
+            profile,
         };
 
         if mode == Mode::Std
@@ -1518,10 +1489,6 @@ impl Builder<'_> {
         {
             let paths = Paths::find(self, target, FerroceneCoverageFor::Library);
             cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
-||||||| 7c04f5d216b
-=======
-            profile,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
 
         cargo

@@ -1157,14 +1157,8 @@ marker_impls! {
 )]
 #[lang = "fn_ptr_trait"]
 #[rustc_deny_explicit_impl]
-<<<<<<< HEAD
-#[rustc_do_not_implement_via_object]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[rustc_do_not_implement_via_object]
-=======
 #[rustc_dyn_incompatible_trait]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]

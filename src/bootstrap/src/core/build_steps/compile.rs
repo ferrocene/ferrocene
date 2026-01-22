@@ -725,7 +725,6 @@ pub fn std_cargo(
         }
     }
 
-<<<<<<< HEAD
     // Ferrocene additions
     if target.contains("ferrocene.subset") {
         cargo.arg("--features=ferrocene_subset");
@@ -738,23 +737,6 @@ pub fn std_cargo(
         cargo.arg("--features=ferrocene_certified_runtime");
     }
 
-    // By default, rustc uses `-Cembed-bitcode=yes`, and Cargo overrides that
-    // with `-Cembed-bitcode=no` for non-LTO builds. However, libstd must be
-    // built with bitcode so that the produced rlibs can be used for both LTO
-    // builds (which use bitcode) and non-LTO builds (which use object code).
-    // So we override the override here!
-    cargo.rustflag("-Cembed-bitcode=yes");
-
-||||||| 7c04f5d216b
-    // By default, rustc uses `-Cembed-bitcode=yes`, and Cargo overrides that
-    // with `-Cembed-bitcode=no` for non-LTO builds. However, libstd must be
-    // built with bitcode so that the produced rlibs can be used for both LTO
-    // builds (which use bitcode) and non-LTO builds (which use object code).
-    // So we override the override here!
-    cargo.rustflag("-Cembed-bitcode=yes");
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     if builder.config.rust_lto == RustcLto::Off {
         cargo.rustflag("-Clto=off");
     }

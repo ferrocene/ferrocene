@@ -60,12 +60,8 @@ use crate::{mem, ptr};
 
 mod bounds;
 pub mod fallback;
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-=======
 pub mod gpu;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod mir;
 pub mod simd;
 
@@ -78,15 +74,9 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 /// A type for atomic ordering parameters for intrinsics. This is a separate type from
 /// `atomic::Ordering` so that we can make it `ConstParamTy` and fix the values used here without a
 /// risk of leaking that to stable code.
-<<<<<<< HEAD
+#[allow(missing_docs)]
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, ConstParamTy, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_subset", derive(ConstParamTy, PartialEq, Eq))]
-||||||| 7c04f5d216b
-#[derive(Debug, ConstParamTy, PartialEq, Eq)]
-=======
-#[allow(missing_docs)]
-#[derive(Debug, ConstParamTy, PartialEq, Eq)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub enum AtomicOrdering {
     // These values must match the compiler's `AtomicOrdering` defined in
     // `rustc_middle/src/ty/consts/int.rs`!
@@ -3612,37 +3602,6 @@ pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize
     )
 }
 
-<<<<<<< HEAD
-/// Copies the current location of arglist `src` to the arglist `dst`.
-///
-/// # Safety
-///
-/// You must check the following invariants before you call this function:
-///
-/// - `dest` must be non-null and point to valid, writable memory.
-/// - `dest` must not alias `src`.
-///
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn va_copy<'f>(dest: *mut VaList<'f>, src: &VaList<'f>);
-
-||||||| 7c04f5d216b
-/// Copies the current location of arglist `src` to the arglist `dst`.
-///
-/// # Safety
-///
-/// You must check the following invariants before you call this function:
-///
-/// - `dest` must be non-null and point to valid, writable memory.
-/// - `dest` must not alias `src`.
-///
-#[rustc_intrinsic]
-#[rustc_nounwind]
-pub unsafe fn va_copy<'f>(dest: *mut VaList<'f>, src: &VaList<'f>);
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 /// Loads an argument of type `T` from the `va_list` `ap` and increment the
 /// argument `ap` points to.
 ///
@@ -3672,6 +3631,7 @@ pub unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
 /// when a variable argument list is used incorrectly.
 #[rustc_intrinsic]
 #[rustc_nounwind]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
     src.duplicate()
 }
@@ -3691,13 +3651,7 @@ pub fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
 ///
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn va_end(ap: &mut VaList<'_>);
-||||||| 7c04f5d216b
-pub unsafe fn va_end(ap: &mut VaList<'_>);
-=======
 pub unsafe fn va_end(ap: &mut VaList<'_>) {
     /* deliberately does nothing */
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

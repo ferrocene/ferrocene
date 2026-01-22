@@ -3492,14 +3492,14 @@ impl Target {
     pub fn ferrocene_subset(&mut self) {
         self.metadata.description =
             self.metadata.description.as_ref().map(|v| format!("{v} (subset)").into());
-        self.metadata.tier = None;
+        self.metadata.tier = Some(3);
     }
 
     /// Modify the target to be a certified-panic one
     pub fn ferrocene_certified_runtime(&mut self) {
         self.metadata.description =
             self.metadata.description.as_ref().map(|v| format!("{v} (certified runtime)").into());
-        self.metadata.tier = None;
+        self.metadata.tier = Some(3);
     }
 }
 

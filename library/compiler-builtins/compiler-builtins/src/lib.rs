@@ -45,6 +45,7 @@ pub mod float;
 pub mod int;
 pub mod math;
 pub mod mem;
+pub mod sync;
 
 // `libm` expects its `support` module to be available in the crate root.
 use math::libm_math::support;
@@ -57,13 +58,6 @@ pub mod aarch64;
 
 #[cfg(all(target_arch = "aarch64", target_feature = "outline-atomics"))]
 pub mod aarch64_outline_atomics;
-
-#[cfg(all(
-    kernel_user_helpers,
-    any(target_os = "linux", target_os = "android"),
-    target_arch = "arm"
-))]
-pub mod arm_linux;
 
 #[cfg(target_arch = "avr")]
 pub mod avr;

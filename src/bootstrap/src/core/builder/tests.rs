@@ -2079,6 +2079,7 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .render_steps(), @"
+        [build] rustdoc 0 <host>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
         [build] llvm <host>
@@ -2256,6 +2257,7 @@ mod snapshot {
             prepare_test_config(&ctx)
                 .stage(2)
                 .render_steps(), @"
+        [build] rustdoc 0 <host>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
         [build] llvm <host>

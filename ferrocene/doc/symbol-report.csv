@@ -1181,6 +1181,19 @@
 <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::DerefMut>::deref_mut
 <core::mem::maybe_dangling::MaybeDangling<P> as core::clone::Clone>::clone
 <core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone
+<core::mem::type_info::Array as core::fmt::Debug>::fmt
+<core::mem::type_info::Bool as core::fmt::Debug>::fmt
+<core::mem::type_info::Char as core::fmt::Debug>::fmt
+<core::mem::type_info::Field as core::fmt::Debug>::fmt
+<core::mem::type_info::Float as core::fmt::Debug>::fmt
+<core::mem::type_info::Int as core::fmt::Debug>::fmt
+<core::mem::type_info::Pointer as core::fmt::Debug>::fmt
+<core::mem::type_info::Reference as core::fmt::Debug>::fmt
+<core::mem::type_info::Slice as core::fmt::Debug>::fmt
+<core::mem::type_info::Str as core::fmt::Debug>::fmt
+<core::mem::type_info::Tuple as core::fmt::Debug>::fmt
+<core::mem::type_info::Type as core::fmt::Debug>::fmt
+<core::mem::type_info::TypeKind as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::clone::Clone>::clone
 <core::num::error::TryFromIntError as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::error::TryFromIntError as core::cmp::PartialEq>::eq
@@ -4070,6 +4083,7 @@ core::intrinsics::rotate_left
 core::intrinsics::rotate_right
 core::intrinsics::select_unpredictable
 core::intrinsics::type_id_eq
+core::intrinsics::type_of
 core::intrinsics::typed_swap_nonoverlapping
 core::intrinsics::ub_checks
 core::intrinsics::unchecked_funnel_shl
@@ -4216,6 +4230,8 @@ core::mem::size_of_val_raw
 core::mem::swap
 core::mem::take
 core::mem::transmute_copy
+core::mem::type_info::<impl core::any::TypeId>::info
+core::mem::type_info::Type::of
 core::mem::zeroed
 core::num::<impl i128>::abs
 core::num::<impl i128>::abs_diff
@@ -5244,8 +5260,6 @@ core::slice::ascii::is_ascii::runtime
 core::slice::ascii::is_ascii::runtime::contains_nonascii
 core::slice::ascii::is_ascii_simple
 core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::eq
-core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::ne
-core::slice::cmp::SlicePartialEq::not_equal
 core::slice::copy_from_slice_impl
 core::slice::copy_from_slice_impl::len_mismatch_fail
 core::slice::copy_from_slice_impl::len_mismatch_fail::do_panic

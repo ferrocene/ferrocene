@@ -23,6 +23,10 @@ path = "hex.rs"
 name = "connect5"
 path = "connect5.rs"
 
+[[bin]]
+name = "gaussian"
+path = "gaussian.rs"
+
 [[example]]
 name = "wasm"
 crate-type = ["cdylib"]

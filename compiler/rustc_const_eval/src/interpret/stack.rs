@@ -12,11 +12,12 @@ use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, mir};
 use rustc_mir_dataflow::impls::always_storage_live_locals;
 use rustc_span::Span;
+use rustc_target::callconv::ArgAbi;
 use tracing::field::Empty;
 use tracing::{info_span, instrument, trace};
 
 use super::{
-    AllocId, CtfeProvenance, Immediate, InterpCx, InterpResult, MPlaceTy, Machine, MemPlace,
+    AllocId, CtfeProvenance, FnArg, Immediate, InterpCx, InterpResult, MPlaceTy, Machine, MemPlace,
     MemPlaceMeta, MemoryKind, Operand, PlaceTy, Pointer, Provenance, ReturnAction, Scalar,
     from_known_layout, interp_ok, throw_ub, throw_unsup,
 };
@@ -455,15 +456,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         };
 
         let return_action = if cleanup {
-            // We need to take the locals out, since we need to mutate while iterating.
             for local in &frame.locals {
                 self.deallocate_local(local.value)?;
             }
 
             // Deallocate any c-variadic arguments.
-            for mplace in &frame.va_list {
-                self.deallocate_vararg(mplace)?;
-            }
+            self.deallocate_varargs(&frame.va_list)?;
 
             // Call the machine hook, which determines the next steps.
             let return_action = M::after_stack_pop(self, frame, unwinding)?;
@@ -610,22 +608,6 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         interp_ok(())
     }
 
-    fn deallocate_vararg(&mut self, vararg: &MPlaceTy<'tcx, M::Provenance>) -> InterpResult<'tcx> {
-        let ptr = vararg.ptr();
-
-        // FIXME: is the `unwrap` valid here?
-        trace!(
-            "deallocating vararg {:?}: {:?}",
-            vararg,
-            // FIXME: what do we do with this comment?
-            // Locals always have a `alloc_id` (they are never the result of a int2ptr).
-            self.dump_alloc(ptr.provenance.unwrap().get_alloc_id().unwrap())
-        );
-        self.deallocate_ptr(ptr, None, MemoryKind::Stack)?;
-
-        interp_ok(())
-    }
-
     /// This is public because it is used by [Aquascope](https://github.com/cognitive-engineering-lab/aquascope/)
     /// to analyze all the locals in a stack frame.
     #[inline(always)]
@@ -650,6 +632,58 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         // Layouts of locals are requested a lot, so we cache them.
         state.layout.set(Some(layout));
         interp_ok(layout)
+    }
+}
+
+impl<'a, 'tcx: 'a, M: Machine<'tcx>> InterpCx<'tcx, M> {
+    /// Consume the arguments provided by the iterator and store them as a list
+    /// of variadic arguments. Return a list of the places that hold those arguments.
+    pub(crate) fn allocate_varargs<I, J>(
+        &mut self,
+        caller_args: &mut I,
+        callee_abis: &mut J,
+    ) -> InterpResult<'tcx, Vec<MPlaceTy<'tcx, M::Provenance>>>
+    where
+        I: Iterator<Item = (&'a FnArg<'tcx, M::Provenance>, &'a ArgAbi<'tcx, Ty<'tcx>>)>,
+        J: Iterator<Item = (usize, &'a ArgAbi<'tcx, Ty<'tcx>>)>,
+    {
+        // Consume the remaining arguments and store them in fresh allocations.
+        let mut varargs = Vec::new();
+        for (fn_arg, caller_abi) in caller_args {
+            // The callee ABI is entirely computed based on which arguments the caller has
+            // provided so it should not be possible to get a mismatch here.
+            let (_idx, callee_abi) = callee_abis.next().unwrap();
+            assert!(self.check_argument_compat(caller_abi, callee_abi)?);
+            // FIXME: do we have to worry about in-place argument passing?
+            let op = self.copy_fn_arg(fn_arg);
+            let mplace = self.allocate(op.layout, MemoryKind::Stack)?;
+            self.copy_op(&op, &mplace)?;
+
+            varargs.push(mplace);
+        }
+        assert!(callee_abis.next().is_none());
+
+        interp_ok(varargs)
+    }
+
+    /// Deallocate the variadic arguments in the list (that must have been created with `allocate_varargs`).
+    fn deallocate_varargs(
+        &mut self,
+        varargs: &[MPlaceTy<'tcx, M::Provenance>],
+    ) -> InterpResult<'tcx> {
+        for vararg in varargs {
+            let ptr = vararg.ptr();
+
+            trace!(
+                "deallocating vararg {:?}: {:?}",
+                vararg,
+                // Locals always have a `alloc_id` (they are never the result of a int2ptr).
+                self.dump_alloc(ptr.provenance.unwrap().get_alloc_id().unwrap())
+            );
+            self.deallocate_ptr(ptr, None, MemoryKind::Stack)?;
+        }
+
+        interp_ok(())
     }
 }
 

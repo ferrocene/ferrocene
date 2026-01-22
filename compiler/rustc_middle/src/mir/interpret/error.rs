@@ -404,6 +404,8 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     InvalidTag(Scalar<AllocId>),
     /// Using a pointer-not-to-a-function as function pointer.
     InvalidFunctionPointer(Pointer<AllocId>),
+    /// Using a pointer-not-to-a-va-list as variable argument list pointer.
+    InvalidVaListPointer(Pointer<AllocId>),
     /// Using a pointer-not-to-a-vtable as vtable pointer.
     InvalidVTablePointer(Pointer<AllocId>),
     /// Using a vtable for the wrong trait.
@@ -438,6 +440,10 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     AbiMismatchReturn { caller_ty: Ty<'tcx>, callee_ty: Ty<'tcx> },
     /// `va_arg` was called on an exhausted `VaList`.
     VaArgOutOfBounds,
+    /// The caller and callee disagree on whether they are c-variadic or not.
+    CVariadicMismatch { caller_is_c_variadic: bool, callee_is_c_variadic: bool },
+    /// The caller and callee disagree on the number of fixed (i.e. non-c-variadic) arguments.
+    CVariadicFixedCountMismatch { caller: u32, callee: u32 },
 }
 
 #[derive(Debug, Clone, Copy)]

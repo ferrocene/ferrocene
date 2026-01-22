@@ -7,6 +7,7 @@
 #![feature(const_clone)]
 
 use std::ffi::VaList;
+use std::mem::MaybeUninit;
 
 const unsafe extern "C" fn read_n<const N: usize>(mut ap: ...) {
     let mut i = N;
@@ -77,23 +78,13 @@ fn use_after_free() {
     };
 }
 
-macro_rules! va_list_copy {
-    ($ap:expr) => {{
-        // A copy created using Clone is valid, and can be used to read arguments.
-        let mut copy = $ap.clone();
-        assert!(copy.arg::<i32>() == 1i32);
-
-        let mut u = core::mem::MaybeUninit::uninit();
-        unsafe { core::ptr::copy_nonoverlapping(&$ap, u.as_mut_ptr(), 1) };
-
-        // Manually creating the copy is fine.
-        unsafe { u.assume_init() }
-    }};
-}
-
 fn manual_copy_drop() {
     const unsafe extern "C" fn helper(ap: ...) {
-        let mut copy: VaList = va_list_copy!(ap);
+        // A copy created using Clone is valid, and can be used to read arguments.
+        let mut copy = ap.clone();
+        assert!(copy.arg::<i32>() == 1i32);
+
+        let mut copy: VaList = unsafe { std::mem::transmute_copy(&ap) };
 
         // Using the copy is actually fine.
         let _ = copy.arg::<i32>();
@@ -104,12 +95,12 @@ fn manual_copy_drop() {
     }
 
     const { unsafe { helper(1, 2, 3) } };
-    //~^ ERROR va_end on unknown va_list allocation ALLOC0 [E0080]
+    //~^ ERROR using ALLOC0 as variable argument list pointer but it does not point to a variable argument list [E0080]
 }
 
 fn manual_copy_forget() {
     const unsafe extern "C" fn helper(ap: ...) {
-        let mut copy: VaList = va_list_copy!(ap);
+        let mut copy: VaList = unsafe { std::mem::transmute_copy(&ap) };
 
         // Using the copy is actually fine.
         let _ = copy.arg::<i32>();
@@ -120,12 +111,12 @@ fn manual_copy_forget() {
     }
 
     const { unsafe { helper(1, 2, 3) } };
-    //~^ ERROR va_end on unknown va_list allocation ALLOC0 [E0080]
+    //~^ ERROR using ALLOC0 as variable argument list pointer but it does not point to a variable argument list [E0080]
 }
 
 fn manual_copy_read() {
     const unsafe extern "C" fn helper(mut ap: ...) {
-        let mut copy: VaList = va_list_copy!(ap);
+        let mut copy: VaList = unsafe { std::mem::transmute_copy(&ap) };
 
         // Reading from `ap` after reading from `copy` is UB.
         let _ = copy.arg::<i32>();
@@ -133,7 +124,15 @@ fn manual_copy_read() {
     }
 
     const { unsafe { helper(1, 2, 3) } };
-    //~^ ERROR va_arg on unknown va_list allocation ALLOC0
+    //~^ ERROR using ALLOC0 as variable argument list pointer but it does not point to a variable argument list [E0080]
+}
+
+fn drop_of_invalid() {
+    const {
+        let mut invalid: MaybeUninit<VaList> = MaybeUninit::zeroed();
+        let ap = unsafe { invalid.assume_init() };
+    }
+    //~^ ERROR pointer not dereferenceable: pointer must point to some allocation, but got null pointer [E0080]
 }
 
 fn main() {
@@ -143,5 +142,6 @@ fn main() {
         manual_copy_read();
         manual_copy_drop();
         manual_copy_forget();
+        drop_of_invalid();
     }
 }

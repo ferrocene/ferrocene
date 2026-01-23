@@ -124,7 +124,7 @@ tests = [
     "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-same-flag-many-times.rs",
     "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_eq.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64v8r-unknown-ferrocene.facade", "aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "Currently output of these tests experiences multiple stdout writers colliding to create unreproducible results"
 
 [["tests/ui"]]

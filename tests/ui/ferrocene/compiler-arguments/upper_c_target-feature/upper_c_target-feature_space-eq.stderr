@@ -7,9 +7,5 @@ warning: unknown and unstable feature specified for `-Ctarget-feature`: `foo`
 '+foo' is not a recognized feature for this target (ignoring feature)
 '+foo' is not a recognized feature for this target (ignoring feature)
 '+foo' is not a recognized feature for this target (ignoring feature)
-'+foo' is not a recognized feature for this target (ignoring feature)
-'+foo' is not a recognized feature for this target (ignoring feature)
-'+foo' is not a recognized feature for this target (ignoring feature)
-'+foo' is not a recognized feature for this target (ignoring feature)
 warning: 1 warning emitted
 

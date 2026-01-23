@@ -32,6 +32,15 @@ on:
         type: boolean
         default: false
         description: If minIO should be used (otherwise, S3 is used)
+      cache-llvm-uri:
+        type: string
+        description: The LLVM artifact to use, if any
+      restore-build-cache:
+        type: boolean
+        default: true
+        description: |
+          If the build cache (llvm/rust) should be restored,
+          conflicts with `cache-llvm-uri`
       build-run-id:
         type: string
         description: The run id of the build workflow
@@ -70,7 +79,6 @@ env:
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
   FERROCENE_HOST: ${{ inputs.host-triple }}
   FERROCENE_TARGETS: ${{ inputs.triples }}
-  # AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
   job:
@@ -94,6 +102,7 @@ jobs:
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.restore-build-cache == true }}
         env:
           AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
         with:
@@ -101,6 +110,17 @@ jobs:
           build-run-id: ${{ inputs.build-run-id }}
           bucket: ${{ inputs.cache-bucket }}
           prefix: ${{ inputs.cache-prefix }}
+
+      - name: Get LLVM cache
+        shell: bash
+        if: ${{ inputs.cache-llvm-uri != '' }}
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+        run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url ${{ inputs.cache-llvm-uri }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/

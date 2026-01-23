@@ -46,7 +46,6 @@ env:
   AWS_PROFILE: amazon # This is *always* amazon, that's where releases go!
   BUILD_METRICS_ARTIFACT: finish-build
 jobs:
-
   finish-build:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
@@ -79,5 +78,5 @@ jobs:
           script: |
             uv run x.py dist ferrocene-build-metadata
             ./ferrocene/ci/scripts/upload-dist-artifacts.sh
-          # This should be re-enabled once GHA builds all platforms.
+          # TODO: This should be re-enabled once GHA builds all platforms.
           # ./ferrocene/ci/scripts/validate-packages-toml.py ${{ github.sha }}

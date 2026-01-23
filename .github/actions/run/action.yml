@@ -29,7 +29,7 @@ runs:
         if [ -z "${AWS_CA_BUNDLE}" ]; then
           unset AWS_CA_BUNDLE
         fi
-        
+
         echo "Got configure args $RUST_CONFIGURE_ARGS"
         ferrocene/ci/run.sh
 
@@ -46,7 +46,8 @@ runs:
         TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
         SCRIPT: |
           ${{ inputs.script }}
-        # RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
+        RUST_CONFIGURE_ARGS: |
+          ${{ inputs.configure }}
       # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
       # Detect if it's empty and unset it.
       run: |

@@ -115,7 +115,7 @@ jobs:
         shell: bash
         if: ${{ inputs.cache-llvm-uri != '' }}
         env:
-          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
         run: |
           if [ -z "${AWS_CA_BUNDLE}" ]; then
             unset AWS_CA_BUNDLE
@@ -124,8 +124,9 @@ jobs:
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
+        if: ${{ inputs.qnx-version != '' }}
         env:
-          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
         with:
           version: ${{ inputs.qnx-version }}
 

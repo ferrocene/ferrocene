@@ -37,7 +37,7 @@ impl Type {
 }
 
 /// Compile-time type information.
-#[derive(Debug)]
+#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub enum TypeKind {

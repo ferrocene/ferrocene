@@ -172,7 +172,6 @@ union MaybeEscapedCharacter<const N: usize> {
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
 #[non_exhaustive]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 pub(crate) struct AlwaysEscaped;
 
 /// Marker type to indicate that the character may be escaped,

@@ -69,7 +69,6 @@ pub use crate::{
 };
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
-#[expect(deprecated)]
 #[cfg(feature = "ferrocene_subset")]
 pub use crate::{
     assert, assert_eq, assert_ne, cfg, column, compile_error, concat, debug_assert,

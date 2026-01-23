@@ -2,4 +2,4 @@
    SPDX-FileCopyrightText: The Ferrocene Developers
    SPDX-FileCopyrightText: The Rust Project Developers
 
-.. |spec_version| replace:: 1.92.0
+.. |spec_version| replace:: 1.93.0

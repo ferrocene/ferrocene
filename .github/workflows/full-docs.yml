@@ -117,7 +117,7 @@ jobs:
           FERROCENE_COVERAGE_OUTCOMES_DIR: /tmp/coverage-outcomes
         with:
           configure: ${{ inputs.configure }}
-          # container: ${{ inputs.container }}
+          container: ${{ inputs.container }}
           script: ${{ inputs.script }}
 
       - name: Upload artifacts to S3

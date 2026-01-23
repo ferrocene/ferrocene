@@ -60,6 +60,7 @@ use crate::{mem, ptr};
 
 mod bounds;
 pub mod fallback;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod gpu;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod mir;

@@ -51,6 +51,7 @@ codegen-units = 1
 lto = "fat"
 
 [profile.bench]
+codegen-units = 1
 # Required for gungraun
 debug = true
 strip = false

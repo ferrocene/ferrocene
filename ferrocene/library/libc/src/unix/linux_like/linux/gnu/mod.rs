@@ -38,7 +38,7 @@ s! {
             target_pointer_width = "32"
         ))]
         __unused1: Padding<[c_char; 4]>,
-        __glibc_reserved: [c_char; 32],
+        __glibc_reserved: Padding<[c_char; 32]>,
     }
 
     pub struct __exit_status {
@@ -255,7 +255,7 @@ s! {
         pub aio_buf: crate::__u64,
         pub aio_nbytes: crate::__u64,
         pub aio_offset: crate::__s64,
-        aio_reserved2: crate::__u64,
+        aio_reserved2: Padding<crate::__u64>,
         pub aio_flags: crate::__u32,
         pub aio_resfd: crate::__u32,
     }
@@ -392,7 +392,7 @@ s! {
         pub ut_tv: __timeval,
 
         pub ut_addr_v6: [i32; 4],
-        __glibc_reserved: [c_char; 20],
+        __glibc_reserved: Padding<[c_char; 20]>,
     }
 }
 
@@ -644,7 +644,6 @@ pub const BUFSIZ: c_uint = 8192;
 pub const TMP_MAX: c_uint = 238328;
 pub const FOPEN_MAX: c_uint = 16;
 pub const FILENAME_MAX: c_uint = 4096;
-pub const POSIX_MADV_DONTNEED: c_int = 4;
 pub const _CS_GNU_LIBC_VERSION: c_int = 2;
 pub const _CS_GNU_LIBPTHREAD_VERSION: c_int = 3;
 pub const _CS_V6_ENV: c_int = 1148;
@@ -1121,6 +1120,16 @@ extern "C" {
         val: c_int,
     ) -> c_int;
     pub fn pthread_sigqueue(thread: crate::pthread_t, sig: c_int, value: crate::sigval) -> c_int;
+    pub fn pthread_tryjoin_np(thread: crate::pthread_t, retval: *mut *mut c_void) -> c_int;
+    #[cfg_attr(
+        all(target_pointer_width = "32", gnu_time_bits64),
+        link_name = "__pthread_timedjoin_np64"
+    )]
+    pub fn pthread_timedjoin_np(
+        thread: crate::pthread_t,
+        retval: *mut *mut c_void,
+        abstime: *const crate::timespec,
+    ) -> c_int;
     pub fn mallinfo() -> crate::mallinfo;
     pub fn mallinfo2() -> crate::mallinfo2;
     pub fn malloc_stats();

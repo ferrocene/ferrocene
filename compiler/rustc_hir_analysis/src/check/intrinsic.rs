@@ -70,6 +70,7 @@ fn intrinsic_operation_unsafety(tcx: TyCtxt<'_>, intrinsic_id: LocalDefId) -> hi
         | sym::add_with_overflow
         | sym::aggregate_raw_ptr
         | sym::align_of
+        | sym::amdgpu_dispatch_ptr
         | sym::assert_inhabited
         | sym::assert_mem_uninitialized_valid
         | sym::assert_zero_valid
@@ -213,7 +214,9 @@ fn intrinsic_operation_unsafety(tcx: TyCtxt<'_>, intrinsic_id: LocalDefId) -> hi
         | sym::type_id
         | sym::type_id_eq
         | sym::type_name
+        | sym::type_of
         | sym::ub_checks
+        | sym::va_copy
         | sym::variant_count
         | sym::vtable_for
         | sym::wrapping_add
@@ -285,6 +288,7 @@ pub(crate) fn check_intrinsic_type(
     let (n_tps, n_cts, inputs, output) = match intrinsic_name {
         sym::autodiff => (4, 0, vec![param(0), param(1), param(2)], param(3)),
         sym::abort => (0, 0, vec![], tcx.types.never),
+        sym::amdgpu_dispatch_ptr => (0, 0, vec![], Ty::new_imm_ptr(tcx, tcx.types.unit)),
         sym::unreachable => (0, 0, vec![], tcx.types.never),
         sym::breakpoint => (0, 0, vec![], tcx.types.unit),
         sym::size_of | sym::align_of | sym::variant_count => (1, 0, vec![], tcx.types.usize),
@@ -308,13 +312,22 @@ pub(crate) fn check_intrinsic_type(
         sym::needs_drop => (1, 0, vec![], tcx.types.bool),
 
         sym::type_name => (1, 0, vec![], Ty::new_static_str(tcx)),
-        sym::type_id => {
-            (1, 0, vec![], tcx.type_of(tcx.lang_items().type_id().unwrap()).instantiate_identity())
-        }
+        sym::type_id => (
+            1,
+            0,
+            vec![],
+            tcx.type_of(tcx.lang_items().type_id().unwrap()).no_bound_vars().unwrap(),
+        ),
         sym::type_id_eq => {
-            let type_id = tcx.type_of(tcx.lang_items().type_id().unwrap()).instantiate_identity();
+            let type_id = tcx.type_of(tcx.lang_items().type_id().unwrap()).no_bound_vars().unwrap();
             (0, 0, vec![type_id, type_id], tcx.types.bool)
         }
+        sym::type_of => (
+            0,
+            0,
+            vec![tcx.type_of(tcx.lang_items().type_id().unwrap()).no_bound_vars().unwrap()],
+            tcx.type_of(tcx.lang_items().type_struct().unwrap()).no_bound_vars().unwrap(),
+        ),
         sym::offload => (
             3,
             0,
@@ -617,14 +630,13 @@ pub(crate) fn check_intrinsic_type(
             )
         }
 
-        sym::va_start | sym::va_end => {
-            (0, 0, vec![mk_va_list_ty(hir::Mutability::Mut).0], tcx.types.unit)
-        }
-
         sym::va_copy => {
             let (va_list_ref_ty, va_list_ty) = mk_va_list_ty(hir::Mutability::Not);
-            let va_list_ptr_ty = Ty::new_mut_ptr(tcx, va_list_ty);
-            (0, 0, vec![va_list_ptr_ty, va_list_ref_ty], tcx.types.unit)
+            (0, 0, vec![va_list_ref_ty], va_list_ty)
+        }
+
+        sym::va_start | sym::va_end => {
+            (0, 0, vec![mk_va_list_ty(hir::Mutability::Mut).0], tcx.types.unit)
         }
 
         sym::va_arg => (1, 0, vec![mk_va_list_ty(hir::Mutability::Mut).0], param(0)),

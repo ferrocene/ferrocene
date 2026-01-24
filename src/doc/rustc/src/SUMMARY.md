@@ -151,6 +151,7 @@
     - [x86_64-pc-cygwin](platform-support/x86_64-pc-cygwin.md)
     - [x86_64-unknown-linux-none](platform-support/x86_64-unknown-linux-none.md)
     - [x86_64-unknown-none](platform-support/x86_64-unknown-none.md)
+    - [x86_64-unknown-linux-gnuasan](platform-support/x86_64-unknown-linux-gnuasan.md)
     - [xtensa-\*-none-elf](platform-support/xtensa.md)
     - [\*-nuttx-\*](platform-support/nuttx.md)
     - [i386-lynx-lynxos178](platform-support/i386-lynx-lynxos178.md) # Ferrocene addition

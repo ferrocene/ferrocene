@@ -4,6 +4,7 @@ pub mod ci;
 pub mod drop_bomb;
 pub mod fs;
 pub mod git;
+#[cfg(feature = "metrics")]
 pub mod metrics;
 pub mod npm;
 pub mod stage0_parser;
@@ -13,6 +14,7 @@ pub mod util;
 // Ferrocene addition
 pub mod diff;
 pub mod ferrocene_targets;
+#[cfg(feature = "metrics")]
 pub mod symbol_report;
 
 /// The default set of crates for opt-dist to collect LLVM profiles.

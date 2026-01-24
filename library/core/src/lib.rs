@@ -126,6 +126,7 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(type_info))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![feature(ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]

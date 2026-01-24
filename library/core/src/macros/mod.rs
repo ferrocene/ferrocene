@@ -286,7 +286,7 @@ macro_rules! assert_ne {
 /// ```
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_macro_transparency = "semiopaque"]
 #[cfg(not(feature = "ferrocene_certified_runtime"))]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
@@ -359,7 +359,7 @@ pub macro assert_matches {
 /// ```
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_macro_transparency = "semiopaque"]
 #[cfg(feature = "ferrocene_certified_runtime")]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) =>{
@@ -594,7 +594,7 @@ macro_rules! debug_assert_ne {
 /// ```
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(assert_matches)]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_macro_transparency = "semiopaque"]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub macro debug_assert_matches($($arg:tt)*) {
     if $crate::cfg!(debug_assertions) {
@@ -2109,7 +2109,7 @@ pub(crate) mod builtin {
     /// Impl detail of EII
     #[unstable(feature = "eii_internals", issue = "none")]
     #[rustc_builtin_macro]
-    pub macro eii_extern_target($item:item) {
+    pub macro eii_declaration($item:item) {
         /* compiler built-in */
     }
 }

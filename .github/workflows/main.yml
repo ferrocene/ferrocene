@@ -22,12 +22,10 @@ jobs:
             rust: beta
           - os: ubuntu-24.04
             rust: nightly
-          - os: macos-14
+          - os: macos-latest
             rust: stable
-          - os: macos-14
+          - os: macos-latest
             rust: nightly
-          - os: macos-latest # macOS 15
-            rust: stable
           - os: windows-latest
             rust: stable-x86_64-msvc
           - os: windows-latest
@@ -81,11 +79,7 @@ jobs:
           CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: packed
           CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: packed
       - run: cargo test --manifest-path crates/without_debuginfo/Cargo.toml
-      - if: matrix.os != 'macos-latest'
-        run: cargo test --manifest-path crates/line-tables-only/Cargo.toml
-      # FIXME: This currently fails on macOS 15.
-      - if: matrix.os == 'macos-latest'
-        run: '! cargo test --manifest-path crates/line-tables-only/Cargo.toml'
+      - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml
 
       # Test debuginfo compression still works
       - run: cargo test
@@ -101,18 +95,18 @@ jobs:
       # Test that, on macOS, packed/unpacked debuginfo both work
       - run: cargo clean && cargo test
         # Test that, on macOS, packed/unpacked debuginfo both work
-        if: contains(matrix.os, 'macos')
+        if: matrix.os == 'macos-latest'
         env:
           CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: unpacked
           CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: unpacked
       - run: cargo clean && cargo test
-        if: contains(matrix.os, 'macos')
+        if: matrix.os == 'macos-latest'
         env:
           CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: packed
           CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: packed
       # Test that, on macOS, binaries with no UUID work
       - run: cargo clean && cargo test
-        if: contains(matrix.os, 'macos')
+        if: matrix.os == 'macos-latest'
         env:
           RUSTFLAGS: "-C link-arg=-Wl,-no_uuid"
 

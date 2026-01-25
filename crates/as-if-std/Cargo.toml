@@ -13,7 +13,7 @@ bench = false
 
 [dependencies]
 cfg-if = "1.0"
-rustc-demangle = "0.1.21"
+rustc-demangle = "0.1.27"
 libc = { version = "0.2.156", default-features = false }
 
 [target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies]

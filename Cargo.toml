@@ -27,7 +27,7 @@ exclude = [
 
 [dependencies]
 cfg-if = "1.0"
-rustc-demangle = "0.1.24"
+rustc-demangle = "0.1.27"
 
 # Optionally enable the ability to serialize a `Backtrace`, controlled through
 # the `serialize-serde` feature below.

@@ -2132,10 +2132,7 @@ impl<T> Option<&T> {
     where
         T: Clone,
     {
-        match self {
-            Some(t) => Some(t.clone()),
-            None => None,
-        }
+        self.map(T::clone)
     }
 }
 
@@ -2183,10 +2180,7 @@ impl<T> Option<&mut T> {
     where
         T: Clone,
     {
-        match self {
-            Some(t) => Some(t.clone()),
-            None => None,
-        }
+        self.as_deref().map(T::clone)
     }
 }
 

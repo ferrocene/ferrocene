@@ -171,7 +171,7 @@ impl_from!(i16 => isize, #[stable(feature = "lossless_iusize_conv", since = "1.2
 // * 53 bits in f64
 // * 113 bits in f128
 // Lossy float conversions are not implemented at this time.
-// FIXME(f16_f128): The `f16`/`f128` impls `#[stable]` attributes should be changed to reference
+// FIXME(f16,f128): The `f16`/`f128` impls `#[stable]` attributes should be changed to reference
 // `f16`/`f128` when they are stabilised (trait impls have to have a `#[stable]` attribute, but none
 // of the `f16`/`f128` impls can be used on stable as the `f16` and `f128` types are unstable).
 
@@ -194,7 +194,7 @@ impl_from!(i16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0
 impl_from!(i32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-// FIXME(f16_f128): This impl would allow using `f128` on stable before it is stabilised.
+// FIXME(f128): This impl would allow using `f128` on stable before it is stabilised.
 // impl_from!(i64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 
 // unsigned integer -> float
@@ -216,11 +216,11 @@ impl_from!(u16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0
 impl_from!(u32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-// FIXME(f16_f128): This impl would allow using `f128` on stable before it is stabilised.
+// FIXME(f128): This impl would allow using `f128` on stable before it is stabilised.
 // impl_from!(u64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 
 // float -> float
-// FIXME(f16_f128): adding additional `From<{float}>` impls to `f32` breaks inference. See
+// FIXME(f16,f128): adding additional `From<{float}>` impls to `f32` breaks inference. See
 // <https://github.com/rust-lang/rust/issues/123831>
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f16 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);

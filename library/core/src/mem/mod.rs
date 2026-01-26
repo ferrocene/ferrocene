@@ -10,7 +10,12 @@ use crate::alloc::Layout;
 use crate::clone::TrivialClone;
 use crate::marker::{Destruct, DiscriminantKind};
 use crate::panic::const_assert;
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| d29e4783dff
+=======
+use crate::ptr::Alignment;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
 // Ferrocene addition: imports for certified subset
@@ -1280,6 +1285,10 @@ pub trait SizedTypeProperties: Sized {
     #[unstable(feature = "sized_type_properties", issue = "none")]
     #[lang = "mem_align_const"]
     const ALIGN: usize = intrinsics::align_of::<Self>();
+
+    #[doc(hidden)]
+    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    const ALIGNMENT: Alignment = Alignment::of::<Self>();
 
     /// `true` if this type requires no storage.
     /// `false` if its [size](size_of) is greater than zero.

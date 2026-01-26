@@ -21,6 +21,7 @@
 #![feature(clamp_magnitude)]
 #![feature(clone_to_uninit)]
 #![feature(const_array)]
+#![feature(const_bool)]
 #![feature(const_cell_traits)]
 #![feature(const_clone)]
 #![feature(const_cmp)]

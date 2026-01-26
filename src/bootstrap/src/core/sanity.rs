@@ -38,6 +38,7 @@ pub struct Finder {
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // just a dummy comment so the list doesn't get onelined
     "x86_64-unknown-linux-gnuasan",
+<<<<<<< HEAD
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -50,6 +51,17 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-ferrocene-none",
     "thumbv7em-ferrocene-none-eabi",
     "thumbv7em-ferrocene-none-eabihf",
+||||||| d29e4783dff
+=======
+    "thumbv7a-none-eabi",
+    "thumbv7a-none-eabihf",
+    "thumbv7r-none-eabi",
+    "thumbv7r-none-eabihf",
+    "thumbv8r-none-eabihf",
+    "armv6-none-eabi",
+    "armv6-none-eabihf",
+    "thumbv6-none-eabi",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

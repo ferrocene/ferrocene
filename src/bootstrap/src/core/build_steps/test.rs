@@ -3192,7 +3192,9 @@ impl Step for Crate {
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {
-                instrument_coverage(builder, &mut cargo, build_compiler);
+                let profiler = builder.profiler_runtime.borrow();
+                let profiler = profiler.as_ref().expect("missing profiler_builtins");
+                instrument_coverage(builder, &mut cargo, &profiler);
                 ferrocene_certified_runtime = true;
             }
 

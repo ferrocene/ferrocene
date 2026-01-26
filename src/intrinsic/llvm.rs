@@ -1062,6 +1062,12 @@ pub fn intrinsic<'gcc, 'tcx>(name: &str, cx: &CodegenCx<'gcc, 'tcx>) -> Function
         "llvm.x86.xgetbv" => "__builtin_ia32_xgetbv",
         // NOTE: this doc specifies the equivalent GCC builtins: http://huonw.github.io/llvmint/llvmint/x86/index.html
         "llvm.sqrt.v2f64" => "__builtin_ia32_sqrtpd",
+        "llvm.sqrt.f32" => {
+            let gcc_name = "__builtin_sqrtf";
+            let func = cx.context.get_builtin_function(gcc_name);
+            cx.functions.borrow_mut().insert(gcc_name.to_string(), func);
+            return func;
+        }
         "llvm.x86.avx512.pmul.dq.512" => "__builtin_ia32_pmuldq512_mask",
         "llvm.x86.avx512.pmulu.dq.512" => "__builtin_ia32_pmuludq512_mask",
         "llvm.x86.avx512.max.ps.512" => "__builtin_ia32_maxps512_mask",

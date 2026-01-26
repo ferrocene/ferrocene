@@ -117,18 +117,6 @@ reason = "Running these tests require changes to bootstrap"
 
 [["tests/ui"]]
 tests = [
-    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-add-and-remove-same-flag.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-minus-minus-plus.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-plus-plus-minus.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_space-eq.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-same-flag-many-times.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_eq.rs",
-]
-targets = ["aarch64v8r-unknown-ferrocene.facade", "aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
-reason = "Currently output of these tests experiences multiple stdout writers colliding to create unreproducible results"
-
-[["tests/ui"]]
-tests = [
     "tests/ui/alloc-error/alloc-error-backtrace.rs"
 ]
 targets = ["aarch64-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]

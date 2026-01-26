@@ -68,6 +68,8 @@ armv5te-none-eabi
 armv5te-unknown-linux-gnueabi
 armv5te-unknown-linux-musleabi
 armv5te-unknown-linux-uclibceabi
+armv6-none-eabi
+armv6-none-eabihf
 armv6-unknown-freebsd
 armv6-unknown-netbsd-eabihf
 armv6k-nintendo-3ds
@@ -230,8 +232,11 @@ sparc64-unknown-openbsd
 sparcv9-sun-solaris
 thumbv4t-none-eabi
 thumbv5te-none-eabi
+thumbv6-none-eabi
 thumbv6m-none-eabi
 thumbv6m-nuttx-eabi
+thumbv7a-none-eabi
+thumbv7a-none-eabihf
 thumbv7a-nuttx-eabi
 thumbv7a-nuttx-eabihf
 thumbv7a-pc-windows-msvc
@@ -251,12 +256,15 @@ thumbv7m-nuttx-eabi
 thumbv7neon-linux-androideabi
 thumbv7neon-unknown-linux-gnueabihf
 thumbv7neon-unknown-linux-musleabihf
+thumbv7r-none-eabi
+thumbv7r-none-eabihf
 thumbv8m.base-none-eabi
 thumbv8m.base-nuttx-eabi
 thumbv8m.main-none-eabi
 thumbv8m.main-none-eabihf
 thumbv8m.main-nuttx-eabi
 thumbv8m.main-nuttx-eabihf
+thumbv8r-none-eabihf
 wasm32-unknown-emscripten
 wasm32-unknown-unknown
 wasm32-wali-linux-musl

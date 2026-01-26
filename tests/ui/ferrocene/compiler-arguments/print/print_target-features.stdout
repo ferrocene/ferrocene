@@ -58,7 +58,6 @@ Features supported by rustc for this target:
     sha512                          - Support SHA512 instructions.
     sm3                             - Support SM3 instructions.
     sm4                             - Support SM4 instructions.
-    soft-float                      - Use software floating point features.
     sse                             - Enable SSE instructions.
     sse2                            - Enable SSE2 instructions.
     sse3                            - Enable SSE3 instructions.
@@ -186,6 +185,7 @@ Code-generation features supported by LLVM for this target:
     slow-two-mem-ops                - Two memory operand instructions are slow.
     slow-unaligned-mem-16           - Slow unaligned 16-byte memory access.
     slow-unaligned-mem-32           - Slow unaligned 32-byte memory access.
+    soft-float                      - Use software floating point features.
     sse-unaligned-mem               - Allow unaligned memory operands with SSE instructions (this may require setting a configuration bit in the processor).
     tagged-globals                  - Use an instruction sequence for taking the address of a global that allows a memory tag in the upper address bits..
     tsxldtrk                        - Support TSXLDTRK instructions.

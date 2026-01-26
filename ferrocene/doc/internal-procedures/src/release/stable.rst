@@ -59,10 +59,63 @@ the latest commit on that branch into the ``beta-${major_version}`` channel
 every night. You can continue landing changes into the branch until you
 are ready to release it as a stable release.
 
+Add version to Known Problems
+-----------------------------
+
+Add the new version to the `Known Problems repository <https://github.com/ferrocene/problems/>`_
+by adding the version and branch to the ``src/config.yml`` file then running the tool, following
+the instructions in ``README.rst``.
+
+Validate that the locally built site now has the version, and that known problems are tracked for it.
+Make a pull request, ensure it gets merged, then validate the new version shows up on the
+`Known Problems page <https://problems.ferrocene.dev/>`_.
+
+Version Bump Release Notes
+--------------------------
+
+Rename ``ferrocene/doc/release-notes/src/next.rst`` to
+``ferrocene/doc/release-notes/src/${version}.rst``.
+Backport this PR according to :ref:`handling-backports`. Then, on the
+``release/1.NN`` branch, remove the ``:upcoming-release:`` from the version.
+
+Create a new ``ferrocene/doc/release-notes/src/next.rst`` on the `main` branch with the following content: 
+
+.. code-block::
+
+   .. SPDX-License-Identifier: MIT OR Apache-2.0
+      SPDX-FileCopyrightText: The Ferrocene Developers
+
+   :upcoming-release:
+
+   Next Ferrocene release
+   ======================
+
+   This page contains the changes to be introduced in the upcoming Ferrocene
+   release.
+
+
+Precautionary validation
+------------------------
+
+Perform :ref:`qualification-plan:release-validation` on the ``release/1.NN`` branch before signing.
+
+Signing
+-------
+
+Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` to perform the
+:ref:`documentation signatures <internal-procedures:signing-all-documents>`.
+
+Delivering the documentation package
+------------------------------------
+
+Wait for the nightly beta, or manually cut a beta release onto production. Over email,
+send the assessor direct links to the ``ferrocene-docs`` and ``ferrocene-docs-signatures``
+packages, as well as a *semantic diff* of what changed since the last release.  
+
 .. _release-technical-reports:
 
 Uploading the technical reports
---------------------------------------------
+-------------------------------
 
 Once qualification and certification are achieved for the Ferrocene major version,
 the technical reports provided by the assessors needs to be uploaded to our AWS

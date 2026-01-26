@@ -462,9 +462,13 @@ jobs:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
           steps:
             - ferrocene-checkout
+            # Darwin does not come with awscli, setup it before aws steps
+            - run:
+                name: Install AWSCLIv2
+                command: brew install awscli
+            - aws-oidc-auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
             - setup-uv
-            - aws-oidc-auth
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps

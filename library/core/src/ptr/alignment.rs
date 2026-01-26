@@ -1,11 +1,8 @@
 #![allow(clippy::enum_clike_unportable_variant)]
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| d29e4783dff
-=======
 use crate::marker::MetaSized;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -82,6 +79,7 @@ impl Alignment {
     ///
     /// assert_eq!(Alignment::of_val(&5i32).as_usize(), 4);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
@@ -130,6 +128,7 @@ impl Alignment {
     ///
     /// assert_eq!(unsafe { Alignment::of_val_raw(&5i32) }.as_usize(), 4);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]

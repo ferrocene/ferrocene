@@ -3361,8 +3361,11 @@
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
+core::alloc::layout::Layout::from_size_alignment_unchecked
+core::alloc::layout::Layout::from_size_alignment_unchecked::precondition_check
 core::alloc::layout::Layout::is_size_align_valid
-core::alloc::layout::Layout::max_size_for_align
+core::alloc::layout::Layout::is_size_alignment_valid
+core::alloc::layout::Layout::max_size_for_alignment
 core::alloc::layout::Layout::new
 core::alloc::layout::Layout::size
 core::any::TypeId::of

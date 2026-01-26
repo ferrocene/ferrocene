@@ -115,18 +115,9 @@ impl Layout {
     /// * `size`, when rounded up to the nearest multiple of `alignment`,
     ///   must not overflow `isize` (i.e., the rounded value must be
     ///   less than or equal to `isize::MAX`).
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_subset"))]
-    const fn from_size_alignment(size: usize, align: Alignment) -> Result<Self, LayoutError> {
-        if size > Self::max_size_for_align(align) {
-            return Err(LayoutError);
-||||||| d29e4783dff
-    const fn from_size_alignment(size: usize, align: Alignment) -> Result<Self, LayoutError> {
-        if size > Self::max_size_for_align(align) {
-            return Err(LayoutError);
-=======
     pub const fn from_size_alignment(
         size: usize,
         alignment: Alignment,
@@ -136,7 +127,6 @@ impl Layout {
             Ok(Layout { size, align: alignment })
         } else {
             Err(LayoutError)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 
@@ -213,6 +203,7 @@ impl Layout {
     /// The minimum byte alignment for a memory block of this layout.
     ///
     /// The returned alignment is guaranteed to be a power of two.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[must_use = "this returns the minimum alignment, without modifying the layout"]
     #[inline]
@@ -270,14 +261,10 @@ impl Layout {
     ///
     /// [trait object]: ../../book/ch17-02-trait-objects.html
     /// [extern type]: ../../unstable-book/language-features/extern-types.html
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "layout_for_ptr", issue = "69835")]
     #[must_use]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_subset"))]
-||||||| d29e4783dff
-=======
     #[inline]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const unsafe fn for_value_raw<T: ?Sized>(t: *const T) -> Self {
         // SAFETY: we pass along the prerequisites of these functions to the caller
         let (size, alignment) = unsafe { (mem::size_of_val_raw(t), Alignment::of_val_raw(t)) };
@@ -340,6 +327,7 @@ impl Layout {
     ///
     /// Returns an error if the combination of `self.size()` and the given
     /// `alignment` violates the conditions listed in [`Layout::from_size_alignment`].
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
     pub const fn adjust_alignment_to(&self, alignment: Alignment) -> Result<Self, LayoutError> {
@@ -373,15 +361,9 @@ impl Layout {
     ///
     /// This can return at most `Alignment::MAX` (aka `isize::MAX + 1`)
     /// because the original size is at most `isize::MAX`.
-    #[inline]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_subset"))]
-    const fn size_rounded_up_to_custom_align(&self, align: Alignment) -> usize {
-||||||| d29e4783dff
-    const fn size_rounded_up_to_custom_align(&self, align: Alignment) -> usize {
-=======
+    #[inline]
     const fn size_rounded_up_to_custom_alignment(&self, alignment: Alignment) -> usize {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // SAFETY:
         // Rounded up value is:
         //   size_rounded_up = (size + align - 1) & !(align - 1);
@@ -630,27 +612,6 @@ impl Layout {
             unsafe { Ok(Layout::from_size_alignment_unchecked(array_size, alignment)) }
         }
     }
-<<<<<<< HEAD
-
-    /// Perma-unstable access to `align` as `Alignment` type.
-    #[unstable(issue = "none", feature = "std_internals")]
-    #[doc(hidden)]
-    #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
-    pub const fn alignment(&self) -> Alignment {
-        self.align
-    }
-||||||| d29e4783dff
-
-    /// Perma-unstable access to `align` as `Alignment` type.
-    #[unstable(issue = "none", feature = "std_internals")]
-    #[doc(hidden)]
-    #[inline]
-    pub const fn alignment(&self) -> Alignment {
-        self.align
-    }
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[stable(feature = "alloc_layout", since = "1.28.0")]

@@ -222,7 +222,7 @@ declare_features! (
     /// Allows writing custom MIR
     (internal, custom_mir, "1.65.0", None),
     /// Implementation details of externally implementable items
-    (internal, eii_internals, "CURRENT_RUSTC_VERSION", None),
+    (internal, eii_internals, "1.94.0", None),
     /// Outputs useful `assert!` messages
     (unstable, generic_assert, "1.63.0", None),
     /// Allows using the #[rustc_intrinsic] attribute.
@@ -233,8 +233,6 @@ declare_features! (
     (internal, link_cfg, "1.14.0", None),
     /// Allows using `?Trait` trait bounds in more contexts.
     (internal, more_maybe_bounds, "1.82.0", None),
-    /// Allows the `multiple_supertrait_upcastable` lint.
-    (unstable, multiple_supertrait_upcastable, "1.69.0", None),
     /// Allow negative trait bounds. This is an internal-only feature for testing the trait solver!
     (internal, negative_bounds, "1.71.0", None),
     /// Set the maximum pattern complexity allowed (not limited by default).
@@ -363,8 +361,6 @@ declare_features! (
     (unstable, asm_goto_with_outputs, "1.85.0", Some(119364)),
     /// Allows the `may_unwind` option in inline assembly.
     (unstable, asm_unwind, "1.58.0", Some(93334)),
-    /// Allows users to enforce equality of associated constants `TraitImpl<AssocConst=3>`.
-    (unstable, associated_const_equality, "1.58.0", Some(92827)),
     /// Allows associated type defaults.
     (unstable, associated_type_defaults, "1.2.0", Some(29661)),
     /// Allows implementing `AsyncDrop`.
@@ -481,7 +477,7 @@ declare_features! (
     /// Allows using `#[export_stable]` which indicates that an item is exportable.
     (incomplete, export_stable, "1.88.0", Some(139939)),
     /// Externally implementable items
-    (unstable, extern_item_impls, "CURRENT_RUSTC_VERSION", Some(125418)),
+    (unstable, extern_item_impls, "1.94.0", Some(125418)),
     /// Allows defining `extern type`s.
     (unstable, extern_types, "1.23.0", Some(43467)),
     /// Allow using 128-bit (quad precision) floating point numbers.
@@ -571,6 +567,8 @@ declare_features! (
     (unstable, more_qualified_paths, "1.54.0", Some(86935)),
     /// The `movrs` target feature on x86.
     (unstable, movrs_target_feature, "1.88.0", Some(137976)),
+    /// Allows the `multiple_supertrait_upcastable` lint.
+    (unstable, multiple_supertrait_upcastable, "1.69.0", Some(150833)),
     /// Allows the `#[must_not_suspend]` attribute.
     (unstable, must_not_suspend, "1.57.0", Some(83310)),
     /// Allows `mut ref` and `mut ref mut` identifier patterns.
@@ -669,7 +667,7 @@ declare_features! (
     /// Allows using `try {...}` expressions.
     (unstable, try_blocks, "1.29.0", Some(31436)),
     /// Allows using `try bikeshed TargetType {...}` expressions.
-    (unstable, try_blocks_heterogeneous, "CURRENT_RUSTC_VERSION", Some(149488)),
+    (unstable, try_blocks_heterogeneous, "1.94.0", Some(149488)),
     /// Allows `impl Trait` to be used inside type aliases (RFC 2515).
     (unstable, type_alias_impl_trait, "1.38.0", Some(63063)),
     /// Allows creation of instances of a struct by moving fields that have

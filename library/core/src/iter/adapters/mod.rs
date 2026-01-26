@@ -45,8 +45,14 @@ mod take;
 mod take_while;
 mod zip;
 
+<<<<<<< HEAD
 #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
+=======
+#[unstable(feature = "iter_array_chunks", issue = "100450")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::array_chunks::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -61,14 +67,26 @@ pub use self::copied::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::flatten::Flatten;
+<<<<<<< HEAD
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
+=======
+#[unstable(feature = "iter_intersperse", issue = "79524")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::intersperse::{Intersperse, IntersperseWith};
 #[stable(feature = "iter_map_while", since = "1.57.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::map_while::MapWhile;
+<<<<<<< HEAD
 #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 7c04f5d216b
+#[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
+=======
+#[unstable(feature = "iter_map_windows", issue = "87155")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::map_windows::MapWindows;
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
 #[cfg(not(feature = "ferrocene_subset"))]

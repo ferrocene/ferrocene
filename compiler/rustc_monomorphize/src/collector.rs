@@ -267,7 +267,8 @@ pub(crate) struct UsageMap<'tcx> {
     // Maps every mono item to the mono items used by it.
     pub used_map: UnordMap<MonoItem<'tcx>, Vec<MonoItem<'tcx>>>,
 
-    // Maps every mono item to the mono items that use it.
+    // Maps each mono item with users to the mono items that use it.
+    // Be careful: subsets `used_map`, so unused items are vacant.
     user_map: UnordMap<MonoItem<'tcx>, Vec<MonoItem<'tcx>>>,
 }
 
@@ -1824,5 +1825,5 @@ pub(crate) fn collect_crate_mono_items<'tcx>(
 
 pub(crate) fn provide(providers: &mut Providers) {
     providers.hooks.should_codegen_locally = should_codegen_locally;
-    providers.items_of_instance = items_of_instance;
+    providers.queries.items_of_instance = items_of_instance;
 }

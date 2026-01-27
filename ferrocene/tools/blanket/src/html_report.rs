@@ -18,6 +18,8 @@ pub(crate) fn generate(
         functions.push(fragment);
     }
 
+    let mut num_lines_tested: f64 = 0.0;
+    let mut num_lines_untested: f64 = 0.0;
     let mut fully_tested = vec![];
     let mut partially_tested = vec![];
     let mut fully_untested = vec![];
@@ -29,13 +31,29 @@ pub(crate) fn generate(
             FunctionCoverageStatus::FullyUntested => fully_untested.push(function),
             FunctionCoverageStatus::FullyIgnored => fully_ignored.push(function),
         };
+
+        for (_, status) in &function.lines.lines {
+            match status {
+                LineCoverageStatus::Tested => num_lines_tested += 1.0,
+                LineCoverageStatus::Untested | LineCoverageStatus::Annotated => {
+                    num_lines_untested += 1.0
+                }
+                LineCoverageStatus::Ignored => (),
+            }
+        }
     }
+    assert_eq!(
+        fully_tested.len() + partially_tested.len() + fully_untested.len() + fully_ignored.len(),
+        coverage.len()
+    );
 
     let fully_tested_class = FunctionCoverageStatus::FullyTested.to_css_class();
     let partially_tested_class = FunctionCoverageStatus::PartiallyTested.to_css_class();
     let fully_untested_class = FunctionCoverageStatus::FullyUntested.to_css_class();
     let fully_ignored_class = FunctionCoverageStatus::FullyIgnored.to_css_class();
 
+    let total_lines = num_lines_tested + num_lines_untested;
+    let percentile_lines_tested = (num_lines_tested / (total_lines)) * 100.0;
     let summary = maud::html!(
         header {
             div class="header-title" {
@@ -50,7 +68,7 @@ pub(crate) fn generate(
         }
         div class="coverage-summary" {
             h1 {
-                "Unknown"
+                (format!("{percentile_lines_tested:.2}% ({num_lines_tested}/{total_lines} lines)"))
             }
         }
         div class="instructions" {
@@ -125,7 +143,7 @@ fn generate_section(
     let human = status.to_human();
     let section = maud::html!(
         section class=(class) data-status=(class)  {
-            h1 { span class="count" { "" } " " (human) }
+            h1 { span class="count" { (functions.len()) } " " (human) }
             div class="list" {
                 @for fragment in fragments {
                     (fragment)

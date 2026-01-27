@@ -121,7 +121,9 @@ declare_tool_lint! {
     ///
     /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
     pub ferrocene::UNCERTIFIED,
-    // Warn,
+    /// This lint is allowed-by-default, to avoid loud warnings for people using ferrocene as a
+    /// "normal" compiler. To enable it, add `#![warn(ferrocene::uncertified)]` to each crate in
+    /// your build, or add it to `[lints]` in Cargo.toml.
     Allow,
     "a verified function called an unverified function",
     report_in_external_macro: true
@@ -317,7 +319,7 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>)
                 instance
             }
         };
-        info!("lint root: {instance:?}");
+        debug!("linting root: {instance:?}");
         let def_id = instance.def_id().expect_local();
         if let Some(mut linter) = LintState::new(tcx, def_id) {
             LintPostMono::visit_instance(&mut linter, &mut visited, instance, None);
@@ -394,7 +396,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
         let site =
             InstantiationSite { lint_node, caller_instance: self.instance, caller_span: call_span };
-        info!("recurse into {callee_instance:?}");
+        trace!("recurse into {callee_instance:?}");
         LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
     }
 
@@ -410,6 +412,8 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                 Some((caller_span, caller_instance))
             }
             None => {
+                // TODO: i think this is wrong? it's assuming THIR will catch all issues in the
+                // current crate, but i'm not sure that's true ...
                 info!("ignoring root instantiation of {use_:?}");
                 return;
                 // info!("linting root instantiation of {use_:?}");
@@ -419,13 +423,6 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
         let tcx = self.linter.tcx;
         let (callee_instance, _) = use_.expect_instance();
-
-        // TODO: remove, this is statically impossible
-        // if !caller_instance.def_id().is_local() {
-        //     span_bug!(caller_span,
-        //         "instantiated mono item starting from another crate? instance={:?}, current={:?}",
-        //         caller_instance.def_id(), tcx.crate_name(LOCAL_CRATE));
-        // }
 
         let callee = callee_instance.def_id();
         let lint_item = self.linter.item;
@@ -479,15 +476,21 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             // We've already compiled this item in a previous crate and we didn't save the
             // MIR between crates.
             // We must have checked the item when it was compiled, so just ignore it.
-            debug!("no MIR for {owner:?}");
+            info!("no MIR for {owner:?}");
             return;
         } else if !visited.insert(instance) {
             // We've already linted this instance (or maybe we're still halfway through linting it).
             // Don't loop forever.
+            //
             // NOTE: this means that `-Z deduplicate-diagnostics=no` doesn't work properly for
             // post-mono errors. I think this isn't worth fixing; just use separate test files if
             // you need to test the same instance being instantiated more than once.
-            debug!("already linted {instance:?}");
+            //
+            // NOTE: because of the funny way we calculate lint nodes, this means that if the same
+            // item is instantiated in multiple places, only the lint level of the first
+            // instantiation will be respected. It might be possible to fix this by caching the
+            // lint level in addition to the instance itself?
+            info!("already linted {instance:?}");
             return;
         }
 
@@ -513,8 +516,8 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                         kind @ ty::FnDef(..) => {
                             span_bug!(span, "{kind:?} should have been a const_fn_def?")
                         }
-                        // ok: see reasoning elsewhere, we have checks to ensure all function pointers we
-                        // can get came from a certified function.
+                        // ok: see reasoning in THIR pass, we have checks to ensure all function
+                        // pointers we can get came from a certified function.
                         ty::FnPtr(..) => {}
                         _ => {
                             // If this is anything other than a function item, it can't have generics and
@@ -524,6 +527,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                                 .span_delayed_bug(span, format!("called a non-function? {func:?}"));
                         }
                     }
+                    info!("ignoring call to non-constant function {func:?}");
                     return None;
                 };
                 let instance = self.monomorphize_instance(pre_mono_call, generic_args, span);
@@ -571,7 +575,6 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
     fn monomorphize_args<T>(
         &self,
-        // generic_args: GenericArgsRef<'tcx>,
         generic_args: T,
         span: Span,
     ) -> (T, TypingEnv<'tcx>)
@@ -600,19 +603,8 @@ impl<'thir, 'tcx: 'thir> thir::visit::Visitor<'thir, 'tcx> for LintThir<'thir, '
             None => return,
             Some(use_) => use_,
         };
-        // This can happen for closures.
-        // without this, diagnostics crash trying to look up the lint level
-        // if self.linter.tcx.opt_hir_owner_node(owner).is_none() {
-        // if self.linter.tcx.hir_maybe_body_owned_by(owner).is_none() {
-        //     owner = self.linter.tcx.hir_enclosing_body_owner(owner);
-        // }
         let hir_id = HirId { owner: self.owner, local_id: expr.temp_scope_id };
-        // let owner = HirId::make_owner(self.linter.owner);
-        // let mut hir_id =
         debug!("id={hir_id:?}, kind={:?}", expr.kind);
-        // if matches!(expr.kind, thir::ExprKind::Closure { .. }) {
-        //     hir_id = HirId::make_owner(
-        // }
         self.linter.lint(hir_id, use_, |_, _| ());
     }
 }
@@ -646,6 +638,8 @@ fn dyn_trait<'tcx>(ty: Ty<'tcx>, span: Span) -> Vec<Binder<'tcx, ExistentialTrai
                             traits.push(t);
                         }
                     }
+                    // TODO: is it possible to have multiple Dynamic types in a single top-level
+                    // type? how? maybe with an enum?
                     ControlFlow::Break(traits)
                 }
                 _ => t.super_visit_with(self),
@@ -737,6 +731,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             // However, we still need to check the closure body to make sure it doesn't call
             // uncertified functions.
             thir::ExprKind::Closure(ref expr) => {
+                // Closures are never an owner, so we need to hang onto the original owner so that
+                // our synthesized HirIds are valid.
                 LintThir::lint_owner(tcx, self.owner, expr.closure_id);
                 return None;
             }
@@ -816,9 +812,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             return None;
         }
 
-        // Skip trait functions. These happen when we're calling the vtable of a
-        // `dyn` unsized object. This case is caught below in
-        // `PointerCoercion::Unsize`.
+        // Skip trait functions. These happen when we're calling the vtable of a `dyn` unsized
+        // object. This case is caught below in `PointerCoercion::Unsize`.
         if matches!(callee.def, InstanceKind::Virtual(..)) {
             info!("skipping dyn assoc item {callee:?}");
             return None;
@@ -839,18 +834,16 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
         // apparently the rest of THIR uses this? it has a comment saying it's wrong though...
         //let typing_mode = TypingMode::non_body_analysis();
+        // this definitely works but there's scary comments about revealing opaque types
+        // let env = TypingEnv::post_analysis(tcx, self.linter.owner);
 
-        // this panics with "failed to normalize" :(
-        // maybe changing the param_env fixed it?
         let typing_mode = TypingMode::typeck_for_body(tcx, self.linter.item);
         let param_env = tcx.param_env(self.linter.item);
         let env = TypingEnv { typing_mode, param_env };
 
-        // this definitely works but there's scary comments about revealing opaque types
-        // let env = TypingEnv::post_analysis(tcx, self.linter.owner);
         match Instance::try_resolve(tcx, env, def_id, args) {
-            Err(_) => {
-                tcx.dcx().span_delayed_bug(span, "could not resolve instance");
+            Err(_) => { // this happens when we hit the type length limit
+                tcx.dcx().span_delayed_bug(span, format!("could not resolve instance ({def_id:?}, {args:?})"));
                 InstantiateResult::Err
             }
             Ok(None) => InstantiateResult::Indeterminate,

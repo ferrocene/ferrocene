@@ -69,7 +69,6 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
-  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
   test:
@@ -99,6 +98,7 @@ jobs:
 
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
+        if: ${{ inputs.use-minio == true }}
         with:
           aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
@@ -107,6 +107,8 @@ jobs:
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || '' }}
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
@@ -153,7 +155,6 @@ jobs:
       - name: Upload artifacts to S3
         if: "!cancelled()"
         env:
-          AWS_PROFILE: amazon # Dist artifacts always go to AWS
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ env.ARTIFACT }}
         run: ./ferrocene/ci/scripts/upload-dist-artifacts.sh

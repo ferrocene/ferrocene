@@ -94,6 +94,7 @@ jobs:
 
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
+        if: ${{ inputs.use-minio == true }}
         with:
           aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
@@ -104,7 +105,7 @@ jobs:
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.restore-build-cache == true }}
         env:
-          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || '' }}
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
@@ -150,7 +151,6 @@ jobs:
       - name: Upload artifacts to S3
         if: "!cancelled()"
         env:
-          # AWS_PROFILE: amazon
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ inputs.build-metrics-artifact }}
         run: |

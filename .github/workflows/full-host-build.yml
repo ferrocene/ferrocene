@@ -60,10 +60,8 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
-  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
-
   # A job to build LLVM.
   llvm:
     runs-on: ${{ inputs.llvm-runner }}
@@ -87,6 +85,7 @@ jobs:
 
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
+        if: ${{ inputs.use-minio == true }}
         with:
           aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
@@ -97,7 +96,7 @@ jobs:
         id: check
         shell: bash
         env:
-          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
         run: |
           if [ -z "${AWS_CA_BUNDLE}" ]; then
             unset AWS_CA_BUNDLE
@@ -110,7 +109,7 @@ jobs:
 
           uri=s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/$name
           echo "uri=$uri" >> $GITHUB_OUTPUT
-          
+
           set +e
           state="miss"
           uv run ferrocene/ci/scripts/llvm_cache.py exists --url $uri
@@ -131,7 +130,6 @@ jobs:
           container: ${{ inputs.container }}
           script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url ${{ steps.check.outputs.uri }}
 
-        
   build:
     runs-on: ${{ inputs.rust-runner }}
     environment: ${{ inputs.environment }}
@@ -155,6 +153,7 @@ jobs:
 
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
+        if: ${{ inputs.use-minio == true }}
         with:
           aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
@@ -163,6 +162,8 @@ jobs:
 
       - name: Get LLVM cache
         shell: bash
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
         run: |
           if [ -z "${AWS_CA_BUNDLE}" ]; then
             unset AWS_CA_BUNDLE
@@ -180,6 +181,8 @@ jobs:
 
       - name: Build cache upload
         shell: bash
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
         run: |
           if [ -z "${AWS_CA_BUNDLE}" ]; then
             unset AWS_CA_BUNDLE
@@ -187,5 +190,3 @@ jobs:
 
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
           uv run ./ferrocene/ci/scripts/cache.py store "s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
-
-

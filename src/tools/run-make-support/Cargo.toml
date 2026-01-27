@@ -21,7 +21,7 @@ wasmparser = { version = "0.236", default-features = false, features = ["std", "
 # tidy-alphabetical-end
 
 # Shared with bootstrap and compiletest
-build_helper = { path = "../../build_helper" }
+build_helper = { path = "../../build_helper", features = ["metrics"]} # Ferrocene addition: We need the metrics feature for symbol report
 # Shared with rustdoc
 rustdoc-json-types = { path = "../../rustdoc-json-types" }
 

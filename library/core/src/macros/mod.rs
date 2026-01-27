@@ -284,16 +284,10 @@ macro_rules! assert_ne {
 /// assert_matches!(a, Some(x) if x > 100);
 /// // assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
+#[cfg(not(feature = "ferrocene_certified_runtime"))]
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
-<<<<<<< HEAD
-#[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
-||||||| 7c04f5d216b
-#[rustc_macro_transparency = "semitransparent"]
-=======
 #[rustc_macro_transparency = "semiopaque"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         match $left {
@@ -363,10 +357,10 @@ pub macro assert_matches {
 /// assert_matches!(a, Some(x) if x > 100);
 /// // assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
+#[cfg(feature = "ferrocene_certified_runtime")]
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(panic_internals)]
-#[rustc_macro_transparency = "semitransparent"]
-#[cfg(feature = "ferrocene_certified_runtime")]
+#[rustc_macro_transparency = "semiopaque"]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) =>{
         match $left {
@@ -598,16 +592,10 @@ macro_rules! debug_assert_ne {
 /// debug_assert_matches!(a, Some(x) if x > 100);
 /// // debug_assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "assert_matches", issue = "82775")]
 #[allow_internal_unstable(assert_matches)]
-<<<<<<< HEAD
-#[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-#[rustc_macro_transparency = "semitransparent"]
-=======
 #[rustc_macro_transparency = "semiopaque"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro debug_assert_matches($($arg:tt)*) {
     if $crate::cfg!(debug_assertions) {
         $crate::assert_matches::assert_matches!($($arg)*);

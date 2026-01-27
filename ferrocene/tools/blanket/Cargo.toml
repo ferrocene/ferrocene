@@ -4,7 +4,7 @@ edition.workspace = true
 
 [dependencies]
 anyhow = { version = "1.0.100", features = ["backtrace"] }
-build_helper = { path = "../../../src/build_helper" }
+build_helper = { path = "../../../src/build_helper", features = ["metrics"]}
 llvm_profparser = { version = "0.10.0", default-features = false }
 maud = { version = "0.27.0" }
 serde = { version = "1.0.226", features = ["derive"] }

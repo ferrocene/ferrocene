@@ -58,6 +58,7 @@ pub use crate::fmt::macros::Debug;
 #[doc(no_inline)]
 pub use crate::hash::macros::Hash;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
 #[expect(deprecated)]
@@ -67,6 +68,14 @@ pub use crate::{
     module_path, option_env, stringify, todo, r#try, unimplemented, unreachable, write, writeln,
 };
 
+#[cfg(feature = "ferrocene_subset")]
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+#[doc(no_inline)]
+pub use crate::{
+    assert, assert_eq, assert_ne, cfg, column, compile_error, concat, debug_assert,
+ file, format_args, include, include_bytes, include_str, line, matches,
+    module_path, option_env, stringify, unreachable, write, writeln,
+};
 // These macros need special handling, so that we don't export them *and* the modules of the same
 // name. We only want the macros in the prelude so we shadow the original modules with private
 // modules with the same names.
@@ -106,6 +115,7 @@ pub use crate::const_format_args;
 #[doc(no_inline)]
 pub use crate::log_syntax;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
 #[doc(no_inline)]
 pub use crate::pattern_type;

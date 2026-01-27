@@ -48,6 +48,7 @@ pub use drop_guard::DropGuard;
 #[doc(inline)]
 pub use crate::intrinsics::transmute;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "type_info", issue = "146922")]
 pub mod type_info;
 

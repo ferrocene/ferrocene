@@ -10,12 +10,8 @@
 use crate::clone::TrivialClone;
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
 use crate::intrinsics::{exact_div, unchecked_sub};
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-=======
 use crate::marker::Destruct;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -69,14 +65,8 @@ pub use index::SliceIndex;
 #[unstable(feature = "slice_range", issue = "76393")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use index::{range, try_range};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[stable(feature = "array_windows", since = "CURRENT_RUSTC_VERSION")]
-||||||| 7c04f5d216b
-#[stable(feature = "array_windows", since = "CURRENT_RUSTC_VERSION")]
-=======
 #[stable(feature = "array_windows", since = "1.94.0")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use iter::ArrayWindows;
 #[stable(feature = "slice_group_by", since = "1.77.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -3390,6 +3380,7 @@ impl<T> [T] {
     /// ```
     ///
     /// [`sort_unstable`]: slice::sort_unstable
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "slice_partial_sort_unstable", issue = "149046")]
     #[inline]
     pub fn partial_sort_unstable<R>(&mut self, range: R)
@@ -3461,6 +3452,7 @@ impl<T> [T] {
     /// ```
     ///
     /// [`sort_unstable_by`]: slice::sort_unstable_by
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "slice_partial_sort_unstable", issue = "149046")]
     #[inline]
     pub fn partial_sort_unstable_by<F, R>(&mut self, range: R, mut compare: F)
@@ -3532,6 +3524,7 @@ impl<T> [T] {
     /// ```
     ///
     /// [`sort_unstable_by_key`]: slice::sort_unstable_by_key
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "slice_partial_sort_unstable", issue = "149046")]
     #[inline]
     pub fn partial_sort_unstable_by_key<K, F, R>(&mut self, range: R, mut f: F)
@@ -5156,15 +5149,9 @@ impl<T> [T] {
     /// assert_eq!(arr.element_offset(ok_elm), Some(0)); // Points to element 0
     /// assert_eq!(arr.element_offset(weird_elm), None); // Points between element 0 and 1
     /// ```
-    #[must_use]
-<<<<<<< HEAD
-    #[unstable(feature = "substr_range", issue = "126769")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "substr_range", issue = "126769")]
-=======
+    #[must_use]
     #[stable(feature = "element_offset", since = "1.94.0")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn element_offset(&self, element: &T) -> Option<usize> {
         if T::IS_ZST {
             panic!("elements are zero-sized");
@@ -5524,15 +5511,9 @@ where
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-impl<T> CloneFromSpec<T> for [T]
-||||||| 7c04f5d216b
-impl<T> CloneFromSpec<T> for [T]
-=======
 #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
 impl<T> const CloneFromSpec<T> for [T]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 where
     T: [const] TrivialClone + [const] Destruct,
 {

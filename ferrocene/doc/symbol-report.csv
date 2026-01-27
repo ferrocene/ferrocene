@@ -5244,8 +5244,6 @@ core::slice::ascii::is_ascii::runtime
 core::slice::ascii::is_ascii::runtime::contains_nonascii
 core::slice::ascii::is_ascii_simple
 core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::eq
-core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::ne
-core::slice::cmp::SlicePartialEq::not_equal
 core::slice::copy_from_slice_impl
 core::slice::copy_from_slice_impl::len_mismatch_fail
 core::slice::copy_from_slice_impl::len_mismatch_fail::do_panic

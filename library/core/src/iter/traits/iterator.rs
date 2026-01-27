@@ -120,15 +120,9 @@ pub trait Iterator {
     /// assert_eq!(second, "all");
     /// assert_eq!(third, "those");
     /// ```
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "iter_next_chunk", reason = "recently added", issue = "98326")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_next_chunk", reason = "recently added", issue = "98326")]
-=======
+    #[inline]
     #[unstable(feature = "iter_next_chunk", issue = "98326")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -677,15 +671,9 @@ pub trait Iterator {
     ///
     /// [`Clone`]: crate::clone::Clone
     /// [`intersperse_with`]: Iterator::intersperse_with
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
-=======
+    #[inline]
     #[unstable(feature = "iter_intersperse", issue = "79524")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn intersperse(self, separator: Self::Item) -> Intersperse<Self>
     where
         Self: Sized,
@@ -742,15 +730,9 @@ pub trait Iterator {
     /// ```
     /// [`Clone`]: crate::clone::Clone
     /// [`intersperse`]: Iterator::intersperse
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
-=======
+    #[inline]
     #[unstable(feature = "iter_intersperse", issue = "79524")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn intersperse_with<G>(self, separator: G) -> IntersperseWith<Self, G>
     where
         Self: Sized,
@@ -1756,15 +1738,9 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), None);
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
-=======
+    #[inline]
     #[unstable(feature = "iter_map_windows", issue = "87155")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>
     where
         Self: Sized,
@@ -2231,15 +2207,9 @@ pub trait Iterator {
     /// assert_eq!(count, vec.len());
     /// assert_eq!(vec, vec![1, 2, 3, 1, 2, 3]);
     /// ```
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "iter_collect_into", reason = "new API", issue = "94780")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_collect_into", reason = "new API", issue = "94780")]
-=======
+    #[inline]
     #[unstable(feature = "iter_collect_into", issue = "94780")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn collect_into<E: Extend<Self::Item>>(self, collection: &mut E) -> &mut E
     where
         Self: Sized,
@@ -2334,14 +2304,8 @@ pub trait Iterator {
     /// assert!(a[..i].iter().all(|n| n % 2 == 0)); // evens
     /// assert!(a[i..].iter().all(|n| n % 2 == 1)); // odds
     /// ```
-<<<<<<< HEAD
-    #[unstable(feature = "iter_partition_in_place", reason = "new API", issue = "62543")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_partition_in_place", reason = "new API", issue = "62543")]
-=======
     #[unstable(feature = "iter_partition_in_place", issue = "62543")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn partition_in_place<'a, T: 'a, P>(mut self, ref mut predicate: P) -> usize
     where
         Self: Sized + DoubleEndedIterator<Item = &'a mut T>,
@@ -2398,14 +2362,8 @@ pub trait Iterator {
     /// assert!("Iterator".chars().is_partitioned(char::is_uppercase));
     /// assert!(!"IntoIterator".chars().is_partitioned(char::is_uppercase));
     /// ```
-<<<<<<< HEAD
-    #[unstable(feature = "iter_is_partitioned", reason = "new API", issue = "62544")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_is_partitioned", reason = "new API", issue = "62544")]
-=======
     #[unstable(feature = "iter_is_partitioned", issue = "62544")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn is_partitioned<P>(mut self, mut predicate: P) -> bool
     where
         Self: Sized,
@@ -2783,15 +2741,9 @@ pub trait Iterator {
     ///     });
     /// assert_eq!(max, Ok(Some("5")));
     /// ```
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "iterator_try_reduce", reason = "new API", issue = "87053")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iterator_try_reduce", reason = "new API", issue = "87053")]
-=======
+    #[inline]
     #[unstable(feature = "iterator_try_reduce", issue = "87053")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn try_reduce<R>(
         &mut self,
         f: impl FnMut(Self::Item, Self::Item) -> R,
@@ -3064,15 +3016,9 @@ pub trait Iterator {
     /// let result = a.into_iter().rev().try_find(|&x| NonZero::new(x).map(|y| y.is_power_of_two()));
     /// assert_eq!(result, None);
     /// ```
-    #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "try_find", reason = "new API", issue = "63178")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "try_find", reason = "new API", issue = "63178")]
-=======
+    #[inline]
     #[unstable(feature = "try_find", issue = "63178")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn try_find<R>(
         &mut self,
         f: impl FnMut(&Self::Item) -> R,
@@ -3653,15 +3599,9 @@ pub trait Iterator {
     ///     assert_eq!(x + y + z, 4);
     /// }
     /// ```
-    #[track_caller]
-<<<<<<< HEAD
-    #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 7c04f5d216b
-    #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
-=======
+    #[track_caller]
     #[unstable(feature = "iter_array_chunks", issue = "100450")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn array_chunks<const N: usize>(self) -> ArrayChunks<Self, N>
     where
         Self: Sized,

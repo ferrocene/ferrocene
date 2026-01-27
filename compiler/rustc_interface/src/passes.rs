@@ -961,8 +961,8 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
     codegen_backend.provide(&mut providers);
 
     // Ferrocene addition: Run our post-mono ferrocene::unvalidated lint pass.
-    providers.collect_and_partition_mono_items = |tcx, ()| {
-        let items = (DEFAULT_QUERY_PROVIDERS.collect_and_partition_mono_items)(tcx, ());
+    providers.queries.collect_and_partition_mono_items = |tcx, ()| {
+        let items = (DEFAULT_QUERY_PROVIDERS.queries.collect_and_partition_mono_items)(tcx, ());
         // We do this here because it integrates with the query system to rerun whenever the items
         // being monomorphized change. We need to ensure that we never monomorphize an item without
         // also checking if it's validated.

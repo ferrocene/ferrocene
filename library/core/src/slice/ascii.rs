@@ -67,6 +67,7 @@ impl [u8] {
     #[rustc_const_stable(feature = "const_eq_ignore_ascii_case", since = "1.89.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn eq_ignore_ascii_case(&self, other: &[u8]) -> bool {
         if self.len() != other.len() {
             return false;

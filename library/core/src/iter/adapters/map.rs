@@ -75,6 +75,7 @@ pub struct Map<I, F> {
 }
 
 impl<I, F> Map<I, F> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, f: F) -> Map<I, F> {
         Map { iter, f }
     }
@@ -93,6 +94,7 @@ impl<I: fmt::Debug, F> fmt::Debug for Map<I, F> {
     }
 }
 
+#[ferrocene::prevalidated]
 fn map_fold<T, B, Acc>(
     mut f: impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> Acc,
@@ -100,6 +102,7 @@ fn map_fold<T, B, Acc>(
     move |acc, elt| g(acc, f(elt))
 }
 
+#[ferrocene::prevalidated]
 fn map_try_fold<'a, T, B, Acc, R>(
     f: &'a mut impl FnMut(T) -> B,
     mut g: impl FnMut(Acc, B) -> R + 'a,
@@ -115,15 +118,18 @@ where
     type Item = B;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<B> {
         self.iter.next().map(&mut self.f)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -133,6 +139,7 @@ where
         self.iter.try_fold(init, map_try_fold(&mut self.f, g))
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,
@@ -216,6 +223,7 @@ where
     I: UncheckedIterator,
     F: FnMut(I::Item) -> B,
 {
+    #[ferrocene::prevalidated]
     unsafe fn next_unchecked(&mut self) -> B {
         // SAFETY: `Map` is 1:1 with the inner iterator, so if the caller promised
         // that there's an element left, the inner iterator has one too.

@@ -103,6 +103,7 @@ use crate::{intrinsics, ub_checks};
 #[rustc_const_stable(feature = "const_unreachable_unchecked", since = "1.57.0")]
 #[track_caller]
 #[coverage(off)] // Ferrocene addition: this function breaks llvm-cov
+#[ferrocene::prevalidated]
 pub const unsafe fn unreachable_unchecked() -> ! {
     ub_checks::assert_unsafe_precondition!(
         check_language_ub,
@@ -202,6 +203,7 @@ pub const unsafe fn unreachable_unchecked() -> ! {
 #[doc(alias = "assume")]
 #[stable(feature = "hint_assert_unchecked", since = "1.81.0")]
 #[rustc_const_stable(feature = "hint_assert_unchecked", since = "1.81.0")]
+#[ferrocene::prevalidated]
 pub const unsafe fn assert_unchecked(cond: bool) {
     // SAFETY: The caller promised `cond` is true.
     unsafe {

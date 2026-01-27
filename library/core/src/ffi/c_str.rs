@@ -267,6 +267,7 @@ impl CStr {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cstr_from_ptr", since = "1.81.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a CStr {
         // SAFETY: The caller has provided a pointer that points to a valid C
         // string with a NUL terminator less than `isize::MAX` from `ptr`.
@@ -366,6 +367,7 @@ impl CStr {
     /// ```
     #[stable(feature = "cstr_from_bytes", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[ferrocene::prevalidated]
     pub const fn from_bytes_with_nul(bytes: &[u8]) -> Result<&Self, FromBytesWithNulError> {
         let nul_pos = memchr::memchr(0, bytes);
         match nul_pos {
@@ -403,6 +405,7 @@ impl CStr {
     #[stable(feature = "cstr_from_bytes", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_cstr_unchecked", since = "1.59.0")]
     #[rustc_allow_const_fn_unstable(const_eval_select)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_bytes_with_nul_unchecked(bytes: &[u8]) -> &CStr {
         const_eval_select!(
             @capture { bytes: &[u8] } -> &CStr:
@@ -601,6 +604,7 @@ impl CStr {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[ferrocene::prevalidated]
     pub const fn to_bytes_with_nul(&self) -> &[u8] {
         // SAFETY: Transmuting a slice of `c_char`s to a slice of `u8`s
         // is safe on all supported targets.
@@ -766,6 +770,7 @@ impl const AsRef<CStr> for CStr {
 #[inline]
 #[unstable(feature = "cstr_internals", issue = "none")]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 const unsafe fn strlen(ptr: *const c_char) -> usize {
     const_eval_select!(
         @capture { s: *const c_char = ptr } -> usize:

@@ -30,6 +30,7 @@ impl bool {
     /// ```
     #[stable(feature = "bool_to_option", since = "1.62.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn then_some<T>(self, t: T) -> Option<T> {
         if self { Some(t) } else { None }
     }
@@ -58,6 +59,7 @@ impl bool {
     #[stable(feature = "lazy_bool_to_option", since = "1.50.0")]
     #[rustc_diagnostic_item = "bool_then"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn then<T, F: FnOnce() -> T>(self, f: F) -> Option<T> {
         if self { Some(f()) } else { None }
     }
@@ -95,6 +97,7 @@ impl bool {
     /// ```
     #[unstable(feature = "bool_to_result", issue = "142748")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn ok_or<E>(self, err: E) -> Result<(), E> {
         if self { Ok(()) } else { Err(err) }
     }
@@ -125,6 +128,7 @@ impl bool {
     /// ```
     #[unstable(feature = "bool_to_result", issue = "142748")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn ok_or_else<E, F: FnOnce() -> E>(self, f: F) -> Result<(), E> {
         if self { Ok(()) } else { Err(f()) }
     }

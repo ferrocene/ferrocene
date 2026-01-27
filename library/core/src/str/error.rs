@@ -78,6 +78,7 @@ impl Utf8Error {
     #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn valid_up_to(&self) -> usize {
         self.valid_up_to
     }
@@ -101,6 +102,7 @@ impl Utf8Error {
     #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn error_len(&self) -> Option<usize> {
         // FIXME(const-hack): This should become `map` again, once it's `const`
         match self.error_len {

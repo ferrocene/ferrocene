@@ -34,7 +34,8 @@ macro_rules! define_valid_range_type {
 
         impl $name {
             #[inline]
-            pub const fn new(val: $int) -> Option<Self> {
+            #[ferrocene::prevalidated]
+pub const fn new(val: $int) -> Option<Self> {
                 if (val as $uint) >= ($low as $uint) && (val as $uint) <= ($high as $uint) {
                     // SAFETY: just checked the inclusive range
                     Some(unsafe { $name(val) })
@@ -50,13 +51,15 @@ macro_rules! define_valid_range_type {
             /// Immediate language UB if `val` is not within the valid range for this
             /// type, as it violates the validity invariant.
             #[inline]
-            pub const unsafe fn new_unchecked(val: $int) -> Self {
+            #[ferrocene::prevalidated]
+pub const unsafe fn new_unchecked(val: $int) -> Self {
                 // SAFETY: Caller promised that `val` is within the valid range.
                 unsafe { $name(val) }
             }
 
             #[inline]
-            pub const fn as_inner(self) -> $int {
+            #[ferrocene::prevalidated]
+pub const fn as_inner(self) -> $int {
                 // SAFETY: This is a transparent wrapper, so unwrapping it is sound
                 // (Not using `.0` due to MCP#807.)
                 unsafe { crate::mem::transmute(self) }
@@ -70,28 +73,32 @@ macro_rules! define_valid_range_type {
 
         impl PartialEq for $name {
             #[inline]
-            fn eq(&self, other: &Self) -> bool {
+            #[ferrocene::prevalidated]
+fn eq(&self, other: &Self) -> bool {
                 self.as_inner() == other.as_inner()
             }
         }
 
         impl Ord for $name {
             #[inline]
-            fn cmp(&self, other: &Self) -> Ordering {
+            #[ferrocene::prevalidated]
+fn cmp(&self, other: &Self) -> Ordering {
                 Ord::cmp(&self.as_inner(), &other.as_inner())
             }
         }
 
         impl PartialOrd for $name {
             #[inline]
-            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            #[ferrocene::prevalidated]
+fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 Some(Ord::cmp(self, other))
             }
         }
 
         impl Hash for $name {
             // Required method
-            fn hash<H: Hasher>(&self, state: &mut H) {
+            #[ferrocene::prevalidated]
+fn hash<H: Hasher>(&self, state: &mut H) {
                 Hash::hash(&self.as_inner(), state);
             }
         }
@@ -117,6 +124,7 @@ impl Nanoseconds {
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
 impl const Default for Nanoseconds {
     #[inline]
+    #[ferrocene::prevalidated]
     fn default() -> Self {
         Self::ZERO
     }

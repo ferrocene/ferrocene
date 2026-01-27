@@ -28,6 +28,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_is_null"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_null(self) -> bool {
         self.cast_const().is_null()
     }
@@ -37,6 +38,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_cast", since = "1.38.0")]
     #[rustc_diagnostic_item = "ptr_cast"]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn cast<U>(self) -> *mut U {
         self as _
     }
@@ -142,6 +144,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_const"]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn cast_const(self) -> *const T {
         self as _
     }
@@ -152,6 +155,7 @@ impl<T: PointeeSized> *mut T {
     #[must_use]
     #[inline(always)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[ferrocene::prevalidated]
     pub fn addr(self) -> usize {
         // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
         // address without exposing the provenance. Note that this is *not* a stable guarantee about
@@ -234,6 +238,7 @@ impl<T: PointeeSized> *mut T {
     /// The pointer can be later reconstructed with [`from_raw_parts_mut`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_raw_parts(self) -> (*mut (), <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self))
     }
@@ -366,12 +371,14 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn offset(self, count: isize) -> *mut T
     where
         T: Sized,
     {
         #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_offset_nowrap(this: *const (), count: isize, size: usize) -> bool {
             // We can use const_eval_select here because this is only for UB checks.
             const_eval_select!(
@@ -480,6 +487,7 @@ impl<T: PointeeSized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn wrapping_offset(self, count: isize) -> *mut T
     where
         T: Sized,
@@ -599,6 +607,7 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const unsafe fn as_mut<'a>(self) -> Option<&'a mut T> {
         // SAFETY: the caller must guarantee that `self` is be valid for
         // a mutable reference if it isn't null.
@@ -905,6 +914,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -951,6 +961,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -958,6 +969,7 @@ impl<T: PointeeSized> *mut T {
         #[cfg(debug_assertions)]
         #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_add_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
                 @capture { this: *const (), count: usize, size: usize } -> bool:
@@ -1058,6 +1070,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1065,6 +1078,7 @@ impl<T: PointeeSized> *mut T {
         #[cfg(debug_assertions)]
         #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_sub_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
                 @capture { this: *const (), count: usize, size: usize } -> bool:
@@ -1174,6 +1188,7 @@ impl<T: PointeeSized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1287,6 +1302,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1449,6 +1465,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1468,6 +1485,7 @@ impl<T: PointeeSized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,
@@ -1528,6 +1546,7 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "1.88.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn replace(self, src: T) -> T
     where
         T: Sized,
@@ -1735,6 +1754,7 @@ impl<T> *mut [T] {
     #[inline(always)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub const fn len(self) -> usize {
         metadata(self)
     }
@@ -1752,6 +1772,7 @@ impl<T> *mut [T] {
     #[inline(always)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_empty(self) -> bool {
         self.len() == 0
     }
@@ -1763,6 +1784,7 @@ impl<T> *mut [T] {
     #[rustc_const_stable(feature = "core_slice_as_array", since = "1.93.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_array<const N: usize>(self) -> Option<*mut [T; N]> {
         if self.len() == N {
             let me = self.as_mut_ptr() as *mut [T; N];
@@ -1815,6 +1837,7 @@ impl<T> *mut [T] {
     #[inline(always)]
     #[track_caller]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
+    #[ferrocene::prevalidated]
     pub unsafe fn split_at_mut(self, mid: usize) -> (*mut [T], *mut [T]) {
         assert!(mid <= self.len());
         // SAFETY: The assert above is only a safety-net as long as `self.len()` is correct
@@ -1859,6 +1882,7 @@ impl<T> *mut [T] {
     /// ```
     #[inline(always)]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
+    #[ferrocene::prevalidated]
     pub unsafe fn split_at_mut_unchecked(self, mid: usize) -> (*mut [T], *mut [T]) {
         let len = self.len();
         let ptr = self.as_mut_ptr();
@@ -1886,6 +1910,7 @@ impl<T> *mut [T] {
     /// ```
     #[inline(always)]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr(self) -> *mut T {
         self as *mut T
     }
@@ -1913,6 +1938,7 @@ impl<T> *mut [T] {
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn get_unchecked_mut<I>(self, index: I) -> *mut I::Output
     where
         I: [const] SliceIndex<[T]>,
@@ -2001,6 +2027,7 @@ impl<T> *mut T {
     /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
     #[inline]
     #[unstable(feature = "ptr_cast_array", issue = "144514")]
+    #[ferrocene::prevalidated]
     pub const fn cast_array<const N: usize>(self) -> *mut [T; N] {
         self.cast()
     }
@@ -2057,6 +2084,7 @@ impl<T, const N: usize> *mut [T; N] {
 impl<T: PointeeSized> PartialEq for *mut T {
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &*mut T) -> bool {
         *self == *other
     }

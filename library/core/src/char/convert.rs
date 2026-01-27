@@ -28,6 +28,7 @@ pub(super) const fn from_u32(i: u32) -> Option<char> {
 #[must_use]
 #[allow(unnecessary_transmutes)]
 #[track_caller]
+#[ferrocene::prevalidated]
 pub(super) const unsafe fn from_u32_unchecked(i: u32) -> char {
     // SAFETY: the caller must guarantee that `i` is a valid char value.
     unsafe {
@@ -294,6 +295,7 @@ impl FromStr for char {
 
 #[inline]
 #[allow(unnecessary_transmutes)]
+#[ferrocene::prevalidated]
 const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
     // This is an optimized version of the check
     // (i > MAX as u32) || (i >= 0xD800 && i <= 0xDFFF),

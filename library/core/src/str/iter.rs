@@ -51,6 +51,7 @@ impl<'a> Iterator for Chars<'a> {
     type Item = char;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<char> {
         // SAFETY: `str` invariant says `self.iter` is a valid UTF-8 string and
         // the resulting `ch` is a valid Unicode Scalar Value.
@@ -64,6 +65,7 @@ impl<'a> Iterator for Chars<'a> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, mut remainder: usize) -> Result<(), NonZero<usize>> {
         const CHUNK_SIZE: usize = 32;
 
@@ -113,6 +115,7 @@ impl<'a> Iterator for Chars<'a> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.iter.len();
         // `(len + 3)` can't overflow, because we know that the `slice::Iter`
@@ -122,6 +125,7 @@ impl<'a> Iterator for Chars<'a> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<char> {
         // No need to go through the entire string.
         self.next_back()
@@ -142,6 +146,7 @@ impl fmt::Debug for Chars<'_> {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Chars<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<char> {
         // SAFETY: `str` invariant says `self.iter` is a valid UTF-8 string and
         // the resulting `ch` is a valid Unicode Scalar Value.
@@ -174,6 +179,7 @@ impl<'a> Chars<'a> {
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_str(&self) -> &'a str {
         // SAFETY: `Chars` is only made from a str, which guarantees the iter is valid UTF-8.
         unsafe { from_utf8_unchecked(self.iter.as_slice()) }
@@ -314,11 +320,13 @@ impl Iterator for Bytes<'_> {
     type Item = u8;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<u8> {
         self.0.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
@@ -330,16 +338,19 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         self.0.last()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.0.nth(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn all<F>(&mut self, f: F) -> bool
     where
         F: FnMut(Self::Item) -> bool,
@@ -348,6 +359,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn any<F>(&mut self, f: F) -> bool
     where
         F: FnMut(Self::Item) -> bool,
@@ -356,6 +368,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -364,6 +377,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,

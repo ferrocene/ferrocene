@@ -178,6 +178,7 @@ define_signed_ilog10! {
 /// on every single primitive type.
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 pub(super) const fn panic_for_nonpositive_argument() -> ! {
     panic!("argument of integer logarithm must be positive")
 }

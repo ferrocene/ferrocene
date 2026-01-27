@@ -34,6 +34,7 @@ pub struct Chain<A, B> {
     b: Option<B>,
 }
 impl<A, B> Chain<A, B> {
+    #[ferrocene::prevalidated]
     pub(in super::super) fn new(a: A, b: B) -> Chain<A, B> {
         Chain { a: Some(a), b: Some(b) }
     }
@@ -80,6 +81,7 @@ where
     type Item = A::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A::Item> {
         and_then_or_clear(&mut self.a, Iterator::next).or_else(|| self.b.as_mut()?.next())
     }
@@ -99,6 +101,7 @@ where
         a_count + b_count
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         Self: Sized,
@@ -116,6 +119,7 @@ where
         try { acc }
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -130,6 +134,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -148,6 +153,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, mut n: usize) -> Option<Self::Item> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -165,6 +171,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -174,6 +181,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<A::Item> {
         // Must exhaust a before b.
         let a_last = self.a.and_then(Iterator::last);
@@ -182,6 +190,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
             Chain { a: Some(a), b: Some(b) } => {
@@ -335,6 +344,7 @@ impl<A: Default, B: Default> Default for Chain<A, B> {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
     if x.is_none() {

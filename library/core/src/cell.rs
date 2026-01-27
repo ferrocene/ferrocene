@@ -441,6 +441,7 @@ impl<T> Cell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_new", since = "1.24.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> Cell<T> {
         Cell { value: UnsafeCell::new(value) }
     }
@@ -460,6 +461,7 @@ impl<T> Cell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn set(&self, val: T)
     where
         T: [const] Destruct,
@@ -538,6 +540,7 @@ impl<T> Cell<T> {
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     #[rustc_confusables("swap")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn replace(&self, val: T) -> T {
         // SAFETY: This can cause data races if called from a separate thread,
         // but `Cell` is `!Sync` so this won't happen.
@@ -581,6 +584,7 @@ impl<T: Copy> Cell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn get(&self) -> T {
         // SAFETY: This can cause data races if called from a separate thread,
         // but `Cell` is `!Sync` so this won't happen.
@@ -936,6 +940,7 @@ impl Display for BorrowMutError {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
+#[ferrocene::prevalidated]
 const fn panic_already_borrowed(err: BorrowMutError) -> ! {
     const_panic!(
         "RefCell already borrowed",
@@ -948,6 +953,7 @@ const fn panic_already_borrowed(err: BorrowMutError) -> ! {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
+#[ferrocene::prevalidated]
 const fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
     const_panic!(
         "RefCell already mutably borrowed",
@@ -973,11 +979,13 @@ type BorrowCounter = isize;
 const UNUSED: BorrowCounter = 0;
 
 #[inline(always)]
+#[ferrocene::prevalidated]
 const fn is_writing(x: BorrowCounter) -> bool {
     x < UNUSED
 }
 
 #[inline(always)]
+#[ferrocene::prevalidated]
 const fn is_reading(x: BorrowCounter) -> bool {
     x > UNUSED
 }
@@ -995,6 +1003,7 @@ impl<T> RefCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_refcell_new", since = "1.24.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> RefCell<T> {
         RefCell {
             value: UnsafeCell::new(value),
@@ -1050,6 +1059,7 @@ impl<T> RefCell<T> {
     #[rustc_confusables("swap")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn replace(&self, t: T) -> T {
         mem::replace(&mut self.borrow_mut(), t)
     }
@@ -1074,6 +1084,7 @@ impl<T> RefCell<T> {
     #[stable(feature = "refcell_replace_swap", since = "1.35.0")]
     #[track_caller]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
         let mut_borrow = &mut *self.borrow_mut();
         let replacement = f(mut_borrow);
@@ -1147,6 +1158,7 @@ impl<T: ?Sized> RefCell<T> {
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn borrow(&self) -> Ref<'_, T> {
         match self.try_borrow() {
             Ok(b) => b,
@@ -1184,6 +1196,7 @@ impl<T: ?Sized> RefCell<T> {
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
         match BorrowRef::new(&self.borrow) {
             Some(b) => {
@@ -1247,6 +1260,7 @@ impl<T: ?Sized> RefCell<T> {
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn borrow_mut(&self) -> RefMut<'_, T> {
         match self.try_borrow_mut() {
             Ok(b) => b,
@@ -1281,6 +1295,7 @@ impl<T: ?Sized> RefCell<T> {
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
         match BorrowRefMut::new(&self.borrow) {
             Some(b) => {
@@ -1460,6 +1475,7 @@ impl<T: Default> RefCell<T> {
     /// assert_eq!(c.into_inner(), 0);
     /// ```
     #[stable(feature = "refcell_take", since = "1.50.0")]
+    #[ferrocene::prevalidated]
     pub fn take(&self) -> T {
         self.replace(Default::default())
     }
@@ -1596,6 +1612,7 @@ struct BorrowRef<'b> {
 
 impl<'b> BorrowRef<'b> {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRef<'b>> {
         let b = borrow.get().wrapping_add(1);
         if !is_reading(b) {
@@ -1622,6 +1639,7 @@ impl<'b> BorrowRef<'b> {
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
 impl const Drop for BorrowRef<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_reading(borrow));
@@ -1668,6 +1686,7 @@ impl<T: ?Sized> const Deref for Ref<'_, T> {
     type Target = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_ref() }
@@ -2097,6 +2116,7 @@ struct BorrowRefMut<'b> {
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
 impl const Drop for BorrowRefMut<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
@@ -2106,6 +2126,7 @@ impl const Drop for BorrowRefMut<'_> {
 
 impl<'b> BorrowRefMut<'b> {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRefMut<'b>> {
         // NOTE: Unlike BorrowRefMut::clone, new is called to create the initial
         // mutable reference, and so there must currently be no existing
@@ -2159,6 +2180,7 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
     type Target = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_ref() }
@@ -2169,6 +2191,7 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_mut() }
@@ -2396,6 +2419,7 @@ impl<T> UnsafeCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unsafe_cell_new", since = "1.32.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> UnsafeCell<T> {
         UnsafeCell { value }
     }
@@ -2415,6 +2439,7 @@ impl<T> UnsafeCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[ferrocene::prevalidated]
     pub const fn into_inner(self) -> T {
         self.value
     }
@@ -2495,6 +2520,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[rustc_as_ptr]
     #[rustc_never_returns_null_ptr]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn get(&self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)]. This exploits std's special status, there is
@@ -2520,6 +2546,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[inline(always)]
     #[stable(feature = "unsafe_cell_get_mut", since = "1.50.0")]
     #[rustc_const_stable(feature = "const_unsafecell_get_mut", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn get_mut(&mut self) -> &mut T {
         &mut self.value
     }
@@ -2555,6 +2582,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_const_stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_diagnostic_item = "unsafe_cell_raw_get"]
+    #[ferrocene::prevalidated]
     pub const fn raw_get(this: *const Self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)]. This exploits std's special status, there is

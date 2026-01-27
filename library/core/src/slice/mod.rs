@@ -146,6 +146,7 @@ impl<T> [T] {
     #[ferrocene::annotation(
         "this function is guaranteed to be constant-evaluated as the size of arrays is always available at compilation"
     )]
+    #[ferrocene::prevalidated]
     pub const fn len(&self) -> usize {
         ptr::metadata(self)
     }
@@ -166,6 +167,7 @@ impl<T> [T] {
     #[rustc_no_implicit_autorefs]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -185,6 +187,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn first(&self) -> Option<&T> {
         if let [first, ..] = self { Some(first) } else { None }
     }
@@ -208,6 +211,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn first_mut(&mut self) -> Option<&mut T> {
         if let [first, ..] = self { Some(first) } else { None }
     }
@@ -228,6 +232,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_first(&self) -> Option<(&T, &[T])> {
         if let [first, tail @ ..] = self { Some((first, tail)) } else { None }
     }
@@ -250,6 +255,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_first_mut(&mut self) -> Option<(&mut T, &mut [T])> {
         if let [first, tail @ ..] = self { Some((first, tail)) } else { None }
     }
@@ -270,6 +276,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_last(&self) -> Option<(&T, &[T])> {
         if let [init @ .., last] = self { Some((last, init)) } else { None }
     }
@@ -292,6 +299,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_last_mut(&mut self) -> Option<(&mut T, &mut [T])> {
         if let [init @ .., last] = self { Some((last, init)) } else { None }
     }
@@ -311,6 +319,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn last(&self) -> Option<&T> {
         if let [.., last] = self { Some(last) } else { None }
     }
@@ -334,6 +343,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn last_mut(&mut self) -> Option<&mut T> {
         if let [.., last] = self { Some(last) } else { None }
     }
@@ -357,6 +367,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
+    #[ferrocene::prevalidated]
     pub const fn first_chunk<const N: usize>(&self) -> Option<&[T; N]> {
         if self.len() < N {
             None
@@ -387,6 +398,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn first_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {
         if self.len() < N {
             None
@@ -608,6 +620,7 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+    #[ferrocene::prevalidated]
     pub const fn get<I>(&self, index: I) -> Option<&I::Output>
     where
         I: [const] SliceIndex<Self>,
@@ -635,6 +648,7 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+    #[ferrocene::prevalidated]
     pub const fn get_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
         I: [const] SliceIndex<Self>,
@@ -675,6 +689,7 @@ impl<T> [T] {
     #[must_use]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn get_unchecked<I>(&self, index: I) -> &I::Output
     where
         I: [const] SliceIndex<Self>,
@@ -720,6 +735,7 @@ impl<T> [T] {
     #[must_use]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn get_unchecked_mut<I>(&mut self, index: I) -> &mut I::Output
     where
         I: [const] SliceIndex<Self>,
@@ -762,6 +778,7 @@ impl<T> [T] {
     #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_ptr(&self) -> *const T {
         self as *const [T] as *const T
     }
@@ -793,6 +810,7 @@ impl<T> [T] {
     #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr(&mut self) -> *mut T {
         self as *mut [T] as *mut T
     }
@@ -888,6 +906,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "core_slice_as_array", since = "1.93.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_array<const N: usize>(&self) -> Option<&[T; N]> {
         if self.len() == N {
             let ptr = self.as_ptr().cast_array();
@@ -907,6 +926,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "core_slice_as_array", since = "1.93.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_array<const N: usize>(&mut self) -> Option<&mut [T; N]> {
         if self.len() == N {
             let ptr = self.as_mut_ptr().cast_array();
@@ -943,6 +963,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn swap(&mut self, a: usize, b: usize) {
         // FIXME: use swap_unchecked here (https://github.com/rust-lang/rust/pull/88540#issuecomment-944344343)
         // Can't take two mutable loans from one vector, so instead use raw pointers.
@@ -1080,6 +1101,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[rustc_diagnostic_item = "slice_iter"]
+    #[ferrocene::prevalidated]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(self)
     }
@@ -1100,6 +1122,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(self)
     }
@@ -1155,6 +1178,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn windows(&self, size: usize) -> Windows<'_, T> {
         let size = NonZero::new(size).expect("window size must be non-zero");
         Windows::new(self, size)
@@ -1195,6 +1219,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn chunks(&self, chunk_size: usize) -> Chunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         Chunks::new(self, chunk_size)
@@ -1239,6 +1264,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn chunks_mut(&mut self, chunk_size: usize) -> ChunksMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksMut::new(self, chunk_size)
@@ -1282,6 +1308,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn chunks_exact(&self, chunk_size: usize) -> ChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExact::new(self, chunk_size)
@@ -1330,6 +1357,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn chunks_exact_mut(&mut self, chunk_size: usize) -> ChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExactMut::new(self, chunk_size)
@@ -1378,6 +1406,7 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn as_chunks_unchecked<const N: usize>(&self) -> &[[T; N]] {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -1436,6 +1465,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_chunks<const N: usize>(&self) -> (&[[T; N]], &[T]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len_rounded_down = self.len() / N * N;
@@ -2003,6 +2033,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_at(&self, mid: usize) -> (&[T], &[T]) {
         match self.split_at_checked(mid) {
             Some(pair) => pair,
@@ -2037,6 +2068,7 @@ impl<T> [T] {
     #[track_caller]
     #[must_use]
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn split_at_mut(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         match self.split_at_mut_checked(mid) {
             Some(pair) => pair,
@@ -2089,6 +2121,7 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T]) {
         // FIXME(const-hack): the const function `from_raw_parts` is used to make this
         // function const; previously the implementation used
@@ -2143,6 +2176,7 @@ impl<T> [T] {
     #[inline]
     #[must_use]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         let len = self.len();
         let ptr = self.as_mut_ptr();
@@ -2204,6 +2238,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "split_at_checked", since = "1.80.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_at_checked(&self, mid: usize) -> Option<(&[T], &[T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which
@@ -2243,6 +2278,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn split_at_mut_checked(&mut self, mid: usize) -> Option<(&mut [T], &mut [T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which
@@ -2683,6 +2719,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub fn starts_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,
@@ -3753,6 +3790,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_slice_rotate", since = "1.92.0")]
+    #[ferrocene::prevalidated]
     pub const fn rotate_left(&mut self, mid: usize) {
         assert!(mid <= self.len());
         let k = self.len() - mid;
@@ -3799,6 +3837,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_slice_rotate", since = "1.92.0")]
+    #[ferrocene::prevalidated]
     pub const fn rotate_right(&mut self, k: usize) {
         assert!(k <= self.len());
         let mid = self.len() - k;
@@ -3822,6 +3861,7 @@ impl<T> [T] {
     /// ```
     #[doc(alias = "memset")]
     #[stable(feature = "slice_fill", since = "1.50.0")]
+    #[ferrocene::prevalidated]
     pub fn fill(&mut self, value: T)
     where
         T: Clone,
@@ -3910,6 +3950,7 @@ impl<T> [T] {
     /// [`split_at_mut`]: slice::split_at_mut
     #[stable(feature = "clone_from_slice", since = "1.7.0")]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub fn clone_from_slice(&mut self, src: &[T])
     where
         T: Clone,
@@ -3976,6 +4017,7 @@ impl<T> [T] {
     #[stable(feature = "copy_from_slice", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_copy_from_slice", since = "1.87.0")]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn copy_from_slice(&mut self, src: &[T])
     where
         T: Copy,
@@ -4092,6 +4134,7 @@ impl<T> [T] {
 
     /// Function to calculate lengths of the middle and trailing slice for `align_to{,_mut}`.
 
+    #[ferrocene::prevalidated]
     fn align_to_offsets<U>(&self) -> (usize, usize) {
         // What we gonna do about `rest` is figure out what multiple of `U`s we can put in a
         // lowest number of `T`s. And how many `T`s we need for each such "multiple".
@@ -4114,6 +4157,7 @@ impl<T> [T] {
         #[ferrocene::annotation(
             "the only use of this function is in a const block, which means it cannot be reached during runtime"
         )]
+        #[ferrocene::prevalidated]
         const fn gcd(a: usize, b: usize) -> usize {
             if b == 0 { a } else { gcd(b, a % b) }
         }
@@ -4161,6 +4205,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub unsafe fn align_to<U>(&self) -> (&[T], &[U], &[T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {
@@ -4226,6 +4271,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub unsafe fn align_to_mut<U>(&mut self) -> (&mut [T], &mut [U], &mut [T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {
@@ -5246,12 +5292,14 @@ impl [f64] {
 /// # Safety
 /// `T` must implement one of `Copy` or `TrivialClone`.
 #[track_caller]
+#[ferrocene::prevalidated]
 const unsafe fn copy_from_slice_impl<T: Clone>(dest: &mut [T], src: &[T]) {
     // The panic code path was put into a cold function to not bloat the
     // call site.
     #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
     #[cfg_attr(panic = "immediate-abort", inline)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     const fn len_mismatch_fail(dst_len: usize, src_len: usize) -> ! {
         const_panic!(
             "copy_from_slice: source slice length does not match destination slice length",
@@ -5282,6 +5330,7 @@ where
     T: Clone,
 {
     #[track_caller]
+    #[ferrocene::prevalidated]
     default fn spec_clone_from(&mut self, src: &[T]) {
         assert!(self.len() == src.len(), "destination and source slices have different lengths");
         // NOTE: We need to explicitly slice them to the same length

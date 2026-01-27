@@ -107,11 +107,13 @@ impl<B, C> const ops::Try for ControlFlow<B, C> {
     type Residual = ControlFlow<B, convert::Infallible>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_output(output: Self::Output) -> Self {
         ControlFlow::Continue(output)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             ControlFlow::Continue(c) => ControlFlow::Continue(c),
@@ -126,6 +128,7 @@ impl<B, C> const ops::Try for ControlFlow<B, C> {
 // https://github.com/rust-lang/rust/issues/99940
 impl<B, C> const ops::FromResidual<ControlFlow<B, convert::Infallible>> for ControlFlow<B, C> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_residual(residual: ControlFlow<B, convert::Infallible>) -> Self {
         match residual {
             ControlFlow::Break(b) => ControlFlow::Break(b),
@@ -152,6 +155,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[stable(feature = "control_flow_enum_is", since = "1.59.0")]
     #[rustc_const_unstable(feature = "min_const_control_flow", issue = "148738")]
+    #[ferrocene::prevalidated]
     pub const fn is_break(&self) -> bool {
         matches!(*self, ControlFlow::Break(_))
     }
@@ -169,6 +173,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[stable(feature = "control_flow_enum_is", since = "1.59.0")]
     #[rustc_const_unstable(feature = "min_const_control_flow", issue = "148738")]
+    #[ferrocene::prevalidated]
     pub const fn is_continue(&self) -> bool {
         matches!(*self, ControlFlow::Continue(_))
     }
@@ -187,6 +192,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     #[rustc_const_unstable(feature = "const_control_flow", issue = "148739")]
+    #[ferrocene::prevalidated]
     pub const fn break_value(self) -> Option<B>
     where
         Self: [const] Destruct,
@@ -265,6 +271,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[unstable(feature = "control_flow_ok", issue = "140266")]
     #[rustc_const_unstable(feature = "min_const_control_flow", issue = "148738")]
+    #[ferrocene::prevalidated]
     pub const fn break_ok(self) -> Result<B, C> {
         match self {
             ControlFlow::Continue(c) => Err(c),
@@ -277,6 +284,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     #[rustc_const_unstable(feature = "const_control_flow", issue = "148739")]
+    #[ferrocene::prevalidated]
     pub const fn map_break<T, F>(self, f: F) -> ControlFlow<T, C>
     where
         F: [const] FnOnce(B) -> T + [const] Destruct,
@@ -301,6 +309,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     #[rustc_const_unstable(feature = "const_control_flow", issue = "148739")]
+    #[ferrocene::prevalidated]
     pub const fn continue_value(self) -> Option<C>
     where
         Self: [const] Destruct,
@@ -378,6 +387,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[unstable(feature = "control_flow_ok", issue = "140266")]
     #[rustc_const_unstable(feature = "min_const_control_flow", issue = "148738")]
+    #[ferrocene::prevalidated]
     pub const fn continue_ok(self) -> Result<C, B> {
         match self {
             ControlFlow::Continue(c) => Ok(c),
@@ -390,6 +400,7 @@ impl<B, C> ControlFlow<B, C> {
     #[inline]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     #[rustc_const_unstable(feature = "const_control_flow", issue = "148739")]
+    #[ferrocene::prevalidated]
     pub const fn map_continue<T, F>(self, f: F) -> ControlFlow<B, T>
     where
         F: [const] FnOnce(C) -> T + [const] Destruct,
@@ -415,6 +426,7 @@ impl<T> ControlFlow<T, T> {
     /// ```
     #[unstable(feature = "control_flow_into_value", issue = "137461")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[ferrocene::prevalidated]
     pub const fn into_value(self) -> T {
         match self {
             ControlFlow::Continue(x) | ControlFlow::Break(x) => x,
@@ -428,6 +440,7 @@ impl<T> ControlFlow<T, T> {
 impl<R: ops::Try> ControlFlow<R, R::Output> {
     /// Creates a `ControlFlow` from any type implementing `Try`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn from_try(r: R) -> Self {
         match R::branch(r) {
             ControlFlow::Continue(v) => ControlFlow::Continue(v),
@@ -437,6 +450,7 @@ impl<R: ops::Try> ControlFlow<R, R::Output> {
 
     /// Converts a `ControlFlow` into any type implementing `Try`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn into_try(self) -> R {
         match self {
             ControlFlow::Continue(v) => R::from_output(v),

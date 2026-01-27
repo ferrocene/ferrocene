@@ -139,7 +139,8 @@ macro_rules! impl_disjoint_bitor {
         impl const DisjointBitOr for $t {
             #[cfg_attr(miri, track_caller)]
             #[inline]
-            unsafe fn disjoint_bitor(self, other: Self) -> Self {
+            #[ferrocene::prevalidated]
+unsafe fn disjoint_bitor(self, other: Self) -> Self {
                 // Note that the assume here is required for UB detection in Miri!
 
                 // SAFETY: our precondition is that there are no bits in common,
@@ -173,7 +174,8 @@ macro_rules! impl_funnel_shifts {
         impl const FunnelShift for $type {
             #[cfg_attr(miri, track_caller)]
             #[inline]
-            unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
+            #[ferrocene::prevalidated]
+unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
                 // This implementation is also used by Miri so we have to check the precondition.
                 // SAFETY: this is guaranteed by the caller
                 unsafe { super::assume(shift < $type::BITS) };
@@ -198,7 +200,8 @@ macro_rules! impl_funnel_shifts {
 
             #[cfg_attr(miri, track_caller)]
             #[inline]
-            unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {
+            #[ferrocene::prevalidated]
+unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {
                 // This implementation is also used by Miri so we have to check the precondition.
                 // SAFETY: this is guaranteed by the caller
                 unsafe { super::assume(shift < $type::BITS) };

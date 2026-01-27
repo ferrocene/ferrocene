@@ -317,6 +317,7 @@ impl<I: Iterator> IntoIterator for I {
     type IntoIter = I;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> I {
         self
     }
@@ -415,6 +416,7 @@ pub trait Extend<A> {
 
     /// Extends a collection with exactly one element.
     #[unstable(feature = "extend_one", issue = "72631")]
+    #[ferrocene::prevalidated]
     fn extend_one(&mut self, item: A) {
         self.extend(Some(item));
     }
@@ -423,6 +425,7 @@ pub trait Extend<A> {
     ///
     /// The default implementation does nothing.
     #[unstable(feature = "extend_one", issue = "72631")]
+    #[ferrocene::prevalidated]
     fn extend_reserve(&mut self, additional: usize) {
         let _ = additional;
     }
@@ -440,6 +443,7 @@ pub trait Extend<A> {
     // This method is for internal usage only. It is only on the trait because of specialization's limitations.
     #[unstable(feature = "extend_one_unchecked", issue = "none")]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     unsafe fn extend_one_unchecked(&mut self, item: A)
     where
         Self: Sized,

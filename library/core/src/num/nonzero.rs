@@ -211,6 +211,7 @@ where
     T: ZeroablePrimitive,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         *self
     }
@@ -435,6 +436,7 @@ where
     #[rustc_const_stable(feature = "const_nonzero_int_methods", since = "1.47.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(n: T) -> Option<Self> {
         // SAFETY: Memory layout optimization guarantees that `Option<NonZero<T>>` has
         //         the same layout and size as `T`, with `0` representing `None`.
@@ -452,6 +454,7 @@ where
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn new_unchecked(n: T) -> Self {
         match Self::new(n) {
             Some(n) => n,
@@ -519,6 +522,7 @@ where
     #[stable(feature = "nonzero", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_nonzero_get", since = "1.34.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn get(self) -> T {
         // Rustc can set range metadata only if it loads `self` from
         // memory somewhere. If the value of `self` was from by-value argument
@@ -647,7 +651,8 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            pub const fn leading_zeros(self) -> u32 {
+            #[ferrocene::prevalidated]
+pub const fn leading_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `ctlz_nonzero`.
                 unsafe {
                     intrinsics::ctlz_nonzero(self.get() as $Uint)
@@ -1389,6 +1394,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             /// part of the exact result, and cannot panic.
             #[doc(alias = "unchecked_div")]
             #[inline]
+            #[ferrocene::prevalidated]
             fn div(self, other: NonZero<$Int>) -> $Int {
                 // SAFETY: Division by zero is checked because `other` is non-zero,
                 // and MIN/-1 is checked because `self` is an unsigned int.
@@ -1701,7 +1707,8 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn ilog2(self) -> u32 {
+        #[ferrocene::prevalidated]
+pub const fn ilog2(self) -> u32 {
             Self::BITS - 1 - self.leading_zeros()
         }
 

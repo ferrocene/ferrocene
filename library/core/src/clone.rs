@@ -243,6 +243,7 @@ pub const trait Clone: Sized {
     /// allocations.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     fn clone_from(&mut self, source: &Self)
     where
         Self: [const] Destruct,
@@ -621,7 +622,8 @@ mod impls {
                 #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
                 impl const Clone for $t {
                     #[inline(always)]
-                    fn clone(&self) -> Self {
+                    #[ferrocene::prevalidated]
+fn clone(&self) -> Self {
                         *self
                     }
                 }
@@ -648,6 +650,7 @@ mod impls {
         #[ferrocene::annotation(
             "This function cannot be executed because it is impossible to create a value of type `!`"
         )]
+        #[ferrocene::prevalidated]
         fn clone(&self) -> Self {
             *self
         }
@@ -665,6 +668,7 @@ mod impls {
         #[ferrocene::annotation(
             "This function is thoroughly tested inside the `test_clone` test in `coretests`. The fact that is shown as uncovered is a bug in our coverage tooling."
         )]
+        #[ferrocene::prevalidated]
         fn clone(&self) -> Self {
             *self
         }
@@ -682,6 +686,7 @@ mod impls {
         #[ferrocene::annotation(
             "This function is thoroughly tested inside the `test_clone` test in `coretests`. The fact that is shown as uncovered is a bug in our coverage tooling."
         )]
+        #[ferrocene::prevalidated]
         fn clone(&self) -> Self {
             *self
         }
@@ -698,6 +703,7 @@ mod impls {
     impl<T: PointeeSized> const Clone for &T {
         #[inline(always)]
         #[rustc_diagnostic_item = "noop_method_clone"]
+        #[ferrocene::prevalidated]
         fn clone(&self) -> Self {
             self
         }

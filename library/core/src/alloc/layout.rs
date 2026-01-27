@@ -77,6 +77,7 @@ impl Layout {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn is_size_align_valid(size: usize, align: usize) -> bool {
         let Some(align) = Alignment::new(align) else { return false };
         if size > Self::max_size_for_align(align) {
@@ -86,6 +87,7 @@ impl Layout {
     }
 
     #[inline(always)]
+    #[ferrocene::prevalidated]
     const fn max_size_for_align(align: Alignment) -> usize {
         // (power-of-two implies align != 0.)
 
@@ -130,6 +132,7 @@ impl Layout {
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_size_align_unchecked(size: usize, align: usize) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -149,6 +152,7 @@ impl Layout {
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn size(&self) -> usize {
         self.size
     }
@@ -161,6 +165,7 @@ impl Layout {
     #[must_use = "this returns the minimum alignment, \
                   without modifying the layout"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn align(&self) -> usize {
         self.align.as_usize()
     }
@@ -170,6 +175,7 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_const_new", since = "1.42.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new<T>() -> Self {
         <T as SizedTypeProperties>::LAYOUT
     }

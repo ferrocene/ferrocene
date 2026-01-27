@@ -31,6 +31,7 @@ pub struct Filter<I, P> {
     predicate: P,
 }
 impl<I, P> Filter<I, P> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, predicate: P) -> Filter<I, P> {
         Filter { iter, predicate }
     }
@@ -81,6 +82,7 @@ impl<I: fmt::Debug, P> fmt::Debug for Filter<I, P> {
     }
 }
 
+#[ferrocene::prevalidated]
 fn filter_fold<T, Acc>(
     mut predicate: impl FnMut(&T) -> bool,
     mut fold: impl FnMut(Acc, T) -> Acc,
@@ -88,6 +90,7 @@ fn filter_fold<T, Acc>(
     move |acc, item| if predicate(&item) { fold(acc, item) } else { acc }
 }
 
+#[ferrocene::prevalidated]
 fn filter_try_fold<'a, T, Acc, R: Try<Output = Acc>>(
     predicate: &'a mut impl FnMut(&T) -> bool,
     mut fold: impl FnMut(Acc, T) -> R + 'a,
@@ -103,6 +106,7 @@ where
     type Item = I::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<I::Item> {
         self.iter.find(&mut self.predicate)
     }
@@ -125,6 +129,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the predicate
@@ -159,6 +164,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -169,6 +175,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,

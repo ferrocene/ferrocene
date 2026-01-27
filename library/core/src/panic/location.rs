@@ -187,6 +187,7 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -227,6 +228,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub const fn file(&self) -> &'a str {
         // SAFETY: The filename is valid.
         unsafe { self.filename.as_ref() }
@@ -276,6 +278,7 @@ impl<'a> Location<'a> {
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn line(&self) -> u32 {
         self.line
     }
@@ -301,6 +304,7 @@ impl<'a> Location<'a> {
     #[stable(feature = "panic_col", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn column(&self) -> u32 {
         self.col
     }

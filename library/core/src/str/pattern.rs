@@ -122,6 +122,7 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the front of the haystack
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         matches!(self.into_searcher(haystack).next(), SearchStep::Match(0, _))
     }
@@ -1033,12 +1034,14 @@ impl<'b> Pattern for &'b str {
     type Searcher<'a> = StrSearcher<'a, 'b>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_searcher(self, haystack: &str) -> StrSearcher<'_, 'b> {
         StrSearcher::new(haystack, self)
     }
 
     /// Checks whether the pattern matches at the front of the haystack.
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         haystack.as_bytes().starts_with(self.as_bytes())
     }
@@ -1148,6 +1151,7 @@ struct EmptyNeedle {
 }
 
 impl<'a, 'b> StrSearcher<'a, 'b> {
+    #[ferrocene::prevalidated]
     fn new(haystack: &'a str, needle: &'b str) -> StrSearcher<'a, 'b> {
         if needle.is_empty() {
             StrSearcher {
@@ -1182,6 +1186,7 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> SearchStep {
         match self.searcher {
             StrSearcherImpl::Empty(ref mut searcher) => {
@@ -1443,6 +1448,7 @@ struct TwoWaySearcher {
 
 */
 impl TwoWaySearcher {
+    #[ferrocene::prevalidated]
     fn new(needle: &[u8], end: usize) -> TwoWaySearcher {
         let (crit_pos_false, period_false) = TwoWaySearcher::maximal_suffix(needle, false);
         let (crit_pos_true, period_true) = TwoWaySearcher::maximal_suffix(needle, true);
@@ -1512,11 +1518,13 @@ impl TwoWaySearcher {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn byteset_create(bytes: &[u8]) -> u64 {
         bytes.iter().fold(0, |a, &b| (1 << (b & 0x3f)) | a)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn byteset_contains(&self, byte: u8) -> bool {
         (self.byteset >> ((byte & 0x3f) as usize)) & 1 != 0
     }
@@ -1527,6 +1535,7 @@ impl TwoWaySearcher {
     // How far we can jump when we encounter a mismatch is all based on the fact
     // that (u, v) is a critical factorization for the needle.
     #[inline]
+    #[ferrocene::prevalidated]
     fn next<S>(&mut self, haystack: &[u8], needle: &[u8], long_period: bool) -> S::Output
     where
         S: TwoWayStrategy,
@@ -1697,6 +1706,7 @@ impl TwoWaySearcher {
     //
     // For long period cases, the resulting period is not exact (it is too short).
     #[inline]
+    #[ferrocene::prevalidated]
     fn maximal_suffix(arr: &[u8], order_greater: bool) -> (usize, usize) {
         let mut left = 0; // Corresponds to i in the paper
         let mut right = 1; // Corresponds to j in the paper
@@ -1743,6 +1753,7 @@ impl TwoWaySearcher {
     // a critical factorization.
     //
     // For long period cases, the resulting period is not exact (it is too short).
+    #[ferrocene::prevalidated]
     fn reverse_maximal_suffix(arr: &[u8], known_period: usize, order_greater: bool) -> usize {
         let mut left = 0; // Corresponds to i in the paper
         let mut right = 1; // Corresponds to j in the paper
@@ -1821,14 +1832,17 @@ impl TwoWayStrategy for RejectAndMatch {
     type Output = SearchStep;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn use_early_reject() -> bool {
         true
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn rejecting(a: usize, b: usize) -> Self::Output {
         SearchStep::Reject(a, b)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn matching(a: usize, b: usize) -> Self::Output {
         SearchStep::Match(a, b)
     }

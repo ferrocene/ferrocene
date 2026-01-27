@@ -19,10 +19,12 @@ impl<T, U> const PartialEq<[U]> for [T]
 where
     T: [const] PartialEq<U>,
 {
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U]) -> bool {
         SlicePartialEq::equal(self, other)
     }
 
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U]) -> bool {
         SlicePartialEq::not_equal(self, other)
     }
@@ -109,6 +111,7 @@ impl<T: PartialOrd> PartialOrd for [T] {
 const trait SlicePartialEq<B> {
     fn equal(&self, other: &[B]) -> bool;
 
+    #[ferrocene::prevalidated]
     fn not_equal(&self, other: &[B]) -> bool {
         !self.equal(other)
     }
@@ -120,6 +123,7 @@ impl<A, B> const SlicePartialEq<B> for [A]
 where
     A: [const] PartialEq<B>,
 {
+    #[ferrocene::prevalidated]
     default fn equal(&self, other: &[B]) -> bool {
         if self.len() != other.len() {
             return false;

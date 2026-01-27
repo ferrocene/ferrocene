@@ -37,6 +37,7 @@ pub struct PanicMessage<'a> {
 
 impl<'a> PanicInfo<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn new(
         // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicArguments` alias.
         message: &'a PanicArguments<'a>,
@@ -65,6 +66,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_info_message", since = "1.81.0")]
+    #[ferrocene::prevalidated]
     pub fn message(&self) -> PanicMessage<'_> {
         PanicMessage { message: self.message }
     }
@@ -95,6 +97,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
+    #[ferrocene::prevalidated]
     pub fn location(&self) -> Option<&Location<'_>> {
         // NOTE: If this is changed to sometimes return None,
         // deal with that case in std::panicking::default_hook and core::panicking::panic_fmt.
@@ -179,6 +182,7 @@ impl<'a> PanicMessage<'a> {
     #[rustc_const_stable(feature = "const_arguments_as_str", since = "1.84.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> Option<&'static str> {
         self.message.as_str()
     }

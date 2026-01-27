@@ -35,6 +35,7 @@ impl<'a, T> IntoIterator for &'a [T] {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
 
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> Iter<'a, T> {
         self.iter()
     }
@@ -45,6 +46,7 @@ impl<'a, T> IntoIterator for &'a mut [T] {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
 
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> IterMut<'a, T> {
         self.iter_mut()
     }
@@ -107,6 +109,7 @@ unsafe impl<T: Sync> Send for Iter<'_, T> {}
 
 impl<'a, T> Iter<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T]) -> Self {
         let len = slice.len();
         let ptr: NonNull<T> = NonNull::from_ref(slice).cast();
@@ -148,6 +151,7 @@ impl<'a, T> Iter<'a, T> {
     #[must_use]
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_slice(&self) -> &'a [T] {
         self.make_slice()
     }
@@ -236,6 +240,7 @@ unsafe impl<T: Send> Send for IterMut<'_, T> {}
 
 impl<'a, T> IterMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a mut [T]) -> Self {
         let len = slice.len();
         let ptr: NonNull<T> = NonNull::from_mut(slice).cast();
@@ -365,6 +370,7 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     // FIXME: Uncomment the `AsMut<[T]>` impl when this gets stabilized.
     #[unstable(feature = "slice_iter_mut_as_mut_slice", issue = "93079")]
+    #[ferrocene::prevalidated]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites
@@ -1418,6 +1424,7 @@ pub struct Windows<'a, T: 'a> {
 
 impl<'a, T: 'a> Windows<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T], size: NonZero<usize>) -> Self {
         Self { v: slice, size }
     }
@@ -1437,6 +1444,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         if self.size.get() > self.v.len() {
             None
@@ -1448,6 +1456,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.size.get() > self.v.len() {
             (0, Some(0))
@@ -1464,6 +1473,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         let size = self.size.get();
         if let Some(rest) = self.v.get(n..)
@@ -1479,6 +1489,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         if self.size.get() > self.v.len() {
             None
@@ -1576,6 +1587,7 @@ pub struct Chunks<'a, T: 'a> {
 
 impl<'a, T: 'a> Chunks<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T], size: usize) -> Self {
         Self { v: slice, chunk_size: size }
     }
@@ -1595,6 +1607,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         if self.v.is_empty() {
             None
@@ -1607,6 +1620,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.v.is_empty() {
             (0, Some(0))
@@ -1623,6 +1637,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -1638,6 +1653,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1768,6 +1784,7 @@ pub struct ChunksMut<'a, T: 'a> {
 
 impl<'a, T: 'a> ChunksMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a mut [T], size: usize) -> Self {
         Self { v: slice, chunk_size: size, _marker: PhantomData }
     }
@@ -1778,6 +1795,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     type Item = &'a mut [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a mut [T]> {
         if self.v.is_empty() {
             None
@@ -1792,6 +1810,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.v.is_empty() {
             (0, Some(0))
@@ -1808,6 +1827,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -1826,6 +1846,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1959,6 +1980,7 @@ pub struct ChunksExact<'a, T: 'a> {
 
 impl<'a, T> ChunksExact<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T], chunk_size: usize) -> Self {
         let rem = slice.len() % chunk_size;
         let fst_len = slice.len() - rem;
@@ -1986,6 +2008,7 @@ impl<'a, T> ChunksExact<'a, T> {
     /// ```
     #[must_use]
     #[stable(feature = "chunks_exact", since = "1.31.0")]
+    #[ferrocene::prevalidated]
     pub fn remainder(&self) -> &'a [T] {
         self.rem
     }
@@ -2005,6 +2028,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         self.v.split_at_checked(self.chunk_size).and_then(|(chunk, rest)| {
             self.v = rest;
@@ -2013,6 +2037,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.v.len() / self.chunk_size;
         (n, Some(n))
@@ -2025,6 +2050,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -2038,6 +2064,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
@@ -2053,6 +2080,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<&'a [T]> {
         if self.v.len() < self.chunk_size {
             None
@@ -2064,6 +2092,7 @@ impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         let len = self.len();
         if n < len {
@@ -2081,6 +2110,7 @@ impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<T> ExactSizeIterator for ChunksExact<'_, T> {
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.v.is_empty()
     }
@@ -2143,6 +2173,7 @@ pub struct ChunksExactMut<'a, T: 'a> {
 
 impl<'a, T> ChunksExactMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a mut [T], chunk_size: usize) -> Self {
         let rem = slice.len() % chunk_size;
         let fst_len = slice.len() - rem;
@@ -2156,6 +2187,7 @@ impl<'a, T> ChunksExactMut<'a, T> {
     /// elements.
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "chunks_exact", since = "1.31.0")]
+    #[ferrocene::prevalidated]
     pub fn into_remainder(self) -> &'a mut [T] {
         self.rem
     }
@@ -2166,6 +2198,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     type Item = &'a mut [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a mut [T]> {
         // SAFETY: we have `&mut self`, so are allowed to temporarily materialize a mut slice
         unsafe { &mut *self.v }.split_at_mut_checked(self.chunk_size).and_then(|(chunk, rest)| {
@@ -2175,6 +2208,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.v.len() / self.chunk_size;
         (n, Some(n))
@@ -2187,6 +2221,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -2201,6 +2236,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
@@ -2216,6 +2252,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<&'a mut [T]> {
         if self.v.len() < self.chunk_size {
             None
@@ -2229,6 +2266,7 @@ impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         let len = self.len();
         if n < len {
@@ -2250,6 +2288,7 @@ impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<T> ExactSizeIterator for ChunksExactMut<'_, T> {
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.v.is_empty()
     }

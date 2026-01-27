@@ -867,6 +867,7 @@ impl<T: PointeeSized> Copy for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Clone for PhantomData<T> {
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         Self
     }

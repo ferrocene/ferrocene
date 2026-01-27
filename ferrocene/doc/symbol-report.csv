@@ -5243,6 +5243,7 @@ core::slice::<impl [T]>::starts_with
 core::slice::<impl [T]>::swap
 core::slice::<impl [T]>::windows
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_simple
 core::slice::ascii::<impl [u8]>::is_ascii
 core::slice::ascii::is_ascii
 core::slice::ascii::is_ascii::compiletime

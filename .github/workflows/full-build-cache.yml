@@ -74,6 +74,19 @@ jobs:
           minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
 
+      # Github Actions only issues a token valid for 5 minutes, this official AWS action seems to have a workaround for that, so we're currently using it.
+      #
+      # Also, if you use this it sets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, etc which breaks using minio.
+      #
+      # Honestly, it's horrible. We'd be very interested in not using it, and instead using AWS via the `.github/actions/aws-config/` action.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
       - name: Get LLVM cache
         shell: bash
         env:
@@ -84,15 +97,6 @@ jobs:
           fi
 
           uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/${{ needs.llvm.outputs.name }}
-
-      # Github Actions only issues a token valid for 5 minutes, this official AWS action seems to have a workaround for that, so we're currently using it.
-      # We'd be very interested in not using it, and instead using AWS via the `.github/actions/aws-config/` action
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-1
-          role-to-assume: ${{ github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
 
       - name: Run
         uses: ./.github/actions/run/

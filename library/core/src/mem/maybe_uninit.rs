@@ -357,6 +357,7 @@ pub union MaybeUninit<T> {
 #[stable(feature = "maybe_uninit", since = "1.36.0")]
 impl<T: Copy> Clone for MaybeUninit<T> {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         // Not calling `T::clone()`, we cannot know if we are initialized enough for that.
         *self
@@ -401,6 +402,7 @@ impl<T> MaybeUninit<T> {
     #[rustc_const_stable(feature = "const_maybe_uninit", since = "1.36.0")]
     #[must_use = "use `forget` to avoid running Drop code"]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn new(val: T) -> MaybeUninit<T> {
         MaybeUninit { value: ManuallyDrop::new(val) }
     }
@@ -424,6 +426,7 @@ impl<T> MaybeUninit<T> {
     #[must_use]
     #[inline(always)]
     #[rustc_diagnostic_item = "maybe_uninit_uninit"]
+    #[ferrocene::prevalidated]
     pub const fn uninit() -> MaybeUninit<T> {
         MaybeUninit { uninit: () }
     }
@@ -474,6 +477,7 @@ impl<T> MaybeUninit<T> {
     #[rustc_diagnostic_item = "maybe_uninit_zeroed"]
     #[stable(feature = "maybe_uninit", since = "1.36.0")]
     #[rustc_const_stable(feature = "const_maybe_uninit_zeroed", since = "1.75.0")]
+    #[ferrocene::prevalidated]
     pub const fn zeroed() -> MaybeUninit<T> {
         let mut u = MaybeUninit::<T>::uninit();
         // SAFETY: `u.as_mut_ptr()` points to allocated memory.
@@ -568,6 +572,7 @@ impl<T> MaybeUninit<T> {
     #[inline(always)]
     #[stable(feature = "maybe_uninit_write", since = "1.55.0")]
     #[rustc_const_stable(feature = "const_maybe_uninit_write", since = "1.85.0")]
+    #[ferrocene::prevalidated]
     pub const fn write(&mut self, val: T) -> &mut T {
         *self = MaybeUninit::new(val);
         // SAFETY: We just initialized this value.
@@ -611,6 +616,7 @@ impl<T> MaybeUninit<T> {
     #[rustc_const_stable(feature = "const_maybe_uninit_as_ptr", since = "1.59.0")]
     #[rustc_as_ptr]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn as_ptr(&self) -> *const T {
         // `MaybeUninit` and `ManuallyDrop` are both `repr(transparent)` so we can cast the pointer.
         self as *const _ as *const T
@@ -653,6 +659,7 @@ impl<T> MaybeUninit<T> {
     #[rustc_const_stable(feature = "const_maybe_uninit_as_mut_ptr", since = "1.83.0")]
     #[rustc_as_ptr]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr(&mut self) -> *mut T {
         // `MaybeUninit` and `ManuallyDrop` are both `repr(transparent)` so we can cast the pointer.
         self as *mut _ as *mut T
@@ -708,6 +715,7 @@ impl<T> MaybeUninit<T> {
     #[inline(always)]
     #[rustc_diagnostic_item = "assume_init"]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init(self) -> T {
         // SAFETY: the caller must guarantee that `self` is initialized.
         // This also means that `self` must be a `value` variant.
@@ -780,6 +788,7 @@ impl<T> MaybeUninit<T> {
     #[rustc_const_stable(feature = "const_maybe_uninit_assume_init_read", since = "1.75.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_read(&self) -> T {
         // SAFETY: the caller must guarantee that `self` is initialized.
         // Reading from `self.as_ptr()` is safe since `self` should be initialized.
@@ -812,6 +821,7 @@ impl<T> MaybeUninit<T> {
     /// [`assume_init`]: MaybeUninit::assume_init
     #[stable(feature = "maybe_uninit_extra", since = "1.60.0")]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_drop(&mut self)
     where
         T: [const] Destruct,
@@ -880,6 +890,7 @@ impl<T> MaybeUninit<T> {
     #[stable(feature = "maybe_uninit_ref", since = "1.55.0")]
     #[rustc_const_stable(feature = "const_maybe_uninit_assume_init_ref", since = "1.59.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_ref(&self) -> &T {
         // SAFETY: the caller must guarantee that `self` is initialized.
         // This also means that `self` must be a `value` variant.
@@ -997,6 +1008,7 @@ impl<T> MaybeUninit<T> {
     #[stable(feature = "maybe_uninit_ref", since = "1.55.0")]
     #[rustc_const_stable(feature = "const_maybe_uninit_assume_init", since = "1.84.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_mut(&mut self) -> &mut T {
         // SAFETY: the caller must guarantee that `self` is initialized.
         // This also means that `self` must be a `value` variant.
@@ -1034,6 +1046,7 @@ impl<T> MaybeUninit<T> {
     #[unstable(feature = "maybe_uninit_array_assume_init", issue = "96097")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn array_assume_init<const N: usize>(array: [Self; N]) -> [T; N] {
         // SAFETY:
         // * The caller guarantees that all elements of the array are initialized
@@ -1064,6 +1077,7 @@ impl<T> MaybeUninit<T> {
     /// assert_eq!(bytes, val.to_ne_bytes());
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
+    #[ferrocene::prevalidated]
     pub const fn as_bytes(&self) -> &[MaybeUninit<u8>] {
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
@@ -1095,6 +1109,7 @@ impl<T> MaybeUninit<T> {
     /// assert_eq!(val2, 0x123456cd);
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
+    #[ferrocene::prevalidated]
     pub const fn as_bytes_mut(&mut self) -> &mut [MaybeUninit<u8>] {
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
@@ -1480,6 +1495,7 @@ impl<T> [MaybeUninit<T>] {
     #[stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[inline(always)]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_drop(&mut self)
     where
         T: [const] Destruct,
@@ -1502,6 +1518,7 @@ impl<T> [MaybeUninit<T>] {
     #[stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[rustc_const_stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_ref(&self) -> &[T] {
         // SAFETY: casting `slice` to a `*const [T]` is safe since the caller guarantees that
         // `slice` is initialized, and `MaybeUninit` is guaranteed to have the same layout as `T`.
@@ -1521,6 +1538,7 @@ impl<T> [MaybeUninit<T>] {
     #[stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[rustc_const_stable(feature = "maybe_uninit_slice", since = "1.93.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init_mut(&mut self) -> &mut [T] {
         // SAFETY: similar to safety notes for `slice_get_ref`, but we have a
         // mutable reference which is also guaranteed to be valid for writes.
@@ -1541,6 +1559,7 @@ impl<T, const N: usize> MaybeUninit<[T; N]> {
     /// ```
     #[unstable(feature = "maybe_uninit_uninit_array_transpose", issue = "96097")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn transpose(self) -> [MaybeUninit<T>; N] {
         // SAFETY: T and MaybeUninit<T> have the same layout
         unsafe { intrinsics::transmute_unchecked(self) }
@@ -1561,6 +1580,7 @@ impl<T, const N: usize> [MaybeUninit<T>; N] {
     /// ```
     #[unstable(feature = "maybe_uninit_uninit_array_transpose", issue = "96097")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn transpose(self) -> MaybeUninit<[T; N]> {
         // SAFETY: T and MaybeUninit<T> have the same layout
         unsafe { intrinsics::transmute_unchecked(self) }

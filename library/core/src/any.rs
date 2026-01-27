@@ -733,6 +733,7 @@ impl dyn Any + Send + Sync {
 #[cfg_attr(feature = "ferrocene_subset", derive_const(Clone))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
+#[ferrocene::prevalidated]
 pub struct TypeId {
     /// This needs to be an array of pointers, since there is provenance
     /// in the first array field. This provenance knows exactly which type
@@ -753,6 +754,7 @@ unsafe impl Sync for TypeId {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl const PartialEq for TypeId {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         #[cfg(miri)]
         return crate::intrinsics::type_id_eq(*self, *other);
@@ -799,6 +801,7 @@ impl TypeId {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_type_id", since = "1.91.0")]
+    #[ferrocene::prevalidated]
     pub const fn of<T: ?Sized + 'static>() -> TypeId {
         const { intrinsics::type_id::<T>() }
     }
@@ -881,6 +884,7 @@ impl fmt::Debug for TypeId {
 #[must_use]
 #[stable(feature = "type_name", since = "1.38.0")]
 #[rustc_const_unstable(feature = "const_type_name", issue = "63084")]
+#[ferrocene::prevalidated]
 pub const fn type_name<T: ?Sized>() -> &'static str {
     const { intrinsics::type_name::<T>() }
 }
@@ -921,6 +925,7 @@ pub const fn type_name<T: ?Sized>() -> &'static str {
 #[must_use]
 #[stable(feature = "type_name_of_val", since = "1.76.0")]
 #[rustc_const_unstable(feature = "const_type_name", issue = "63084")]
+#[ferrocene::prevalidated]
 pub const fn type_name_of_val<T: ?Sized>(_val: &T) -> &'static str {
     type_name::<T>()
 }

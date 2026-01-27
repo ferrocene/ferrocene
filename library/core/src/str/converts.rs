@@ -86,6 +86,7 @@ use crate::{mem, ptr};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
 #[rustc_diagnostic_item = "str_from_utf8"]
+#[ferrocene::prevalidated]
 pub const fn from_utf8(v: &[u8]) -> Result<&str, Utf8Error> {
     // FIXME(const-hack): This should use `?` again, once it's `const`
     match run_utf8_validation(v) {
@@ -132,6 +133,7 @@ pub const fn from_utf8(v: &[u8]) -> Result<&str, Utf8Error> {
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8", since = "1.87.0")]
 #[rustc_diagnostic_item = "str_from_utf8_mut"]
+#[ferrocene::prevalidated]
 pub const fn from_utf8_mut(v: &mut [u8]) -> Result<&mut str, Utf8Error> {
     // FIXME(const-hack): This should use `?` again, once it's `const`
     match run_utf8_validation(v) {
@@ -175,6 +177,7 @@ pub const fn from_utf8_mut(v: &mut [u8]) -> Result<&mut str, Utf8Error> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8_unchecked", since = "1.55.0")]
 #[rustc_diagnostic_item = "str_from_utf8_unchecked"]
+#[ferrocene::prevalidated]
 pub const unsafe fn from_utf8_unchecked(v: &[u8]) -> &str {
     // SAFETY: the caller must guarantee that the bytes `v` are valid UTF-8.
     // Also relies on `&str` and `&[u8]` having the same layout.
@@ -205,6 +208,7 @@ pub const unsafe fn from_utf8_unchecked(v: &[u8]) -> &str {
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8_unchecked_mut", since = "1.83.0")]
 #[rustc_diagnostic_item = "str_from_utf8_unchecked_mut"]
+#[ferrocene::prevalidated]
 pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
     // SAFETY: the caller must guarantee that the bytes `v`
     // are valid UTF-8, thus the cast to `*mut str` is safe.
@@ -226,6 +230,7 @@ pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
 #[inline]
 #[must_use]
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
+#[ferrocene::prevalidated]
 pub const unsafe fn from_raw_parts<'a>(ptr: *const u8, len: usize) -> &'a str {
     // SAFETY: the caller must uphold the safety contract for `from_raw_parts`.
     unsafe { &*ptr::from_raw_parts(ptr, len) }
@@ -244,6 +249,7 @@ pub const unsafe fn from_raw_parts<'a>(ptr: *const u8, len: usize) -> &'a str {
 #[inline]
 #[must_use]
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
+#[ferrocene::prevalidated]
 pub const unsafe fn from_raw_parts_mut<'a>(ptr: *mut u8, len: usize) -> &'a mut str {
     // SAFETY: the caller must uphold the safety contract for `from_raw_parts_mut`.
     unsafe { &mut *ptr::from_raw_parts_mut(ptr, len) }

@@ -60,6 +60,7 @@ use crate::{assert_unsafe_precondition, fmt};
 #[derive_const(Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[unstable(feature = "ascii_char", issue = "110998")]
 #[repr(u8)]
+#[ferrocene::prevalidated]
 pub enum AsciiChar {
     /// U+0000 (The default variant)
     #[unstable(feature = "ascii_char_variants", issue = "110998")]
@@ -540,6 +541,7 @@ impl AsciiChar {
     /// Gets this ASCII character as a byte.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_u8(self) -> u8 {
         self as u8
     }
@@ -1203,6 +1205,7 @@ impl [AsciiChar] {
     /// Views this slice of ASCII characters as a UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> &str {
         let ascii_ptr: *const Self = self;
         let str_ptr = ascii_ptr as *const str;
@@ -1214,6 +1217,7 @@ impl [AsciiChar] {
     /// Views this slice of ASCII characters as a slice of `u8` bytes.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_bytes(&self) -> &[u8] {
         self.as_str().as_bytes()
     }

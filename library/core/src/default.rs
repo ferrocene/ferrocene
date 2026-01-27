@@ -155,6 +155,7 @@ macro_rules! default_impl {
         impl const Default for $t {
             #[inline(always)]
             #[doc = $doc]
+            #[ferrocene::prevalidated]
             fn default() -> $t {
                 $v
             }

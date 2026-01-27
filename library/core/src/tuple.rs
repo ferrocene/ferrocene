@@ -31,11 +31,13 @@ macro_rules! tuple_impls {
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
             impl<$($T: [const] PartialEq),+> const PartialEq for ($($T,)+) {
                 #[inline]
-                fn eq(&self, other: &($($T,)+)) -> bool {
+                #[ferrocene::prevalidated]
+fn eq(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} == other.${index()} )&&+
                 }
                 #[inline]
-                fn ne(&self, other: &($($T,)+)) -> bool {
+                #[ferrocene::prevalidated]
+fn ne(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} != other.${index()} )||+
                 }
             }

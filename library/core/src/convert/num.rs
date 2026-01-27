@@ -82,7 +82,8 @@ macro_rules! impl_from {
             // Rustdocs on functions do not.
             #[doc = $doc]
             #[inline(always)]
-            fn from(small: $Small) -> Self {
+            #[ferrocene::prevalidated]
+fn from(small: $Small) -> Self {
                 small as Self
             }
         }
@@ -305,7 +306,8 @@ macro_rules! impl_try_from_unbounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(value: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(value: $source) -> Result<Self, Self::Error> {
                 Ok(value as Self)
             }
         }
@@ -348,7 +350,8 @@ macro_rules! impl_try_from_upper_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u > (Self::MAX as $source) {
                     Err(TryFromIntError(()))
                 } else {
@@ -371,7 +374,8 @@ macro_rules! impl_try_from_both_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 let min = Self::MIN as $source;
                 let max = Self::MAX as $source;
                 if u < min || u > max {

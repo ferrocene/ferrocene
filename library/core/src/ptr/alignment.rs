@@ -22,6 +22,7 @@ use crate::mem;
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone))]
 #[repr(transparent)]
+#[ferrocene::prevalidated]
 pub struct Alignment(AlignmentEnum);
 
 // Alignment is `repr(usize)`, but via extra steps.
@@ -146,6 +147,7 @@ impl Alignment {
     /// Note that `0` is not a power of two, nor a valid alignment.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(align: usize) -> Option<Self> {
         if align.is_power_of_two() {
             // SAFETY: Just checked it only has one bit set
@@ -166,6 +168,7 @@ impl Alignment {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn new_unchecked(align: usize) -> Self {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -181,6 +184,7 @@ impl Alignment {
     /// Returns the alignment as a [`usize`].
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_usize(self) -> usize {
         self.0 as usize
     }
@@ -412,6 +416,7 @@ enum AlignmentEnum {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
 #[derive(Copy, Clone)]
 #[repr(usize)]
+#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,

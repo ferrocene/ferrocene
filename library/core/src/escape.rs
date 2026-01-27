@@ -13,6 +13,7 @@ const HEX_DIGITS: [ascii::Char; 16] = *b"0123456789abcdef".as_ascii().unwrap();
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
 #[inline]
+#[ferrocene::prevalidated]
 const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 2) };
 
@@ -138,6 +139,7 @@ const fn escape_ascii<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>)
 /// Escapes a character with `\u{NNNN}` representation.
 ///
 /// Returns a buffer with the escaped representation and its corresponding range.
+#[ferrocene::prevalidated]
 const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 10 && N < u8::MAX as usize) };
 
@@ -172,16 +174,19 @@ union MaybeEscapedCharacter<const N: usize> {
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
 #[non_exhaustive]
+#[ferrocene::prevalidated]
 pub(crate) struct AlwaysEscaped;
 
 /// Marker type to indicate that the character may be escaped,
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
 #[non_exhaustive]
+#[ferrocene::prevalidated]
 pub(crate) struct MaybeEscaped;
 
 /// An iterator over a possibly escaped character.
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub(crate) struct EscapeIterInner<const N: usize, ESCAPING> {
     // Invariant:
     //
@@ -203,6 +208,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     ///
     /// `data.escape_seq` must contain an escape sequence in the range given by `alive`.
     #[inline]
+    #[ferrocene::prevalidated]
     const unsafe fn new(data: MaybeEscapedCharacter<N>, alive: Range<u8>) -> Self {
         // Longer escape sequences are not useful given `alive.end` is at most
         // `Self::LITERAL_ESCAPE_START`.
@@ -215,6 +221,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
         Self { data, alive, escaping: PhantomData }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) const fn backslash(c: ascii::Char) -> Self {
         let (escape_seq, alive) = backslash(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.
@@ -228,6 +235,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
         unsafe { Self::new(MaybeEscapedCharacter { escape_seq }, alive) }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) const fn unicode(c: char) -> Self {
         let (escape_seq, alive) = escape_unicode(c);
         // SAFETY: `escape_seq` contains an escape sequence in the range given by `alive`.
@@ -242,6 +250,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn len(&self) -> usize {
         usize::from(self.alive.end - self.alive.start)
     }
@@ -260,6 +269,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
 
     /// Returns a `char` if `self.data` contains one in its `literal` variant.
     #[inline]
+    #[ferrocene::prevalidated]
     const fn to_char(&self) -> Option<char> {
         if self.alive.end > Self::LITERAL_ESCAPE_START {
             // SAFETY: We just checked that `self.data` contains a `char` in
@@ -278,6 +288,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     /// - `self.data` must contain printable ASCII characters in its `escape_seq` variant.
     /// - `self.alive` must be a valid range for `self.data.escape_seq`.
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn to_str_unchecked(&self) -> &str {
         debug_assert!(self.alive.end <= Self::LITERAL_ESCAPE_START);
 
@@ -321,6 +332,7 @@ impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
     // the `literal` variant of its `self.data`, meaning the `AlwaysEscaped` marker
     // guarantees that `self.data` contains printable ASCII characters in its
     // `escape_seq` variant.
+    #[ferrocene::prevalidated]
     pub(crate) const fn printable(c: char) -> Self {
         Self {
             data: MaybeEscapedCharacter { literal: c },
@@ -331,6 +343,7 @@ impl<const N: usize> EscapeIterInner<N, MaybeEscaped> {
         }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) fn next(&mut self) -> Option<char> {
         let i = self.alive.next()?;
 
@@ -356,6 +369,7 @@ impl<const N: usize> fmt::Display for EscapeIterInner<N, AlwaysEscaped> {
 }
 
 impl<const N: usize> fmt::Display for EscapeIterInner<N, MaybeEscaped> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(c) = self.to_char() {
             return f.write_char(c);

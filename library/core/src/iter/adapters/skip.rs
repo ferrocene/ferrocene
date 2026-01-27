@@ -27,12 +27,14 @@ use crate::ops::Try;
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Skip<I> {
     iter: I,
     n: usize,
 }
 
 impl<I> Skip<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, n: usize) -> Skip<I> {
         Skip { iter, n }
     }
@@ -46,6 +48,7 @@ where
     type Item = <I as Iterator>::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<I::Item> {
         if unlikely(self.n > 0) {
             self.iter.nth(crate::mem::take(&mut self.n))
@@ -55,6 +58,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         if self.n > 0 {
             let skip: usize = crate::mem::take(&mut self.n);
@@ -77,6 +81,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(mut self) -> usize {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -88,6 +93,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<I::Item> {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -97,6 +103,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
 
@@ -110,6 +117,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -128,6 +136,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -143,6 +152,7 @@ where
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         let skip_inner = self.n;
         let skip_and_advance = skip_inner.saturating_add(n);

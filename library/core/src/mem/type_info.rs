@@ -9,6 +9,7 @@ use crate::intrinsics::type_of;
 #[non_exhaustive]
 #[lang = "type_info"]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Type {
     /// Per-type information
     pub kind: TypeKind,
@@ -21,6 +22,7 @@ impl TypeId {
     /// It can only be called at compile time.
     #[unstable(feature = "type_info", issue = "146922")]
     #[rustc_const_unstable(feature = "type_info", issue = "146922")]
+    #[ferrocene::prevalidated]
     pub const fn info(self) -> Type {
         type_of(self)
     }
@@ -31,6 +33,7 @@ impl Type {
     #[unstable(feature = "type_info", issue = "146922")]
     #[rustc_const_unstable(feature = "type_info", issue = "146922")]
     // FIXME(reflection): don't require the 'static bound
+    #[ferrocene::prevalidated]
     pub const fn of<T: ?Sized + 'static>() -> Self {
         const { TypeId::of::<T>().info() }
     }
@@ -40,6 +43,7 @@ impl Type {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub enum TypeKind {
     /// Tuples.
     Tuple(Tuple),
@@ -69,6 +73,7 @@ pub enum TypeKind {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Tuple {
     /// All fields of a tuple.
     pub fields: &'static [Field],
@@ -78,6 +83,7 @@ pub struct Tuple {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Field {
     /// The field's type.
     pub ty: TypeId,
@@ -89,6 +95,7 @@ pub struct Field {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Array {
     /// The type of each element in the array.
     pub element_ty: TypeId,
@@ -100,6 +107,7 @@ pub struct Array {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Slice {
     /// The type of each element in the slice.
     pub element_ty: TypeId,
@@ -109,6 +117,7 @@ pub struct Slice {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Bool {
     // No additional information to provide for now.
 }
@@ -117,6 +126,7 @@ pub struct Bool {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Char {
     // No additional information to provide for now.
 }
@@ -125,6 +135,7 @@ pub struct Char {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Int {
     /// The bit width of the signed integer type.
     pub bits: u32,
@@ -136,6 +147,7 @@ pub struct Int {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Float {
     /// The bit width of the floating-point type.
     pub bits: u32,
@@ -145,6 +157,7 @@ pub struct Float {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Str {
     // No additional information to provide for now.
 }
@@ -153,6 +166,7 @@ pub struct Str {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Reference {
     /// The type of the value being referred to.
     pub pointee: TypeId,
@@ -164,6 +178,7 @@ pub struct Reference {
 #[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
+#[ferrocene::prevalidated]
 pub struct Pointer {
     /// The type of the value being pointed to.
     pub pointee: TypeId,

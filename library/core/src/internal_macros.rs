@@ -7,7 +7,8 @@ macro_rules! forward_ref_unop {
             type Output = <$t as $imp>::Output;
 
             #[inline]
-            fn $method(self) -> <$t as $imp>::Output {
+            #[ferrocene::prevalidated]
+fn $method(self) -> <$t as $imp>::Output {
                 $imp::$method(*self)
             }
         }
@@ -24,7 +25,8 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
-            fn $method(self, other: $u) -> <$t as $imp<$u>>::Output {
+            #[ferrocene::prevalidated]
+fn $method(self, other: $u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, other)
             }
         }
@@ -35,7 +37,8 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
-            fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
+            #[ferrocene::prevalidated]
+fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(self, *other)
             }
         }
@@ -46,7 +49,8 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
-            fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
+            #[ferrocene::prevalidated]
+fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, *other)
             }
         }
@@ -61,7 +65,8 @@ macro_rules! forward_ref_op_assign {
         impl const $imp<&$u> for $t {
             #[inline]
             #[track_caller]
-            fn $method(&mut self, other: &$u) {
+            #[ferrocene::prevalidated]
+fn $method(&mut self, other: &$u) {
                 $imp::$method(self, *other);
             }
         }

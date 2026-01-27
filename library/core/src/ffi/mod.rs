@@ -63,6 +63,7 @@ pub use self::primitives::{c_ptrdiff_t, c_size_t, c_ssize_t};
 #[lang = "c_void"]
 #[repr(u8)]
 #[stable(feature = "core_c_void", since = "1.30.0")]
+#[ferrocene::prevalidated]
 pub enum c_void {
     #[unstable(
         feature = "c_void_variant",

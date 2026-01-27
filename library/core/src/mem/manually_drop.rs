@@ -161,6 +161,7 @@ use crate::ptr;
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 #[rustc_pub_transparent]
+#[ferrocene::prevalidated]
 pub struct ManuallyDrop<T: ?Sized> {
     value: MaybeDangling<T>,
 }
@@ -184,6 +185,7 @@ impl<T> ManuallyDrop<T> {
     #[stable(feature = "manually_drop", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> ManuallyDrop<T> {
         ManuallyDrop { value: MaybeDangling::new(value) }
     }
@@ -202,6 +204,7 @@ impl<T> ManuallyDrop<T> {
     #[stable(feature = "manually_drop", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn into_inner(slot: ManuallyDrop<T>) -> T {
         // Cannot use `MaybeDangling::into_inner` as that does not yet have the desired semantics.
         // SAFETY: We know this is a valid `T`. `slot` will not be dropped.
@@ -227,6 +230,7 @@ impl<T> ManuallyDrop<T> {
     #[stable(feature = "manually_drop_take", since = "1.42.0")]
     #[rustc_const_unstable(feature = "const_manually_drop_take", issue = "148773")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const unsafe fn take(slot: &mut ManuallyDrop<T>) -> T {
         // SAFETY: we are reading from a reference, which is guaranteed
         // to be valid for reads.
@@ -260,6 +264,7 @@ impl<T: ?Sized> ManuallyDrop<T> {
     #[stable(feature = "manually_drop", since = "1.20.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn drop(slot: &mut ManuallyDrop<T>)
     where
         T: [const] Destruct,
@@ -276,6 +281,7 @@ impl<T: ?Sized> ManuallyDrop<T> {
 impl<T: ?Sized> const Deref for ManuallyDrop<T> {
     type Target = T;
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         self.value.as_ref()
     }
@@ -285,6 +291,7 @@ impl<T: ?Sized> const Deref for ManuallyDrop<T> {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<T: ?Sized> const DerefMut for ManuallyDrop<T> {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut T {
         self.value.as_mut()
     }
@@ -298,6 +305,7 @@ impl<T: ?Sized + Eq> Eq for ManuallyDrop<T> {}
 
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized + PartialEq> PartialEq for ManuallyDrop<T> {
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         self.value.as_ref().eq(other.value.as_ref())
     }

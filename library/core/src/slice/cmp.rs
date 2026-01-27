@@ -20,6 +20,7 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U]) -> bool {
         SlicePartialEq::equal(self, other)
     }
@@ -118,6 +119,7 @@ where
     // such as in `<str as PartialEq>::eq`.
     // The codegen backend can still inline it later if needed.
     #[rustc_no_mir_inline]
+    #[ferrocene::prevalidated]
     default fn equal(&self, other: &[B]) -> bool {
         if self.len() != other.len() {
             return false;

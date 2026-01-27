@@ -21,12 +21,14 @@ use crate::ops::{ControlFlow, Try};
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Skip<I> {
     iter: I,
     n: usize,
 }
 
 impl<I> Skip<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, n: usize) -> Skip<I> {
         Skip { iter, n }
     }
@@ -40,6 +42,7 @@ where
     type Item = <I as Iterator>::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<I::Item> {
         if unlikely(self.n > 0) {
             self.iter.nth(crate::mem::take(&mut self.n))
@@ -49,6 +52,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         if self.n > 0 {
             let skip: usize = crate::mem::take(&mut self.n);
@@ -71,6 +75,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(mut self) -> usize {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -82,6 +87,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<I::Item> {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -91,6 +97,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
 
@@ -104,6 +111,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -122,6 +130,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -137,6 +146,7 @@ where
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         let skip_inner = self.n;
         let skip_and_advance = skip_inner.saturating_add(n);
@@ -196,11 +206,13 @@ impl<I> DoubleEndedIterator for Skip<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
 {
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.len() > 0 { self.iter.next_back() } else { None }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<I::Item> {
         let len = self.len();
         if n < len {
@@ -214,12 +226,14 @@ where
         }
     }
 
+    #[ferrocene::prevalidated]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
+        #[ferrocene::prevalidated]
         fn check<T, Acc, R: Try<Output = Acc>>(
             mut n: usize,
             mut fold: impl FnMut(Acc, T) -> R,
@@ -238,6 +252,7 @@ where
     impl_fold_via_try_fold! { rfold -> try_rfold }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let min = crate::cmp::min(self.len(), n);
         let rem = self.iter.advance_back_by(min);

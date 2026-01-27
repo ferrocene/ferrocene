@@ -170,6 +170,7 @@ pub macro const_panic {
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         #[inline(always)] // inline the wrapper
         #[track_caller]
+        #[ferrocene::prevalidated]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

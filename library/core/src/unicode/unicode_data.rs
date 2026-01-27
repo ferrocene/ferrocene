@@ -60,12 +60,14 @@ const fn bitset_search<
 }
 
 #[repr(transparent)]
+#[ferrocene::prevalidated]
 struct ShortOffsetRunHeader(u32);
 
 impl ShortOffsetRunHeader {
     #[ferrocene::annotation(
         "The only uses of this function are inside statics without any inner mutability. Meaning that they can't be covered"
     )]
+    #[ferrocene::prevalidated]
     const fn new(start_index: usize, prefix_sum: u32) -> Self {
         assert!(start_index < (1 << 11));
         assert!(prefix_sum < (1 << 21));
@@ -74,11 +76,13 @@ impl ShortOffsetRunHeader {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn start_index(&self) -> usize {
         (self.0 >> 21) as usize
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn prefix_sum(&self) -> u32 {
         self.0 & ((1 << 21) - 1)
     }
@@ -89,6 +93,7 @@ impl ShortOffsetRunHeader {
 /// - The last element of `short_offset_runs` must be greater than `std::char::MAX`.
 /// - The start indices of all elements in `short_offset_runs` must be less than `OFFSETS`.
 #[inline(always)]
+#[ferrocene::prevalidated]
 unsafe fn skip_search<const SOR: usize, const OFFSETS: usize>(
     needle: char,
     short_offset_runs: &[ShortOffsetRunHeader; SOR],
@@ -451,12 +456,14 @@ pub mod grapheme_extend {
         7, 2, 5, 1, 0, 7, 109, 7, 0, 96, 128, 240, 0,
     ];
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn lookup(c: char) -> bool {
         debug_assert!(!c.is_ascii());
         (c as u32) >= 0x300 && lookup_slow(c)
     }
 
     #[inline(never)]
+    #[ferrocene::prevalidated]
     fn lookup_slow(c: char) -> bool {
         const {
             assert!(SHORT_OFFSET_RUNS.last().unwrap().0 > char::MAX as u32);

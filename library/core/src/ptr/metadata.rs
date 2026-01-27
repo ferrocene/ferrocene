@@ -104,6 +104,7 @@ pub trait Thin = Pointee<Metadata = ()> + PointeeSized;
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
 #[inline]
+#[ferrocene::prevalidated]
 pub const fn metadata<T: PointeeSized>(ptr: *const T) -> <T as Pointee>::Metadata {
     ptr_metadata(ptr)
 }
@@ -120,6 +121,7 @@ pub const fn metadata<T: PointeeSized>(ptr: *const T) -> <T as Pointee>::Metadat
 /// [`slice::from_raw_parts`]: crate::slice::from_raw_parts
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[inline]
+#[ferrocene::prevalidated]
 pub const fn from_raw_parts<T: PointeeSized>(
     data_pointer: *const impl Thin,
     metadata: <T as Pointee>::Metadata,
@@ -133,6 +135,7 @@ pub const fn from_raw_parts<T: PointeeSized>(
 /// See the documentation of [`from_raw_parts`] for more details.
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[inline]
+#[ferrocene::prevalidated]
 pub const fn from_raw_parts_mut<T: PointeeSized>(
     data_pointer: *mut impl Thin,
     metadata: <T as Pointee>::Metadata,
@@ -163,6 +166,7 @@ pub const fn from_raw_parts_mut<T: PointeeSized>(
 /// duplicated in multiple codegen units), and pointers to vtables of *different* types/traits can
 /// compare equal (since identical vtables can be deduplicated within a codegen unit).
 #[lang = "dyn_metadata"]
+#[ferrocene::prevalidated]
 pub struct DynMetadata<Dyn: PointeeSized> {
     _vtable_ptr: NonNull<VTable>,
     _phantom: crate::marker::PhantomData<Dyn>,
@@ -185,6 +189,7 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     /// field of `DynMetadata`. To work around that issue, we use `transmute` instead of using a
     /// field projection.
     #[inline]
+    #[ferrocene::prevalidated]
     fn vtable_ptr(self) -> *const VTable {
         // SAFETY: this layout assumption is hard-coded into the compiler.
         // If it's somehow not a size match, the transmute will error.
@@ -224,6 +229,7 @@ unsafe impl<Dyn: PointeeSized> Send for DynMetadata<Dyn> {}
 unsafe impl<Dyn: PointeeSized> Sync for DynMetadata<Dyn> {}
 
 impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata").field(&self.vtable_ptr()).finish()
     }
@@ -238,6 +244,7 @@ impl<Dyn: PointeeSized> Copy for DynMetadata<Dyn> {}
 
 impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         *self
     }

@@ -122,6 +122,7 @@ use crate::{array, ptr, ub_checks};
 #[must_use]
 #[rustc_diagnostic_item = "slice_from_raw_parts"]
 #[track_caller]
+#[ferrocene::prevalidated]
 pub const unsafe fn from_raw_parts<'a, T>(data: *const T, len: usize) -> &'a [T] {
     // SAFETY: the caller must uphold the safety contract for `from_raw_parts`.
     unsafe {
@@ -177,6 +178,7 @@ pub const unsafe fn from_raw_parts<'a, T>(data: *const T, len: usize) -> &'a [T]
 #[must_use]
 #[rustc_diagnostic_item = "slice_from_raw_parts_mut"]
 #[track_caller]
+#[ferrocene::prevalidated]
 pub const unsafe fn from_raw_parts_mut<'a, T>(data: *mut T, len: usize) -> &'a mut [T] {
     // SAFETY: the caller must uphold the safety contract for `from_raw_parts_mut`.
     unsafe {
@@ -201,6 +203,7 @@ pub const unsafe fn from_raw_parts_mut<'a, T>(data: *mut T, len: usize) -> &'a m
 #[rustc_const_stable(feature = "const_slice_from_ref_shared", since = "1.63.0")]
 #[rustc_diagnostic_item = "slice_from_ref"]
 #[must_use]
+#[ferrocene::prevalidated]
 pub const fn from_ref<T>(s: &T) -> &[T] {
     array::from_ref(s)
 }
@@ -209,6 +212,7 @@ pub const fn from_ref<T>(s: &T) -> &[T] {
 #[stable(feature = "from_ref", since = "1.28.0")]
 #[rustc_const_stable(feature = "const_slice_from_ref", since = "1.83.0")]
 #[must_use]
+#[ferrocene::prevalidated]
 pub const fn from_mut<T>(s: &mut T) -> &mut [T] {
     array::from_mut(s)
 }

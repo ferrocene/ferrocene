@@ -49,6 +49,7 @@ macro_rules! integer_sum_product {
     (@impls $zero:expr, $one:expr, #[$attr:meta], $($a:ty)*) => ($(
         #[$attr]
         impl Sum for $a {
+            #[ferrocene::prevalidated]
             fn sum<I: Iterator<Item=Self>>(iter: I) -> Self {
                 iter.fold(
                     $zero,
@@ -72,6 +73,7 @@ macro_rules! integer_sum_product {
 
         #[$attr]
         impl<'a> Sum<&'a $a> for $a {
+            #[ferrocene::prevalidated]
             fn sum<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
                 iter.fold(
                     $zero,
@@ -164,6 +166,7 @@ macro_rules! float_sum_product {
     ($($a:ident)*) => ($(
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
         impl Sum for $a {
+            #[ferrocene::prevalidated]
             fn sum<I: Iterator<Item=Self>>(iter: I) -> Self {
                 iter.fold(
                     -0.0,
@@ -187,6 +190,7 @@ macro_rules! float_sum_product {
 
         #[stable(feature = "iter_arith_traits", since = "1.12.0")]
         impl<'a> Sum<&'a $a> for $a {
+            #[ferrocene::prevalidated]
             fn sum<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
                 iter.fold(
                     -0.0,

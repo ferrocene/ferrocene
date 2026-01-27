@@ -18,6 +18,7 @@ impl<const N: usize> [u8; N] {
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_ascii(&self) -> Option<&[ascii::Char; N]> {
         if self.is_ascii() {
             // SAFETY: Just checked that it's ASCII
@@ -36,6 +37,7 @@ impl<const N: usize> [u8; N] {
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const unsafe fn as_ascii_unchecked(&self) -> &[ascii::Char; N] {
         let byte_ptr: *const [u8; N] = self;
         let ascii_ptr = byte_ptr as *const [ascii::Char; N];

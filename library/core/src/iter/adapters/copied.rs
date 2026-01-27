@@ -21,11 +21,13 @@ use crate::{array, ptr};
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct Copied<I> {
     it: I,
 }
 
 impl<I> Copied<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(it: I) -> Copied<I> {
         Copied { it }
     }
@@ -38,10 +40,12 @@ impl<I> Copied<I> {
     }
 }
 
+#[ferrocene::prevalidated]
 fn copy_fold<T: Copy, Acc>(mut f: impl FnMut(Acc, T) -> Acc) -> impl FnMut(Acc, &T) -> Acc {
     move |acc, &elt| f(acc, elt)
 }
 
+#[ferrocene::prevalidated]
 fn copy_try_fold<T: Copy, Acc, R>(mut f: impl FnMut(Acc, T) -> R) -> impl FnMut(Acc, &T) -> R {
     move |acc, &elt| f(acc, elt)
 }
@@ -54,6 +58,7 @@ where
 {
     type Item = T;
 
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<T> {
         self.it.next().copied()
     }
@@ -68,10 +73,12 @@ where
         <I as SpecNextChunk<'_, N, T>>::spec_next_chunk(&mut self.it)
     }
 
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.it.size_hint()
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -81,6 +88,7 @@ where
         self.it.try_fold(init, copy_try_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -88,19 +96,23 @@ where
         self.it.fold(init, copy_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<T> {
         self.it.nth(n).copied()
     }
 
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<T> {
         self.it.last().copied()
     }
 
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.it.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.it.advance_by(n)
     }
@@ -122,10 +134,12 @@ where
     I: DoubleEndedIterator<Item = &'a T>,
     T: Copy,
 {
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<T> {
         self.it.next_back().copied()
     }
 
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -135,6 +149,7 @@ where
         self.it.try_rfold(init, copy_try_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -143,6 +158,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.it.advance_back_by(n)
     }
@@ -154,10 +170,12 @@ where
     I: ExactSizeIterator<Item = &'a T>,
     T: Copy,
 {
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         self.it.len()
     }
 
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.it.is_empty()
     }

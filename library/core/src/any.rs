@@ -160,6 +160,7 @@ impl<T: 'static + ?Sized> Any for T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for dyn Any {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
@@ -170,6 +171,7 @@ impl fmt::Debug for dyn Any {
 // dispatch works with upcasting.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for dyn Any + Send {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
@@ -177,6 +179,7 @@ impl fmt::Debug for dyn Any + Send {
 
 #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
 impl fmt::Debug for dyn Any + Send + Sync {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
@@ -736,6 +739,7 @@ impl dyn Any + Send + Sync {
 #[cfg_attr(feature = "ferrocene_subset", derive_const(Clone))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
+#[ferrocene::prevalidated]
 pub struct TypeId {
     /// This needs to be an array of pointers, since there is provenance
     /// in the first array field. This provenance knows exactly which type
@@ -756,6 +760,7 @@ unsafe impl Sync for TypeId {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl const PartialEq for TypeId {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         #[cfg(miri)]
         return crate::intrinsics::type_id_eq(*self, *other);
@@ -802,6 +807,7 @@ impl TypeId {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_type_id", since = "1.91.0")]
+    #[ferrocene::prevalidated]
     pub const fn of<T: ?Sized + 'static>() -> TypeId {
         const { intrinsics::type_id::<T>() }
     }
@@ -869,6 +875,7 @@ impl TypeId {
         }
     }
 
+    #[ferrocene::prevalidated]
     fn as_u128(self) -> u128 {
         let mut bytes = [0; 16];
 
@@ -910,6 +917,7 @@ impl hash::Hash for TypeId {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for TypeId {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "TypeId({:#034x})", self.as_u128())
     }
@@ -945,6 +953,7 @@ impl fmt::Debug for TypeId {
 #[must_use]
 #[stable(feature = "type_name", since = "1.38.0")]
 #[rustc_const_unstable(feature = "const_type_name", issue = "63084")]
+#[ferrocene::prevalidated]
 pub const fn type_name<T: ?Sized>() -> &'static str {
     const { intrinsics::type_name::<T>() }
 }
@@ -985,6 +994,7 @@ pub const fn type_name<T: ?Sized>() -> &'static str {
 #[must_use]
 #[stable(feature = "type_name_of_val", since = "1.76.0")]
 #[rustc_const_unstable(feature = "const_type_name", issue = "63084")]
+#[ferrocene::prevalidated]
 pub const fn type_name_of_val<T: ?Sized>(_val: &T) -> &'static str {
     type_name::<T>()
 }

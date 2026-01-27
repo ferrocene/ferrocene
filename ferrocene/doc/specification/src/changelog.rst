@@ -19,6 +19,69 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.93.0
+-------------------------------
+
+- `Stabilize several s390x vector-related target features and the is_s390x_feature_detected! macro <https://github.com/rust-lang/rust/pull/145656>`_
+
+  - No change: the target is outside the scope of FLS
+
+- `Stabilize declaration of C-style variadic functions for the system ABI <https://github.com/rust-lang/rust/pull/145954>`_
+- `Emit error when using some keyword as a cfg predicate <https://github.com/rust-lang/rust/pull/146978>`_
+
+  - No change: this bug was not documented in FLS
+
+- `Stabilize asm_cfg <https://github.com/rust-lang/rust/pull/147736>`_
+- `During const-evaluation, support copying pointers byte-by-byte <https://github.com/rust-lang/rust/pull/148259>`_
+- `LUB coercions now correctly handle function item types, and functions with differing safeties <https://github.com/rust-lang/rust/pull/148602>`_
+- `Allow const items that contain mutable references to static (which is *very* unsafe, but not *always* UB) <https://github.com/rust-lang/rust/pull/148746>`_
+- `Add warn-by-default const_item_interior_mutations lint to warn against calls which mutate interior mutable const items <https://github.com/rust-lang/rust/pull/148407>`_
+
+  - Lints are outside the scope of FLS
+
+- `Add warn-by-default function_casts_as_integer lint <https://github.com/rust-lang/rust/pull/141470>`_
+
+  - Lints are outside the scope of FLS
+
+Language changes in Rust 1.92.0
+-------------------------------
+
+- `Document MaybeUninit representation and validity <https://github.com/rust-lang/rust/pull/140463>`_
+
+  - This is not a language change
+
+- `Allow "&raw [mut | const]" for union field in safe code <https://github.com/rust-lang/rust/pull/141469>`_
+
+  - This lifted restriction was not specified in the FLS
+
+- `Prefer item bounds of associated types over where-bounds for auto-traits and Sized <https://github.com/rust-lang/rust/pull/144064>`_
+
+  - This is a fix for a regression that only existed in development versions of Rust (Beta and Nightly)
+
+- `Do not materialize X in "[X; 0]" when X is unsizing a const <https://github.com/rust-lang/rust/pull/145277>`_
+
+  - This behavior was not documented in the FLS
+
+- `Support combining #[track_caller] and #[no_mangle] (requires every declaration specifying #[track_caller] as well) <https://github.com/rust-lang/rust/pull/145724>`_
+
+  - This lifted restriction was not documented in the FLS
+
+- `Make never type lints never_type_fallback_flowing_into_unsafe and dependency_on_unit_never_type_fallback deny-by-default <https://github.com/rust-lang/rust/pull/146167>`_
+
+  - Lints are not part of the FLS
+
+- `Allow specifying multiple bounds for same associated item, except in trait objects <https://github.com/rust-lang/rust/pull/146593>`_
+
+  - This lifted restriction was not documented in the FLS
+
+- `Slightly strengthen higher-ranked region handling in coherence <https://github.com/rust-lang/rust/pull/146725>`_
+
+  - The lifted restriction was not documented in the FLS
+
+- `The unused_must_use lint no longer warns on "Result<(), Uninhabited>" (for instance, "Result<(), !>"), or "ControlFlow<Uninhabited, ()>" <https://github.com/rust-lang/rust/pull/147382>`_. This avoids having to check for an error that can never happen.
+
+  - No change: lints are not part of the FLS
+
 Language changes in Rust 1.91.1
 -------------------------------
 

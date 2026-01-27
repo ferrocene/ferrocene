@@ -33,6 +33,7 @@ function onSearch(query) {
             }
         }
         section.querySelector(".count").textContent = numFunctions.toString();
+        document.querySelector("button." + section.classList[0]).querySelector(".count").textContent = numFunctions.toString();
     }
 
     var totalLines = numLinesTested + numLinesUntested;

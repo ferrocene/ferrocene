@@ -78,16 +78,16 @@ pub(crate) fn generate(
         }
         div class="picker-buttons" {
                 button class=(fully_tested_class) data-filter=(fully_tested_class) {
-                    (fully_tested.len()) " Fully Tested"
+                    span class="count" { (fully_tested.len()) } " Fully Tested"
                 }
                 button class=(partially_tested_class) data-filter=(partially_tested_class) {
-                    (partially_tested.len()) " Partially Tested"
+                    span class="count" { (partially_tested.len()) } " Partially Tested"
                 }
                 button class=(fully_untested_class) data-filter=(fully_untested_class) {
-                    (fully_untested.len()) " Fully Untested"
+                    span class="count" { (fully_untested.len()) } " Fully Untested"
                 }
                 button class=(fully_ignored_class) data-filter=(fully_ignored_class) {
-                    (fully_ignored.len()) " Fully Ignored"
+                    span class="count" { (fully_ignored.len()) } " Fully Ignored"
                 }
         }
         div class="misc-checkboxes" {

@@ -14,12 +14,9 @@ on:
       triples:
         type: string
         description: A comma separated list of targets to build
-      rust-runner:
+      runner:
         type: string
         description: The GitHub Runner to run the rust build on
-      llvm-runner:
-        type: string
-        description: The GitHub Runner to run the llvm build on
       use-minio:
         type: boolean
         default: false
@@ -54,7 +51,7 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ inputs.rust-runner }}
+    runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: build-${{inputs.host-triple}}

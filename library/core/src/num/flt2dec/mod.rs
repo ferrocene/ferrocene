@@ -145,6 +145,7 @@ pub const MAX_SIG_DIGITS: usize = 17;
 /// When `d` contains decimal digits, increase the last digit and propagate carry.
 /// Returns a next digit when it causes the length to change.
 #[doc(hidden)]
+#[ferrocene::prevalidated]
 pub fn round_up(d: &mut [u8]) -> Option<u8> {
     match d.iter().rposition(|&c| c != b'9') {
         Some(i) => {
@@ -174,6 +175,7 @@ pub fn round_up(d: &mut [u8]) -> Option<u8> {
 /// it will be ignored and full digits will be printed. It is only used to print
 /// additional zeroes after rendered digits. Thus `frac_digits` of 0 means that
 /// it will only print given digits and nothing else.
+#[ferrocene::prevalidated]
 fn digits_to_dec_str<'a>(
     buf: &'a [u8],
     exp: i16,
@@ -252,6 +254,7 @@ fn digits_to_dec_str<'a>(
 /// it will be ignored and full digits will be printed. It is only used to print
 /// additional zeroes after rendered digits. Thus, `min_digits == 0` means that
 /// it will only print the given digits and nothing else.
+#[ferrocene::prevalidated]
 fn digits_to_exp_str<'a>(
     buf: &'a [u8],
     exp: i16,
@@ -293,6 +296,7 @@ fn digits_to_exp_str<'a>(
 
 /// Sign formatting options.
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[ferrocene::prevalidated]
 pub enum Sign {
     /// Prints `-` for any negative value.
     Minus, // -inf -1 -0  0  1  inf nan
@@ -302,6 +306,7 @@ pub enum Sign {
 
 /// Returns the static byte string corresponding to the sign to be formatted.
 /// It can be either `""`, `"+"` or `"-"`.
+#[ferrocene::prevalidated]
 fn determine_sign(sign: Sign, decoded: &FullDecoded, negative: bool) -> &'static str {
     match (*decoded, sign) {
         (FullDecoded::Nan, _) => "",
@@ -341,6 +346,7 @@ fn determine_sign(sign: Sign, decoded: &FullDecoded, negative: bool) -> &'static
 /// The byte buffer should be at least `MAX_SIG_DIGITS` bytes long.
 /// There should be at least 4 parts available, due to the worst case like
 /// `[+][0.][0000][2][0000]` with `frac_digits = 10`.
+#[ferrocene::prevalidated]
 pub fn to_shortest_str<'a, T, F>(
     mut format_shortest: F,
     v: T,
@@ -415,6 +421,7 @@ where
 /// The byte buffer should be at least `MAX_SIG_DIGITS` bytes long.
 /// There should be at least 6 parts available, due to the worst case like
 /// `[+][1][.][2345][e][-][6]`.
+#[ferrocene::prevalidated]
 pub fn to_shortest_exp_str<'a, T, F>(
     mut format_shortest: F,
     v: T,
@@ -487,6 +494,7 @@ where
 /// allocate all the buffer beforehand. Consequently, for any given arguments,
 /// 826 bytes of buffer should be sufficient for `f64`. Compare this with
 /// the actual number for the worst case: 770 bytes (when `exp = -1074`).
+#[ferrocene::prevalidated]
 fn estimate_max_buf_len(exp: i16) -> usize {
     21 + ((if exp < 0 { -12 } else { 5 } * exp as i32) as usize >> 4)
 }
@@ -507,6 +515,7 @@ fn estimate_max_buf_len(exp: i16) -> usize {
 /// (The tipping point for `f64` is about 800, so 1000 bytes should be enough.)
 /// There should be at least 6 parts available, due to the worst case like
 /// `[+][1][.][2345][e][-][6]`.
+#[ferrocene::prevalidated]
 pub fn to_exact_exp_str<'a, T, F>(
     mut format_exact: F,
     v: T,
@@ -583,6 +592,7 @@ where
 /// (The tipping point for `f64` is about 800, and 1000 bytes should be enough.)
 /// There should be at least 4 parts available, due to the worst case like
 /// `[+][0.][0000][2][0000]` with `frac_digits = 10`.
+#[ferrocene::prevalidated]
 pub fn to_exact_fixed_str<'a, T, F>(
     mut format_exact: F,
     v: T,

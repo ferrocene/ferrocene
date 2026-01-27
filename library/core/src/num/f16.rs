@@ -429,6 +429,7 @@ impl f16 {
     /// ```
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
+    #[ferrocene::prevalidated]
     pub const fn classify(self) -> FpCategory {
         let b = self.to_bits();
         match (b & Self::MAN_MASK, b & Self::EXP_MASK) {
@@ -916,6 +917,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[allow(unnecessary_transmutes)]
+    #[ferrocene::prevalidated]
     pub const fn to_bits(self) -> u16 {
         // SAFETY: `u16` is a plain old datatype so we can always transmute to it.
         unsafe { mem::transmute(self) }
@@ -963,6 +965,7 @@ impl f16 {
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     #[allow(unnecessary_transmutes)]
+    #[ferrocene::prevalidated]
     pub const fn from_bits(v: u16) -> Self {
         // It turns out the safety issues with sNaN were overblown! Hooray!
         // SAFETY: `u16` is a plain old datatype so we can always transmute from it.
@@ -1343,6 +1346,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
+    #[ferrocene::prevalidated]
     pub const fn abs(self) -> Self {
         intrinsics::fabsf16(self)
     }

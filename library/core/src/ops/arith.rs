@@ -102,7 +102,8 @@ macro_rules! add_impl {
             #[inline]
             #[track_caller]
             #[rustc_inherit_overflow_checks]
-            fn add(self, other: $t) -> $t { self + other }
+            #[ferrocene::prevalidated]
+fn add(self, other: $t) -> $t { self + other }
         }
 
         forward_ref_binop! { impl Add, add for $t, $t,
@@ -215,7 +216,8 @@ macro_rules! sub_impl {
             #[inline]
             #[track_caller]
             #[rustc_inherit_overflow_checks]
-            fn sub(self, other: $t) -> $t { self - other }
+            #[ferrocene::prevalidated]
+fn sub(self, other: $t) -> $t { self - other }
         }
 
         forward_ref_binop! { impl Sub, sub for $t, $t,
@@ -349,7 +351,8 @@ macro_rules! mul_impl {
             #[inline]
             #[track_caller]
             #[rustc_inherit_overflow_checks]
-            fn mul(self, other: $t) -> $t { self * other }
+            #[ferrocene::prevalidated]
+fn mul(self, other: $t) -> $t { self * other }
         }
 
         forward_ref_binop! { impl Mul, mul for $t, $t,
@@ -492,7 +495,8 @@ macro_rules! div_impl_integer {
 
             #[inline]
             #[track_caller]
-            fn div(self, other: $t) -> $t { self / other }
+            #[ferrocene::prevalidated]
+fn div(self, other: $t) -> $t { self / other }
         }
 
         forward_ref_binop! { impl Div, div for $t, $t,
@@ -514,7 +518,8 @@ macro_rules! div_impl_float {
             type Output = $t;
 
             #[inline]
-            fn div(self, other: $t) -> $t { self / other }
+            #[ferrocene::prevalidated]
+fn div(self, other: $t) -> $t { self / other }
         }
 
         forward_ref_binop! { impl Div, div for $t, $t,
@@ -601,7 +606,8 @@ macro_rules! rem_impl_integer {
 
             #[inline]
             #[track_caller]
-            fn rem(self, other: $t) -> $t { self % other }
+            #[ferrocene::prevalidated]
+fn rem(self, other: $t) -> $t { self % other }
         }
 
         forward_ref_binop! { impl Rem, rem for $t, $t,
@@ -638,7 +644,8 @@ macro_rules! rem_impl_float {
             type Output = $t;
 
             #[inline]
-            fn rem(self, other: $t) -> $t { self % other }
+            #[ferrocene::prevalidated]
+fn rem(self, other: $t) -> $t { self % other }
         }
 
         forward_ref_binop! { impl Rem, rem for $t, $t,
@@ -717,7 +724,8 @@ macro_rules! neg_impl {
 
             #[inline]
             #[rustc_inherit_overflow_checks]
-            fn neg(self) -> $t { -self }
+            #[ferrocene::prevalidated]
+fn neg(self) -> $t { -self }
         }
 
         forward_ref_unop! { impl Neg, neg for $t,
@@ -788,7 +796,8 @@ macro_rules! add_assign_impl {
             #[inline]
             #[track_caller]
             #[rustc_inherit_overflow_checks]
-            fn add_assign(&mut self, other: $t) { *self += other }
+            #[ferrocene::prevalidated]
+fn add_assign(&mut self, other: $t) { *self += other }
         }
 
         forward_ref_op_assign! { impl AddAssign, add_assign for $t, $t,
@@ -859,7 +868,8 @@ macro_rules! sub_assign_impl {
             #[inline]
             #[track_caller]
             #[rustc_inherit_overflow_checks]
-            fn sub_assign(&mut self, other: $t) { *self -= other }
+            #[ferrocene::prevalidated]
+fn sub_assign(&mut self, other: $t) { *self -= other }
         }
 
         forward_ref_op_assign! { impl SubAssign, sub_assign for $t, $t,
@@ -921,7 +931,8 @@ macro_rules! mul_assign_impl {
             #[inline]
             #[track_caller]
             #[rustc_inherit_overflow_checks]
-            fn mul_assign(&mut self, other: $t) { *self *= other }
+            #[ferrocene::prevalidated]
+fn mul_assign(&mut self, other: $t) { *self *= other }
         }
 
         forward_ref_op_assign! { impl MulAssign, mul_assign for $t, $t,
@@ -982,7 +993,8 @@ macro_rules! div_assign_impl {
         impl const DivAssign for $t {
             #[inline]
             #[track_caller]
-            fn div_assign(&mut self, other: $t) { *self /= other }
+            #[ferrocene::prevalidated]
+fn div_assign(&mut self, other: $t) { *self /= other }
         }
 
         forward_ref_op_assign! { impl DivAssign, div_assign for $t, $t,
@@ -1047,7 +1059,8 @@ macro_rules! rem_assign_impl {
         impl const RemAssign for $t {
             #[inline]
             #[track_caller]
-            fn rem_assign(&mut self, other: $t) { *self %= other }
+            #[ferrocene::prevalidated]
+fn rem_assign(&mut self, other: $t) { *self %= other }
         }
 
         forward_ref_op_assign! { impl RemAssign, rem_assign for $t, $t,

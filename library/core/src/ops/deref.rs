@@ -156,6 +156,7 @@ impl<T: ?Sized> const Deref for &T {
     type Target = T;
 
     #[rustc_diagnostic_item = "noop_method_deref"]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         self
     }
@@ -169,6 +170,7 @@ impl<T: ?Sized> !DerefMut for &T {}
 impl<T: ?Sized> const Deref for &mut T {
     type Target = T;
 
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         self
     }
@@ -277,6 +279,7 @@ pub const trait DerefMut: [const] Deref + PointeeSized {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<T: ?Sized> const DerefMut for &mut T {
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut T {
         self
     }

@@ -73,10 +73,12 @@ use crate::{mem, ptr};
 #[repr(transparent)]
 #[rustc_pub_transparent]
 #[derive(Copy, Clone, Debug, Default)]
+#[ferrocene::prevalidated]
 pub struct MaybeDangling<P: ?Sized>(P);
 
 impl<P: ?Sized> MaybeDangling<P> {
     /// Wraps a value in a `MaybeDangling`, allowing it to dangle.
+    #[ferrocene::prevalidated]
     pub const fn new(x: P) -> Self
     where
         P: Sized,
@@ -87,6 +89,7 @@ impl<P: ?Sized> MaybeDangling<P> {
     /// Returns a reference to the inner value.
     ///
     /// Note that this is UB if the inner value is currently dangling.
+    #[ferrocene::prevalidated]
     pub const fn as_ref(&self) -> &P {
         &self.0
     }
@@ -94,6 +97,7 @@ impl<P: ?Sized> MaybeDangling<P> {
     /// Returns a mutable reference to the inner value.
     ///
     /// Note that this is UB if the inner value is currently dangling.
+    #[ferrocene::prevalidated]
     pub const fn as_mut(&mut self) -> &mut P {
         &mut self.0
     }
@@ -101,6 +105,7 @@ impl<P: ?Sized> MaybeDangling<P> {
     /// Extracts the value from the `MaybeDangling` container.
     ///
     /// Note that this is UB if the inner value is currently dangling.
+    #[ferrocene::prevalidated]
     pub const fn into_inner(self) -> P
     where
         P: Sized,

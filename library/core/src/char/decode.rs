@@ -15,6 +15,7 @@ use crate::iter::FusedIterator;
 /// [`decode_utf16`]: char::decode_utf16
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct DecodeUtf16<I>
 where
     I: Iterator<Item = u16>,
@@ -28,6 +29,7 @@ where
 /// This `struct` is created when using the [`DecodeUtf16`] type.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[ferrocene::prevalidated]
 pub struct DecodeUtf16Error {
     code: u16,
 }
@@ -35,6 +37,7 @@ pub struct DecodeUtf16Error {
 /// Creates an iterator over the UTF-16 encoded code points in `iter`,
 /// returning unpaired surrogates as `Err`s. See [`char::decode_utf16`].
 #[inline]
+#[ferrocene::prevalidated]
 pub(super) fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
     DecodeUtf16 { iter: iter.into_iter(), buf: None }
 }
@@ -43,6 +46,7 @@ pub(super) fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<
 impl<I: Iterator<Item = u16>> Iterator for DecodeUtf16<I> {
     type Item = Result<char, DecodeUtf16Error>;
 
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Result<char, DecodeUtf16Error>> {
         let u = match self.buf.take() {
             Some(buf) => buf,
@@ -76,6 +80,7 @@ impl<I: Iterator<Item = u16>> Iterator for DecodeUtf16<I> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (low, high) = self.iter.size_hint();
 
@@ -117,6 +122,7 @@ impl DecodeUtf16Error {
     /// Returns the unpaired surrogate which caused this error.
     #[must_use]
     #[stable(feature = "decode_utf16", since = "1.9.0")]
+    #[ferrocene::prevalidated]
     pub fn unpaired_surrogate(&self) -> u16 {
         self.code
     }

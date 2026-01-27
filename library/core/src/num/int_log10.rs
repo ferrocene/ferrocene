@@ -5,6 +5,7 @@ use crate::num::NonZero;
 
 // 0 < val <= u8::MAX
 #[inline]
+#[ferrocene::prevalidated]
 const fn u8_impl(val: u8) -> u32 {
     let val = val as u32;
 
@@ -26,6 +27,7 @@ const fn u8_impl(val: u8) -> u32 {
 
 // 0 < val < 100_000
 #[inline]
+#[ferrocene::prevalidated]
 const fn less_than_5(val: u32) -> u32 {
     // Similar to u8, when adding one of these constants to val,
     // we get two possible bit patterns above the low 17 bits,
@@ -47,12 +49,14 @@ const fn less_than_5(val: u32) -> u32 {
 
 // 0 < val <= u16::MAX
 #[inline]
+#[ferrocene::prevalidated]
 const fn u16_impl(val: u16) -> u32 {
     less_than_5(val as u32)
 }
 
 // 0 < val <= u32::MAX
 #[inline]
+#[ferrocene::prevalidated]
 const fn u32_impl(mut val: u32) -> u32 {
     let mut log = 0;
     if val >= 100_000 {
@@ -64,6 +68,7 @@ const fn u32_impl(mut val: u32) -> u32 {
 
 // 0 < val <= u64::MAX
 #[inline]
+#[ferrocene::prevalidated]
 const fn u64_impl(mut val: u64) -> u32 {
     let mut log = 0;
     if val >= 10_000_000_000 {
@@ -79,6 +84,7 @@ const fn u64_impl(mut val: u64) -> u32 {
 
 // 0 < val <= u128::MAX
 #[inline]
+#[ferrocene::prevalidated]
 const fn u128_impl(mut val: u128) -> u32 {
     let mut log = 0;
     if val >= 100_000_000_000_000_000_000_000_000_000_000 {
@@ -96,7 +102,8 @@ const fn u128_impl(mut val: u128) -> u32 {
 macro_rules! define_unsigned_ilog10 {
     ($($ty:ident => $impl_fn:ident,)*) => {$(
         #[inline]
-        pub(super) const fn $ty(val: NonZero<$ty>) -> u32 {
+        #[ferrocene::prevalidated]
+pub(super) const fn $ty(val: NonZero<$ty>) -> u32 {
             let result = $impl_fn(val.get());
 
             // SAFETY: Integer logarithm is monotonic non-decreasing, so the computed `result` cannot
@@ -117,6 +124,7 @@ define_unsigned_ilog10! {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 pub(super) const fn usize(val: NonZero<usize>) -> u32 {
     #[cfg(target_pointer_width = "16")]
     let impl_fn = u16;
@@ -168,6 +176,7 @@ define_signed_ilog10! {
 /// on every single primitive type.
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 pub(super) const fn panic_for_nonpositive_argument() -> ! {
     panic!("argument of integer logarithm must be positive")
 }

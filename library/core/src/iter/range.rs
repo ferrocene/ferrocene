@@ -97,6 +97,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///   * Corollary: `Step::forward(a, 0) == a`
     /// * `Step::forward(a, n) >= a`
     /// * `Step::backward(Step::forward(a, n), n) == a`
+    #[ferrocene::prevalidated]
     fn forward(start: Self, count: usize) -> Self {
         Step::forward_checked(start, count).expect("overflow in `Step::forward`")
     }
@@ -122,6 +123,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     /// For any `a` and `n`, where no overflow occurs:
     ///
     /// * `Step::forward_unchecked(a, n)` is equivalent to `Step::forward(a, n)`
+    #[ferrocene::prevalidated]
     unsafe fn forward_unchecked(start: Self, count: usize) -> Self {
         Step::forward(start, count)
     }
@@ -167,6 +169,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     ///   * Corollary: `Step::backward(a, 0) == a`
     /// * `Step::backward(a, n) <= a`
     /// * `Step::forward(Step::backward(a, n), n) == a`
+    #[ferrocene::prevalidated]
     fn backward(start: Self, count: usize) -> Self {
         Step::backward_checked(start, count).expect("overflow in `Step::backward`")
     }
@@ -192,6 +195,7 @@ pub trait Step: Clone + PartialOrd + Sized {
     /// For any `a` and `n`, where no overflow occurs:
     ///
     /// * `Step::backward_unchecked(a, n)` is equivalent to `Step::backward(a, n)`
+    #[ferrocene::prevalidated]
     unsafe fn backward_unchecked(start: Self, count: usize) -> Self {
         Step::backward(start, count)
     }
@@ -202,12 +206,14 @@ pub trait Step: Clone + PartialOrd + Sized {
 macro_rules! step_signed_methods {
     ($unsigned: ty) => {
         #[inline]
+        #[ferrocene::prevalidated]
         unsafe fn forward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start + n` doesn't overflow.
             unsafe { start.checked_add_unsigned(n as $unsigned).unwrap_unchecked() }
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         unsafe fn backward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start - n` doesn't overflow.
             unsafe { start.checked_sub_unsigned(n as $unsigned).unwrap_unchecked() }
@@ -218,12 +224,14 @@ macro_rules! step_signed_methods {
 macro_rules! step_unsigned_methods {
     () => {
         #[inline]
+        #[ferrocene::prevalidated]
         unsafe fn forward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start + n` doesn't overflow.
             unsafe { start.unchecked_add(n as Self) }
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         unsafe fn backward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start - n` doesn't overflow.
             unsafe { start.unchecked_sub(n as Self) }
@@ -237,6 +245,7 @@ macro_rules! step_identical_methods {
         #[inline]
         #[allow(arithmetic_overflow)]
         #[rustc_inherit_overflow_checks]
+        #[ferrocene::prevalidated]
         fn forward(start: Self, n: usize) -> Self {
             // In debug builds, trigger a panic on overflow.
             // This should optimize completely out in release builds.
@@ -250,6 +259,7 @@ macro_rules! step_identical_methods {
         #[inline]
         #[allow(arithmetic_overflow)]
         #[rustc_inherit_overflow_checks]
+        #[ferrocene::prevalidated]
         fn backward(start: Self, n: usize) -> Self {
             // In debug builds, trigger a panic on overflow.
             // This should optimize completely out in release builds.
@@ -277,7 +287,8 @@ macro_rules! step_integer_impls {
                 step_unsigned_methods!();
 
                 #[inline]
-                fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+                #[ferrocene::prevalidated]
+fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         // This relies on $u_narrower <= usize
                         let steps = (*end - *start) as usize;
@@ -288,7 +299,8 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                fn forward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     match Self::try_from(n) {
                         Ok(n) => start.checked_add(n),
                         Err(_) => None, // if n is out of range, `unsigned_start + n` is too
@@ -296,7 +308,8 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                fn backward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match Self::try_from(n) {
                         Ok(n) => start.checked_sub(n),
                         Err(_) => None, // if n is out of range, `unsigned_start - n` is too
@@ -311,7 +324,8 @@ macro_rules! step_integer_impls {
                 step_signed_methods!($u_narrower);
 
                 #[inline]
-                fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+                #[ferrocene::prevalidated]
+fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         // This relies on $i_narrower <= usize
                         //
@@ -326,7 +340,8 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                fn forward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     match $u_narrower::try_from(n) {
                         Ok(n) => {
                             // Wrapping handles cases like
@@ -347,7 +362,8 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                fn backward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match $u_narrower::try_from(n) {
                         Ok(n) => {
                             // Wrapping handles cases like
@@ -377,7 +393,8 @@ macro_rules! step_integer_impls {
                 step_unsigned_methods!();
 
                 #[inline]
-                fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+                #[ferrocene::prevalidated]
+fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         if let Ok(steps) = usize::try_from(*end - *start) {
                             (steps, Some(steps))
@@ -390,12 +407,14 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                fn forward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_add(n as Self)
                 }
 
                 #[inline]
-                fn backward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
             }
@@ -407,7 +426,8 @@ macro_rules! step_integer_impls {
                 step_signed_methods!($u_wider);
 
                 #[inline]
-                fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+                #[ferrocene::prevalidated]
+fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         match end.checked_sub(*start) {
                             Some(result) => {
@@ -427,12 +447,14 @@ macro_rules! step_integer_impls {
                 }
 
                 #[inline]
-                fn forward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_add(n as Self)
                 }
 
                 #[inline]
-                fn backward_checked(start: Self, n: usize) -> Option<Self> {
+                #[ferrocene::prevalidated]
+fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
             }
@@ -706,6 +728,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_next(&mut self) -> Option<A> {
         if self.start < self.end {
             let n =
@@ -717,6 +740,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_nth(&mut self, n: usize) -> Option<A> {
         if let Some(plus_n) = Step::forward_checked(self.start.clone(), n) {
             if plus_n < self.end {
@@ -731,6 +755,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -744,6 +769,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_next_back(&mut self) -> Option<A> {
         if self.start < self.end {
             self.end =
@@ -755,6 +781,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_nth_back(&mut self, n: usize) -> Option<A> {
         if let Some(minus_n) = Step::backward_checked(self.end.clone(), n) {
             if minus_n > self.start {
@@ -769,6 +796,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -870,11 +898,13 @@ impl<A: Step> Iterator for ops::Range<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A> {
         self.spec_next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end)
@@ -884,6 +914,7 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end).1.expect("count overflowed usize")
@@ -893,11 +924,13 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.spec_nth(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
@@ -927,6 +960,7 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_by(n)
     }
@@ -1000,16 +1034,19 @@ range_incl_exact_iter_impl! {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A: Step> DoubleEndedIterator for ops::Range<A> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<A> {
         self.spec_next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.spec_nth_back(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_back_by(n)
     }
@@ -1099,6 +1136,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_next(&mut self) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1115,6 +1153,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1144,6 +1183,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_next_back(&mut self) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1160,6 +1200,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1191,6 +1232,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
 
 impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_next(&mut self) -> Option<T> {
         if self.is_empty() {
             return None;
@@ -1207,6 +1249,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1236,6 +1279,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_next_back(&mut self) -> Option<T> {
         if self.is_empty() {
             return None;
@@ -1252,6 +1296,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1286,11 +1331,13 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A> {
         self.spec_next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.is_empty() {
             return (0, Some(0));
@@ -1301,6 +1348,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         if self.is_empty() {
             return 0;
@@ -1313,6 +1361,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1341,6 +1390,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -1353,6 +1403,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
     impl_fold_via_try_fold! { fold -> try_fold }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
@@ -1385,11 +1436,13 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 impl<A: Step> DoubleEndedIterator for ops::RangeInclusive<A> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<A> {
         self.spec_next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1418,6 +1471,7 @@ impl<A: Step> DoubleEndedIterator for ops::RangeInclusive<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,

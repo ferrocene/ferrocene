@@ -555,6 +555,7 @@ use crate::{convert, fmt, hint};
 #[must_use = "this `Result` may be an `Err` variant, which should be handled"]
 #[rustc_diagnostic_item = "Result"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub enum Result<T, E> {
     /// Contains the success value
     #[lang = "Ok"]
@@ -591,6 +592,7 @@ impl<T, E> Result<T, E> {
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_ok(&self) -> bool {
         matches!(*self, Ok(_))
     }
@@ -617,6 +619,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "is_some_and", since = "1.70.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn is_ok_and<F>(self, f: F) -> bool
     where
         F: [const] FnOnce(T) -> bool + [const] Destruct,
@@ -644,6 +647,7 @@ impl<T, E> Result<T, E> {
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_err(&self) -> bool {
         !self.is_ok()
     }
@@ -672,6 +676,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "is_some_and", since = "1.70.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn is_err_and<F>(self, f: F) -> bool
     where
         F: [const] FnOnce(E) -> bool + [const] Destruct,
@@ -706,6 +711,7 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
     #[rustc_diagnostic_item = "result_ok_method"]
+    #[ferrocene::prevalidated]
     pub const fn ok(self) -> Option<T>
     where
         T: [const] Destruct,
@@ -734,6 +740,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn err(self) -> Option<E>
     where
         T: [const] Destruct,
@@ -766,6 +773,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_ref(&self) -> Result<&T, &E> {
         match *self {
             Ok(ref x) => Ok(x),
@@ -796,6 +804,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_mut(&mut self) -> Result<&mut T, &mut E> {
         match *self {
             Ok(ref mut x) => Ok(x),
@@ -829,6 +838,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn map<U, F>(self, op: F) -> Result<U, E>
     where
         F: [const] FnOnce(T) -> U + [const] Destruct,
@@ -861,6 +871,7 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_map_or", since = "1.41.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
     #[must_use = "if you don't need the returned value, use `if let` instead"]
+    #[ferrocene::prevalidated]
     pub const fn map_or<U, F>(self, default: U, f: F) -> U
     where
         F: [const] FnOnce(T) -> U + [const] Destruct,
@@ -895,6 +906,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "result_map_or_else", since = "1.41.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn map_or_else<U, D, F>(self, default: D, f: F) -> U
     where
         D: [const] FnOnce(E) -> U + [const] Destruct,
@@ -926,6 +938,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[unstable(feature = "result_option_map_or_default", issue = "138099")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn map_or_default<U, F>(self, f: F) -> U
     where
         F: [const] FnOnce(T) -> U + [const] Destruct,
@@ -960,6 +973,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn map_err<F, O>(self, op: O) -> Result<T, F>
     where
         O: [const] FnOnce(E) -> F + [const] Destruct,
@@ -986,6 +1000,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn inspect<F>(self, f: F) -> Self
     where
         F: [const] FnOnce(&T) + [const] Destruct,
@@ -1014,6 +1029,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn inspect_err<F>(self, f: F) -> Self
     where
         F: [const] FnOnce(&E) + [const] Destruct,
@@ -1044,6 +1060,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "inner_deref", since = "1.47.0")]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    #[ferrocene::prevalidated]
     pub const fn as_deref(&self) -> Result<&T::Target, &E>
     where
         T: [const] Deref,
@@ -1072,6 +1089,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "inner_deref", since = "1.47.0")]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    #[ferrocene::prevalidated]
     pub const fn as_deref_mut(&mut self) -> Result<&mut T::Target, &mut E>
     where
         T: [const] DerefMut,
@@ -1181,6 +1199,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
+    #[ferrocene::prevalidated]
     pub fn expect(self, msg: &str) -> T
     where
         E: fmt::Debug,
@@ -1269,6 +1288,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "result_unwrap_or_default", since = "1.16.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap_or_default(self) -> T
     where
         T: [const] Default + [const] Destruct,
@@ -1454,6 +1474,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn and<U>(self, res: Result<U, E>) -> Result<U, E>
     where
         T: [const] Destruct,
@@ -1500,6 +1521,7 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
     #[rustc_confusables("flat_map", "flatmap")]
+    #[ferrocene::prevalidated]
     pub const fn and_then<U, F>(self, op: F) -> Result<U, E>
     where
         F: [const] FnOnce(T) -> Result<U, E> + [const] Destruct,
@@ -1540,6 +1562,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn or<F>(self, res: Result<T, F>) -> Result<T, F>
     where
         T: [const] Destruct,
@@ -1571,6 +1594,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn or_else<F, O>(self, op: O) -> Result<T, F>
     where
         O: [const] FnOnce(E) -> Result<T, F> + [const] Destruct,
@@ -1602,6 +1626,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap_or(self, default: T) -> T
     where
         T: [const] Destruct,
@@ -1628,6 +1653,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap_or_else<F>(self, op: F) -> T
     where
         F: [const] FnOnce(E) -> T + [const] Destruct,
@@ -1662,6 +1688,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[rustc_const_unstable(feature = "const_result_unwrap_unchecked", issue = "148714")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
@@ -1700,6 +1727,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
+    #[ferrocene::prevalidated]
     pub unsafe fn unwrap_err_unchecked(self) -> E {
         match self {
             #[ferrocene::annotation(
@@ -1729,6 +1757,7 @@ impl<T, E> Result<&T, E> {
     #[stable(feature = "result_copied", since = "1.59.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[ferrocene::prevalidated]
     pub const fn copied(self) -> Result<T, E>
     where
         T: Copy,
@@ -1755,6 +1784,7 @@ impl<T, E> Result<&T, E> {
     /// ```
     #[inline]
     #[stable(feature = "result_cloned", since = "1.59.0")]
+    #[ferrocene::prevalidated]
     pub fn cloned(self) -> Result<T, E>
     where
         T: Clone,
@@ -1780,6 +1810,7 @@ impl<T, E> Result<&mut T, E> {
     #[stable(feature = "result_copied", since = "1.59.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[ferrocene::prevalidated]
     pub const fn copied(self) -> Result<T, E>
     where
         T: Copy,
@@ -1806,6 +1837,7 @@ impl<T, E> Result<&mut T, E> {
     /// ```
     #[inline]
     #[stable(feature = "result_cloned", since = "1.59.0")]
+    #[ferrocene::prevalidated]
     pub fn cloned(self) -> Result<T, E>
     where
         T: Clone,
@@ -1834,6 +1866,7 @@ impl<T, E> Result<Option<T>, E> {
     #[stable(feature = "transpose_result", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[ferrocene::prevalidated]
     pub const fn transpose(self) -> Option<Result<T, E>> {
         match self {
             Ok(Some(x)) => Some(Ok(x)),
@@ -1886,6 +1919,7 @@ impl<T, E> Result<Result<T, E>, E> {
 #[inline(never)]
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
     panic!("{msg}: {error:?}");
 }
@@ -1913,6 +1947,7 @@ where
     E: Clone,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         match self {
             Ok(x) => Ok(x.clone()),
@@ -1921,6 +1956,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone_from(&mut self, source: &Self) {
         match (self, source) {
             (Ok(to), Ok(from)) => to.clone_from(from),
@@ -2211,11 +2247,13 @@ impl<T, E> const ops::Try for Result<T, E> {
     type Residual = Result<convert::Infallible, E>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_output(output: Self::Output) -> Self {
         Ok(output)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             Ok(v) => ControlFlow::Continue(v),
@@ -2231,6 +2269,7 @@ impl<T, E, F: [const] From<E>> const ops::FromResidual<Result<convert::Infallibl
 {
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
         match residual {
             Err(e) => Err(From::from(e)),

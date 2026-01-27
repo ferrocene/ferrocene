@@ -48,7 +48,6 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
-  AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || 'amazon'}}
 
 jobs:
   self-test:
@@ -67,6 +66,7 @@ jobs:
 
       - name: Configure AWS & MinIO (if applicable)
         uses: ./.github/actions/aws-config/
+        if: ${{ inputs.use-minio == true }}
         with:
           aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
@@ -87,8 +87,6 @@ jobs:
 
       - name: Run
         uses: ./.github/actions/run/
-        env:
-          AWS_PROFILE: amazon # The self test artifacts are always on AWS
         with:
           container: ${{ inputs.container }}
           script: |

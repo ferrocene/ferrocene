@@ -46,7 +46,8 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "armv6-none-eabi",
     "armv6-none-eabihf",
     "thumbv6-none-eabi",
-<<<<<<< HEAD
+    "aarch64v8r-unknown-none",
+    "aarch64v8r-unknown-none-softfloat",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -59,11 +60,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-ferrocene-none",
     "thumbv7em-ferrocene-none-eabi",
     "thumbv7em-ferrocene-none-eabihf",
-||||||| b3cda168c8a
-=======
-    "aarch64v8r-unknown-none",
-    "aarch64v8r-unknown-none-softfloat",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

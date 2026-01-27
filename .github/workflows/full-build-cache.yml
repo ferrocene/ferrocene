@@ -48,6 +48,9 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
+      artifact-build:
+        description: The name of the build job artifact
+        value: ${{ jobs.build.outputs.artifact-name }}
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
@@ -63,6 +66,8 @@ jobs:
       ARTIFACT: build-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-name: ${{ env.ARTIFACT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

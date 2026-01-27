@@ -17,9 +17,10 @@ timeout_sec = 18000
 # bors will wait before erroring out.
 prerun_timeout_sec = 3600
 
-# Require at least 1 up to date approval before allowing `bors r+`
-required_approvals = 1
-up_to_date_approvals = true
+# We intentionally do not require an approval in the bors config before merging.
+# Some PRs, such as backports, are machine-generated but still opened by an individual.
+# Requiring an approval would prevent them from being self-approved.
+# See https://public-docs.ferrocene.dev/main/qualification/plan/development.html#merge-requirements:~:text=machine%2Dgenerated for more information.
 
 # Remove the personal branches after they're merged
 delete_merged_branches = true

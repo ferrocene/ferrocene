@@ -105,7 +105,7 @@ use rustc_middle::thir::{self, Thir};
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
     self, Binder, EarlyBinder, ExistentialPredicate, ExistentialTraitRef, GenericArgs,
-    GenericArgsRef, Instance, InstanceKind, List, Ty, TyCtxt, TypeFoldable, TypeSuperVisitable,
+    GenericArgsRef, Instance, InstanceKind, Ty, TyCtxt, TypeFoldable, TypeSuperVisitable,
     TypeVisitable, TypeVisitor, TypingEnv,
 };
 use rustc_session::{declare_lint_pass, declare_tool_lint};
@@ -127,37 +127,9 @@ declare_tool_lint! {
     report_in_external_macro: true
 }
 
-// pub fn check_mono_item<'tcx>(tcx: TyCtxt<'tcx>, instance: Instance<'tcx>) {
-//     // TODO: reuse linter from thir so we don't duplicate warnings
-//     if let Some(mut linter) = instance.def_id().as_local().and_then(|local| LintHelper::new(tcx, local)) {
-//         LintInstance::visit_item(&mut linter, instance, None);
-//     }
-// }
-
-// From here on can be shared between Sherruff and Ferrocene.
-
 declare_lint_pass!(LintUncertified => [UNCERTIFIED]);
 
 impl<'tcx> LateLintPass<'tcx> for LintUncertified {
-    // TODO: sanity check on HIR
-    // fn check_expr(&mut self, cx: &LateContext<'tcx>, e: &'tcx Expr<'_>) {
-    //     if !cfg!(debug_assertions) { return }
-    //
-    //     let tcx = cx.tcx;
-    //     let owner = e.hir_id.owner.def_id;
-    //
-    //     let ShouldLint::Lint { annotation } = should_lint_owner(owner, tcx)
-    //     else { return; };
-    //
-    //     let Some((callee, receiver_span)) = get_call_def_hir(e, cx)
-    //     else { return; };
-    //
-    //     let callee_is_certified = tcx.get_attrs_by_path(callee, &*sym::CERTIFIED_ATTR).next().is_some();
-    //     if !callee_is_certified {
-    //         // tcx.dcx().span_delayed_bug(receiver_span, "HIR visitor caught an uncertified function that THIR visitor didn't");
-    //     }
-    // }
-
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
         LintThir::lint_owner(cx.tcx, item.owner_id, item.owner_id.def_id);
     }
@@ -177,7 +149,7 @@ struct LintThir<'thir, 'tcx> {
     owner: OwnerId,
 }
 
-struct LintInstance<'a, 'tcx> {
+struct LintPostMono<'a, 'tcx> {
     instance: Instance<'tcx>,
     linter: &'a mut LintState<'tcx>,
     visited: &'a mut FxHashSet<Instance<'tcx>>,
@@ -186,10 +158,9 @@ struct LintInstance<'a, 'tcx> {
 }
 
 struct InstantiationSite<'tcx> {
+    /// NOTE: this points to the call site which causes the callee to be monomorphized.
     lint_node: HirId,
     caller_span: Span,
-    /// NOTE: this is the instance containing `lint_node` which causes the callee to be
-    /// monomorphized.
     caller_instance: Instance<'tcx>,
 }
 
@@ -326,7 +297,7 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>)
         let instance = match root {
             // global asm is always an exported constraint
             MonoItem::GlobalAsm(..) => continue,
-            // NOTE: panics if item has generics rather than silently doing the wrong thing
+            // NOTE: `mono` panics if item has generics rather than silently doing the wrong thing
             MonoItem::Static(def_id) => Instance::mono(tcx, def_id),
             MonoItem::Fn(instance) => {
                 let def = instance.def_id();
@@ -349,12 +320,12 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>)
         info!("lint root: {instance:?}");
         let def_id = instance.def_id().expect_local();
         if let Some(mut linter) = LintState::new(tcx, def_id) {
-            LintInstance::visit_instance(&mut linter, &mut visited, instance, None);
+            LintPostMono::visit_instance(&mut linter, &mut visited, instance, None);
         }
     }
 }
 
-impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintInstance<'a, 'tcx> {
+impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
     fn visit_terminator(&mut self, terminator: &Terminator<'tcx>, location: Location) {
         if let Some((callee_instance, pre_mono_call)) = self.get_call_def_mir(terminator, location)
         {
@@ -392,7 +363,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintInstance<'a, 'tcx> {
     }
 }
 
-impl<'a, 'tcx> LintInstance<'a, 'tcx> {
+impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     fn on_edge(
         &mut self,
         use_: UseKind<'tcx>,
@@ -424,7 +395,7 @@ impl<'a, 'tcx> LintInstance<'a, 'tcx> {
         let site =
             InstantiationSite { lint_node, caller_instance: self.instance, caller_span: call_span };
         info!("recurse into {callee_instance:?}");
-        LintInstance::visit_instance(self.linter, self.visited, callee_instance, Some(site));
+        LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
     }
 
     fn lint_at(
@@ -495,13 +466,6 @@ impl<'a, 'tcx> LintInstance<'a, 'tcx> {
         });
     }
 
-    fn body(tcx: TyCtxt<'tcx>, owner: DefId) -> &'tcx Body<'tcx> {
-        match tcx.def_kind(owner) {
-            DefKind::Const | DefKind::Static { .. } => tcx.mir_for_ctfe(owner), // otherwise optimized_mir panics
-            _ => tcx.optimized_mir(owner),
-        }
-    }
-
     fn visit_instance(
         linter: &'a mut LintState<'tcx>,
         visited: &mut FxHashSet<Instance<'tcx>>,
@@ -528,7 +492,7 @@ impl<'a, 'tcx> LintInstance<'a, 'tcx> {
         }
 
         let body = tcx.instance_mir(instance.def);
-        let mut this = LintInstance { linter, visited, instance, body, from_instantiation };
+        let mut this = LintPostMono { linter, visited, instance, body, from_instantiation };
         for (bb, data) in mir::traversal::reachable(body) {
             this.visit_basic_block_data(bb, data);
         }
@@ -565,7 +529,7 @@ impl<'a, 'tcx> LintInstance<'a, 'tcx> {
                 let instance = self.monomorphize_instance(pre_mono_call, generic_args, span);
                 (pre_mono_call, instance)
             }
-            TerminatorKind::Drop { place, target, unwind, replace, drop, async_fut } => {
+            TerminatorKind::Drop { place, target: _, unwind: _, replace: _, drop, async_fut } => {
                 if drop.is_some() || async_fut.is_some() {
                     span_bug!(span, "ferrocene::certified doesn't know how to check async drop");
                 }
@@ -904,61 +868,6 @@ enum InstantiateResult<'tcx> {
     /// We don't yet have enough info to resolve this to a concrete function.
     Indeterminate,
 }
-
-/// Return the DefId of the Expr being called, along with a narrowed span of the call,
-/// or None if we know statically that expressions of this kind must be local to the owner.
-// fn get_call_def_hir<'tcx>(e: &'tcx Expr<'_>, cx: &LateContext<'tcx>) -> UseKind {
-//     let ty_res = cx.typeck_results();
-//     match e.kind {
-//         ExprKind::Path(qpath) => {
-//             // TODO: check if this is actually a function lmao
-//             let id = ty_res.qpath_res(&qpath, e.hir_id).opt_def_id()?;
-//             if matches!(cx.tcx.def_kind(id), DefKind::Ctor(..)) {
-//                 // most programmers don't think about ctors as functions, and it's always
-//                 // possible to construct it by fields anyway.
-//                 UseKind::None
-//             } else {
-//                 UseKind::Named(id, e.span)
-//             }
-//         }
-//         ExprKind::Call(func, _args) => {
-//             match func.kind {
-//                 ExprKind::Path(qpath) => {
-//                     let id = match ty_res.qpath_res(&qpath, func.hir_id) {
-//                         Res::Def(_kind, id) => id,
-//                         Res::Local(l) => match cx.tcx.hir_node(l) {
-//                             // We're calling a closure or function pointer that's been assigned to
-//                             // a local variable. We lint on that at the time it's assigned, so we
-//                             // don't have to lint on the call here.
-//                             Node::Pat(Pat { kind: PatKind::Binding { .. }, .. }) => return UseKind::None,
-//                             node => unreachable!("unexpected call to node {node:?}"),
-//                         }
-//                         other => unreachable!("{other:?}"),
-//                     };
-//                     UseKind::Call(id, func.span)
-//                 }
-//                 ExprKind::Closure(_) => UseKind::None, // immediately executed closure. this is fine.
-//                 other => {
-//                     // TODO: this debug impl is horrible lmao
-//                     unsupported_expr(format!("unsupported call kind {other:?}"), e.hir_id, func.span, cx.tcx);
-//                     UseKind::None
-//                 }
-//             }
-//         }
-//         ExprKind::MethodCall(method, _receiver, _args, _span) => {
-//             UseKind::Call(ty_res.type_dependent_def_id(e.hir_id).expect("failed to typeck method receiver?"), method.ident.span)
-//         }
-//         // #[allow(unused_variables)]
-//         // ExprKind::Binary(_, lhs, rhs) | ExprKind::Index(lhs, rhs, _) | ExprKind::AssignOp(_, lhs, rhs) => {
-//         //     todo!("implicit function call")
-//         // }
-//         // #[allow(unused_variables)]
-//         // ExprKind::Unary(op, inner) => {
-//         //     todo!("implicit function call")
-//         // }
-//         _ => UseKind::None,
-//     }
-// }
 
 #[derive(Copy, Clone, Debug)]
 enum UseKind<'tcx> {

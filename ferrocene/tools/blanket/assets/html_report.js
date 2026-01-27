@@ -91,7 +91,7 @@ function main() {
         }
     });
     let searchButton = document.querySelector("button[name=search-button]");
-    searchButton.addEventListener("onClick", function(event) {
+    searchButton.addEventListener("click", function(event) {
         let query = searchBar.value;
         onSearch(query);
     });

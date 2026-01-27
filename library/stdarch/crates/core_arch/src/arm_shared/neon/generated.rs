@@ -15808,21 +15808,13 @@ pub unsafe fn vld1q_f16(ptr: *const f16) -> float16x8_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld1_f16_x2(a: *const f16) -> float16x4x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v4f16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v4f16.p0")]
-        fn _vld1_f16_x2(a: *const f16) -> float16x4x2_t;
-    }
-    _vld1_f16_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f16_x3)"]
@@ -15834,21 +15826,13 @@ pub unsafe fn vld1_f16_x2(a: *const f16) -> float16x4x2_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld1_f16_x3(a: *const f16) -> float16x4x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v4f16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v4f16.p0")]
-        fn _vld1_f16_x3(a: *const f16) -> float16x4x3_t;
-    }
-    _vld1_f16_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f16_x4)"]
@@ -15860,21 +15844,13 @@ pub unsafe fn vld1_f16_x3(a: *const f16) -> float16x4x3_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld1_f16_x4(a: *const f16) -> float16x4x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v4f16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v4f16.p0")]
-        fn _vld1_f16_x4(a: *const f16) -> float16x4x4_t;
-    }
-    _vld1_f16_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f16_x2)"]
@@ -15886,21 +15862,13 @@ pub unsafe fn vld1_f16_x4(a: *const f16) -> float16x4x4_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld1q_f16_x2(a: *const f16) -> float16x8x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v8f16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v8f16.p0")]
-        fn _vld1q_f16_x2(a: *const f16) -> float16x8x2_t;
-    }
-    _vld1q_f16_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f16_x3)"]
@@ -15912,21 +15880,13 @@ pub unsafe fn vld1q_f16_x2(a: *const f16) -> float16x8x2_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld1q_f16_x3(a: *const f16) -> float16x8x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v8f16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v8f16.p0")]
-        fn _vld1q_f16_x3(a: *const f16) -> float16x8x3_t;
-    }
-    _vld1q_f16_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f16_x4)"]
@@ -15938,21 +15898,13 @@ pub unsafe fn vld1q_f16_x3(a: *const f16) -> float16x8x3_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp16"))]
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld1q_f16_x4(a: *const f16) -> float16x8x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v8f16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v8f16.p0")]
-        fn _vld1q_f16_x4(a: *const f16) -> float16x8x4_t;
-    }
-    _vld1q_f16_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32)"]
@@ -16156,10 +16108,10 @@ pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -16170,15 +16122,7 @@ pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_f32_x2(a: *const f32) -> float32x2x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v2f32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v2f32.p0")]
-        fn _vld1_f32_x2(a: *const f32) -> float32x2x2_t;
-    }
-    _vld1_f32_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32_x3)"]
@@ -16187,10 +16131,10 @@ pub unsafe fn vld1_f32_x2(a: *const f32) -> float32x2x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -16201,15 +16145,7 @@ pub unsafe fn vld1_f32_x2(a: *const f32) -> float32x2x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_f32_x3(a: *const f32) -> float32x2x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v2f32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v2f32.p0")]
-        fn _vld1_f32_x3(a: *const f32) -> float32x2x3_t;
-    }
-    _vld1_f32_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32_x4)"]
@@ -16218,10 +16154,10 @@ pub unsafe fn vld1_f32_x3(a: *const f32) -> float32x2x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -16232,15 +16168,7 @@ pub unsafe fn vld1_f32_x3(a: *const f32) -> float32x2x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_f32_x4(a: *const f32) -> float32x2x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v2f32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v2f32.p0")]
-        fn _vld1_f32_x4(a: *const f32) -> float32x2x4_t;
-    }
-    _vld1_f32_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32_x2)"]
@@ -16249,10 +16177,10 @@ pub unsafe fn vld1_f32_x4(a: *const f32) -> float32x2x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -16263,15 +16191,7 @@ pub unsafe fn vld1_f32_x4(a: *const f32) -> float32x2x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_f32_x2(a: *const f32) -> float32x4x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v4f32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v4f32.p0")]
-        fn _vld1q_f32_x2(a: *const f32) -> float32x4x2_t;
-    }
-    _vld1q_f32_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32_x3)"]
@@ -16280,10 +16200,10 @@ pub unsafe fn vld1q_f32_x2(a: *const f32) -> float32x4x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -16294,15 +16214,7 @@ pub unsafe fn vld1q_f32_x2(a: *const f32) -> float32x4x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_f32_x3(a: *const f32) -> float32x4x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v4f32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v4f32.p0")]
-        fn _vld1q_f32_x3(a: *const f32) -> float32x4x3_t;
-    }
-    _vld1q_f32_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32_x4)"]
@@ -16311,10 +16223,10 @@ pub unsafe fn vld1q_f32_x3(a: *const f32) -> float32x4x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -16325,15 +16237,7 @@ pub unsafe fn vld1q_f32_x3(a: *const f32) -> float32x4x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_f32_x4(a: *const f32) -> float32x4x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v4f32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v4f32.p0")]
-        fn _vld1q_f32_x4(a: *const f32) -> float32x4x4_t;
-    }
-    _vld1q_f32_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load one single-element structure to one lane of one register"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_lane_f16)"]
@@ -17000,10 +16904,10 @@ pub unsafe fn vld1_p64(ptr: *const p64) -> poly64x1_t {
 #[inline(always)]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17014,7 +16918,7 @@ pub unsafe fn vld1_p64(ptr: *const p64) -> poly64x1_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p64_x2(a: *const p64) -> poly64x1x2_t {
-    transmute(vld1_s64_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p64_x3)"]
@@ -17026,7 +16930,7 @@ pub unsafe fn vld1_p64_x2(a: *const p64) -> poly64x1x2_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17037,7 +16941,7 @@ pub unsafe fn vld1_p64_x2(a: *const p64) -> poly64x1x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p64_x3(a: *const p64) -> poly64x1x3_t {
-    transmute(vld1_s64_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p64_x4)"]
@@ -17049,7 +16953,7 @@ pub unsafe fn vld1_p64_x3(a: *const p64) -> poly64x1x3_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17060,7 +16964,7 @@ pub unsafe fn vld1_p64_x3(a: *const p64) -> poly64x1x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p64_x4(a: *const p64) -> poly64x1x4_t {
-    transmute(vld1_s64_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x2)"]
@@ -17072,7 +16976,7 @@ pub unsafe fn vld1_p64_x4(a: *const p64) -> poly64x1x4_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17083,7 +16987,7 @@ pub unsafe fn vld1_p64_x4(a: *const p64) -> poly64x1x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p64_x2(a: *const p64) -> poly64x2x2_t {
-    transmute(vld1q_s64_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x3)"]
@@ -17095,7 +16999,7 @@ pub unsafe fn vld1q_p64_x2(a: *const p64) -> poly64x2x2_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17106,7 +17010,7 @@ pub unsafe fn vld1q_p64_x2(a: *const p64) -> poly64x2x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
-    transmute(vld1q_s64_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x4)"]
@@ -17118,7 +17022,7 @@ pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17129,7 +17033,7 @@ pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p64_x4(a: *const p64) -> poly64x2x4_t {
-    transmute(vld1q_s64_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s8)"]
@@ -17242,10 +17146,10 @@ pub unsafe fn vld1q_s64(ptr: *const i64) -> int64x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17256,15 +17160,7 @@ pub unsafe fn vld1q_s64(ptr: *const i64) -> int64x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s8_x2(a: *const i8) -> int8x8x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v8i8.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v8i8.p0")]
-        fn _vld1_s8_x2(a: *const i8) -> int8x8x2_t;
-    }
-    _vld1_s8_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s8_x3)"]
@@ -17273,10 +17169,10 @@ pub unsafe fn vld1_s8_x2(a: *const i8) -> int8x8x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17287,15 +17183,7 @@ pub unsafe fn vld1_s8_x2(a: *const i8) -> int8x8x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s8_x3(a: *const i8) -> int8x8x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v8i8.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v8i8.p0")]
-        fn _vld1_s8_x3(a: *const i8) -> int8x8x3_t;
-    }
-    _vld1_s8_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s8_x4)"]
@@ -17304,10 +17192,10 @@ pub unsafe fn vld1_s8_x3(a: *const i8) -> int8x8x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17318,15 +17206,7 @@ pub unsafe fn vld1_s8_x3(a: *const i8) -> int8x8x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s8_x4(a: *const i8) -> int8x8x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v8i8.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v8i8.p0")]
-        fn _vld1_s8_x4(a: *const i8) -> int8x8x4_t;
-    }
-    _vld1_s8_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s8_x2)"]
@@ -17335,10 +17215,10 @@ pub unsafe fn vld1_s8_x4(a: *const i8) -> int8x8x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17349,15 +17229,7 @@ pub unsafe fn vld1_s8_x4(a: *const i8) -> int8x8x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s8_x2(a: *const i8) -> int8x16x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v16i8.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v16i8.p0")]
-        fn _vld1q_s8_x2(a: *const i8) -> int8x16x2_t;
-    }
-    _vld1q_s8_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s8_x3)"]
@@ -17366,10 +17238,10 @@ pub unsafe fn vld1q_s8_x2(a: *const i8) -> int8x16x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17380,15 +17252,7 @@ pub unsafe fn vld1q_s8_x2(a: *const i8) -> int8x16x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s8_x3(a: *const i8) -> int8x16x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v16i8.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v16i8.p0")]
-        fn _vld1q_s8_x3(a: *const i8) -> int8x16x3_t;
-    }
-    _vld1q_s8_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s8_x4)"]
@@ -17397,10 +17261,10 @@ pub unsafe fn vld1q_s8_x3(a: *const i8) -> int8x16x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17411,15 +17275,7 @@ pub unsafe fn vld1q_s8_x3(a: *const i8) -> int8x16x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s8_x4(a: *const i8) -> int8x16x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v16i8.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v16i8.p0")]
-        fn _vld1q_s8_x4(a: *const i8) -> int8x16x4_t;
-    }
-    _vld1q_s8_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s16_x2)"]
@@ -17428,10 +17284,10 @@ pub unsafe fn vld1q_s8_x4(a: *const i8) -> int8x16x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17442,15 +17298,7 @@ pub unsafe fn vld1q_s8_x4(a: *const i8) -> int8x16x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s16_x2(a: *const i16) -> int16x4x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v4i16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v4i16.p0")]
-        fn _vld1_s16_x2(a: *const i16) -> int16x4x2_t;
-    }
-    _vld1_s16_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s16_x3)"]
@@ -17459,10 +17307,10 @@ pub unsafe fn vld1_s16_x2(a: *const i16) -> int16x4x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17473,15 +17321,7 @@ pub unsafe fn vld1_s16_x2(a: *const i16) -> int16x4x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s16_x3(a: *const i16) -> int16x4x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v4i16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v4i16.p0")]
-        fn _vld1_s16_x3(a: *const i16) -> int16x4x3_t;
-    }
-    _vld1_s16_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s16_x4)"]
@@ -17490,10 +17330,10 @@ pub unsafe fn vld1_s16_x3(a: *const i16) -> int16x4x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17504,15 +17344,7 @@ pub unsafe fn vld1_s16_x3(a: *const i16) -> int16x4x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s16_x4(a: *const i16) -> int16x4x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v4i16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v4i16.p0")]
-        fn _vld1_s16_x4(a: *const i16) -> int16x4x4_t;
-    }
-    _vld1_s16_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s16_x2)"]
@@ -17521,10 +17353,10 @@ pub unsafe fn vld1_s16_x4(a: *const i16) -> int16x4x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17535,15 +17367,7 @@ pub unsafe fn vld1_s16_x4(a: *const i16) -> int16x4x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s16_x2(a: *const i16) -> int16x8x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v8i16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v8i16.p0")]
-        fn _vld1q_s16_x2(a: *const i16) -> int16x8x2_t;
-    }
-    _vld1q_s16_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s16_x3)"]
@@ -17552,10 +17376,10 @@ pub unsafe fn vld1q_s16_x2(a: *const i16) -> int16x8x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17566,15 +17390,7 @@ pub unsafe fn vld1q_s16_x2(a: *const i16) -> int16x8x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s16_x3(a: *const i16) -> int16x8x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v8i16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v8i16.p0")]
-        fn _vld1q_s16_x3(a: *const i16) -> int16x8x3_t;
-    }
-    _vld1q_s16_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s16_x4)"]
@@ -17583,10 +17399,10 @@ pub unsafe fn vld1q_s16_x3(a: *const i16) -> int16x8x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17597,15 +17413,7 @@ pub unsafe fn vld1q_s16_x3(a: *const i16) -> int16x8x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s16_x4(a: *const i16) -> int16x8x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v8i16.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v8i16.p0")]
-        fn _vld1q_s16_x4(a: *const i16) -> int16x8x4_t;
-    }
-    _vld1q_s16_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s32_x2)"]
@@ -17614,10 +17422,10 @@ pub unsafe fn vld1q_s16_x4(a: *const i16) -> int16x8x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17628,15 +17436,7 @@ pub unsafe fn vld1q_s16_x4(a: *const i16) -> int16x8x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s32_x2(a: *const i32) -> int32x2x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v2i32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v2i32.p0")]
-        fn _vld1_s32_x2(a: *const i32) -> int32x2x2_t;
-    }
-    _vld1_s32_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s32_x3)"]
@@ -17645,10 +17445,10 @@ pub unsafe fn vld1_s32_x2(a: *const i32) -> int32x2x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17659,15 +17459,7 @@ pub unsafe fn vld1_s32_x2(a: *const i32) -> int32x2x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s32_x3(a: *const i32) -> int32x2x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v2i32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v2i32.p0")]
-        fn _vld1_s32_x3(a: *const i32) -> int32x2x3_t;
-    }
-    _vld1_s32_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s32_x4)"]
@@ -17676,10 +17468,10 @@ pub unsafe fn vld1_s32_x3(a: *const i32) -> int32x2x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17690,15 +17482,7 @@ pub unsafe fn vld1_s32_x3(a: *const i32) -> int32x2x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s32_x4(a: *const i32) -> int32x2x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v2i32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v2i32.p0")]
-        fn _vld1_s32_x4(a: *const i32) -> int32x2x4_t;
-    }
-    _vld1_s32_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s32_x2)"]
@@ -17707,10 +17491,10 @@ pub unsafe fn vld1_s32_x4(a: *const i32) -> int32x2x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17721,15 +17505,7 @@ pub unsafe fn vld1_s32_x4(a: *const i32) -> int32x2x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s32_x2(a: *const i32) -> int32x4x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v4i32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v4i32.p0")]
-        fn _vld1q_s32_x2(a: *const i32) -> int32x4x2_t;
-    }
-    _vld1q_s32_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s32_x3)"]
@@ -17738,10 +17514,10 @@ pub unsafe fn vld1q_s32_x2(a: *const i32) -> int32x4x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17752,15 +17528,7 @@ pub unsafe fn vld1q_s32_x2(a: *const i32) -> int32x4x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s32_x3(a: *const i32) -> int32x4x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v4i32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v4i32.p0")]
-        fn _vld1q_s32_x3(a: *const i32) -> int32x4x3_t;
-    }
-    _vld1q_s32_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s32_x4)"]
@@ -17769,10 +17537,10 @@ pub unsafe fn vld1q_s32_x3(a: *const i32) -> int32x4x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17783,15 +17551,7 @@ pub unsafe fn vld1q_s32_x3(a: *const i32) -> int32x4x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s32_x4(a: *const i32) -> int32x4x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v4i32.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v4i32.p0")]
-        fn _vld1q_s32_x4(a: *const i32) -> int32x4x4_t;
-    }
-    _vld1q_s32_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s64_x2)"]
@@ -17800,10 +17560,10 @@ pub unsafe fn vld1q_s32_x4(a: *const i32) -> int32x4x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17814,15 +17574,7 @@ pub unsafe fn vld1q_s32_x4(a: *const i32) -> int32x4x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s64_x2(a: *const i64) -> int64x1x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v1i64.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v1i64.p0")]
-        fn _vld1_s64_x2(a: *const i64) -> int64x1x2_t;
-    }
-    _vld1_s64_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s64_x3)"]
@@ -17831,10 +17583,10 @@ pub unsafe fn vld1_s64_x2(a: *const i64) -> int64x1x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17845,15 +17597,7 @@ pub unsafe fn vld1_s64_x2(a: *const i64) -> int64x1x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s64_x3(a: *const i64) -> int64x1x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v1i64.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v1i64.p0")]
-        fn _vld1_s64_x3(a: *const i64) -> int64x1x3_t;
-    }
-    _vld1_s64_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s64_x4)"]
@@ -17862,10 +17606,10 @@ pub unsafe fn vld1_s64_x3(a: *const i64) -> int64x1x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17876,15 +17620,7 @@ pub unsafe fn vld1_s64_x3(a: *const i64) -> int64x1x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_s64_x4(a: *const i64) -> int64x1x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v1i64.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v1i64.p0")]
-        fn _vld1_s64_x4(a: *const i64) -> int64x1x4_t;
-    }
-    _vld1_s64_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s64_x2)"]
@@ -17893,10 +17629,10 @@ pub unsafe fn vld1_s64_x4(a: *const i64) -> int64x1x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17907,15 +17643,7 @@ pub unsafe fn vld1_s64_x4(a: *const i64) -> int64x1x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s64_x2(a: *const i64) -> int64x2x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x2.v2i64.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x2.v2i64.p0")]
-        fn _vld1q_s64_x2(a: *const i64) -> int64x2x2_t;
-    }
-    _vld1q_s64_x2(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s64_x3)"]
@@ -17924,10 +17652,10 @@ pub unsafe fn vld1q_s64_x2(a: *const i64) -> int64x2x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17938,15 +17666,7 @@ pub unsafe fn vld1q_s64_x2(a: *const i64) -> int64x2x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s64_x3(a: *const i64) -> int64x2x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x3.v2i64.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x3.v2i64.p0")]
-        fn _vld1q_s64_x3(a: *const i64) -> int64x2x3_t;
-    }
-    _vld1q_s64_x3(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s64_x4)"]
@@ -17955,10 +17675,10 @@ pub unsafe fn vld1q_s64_x3(a: *const i64) -> int64x2x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -17969,15 +17689,7 @@ pub unsafe fn vld1q_s64_x3(a: *const i64) -> int64x2x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_s64_x4(a: *const i64) -> int64x2x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld1x4.v2i64.p0"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vld1x4.v2i64.p0")]
-        fn _vld1q_s64_x4(a: *const i64) -> int64x2x4_t;
-    }
-    _vld1q_s64_x4(a)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x2)"]
@@ -17986,10 +17698,10 @@ pub unsafe fn vld1q_s64_x4(a: *const i64) -> int64x2x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18000,7 +17712,7 @@ pub unsafe fn vld1q_s64_x4(a: *const i64) -> int64x2x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u8_x2(a: *const u8) -> uint8x8x2_t {
-    transmute(vld1_s8_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x3)"]
@@ -18009,10 +17721,10 @@ pub unsafe fn vld1_u8_x2(a: *const u8) -> uint8x8x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18023,7 +17735,7 @@ pub unsafe fn vld1_u8_x2(a: *const u8) -> uint8x8x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u8_x3(a: *const u8) -> uint8x8x3_t {
-    transmute(vld1_s8_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x4)"]
@@ -18032,10 +17744,10 @@ pub unsafe fn vld1_u8_x3(a: *const u8) -> uint8x8x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18046,7 +17758,7 @@ pub unsafe fn vld1_u8_x3(a: *const u8) -> uint8x8x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u8_x4(a: *const u8) -> uint8x8x4_t {
-    transmute(vld1_s8_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x2)"]
@@ -18055,10 +17767,10 @@ pub unsafe fn vld1_u8_x4(a: *const u8) -> uint8x8x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18069,7 +17781,7 @@ pub unsafe fn vld1_u8_x4(a: *const u8) -> uint8x8x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u8_x2(a: *const u8) -> uint8x16x2_t {
-    transmute(vld1q_s8_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x3)"]
@@ -18078,10 +17790,10 @@ pub unsafe fn vld1q_u8_x2(a: *const u8) -> uint8x16x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18092,7 +17804,7 @@ pub unsafe fn vld1q_u8_x2(a: *const u8) -> uint8x16x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u8_x3(a: *const u8) -> uint8x16x3_t {
-    transmute(vld1q_s8_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x4)"]
@@ -18101,10 +17813,10 @@ pub unsafe fn vld1q_u8_x3(a: *const u8) -> uint8x16x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18115,7 +17827,7 @@ pub unsafe fn vld1q_u8_x3(a: *const u8) -> uint8x16x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u8_x4(a: *const u8) -> uint8x16x4_t {
-    transmute(vld1q_s8_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x2)"]
@@ -18124,10 +17836,10 @@ pub unsafe fn vld1q_u8_x4(a: *const u8) -> uint8x16x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18138,7 +17850,7 @@ pub unsafe fn vld1q_u8_x4(a: *const u8) -> uint8x16x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u16_x2(a: *const u16) -> uint16x4x2_t {
-    transmute(vld1_s16_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x3)"]
@@ -18147,10 +17859,10 @@ pub unsafe fn vld1_u16_x2(a: *const u16) -> uint16x4x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18161,7 +17873,7 @@ pub unsafe fn vld1_u16_x2(a: *const u16) -> uint16x4x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u16_x3(a: *const u16) -> uint16x4x3_t {
-    transmute(vld1_s16_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x4)"]
@@ -18170,10 +17882,10 @@ pub unsafe fn vld1_u16_x3(a: *const u16) -> uint16x4x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18184,7 +17896,7 @@ pub unsafe fn vld1_u16_x3(a: *const u16) -> uint16x4x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u16_x4(a: *const u16) -> uint16x4x4_t {
-    transmute(vld1_s16_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x2)"]
@@ -18193,10 +17905,10 @@ pub unsafe fn vld1_u16_x4(a: *const u16) -> uint16x4x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18207,7 +17919,7 @@ pub unsafe fn vld1_u16_x4(a: *const u16) -> uint16x4x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u16_x2(a: *const u16) -> uint16x8x2_t {
-    transmute(vld1q_s16_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x3)"]
@@ -18216,10 +17928,10 @@ pub unsafe fn vld1q_u16_x2(a: *const u16) -> uint16x8x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18230,7 +17942,7 @@ pub unsafe fn vld1q_u16_x2(a: *const u16) -> uint16x8x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u16_x3(a: *const u16) -> uint16x8x3_t {
-    transmute(vld1q_s16_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x4)"]
@@ -18239,10 +17951,10 @@ pub unsafe fn vld1q_u16_x3(a: *const u16) -> uint16x8x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18253,7 +17965,7 @@ pub unsafe fn vld1q_u16_x3(a: *const u16) -> uint16x8x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u16_x4(a: *const u16) -> uint16x8x4_t {
-    transmute(vld1q_s16_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x2)"]
@@ -18262,10 +17974,10 @@ pub unsafe fn vld1q_u16_x4(a: *const u16) -> uint16x8x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18276,7 +17988,7 @@ pub unsafe fn vld1q_u16_x4(a: *const u16) -> uint16x8x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u32_x2(a: *const u32) -> uint32x2x2_t {
-    transmute(vld1_s32_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x3)"]
@@ -18285,10 +17997,10 @@ pub unsafe fn vld1_u32_x2(a: *const u32) -> uint32x2x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18299,7 +18011,7 @@ pub unsafe fn vld1_u32_x2(a: *const u32) -> uint32x2x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u32_x3(a: *const u32) -> uint32x2x3_t {
-    transmute(vld1_s32_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x4)"]
@@ -18308,10 +18020,10 @@ pub unsafe fn vld1_u32_x3(a: *const u32) -> uint32x2x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18322,7 +18034,7 @@ pub unsafe fn vld1_u32_x3(a: *const u32) -> uint32x2x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u32_x4(a: *const u32) -> uint32x2x4_t {
-    transmute(vld1_s32_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x2)"]
@@ -18331,10 +18043,10 @@ pub unsafe fn vld1_u32_x4(a: *const u32) -> uint32x2x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18345,7 +18057,7 @@ pub unsafe fn vld1_u32_x4(a: *const u32) -> uint32x2x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u32_x2(a: *const u32) -> uint32x4x2_t {
-    transmute(vld1q_s32_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x3)"]
@@ -18354,10 +18066,10 @@ pub unsafe fn vld1q_u32_x2(a: *const u32) -> uint32x4x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18368,7 +18080,7 @@ pub unsafe fn vld1q_u32_x2(a: *const u32) -> uint32x4x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u32_x3(a: *const u32) -> uint32x4x3_t {
-    transmute(vld1q_s32_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x4)"]
@@ -18377,10 +18089,10 @@ pub unsafe fn vld1q_u32_x3(a: *const u32) -> uint32x4x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18391,7 +18103,7 @@ pub unsafe fn vld1q_u32_x3(a: *const u32) -> uint32x4x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u32_x4(a: *const u32) -> uint32x4x4_t {
-    transmute(vld1q_s32_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u64_x2)"]
@@ -18400,10 +18112,10 @@ pub unsafe fn vld1q_u32_x4(a: *const u32) -> uint32x4x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18414,7 +18126,7 @@ pub unsafe fn vld1q_u32_x4(a: *const u32) -> uint32x4x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u64_x2(a: *const u64) -> uint64x1x2_t {
-    transmute(vld1_s64_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u64_x3)"]
@@ -18423,10 +18135,10 @@ pub unsafe fn vld1_u64_x2(a: *const u64) -> uint64x1x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18437,7 +18149,7 @@ pub unsafe fn vld1_u64_x2(a: *const u64) -> uint64x1x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u64_x3(a: *const u64) -> uint64x1x3_t {
-    transmute(vld1_s64_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u64_x4)"]
@@ -18446,10 +18158,10 @@ pub unsafe fn vld1_u64_x3(a: *const u64) -> uint64x1x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18460,7 +18172,7 @@ pub unsafe fn vld1_u64_x3(a: *const u64) -> uint64x1x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_u64_x4(a: *const u64) -> uint64x1x4_t {
-    transmute(vld1_s64_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x2)"]
@@ -18469,10 +18181,10 @@ pub unsafe fn vld1_u64_x4(a: *const u64) -> uint64x1x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18483,7 +18195,7 @@ pub unsafe fn vld1_u64_x4(a: *const u64) -> uint64x1x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u64_x2(a: *const u64) -> uint64x2x2_t {
-    transmute(vld1q_s64_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x3)"]
@@ -18492,10 +18204,10 @@ pub unsafe fn vld1q_u64_x2(a: *const u64) -> uint64x2x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18506,7 +18218,7 @@ pub unsafe fn vld1q_u64_x2(a: *const u64) -> uint64x2x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u64_x3(a: *const u64) -> uint64x2x3_t {
-    transmute(vld1q_s64_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x4)"]
@@ -18515,10 +18227,10 @@ pub unsafe fn vld1q_u64_x3(a: *const u64) -> uint64x2x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18529,7 +18241,7 @@ pub unsafe fn vld1q_u64_x3(a: *const u64) -> uint64x2x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_u64_x4(a: *const u64) -> uint64x2x4_t {
-    transmute(vld1q_s64_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x2)"]
@@ -18538,10 +18250,10 @@ pub unsafe fn vld1q_u64_x4(a: *const u64) -> uint64x2x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18552,7 +18264,7 @@ pub unsafe fn vld1q_u64_x4(a: *const u64) -> uint64x2x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p8_x2(a: *const p8) -> poly8x8x2_t {
-    transmute(vld1_s8_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x3)"]
@@ -18561,10 +18273,10 @@ pub unsafe fn vld1_p8_x2(a: *const p8) -> poly8x8x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18575,7 +18287,7 @@ pub unsafe fn vld1_p8_x2(a: *const p8) -> poly8x8x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p8_x3(a: *const p8) -> poly8x8x3_t {
-    transmute(vld1_s8_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x4)"]
@@ -18584,10 +18296,10 @@ pub unsafe fn vld1_p8_x3(a: *const p8) -> poly8x8x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18598,7 +18310,7 @@ pub unsafe fn vld1_p8_x3(a: *const p8) -> poly8x8x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p8_x4(a: *const p8) -> poly8x8x4_t {
-    transmute(vld1_s8_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x2)"]
@@ -18607,10 +18319,10 @@ pub unsafe fn vld1_p8_x4(a: *const p8) -> poly8x8x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18621,7 +18333,7 @@ pub unsafe fn vld1_p8_x4(a: *const p8) -> poly8x8x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p8_x2(a: *const p8) -> poly8x16x2_t {
-    transmute(vld1q_s8_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x3)"]
@@ -18630,10 +18342,10 @@ pub unsafe fn vld1q_p8_x2(a: *const p8) -> poly8x16x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18644,7 +18356,7 @@ pub unsafe fn vld1q_p8_x2(a: *const p8) -> poly8x16x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p8_x3(a: *const p8) -> poly8x16x3_t {
-    transmute(vld1q_s8_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x4)"]
@@ -18653,10 +18365,10 @@ pub unsafe fn vld1q_p8_x3(a: *const p8) -> poly8x16x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18667,7 +18379,7 @@ pub unsafe fn vld1q_p8_x3(a: *const p8) -> poly8x16x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p8_x4(a: *const p8) -> poly8x16x4_t {
-    transmute(vld1q_s8_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x2)"]
@@ -18676,10 +18388,10 @@ pub unsafe fn vld1q_p8_x4(a: *const p8) -> poly8x16x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18690,7 +18402,7 @@ pub unsafe fn vld1q_p8_x4(a: *const p8) -> poly8x16x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p16_x2(a: *const p16) -> poly16x4x2_t {
-    transmute(vld1_s16_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x3)"]
@@ -18699,10 +18411,10 @@ pub unsafe fn vld1_p16_x2(a: *const p16) -> poly16x4x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18713,7 +18425,7 @@ pub unsafe fn vld1_p16_x2(a: *const p16) -> poly16x4x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p16_x3(a: *const p16) -> poly16x4x3_t {
-    transmute(vld1_s16_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x4)"]
@@ -18722,10 +18434,10 @@ pub unsafe fn vld1_p16_x3(a: *const p16) -> poly16x4x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18736,7 +18448,7 @@ pub unsafe fn vld1_p16_x3(a: *const p16) -> poly16x4x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1_p16_x4(a: *const p16) -> poly16x4x4_t {
-    transmute(vld1_s16_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x2)"]
@@ -18745,10 +18457,10 @@ pub unsafe fn vld1_p16_x4(a: *const p16) -> poly16x4x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18759,7 +18471,7 @@ pub unsafe fn vld1_p16_x4(a: *const p16) -> poly16x4x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p16_x2(a: *const p16) -> poly16x8x2_t {
-    transmute(vld1q_s16_x2(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x3)"]
@@ -18768,10 +18480,10 @@ pub unsafe fn vld1q_p16_x2(a: *const p16) -> poly16x8x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18782,7 +18494,7 @@ pub unsafe fn vld1q_p16_x2(a: *const p16) -> poly16x8x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
-    transmute(vld1q_s16_x3(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x4)"]
@@ -18791,10 +18503,10 @@ pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
-#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
-    assert_instr(ld1)
+    assert_instr(ld)
 )]
 #[cfg_attr(
     not(target_arch = "arm"),
@@ -18805,7 +18517,7 @@ pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub unsafe fn vld1q_p16_x4(a: *const p16) -> poly16x8x4_t {
-    transmute(vld1q_s16_x4(transmute(a)))
+    crate::ptr::read_unaligned(a.cast())
 }
 #[inline(always)]
 #[rustc_legacy_const_generics(1)]

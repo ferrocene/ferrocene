@@ -13,6 +13,7 @@ pub(crate) fn target() -> Target {
     let mut target = super::aarch64v8r_unknown_none::target();
 
     target.metadata = TargetMetadata::default();
+    target.metadata.tier = Some(1);
 
     // libstd port
     target.families = cvs!["unix"];

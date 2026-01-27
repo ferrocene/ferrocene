@@ -11,6 +11,7 @@ macro_rules! radix_integer {
         #[stable(feature = "rust1", since = "1.0.0")]
         impl fmt::$Trait for $Unsigned {
             /// Format unsigned integers in the radix.
+            #[ferrocene::prevalidated]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 // Check macro arguments at compile time.
                 const {
@@ -53,6 +54,7 @@ macro_rules! radix_integer {
         #[stable(feature = "rust1", since = "1.0.0")]
         impl fmt::$Trait for $Signed {
             /// Format signed integers in the two’s-complement form.
+            #[ferrocene::prevalidated]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 fmt::$Trait::fmt(&self.cast_unsigned(), f)
             }
@@ -82,7 +84,8 @@ macro_rules! impl_Debug {
             #[stable(feature = "rust1", since = "1.0.0")]
             impl fmt::Debug for $T {
                 #[inline]
-                fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                     if f.debug_lower_hex() {
                         fmt::LowerHex::fmt(self, f)
                     } else if f.debug_upper_hex() {
@@ -110,6 +113,7 @@ static DECIMAL_PAIRS: &[u8; 200] = b"\
 ///
 /// `buf` content starting from `offset` index MUST BE initialized and MUST BE ascii
 /// characters.
+#[ferrocene::prevalidated]
 unsafe fn slice_buffer_to_str(buf: &[MaybeUninit<u8>], offset: usize) -> &str {
     // SAFETY: `offset` is always included between 0 and `buf`'s length.
     let written = unsafe { buf.get_unchecked(offset..) };
@@ -132,7 +136,8 @@ macro_rules! impl_Display {
 
         #[stable(feature = "rust1", since = "1.0.0")]
         impl fmt::Display for $Unsigned {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 #[cfg(not(feature = "optimize_for_size"))]
                 {
                     const MAX_DEC_N: usize = $Unsigned::MAX.ilog10() as usize + 1;
@@ -153,7 +158,8 @@ macro_rules! impl_Display {
 
         #[stable(feature = "rust1", since = "1.0.0")]
         impl fmt::Display for $Signed {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 #[cfg(not(feature = "optimize_for_size"))]
                 {
                     const MAX_DEC_N: usize = $Unsigned::MAX.ilog10() as usize + 1;
@@ -180,14 +186,16 @@ macro_rules! impl_Display {
                 reason = "specialized method meant to only be used by `SpecToString` implementation",
                 issue = "none"
             )]
-            pub unsafe fn _fmt<'a>(self, buf: &'a mut [MaybeUninit::<u8>]) -> &'a str {
+            #[ferrocene::prevalidated]
+pub unsafe fn _fmt<'a>(self, buf: &'a mut [MaybeUninit::<u8>]) -> &'a str {
                 // SAFETY: `buf` will always be big enough to contain all digits.
                 let offset = unsafe { self._fmt_inner(buf) };
                 // SAFETY: Starting from `offset`, all elements of the slice have been set.
                 unsafe { slice_buffer_to_str(buf, offset) }
             }
 
-            unsafe fn _fmt_inner(self, buf: &mut [MaybeUninit::<u8>]) -> usize {
+            #[ferrocene::prevalidated]
+unsafe fn _fmt_inner(self, buf: &mut [MaybeUninit::<u8>]) -> usize {
                 // Count the number of bytes in buf that are not initialized.
                 let mut offset = buf.len();
                 // Consume the least-significant decimals from a working copy.
@@ -274,7 +282,8 @@ macro_rules! impl_Display {
             #[doc = concat!("assert_eq!(n2.format_into(&mut buf), ", stringify!($Signed::MAX), ".to_string());")]
             /// ```
             #[unstable(feature = "int_format_into", issue = "138215")]
-            pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
+            #[ferrocene::prevalidated]
+pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
                 let mut offset;
 
                 #[cfg(not(feature = "optimize_for_size"))]
@@ -319,7 +328,8 @@ macro_rules! impl_Display {
             #[doc = concat!("assert_eq!(n2.format_into(&mut buf), ", stringify!($Unsigned::MAX), ".to_string());")]
             /// ```
             #[unstable(feature = "int_format_into", issue = "138215")]
-            pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
+            #[ferrocene::prevalidated]
+pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
                 let offset;
 
                 #[cfg(not(feature = "optimize_for_size"))]
@@ -378,7 +388,8 @@ macro_rules! impl_Exp {
     ($($Signed:ident, $Unsigned:ident),* ; as $T:ident into $fmt_fn:ident) => {
         const _: () = assert!($T::MIN == 0, "need unsigned");
 
-        fn $fmt_fn(
+        #[ferrocene::prevalidated]
+fn $fmt_fn(
             f: &mut fmt::Formatter<'_>,
             n: $T,
             is_nonnegative: bool,
@@ -560,25 +571,29 @@ macro_rules! impl_Exp {
         };
         #[stable(feature = "integer_exp_format", since = "1.42.0")]
         impl fmt::LowerExp for $Signed {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 $fmt_fn(f, self.unsigned_abs() as $T, *self >= 0, b'e')
             }
         }
         #[stable(feature = "integer_exp_format", since = "1.42.0")]
         impl fmt::LowerExp for $Unsigned {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 $fmt_fn(f, *self as $T, true, b'e')
             }
         }
         #[stable(feature = "integer_exp_format", since = "1.42.0")]
         impl fmt::UpperExp for $Signed {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 $fmt_fn(f, self.unsigned_abs() as $T, *self >= 0, b'E')
             }
         }
         #[stable(feature = "integer_exp_format", since = "1.42.0")]
         impl fmt::UpperExp for $Unsigned {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 $fmt_fn(f, *self as $T, true, b'E')
             }
         }
@@ -616,6 +631,7 @@ const U128_MAX_DEC_N: usize = u128::MAX.ilog10() as usize + 1;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Display for u128 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut buf = [MaybeUninit::<u8>::uninit(); U128_MAX_DEC_N];
 
@@ -626,6 +642,7 @@ impl fmt::Display for u128 {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Display for i128 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // This is not a typo, we use the maximum number of digits of `u128`, hence why we use
         // `U128_MAX_DEC_N`.
@@ -646,6 +663,7 @@ impl u128 {
         reason = "specialized method meant to only be used by `SpecToString` implementation",
         issue = "none"
     )]
+    #[ferrocene::prevalidated]
     pub unsafe fn _fmt<'a>(self, buf: &'a mut [MaybeUninit<u8>]) -> &'a str {
         // SAFETY: `buf` will always be big enough to contain all digits.
         let offset = unsafe { self._fmt_inner(buf) };
@@ -653,6 +671,7 @@ impl u128 {
         unsafe { slice_buffer_to_str(buf, offset) }
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn _fmt_inner(self, buf: &mut [MaybeUninit<u8>]) -> usize {
         // Optimize common-case zero, which would also need special treatment due to
         // its "leading" zero.
@@ -759,6 +778,7 @@ impl u128 {
     /// assert_eq!(n2.format_into(&mut buf2), u128::MAX.to_string());
     /// ```
     #[unstable(feature = "int_format_into", issue = "138215")]
+    #[ferrocene::prevalidated]
     pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
         let diff = buf.capacity() - U128_MAX_DEC_N;
         // FIXME: Once const generics are better, use `NumberBufferTrait::BUF_SIZE` as generic const
@@ -792,6 +812,7 @@ impl i128 {
     /// assert_eq!(n2.format_into(&mut buf), i128::MAX.to_string());
     /// ```
     #[unstable(feature = "int_format_into", issue = "138215")]
+    #[ferrocene::prevalidated]
     pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
         let diff = buf.capacity() - U128_MAX_DEC_N;
         // FIXME: Once const generics are better, use `NumberBufferTrait::BUF_SIZE` as generic const
@@ -819,6 +840,7 @@ impl i128 {
 
 /// Encodes the 16 least-significant decimals of n into `buf[OFFSET .. OFFSET +
 /// 16 ]`.
+#[ferrocene::prevalidated]
 fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
     // Consume the least-significant decimals from a working copy.
     let mut remain = n;
@@ -847,6 +869,7 @@ fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
 ///   Implementation, 1994, pp. 61–72
 ///
 #[inline]
+#[ferrocene::prevalidated]
 fn div_rem_1e16(n: u128) -> (u128, u64) {
     const D: u128 = 1_0000_0000_0000_0000;
     // The check inlines well with the caller flow.

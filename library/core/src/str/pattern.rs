@@ -121,12 +121,14 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the front of the haystack
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         matches!(self.into_searcher(haystack).next(), SearchStep::Match(0, _))
     }
 
     /// Checks whether the pattern matches at the back of the haystack
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -194,6 +196,7 @@ pub enum Utf8Pattern<'a> {
 
 /// Result of calling [`Searcher::next()`] or [`ReverseSearcher::next_back()`].
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[ferrocene::prevalidated]
 pub enum SearchStep {
     /// Expresses that a match of the pattern has been found at
     /// `haystack[a..b]`.
@@ -257,6 +260,7 @@ pub unsafe trait Searcher<'a> {
     /// `(start_match, end_match)`, where start_match is the index of where
     /// the match begins, and end_match is the index after the end of the match.
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         loop {
             match self.next() {
@@ -382,6 +386,7 @@ pub trait DoubleEndedSearcher<'a>: ReverseSearcher<'a> {}
 
 /// Associated type for `<char as Pattern>::Searcher<'a>`.
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct CharSearcher<'a> {
     haystack: &'a str,
     // safety invariant: `finger`/`finger_back` must be a valid utf8 byte index of `haystack`
@@ -408,6 +413,7 @@ pub struct CharSearcher<'a> {
 }
 
 impl CharSearcher<'_> {
+    #[ferrocene::prevalidated]
     fn utf8_size(&self) -> usize {
         self.utf8_size.into()
     }
@@ -415,10 +421,12 @@ impl CharSearcher<'_> {
 
 unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn haystack(&self) -> &'a str {
         self.haystack
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> SearchStep {
         let old_finger = self.finger;
         // SAFETY: 1-4 guarantee safety of `get_unchecked`
@@ -446,6 +454,7 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
         }
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         loop {
             // get the haystack after the last character found
@@ -493,6 +502,7 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
 
 unsafe impl<'a> ReverseSearcher<'a> for CharSearcher<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> SearchStep {
         let old_finger = self.finger_back;
         // SAFETY: see the comment for next() above
@@ -580,6 +590,7 @@ impl Pattern for char {
     type Searcher<'a> = CharSearcher<'a>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_searcher<'a>(self, haystack: &'a str) -> Self::Searcher<'a> {
         let mut utf8_encoded = [0; char::MAX_LEN_UTF8];
         let utf8_size = self
@@ -610,6 +621,7 @@ impl Pattern for char {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         self.encode_utf8(&mut [0u8; 4]).is_prefix_of(haystack)
     }
@@ -621,6 +633,7 @@ impl Pattern for char {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -1030,12 +1043,14 @@ impl<'b> Pattern for &'b str {
     type Searcher<'a> = StrSearcher<'a, 'b>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_searcher(self, haystack: &str) -> StrSearcher<'_, 'b> {
         StrSearcher::new(haystack, self)
     }
 
     /// Checks whether the pattern matches at the front of the haystack.
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         haystack.as_bytes().starts_with(self.as_bytes())
     }
@@ -1084,6 +1099,7 @@ impl<'b> Pattern for &'b str {
 
     /// Checks whether the pattern matches at the back of the haystack.
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -1120,6 +1136,7 @@ impl<'b> Pattern for &'b str {
 
 #[derive(Clone, Debug)]
 /// Associated type for `<&str as Pattern>::Searcher<'a>`.
+#[ferrocene::prevalidated]
 pub struct StrSearcher<'a, 'b> {
     haystack: &'a str,
     needle: &'b str,
@@ -1128,11 +1145,13 @@ pub struct StrSearcher<'a, 'b> {
 }
 
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 enum StrSearcherImpl {
     Empty(EmptyNeedle),
     TwoWay(TwoWaySearcher),
 }
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 struct EmptyNeedle {
     position: usize,
     end: usize,
@@ -1143,6 +1162,7 @@ struct EmptyNeedle {
 }
 
 impl<'a, 'b> StrSearcher<'a, 'b> {
+    #[ferrocene::prevalidated]
     fn new(haystack: &'a str, needle: &'b str) -> StrSearcher<'a, 'b> {
         if needle.is_empty() {
             StrSearcher {
@@ -1171,11 +1191,13 @@ impl<'a, 'b> StrSearcher<'a, 'b> {
 
 unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn haystack(&self) -> &'a str {
         self.haystack
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> SearchStep {
         match self.searcher {
             StrSearcherImpl::Empty(ref mut searcher) => {
@@ -1228,6 +1250,7 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_match(&mut self) -> Option<(usize, usize)> {
         match self.searcher {
             StrSearcherImpl::Empty(..) => loop {
@@ -1261,6 +1284,7 @@ unsafe impl<'a, 'b> Searcher<'a> for StrSearcher<'a, 'b> {
 
 unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> SearchStep {
         match self.searcher {
             StrSearcherImpl::Empty(ref mut searcher) => {
@@ -1340,6 +1364,7 @@ unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
 
 /// The internal state of the two-way substring search algorithm.
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 struct TwoWaySearcher {
     // constants
     /// critical factorization index
@@ -1435,6 +1460,7 @@ struct TwoWaySearcher {
 
 */
 impl TwoWaySearcher {
+    #[ferrocene::prevalidated]
     fn new(needle: &[u8], end: usize) -> TwoWaySearcher {
         let (crit_pos_false, period_false) = TwoWaySearcher::maximal_suffix(needle, false);
         let (crit_pos_true, period_true) = TwoWaySearcher::maximal_suffix(needle, true);
@@ -1504,11 +1530,13 @@ impl TwoWaySearcher {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn byteset_create(bytes: &[u8]) -> u64 {
         bytes.iter().fold(0, |a, &b| (1 << (b & 0x3f)) | a)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn byteset_contains(&self, byte: u8) -> bool {
         (self.byteset >> ((byte & 0x3f) as usize)) & 1 != 0
     }
@@ -1519,6 +1547,7 @@ impl TwoWaySearcher {
     // How far we can jump when we encounter a mismatch is all based on the fact
     // that (u, v) is a critical factorization for the needle.
     #[inline]
+    #[ferrocene::prevalidated]
     fn next<S>(&mut self, haystack: &[u8], needle: &[u8], long_period: bool) -> S::Output
     where
         S: TwoWayStrategy,
@@ -1602,6 +1631,7 @@ impl TwoWaySearcher {
     // To search in reverse through the haystack, we search forward through
     // a reversed haystack with a reversed needle, matching first u' and then v'.
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back<S>(&mut self, haystack: &[u8], needle: &[u8], long_period: bool) -> S::Output
     where
         S: TwoWayStrategy,
@@ -1688,6 +1718,7 @@ impl TwoWaySearcher {
     //
     // For long period cases, the resulting period is not exact (it is too short).
     #[inline]
+    #[ferrocene::prevalidated]
     fn maximal_suffix(arr: &[u8], order_greater: bool) -> (usize, usize) {
         let mut left = 0; // Corresponds to i in the paper
         let mut right = 1; // Corresponds to j in the paper
@@ -1734,6 +1765,7 @@ impl TwoWaySearcher {
     // a critical factorization.
     //
     // For long period cases, the resulting period is not exact (it is too short).
+    #[ferrocene::prevalidated]
     fn reverse_maximal_suffix(arr: &[u8], known_period: usize, order_greater: bool) -> usize {
         let mut left = 0; // Corresponds to i in the paper
         let mut right = 1; // Corresponds to j in the paper
@@ -1784,40 +1816,48 @@ trait TwoWayStrategy {
 }
 
 /// Skip to match intervals as quickly as possible
+#[ferrocene::prevalidated]
 enum MatchOnly {}
 
 impl TwoWayStrategy for MatchOnly {
     type Output = Option<(usize, usize)>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn use_early_reject() -> bool {
         false
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn rejecting(_a: usize, _b: usize) -> Self::Output {
         None
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn matching(a: usize, b: usize) -> Self::Output {
         Some((a, b))
     }
 }
 
 /// Emit Rejects regularly
+#[ferrocene::prevalidated]
 enum RejectAndMatch {}
 
 impl TwoWayStrategy for RejectAndMatch {
     type Output = SearchStep;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn use_early_reject() -> bool {
         true
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn rejecting(a: usize, b: usize) -> Self::Output {
         SearchStep::Reject(a, b)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn matching(a: usize, b: usize) -> Self::Output {
         SearchStep::Match(a, b)
     }

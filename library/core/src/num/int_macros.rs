@@ -73,7 +73,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn count_ones(self) -> u32 { (self as $UnsignedT).count_ones() }
+        #[ferrocene::prevalidated]
+pub const fn count_ones(self) -> u32 { (self as $UnsignedT).count_ones() }
 
         /// Returns the number of zeros in the binary representation of `self`.
         ///
@@ -87,7 +88,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn count_zeros(self) -> u32 {
+        #[ferrocene::prevalidated]
+pub const fn count_zeros(self) -> u32 {
             (!self).count_ones()
         }
 
@@ -109,7 +111,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn leading_zeros(self) -> u32 {
+        #[ferrocene::prevalidated]
+pub const fn leading_zeros(self) -> u32 {
             (self as $UnsignedT).leading_zeros()
         }
 
@@ -275,7 +278,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn cast_unsigned(self) -> $UnsignedT {
+        #[ferrocene::prevalidated]
+pub const fn cast_unsigned(self) -> $UnsignedT {
             self as $UnsignedT
         }
 
@@ -302,7 +306,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn rotate_left(self, n: u32) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn rotate_left(self, n: u32) -> Self {
             (self as $UnsignedT).rotate_left(n) as Self
         }
 
@@ -432,7 +437,8 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_conversions", since = "1.32.0")]
         #[must_use]
         #[inline]
-        pub const fn from_le(x: Self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn from_le(x: Self) -> Self {
             #[cfg(target_endian = "little")]
             {
                 x
@@ -507,7 +513,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn to_le(self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn to_le(self) -> Self {
             #[cfg(target_endian = "little")]
             {
                 self
@@ -532,7 +539,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_add(self, rhs: Self) -> Option<Self> {
+        #[ferrocene::prevalidated]
+pub const fn checked_add(self, rhs: Self) -> Option<Self> {
             let (a, b) = self.overflowing_add(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
         }
@@ -624,7 +632,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_add_unsigned(self, rhs: $UnsignedT) -> Option<Self> {
+        #[ferrocene::prevalidated]
+pub const fn checked_add_unsigned(self, rhs: $UnsignedT) -> Option<Self> {
             let (a, b) = self.overflowing_add_unsigned(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
         }
@@ -675,7 +684,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_sub(self, rhs: Self) -> Option<Self> {
+        #[ferrocene::prevalidated]
+pub const fn checked_sub(self, rhs: Self) -> Option<Self> {
             let (a, b) = self.overflowing_sub(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
         }
@@ -767,7 +777,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_sub_unsigned(self, rhs: $UnsignedT) -> Option<Self> {
+        #[ferrocene::prevalidated]
+pub const fn checked_sub_unsigned(self, rhs: $UnsignedT) -> Option<Self> {
             let (a, b) = self.overflowing_sub_unsigned(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
         }
@@ -818,7 +829,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
+        #[ferrocene::prevalidated]
+pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
             let (a, b) = self.overflowing_mul(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
         }
@@ -1313,7 +1325,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        pub const unsafe fn unchecked_neg(self) -> Self {
+        #[ferrocene::prevalidated]
+pub const unsafe fn unchecked_neg(self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
                 concat!(stringify!($SelfT), "::unchecked_neg cannot overflow"),
@@ -1433,7 +1446,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
+        #[ferrocene::prevalidated]
+pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
                 concat!(stringify!($SelfT), "::unchecked_shl cannot overflow"),
@@ -1617,7 +1631,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        pub const unsafe fn unchecked_shr(self, rhs: u32) -> Self {
+        #[ferrocene::prevalidated]
+pub const unsafe fn unchecked_shr(self, rhs: u32) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
                 concat!(stringify!($SelfT), "::unchecked_shr cannot overflow"),
@@ -2154,7 +2169,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn wrapping_add(self, rhs: Self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_add(self, rhs: Self) -> Self {
             intrinsics::wrapping_add(self, rhs)
         }
 
@@ -2191,7 +2207,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn wrapping_sub(self, rhs: Self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_sub(self, rhs: Self) -> Self {
             intrinsics::wrapping_sub(self, rhs)
         }
 
@@ -2228,7 +2245,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn wrapping_mul(self, rhs: Self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_mul(self, rhs: Self) -> Self {
             intrinsics::wrapping_mul(self, rhs)
         }
 
@@ -2358,7 +2376,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn wrapping_neg(self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_neg(self) -> Self {
             (0 as $SelfT).wrapping_sub(self)
         }
 
@@ -2391,7 +2410,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn wrapping_shl(self, rhs: u32) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_shl(self, rhs: u32) -> Self {
             // SAFETY: the masking by the bitsize of the type ensures that we do not shift
             // out of bounds
             unsafe {
@@ -2428,7 +2448,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn wrapping_shr(self, rhs: u32) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_shr(self, rhs: u32) -> Self {
             // SAFETY: the masking by the bitsize of the type ensures that we do not shift
             // out of bounds
             unsafe {
@@ -2457,7 +2478,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[allow(unused_attributes)]
         #[inline]
-        pub const fn wrapping_abs(self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn wrapping_abs(self) -> Self {
              if self.is_negative() {
                  self.wrapping_neg()
              } else {
@@ -2481,7 +2503,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn unsigned_abs(self) -> $UnsignedT {
+        #[ferrocene::prevalidated]
+pub const fn unsigned_abs(self) -> $UnsignedT {
              self.wrapping_abs() as $UnsignedT
         }
 
@@ -2558,7 +2581,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn overflowing_add(self, rhs: Self) -> (Self, bool) {
+        #[ferrocene::prevalidated]
+pub const fn overflowing_add(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::add_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)
         }
@@ -2639,7 +2663,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn overflowing_add_unsigned(self, rhs: $UnsignedT) -> (Self, bool) {
+        #[ferrocene::prevalidated]
+pub const fn overflowing_add_unsigned(self, rhs: $UnsignedT) -> (Self, bool) {
             let rhs = rhs as Self;
             let (res, overflowed) = self.overflowing_add(rhs);
             (res, overflowed ^ (rhs < 0))
@@ -2661,7 +2686,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
+        #[ferrocene::prevalidated]
+pub const fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::sub_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)
         }
@@ -2743,7 +2769,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn overflowing_sub_unsigned(self, rhs: $UnsignedT) -> (Self, bool) {
+        #[ferrocene::prevalidated]
+pub const fn overflowing_sub_unsigned(self, rhs: $UnsignedT) -> (Self, bool) {
             let rhs = rhs as Self;
             let (res, overflowed) = self.overflowing_sub(rhs);
             (res, overflowed ^ (rhs < 0))
@@ -2765,7 +2792,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        pub const fn overflowing_mul(self, rhs: Self) -> (Self, bool) {
+        #[ferrocene::prevalidated]
+pub const fn overflowing_mul(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::mul_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)
         }
@@ -3011,7 +3039,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[allow(unused_attributes)]
-        pub const fn overflowing_neg(self) -> (Self, bool) {
+        #[ferrocene::prevalidated]
+pub const fn overflowing_neg(self) -> (Self, bool) {
             if intrinsics::unlikely(self == Self::MIN) {
                 (Self::MIN, true)
             } else {
@@ -3520,7 +3549,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        pub const fn ilog(self, base: Self) -> u32 {
+        #[ferrocene::prevalidated]
+pub const fn ilog(self, base: Self) -> u32 {
             assert!(base >= 2, "base of integer logarithm must be at least 2");
             if let Some(log) = self.checked_ilog(base) {
                 log
@@ -3546,7 +3576,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        pub const fn ilog2(self) -> u32 {
+        #[ferrocene::prevalidated]
+pub const fn ilog2(self) -> u32 {
             if let Some(log) = self.checked_ilog2() {
                 log
             } else {
@@ -3599,7 +3630,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_ilog(self, base: Self) -> Option<u32> {
+        #[ferrocene::prevalidated]
+pub const fn checked_ilog(self, base: Self) -> Option<u32> {
             if self <= 0 || base <= 1 {
                 None
             } else {
@@ -3623,7 +3655,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn checked_ilog2(self) -> Option<u32> {
+        #[ferrocene::prevalidated]
+pub const fn checked_ilog2(self) -> Option<u32> {
             if self <= 0 {
                 None
             } else {
@@ -3680,7 +3713,8 @@ macro_rules! int_impl {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        pub const fn abs(self) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn abs(self) -> Self {
             // Note that the #[rustc_inherit_overflow_checks] and #[inline]
             // above mean that the overflow semantics of the subtraction
             // depend on the crate we're being called from.
@@ -3710,7 +3744,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn abs_diff(self, other: Self) -> $UnsignedT {
+        #[ferrocene::prevalidated]
+pub const fn abs_diff(self, other: Self) -> $UnsignedT {
             if self < other {
                 // Converting a non-negative x from signed to unsigned by using
                 // `x as U` is left unchanged, but a negative x is converted
@@ -3788,7 +3823,8 @@ macro_rules! int_impl {
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[inline(always)]
-        pub const fn is_negative(self) -> bool { self < 0 }
+        #[ferrocene::prevalidated]
+pub const fn is_negative(self) -> bool { self < 0 }
 
         /// Returns the memory representation of this integer as a byte array in
         /// big-endian (network) byte order.
@@ -3827,7 +3863,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn to_le_bytes(self) -> [u8; size_of::<Self>()] {
+        #[ferrocene::prevalidated]
+pub const fn to_le_bytes(self) -> [u8; size_of::<Self>()] {
             self.to_le().to_ne_bytes()
         }
 
@@ -3864,7 +3901,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn to_ne_bytes(self) -> [u8; size_of::<Self>()] {
+        #[ferrocene::prevalidated]
+pub const fn to_ne_bytes(self) -> [u8; size_of::<Self>()] {
             // SAFETY: integers are plain old datatypes so we can always transmute them to
             // arrays of bytes
             unsafe { mem::transmute(self) }
@@ -3925,7 +3963,8 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_conversion", since = "1.44.0")]
         #[must_use]
         #[inline]
-        pub const fn from_le_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn from_le_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             Self::from_le(Self::from_ne_bytes(bytes))
         }
 
@@ -3968,7 +4007,8 @@ macro_rules! int_impl {
         // SAFETY: const sound because integers are plain old datatypes so we can always
         // transmute to them
         #[inline]
-        pub const fn from_ne_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
+        #[ferrocene::prevalidated]
+pub const fn from_ne_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
             // SAFETY: integers are plain old datatypes so we can always transmute to them
             unsafe { mem::transmute(bytes) }
         }

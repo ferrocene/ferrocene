@@ -101,6 +101,7 @@ use crate::{intrinsics, ub_checks};
 #[rustc_const_stable(feature = "const_unreachable_unchecked", since = "1.57.0")]
 #[track_caller]
 #[coverage(off)] // Ferrocene addition: this function breaks llvm-cov
+#[ferrocene::prevalidated]
 pub const unsafe fn unreachable_unchecked() -> ! {
     ub_checks::assert_unsafe_precondition!(
         check_language_ub,
@@ -200,6 +201,7 @@ pub const unsafe fn unreachable_unchecked() -> ! {
 #[doc(alias = "assume")]
 #[stable(feature = "hint_assert_unchecked", since = "1.81.0")]
 #[rustc_const_stable(feature = "hint_assert_unchecked", since = "1.81.0")]
+#[ferrocene::prevalidated]
 pub const unsafe fn assert_unchecked(cond: bool) {
     // SAFETY: The caller promised `cond` is true.
     unsafe {
@@ -833,6 +835,7 @@ pub const fn cold_path() {
 #[inline(always)]
 #[stable(feature = "select_unpredictable", since = "1.88.0")]
 #[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
+#[ferrocene::prevalidated]
 pub const fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T
 where
     T: [const] Destruct,
@@ -842,6 +845,7 @@ where
     let mut true_val = MaybeUninit::new(true_val);
     let mut false_val = MaybeUninit::new(false_val);
 
+    #[ferrocene::prevalidated]
     struct DropOnPanic<T> {
         // Invariant: valid pointer and points to an initialized value that is not further used,
         // i.e. it can be dropped by this guard.
@@ -849,6 +853,7 @@ where
     }
 
     impl<T> Drop for DropOnPanic<T> {
+        #[ferrocene::prevalidated]
         fn drop(&mut self) {
             // SAFETY: Must be guaranteed on construction of local type `DropOnPanic`.
             unsafe { self.inner.drop_in_place() }

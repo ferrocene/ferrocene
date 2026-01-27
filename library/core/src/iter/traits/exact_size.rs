@@ -113,6 +113,7 @@ pub trait ExactSizeIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         let (lower, upper) = self.size_hint();
         // Note: This assertion is overly defensive, but it checks the invariant
@@ -145,6 +146,7 @@ pub trait ExactSizeIterator: Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "exact_size_is_empty", issue = "35428")]
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -152,9 +154,11 @@ pub trait ExactSizeIterator: Iterator {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I: ExactSizeIterator + ?Sized> ExactSizeIterator for &mut I {
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         (**self).len()
     }
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         (**self).is_empty()
     }

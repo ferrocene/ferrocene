@@ -61,6 +61,7 @@ use crate::{assert_unsafe_precondition, fmt};
 #[derive_const(Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[unstable(feature = "ascii_char", issue = "110998")]
 #[repr(u8)]
+#[ferrocene::prevalidated]
 pub enum AsciiChar {
     /// U+0000 (The default variant)
     #[unstable(feature = "ascii_char_variants", issue = "110998")]
@@ -481,6 +482,7 @@ impl AsciiChar {
     /// `b` must be in `0..=127`, or else this is UB.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_u8_unchecked(b: u8) -> Self {
         // SAFETY: Our safety precondition is that `b` is in-range.
         unsafe { transmute(b) }
@@ -540,6 +542,7 @@ impl AsciiChar {
     /// Gets this ASCII character as a byte.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_u8(self) -> u8 {
         self as u8
     }
@@ -555,6 +558,7 @@ impl AsciiChar {
     /// Views this ASCII character as a one-code-unit UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> &str {
         crate::slice::from_ref(self).as_str()
     }
@@ -1202,6 +1206,7 @@ impl [AsciiChar] {
     /// Views this slice of ASCII characters as a UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> &str {
         let ascii_ptr: *const Self = self;
         let str_ptr = ascii_ptr as *const str;
@@ -1213,6 +1218,7 @@ impl [AsciiChar] {
     /// Views this slice of ASCII characters as a slice of `u8` bytes.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_bytes(&self) -> &[u8] {
         self.as_str().as_bytes()
     }
@@ -1220,6 +1226,7 @@ impl [AsciiChar] {
 
 #[unstable(feature = "ascii_char", issue = "110998")]
 impl fmt::Display for AsciiChar {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <str as fmt::Display>::fmt(self.as_str(), f)
     }
@@ -1227,9 +1234,11 @@ impl fmt::Display for AsciiChar {
 
 #[unstable(feature = "ascii_char", issue = "110998")]
 impl fmt::Debug for AsciiChar {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use AsciiChar::{Apostrophe, Null, ReverseSolidus as Backslash};
 
+        #[ferrocene::prevalidated]
         fn backslash(a: AsciiChar) -> ([AsciiChar; 6], usize) {
             ([Apostrophe, Backslash, a, Apostrophe, Null, Null], 4)
         }

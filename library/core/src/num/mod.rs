@@ -505,6 +505,7 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_u8_is_ascii", since = "1.43.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii(&self) -> bool {
         *self <= 127
     }
@@ -586,6 +587,7 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_ascii_lowercase(&self) -> u8 {
         // Set the 6th bit if this is an uppercase letter
         *self | (self.is_ascii_uppercase() as u8 * ASCII_CASE_MASK)
@@ -613,6 +615,7 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn eq_ignore_ascii_case(&self, other: &u8) -> bool {
         self.to_ascii_lowercase() == other.to_ascii_lowercase()
     }
@@ -703,6 +706,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_alphabetic(&self) -> bool {
         matches!(*self, b'A'..=b'Z' | b'a'..=b'z')
     }
@@ -737,6 +741,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_uppercase(&self) -> bool {
         matches!(*self, b'A'..=b'Z')
     }
@@ -1080,6 +1085,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_control(&self) -> bool {
         matches!(*self, b'\0'..=b'\x1F' | b'\x7F')
     }
@@ -1105,11 +1111,13 @@ impl u8 {
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_ascii(self) -> ascii::EscapeDefault {
         ascii::escape_default(self)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn is_utf8_char_boundary(self) -> bool {
         // This is bit magic equivalent to: b < 128 || b >= 192
         (self as i8) >= -0x40
@@ -1162,6 +1170,7 @@ impl u16 {
     #[must_use]
     #[unstable(feature = "utf16_extra", issue = "94919")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_utf16_surrogate(self) -> bool {
         matches!(self, 0xD800..=0xDFFF)
     }
@@ -1337,12 +1346,14 @@ impl usize {
 impl usize {
     /// Returns an `usize` where every byte is equal to `x`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn repeat_u8(x: u8) -> usize {
         usize::from_ne_bytes([x; size_of::<usize>()])
     }
 
     /// Returns an `usize` where every byte pair is equal to `x`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn repeat_u16(x: u16) -> usize {
         let mut r = 0usize;
         let mut i = 0;
@@ -1379,6 +1390,7 @@ impl usize {
 /// ```
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub enum FpCategory {
     /// NaN (not a number): this value results from calculations like `(-1.0).sqrt()`.
     ///
@@ -1426,6 +1438,7 @@ pub enum FpCategory {
 #[doc(hidden)]
 #[inline(always)]
 #[unstable(issue = "none", feature = "std_internals")]
+#[ferrocene::prevalidated]
 pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) -> bool {
     radix <= 16 && digits.len() <= size_of::<T>() * 2 - is_signed_ty as usize
 }
@@ -1434,6 +1447,7 @@ pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) 
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 const fn from_ascii_radix_panic(radix: u32) -> ! {
     const_panic!(
         "from_ascii_radix: radix must lie in the range `[2, 36]`",
@@ -1535,7 +1549,8 @@ macro_rules! from_str_int_impl {
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_stable(feature = "const_int_from_str", since = "1.82.0")]
             #[inline]
-            pub const fn from_str_radix(src: &str, radix: u32) -> Result<$int_ty, ParseIntError> {
+            #[ferrocene::prevalidated]
+pub const fn from_str_radix(src: &str, radix: u32) -> Result<$int_ty, ParseIntError> {
                 <$int_ty>::from_ascii_radix(src.as_bytes(), radix)
             }
 
@@ -1615,7 +1630,8 @@ macro_rules! from_str_int_impl {
             /// ```
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
-            pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<$int_ty, ParseIntError> {
+            #[ferrocene::prevalidated]
+pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<$int_ty, ParseIntError> {
                 use self::IntErrorKind::*;
                 use self::ParseIntError as PIE;
 

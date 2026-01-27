@@ -8,10 +8,12 @@ use crate::fmt;
 /// The error type returned when a checked integral type conversion fails.
 #[stable(feature = "try_from", since = "1.34.0")]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub struct TryFromIntError(pub(crate) ());
 
 #[stable(feature = "try_from", since = "1.34.0")]
 impl fmt::Display for TryFromIntError {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         "out of range integral type conversion attempted".fmt(f)
     }
@@ -24,6 +26,7 @@ impl Error for TryFromIntError {}
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const From<Infallible> for TryFromIntError {
+    #[ferrocene::prevalidated]
     fn from(x: Infallible) -> TryFromIntError {
         match x {}
     }
@@ -33,6 +36,7 @@ impl const From<Infallible> for TryFromIntError {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const From<!> for TryFromIntError {
     #[inline]
+    #[ferrocene::prevalidated]
     fn from(never: !) -> TryFromIntError {
         // Match rather than coerce to make sure that code like
         // `From<Infallible> for TryFromIntError` above will keep working
@@ -64,6 +68,7 @@ impl const From<!> for TryFromIntError {
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct ParseIntError {
     pub(super) kind: IntErrorKind,
 }
@@ -82,6 +87,7 @@ pub struct ParseIntError {
 #[stable(feature = "int_error_matching", since = "1.55.0")]
 #[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
 #[non_exhaustive]
+#[ferrocene::prevalidated]
 pub enum IntErrorKind {
     /// Value being parsed is empty.
     ///
@@ -116,6 +122,7 @@ impl ParseIntError {
     #[must_use]
     #[rustc_const_stable(feature = "const_int_from_str", since = "1.82.0")]
     #[stable(feature = "int_error_matching", since = "1.55.0")]
+    #[ferrocene::prevalidated]
     pub const fn kind(&self) -> &IntErrorKind {
         &self.kind
     }
@@ -123,6 +130,7 @@ impl ParseIntError {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Display for ParseIntError {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             IntErrorKind::Empty => "cannot parse integer from empty string",

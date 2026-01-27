@@ -545,6 +545,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
+    #[ferrocene::prevalidated]
     pub const fn is_nan(self) -> bool {
         self != self
     }
@@ -568,6 +569,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_infinite(self) -> bool {
         // Getting clever with transmutation can result in incorrect answers on some FPUs
         // FIXME: alter the Rust <-> Rust calling convention to prevent this problem.
@@ -670,6 +672,7 @@ impl f64 {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn classify(self) -> FpCategory {
         // We used to have complicated logic here that avoids the simple bit-based tests to work
         // around buggy codegen for x87 targets (see
@@ -707,6 +710,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_sign_positive(self) -> bool {
         !self.is_sign_negative()
     }
@@ -716,6 +720,7 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
     #[inline]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     pub fn is_positive(self) -> bool {
         self.is_sign_positive()
     }
@@ -741,6 +746,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_sign_negative(self) -> bool {
         // IEEE754 says: isSignMinus(x) is true if and only if x has negative sign. isSignMinus
         // applies to zeros and NaNs as well.
@@ -752,6 +758,7 @@ impl f64 {
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
     #[inline]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     pub fn is_negative(self) -> bool {
         self.is_sign_negative()
     }
@@ -1136,6 +1143,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[allow(unnecessary_transmutes)]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_bits(self) -> u64 {
         // SAFETY: `u64` is a plain old datatype so we can always transmute to it.
         unsafe { mem::transmute(self) }
@@ -1182,6 +1190,7 @@ impl f64 {
     #[must_use]
     #[inline]
     #[allow(unnecessary_transmutes)]
+    #[ferrocene::prevalidated]
     pub const fn from_bits(v: u64) -> Self {
         // It turns out the safety issues with sNaN were overblown! Hooray!
         // SAFETY: `u64` is a plain old datatype so we can always transmute from it.
@@ -1227,6 +1236,7 @@ impl f64 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_le_bytes(self) -> [u8; 8] {
         self.to_bits().to_le_bytes()
     }
@@ -1301,6 +1311,7 @@ impl f64 {
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn from_le_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_le_bytes(bytes))
     }
@@ -1531,6 +1542,7 @@ impl f64 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn abs(self) -> f64 {
         intrinsics::fabsf64(self)
     }
@@ -1590,6 +1602,7 @@ impl f64 {
     #[stable(feature = "copysign", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn copysign(self, sign: f64) -> f64 {
         intrinsics::copysignf64(self, sign)
     }

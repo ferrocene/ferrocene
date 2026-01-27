@@ -19,6 +19,7 @@ use crate::ops::Try;
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Fuse<I> {
     // NOTE: for `I: FusedIterator`, we never bother setting `None`, but
     // we still have to be prepared for that state due to variance.
@@ -26,10 +27,12 @@ pub struct Fuse<I> {
     iter: Option<I>,
 }
 impl<I> Fuse<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I) -> Fuse<I> {
         Fuse { iter: Some(iter) }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) fn into_inner(self) -> Option<I> {
         self.iter
     }

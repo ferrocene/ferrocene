@@ -27,15 +27,18 @@ use crate::{
 /// for more.
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct FlatMap<I, U: IntoIterator, F> {
     inner: FlattenCompat<Map<I, F>, <U as IntoIterator>::IntoIter>,
 }
 
 impl<I: Iterator, U: IntoIterator, F: FnMut(I::Item) -> U> FlatMap<I, U, F> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, f: F) -> FlatMap<I, U, F> {
         FlatMap { inner: FlattenCompat::new(iter.map(f)) }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) fn into_parts(self) -> (Option<U::IntoIter>, Option<I>, Option<U::IntoIter>) {
         (
             self.inner.frontiter,
@@ -50,6 +53,7 @@ impl<I: Clone, U, F: Clone> Clone for FlatMap<I, U, F>
 where
     U: Clone + IntoIterator<IntoIter: Clone>,
 {
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         FlatMap { inner: self.inner.clone() }
     }
@@ -60,6 +64,7 @@ impl<I: fmt::Debug, U, F> fmt::Debug for FlatMap<I, U, F>
 where
     U: IntoIterator<IntoIter: fmt::Debug>,
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FlatMap").field("inner", &self.inner).finish()
     }
@@ -381,6 +386,7 @@ where
 /// this type.
 #[derive(Clone, Debug)]
 #[unstable(feature = "trusted_len", issue = "37572")]
+#[ferrocene::prevalidated]
 struct FlattenCompat<I, U> {
     iter: Fuse<I>,
     frontiter: Option<U>,
@@ -391,6 +397,7 @@ where
     I: Iterator,
 {
     /// Adapts an iterator by flattening it, for use in `flatten()` and `flat_map()`.
+    #[ferrocene::prevalidated]
     fn new(iter: I) -> FlattenCompat<I, U> {
         FlattenCompat { iter: iter.fuse(), frontiter: None, backiter: None }
     }

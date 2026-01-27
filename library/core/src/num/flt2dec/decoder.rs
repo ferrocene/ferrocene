@@ -11,6 +11,7 @@ use crate::num::dec2flt::float::RawFloat;
 ///   round to the original value. The range is inclusive only when
 ///   `inclusive` is `true`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub struct Decoded {
     /// The scaled mantissa.
     pub mant: u64,
@@ -28,6 +29,7 @@ pub struct Decoded {
 
 /// Decoded unsigned value.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub enum FullDecoded {
     /// Not-a-number.
     Nan,
@@ -47,18 +49,21 @@ pub trait DecodableFloat: RawFloat + Copy {
 
 #[cfg(target_has_reliable_f16)]
 impl DecodableFloat for f16 {
+    #[ferrocene::prevalidated]
     fn min_pos_norm_value() -> Self {
         f16::MIN_POSITIVE
     }
 }
 
 impl DecodableFloat for f32 {
+    #[ferrocene::prevalidated]
     fn min_pos_norm_value() -> Self {
         f32::MIN_POSITIVE
     }
 }
 
 impl DecodableFloat for f64 {
+    #[ferrocene::prevalidated]
     fn min_pos_norm_value() -> Self {
         f64::MIN_POSITIVE
     }
@@ -66,6 +71,7 @@ impl DecodableFloat for f64 {
 
 /// Returns a sign (true when negative) and `FullDecoded` value
 /// from given floating point number.
+#[ferrocene::prevalidated]
 pub fn decode<T: DecodableFloat>(v: T) -> (/*negative?*/ bool, FullDecoded) {
     let (mant, exp, sign) = v.integer_decode();
     let even = (mant & 1) == 0;

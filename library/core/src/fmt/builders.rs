@@ -2,22 +2,26 @@
 
 use crate::fmt::{self, Debug, Formatter};
 
+#[ferrocene::prevalidated]
 struct PadAdapter<'buf, 'state> {
     buf: &'buf mut (dyn fmt::Write + 'buf),
     state: &'state mut PadAdapterState,
 }
 
+#[ferrocene::prevalidated]
 struct PadAdapterState {
     on_newline: bool,
 }
 
 impl Default for PadAdapterState {
+    #[ferrocene::prevalidated]
     fn default() -> Self {
         PadAdapterState { on_newline: true }
     }
 }
 
 impl<'buf, 'state> PadAdapter<'buf, 'state> {
+    #[ferrocene::prevalidated]
     fn wrap<'slot, 'fmt: 'buf + 'slot>(
         fmt: &'fmt mut fmt::Formatter<'_>,
         slot: &'slot mut Option<Self>,
@@ -28,6 +32,7 @@ impl<'buf, 'state> PadAdapter<'buf, 'state> {
 }
 
 impl fmt::Write for PadAdapter<'_, '_> {
+    #[ferrocene::prevalidated]
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for s in s.split_inclusive('\n') {
             if self.state.on_newline {
@@ -41,6 +46,7 @@ impl fmt::Write for PadAdapter<'_, '_> {
         Ok(())
     }
 
+    #[ferrocene::prevalidated]
     fn write_char(&mut self, c: char) -> fmt::Result {
         if self.state.on_newline {
             self.buf.write_str("    ")?;
@@ -85,12 +91,14 @@ impl fmt::Write for PadAdapter<'_, '_> {
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
 #[rustc_diagnostic_item = "DebugStruct"]
+#[ferrocene::prevalidated]
 pub struct DebugStruct<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
     has_fields: bool,
 }
 
+#[ferrocene::prevalidated]
 pub(super) fn debug_struct_new<'a, 'b>(
     fmt: &'a mut fmt::Formatter<'b>,
     name: &str,
@@ -129,6 +137,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn field(&mut self, name: &str, value: &dyn fmt::Debug) -> &mut Self {
         self.field_with(name, |f| value.fmt(f))
     }
@@ -138,6 +147,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     /// This method is equivalent to [`DebugStruct::field`], but formats the
     /// value using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn field_with<F>(&mut self, name: &str, value_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -194,6 +204,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_non_exhaustive", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub fn finish_non_exhaustive(&mut self) -> fmt::Result {
         self.result = self.result.and_then(|_| {
             if self.has_fields {
@@ -241,6 +252,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn finish(&mut self) -> fmt::Result {
         if self.has_fields {
             self.result = self.result.and_then(|_| {
@@ -250,6 +262,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
         self.result
     }
 
+    #[ferrocene::prevalidated]
     fn is_pretty(&self) -> bool {
         self.fmt.alternate()
     }
@@ -286,6 +299,7 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[ferrocene::prevalidated]
 pub struct DebugTuple<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -293,6 +307,7 @@ pub struct DebugTuple<'a, 'b: 'a> {
     empty_name: bool,
 }
 
+#[ferrocene::prevalidated]
 pub(super) fn debug_tuple_new<'a, 'b>(
     fmt: &'a mut fmt::Formatter<'b>,
     name: &str,
@@ -326,6 +341,7 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn field(&mut self, value: &dyn fmt::Debug) -> &mut Self {
         self.field_with(|f| value.fmt(f))
     }
@@ -335,6 +351,7 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// This method is equivalent to [`DebugTuple::field`], but formats the
     /// value using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn field_with<F>(&mut self, value_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -384,6 +401,7 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_more_non_exhaustive", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub fn finish_non_exhaustive(&mut self) -> fmt::Result {
         self.result = self.result.and_then(|_| {
             if self.fields > 0 {
@@ -428,6 +446,7 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn finish(&mut self) -> fmt::Result {
         if self.fields > 0 {
             self.result = self.result.and_then(|_| {
@@ -440,12 +459,14 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
         self.result
     }
 
+    #[ferrocene::prevalidated]
     fn is_pretty(&self) -> bool {
         self.fmt.alternate()
     }
 }
 
 /// A helper used to print list-like items with no special formatting.
+#[ferrocene::prevalidated]
 struct DebugInner<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -453,6 +474,7 @@ struct DebugInner<'a, 'b: 'a> {
 }
 
 impl<'a, 'b: 'a> DebugInner<'a, 'b> {
+    #[ferrocene::prevalidated]
     fn entry_with<F>(&mut self, entry_fmt: F)
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -478,6 +500,7 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
         self.has_fields = true;
     }
 
+    #[ferrocene::prevalidated]
     fn is_pretty(&self) -> bool {
         self.fmt.alternate()
     }
@@ -511,10 +534,12 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[ferrocene::prevalidated]
 pub struct DebugSet<'a, 'b: 'a> {
     inner: DebugInner<'a, 'b>,
 }
 
+#[ferrocene::prevalidated]
 pub(super) fn debug_set_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugSet<'a, 'b> {
     let result = fmt.write_str("{");
     DebugSet { inner: DebugInner { fmt, result, has_fields: false } }
@@ -545,6 +570,7 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn entry(&mut self, entry: &dyn fmt::Debug) -> &mut Self {
         self.inner.entry_with(|f| entry.fmt(f));
         self
@@ -555,6 +581,7 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// This method is equivalent to [`DebugSet::entry`], but formats the
     /// entry using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn entry_with<F>(&mut self, entry_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -587,6 +614,7 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn entries<D, I>(&mut self, entries: I) -> &mut Self
     where
         D: fmt::Debug,
@@ -627,6 +655,7 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_more_non_exhaustive", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub fn finish_non_exhaustive(&mut self) -> fmt::Result {
         self.inner.result = self.inner.result.and_then(|_| {
             if self.inner.has_fields {
@@ -669,6 +698,7 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn finish(&mut self) -> fmt::Result {
         self.inner.result = self.inner.result.and_then(|_| self.inner.fmt.write_str("}"));
         self.inner.result
@@ -703,10 +733,12 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[ferrocene::prevalidated]
 pub struct DebugList<'a, 'b: 'a> {
     inner: DebugInner<'a, 'b>,
 }
 
+#[ferrocene::prevalidated]
 pub(super) fn debug_list_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugList<'a, 'b> {
     let result = fmt.write_str("[");
     DebugList { inner: DebugInner { fmt, result, has_fields: false } }
@@ -737,6 +769,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn entry(&mut self, entry: &dyn fmt::Debug) -> &mut Self {
         self.inner.entry_with(|f| entry.fmt(f));
         self
@@ -747,6 +780,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// This method is equivalent to [`DebugList::entry`], but formats the
     /// entry using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn entry_with<F>(&mut self, entry_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -779,6 +813,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn entries<D, I>(&mut self, entries: I) -> &mut Self
     where
         D: fmt::Debug,
@@ -819,6 +854,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_more_non_exhaustive", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub fn finish_non_exhaustive(&mut self) -> fmt::Result {
         self.inner.result.and_then(|_| {
             if self.inner.has_fields {
@@ -860,6 +896,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn finish(&mut self) -> fmt::Result {
         self.inner.result = self.inner.result.and_then(|_| self.inner.fmt.write_str("]"));
         self.inner.result
@@ -894,6 +931,7 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
 #[must_use = "must eventually call `finish()` on Debug builders"]
 #[allow(missing_debug_implementations)]
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[ferrocene::prevalidated]
 pub struct DebugMap<'a, 'b: 'a> {
     fmt: &'a mut fmt::Formatter<'b>,
     result: fmt::Result,
@@ -903,6 +941,7 @@ pub struct DebugMap<'a, 'b: 'a> {
     state: PadAdapterState,
 }
 
+#[ferrocene::prevalidated]
 pub(super) fn debug_map_new<'a, 'b>(fmt: &'a mut fmt::Formatter<'b>) -> DebugMap<'a, 'b> {
     let result = fmt.write_str("{");
     DebugMap { fmt, result, has_fields: false, has_key: false, state: Default::default() }
@@ -932,6 +971,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn entry(&mut self, key: &dyn fmt::Debug, value: &dyn fmt::Debug) -> &mut Self {
         self.key(key).value(value)
     }
@@ -968,6 +1008,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_map_key_value", since = "1.42.0")]
+    #[ferrocene::prevalidated]
     pub fn key(&mut self, key: &dyn fmt::Debug) -> &mut Self {
         self.key_with(|f| key.fmt(f))
     }
@@ -977,6 +1018,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// This method is equivalent to [`DebugMap::key`], but formats the
     /// key using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn key_with<F>(&mut self, key_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -1044,6 +1086,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_map_key_value", since = "1.42.0")]
+    #[ferrocene::prevalidated]
     pub fn value(&mut self, value: &dyn fmt::Debug) -> &mut Self {
         self.value_with(|f| value.fmt(f))
     }
@@ -1053,6 +1096,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// This method is equivalent to [`DebugMap::value`], but formats the
     /// value using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn value_with<F>(&mut self, value_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -1102,6 +1146,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn entries<K, V, I>(&mut self, entries: I) -> &mut Self
     where
         K: fmt::Debug,
@@ -1147,6 +1192,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_more_non_exhaustive", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub fn finish_non_exhaustive(&mut self) -> fmt::Result {
         self.result = self.result.and_then(|_| {
             assert!(!self.has_key, "attempted to finish a map with a partial entry");
@@ -1196,6 +1242,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn finish(&mut self) -> fmt::Result {
         self.result = self.result.and_then(|_| {
             assert!(!self.has_key, "attempted to finish a map with a partial entry");
@@ -1205,6 +1252,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
         self.result
     }
 
+    #[ferrocene::prevalidated]
     fn is_pretty(&self) -> bool {
         self.fmt.alternate()
     }
@@ -1229,6 +1277,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
 #[rustc_const_stable(feature = "const_fmt_from_fn", since = "CURRENT_RUSTC_VERSION")]
 #[must_use = "returns a type implementing Debug and Display, which do not have any effects unless they are used"]
+#[ferrocene::prevalidated]
 pub const fn from_fn<F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result>(f: F) -> FromFn<F> {
     FromFn(f)
 }
@@ -1237,6 +1286,7 @@ pub const fn from_fn<F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result>(f: F) -> Fro
 ///
 /// Created with [`from_fn`].
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
+#[ferrocene::prevalidated]
 pub struct FromFn<F>(F);
 
 #[stable(feature = "fmt_from_fn", since = "1.93.0")]
@@ -1244,6 +1294,7 @@ impl<F> fmt::Debug for FromFn<F>
 where
     F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         (self.0)(f)
     }
@@ -1254,6 +1305,7 @@ impl<F> fmt::Display for FromFn<F>
 where
     F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         (self.0)(f)
     }

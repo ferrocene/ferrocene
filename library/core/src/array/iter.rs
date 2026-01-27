@@ -28,16 +28,19 @@ type InnerUnsized<T> = iter_inner::PolymorphicIter<[MaybeUninit<T>]>;
 #[rustc_insignificant_dtor]
 #[rustc_diagnostic_item = "ArrayIntoIter"]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct IntoIter<T, const N: usize> {
     inner: ManuallyDrop<InnerSized<T, N>>,
 }
 
 impl<T, const N: usize> IntoIter<T, N> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn unsize(&self) -> &InnerUnsized<T> {
         self.inner.deref()
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn unsize_mut(&mut self) -> &mut InnerUnsized<T> {
         self.inner.deref_mut()
     }
@@ -62,6 +65,7 @@ impl<T, const N: usize> IntoIterator for [T; N] {
     ///
     /// [array]: prim@array
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> Self::IntoIter {
         // SAFETY: The transmute here is actually safe. The docs of `MaybeUninit`
         // promise:
@@ -249,16 +253,19 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     type Item = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Self::Item> {
         self.unsize_mut().next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.unsize().size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -267,6 +274,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -277,16 +285,19 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_by(n)
     }
@@ -305,11 +316,13 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
 impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.unsize_mut().next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn rfold<Acc, Fold>(mut self, init: Acc, rfold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -318,6 +331,7 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -328,6 +342,7 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_back_by(n)
     }
@@ -343,6 +358,7 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
 //   removed by earlier optimization passes.
 impl<T, const N: usize> Drop for IntoIter<T, N> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         if crate::mem::needs_drop::<T>() {
             // SAFETY: This is the only place where we drop this field.
@@ -354,10 +370,12 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
 impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         self.inner.len()
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.inner.len() == 0
     }
@@ -399,6 +417,7 @@ where
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for IntoIter<T, N> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.unsize().fmt(f)
     }

@@ -32,7 +32,8 @@ macro_rules! int {
     ($($ty:ty),+) => {
         $(
             impl CastInto<i16> for $ty {
-                fn cast(self) -> i16 {
+                #[ferrocene::prevalidated]
+fn cast(self) -> i16 {
                     self as i16
                 }
             }
@@ -197,6 +198,7 @@ pub trait RawFloat:
     /// with the explicit bit set but otherwise unshifted
     ///
     /// `s` is only ever +/-1.
+    #[ferrocene::prevalidated]
     fn integer_decode(self) -> (u64, i16, i8) {
         let bits = self.to_bits();
         let sign: i8 = if bits >> (Self::BITS - 1) == Self::Int::ZERO { 1 } else { -1 };
@@ -214,6 +216,7 @@ pub trait RawFloat:
 
 /// Solve for `b` in `10^b = 2^a`
 #[ferrocene::annotation("This function is only being used in constants and cannot be covered")]
+#[ferrocene::prevalidated]
 const fn pow2_to_pow10(a: i64) -> i64 {
     let res = (a as f64) / f64::consts::LOG2_10;
     res as i64
@@ -238,26 +241,31 @@ impl RawFloat for f16 {
     const SMALLEST_POWER_OF_TEN: i32 = -27;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_u64(v: u64) -> Self {
         debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
         v as _
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_u64_bits(v: u64) -> Self {
         Self::from_bits((v & 0xFFFF) as u16)
     }
 
+    #[ferrocene::prevalidated]
     fn pow10_fast_path(exponent: usize) -> Self {
         #[allow(clippy::use_self)]
         const TABLE: [f16; 8] = [1e0, 1e1, 1e2, 1e3, 1e4, 0.0, 0.0, 0.];
         TABLE[exponent & 7]
     }
 
+    #[ferrocene::prevalidated]
     fn to_bits(self) -> Self::Int {
         self.to_bits()
     }
 
+    #[ferrocene::prevalidated]
     fn classify(self) -> FpCategory {
         self.classify()
     }
@@ -281,16 +289,19 @@ impl RawFloat for f32 {
     const SMALLEST_POWER_OF_TEN: i32 = -65;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_u64(v: u64) -> Self {
         debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
         v as _
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_u64_bits(v: u64) -> Self {
         f32::from_bits((v & 0xFFFFFFFF) as u32)
     }
 
+    #[ferrocene::prevalidated]
     fn pow10_fast_path(exponent: usize) -> Self {
         #[allow(clippy::use_self)]
         const TABLE: [f32; 16] =
@@ -298,10 +309,12 @@ impl RawFloat for f32 {
         TABLE[exponent & 15]
     }
 
+    #[ferrocene::prevalidated]
     fn to_bits(self) -> Self::Int {
         self.to_bits()
     }
 
+    #[ferrocene::prevalidated]
     fn classify(self) -> FpCategory {
         self.classify()
     }
@@ -325,16 +338,19 @@ impl RawFloat for f64 {
     const SMALLEST_POWER_OF_TEN: i32 = -342;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_u64(v: u64) -> Self {
         debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
         v as _
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_u64_bits(v: u64) -> Self {
         f64::from_bits(v)
     }
 
+    #[ferrocene::prevalidated]
     fn pow10_fast_path(exponent: usize) -> Self {
         const TABLE: [f64; 32] = [
             1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
@@ -343,10 +359,12 @@ impl RawFloat for f64 {
         TABLE[exponent & 31]
     }
 
+    #[ferrocene::prevalidated]
     fn to_bits(self) -> Self::Int {
         self.to_bits()
     }
 
+    #[ferrocene::prevalidated]
     fn classify(self) -> FpCategory {
         self.classify()
     }

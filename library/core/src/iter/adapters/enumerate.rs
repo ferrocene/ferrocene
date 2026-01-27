@@ -18,11 +18,13 @@ use crate::ops::Try;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Enumerate"]
+#[ferrocene::prevalidated]
 pub struct Enumerate<I> {
     iter: I,
     count: usize,
 }
 impl<I> Enumerate<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I) -> Enumerate<I> {
         Enumerate { iter, count: 0 }
     }
@@ -80,6 +82,7 @@ where
     /// Might panic if the index of the element overflows a `usize`.
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<(usize, <I as Iterator>::Item)> {
         let a = self.iter.next()?;
         let i = self.count;
@@ -88,12 +91,14 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<(usize, I::Item)> {
         let a = self.iter.nth(n)?;
         let i = self.count + n;
@@ -102,11 +107,13 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.iter.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -114,6 +121,7 @@ where
         R: Try<Output = Acc>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn enumerate<'a, T, Acc, R>(
             count: &'a mut usize,
             mut fold: impl FnMut(Acc, (usize, T)) -> R + 'a,
@@ -130,11 +138,13 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn enumerate<T, Acc>(
             mut count: usize,
             mut fold: impl FnMut(Acc, (usize, T)) -> Acc,
@@ -152,6 +162,7 @@ where
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let remaining = self.iter.advance_by(n);
         let advanced = match remaining {

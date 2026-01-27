@@ -340,20 +340,24 @@ impl fmt::Display for EscapeDefault {
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
 impl EscapeDebug {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn printable(chr: char) -> Self {
         Self(EscapeIterInner::printable(chr))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn backslash(c: ascii::Char) -> Self {
         Self(EscapeIterInner::backslash(c))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn unicode(c: char) -> Self {
         Self(EscapeIterInner::unicode(c))
     }
@@ -364,17 +368,20 @@ impl Iterator for EscapeDebug {
     type Item = char;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<char> {
         self.0.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.len();
         (n, Some(n))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
@@ -382,6 +389,7 @@ impl Iterator for EscapeDebug {
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 impl ExactSizeIterator for EscapeDebug {
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         self.0.len()
     }
@@ -394,6 +402,7 @@ impl FusedIterator for EscapeDebug {}
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 impl fmt::Display for EscapeDebug {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.0, f)
     }

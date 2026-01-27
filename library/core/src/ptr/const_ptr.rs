@@ -26,6 +26,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_diagnostic_item = "ptr_const_is_null"]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_eval_select)]
+    #[ferrocene::prevalidated]
     pub const fn is_null(self) -> bool {
         // Compare via a cast to a thin pointer, so fat pointers are only
         // considering their "data" part for null-ness.
@@ -52,6 +53,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_cast", since = "1.38.0")]
     #[rustc_diagnostic_item = "const_ptr_cast"]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn cast<U>(self) -> *const U {
         self as _
     }
@@ -78,6 +80,7 @@ impl<T: PointeeSized> *const T {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn try_cast_aligned<U>(self) -> Option<*const U> {
         if self.is_aligned_to(align_of::<U>()) { Some(self.cast()) } else { None }
     }
@@ -134,6 +137,7 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: PointeeSized,
@@ -158,6 +162,7 @@ impl<T: PointeeSized> *const T {
     #[must_use]
     #[inline(always)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[ferrocene::prevalidated]
     pub fn addr(self) -> usize {
         // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
         // address without exposing the provenance. Note that this is *not* a stable guarantee about
@@ -191,6 +196,7 @@ impl<T: PointeeSized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
+    #[ferrocene::prevalidated]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -239,6 +245,7 @@ impl<T: PointeeSized> *const T {
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }
@@ -359,12 +366,14 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,
     {
         #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_offset_nowrap(this: *const (), count: isize, size: usize) -> bool {
             // We can use const_eval_select here because this is only for UB checks.
             const_eval_select!(
@@ -474,6 +483,7 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -716,11 +726,13 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
     {
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_ptr_ge(this: *const (), origin: *const ()) -> bool {
             const_eval_select!(
                 @capture { this: *const (), origin: *const () } -> bool:
@@ -787,6 +799,7 @@ impl<T: PointeeSized> *const T {
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn guaranteed_eq(self, other: *const T) -> Option<bool>
     where
         T: Sized,
@@ -849,6 +862,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -856,6 +870,7 @@ impl<T: PointeeSized> *const T {
         #[cfg(debug_assertions)]
         #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_add_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
                 @capture { this: *const (), count: usize, size: usize } -> bool:
@@ -901,6 +916,7 @@ impl<T: PointeeSized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
@@ -1075,6 +1091,7 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1191,6 +1208,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1233,6 +1251,7 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1322,6 +1341,7 @@ impl<T: PointeeSized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "align_offset", since = "1.36.0")]
+    #[ferrocene::prevalidated]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1401,6 +1421,7 @@ impl<T: PointeeSized> *const T {
     #[must_use]
     #[inline]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
+    #[ferrocene::prevalidated]
     pub fn is_aligned_to(self, align: usize) -> bool {
         if !align.is_power_of_two() {
             panic!("is_aligned_to: align is not a power-of-two");
@@ -1491,6 +1512,7 @@ impl<T> *const [T] {
     #[inline]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub const fn len(self) -> usize {
         metadata(self)
     }
@@ -1508,6 +1530,7 @@ impl<T> *const [T] {
     #[inline(always)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_empty(self) -> bool {
         self.len() == 0
     }
@@ -1527,6 +1550,7 @@ impl<T> *const [T] {
     /// ```
     #[inline]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[ferrocene::prevalidated]
     pub const fn as_ptr(self) -> *const T {
         self as *const T
     }
@@ -1538,6 +1562,7 @@ impl<T> *const [T] {
     #[rustc_const_stable(feature = "core_slice_as_array", since = "1.93.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_array<const N: usize>(self) -> Option<*const [T; N]> {
         if self.len() == N {
             let me = self.as_ptr() as *const [T; N];
@@ -1596,6 +1621,7 @@ impl<T> *const T {
     /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
     #[inline]
     #[unstable(feature = "ptr_cast_array", issue = "144514")]
+    #[ferrocene::prevalidated]
     pub const fn cast_array<const N: usize>(self) -> *const [T; N] {
         self.cast()
     }
@@ -1649,6 +1675,7 @@ impl<T, const N: usize> *const [T; N] {
 impl<T: PointeeSized> PartialEq for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &*const T) -> bool {
         *self == *other
     }
@@ -1671,6 +1698,7 @@ impl<T: PointeeSized> Eq for *const T {}
 impl<T: PointeeSized> Ord for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn cmp(&self, other: &*const T) -> Ordering {
         if self < other {
             Less
@@ -1691,30 +1719,35 @@ impl<T: PointeeSized> Ord for *const T {
 impl<T: PointeeSized> PartialOrd for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn partial_cmp(&self, other: &*const T) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn lt(&self, other: &*const T) -> bool {
         *self < *other
     }
 
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn le(&self, other: &*const T) -> bool {
         *self <= *other
     }
 
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn gt(&self, other: &*const T) -> bool {
         *self > *other
     }
 
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn ge(&self, other: &*const T) -> bool {
         *self >= *other
     }

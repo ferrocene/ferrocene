@@ -92,6 +92,7 @@ use crate::{
 #[rustc_layout_scalar_valid_range_start(1)]
 #[rustc_nonnull_optimization_guaranteed]
 #[rustc_diagnostic_item = "NonNull"]
+#[ferrocene::prevalidated]
 pub struct NonNull<T: PointeeSized> {
     // Remember to use `.as_ptr()` instead of `.pointer`, as field projecting to
     // this is banned by <https://github.com/rust-lang/compiler-team/issues/807>.
@@ -222,6 +223,7 @@ impl<T: Sized> NonNull<T> {
     /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
     #[inline]
     #[unstable(feature = "ptr_cast_array", issue = "144514")]
+    #[ferrocene::prevalidated]
     pub const fn cast_array<const N: usize>(self) -> NonNull<[T; N]> {
         self.cast()
     }
@@ -255,6 +257,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_new_unchecked", since = "1.25.0")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         // SAFETY: the caller must guarantee that `ptr` is non-null.
         unsafe {
@@ -305,6 +308,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "non_null_from_ref", since = "1.89.0")]
     #[rustc_const_stable(feature = "non_null_from_ref", since = "1.89.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn from_ref(r: &T) -> Self {
         // SAFETY: A reference cannot be null.
         unsafe { NonNull { pointer: r as *const T } }
@@ -314,6 +318,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "non_null_from_ref", since = "1.89.0")]
     #[rustc_const_stable(feature = "non_null_from_ref", since = "1.89.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn from_mut(r: &mut T) -> Self {
         // SAFETY: A mutable reference cannot be null.
         unsafe { NonNull { pointer: r as *mut T } }
@@ -430,6 +435,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[rustc_never_returns_null_ptr]
     #[must_use]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn as_ptr(self) -> *mut T {
         // This is a transmute for the same reasons as `NonZero::get`.
 
@@ -469,6 +475,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_as_ref", since = "1.73.0")]
     #[must_use]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn as_ref<'a>(&self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -507,6 +514,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[rustc_const_stable(feature = "const_ptr_as_ref", since = "1.83.0")]
     #[must_use]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn as_mut<'a>(&mut self) -> &'a mut T {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a mutable reference.
@@ -531,6 +539,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn cast<U>(self) -> NonNull<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
         unsafe { NonNull { pointer: self.as_ptr() as *mut U } }
@@ -605,6 +614,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn offset(self, count: isize) -> Self
     where
         T: Sized,
@@ -682,6 +692,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -760,6 +771,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -983,6 +995,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn offset_from_unsigned(self, subtracted: NonNull<T>) -> usize
     where
         T: Sized,
@@ -1021,6 +1034,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1732,6 +1746,7 @@ impl<T> NonNull<[T]> {
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> Clone for NonNull<T> {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         *self
     }
@@ -1758,6 +1773,7 @@ unsafe impl<T: PointeeSized> PinCoerceUnsized for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> fmt::Debug for NonNull<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
     }
@@ -1765,6 +1781,7 @@ impl<T: PointeeSized> fmt::Debug for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> fmt::Pointer for NonNull<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
     }
@@ -1778,6 +1795,7 @@ impl<T: PointeeSized> Eq for NonNull<T> {}
 impl<T: PointeeSized> PartialEq for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         self.as_ptr() == other.as_ptr()
     }
@@ -1829,6 +1847,7 @@ impl<T: PointeeSized> const From<&mut T> for NonNull<T> {
     ///
     /// This conversion is safe and infallible since references cannot be null.
     #[inline]
+    #[ferrocene::prevalidated]
     fn from(r: &mut T) -> Self {
         NonNull::from_mut(r)
     }

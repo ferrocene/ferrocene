@@ -62,6 +62,7 @@ pub use self::primitives::{c_ptrdiff_t, c_size_t, c_ssize_t};
 #[lang = "c_void"]
 #[repr(u8)]
 #[stable(feature = "core_c_void", since = "1.30.0")]
+#[ferrocene::prevalidated]
 pub enum c_void {
     #[unstable(
         feature = "c_void_variant",
@@ -81,6 +82,7 @@ pub enum c_void {
 
 #[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for c_void {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("c_void").finish()
     }

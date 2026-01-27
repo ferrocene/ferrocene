@@ -37,6 +37,7 @@ use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, mem::Siz
 #[stable(feature = "alloc_layout", since = "1.28.0")]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[lang = "alloc_layout"]
+#[ferrocene::prevalidated]
 pub struct Layout {
     // size of the requested block of memory, measured in bytes.
     size: usize,
@@ -77,16 +78,19 @@ impl Layout {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn is_size_align_valid(size: usize, align: usize) -> bool {
         let Some(alignment) = Alignment::new(align) else { return false };
         Self::is_size_alignment_valid(size, alignment)
     }
 
+    #[ferrocene::prevalidated]
     const fn is_size_alignment_valid(size: usize, alignment: Alignment) -> bool {
         size <= Self::max_size_for_alignment(alignment)
     }
 
     #[inline(always)]
+    #[ferrocene::prevalidated]
     const fn max_size_for_alignment(alignment: Alignment) -> usize {
         // (power-of-two implies align != 0.)
 
@@ -141,6 +145,7 @@ impl Layout {
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_size_align_unchecked(size: usize, align: usize) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -165,6 +170,7 @@ impl Layout {
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_size_alignment_unchecked(size: usize, alignment: Alignment) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -184,6 +190,7 @@ impl Layout {
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn size(&self) -> usize {
         self.size
     }
@@ -196,6 +203,7 @@ impl Layout {
     #[must_use = "this returns the minimum alignment, \
                   without modifying the layout"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn align(&self) -> usize {
         self.align.as_usize()
     }
@@ -216,6 +224,7 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_const_new", since = "1.42.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new<T>() -> Self {
         <T as SizedTypeProperties>::LAYOUT
     }

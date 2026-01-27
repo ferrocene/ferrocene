@@ -17,6 +17,7 @@ use crate::ops::{ControlFlow, Try};
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct TakeWhile<I, P> {
     iter: I,
     flag: bool,
@@ -24,6 +25,7 @@ pub struct TakeWhile<I, P> {
 }
 
 impl<I, P> TakeWhile<I, P> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, predicate: P) -> TakeWhile<I, P> {
         TakeWhile { iter, flag: false, predicate }
     }
@@ -31,6 +33,7 @@ impl<I, P> TakeWhile<I, P> {
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<I: fmt::Debug, P> fmt::Debug for TakeWhile<I, P> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TakeWhile").field("iter", &self.iter).field("flag", &self.flag).finish()
     }
@@ -44,6 +47,7 @@ where
     type Item = I::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<I::Item> {
         if self.flag {
             None
@@ -59,6 +63,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.flag {
             (0, Some(0))
@@ -69,12 +74,14 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
+        #[ferrocene::prevalidated]
         fn check<'a, T, Acc, R: Try<Output = Acc>>(
             flag: &'a mut bool,
             p: &'a mut impl FnMut(&T) -> bool,

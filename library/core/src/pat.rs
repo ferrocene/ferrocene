@@ -47,7 +47,8 @@ macro_rules! impl_range_pat {
             impl const RangePattern for $ty {
                 const MIN: $ty = <$ty>::MIN;
                 const MAX: $ty = <$ty>::MAX;
-                fn sub_one(self) -> Self {
+                #[ferrocene::prevalidated]
+fn sub_one(self) -> Self {
                     match self.checked_sub(1) {
                         Some(val) => val,
                         None => panic!("exclusive range end at minimum value of type")

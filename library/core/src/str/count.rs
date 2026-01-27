@@ -24,6 +24,7 @@ const USIZE_SIZE: usize = size_of::<usize>();
 const UNROLL_INNER: usize = 4;
 
 #[inline]
+#[ferrocene::prevalidated]
 pub(super) fn count_chars(s: &str) -> usize {
     if cfg!(feature = "optimize_for_size") || s.len() < USIZE_SIZE * UNROLL_INNER {
         // Avoid entering the optimized implementation for strings where the
@@ -36,6 +37,7 @@ pub(super) fn count_chars(s: &str) -> usize {
     }
 }
 
+#[ferrocene::prevalidated]
 fn do_count_chars(s: &str) -> usize {
     // For correctness, `CHUNK_SIZE` must be:
     //
@@ -112,6 +114,7 @@ fn do_count_chars(s: &str) -> usize {
 // false), and bytes which are non-continuation bytes are left as `0x01` (e.g.
 // true)
 #[inline]
+#[ferrocene::prevalidated]
 fn contains_non_continuation_byte(w: usize) -> usize {
     const LSB: usize = usize::repeat_u8(0x01);
     ((!w >> 7) | (w >> 6)) & LSB
@@ -120,6 +123,7 @@ fn contains_non_continuation_byte(w: usize) -> usize {
 // Morally equivalent to `values.to_ne_bytes().into_iter().sum::<usize>()`, but
 // more efficient.
 #[inline]
+#[ferrocene::prevalidated]
 fn sum_bytes_in_usize(values: usize) -> usize {
     const LSB_SHORTS: usize = usize::repeat_u16(0x0001);
     const SKIP_BYTES: usize = usize::repeat_u16(0x00ff);
@@ -132,6 +136,7 @@ fn sum_bytes_in_usize(values: usize) -> usize {
 // bytes in the string which are not continuation bytes", and is used for the
 // head and tail of the input string (the first and last item in the tuple
 // returned by `slice::align_to`).
+#[ferrocene::prevalidated]
 fn char_count_general_case(s: &[u8]) -> usize {
     s.iter().filter(|&&byte| !super::validations::utf8_is_cont_byte(byte)).count()
 }

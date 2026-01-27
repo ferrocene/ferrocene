@@ -77,6 +77,7 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 /// risk of leaking that to stable code.
 #[allow(missing_docs)]
 #[derive(Debug, ConstParamTy, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub enum AtomicOrdering {
     // These values must match the compiler's `AtomicOrdering` defined in
     // `rustc_middle/src/ty/consts/int.rs`!
@@ -410,6 +411,7 @@ pub const unsafe fn unreachable() -> !;
 #[ferrocene::annotation(
     "Cannot be covered, since the purpose of the function is to never receive a `b` that is `false`, and if it does it will kill the process."
 )]
+#[ferrocene::prevalidated]
 pub const unsafe fn assume(b: bool) {
     if !b {
         // SAFETY: the caller must guarantee the argument is never `false`
@@ -429,6 +431,7 @@ pub const unsafe fn assume(b: bool) {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
+#[ferrocene::prevalidated]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.
@@ -445,6 +448,7 @@ pub const fn cold_path() {}
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
 #[inline(always)]
+#[ferrocene::prevalidated]
 pub const fn likely(b: bool) -> bool {
     if b {
         true
@@ -468,6 +472,7 @@ pub const fn likely(b: bool) -> bool {
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
 #[inline(always)]
+#[ferrocene::prevalidated]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();
@@ -497,6 +502,7 @@ pub const fn unlikely(b: bool) -> bool {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[inline]
+#[ferrocene::prevalidated]
 pub const fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
     if b {
         forget(false_val);
@@ -1947,6 +1953,7 @@ pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering
 #[ferrocene::annotation(
     "This function only redirects to `intrinsics::fallback::DisjointBitOr::disjoint_bitor` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
 )]
+#[ferrocene::prevalidated]
 pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: T) -> T {
     // SAFETY: same preconditions as this function.
     unsafe { fallback::DisjointBitOr::disjoint_bitor(a, b) }
@@ -2016,6 +2023,7 @@ pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn carrying_mul_add<T: [const] fallback::CarryingMulAdd<Unsigned = U>, U>(
     multiplier: T,
     multiplicand: T,
@@ -2121,6 +2129,7 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic]
 #[rustc_allow_const_fn_unstable(const_trait_impl, funnel_shifts)]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
     // Make sure to call the intrinsic for `funnel_shl`, not the fallback impl.
     // SAFETY: we modulo `shift` so that the result is definitely less than the size of
@@ -2143,6 +2152,7 @@ pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> 
 #[rustc_intrinsic]
 #[rustc_allow_const_fn_unstable(const_trait_impl, funnel_shifts)]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
     // Make sure to call the intrinsic for `funnel_shr`, not the fallback impl.
     // SAFETY: we modulo `shift` so that the result is definitely less than the size of
@@ -2243,6 +2253,7 @@ pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 #[ferrocene::annotation(
     "This function only redirects to `intrinsics::fallback::FunnelShift::unchecked_funnel_shl` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
 )]
+#[ferrocene::prevalidated]
 pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
     a: T,
     b: T,
@@ -2274,6 +2285,7 @@ pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
 #[ferrocene::annotation(
     "This function only redirects to `intrinsics::fallback::FunnelShift::unchecked_funnel_shr` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
 )]
+#[ferrocene::prevalidated]
 pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
     a: T,
     b: T,
@@ -2292,6 +2304,7 @@ pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
 #[rustc_const_unstable(feature = "uint_carryless_mul", issue = "152080")]
 #[unstable(feature = "uint_carryless_mul", issue = "152080")]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn carryless_mul<T: [const] fallback::CarrylessMul>(a: T, b: T) -> T {
     a.carryless_mul(b)
 }
@@ -2391,6 +2404,7 @@ pub const unsafe fn ptr_offset_from_unsigned<T>(ptr: *const T, base: *const T) -
 #[rustc_do_not_const_check]
 #[inline]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn ptr_guaranteed_cmp<T>(ptr: *const T, other: *const T) -> u8 {
     (ptr == other) as u8
 }
@@ -2541,14 +2555,16 @@ pub(crate) macro const_eval_select {
     ) => {{
         #[inline]
         $(#[$runtime_attr])*
-        fn runtime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
+        #[ferrocene::prevalidated]
+fn runtime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
             $runtime
         }
 
         #[inline]
         $(#[$compiletime_attr])*
         #[ferrocene::annotation("Cannot be covered as this only runs during compilation.")]
-        const fn compiletime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
+        #[ferrocene::prevalidated]
+const fn compiletime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
             // Don't warn if one of the arguments is unused.
             $(let _ = $arg;)*
 
@@ -2654,6 +2670,7 @@ pub(crate) macro const_eval_select {
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
+#[ferrocene::prevalidated]
 pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
     false
 }
@@ -2682,6 +2699,7 @@ pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
 #[inline]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
+#[ferrocene::prevalidated]
 pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
     // SAFETY: The caller provided single non-overlapping items behind
     // pointers, so swapping them with `count: 1` is fine.
@@ -2707,6 +2725,7 @@ pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
 #[ferrocene::annotation(
     "This function is always used in `assert_unsafe_precondition` which produces an unwinding panic, meaning that we cannot cover it."
 )]
+#[ferrocene::prevalidated]
 pub const fn ub_checks() -> bool {
     cfg!(ub_checks)
 }
@@ -2728,6 +2747,7 @@ pub const fn ub_checks() -> bool {
 #[ferrocene::annotation(
     "This function cannot trivially be tested since it depends on the build configuration. It was manually reviewed."
 )]
+#[ferrocene::prevalidated]
 pub const fn overflow_checks() -> bool {
     cfg!(debug_assertions)
 }
@@ -2779,6 +2799,7 @@ pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize)
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
 #[ferrocene::annotation("This function is also a noop in runtime so we can't cover it currently.")]
+#[ferrocene::prevalidated]
 pub const unsafe fn const_make_global(ptr: *mut u8) -> *const u8 {
     // const eval overrides this function; at runtime, it is a NOP.
     ptr
@@ -3037,6 +3058,7 @@ pub const fn type_id<T: ?Sized>() -> crate::any::TypeId;
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
 #[ferrocene::annotation("Cannot be covered as this code cannot be reached during runtime.")]
+#[ferrocene::prevalidated]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
     a.data == b.data
 }

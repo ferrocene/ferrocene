@@ -64,7 +64,8 @@ macro_rules! impl_from_bool {
             #[doc = concat!("assert_eq!(", stringify!($int), "::from(true), 1);")]
             /// ```
             #[inline(always)]
-            fn from(b: bool) -> Self {
+            #[ferrocene::prevalidated]
+fn from(b: bool) -> Self {
                 b as Self
             }
         }
@@ -83,7 +84,8 @@ macro_rules! impl_from {
         impl const From<$small> for $large {
             #[doc = concat!("Converts from [`", stringify!($small), "`] to [`", stringify!($large), "`] losslessly.")]
             #[inline(always)]
-            fn from(small: $small) -> Self {
+            #[ferrocene::prevalidated]
+fn from(small: $small) -> Self {
                 debug_assert!(<$large>::MIN as i128 <= <$small>::MIN as i128);
                 debug_assert!(<$small>::MAX as u128 <= <$large>::MAX as u128);
                 small as Self
@@ -296,7 +298,8 @@ macro_rules! impl_try_from_unbounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(value: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(value: $source) -> Result<Self, Self::Error> {
                 Ok(value as Self)
             }
         }
@@ -315,7 +318,8 @@ macro_rules! impl_try_from_lower_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u >= 0 {
                     Ok(u as Self)
                 } else {
@@ -338,7 +342,8 @@ macro_rules! impl_try_from_upper_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u > (Self::MAX as $source) {
                     Err(TryFromIntError(()))
                 } else {
@@ -361,7 +366,8 @@ macro_rules! impl_try_from_both_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 let min = Self::MIN as $source;
                 let max = Self::MAX as $source;
                 if u < min || u > max {
@@ -395,7 +401,8 @@ macro_rules! impl_try_from_integer_for_bool {
             #[doc = concat!("assert!(<", stringify!($int), " as TryInto<bool>>::try_into(2).is_err());")]
             /// ```
             #[inline]
-            fn try_from(i: $int) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(i: $int) -> Result<Self, Self::Error> {
                 match i {
                     0 => Ok(false),
                     1 => Ok(true),

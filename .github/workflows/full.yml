@@ -49,6 +49,41 @@ jobs:
     steps:
       - run: exit 0
 
+  ### LLVM
+  #
+  # Don't try to make these a matrix, or some separate abstracted workflow, you'll make it so
+  # starting the next step depends on *all* hosts being done, which is undesirable since Windows
+  # is very, very slow.
+  llvm-x86_64-unknown-linux-gnu:
+    name: LLVM (x86_64-unknown-linux-gnu)
+    needs:
+      - calculate-envs
+    uses: ./.github/workflows/full-llvm.yml
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
+  llvm-aarch64-unknown-linux-gnu:
+    name: LLVM (aarch64-unknown-linux-gnu)
+    needs:
+      - calculate-envs
+    uses: ./.github/workflows/full-llvm.yml
+    secrets: inherit
+    with:
+      host-triple: aarch64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-arm64
+      use-minio: true
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
   ### Build hosts
   #
   # Don't try to make these a matrix, or some separate abstracted workflow, you'll make it so
@@ -58,12 +93,11 @@ jobs:
     name: Build (x86_64-unknown-linux-gnu)
     needs:
       - calculate-envs
-    uses: ./.github/workflows/full-host-build.yml
+    uses: ./.github/workflows/full-build-cache.yml
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      rust-runner: ferrocene-arc-runners-ubuntu-20-amd64
-      llvm-runner: ubuntu-20-llvm-20core-30gb-amd64
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
@@ -74,12 +108,11 @@ jobs:
     name: Build (aarch64-unknown-linux-gnu)
     needs:
       - calculate-envs
-    uses: ./.github/workflows/full-host-build.yml
+    uses: ./.github/workflows/full-build-cache.yml
     secrets: inherit
     with:
       host-triple: aarch64-unknown-linux-gnu
-      rust-runner: ferrocene-arc-runners-ubuntu-20-arm64
-      llvm-runner: ubuntu-20-llvm-20core-30gb-arm64
+      runner: ferrocene-arc-runners-ubuntu-20-arm64
       use-minio: true
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
@@ -102,12 +135,10 @@ jobs:
       matrix:
         include:
           - run-name: dist
-            build-metrics-artifact: dist-aarch64-unknown-linux-gnu
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
           - run-name: tools
-            build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
       run-name: ${{ matrix.run-name }}
@@ -122,7 +153,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: dist-x86_64-unknown-linux-gnu
 
   dist-aarch64-unknown-linux-gnu:
     name: Dist (aarch64-unknown-linux-gnu)
@@ -135,13 +165,11 @@ jobs:
       matrix:
         include:
           - run-name: Dist
-            build-metrics-artifact: dist-aarch64-unknown-linux-gnu
             script: |
               uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
               uv run x.py --stage 2 dist rust-std
 
           - run-name: Tools
-            build-metrics-artifact: dist-tools-aarch64-unknown-linux-gnu
             script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
       run-name: ${{ matrix.run-name }}
@@ -156,7 +184,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: ${{ matrix.build-metrics-artifact }}
 
   ### Test targets
   #
@@ -197,7 +224,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-x86_64-unknown-linux-gnu-on-${{ matrix.host }}
 
   # Interm job, this should get deleted when we certify fmt
   test-x86_64-unknown-linux-gnu-certified-panic:
@@ -229,7 +255,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-x86_64-unknown-linux-gnu-certified-panic-on-${{ matrix.host }}
 
   test-aarch64-unknown-none:
     strategy:
@@ -264,7 +289,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-aarch64-unknown-none-on-${{ matrix.host }}
 
   # Interm job, this should get deleted when we certify fmt
   test-aarch64-unknown-none-certified-panic:
@@ -297,7 +321,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-aarch64-unknown-none-certified-panic-on-${{ matrix.host }}
 
   test-thumbv7em-none-eabi:
     strategy:
@@ -332,7 +355,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-thumbv7em-none-eabi-on-${{ matrix.host }}
 
   # Interm job, this should get deleted when we certify fmt
   test-thumbv7em-none-eabi-certified-panic:
@@ -364,7 +386,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-thumbv7em-none-eabi-certified-panic-on-${{ matrix.host }}
 
   test-thumbv7em-none-eabihf:
     strategy:
@@ -399,7 +420,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-thumbv7em-none-eabihf-on-${{ matrix.host }}
 
   # Interm job, this should get deleted when we certify fmt
   test-thumbv7em-none-eabihf-certified-panic:
@@ -431,7 +451,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: test-thumbv7em-none-eabihf-certified-panic-on-${{ matrix.host }}
 
   ### Misc jobs
   #
@@ -483,7 +502,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: certified-subsets
 
   # Build the docs tarball
   docs:
@@ -522,7 +540,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: docs
 
   # Pack the source tarball
   source:
@@ -545,7 +562,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: source
 
   # Basic checks
   checks:
@@ -569,7 +585,6 @@ jobs:
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
       cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
-      build-metrics-artifact: checks
 
   # Build all our added targets
   targets:

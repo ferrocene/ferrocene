@@ -1,0 +1,128 @@
+name: Build host
+run-name: Build (${{inputs.host-triple}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
+      runner:
+        type: string
+        description: The GitHub Runner to run the llvm build on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      cache-llvm-uri:
+        description: The URI of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.uri }}
+      cache-llvm-name:
+        description: The filename of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.name }}
+      artifact-build:
+        description: The name of the build job artifact
+        value: ${{ jobs.llvm.outputs.artifact-name }}
+
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
+
+jobs:
+  # A job to build LLVM.
+  llvm:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    outputs:
+      name: ${{ steps.check.outputs.name }}
+      uri: ${{ steps.check.outputs.uri }}
+    env:
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: false
+
+      - name: Configure AWS & MinIO (if applicable)
+        uses: ./.github/actions/aws-config/
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          minio-endpoint-url: ${{ secrets.CACHE_ENDPOINT_URL }}
+          minio-access-key-id: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          minio-secret-access_key: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+
+      - name: Check cache
+        id: check
+        shell: bash
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
+        run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+
+          set -e
+          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
+          name="${{ inputs.host-triple }}-$hash.tar.zst"
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+          uri=s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/$name
+          echo "uri=$uri" >> $GITHUB_OUTPUT
+
+          set +e
+          state="miss"
+          uv run ferrocene/ci/scripts/llvm_cache.py exists --url $uri
+          if [ $? -eq 0 ]; then
+            state="hit"
+          fi
+          set -e
+
+          echo "state=$state" >> $GITHUB_OUTPUT
+
+          echo "Cache $state: LLVM (${{ inputs.host-triple }})"
+          echo "::notice title=Cache $state: LLVM (${{ inputs.host-triple }})::$uri"
+
+      - name: Run
+        if: ${{ steps.check.outputs.state != 'hit' }}
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url ${{ steps.check.outputs.uri }}

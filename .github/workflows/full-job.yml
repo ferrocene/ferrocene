@@ -68,9 +68,6 @@ on:
         description: The cache prefix
       environment:
         type: string
-      build-metrics-artifact:
-        type: string
-        description: The name of the build-metrics report artifact
 
 env:
   ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}

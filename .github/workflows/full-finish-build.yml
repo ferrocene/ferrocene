@@ -43,8 +43,6 @@ env:
   ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
   CACHE_BUCKET: ${{ inputs.cache-bucket }}
   CACHE_PREFIX: ${{ inputs.cache-prefix }}
-  AWS_PROFILE: amazon # This is *always* amazon, that's where releases go!
-  BUILD_METRICS_ARTIFACT: finish-build
 jobs:
   finish-build:
     runs-on: ${{ inputs.runner }}

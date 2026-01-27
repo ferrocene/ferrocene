@@ -79,7 +79,10 @@ jobs:
           version: ${{ inputs.qnx-version }}
 
       # Github Actions only issues a token valid for 5 minutes, this official AWS action seems to have a workaround for that, so we're currently using it.
-      # We'd be very interested in not using it, and instead using AWS via the `.github/actions/aws-config/` action
+      #
+      # Also, if you use this it sets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, etc which breaks using minio.
+      #
+      # Honestly, it's horrible. We'd be very interested in not using it, and instead using AWS via the `.github/actions/aws-config/` action.
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

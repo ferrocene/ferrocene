@@ -10,17 +10,23 @@ on:
     inputs:
       host-triple:
         type: string
+        required: true
         description: The Rust triple of the host platform
       triples:
         type: string
         description: A comma separated list of targets to build
       runner:
         type: string
+        required: true
         description: The GitHub Runner to run the rust build on
       use-minio:
         type: boolean
         default: false
         description: If minIO should be used (otherwise, S3 is used)
+      cache-llvm-uri:
+        type: string
+        required: true
+        description: The LLVM cache
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
@@ -96,7 +102,7 @@ jobs:
             unset AWS_CA_BUNDLE
           fi
 
-          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/${{ needs.llvm.outputs.name }}
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url ${{ inputs.cache-llvm-uri }}
 
       - name: Run
         uses: ./.github/actions/run/

@@ -89,7 +89,6 @@
 pub use self::sip::SipHasher;
 #[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "hashmap_internals", issue = "none")]
-#[allow(deprecated)]
 #[doc(hidden)]
 pub use self::sip::SipHasher13;
 #[cfg(not(feature = "ferrocene_subset"))]

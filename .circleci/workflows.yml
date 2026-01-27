@@ -1045,7 +1045,7 @@ workflows:
           name: aarch64v8r-none-test-compiletest
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
-          qemu-arch: neoverse-v1
+          qemu-arch: qemu-aarch64
           job: qnx:compiletest-no-only-hosts
           resource-class: large # 4-core
           requires:
@@ -1054,7 +1054,7 @@ workflows:
           name: aarch64v8r-none-test-library
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
-          qemu-arch: neoverse-v1
+          qemu-arch: qemu-aarch64
           job: test:library
           resource-class: large # 4-core
           requires:
@@ -1063,7 +1063,7 @@ workflows:
           name: aarch64v8r-none-test-library-certified-panic
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: neoverse-v1
-          qemu-arch: neoverse-v1
+          qemu-arch: qemu-aarch64
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

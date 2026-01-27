@@ -120,10 +120,11 @@ declare_tool_lint! {
     /// This is not allowed if you want your code to be certified by a safety assessor.
     ///
     /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
-    pub ferrocene::UNCERTIFIED,
+    ///
     /// This lint is allowed-by-default, to avoid loud warnings for people using ferrocene as a
     /// "normal" compiler. To enable it, add `#![warn(ferrocene::uncertified)]` to each crate in
     /// your build, or add it to `[lints]` in Cargo.toml.
+    pub ferrocene::UNCERTIFIED,
     Allow,
     "a verified function called an unverified function",
     report_in_external_macro: true
@@ -695,27 +696,25 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     fn get_call_def_thir(&mut self, expr: &thir::Expr<'tcx>) -> Option<UseKind<'tcx>> {
         let tcx = self.linter.tcx;
 
-        let def_id = match expr.kind {
+        match expr.kind {
             thir::ExprKind::NamedConst { def_id, .. }
             | thir::ExprKind::StaticRef { def_id, .. } => {
-                if let Some(unknown_fn) = contains_unknown_fn(expr.ty) {
-                    // It's possible for runtime code to access an unknown function type from this
-                    // contant. Ensure that it's marked with `prevalidated` so that its body gets
-                    // checked.
-                    return Some(UseKind::ContainsTy(def_id, unknown_fn, expr.span));
-                } else {
-                    // These have bodies, but they are always evaluated at compile time.
-                    // We argue to our assessor that means that the correct behavior is
-                    // validated whenever the const/static is used in a runtime function, so the
-                    // functions that generate the constant don't need to be tested separately.
-                    // The constants themselves execute no code at runtime, so mentioning them is ok.
-                    return None;
-                }
+                // Statics and constants have bodies, but they are always evaluated at compile time.
+                // We argue to our assessor that means that the correct behavior is
+                // validated whenever the const/static is used in a runtime function, so the
+                // functions that generate the constant don't need to be tested separately.
+                // The constants themselves execute no code at runtime, so mentioning them is ok.
+                let unknown_fn = contains_unknown_fn(expr.ty)?;
+                // However, it's possible for runtime code to access an unknown function type from
+                // this constant. Ensure that it's marked with `prevalidated` so that its body gets
+                // checked.
+                Some(UseKind::ContainsTy(def_id, unknown_fn, expr.span))
             }
             thir::ExprKind::ZstLiteral { .. } => match expr.ty.kind() {
                 ty::FnDef(maybe_trait_fn, generic_args) => {
                     debug!("saw zst {:?}", expr.ty);
-                    self.get_concrete_fn_def(*maybe_trait_fn, generic_args, expr.span)?.def_id()
+                    let fn_def = self.get_concrete_fn_def(*maybe_trait_fn, generic_args, expr.span)?;
+                    Some(UseKind::Named(fn_def.def_id(), expr.span))
                 }
                 _ => span_bug!(expr.span, "called ZST literals should always be named functions"),
             },
@@ -725,7 +724,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 let instance = self.instance_of_ty(ty, expr.span)?;
 
                 debug!("saw call to {instance:?}");
-                return Some(UseKind::Called(instance, diag_span));
+                Some(UseKind::Called(instance, diag_span))
             }
             // We assume all closure definitions in this function are also certified.
             // However, we still need to check the closure body to make sure it doesn't call
@@ -734,7 +733,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // Closures are never an owner, so we need to hang onto the original owner so that
                 // our synthesized HirIds are valid.
                 LintThir::lint_owner(tcx, self.owner, expr.closure_id);
-                return None;
+                None
             }
             thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, .. } => {
                 let bound_traits = dyn_trait(expr.ty, expr.span);
@@ -750,12 +749,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                         }
                     }
                 }
-                return None;
+                None
             }
             // Nothing to check.
-            _ => return None,
-        };
-        Some(UseKind::Named(def_id, expr.span))
+            _ => None,
+        }
     }
 
     fn instance_of_ty(&self, ty: Ty<'tcx>, span: Span) -> Option<Instance<'tcx>> {

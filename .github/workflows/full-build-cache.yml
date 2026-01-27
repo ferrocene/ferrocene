@@ -56,8 +56,6 @@ jobs:
   build:
     runs-on: ${{ inputs.rust-runner }}
     environment: ${{ inputs.environment }}
-    needs:
-      - llvm
     env:
       ARTIFACT: build-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}

@@ -22,6 +22,9 @@ runs:
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: |
           ${{ inputs.configure }}
+      # Due to a GHA limitation, envs are always set, but sometimes empty.
+      # Detect if it's empty and unset it.
+      # https://github.com/actions/runner/issues/1126
       run: |
         if [ -z "${TEST_DEVICE_ADDR}" ]; then
           unset TEST_DEVICE_ADDR
@@ -48,8 +51,9 @@ runs:
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: |
           ${{ inputs.configure }}
-      # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
+      # Due to a GHA limitation, envs are always set, but sometimes empty.
       # Detect if it's empty and unset it.
+      # https://github.com/actions/runner/issues/1126
       run: |
         if [ -z "${TEST_DEVICE_ADDR}" ]; then
           unset TEST_DEVICE_ADDR

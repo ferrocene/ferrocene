@@ -639,7 +639,8 @@ jobs:
     uses: ./.github/workflows/full-self-test.yml
     needs:
       - calculate-envs
-      - dist
+      - dist-x86_64-unknown-linux-gnu
+      - dist-aarch64-unknown-linux-gnu
       - targets
     secrets: inherit
     strategy:

@@ -73,6 +73,7 @@ jobs:
   job:
     name: ${{ inputs.run-name }}
     runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,6 +101,8 @@ jobs:
           bucket: ${{ inputs.cache-bucket }}
           prefix: ${{ inputs.cache-prefix }}
 
+      # Github Actions only issues a token valid for 5 minutes, this official AWS action seems to have a workaround for that, so we're currently using it.
+      # We'd be very interested in not using it, and instead using AWS via the `.github/actions/aws-config/` action
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -341,3 +341,10 @@ WORKDIR /home/ci
 ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"
 RUN curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
 
+# Additional tools needed to generate SBOMs
+
+RUN curl -LsSf https://github.com/psastras/sbom-rs/releases/download/cargo-sbom-v0.10.0/cargo-sbom-x86_64-unknown-linux-gnu -o /home/ci/.local/bin/cargo-sbom
+RUN if [ "$(sha256sum -b /home/ci/.local/bin/cargo-sbom | awk '{print $1}')" != "860a50d3e009c72fefc12506869cc11ea34d240c65da65cda2c491ed2aaa34f4" ]; then exit 1; fi
+
+RUN curl -LsSf https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.29.2/cyclonedx-linux-x64 -o /home/ci/.local/bin/cyclonedx
+RUN if [ "$(sha256sum -b /home/ci/.local/bin/cyclonedx | awk '{print $1}')" != "6c5ed6321ee3bb3c268b6d19477dbcd5509a757f118bed4b6508fe9fbbdc2a5b" ]; then exit 1; fi

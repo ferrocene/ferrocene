@@ -27,7 +27,7 @@ jobs:
           corepack install
           corepack enable yarn
           yarn -v
-          yarn install --immutable
+          YARN_ENABLE_HARDENED_MODE=0 yarn install --immutable
 
       - name: Temp tools
         run: |

@@ -58,12 +58,19 @@ start_vm() {
     fi
     rm -f "${emulatordir}"/pipe.*
     mkfifo "${emulatordir}"/pipe.in "${emulatordir}"/pipe.out
+
+    KVM_ARG=""
+    if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+        KVM_ARG="-accel kvm"
+    fi
+
     qemu-system-x86_64 \
         -smp 2 \
         -m 1G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0,mac="${vm_mac_addr}" \
         -pidfile "${emulatordir}"/qemu.pid \
+        ${KVM_ARG} \
         -nographic \
         -kernel "${emulatordir}"/ifs.bin \
         -object rng-random,filename=/dev/urandom,id=rng0 \

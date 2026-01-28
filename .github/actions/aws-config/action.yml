@@ -1,0 +1,49 @@
+name: "Set up AWS"
+description: "Set up the AWS profiles"
+inputs:
+  minio-endpoint-url:
+    description: The `endpoint_url` for the MinIO profile
+  minio-access-key-id:
+    description: The `aws_access_key` for the MinIO profile
+  minio-secret-access_key:
+    description: The `aws_secret_access_key` for the MinIO profile
+  aws-role-arn:
+    description: The `role_arn` for the AWS profile
+
+runs:
+  using: "composite"
+  steps:
+    - name: Configure `aws`
+      shell: bash
+      run: |
+        curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" --fail --silent --show-error | jq -r '.value' > /tmp/awsjwt
+        chmod 0600 /tmp/awsjwt
+
+        mkdir -p ~/.aws
+
+        cat <<EOF > ~/.aws/config
+        [profile amazon]
+        region = us-east-1
+        duration-seconds = 7200
+        role_arn = ${{ inputs.aws-role-arn }}
+        web_identity_token_file = /tmp/awsjwt
+
+        [profile minio]
+        region = eu-central-1
+        endpoint_url = ${{ inputs.minio-endpoint-url }}
+        aws_access_key_id = ${{ inputs.minio-access-key-id }}
+        aws_secret_access_key = ${{ inputs.minio-secret-access_key }}
+        services = ferrous-minio
+
+        [services ferrous-minio]
+        s3 =
+          endpoint_url = ${{ inputs.minio-endpoint-url }}
+        EOF
+
+        echo "aws --version: $(aws --version)"
+        echo "Testing authentication..."
+        aws s3 ls ferrocene-ci-caches --profile minio > /dev/null
+        echo "Can authenticate with minio!"
+        aws sts get-caller-identity --profile amazon > /dev/null
+        echo "Can authenticate with amazon!"

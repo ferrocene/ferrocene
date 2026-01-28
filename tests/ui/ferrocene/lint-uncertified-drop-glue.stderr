@@ -13,9 +13,8 @@ LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | pub fn has_drop_reachable() {
    |        ^^^^^^^^^^^^^^^^^^
-  --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
-   |
-   = note: generic method `core::ops::Drop::drop` instantiated by `drop_in_place::<ExplicitDropImpl>`
+LL |     DropGlueOnly(ExplicitDropImpl);
+   |                                   - generic method `core::ops::Drop::drop` instantiated by `has_drop_reachable`
 note: the lint level is defined here
   --> $DIR/lint-uncertified-drop-glue.rs:10:9
    |

@@ -26,6 +26,7 @@ struct LintPostMono<'a, 'tcx> {
     from_instantiation: Option<InstantiationSite<'tcx>>,
 }
 
+#[derive(Copy, Clone)]
 struct InstantiationSite<'tcx> {
     /// NOTE: this points to the call site which causes the callee to be monomorphized.
     lint_node: HirId,
@@ -141,8 +142,13 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
         self.lint_at(lint_node, use_, pre_mono_call, decorate);
 
-        let site =
-            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: call_span };
+        let site = if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_in_place_fn() {
+            // We want to show a better span; drop_in_place is never interesting since the body is
+            // synthesized by a MIR shim anyway.
+            self.from_instantiation.unwrap()
+        } else {
+            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: call_span }
+        };
         trace!("recurse into {callee_instance:?}");
         LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
     }

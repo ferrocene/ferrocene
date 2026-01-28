@@ -19,7 +19,7 @@ fn has_drop_unreachable() {
 
 #[ferrocene::prevalidated] //~ NOTE marked
 pub fn has_drop_reachable() { //~ NOTE validated
-    DropGlueOnly(ExplicitDropImpl);
+    DropGlueOnly(ExplicitDropImpl); //~ NOTE instantiated
 }
 
 // this span points to ptr::drop_in_place

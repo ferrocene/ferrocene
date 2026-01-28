@@ -17,9 +17,7 @@ fn has_drop_unreachable() {
 
 #[ferrocene::prevalidated] //~ NOTE marked
 pub fn has_drop_reachable() { //~ NOTE validated
-    // TODO: this diagnostic doesn't show up because we treat drop_in_place as the instantiation
-    // site
-    ExplicitDropImpl; // NOTE instantiated by
+    ExplicitDropImpl; //~ NOTE instantiated by
 }
 
 //~? ERROR unvalidated

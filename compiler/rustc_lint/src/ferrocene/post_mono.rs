@@ -364,3 +364,12 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     }
 }
 
+impl<'tcx> UseKind<'tcx> {
+    #[track_caller]
+    fn expect_instance(self) -> (Instance<'tcx>, Span) {
+        match self {
+            UseKind::Cast(instance, span) | UseKind::Called(instance, span) => (instance, span),
+            UseKind::ContainsTy(..) | UseKind::Named(..) => unreachable!(), // only in THIR pass
+        }
+    }
+}

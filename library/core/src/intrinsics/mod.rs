@@ -2982,6 +2982,7 @@ pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 /// Compute the type information of a concrete type.
 /// It can only be called at compile time, the backends do
 /// not implement it.
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_intrinsic]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 pub const fn type_of(_id: crate::any::TypeId) -> crate::mem::type_info::Type {

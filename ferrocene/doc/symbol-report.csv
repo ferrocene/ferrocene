@@ -1326,19 +1326,6 @@
 <core::mem::maybe_dangling::MaybeDangling<P> as core::fmt::Debug>::fmt
 <core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone
 <core::mem::maybe_uninit::MaybeUninit<T> as core::fmt::Debug>::fmt
-<core::mem::type_info::Array as core::fmt::Debug>::fmt
-<core::mem::type_info::Bool as core::fmt::Debug>::fmt
-<core::mem::type_info::Char as core::fmt::Debug>::fmt
-<core::mem::type_info::Field as core::fmt::Debug>::fmt
-<core::mem::type_info::Float as core::fmt::Debug>::fmt
-<core::mem::type_info::Int as core::fmt::Debug>::fmt
-<core::mem::type_info::Pointer as core::fmt::Debug>::fmt
-<core::mem::type_info::Reference as core::fmt::Debug>::fmt
-<core::mem::type_info::Slice as core::fmt::Debug>::fmt
-<core::mem::type_info::Str as core::fmt::Debug>::fmt
-<core::mem::type_info::Tuple as core::fmt::Debug>::fmt
-<core::mem::type_info::Type as core::fmt::Debug>::fmt
-<core::mem::type_info::TypeKind as core::fmt::Debug>::fmt
 <core::num::FpCategory as core::clone::Clone>::clone
 <core::num::FpCategory as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::FpCategory as core::cmp::PartialEq>::eq
@@ -4662,7 +4649,6 @@ core::intrinsics::rotate_left
 core::intrinsics::rotate_right
 core::intrinsics::select_unpredictable
 core::intrinsics::type_id_eq
-core::intrinsics::type_of
 core::intrinsics::typed_swap_nonoverlapping
 core::intrinsics::ub_checks
 core::intrinsics::unchecked_funnel_shl
@@ -4825,8 +4811,6 @@ core::mem::size_of_val_raw
 core::mem::swap
 core::mem::take
 core::mem::transmute_copy
-core::mem::type_info::<impl core::any::TypeId>::info
-core::mem::type_info::Type::of
 core::mem::zeroed
 core::num::<impl i128>::abs
 core::num::<impl i128>::abs_diff

@@ -42,6 +42,9 @@ impl Step for Sbom {
         let partial_sbom_dir = base_sbom_dir.join(SBOM_SUBPACKAGE_DIR);
         let main_sbom_file = base_sbom_dir.join(MAIN_FERROCENE_SBOM_FILE);
 
+        std::fs::create_dir_all(&partial_sbom_dir)
+            .expect("Creating the SBOM subpackage dir should never fail.");
+
         // ##### Subpackage SBOM filenames
         // **Note:** Must end with `_sbom.json` to auto-detect them for merging.
         const SBOM_FILE_END: &str = "_sbom.json";

@@ -10,6 +10,38 @@ const summarySelectors = [
 ];
 let functionsSelector = ".functions"
 
+function onSearch(query) {
+    var numLinesTested = 0;
+    var numLinesUntested = 0;
+
+    for (section of document.querySelectorAll("section")) {
+        var numFunctions = 0;
+        for (details of section.querySelectorAll("details")) {
+            var summary = details.querySelector("summary");
+            if (summary.innerText.search(query) === -1) {
+                summary.style.display = "none";
+            } else {
+                summary.style = "";
+
+                var testedLines = parseInt(summary.getAttribute("tested-lines"));
+                var untestedLines = parseInt(summary.getAttribute("untested-lines"));
+                var annotatedLines = parseInt(summary.getAttribute("annotated-lines"));
+
+                numLinesTested += testedLines;
+                numLinesUntested += untestedLines + annotatedLines;
+                numFunctions += 1;
+            }
+        }
+        section.querySelector(".count").textContent = numFunctions.toString();
+        document.querySelector("button." + section.classList[0]).querySelector(".count").textContent = numFunctions.toString();
+    }
+
+    var totalLines = numLinesTested + numLinesUntested;
+    var percentileLinesTested = (numLinesTested / totalLines) * 100.0;
+
+    document.querySelector(".coverage-summary").children[0].textContent = `${percentileLinesTested.toFixed(2)}% (${numLinesTested}/${totalLines} lines)`;
+}
+
 function main() {
     let functionsElem = document.querySelector(functionsSelector);
     for (selector of summarySelectors) {
@@ -51,6 +83,21 @@ function main() {
             r.style.setProperty("--var-annotated-text", null);
         }
     });
+
+    let searchBar = document.querySelector("input[name=search-bar]");
+    searchBar.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            let query = searchBar.value;
+            onSearch(query);
+        }
+    });
+    let searchButton = document.querySelector("button[name=search-button]");
+    searchButton.addEventListener("click", function(event) {
+        let query = searchBar.value;
+        onSearch(query);
+    });
+
+    onSearch(".");
 }
 
 if (document.readyState === "loading") {

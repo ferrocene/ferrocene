@@ -28,15 +28,22 @@ header {
 
     display: flex;
     align-items: center;
+    justify-content: space-between;
+}
+
+.header-title {
+    padding: 0 1em;
+    display: flex;
+    align-items: center;
     gap: 1.5em;
 }
 
-header h1 {
+.header-title h1 {
     margin: 0;
     font-size: 1.25em;
 }
 
-header a {
+.header-title a {
     color: var(--header-color);
 }
 

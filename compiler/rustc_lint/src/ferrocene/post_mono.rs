@@ -1,0 +1,342 @@
+use rustc_data_structures::fx::FxHashSet;
+use rustc_errors::Diag;
+use rustc_hir::{CRATE_HIR_ID, HirId};
+use rustc_hir::def_id::DefId;
+use rustc_middle::mir::mono::MonoItem;
+use rustc_middle::mir::visit::Visitor as _;
+use rustc_middle::mir::{
+    self, Body, CastKind, ClearCrossCrate, Location, Rvalue, SourceInfo, Terminator, TerminatorKind,
+};
+use rustc_middle::span_bug;
+use rustc_middle::ty::adjustment::PointerCoercion;
+use rustc_middle::ty::{
+    self, EarlyBinder, GenericArgsRef, Instance, InstanceKind, TyCtxt, TypeFoldable, TypingEnv,
+};
+
+use rustc_span::Span;
+use tracing::{debug, info, trace};
+
+use crate::ferrocene::certified::{LintState, UseKind};
+
+struct LintPostMono<'a, 'tcx> {
+    instance: Instance<'tcx>,
+    linter: &'a mut LintState<'tcx>,
+    visited: &'a mut FxHashSet<Instance<'tcx>>,
+    body: &'a Body<'tcx>,
+    from_instantiation: Option<InstantiationSite<'tcx>>,
+}
+
+struct InstantiationSite<'tcx> {
+    /// NOTE: this points to the call site which causes the callee to be monomorphized.
+    lint_node: HirId,
+    caller_span: Span,
+    caller_instance: Instance<'tcx>,
+}
+
+// Lint all used items recursively, starting from validated roots.
+// Validated roots are calculated in `rustc_monomorphize::collector::ferrocene`, see there for
+// details.
+pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>) {
+    trace!("all roots: {roots:?}");
+
+    let mut visited = FxHashSet::default();
+    // TODO: reuse linter across roots so we don't emit duplicate diagnostics.
+    // let linter = LintHelper::new(tcx, local);
+    for root in roots {
+        let instance = match root {
+            // global asm is always an exported constraint
+            MonoItem::GlobalAsm(..) => continue,
+            // NOTE: `mono` panics if item has generics rather than silently doing the wrong thing
+            MonoItem::Static(def_id) => Instance::mono(tcx, def_id),
+            MonoItem::Fn(instance) => {
+                let def = instance.def_id();
+
+                // Skip std::rt::lang_start. Technically we could lint on it as if it were the span
+                // of `main`, but the lint would never be useful.
+                // In general we treat all shims as part of the compiler qualification rather than
+                // the standard library certification, since they're only accessible through
+                // language features.
+                // Note that we may not have `lang_start` yet if we're still compiling core.
+                if Some(def) == tcx.lang_items().start_fn() {
+                    continue;
+                } else if !def.is_local() && Some(def) == tcx.entry_fn(()).map(|(id, _)| id) {
+                    // it's possible to have main functions that came from another crate!
+                    continue;
+                }
+                instance
+            }
+        };
+        debug!("linting root: {instance:?}");
+        let def_id = instance.def_id().expect_local();
+        if let Some(mut linter) = LintState::new(tcx, def_id) {
+            LintPostMono::visit_instance(&mut linter, &mut visited, instance, None);
+        }
+    }
+}
+
+impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
+    fn visit_terminator(&mut self, terminator: &Terminator<'tcx>, location: Location) {
+        if let Some((callee_instance, pre_mono_call)) = self.get_call_def_mir(terminator, location)
+        {
+            let use_ = UseKind::Called(callee_instance, terminator.source_info.span);
+            self.on_edge(use_, &terminator.source_info, pre_mono_call, |_| ());
+        }
+    }
+
+    fn visit_rvalue(&mut self, rval: &Rvalue<'tcx>, location: Location) {
+        let Rvalue::Cast(
+            CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer(_), _),
+            operand,
+            _fn_ptr_ty,
+        ) = rval
+        else {
+            return;
+        };
+        let call_span = operand.span(self.body);
+
+        let Some((pre_mono_call, generic_args)) = operand.const_fn_def() else {
+            span_bug!(
+                call_span,
+                "don't know how to handle ReifyFnPointer cast of non-constant fn {operand:?}"
+            );
+        };
+
+        let callee_instance = self.monomorphize_instance(pre_mono_call, generic_args, call_span);
+        // TODO: need to also check this in THIR pass
+        let use_ = UseKind::Cast(callee_instance, call_span);
+        let source_info = self.body.source_info(location);
+        self.on_edge(use_, source_info, pre_mono_call, |diag| {
+            diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
+            diag.note("as a precaution, it must assume you will eventually call the function");
+        });
+    }
+}
+
+impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
+    fn on_edge(
+        &mut self,
+        use_: UseKind<'tcx>,
+        source_info: &SourceInfo,
+        pre_mono_call: DefId,
+        decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
+    ) {
+        let (callee_instance, call_span) = use_.expect_instance();
+
+        // Recurse into the instantiated call. Keep the call span for diagnostics.
+        // Try to update the lint node if possible, but use the lint node of the caller if the
+        // callee is cross-crate.
+        // FIXME: we have enough info here to show a backtrace of how the function was instantiated,
+        // maybe pass that in so we can show it?
+        let lint_node = match self.body.source_scopes[source_info.scope].local_data.as_ref() {
+            ClearCrossCrate::Set(data) => data.lint_root,
+            // We assume that all roots come from the current crate.
+            // This is checked earlier in `lint_validated_roots`.
+            ClearCrossCrate::Clear => match self.from_instantiation.as_ref() {
+                Some(local) => local.lint_node,
+                // A local root can resolve to a cross-crate instantiation when a MIR inline pass runs.
+                // We don't have anywhere to point to, so just point to the crate root.
+                None => CRATE_HIR_ID,
+            },
+        };
+
+        self.lint_at(lint_node, use_, pre_mono_call, decorate);
+
+        let site =
+            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: call_span };
+        trace!("recurse into {callee_instance:?}");
+        LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
+    }
+
+    fn lint_at(
+        &mut self,
+        lint_node: HirId,
+        use_: UseKind<'tcx>,
+        pre_mono_call: DefId,
+        decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
+    ) {
+        let caller = match self.from_instantiation {
+            Some(InstantiationSite { caller_span, caller_instance, .. }) => {
+                Some((caller_span, caller_instance))
+            }
+            None => {
+                // TODO: i think this is wrong? it's assuming THIR will catch all issues in the
+                // current crate, but i'm not sure that's true ...
+                info!("ignoring root instantiation of {use_:?}");
+                return;
+                // info!("linting root instantiation of {use_:?}");
+                // None
+            }
+        };
+
+        let tcx = self.linter.tcx;
+        let (callee_instance, _) = use_.expect_instance();
+
+        let callee = callee_instance.def_id();
+        let lint_item = self.linter.item;
+
+        // This is a bit odd - we use the HIR id of the caller function,
+        // not the callee that actually caused the error.
+        // This is so people can `allow` individual instantiations rather than having to
+        // blanket-allow all of them.
+        self.linter.lint(lint_node, use_, |diag: &mut Diag<'_, _>, validated_span| {
+            decorate(diag);
+
+            let callee_descr = format!(
+                "generic {} `{}`",
+                tcx.def_descr(callee),
+                rustc_middle::ty::print::with_no_trimmed_paths!(tcx.def_path_str(pre_mono_call))
+            );
+
+            if let Some((caller_span, caller_instance)) = caller {
+                let msg = format!(
+                    "{callee_descr} instantiated by `{}`",
+                    tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args)
+                );
+
+                if let Some(multi) = validated_span {
+                    multi.push_span_label(caller_span, msg);
+                } else {
+                    diag.span_note(
+                        caller_span,
+                        format!("{msg}, which is called from a validated entrypoint"),
+                    );
+                }
+            } else {
+                diag.note(format!(
+                    "{callee_descr} instantiated by validated entrypoint {}",
+                    tcx.def_path_str(lint_item)
+                ));
+            }
+        });
+    }
+
+    fn visit_instance(
+        linter: &'a mut LintState<'tcx>,
+        visited: &mut FxHashSet<Instance<'tcx>>,
+        instance: Instance<'tcx>,
+        from_instantiation: Option<InstantiationSite<'tcx>>,
+    ) {
+        let tcx = linter.tcx;
+        let owner = instance.def_id();
+
+        if !tcx.is_mir_available(owner) {
+            // We've already compiled this item in a previous crate and we didn't save the
+            // MIR between crates.
+            // We must have checked the item when it was compiled, so just ignore it.
+            info!("no MIR for {owner:?}");
+            return;
+        } else if !visited.insert(instance) {
+            // We've already linted this instance (or maybe we're still halfway through linting it).
+            // Don't loop forever.
+            //
+            // NOTE: this means that `-Z deduplicate-diagnostics=no` doesn't work properly for
+            // post-mono errors. I think this isn't worth fixing; just use separate test files if
+            // you need to test the same instance being instantiated more than once.
+            //
+            // NOTE: because of the funny way we calculate lint nodes, this means that if the same
+            // item is instantiated in multiple places, only the lint level of the first
+            // instantiation will be respected. It might be possible to fix this by caching the
+            // lint level in addition to the instance itself?
+            info!("already linted {instance:?}");
+            return;
+        }
+
+        let body = tcx.instance_mir(instance.def);
+        let mut this = LintPostMono { linter, visited, instance, body, from_instantiation };
+        for (bb, data) in mir::traversal::reachable(body) {
+            this.visit_basic_block_data(bb, data);
+        }
+    }
+
+    fn get_call_def_mir(
+        &self,
+        terminator: &Terminator<'tcx>,
+        _loc: Location,
+    ) -> Option<(Instance<'tcx>, DefId)> {
+        let tcx = self.linter.tcx;
+        let span = terminator.source_info.span;
+
+        let (pre_mono_call, call_instance) = match &terminator.kind {
+            TerminatorKind::Call { func, .. } | TerminatorKind::TailCall { func, .. } => {
+                let Some((pre_mono_call, generic_args)) = func.const_fn_def() else {
+                    match func.ty(self.body, tcx).kind() {
+                        kind @ ty::FnDef(..) => {
+                            span_bug!(span, "{kind:?} should have been a const_fn_def?")
+                        }
+                        // ok: see reasoning in THIR pass, we have checks to ensure all function
+                        // pointers we can get came from a certified function.
+                        ty::FnPtr(..) => {}
+                        _ => {
+                            // If this is anything other than a function item, it can't have generics and
+                            // therefore must have been checked by the THIR pass.
+                            // TODO: are we sure is this true when we're passed an `impl Fn`?
+                            tcx.dcx()
+                                .span_delayed_bug(span, format!("called a non-function? {func:?}"));
+                        }
+                    }
+                    info!("ignoring call to non-constant function {func:?}");
+                    return None;
+                };
+                let instance = self.monomorphize_instance(pre_mono_call, generic_args, span);
+                (pre_mono_call, instance)
+            }
+            TerminatorKind::Drop { place, target: _, unwind: _, replace: _, drop, async_fut } => {
+                if drop.is_some() || async_fut.is_some() {
+                    span_bug!(span, "ferrocene::certified doesn't know how to check async drop");
+                }
+
+                let drop_in_place = tcx.lang_items().drop_in_place_fn().unwrap();
+                let (ty, _) = self.monomorphize_args(place.ty(self.body, tcx), span);
+                let generics = tcx.mk_args(&[ty.ty.into()]);
+                // Use DropGlue directly rather than going through drop_in_place so that we get
+                // better spans.
+                let def = InstanceKind::DropGlue(drop_in_place, Some(ty.ty));
+                let instance = Instance { def, args: generics };
+                debug!("resolve drop glue => instance={instance:?}, ty={ty:?}");
+                (drop_in_place, instance)
+            }
+            _ => return None,
+        };
+
+        // if call_instance.def_id() == pre_mono_call
+        //     && generic_args.is_empty()
+        //     && pre_mono_call.is_local()
+        //     && tcx.dcx().err_count() == 0
+        // {
+        // TODO: this is broken if the warning isn't set to Deny, lol
+        // tcx.dcx().span_delayed_bug(span, format!("THIR pass didn't catch simple call? {pre_mono_call:?}"));
+        // }
+
+        Some((call_instance, pre_mono_call))
+    }
+
+    fn monomorphize_instance(
+        &self,
+        def_id: DefId,
+        generic_args: GenericArgsRef<'tcx>,
+        span: Span,
+    ) -> Instance<'tcx> {
+        let (mono_args, typing_env) = self.monomorphize_args(generic_args, span);
+        Instance::expect_resolve(self.linter.tcx, typing_env, def_id, mono_args, span)
+    }
+
+    fn monomorphize_args<T>(
+        &self,
+        generic_args: T,
+        span: Span,
+    ) -> (T, TypingEnv<'tcx>)
+    where
+        T: TypeFoldable<TyCtxt<'tcx>>,
+    {
+        let tcx = self.linter.tcx;
+
+        let env = TypingEnv::post_analysis(tcx, self.linter.item);
+        let args = self.instance.instantiate_mir_and_normalize_erasing_regions(
+            tcx,
+            env,
+            EarlyBinder::bind(generic_args),
+        );
+        (args, env)
+    }
+}
+

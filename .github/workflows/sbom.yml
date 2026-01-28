@@ -25,7 +25,8 @@ jobs:
         run: |
           npm install -g corepack
           corepack install
-          yarn install
+          
+        #yarn install
 
       - name: Temp tools
         run: |

@@ -89,6 +89,8 @@ node_modules
 /src/doc/rustc-dev-guide/mermaid.min.js
 .yarn/install-state.gz
 .yarn/releases/
+.pnp.cjs
+.pnp.loader.mjs
 
 ## Rustdoc GUI tests
 tests/rustdoc-gui/src/**.lock

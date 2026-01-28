@@ -10,7 +10,7 @@ use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_span::Span;
 use tracing::{debug, info};
 
-use crate::ferrocene::certified::{InstantiateResult, LintState, UseKind};
+use crate::ferrocene::certified::{InstantiateResult, LintState, Use, UseKind};
 
 pub(super) struct LintThir<'thir, 'tcx> {
     thir: &'thir Thir<'tcx>,
@@ -56,10 +56,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         Some(())
     }
 
-    fn get_call_def_thir(&mut self, expr: &thir::Expr<'tcx>) -> Option<UseKind<'tcx>> {
+    fn get_call_def_thir(&mut self, expr: &thir::Expr<'tcx>) -> Option<Use<'tcx>> {
         let tcx = self.linter.tcx;
+        let mut span = expr.span;
 
-        match expr.kind {
+        let use_kind = match expr.kind {
             thir::ExprKind::NamedConst { def_id, .. }
             | thir::ExprKind::StaticRef { def_id, .. } => {
                 // Statics and constants have bodies, but they are always evaluated at compile time.
@@ -71,23 +72,23 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // However, it's possible for runtime code to access an unknown function type from
                 // this constant. Ensure that it's marked with `prevalidated` so that its body gets
                 // checked.
-                Some(UseKind::ContainsTy(def_id, unknown_fn, expr.span))
+                UseKind::ContainsTy(def_id, unknown_fn)
             }
             thir::ExprKind::ZstLiteral { .. } => match expr.ty.kind() {
                 ty::FnDef(maybe_trait_fn, generic_args) => {
                     debug!("saw zst {:?}", expr.ty);
                     let fn_def = self.get_concrete_fn_def(*maybe_trait_fn, generic_args, expr.span)?;
-                    Some(UseKind::Named(fn_def.def_id(), expr.span))
+                    UseKind::Named(fn_def.def_id())
                 }
                 _ => span_bug!(expr.span, "called ZST literals should always be named functions"),
             },
             // we use a custom span here, not the expr's span, so return immediately.
             thir::ExprKind::Call { ty, .. } => {
-                let diag_span = tcx.sess.source_map().span_until_char(expr.span, '(');
                 let instance = self.instance_of_ty(ty, expr.span)?;
+                span = tcx.sess.source_map().span_until_char(expr.span, '(');
 
                 debug!("saw call to {instance:?}");
-                Some(UseKind::Called(instance, diag_span))
+                UseKind::Called(instance)
             }
             // We assume all closure definitions in this function are also certified.
             // However, we still need to check the closure body to make sure it doesn't call
@@ -96,27 +97,32 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // Closures are never an owner, so we need to hang onto the original owner so that
                 // our synthesized HirIds are valid.
                 LintThir::lint_owner(tcx, self.owner, expr.closure_id);
-                None
+                return None;
             }
-            thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, .. } => {
-                let bound_traits = dyn_trait(expr.ty, expr.span);
-                for trait_ in bound_traits {
-                    for assoc_id in tcx.associated_item_def_ids(trait_.def_id()) {
-                        if tcx.def_kind(assoc_id).is_fn_like() {
-                            // TODO: this is a giant hack and not even right lmao
-                            // in particular it says "not certified" when it should do the
-                            // same thing as fn pointers and say "the compiler can't
-                            // guarantee this is right".
-                            debug!("saw unsized coercion to {:?}", expr.ty);
-                            return Some(UseKind::Named(*assoc_id, expr.span));
-                        }
-                    }
-                }
-                None
-            }
+            thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, .. } => self.check_dyn_trait_coercion(expr)?,
             // Nothing to check.
-            _ => None,
+            _ => return None,
+        };
+
+        Some(Use { kind: use_kind, span })
+    }
+
+    fn check_dyn_trait_coercion(&self, expr: &thir::Expr<'tcx>) -> Option<UseKind<'tcx>> {
+        let tcx = self.linter.tcx;
+        let bound_traits = dyn_trait(expr.ty, expr.span);
+        for trait_ in bound_traits {
+            for assoc_id in tcx.associated_item_def_ids(trait_.def_id()) {
+                if tcx.def_kind(assoc_id).is_fn_like() {
+                    // TODO: this is a giant hack and not even right lmao
+                    // in particular it says "not certified" when it should do the
+                    // same thing as fn pointers and say "the compiler can't
+                    // guarantee this is right".
+                    debug!("saw unsized coercion to {:?}", expr.ty);
+                    return Some(UseKind::Named(*assoc_id));
+                }
+            }
         }
+        None
     }
 
     fn instance_of_ty(&self, ty: Ty<'tcx>, span: Span) -> Option<Instance<'tcx>> {

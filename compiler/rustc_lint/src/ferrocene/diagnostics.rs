@@ -3,7 +3,7 @@ use rustc_hir::{HirId, def_id::DefId};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
-use crate::ferrocene::{UNCERTIFIED, certified::{LintState, UseKind}};
+use crate::ferrocene::{UNCERTIFIED, certified::{LintState, Use, UseKind}};
 
 impl<'tcx> LintState<'tcx> {
     fn func_span(&self, def_id: DefId) -> Span {
@@ -16,11 +16,11 @@ impl<'tcx> LintState<'tcx> {
     pub(super) fn lint(
         &mut self,
         lint_node: HirId,
-        use_: UseKind<'tcx>,
+        use_: Use<'tcx>,
         extra_info: impl FnOnce(&mut Diag<'_, ()>, Option<&mut MultiSpan>),
     ) {
         let Self { tcx, item: owner, .. } = *self;
-        let (callee, receiver_span) = use_.as_parts();
+        let (callee, receiver_span) = (use_.def_id(), use_.span);
 
         debug!("linting node {lint_node:?}");
         tcx.node_span_lint(UNCERTIFIED, lint_node, receiver_span, |diag| {
@@ -32,18 +32,16 @@ impl<'tcx> LintState<'tcx> {
             ));
 
             // Need to do this lazily or `with_no_trimmed_paths` will panic :/
-            let name = match use_ {
-                UseKind::Named(_, _) | UseKind::ContainsTy(..) => tcx.def_path_str(callee),
-                UseKind::Cast(instance, _) | UseKind::Called(instance, _) => {
-                    tcx.def_path_str_with_args(callee, instance.args)
-                }
+            let name = match use_.opt_instance() {
+                None => tcx.def_path_str(callee),
+                Some(instance) => tcx.def_path_str_with_args(callee, instance.args),
             };
             // TODO: this is horrible for `Cast` or `ContainsTy`. Need to rewrite all this
             // logic to bring the appropriate data into `lint` and then actually look at
             // the discriminant instead of just collapsing it to `name`.
             diag.span_label(self.func_span(callee), format!("`{name}` is unvalidated"));
 
-            if matches!(use_, UseKind::ContainsTy(..)) {
+            if matches!(use_.kind, UseKind::ContainsTy(..)) {
                 diag.note(format!("`{name}` contains a function pointer that might be called at runtime"));
                 diag.note("the Ferrocene compiler does not know if that function was verified, so it must assume it is unverified");
             }
@@ -80,9 +78,9 @@ impl<'tcx> LintState<'tcx> {
     }
 }
 
-impl<'tcx> UseKind<'tcx> {
+impl<'tcx> Use<'tcx> {
     pub(super) fn present_tense(self) -> &'static str {
-        match self {
+        match self.kind{
             UseKind::Called(..) => "calls",
             UseKind::Named(..) => "uses",
             // originally this said "type-erases" but that's unfamiliar jargon, and it's not clear

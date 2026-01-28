@@ -169,11 +169,11 @@ impl<'tcx> LintState<'tcx> {
     pub(super) fn check(
         &mut self,
         lint_node: HirId,
-        use_: UseKind<'tcx>,
+        use_: Use<'tcx>,
         extra_info: impl FnOnce(&mut Diag<'_, ()>, Option<&mut MultiSpan>),
     ) {
         let tcx = self.tcx;
-        let callee = use_.as_parts().0;
+        let callee = use_.def_id();
 
         if matches!(item_is_validated(tcx, callee), ValidatedStatus::Validated { .. }) {
             debug!("no need to lint call to certified {callee:?}");
@@ -202,18 +202,31 @@ pub(super) enum InstantiateResult<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub(super) enum UseKind<'tcx> {
-    Called(Instance<'tcx>, Span),
-    Named(DefId, Span),
-    Cast(Instance<'tcx>, Span),
-    ContainsTy(DefId, Ty<'tcx>, Span),
+pub(super) struct Use<'tcx> {
+    pub(super) kind: UseKind<'tcx>,
+    pub(super) span: Span,
 }
 
-impl<'tcx> UseKind<'tcx> {
-    pub(super) fn as_parts(self) -> (DefId, Span) {
-        match self {
-            Self::Called(instance, span) | Self::Cast(instance, span) => (instance.def_id(), span),
-            Self::Named(id, span) | Self::ContainsTy(id, _, span) => (id, span),
+#[derive(Copy, Clone, Debug)]
+pub(super) enum UseKind<'tcx> {
+    Called(Instance<'tcx>),
+    Cast(Instance<'tcx>),
+    ContainsTy(DefId, Ty<'tcx>),
+    Named(DefId),
+}
+
+impl<'tcx> Use<'tcx> {
+    pub(super) fn def_id(self) -> DefId {
+        match self.kind {
+            UseKind::Called(instance) | UseKind::Cast(instance) => instance.def_id(),
+            UseKind::Named(id) | UseKind::ContainsTy(id, _) => id,
+        }
+    }
+
+    pub(super) fn opt_instance(self) -> Option<Instance<'tcx>> {
+        match self.kind {
+            UseKind::Cast(instance) | UseKind::Called(instance) => Some(instance),
+            UseKind::ContainsTy(..) | UseKind::Named(..) => None,
         }
     }
 }

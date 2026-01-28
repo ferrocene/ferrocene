@@ -16,7 +16,7 @@ use rustc_middle::ty::{
 use rustc_span::Span;
 use tracing::{debug, info, trace};
 
-use crate::ferrocene::certified::{LintState, UseKind};
+use crate::ferrocene::certified::{LintState, Use, UseKind};
 
 struct LintPostMono<'a, 'tcx> {
     instance: Instance<'tcx>,
@@ -79,7 +79,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
     fn visit_terminator(&mut self, terminator: &Terminator<'tcx>, location: Location) {
         if let Some((callee_instance, pre_mono_call)) = self.get_call_def_mir(terminator, location)
         {
-            let use_ = UseKind::Called(callee_instance, terminator.source_info.span);
+            let use_ = Use { kind: UseKind::Called(callee_instance), span: terminator.source_info.span };
             self.on_edge(use_, &terminator.source_info, pre_mono_call, |_| ());
         }
     }
@@ -104,7 +104,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
 
         let callee_instance = self.monomorphize_instance(pre_mono_call, generic_args, call_span);
         // TODO: need to also check this in THIR pass
-        let use_ = UseKind::Cast(callee_instance, call_span);
+        let use_ = Use { kind: UseKind::Cast(callee_instance), span: call_span };
         let source_info = self.body.source_info(location);
         self.on_edge(use_, source_info, pre_mono_call, |diag| {
             diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
@@ -116,12 +116,12 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
 impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     fn on_edge(
         &mut self,
-        use_: UseKind<'tcx>,
+        use_: Use<'tcx>,
         source_info: &SourceInfo,
         pre_mono_call: DefId,
         decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
     ) {
-        let (callee_instance, call_span) = use_.expect_instance();
+        let callee_instance = use_.expect_instance();
 
         // Recurse into the instantiated call. Keep the call span for diagnostics.
         // Try to update the lint node if possible, but use the lint node of the caller if the
@@ -147,7 +147,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             // synthesized by a MIR shim anyway.
             self.from_instantiation.unwrap()
         } else {
-            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: call_span }
+            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: use_.span }
         };
         trace!("recurse into {callee_instance:?}");
         LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
@@ -156,7 +156,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     fn lint_at(
         &mut self,
         lint_node: HirId,
-        use_: UseKind<'tcx>,
+        use_: Use<'tcx>,
         pre_mono_call: DefId,
         decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
     ) {
@@ -175,7 +175,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         };
 
         let tcx = self.linter.tcx;
-        let (callee_instance, _) = use_.expect_instance();
+        let callee_instance = use_.expect_instance();
 
         let callee = callee_instance.def_id();
         let lint_item = self.linter.item;
@@ -364,12 +364,11 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     }
 }
 
-impl<'tcx> UseKind<'tcx> {
+impl<'tcx> Use<'tcx> {
     #[track_caller]
-    fn expect_instance(self) -> (Instance<'tcx>, Span) {
-        match self {
-            UseKind::Cast(instance, span) | UseKind::Called(instance, span) => (instance, span),
-            UseKind::ContainsTy(..) | UseKind::Named(..) => unreachable!(), // only in THIR pass
-        }
+    fn expect_instance(self) -> Instance<'tcx> {
+        self.opt_instance().unwrap_or_else(|| {
+            span_bug!(self.span, "called expect_instance on a THIR-only lint kind")
+        })
     }
 }

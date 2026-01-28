@@ -10,39 +10,60 @@ const summarySelectors = [
 ];
 let functionsSelector = ".functions"
 
-function onSearch(query) {
-    var numLinesTested = 0;
-    var numLinesUntested = 0;
+function putBefore(path, section) {
+    var path = details.querySelector("code").innerText;
+    var before = Array.prototype.slice.call(section.children).find(function(e) {
+        return e.querySelector("code").innerText > path;
+    });
 
-    for (section of document.querySelectorAll("section")) {
-        var numFunctions = 0;
-        for (details of section.querySelectorAll("details")) {
-            var summary = details.querySelector("summary");
-            if (summary.innerText.search(query) === -1) {
-                summary.style.display = "none";
-            } else {
-                summary.style = "";
-
-                var testedLines = parseInt(summary.getAttribute("tested-lines"));
-                var untestedLines = parseInt(summary.getAttribute("untested-lines"));
-                var annotatedLines = parseInt(summary.getAttribute("annotated-lines"));
-
-                numLinesTested += testedLines;
-                numLinesUntested += untestedLines + annotatedLines;
-                numFunctions += 1;
-            }
-        }
-        section.querySelector(".count").textContent = numFunctions.toString();
-        document.querySelector("button." + section.classList[0]).querySelector(".count").textContent = numFunctions.toString();
+    if (before === null) {
+        section.appendChild(details);
+    } else {
+        section.insertBefore(details, before);
     }
-
-    var totalLines = numLinesTested + numLinesUntested;
-    var percentileLinesTested = (numLinesTested / totalLines) * 100.0;
-
-    document.querySelector(".coverage-summary").children[0].textContent = `${percentileLinesTested.toFixed(2)}% (${numLinesTested}/${totalLines} lines)`;
 }
 
 function main() {
+    var currentQuery = "";
+    var annotatedIsTested = false;
+
+    function onSearch() {
+        var numLinesTested = 0;
+        var numLinesUntested = 0;
+
+        for (section of document.querySelectorAll("section")) {
+            var numFunctions = 0;
+            for (details of section.querySelectorAll("details")) {
+                var summary = details.querySelector("summary");
+                if (summary.innerText.search(currentQuery) === -1) {
+                    summary.style.display = "none";
+                } else {
+                    summary.style = "";
+
+                    var testedLines = parseInt(summary.getAttribute("tested-lines"));
+                    var untestedLines = parseInt(summary.getAttribute("untested-lines"));
+                    var annotatedLines = parseInt(summary.getAttribute("annotated-lines"));
+
+                    numLinesTested += testedLines;
+                    numLinesUntested += untestedLines;
+                    if (annotatedIsTested) {
+                        numLinesTested += annotatedLines;
+                    } else {
+                        numLinesUntested += annotatedLines;
+                    }
+                    numFunctions += 1;
+                }
+            }
+            section.querySelector(".count").textContent = numFunctions.toString();
+            document.querySelector("button." + section.classList[0]).querySelector(".count").textContent = numFunctions.toString();
+        }
+
+        var totalLines = numLinesTested + numLinesUntested;
+        var percentileLinesTested = (numLinesTested / totalLines) * 100.0;
+
+        document.querySelector(".coverage-summary").children[0].textContent = `${percentileLinesTested.toFixed(2)}% (${numLinesTested}/${totalLines} lines)`;
+    }
+
     let functionsElem = document.querySelector(functionsSelector);
     for (selector of summarySelectors) {
         let summaryItemElem = document.querySelector(selector);
@@ -65,39 +86,50 @@ function main() {
     let checkbox = document.querySelector("input[name=annotated-checkbox]");
 
     checkbox.addEventListener('change', function() {
-        var r = document.querySelector(':root');
-        var rs = getComputedStyle(r);
-        if (this.checked) {
-            let color = rs.getPropertyValue("--var-ignored");
-            r.style.setProperty("--var-untested-annotated", color);
-            r.style.setProperty("--var-partial-annotated", color);
+        annotatedIsTested = this.checked;
 
-            r.style.setProperty("--var-annotated-text", "line-through");
+        var fullyTestedSection = document.querySelector("section.fully-tested").querySelector(".list");
+        var partiallyTestedSection = document.querySelector("section.partially-tested").querySelector(".list");
+        var fullyUntestedSection = document.querySelector("section.fully-untested").querySelector(".list");
+        var fullyIgnoredSection = document.querySelector("section.fully-ignored").querySelector(".list");
+
+        if (annotatedIsTested) {
+            for (details of document.querySelectorAll("details.annotation")) {
+                var path = details.querySelector("code").innerText;
+                putBefore(path, fullyTestedSection);
+            }
         } else {
-            let color_untested = rs.getPropertyValue("--var-untested");
-            r.style.setProperty("--var-untested-annotated", color_untested);
-
-            let color_partial = rs.getPropertyValue("--var-partial");
-            r.style.setProperty("--var-partial-annotated", color_partial);
-
-            r.style.setProperty("--var-annotated-text", null);
+            for (details of document.querySelectorAll("details.annotation")) {
+                var path = details.querySelector("code").innerText;
+                if (details.classList.contains("partially-tested")) {
+                    putBefore(path, partiallyTestedSection);
+                } else if (details.classList.contains("fully-untested")) {
+                    putBefore(path, fullyUntestedSection);
+                } else if (details.classList.contains("fully-tested")) {
+                    putBefore(path, fullyTestedSection);
+                } else {
+                    putBefore(path, fullyIgnoredSection);
+                }
+            }
         }
+
+        onSearch();
     });
 
     let searchBar = document.querySelector("input[name=search-bar]");
     searchBar.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
-            let query = searchBar.value;
-            onSearch(query);
+            currentQuery = searchBar.value;
+            onSearch();
         }
     });
     let searchButton = document.querySelector("button[name=search-button]");
     searchButton.addEventListener("click", function(event) {
-        let query = searchBar.value;
-        onSearch(query);
+        currentQuery = searchBar.value;
+        onSearch();
     });
 
-    onSearch(".");
+    onSearch();
 }
 
 if (document.readyState === "loading") {

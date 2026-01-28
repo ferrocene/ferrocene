@@ -92,7 +92,7 @@ pub(crate) fn generate(
         }
         div class="misc-checkboxes" {
                 input type="checkbox" name="annotated-checkbox" unchecked;
-                "Line-through annotated functions"
+                "count annotated lines as tested"
         }
     );
 

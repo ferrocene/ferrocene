@@ -1,8 +1,7 @@
 use rustc_errors::{Diag, MultiSpan};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{item_is_validated, ValidatedStatus};
 use rustc_hir::{HirId, def_id::DefId};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
-use tracing::{debug, info};
+use tracing::debug;
 
 use crate::ferrocene::{UNCERTIFIED, certified::{LintState, UseKind}};
 
@@ -21,20 +20,7 @@ impl<'tcx> LintState<'tcx> {
         extra_info: impl FnOnce(&mut Diag<'_, ()>, Option<&mut MultiSpan>),
     ) {
         let Self { tcx, item: owner, .. } = *self;
-
         let (callee, receiver_span) = use_.as_parts();
-
-        if matches!(item_is_validated(tcx, callee), ValidatedStatus::Validated { .. }) {
-            debug!("no need to lint call to certified {callee:?}");
-            return;
-        }
-
-        // We have conditional logic below that -Z deduplicate-diagnostics doesn't know about.
-        // Deduplicate lints manually.
-        if tcx.sess.opts.unstable_opts.deduplicate_diagnostics && !self.shown_lints.insert(callee) {
-            info!(r#"ignoring duplicate lint for {callee:?}"#);
-            return;
-        }
 
         debug!("linting node {lint_node:?}");
         tcx.node_span_lint(UNCERTIFIED, lint_node, receiver_span, |diag| {

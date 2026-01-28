@@ -88,7 +88,8 @@
 //! We get these type variables from a `ParamEnv`.
 
 use rustc_data_structures::fx::FxHashSet;
-use rustc_hir::Item;
+use rustc_errors::{Diag, MultiSpan};
+use rustc_hir::{HirId, Item};
 use rustc_hir::def::DefKind;
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::span_bug;
@@ -96,7 +97,7 @@ use rustc_middle::ty::{Instance, Ty, TyCtxt};
 use rustc_session::{declare_lint_pass, declare_tool_lint};
 use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::Span;
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::ferrocene::thir::LintThir;
 use crate::{LateContext, LateLintPass};
@@ -163,6 +164,30 @@ impl<'tcx> LintState<'tcx> {
             shown_item: false,
             shown_lints: FxHashSet::default(),
         })
+    }
+
+    pub(super) fn check(
+        &mut self,
+        lint_node: HirId,
+        use_: UseKind<'tcx>,
+        extra_info: impl FnOnce(&mut Diag<'_, ()>, Option<&mut MultiSpan>),
+    ) {
+        let tcx = self.tcx;
+        let callee = use_.as_parts().0;
+
+        if matches!(item_is_validated(tcx, callee), ValidatedStatus::Validated { .. }) {
+            debug!("no need to lint call to certified {callee:?}");
+            return;
+        }
+
+        // We have conditional logic below that -Z deduplicate-diagnostics doesn't know about.
+        // Deduplicate lints manually.
+        if tcx.sess.opts.unstable_opts.deduplicate_diagnostics && !self.shown_lints.insert(callee) {
+            info!(r#"ignoring duplicate lint for {callee:?}"#);
+            return;
+        }
+
+        self.lint(lint_node, use_, extra_info);
     }
 }
 

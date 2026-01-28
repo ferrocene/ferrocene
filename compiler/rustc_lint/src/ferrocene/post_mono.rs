@@ -184,7 +184,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         // not the callee that actually caused the error.
         // This is so people can `allow` individual instantiations rather than having to
         // blanket-allow all of them.
-        self.linter.lint(lint_node, use_, |diag: &mut Diag<'_, _>, validated_span| {
+        self.linter.check(lint_node, use_, |diag: &mut Diag<'_, _>, validated_span| {
             decorate(diag);
 
             let callee_descr = format!(

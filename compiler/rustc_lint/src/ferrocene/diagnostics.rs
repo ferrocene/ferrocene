@@ -13,7 +13,7 @@ impl<'tcx> LintState<'tcx> {
         }
     }
 
-    pub(super) fn lint(
+    pub(super) fn lint_use(
         &mut self,
         lint_node: HirId,
         use_: Use<'tcx>,

@@ -166,7 +166,7 @@ impl<'tcx> LintState<'tcx> {
         })
     }
 
-    pub(super) fn check(
+    pub(super) fn check_use(
         &mut self,
         lint_node: HirId,
         use_: Use<'tcx>,
@@ -187,7 +187,7 @@ impl<'tcx> LintState<'tcx> {
             return;
         }
 
-        self.lint(lint_node, use_, extra_info);
+        self.lint_use(lint_node, use_, extra_info);
     }
 }
 

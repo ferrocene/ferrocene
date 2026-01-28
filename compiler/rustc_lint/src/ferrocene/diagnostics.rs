@@ -3,7 +3,7 @@ use rustc_hir::{HirId, def_id::DefId};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
-use crate::ferrocene::{UNCERTIFIED, certified::{LintState, Use, UseKind}};
+use crate::ferrocene::{UNCERTIFIED, certified::{LintState, Use, UseKind}, post_mono::InstantiationSite};
 
 impl<'tcx> LintState<'tcx> {
     fn func_span(&self, def_id: DefId) -> Span {
@@ -62,7 +62,9 @@ impl<'tcx> LintState<'tcx> {
                 if let Some(annotation) = self.annotation {
                     validated_span.push_span_label(annotation, "marked as validated here");
                 }
+
                 extra_info(diag, Some(&mut validated_span));
+                self.decorate_instantiation(use_, diag, Some(&mut validated_span));
 
                 diag.span_note(
                     validated_span,
@@ -73,8 +75,39 @@ impl<'tcx> LintState<'tcx> {
                 }
             } else {
                 extra_info(diag, None);
+                self.decorate_instantiation(use_, diag, None);
             }
         });
+    }
+
+    fn decorate_instantiation(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>, validated_span: Option<&mut MultiSpan>) {
+        let tcx = self.tcx;
+        if let Some(InstantiationSite { caller_span, caller_instance, pre_mono_item, lint_node: _ }) = use_.from_instantiation {
+            let callee_descr = format!(
+                "generic {} `{}`",
+                tcx.def_descr(pre_mono_item),
+                rustc_middle::ty::print::with_no_trimmed_paths!(tcx.def_path_str(pre_mono_item))
+            );
+
+            let msg = format!(
+                "{callee_descr} instantiated by `{}`",
+                tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args)
+            );
+
+            if let Some(multi) = validated_span {
+                multi.push_span_label(caller_span, msg);
+            } else {
+                diag.span_note(
+                    caller_span,
+                    format!("{msg}, which is called from a validated entrypoint"),
+                );
+            }
+        // } else {
+        //     diag.note(format!(
+        //             "{callee_descr} instantiated by validated entrypoint {}",
+        //             tcx.def_path_str(self.item)
+        //     ));
+        }
     }
 }
 

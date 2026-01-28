@@ -29,9 +29,10 @@ struct LintPostMono<'a, 'tcx> {
 #[derive(Copy, Clone, Debug)]
 pub(super) struct InstantiationSite<'tcx> {
     /// NOTE: this points to the call site which causes the callee to be monomorphized.
-    lint_node: HirId,
-    caller_span: Span,
-    caller_instance: Instance<'tcx>,
+    pub(super) lint_node: HirId,
+    pub(super) caller_span: Span,
+    pub(super) caller_instance: Instance<'tcx>,
+    pub(super) pre_mono_item: DefId,
 }
 
 // Lint all used items recursively, starting from validated roots.
@@ -144,14 +145,14 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             },
         };
 
-        self.lint_at(lint_node, use_, pre_mono_call, decorate);
+        self.lint_at(lint_node, use_, decorate);
 
         let site = if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_in_place_fn() {
             // We want to show a better span; drop_in_place is never interesting since the body is
             // synthesized by a MIR shim anyway.
             self.from_instantiation.unwrap()
         } else {
-            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: use_.span }
+            InstantiationSite { lint_node, caller_instance: self.instance, caller_span: use_.span, pre_mono_item: pre_mono_call }
         };
         trace!("recurse into {callee_instance:?}");
         LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
@@ -161,62 +162,22 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         &mut self,
         lint_node: HirId,
         use_: Use<'tcx>,
-        pre_mono_call: DefId,
         decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
     ) {
-        let caller = match self.from_instantiation {
-            Some(InstantiationSite { caller_span, caller_instance, .. }) => {
-                Some((caller_span, caller_instance))
-            }
-            None => {
-                // TODO: i think this is wrong? it's assuming THIR will catch all issues in the
-                // current crate, but i'm not sure that's true ...
-                info!("ignoring root instantiation of {use_:?}");
-                return;
-                // info!("linting root instantiation of {use_:?}");
-                // None
-            }
-        };
-
-        let tcx = self.linter.tcx;
-        let callee_instance = use_.expect_instance();
-
-        let callee = callee_instance.def_id();
-        let lint_item = self.linter.item;
+        if self.from_instantiation.is_none() {
+            // TODO: i think this is wrong? it's assuming THIR will catch all issues in the
+            // current crate, but i'm not sure that's true ...
+            info!("ignoring root instantiation of {use_:?}");
+            // info!("linting root instantiation of {use_:?}");
+            return;
+        }
 
         // This is a bit odd - we use the HIR id of the caller function,
         // not the callee that actually caused the error.
         // This is so people can `allow` individual instantiations rather than having to
         // blanket-allow all of them.
-        self.linter.check_use(lint_node, use_, |diag: &mut Diag<'_, _>, validated_span| {
+        self.linter.check_use(lint_node, use_, |diag: &mut Diag<'_, _>, _validated_span| {
             decorate(diag);
-
-            let callee_descr = format!(
-                "generic {} `{}`",
-                tcx.def_descr(callee),
-                rustc_middle::ty::print::with_no_trimmed_paths!(tcx.def_path_str(pre_mono_call))
-            );
-
-            if let Some((caller_span, caller_instance)) = caller {
-                let msg = format!(
-                    "{callee_descr} instantiated by `{}`",
-                    tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args)
-                );
-
-                if let Some(multi) = validated_span {
-                    multi.push_span_label(caller_span, msg);
-                } else {
-                    diag.span_note(
-                        caller_span,
-                        format!("{msg}, which is called from a validated entrypoint"),
-                    );
-                }
-            } else {
-                diag.note(format!(
-                    "{callee_descr} instantiated by validated entrypoint {}",
-                    tcx.def_path_str(lint_item)
-                ));
-            }
         });
     }
 

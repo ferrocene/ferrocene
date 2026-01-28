@@ -99,7 +99,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 LintThir::lint_owner(tcx, self.owner, expr.closure_id);
                 return None;
             }
-            thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, .. } => self.check_dyn_trait_coercion(expr)?,
+            thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, source, .. } => self.check_dyn_trait_coercion(expr, source)?,
             // Nothing to check.
             _ => return None,
         };
@@ -107,7 +107,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         Some(Use { kind: use_kind, span, from_instantiation: None })
     }
 
-    fn check_dyn_trait_coercion(&self, expr: &thir::Expr<'tcx>) -> Option<UseKind<'tcx>> {
+    fn check_dyn_trait_coercion(&self, expr: &thir::Expr<'tcx>, source: thir::ExprId) -> Option<UseKind<'tcx>> {
         let tcx = self.linter.tcx;
         let bound_traits = dyn_trait(expr.ty, expr.span);
         for trait_ in bound_traits {
@@ -117,8 +117,13 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     // in particular it says "not certified" when it should do the
                     // same thing as fn pointers and say "the compiler can't
                     // guarantee this is right".
+                    //
+                    // TODO: only error here if the implementation of the trait is uncertified
+                    // TODO: list all uncertified functions
+                    // TODO: this shows the type of the trait object, not the type
+                    // of the object being cast.
                     debug!("saw unsized coercion to {:?}", expr.ty);
-                    return Some(UseKind::Named(*assoc_id));
+                    return Some(UseKind::TraitObjectCast(*assoc_id, self.thir[source].ty));
                 }
             }
         }

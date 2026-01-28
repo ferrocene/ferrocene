@@ -55,7 +55,7 @@ LL | fn normal_def() {
 LL | static CERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |                                            ^^^^^^^^^^
 
-error: validated constant uses an unvalidated method
+error: validated constant possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:95:76
    |
 LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
@@ -66,6 +66,8 @@ LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = 
    = note: `std::cmp::PartialOrd::partial_cmp` is unvalidated
    |
    = help: contact Ferrocene support to see if this method is possible to certify
+   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialOrd` is validated
+   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialOrd::partial_cmp`
 note: `CERTIFIED_DYN_CONST` is validated
   --> $DIR/lint-uncertified.rs:95:7
    |
@@ -74,7 +76,7 @@ LL | #[ferrocene::prevalidated]
 LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |       ^^^^^^^^^^^^^^^^^^^
 
-error: validated static uses an unvalidated method
+error: validated static possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:98:78
    |
 LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
@@ -83,6 +85,9 @@ LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) 
   --> $SRC_DIR/core/src/cmp.rs:LL:COL
    |
    = note: `std::cmp::PartialOrd::partial_cmp` is unvalidated
+   |
+   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialOrd` is validated
+   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialOrd::partial_cmp`
 note: `CERTIFIED_DYN_STATIC` is validated
   --> $DIR/lint-uncertified.rs:98:8
    |
@@ -144,7 +149,7 @@ LL | #[derive(Clone)]
 LL |     trait_fn_type(&Unvalidated);
    |     ^^^^^^^^^^^^^
 
-error: validated function uses an unvalidated method
+error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:121:51
    |
 LL |     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated;
@@ -153,8 +158,11 @@ LL |     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated;
   --> $SRC_DIR/core/src/cmp.rs:LL:COL
    |
    = note: `std::cmp::PartialOrd::partial_cmp` is unvalidated
+   |
+   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialOrd` is validated
+   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialOrd::partial_cmp`
 
-error: validated function uses an unvalidated method
+error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:124:70
    |
 LL |     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unvalidated;
@@ -163,8 +171,11 @@ LL |     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unval
   --> $SRC_DIR/core/src/cmp.rs:LL:COL
    |
    = note: `std::cmp::PartialEq::eq` is unvalidated
+   |
+   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialEq` is validated
+   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialEq::eq`
 
-error: validated function uses an unvalidated method
+error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:131:52
    |
 LL |     let dyn_trait_fully_certified: &dyn ToString = &Unvalidated;
@@ -173,6 +184,9 @@ LL |     let dyn_trait_fully_certified: &dyn ToString = &Unvalidated;
   --> $SRC_DIR/alloc/src/string.rs:LL:COL
    |
    = note: `to_string` is unvalidated
+   |
+   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `ToString` is validated
+   = note: as a precaution, it must assume you will eventually call `to_string`
 
 error: validated function uses an unvalidated function
   --> $DIR/lint-uncertified.rs:29:13

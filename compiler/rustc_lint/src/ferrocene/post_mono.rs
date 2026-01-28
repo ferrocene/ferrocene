@@ -104,7 +104,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
 
         let callee_instance = self.monomorphize_instance(pre_mono_call, generic_args, call_span);
         // TODO: need to also check this in THIR pass
-        let use_ = self.use_(UseKind::Cast(callee_instance), call_span);
+        let use_ = self.use_(UseKind::FnPtrCast(callee_instance), call_span);
         let source_info = self.body.source_info(location);
         self.on_edge(use_, source_info, pre_mono_call);
     }

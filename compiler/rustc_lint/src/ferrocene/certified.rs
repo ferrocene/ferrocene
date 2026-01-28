@@ -210,7 +210,8 @@ pub(super) struct Use<'tcx> {
 #[derive(Copy, Clone, Debug)]
 pub(super) enum UseKind<'tcx> {
     Called(Instance<'tcx>),
-    Cast(Instance<'tcx>),
+    FnPtrCast(Instance<'tcx>),
+    TraitObjectCast(DefId, Ty<'tcx>),
     ContainsTy(DefId, Ty<'tcx>),
     Named(DefId),
 }
@@ -218,15 +219,16 @@ pub(super) enum UseKind<'tcx> {
 impl<'tcx> Use<'tcx> {
     pub(super) fn def_id(self) -> DefId {
         match self.kind {
-            UseKind::Called(instance) | UseKind::Cast(instance) => instance.def_id(),
+            UseKind::Called(instance) | UseKind::FnPtrCast(instance) => instance.def_id(),
             UseKind::Named(id) | UseKind::ContainsTy(id, _) => id,
+            UseKind::TraitObjectCast(assoc_fn, _) => assoc_fn,
         }
     }
 
     pub(super) fn opt_instance(self) -> Option<Instance<'tcx>> {
         match self.kind {
-            UseKind::Cast(instance) | UseKind::Called(instance) => Some(instance),
-            UseKind::ContainsTy(..) | UseKind::Named(..) => None,
+            UseKind::FnPtrCast(instance) | UseKind::Called(instance) => Some(instance),
+            UseKind::TraitObjectCast(..) | UseKind::ContainsTy(..) | UseKind::Named(..) => None,
         }
     }
 }

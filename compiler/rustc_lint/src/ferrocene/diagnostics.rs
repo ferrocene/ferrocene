@@ -80,9 +80,15 @@ impl<'tcx> LintState<'tcx> {
     }
 
     fn decorate_cast(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) {
-        if matches!(use_.kind, UseKind::Cast(..)) {
+        let tcx = self.tcx;
+        if matches!(use_.kind, UseKind::FnPtrCast(..)) {
             diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
             diag.note("as a precaution, it must assume you will eventually call the function");
+        } else if let UseKind::TraitObjectCast(assoc_fn, ty) = use_.kind {
+            let trait_ = self.tcx.trait_of_assoc(assoc_fn).unwrap();
+            diag.note(format!("Ferrocene cannot tell whether `{ty}`'s implementation of `{}` is validated",
+                tcx.def_path_str(trait_)));
+            diag.note(format!("as a precaution, it must assume you will eventually call `{}`", tcx.def_path_str(assoc_fn)));
         }
     }
 
@@ -124,7 +130,7 @@ impl<'tcx> Use<'tcx> {
             UseKind::Named(..) => "uses",
             // originally this said "type-erases" but that's unfamiliar jargon, and it's not clear
             // that it actually helps understanding.
-            UseKind::Cast(..) => "possibly calls",
+            UseKind::TraitObjectCast(..) | UseKind::FnPtrCast(..) => "possibly calls",
             UseKind::ContainsTy(..) => "uses",
         }
     }

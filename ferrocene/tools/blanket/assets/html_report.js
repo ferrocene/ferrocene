@@ -36,9 +36,9 @@ function main() {
             for (details of section.querySelectorAll("details")) {
                 var summary = details.querySelector("summary");
                 if (summary.innerText.search(currentQuery) === -1) {
-                    summary.style.display = "none";
+                    details.style.display = "none";
                 } else {
-                    summary.style = "";
+                    details.style = "";
 
                     var testedLines = parseInt(summary.getAttribute("tested-lines"));
                     var untestedLines = parseInt(summary.getAttribute("untested-lines"));

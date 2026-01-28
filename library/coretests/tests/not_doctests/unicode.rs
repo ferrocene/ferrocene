@@ -19,3 +19,17 @@ fn test_unicode_is_printable() {
     assert_eq!(string('\u{e01f0}'), "\\u{e01f0}");
     assert_eq!(string('\u{20000}'), "𠀀");
 }
+
+// Cover `core::unicode::unicode_data::skip_search`
+#[test]
+fn test_unicode_skip_search() {
+    fn string(c: char) -> String {
+        let iter: String = c.escape_debug().collect();
+        let disp: String = c.escape_debug().to_string();
+        assert_eq!(iter, disp);
+        iter
+    }
+
+    // 0x300 makes `binary_search_by_key` return `Ok`
+    assert_eq!(string('\u{300}'), "\\u{300}");
+}

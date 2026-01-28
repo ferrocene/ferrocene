@@ -35,6 +35,14 @@ Language changes in Rust 1.93.0
 - `During const-evaluation, support copying pointers byte-by-byte <https://github.com/rust-lang/rust/pull/148259>`_
 - `LUB coercions now correctly handle function item types, and functions with differing safeties <https://github.com/rust-lang/rust/pull/148602>`_
 - `Allow const items that contain mutable references to static (which is *very* unsafe, but not *always* UB) <https://github.com/rust-lang/rust/pull/148746>`_
+
+  * Removed paragraph: :p:`fls_ooOYxhVh8hZo`
+  * Removed paragraph: :p:`fls_zkNFeBLy80UA`
+  * Removed paragraph: :p:`fls_VhzGfnWg7YrG`
+  * Removed paragraph: :p:`fls_qC6L0km0ZMFI`
+  * Removed paragraph: :p:`fls_ibYKKQdB2tDn`
+  * Removed paragraph: :p:`fls_dQdSxf8kOgbi`
+
 - `Add warn-by-default const_item_interior_mutations lint to warn against calls which mutate interior mutable const items <https://github.com/rust-lang/rust/pull/148407>`_
 
   - Lints are outside the scope of FLS

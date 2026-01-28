@@ -19,6 +19,8 @@ use rustc_middle::ty::layout::{
 };
 use rustc_middle::ty::{self, ExistentialTraitRef, Instance, Ty, TyCtxt};
 use rustc_session::Session;
+#[cfg(feature = "master")]
+use rustc_session::config::DebugInfo;
 use rustc_span::source_map::respan;
 use rustc_span::{DUMMY_SP, Span};
 use rustc_target::spec::{HasTargetSpec, HasX86AbiOpt, Target, TlsModel, X86Abi};
@@ -143,6 +145,11 @@ impl<'gcc, 'tcx> CodegenCx<'gcc, 'tcx> {
         supports_f64_type: bool,
         supports_f128_type: bool,
     ) -> Self {
+        #[cfg(feature = "master")]
+        if tcx.sess.opts.debuginfo != DebugInfo::None {
+            context.set_filename(codegen_unit.name().as_str());
+        }
+
         let create_type = |ctype, rust_type| {
             let layout = tcx
                 .layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(rust_type))

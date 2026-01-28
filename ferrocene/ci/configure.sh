@@ -145,6 +145,7 @@ add --set target.x86_64-unknown-linux-musl.sanitizers=false
 
 # experiment to enable code coverage
 add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
+add --set 'target."aarch64v8r-unknown-ferrocene.facade".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
 

@@ -109,9 +109,8 @@ impl Step for Sbom {
 
         if !BootstrapCommand::new("yarn")
             .current_dir(&self.root_dir)
-            .arg("dlx")
-            .arg("-q")
-            .arg("@cyclonedx/yarn-plugin-cyclonedx")
+            .arg("exec")
+            .arg("cyclonedx-yarn")
             .arg("-o")
             .arg(partial_sbom_dir.join(YARN_ROOT_SBOM))
             .run(builder.exec_ctx())

@@ -23,6 +23,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cyclonedx/yarn-plugin-cyclonedx@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@cyclonedx/yarn-plugin-cyclonedx@npm:3.2.1"
+  bin:
+    cyclonedx-yarn: bin/cyclonedx-yarn-cli.js
+  checksum: 10c0/a00841cfd653565e0880903b8729b054327cd72efe1670c5a81a75bd1c782641aa557b04602e8dd4beb562f91efb51e52b58c383fe285614929b281334e03c37
+  languageName: node
+  linkType: hard
+
 "@eslint-community/eslint-utils@npm:^4.2.0":
   version: 4.9.1
   resolution: "@eslint-community/eslint-utils@npm:4.9.1"
@@ -1555,6 +1564,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rustdoc-js-helper@workspace:."
   dependencies:
+    "@cyclonedx/yarn-plugin-cyclonedx": "npm:^3.2.1"
     browser-ui-test: "npm:^0.22.2"
     es-check: "npm:^9.4.4"
     eslint: "npm:^8.57.1"

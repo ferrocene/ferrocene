@@ -282,6 +282,14 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                     return None;
                 };
                 let instance = self.monomorphize_instance(pre_mono_call, generic_args, span);
+                if matches!(instance.def, InstanceKind::Virtual(..)) {
+                    // This is a call through a vtable: (x as dyn Trait).foo().
+                    // We don't know what instance `foo` resolves too, but we linted earlier when
+                    // `x` was cast to `dyn Trait`, so we can assume this call here is ok.
+                    // See the reasoning in THIR about function pointers.
+                    return None;
+                }
+
                 (pre_mono_call, instance)
             }
             TerminatorKind::Drop { place, target: _, unwind: _, replace: _, drop, async_fut } => {
@@ -296,9 +304,11 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
                 let drop_in_place = tcx.lang_items().drop_in_place_fn().unwrap();
                 let generics = tcx.mk_args(&[ty.ty.into()]);
-                // Use DropGlue directly rather than going through drop_in_place so that we get
-                // better spans.
-                let def = InstanceKind::DropGlue(drop_in_place, Some(ty.ty));
+                // We can't use DropGlue directly because `create_coroutine_drop_shim` treats
+                // coroutines specially and we'll crash if we try to avoid going through it.
+                // TODO: skip drop_in_place when iterating roots, it's never interesting and we want
+                // to show a different instantiation site in diagnostics.
+                let def = InstanceKind::Item(drop_in_place);
                 let instance = Instance { def, args: generics };
                 debug!("resolve drop glue => instance={instance:?}, ty={ty:?}");
                 (drop_in_place, instance)

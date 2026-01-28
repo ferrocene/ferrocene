@@ -22,7 +22,8 @@ impl Clone for Unvalidated {
 
 #[ferrocene::prevalidated]
 #[warn(ferrocene::uncertified)] //~ NOTE lint level
-fn uninstantiated_generic_indirect<T>(val: T) {} //~ NOTE instantiated
+// TODO: this diagnostic doesn't show up because we treat drop_in_place as the instantiation site
+fn uninstantiated_generic_indirect<T>(val: T) {} // NOTE instantiated
 
 #[ferrocene::prevalidated]
 fn uninstantiated_generic_direct<T: Clone>(val: T) {

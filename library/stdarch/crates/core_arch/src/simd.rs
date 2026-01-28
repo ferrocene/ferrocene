@@ -45,8 +45,10 @@ pub(crate) struct Simd<T: SimdElement, const N: usize>([T; N]);
 impl<T: SimdElement, const N: usize> Simd<T, N> {
     /// A value of this type where all elements are zeroed out.
     // SAFETY: `T` implements `SimdElement`, so it is zeroable.
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const ZERO: Self = unsafe { crate::mem::zeroed() };
 
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline(always)]
     pub(crate) const fn from_array(elements: [T; N]) -> Self {
         Self(elements)
@@ -60,6 +62,7 @@ impl<T: SimdElement, const N: usize> Simd<T, N> {
 
     /// Extract the element at position `index`. Note that `index` is not a constant so this
     /// operation is not efficient on most platforms. Use for testing only.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
     pub(crate) const fn extract_dyn(&self, index: usize) -> T {
@@ -151,114 +154,7 @@ macro_rules! simd_ty {
         impl $id {
             #[inline(always)]
             pub(crate) const fn new($($param_name: $elem_type),*) -> Self {
-<<<<<<< HEAD
-                $id([$($param_name),*])
-            }
-            #[inline(always)]
-            pub(crate) const fn from_array(elements: [$elem_type; $len]) -> Self {
-                $id(elements)
-            }
-            // FIXME: Workaround rust@60637
-            #[inline(always)]
-            #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-            pub(crate) const fn splat(value: $elem_type) -> Self {
-                #[derive(Copy, Clone)]
-                #[repr(simd)]
-                struct JustOne([$elem_type; 1]);
-                let one = JustOne([value]);
-                // SAFETY: 0 is always in-bounds because we're shuffling
-                // a simd type with exactly one element.
-                unsafe { simd_shuffle!(one, one, [0; $len]) }
-            }
-
-            /// Extract the element at position `index`.
-            /// `index` is not a constant so this is not efficient!
-            /// Use for testing only.
-            // FIXME: Workaround rust@60637
-            #[inline(always)]
-            pub(crate) const fn extract(&self, index: usize) -> $elem_type {
-                self.as_array()[index]
-            }
-
-            #[inline]
-            pub(crate) const fn as_array(&self) -> &[$elem_type; $len] {
-                let simd_ptr: *const Self = self;
-                let array_ptr: *const [$elem_type; $len] = simd_ptr.cast();
-                // SAFETY: We can always read the prefix of a simd type as an array.
-                // There might be more padding afterwards for some widths, but
-                // that's not a problem for reading less than that.
-                unsafe { &*array_ptr }
-            }
-        }
-
-        #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-        const impl core::cmp::PartialEq for $id {
-            #[inline]
-            fn eq(&self, other: &Self) -> bool {
-                self.as_array() == other.as_array()
-            }
-        }
-
-        #[cfg(not(feature = "ferrocene_subset"))]
-        impl core::fmt::Debug for $id {
-            #[inline]
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                debug_simd_finish(f, stringify!($id), self.as_array())
-||||||| b3cda168c8a
-                $id([$($param_name),*])
-            }
-            #[inline(always)]
-            pub(crate) const fn from_array(elements: [$elem_type; $len]) -> Self {
-                $id(elements)
-            }
-            // FIXME: Workaround rust@60637
-            #[inline(always)]
-            #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-            pub(crate) const fn splat(value: $elem_type) -> Self {
-                #[derive(Copy, Clone)]
-                #[repr(simd)]
-                struct JustOne([$elem_type; 1]);
-                let one = JustOne([value]);
-                // SAFETY: 0 is always in-bounds because we're shuffling
-                // a simd type with exactly one element.
-                unsafe { simd_shuffle!(one, one, [0; $len]) }
-            }
-
-            /// Extract the element at position `index`.
-            /// `index` is not a constant so this is not efficient!
-            /// Use for testing only.
-            // FIXME: Workaround rust@60637
-            #[inline(always)]
-            pub(crate) const fn extract(&self, index: usize) -> $elem_type {
-                self.as_array()[index]
-            }
-
-            #[inline]
-            pub(crate) const fn as_array(&self) -> &[$elem_type; $len] {
-                let simd_ptr: *const Self = self;
-                let array_ptr: *const [$elem_type; $len] = simd_ptr.cast();
-                // SAFETY: We can always read the prefix of a simd type as an array.
-                // There might be more padding afterwards for some widths, but
-                // that's not a problem for reading less than that.
-                unsafe { &*array_ptr }
-            }
-        }
-
-        #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-        const impl core::cmp::PartialEq for $id {
-            #[inline]
-            fn eq(&self, other: &Self) -> bool {
-                self.as_array() == other.as_array()
-            }
-        }
-
-        impl core::fmt::Debug for $id {
-            #[inline]
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                debug_simd_finish(f, stringify!($id), self.as_array())
-=======
                 Self([$($param_name),*])
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
         }
     }
@@ -334,90 +230,7 @@ macro_rules! simd_m_ty {
         impl $id {
             #[inline(always)]
             pub(crate) const fn new($($param_name: bool),*) -> Self {
-<<<<<<< HEAD
-                $id([$(Self::bool_to_internal($param_name)),*])
-            }
-
-            // FIXME: Workaround rust@60637
-            #[inline(always)]
-            #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-            pub(crate) const fn splat(value: bool) -> Self {
-                #[derive(Copy, Clone)]
-                #[repr(simd)]
-                struct JustOne([$elem_type; 1]);
-                let one = JustOne([Self::bool_to_internal(value)]);
-                // SAFETY: 0 is always in-bounds because we're shuffling
-                // a simd type with exactly one element.
-                unsafe { simd_shuffle!(one, one, [0; $len]) }
-            }
-
-            #[inline]
-            pub(crate) const fn as_array(&self) -> &[$elem_type; $len] {
-                let simd_ptr: *const Self = self;
-                let array_ptr: *const [$elem_type; $len] = simd_ptr.cast();
-                // SAFETY: We can always read the prefix of a simd type as an array.
-                // There might be more padding afterwards for some widths, but
-                // that's not a problem for reading less than that.
-                unsafe { &*array_ptr }
-            }
-        }
-
-        #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-        const impl core::cmp::PartialEq for $id {
-            #[inline]
-            fn eq(&self, other: &Self) -> bool {
-                self.as_array() == other.as_array()
-            }
-        }
-
-        #[cfg(not(feature = "ferrocene_subset"))]
-        impl core::fmt::Debug for $id {
-            #[inline]
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                debug_simd_finish(f, stringify!($id), self.as_array())
-||||||| b3cda168c8a
-                $id([$(Self::bool_to_internal($param_name)),*])
-            }
-
-            // FIXME: Workaround rust@60637
-            #[inline(always)]
-            #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-            pub(crate) const fn splat(value: bool) -> Self {
-                #[derive(Copy, Clone)]
-                #[repr(simd)]
-                struct JustOne([$elem_type; 1]);
-                let one = JustOne([Self::bool_to_internal(value)]);
-                // SAFETY: 0 is always in-bounds because we're shuffling
-                // a simd type with exactly one element.
-                unsafe { simd_shuffle!(one, one, [0; $len]) }
-            }
-
-            #[inline]
-            pub(crate) const fn as_array(&self) -> &[$elem_type; $len] {
-                let simd_ptr: *const Self = self;
-                let array_ptr: *const [$elem_type; $len] = simd_ptr.cast();
-                // SAFETY: We can always read the prefix of a simd type as an array.
-                // There might be more padding afterwards for some widths, but
-                // that's not a problem for reading less than that.
-                unsafe { &*array_ptr }
-            }
-        }
-
-        #[rustc_const_unstable(feature = "stdarch_const_helpers", issue = "none")]
-        const impl core::cmp::PartialEq for $id {
-            #[inline]
-            fn eq(&self, other: &Self) -> bool {
-                self.as_array() == other.as_array()
-            }
-        }
-
-        impl core::fmt::Debug for $id {
-            #[inline]
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                debug_simd_finish(f, stringify!($id), self.as_array())
-=======
                 Self([$(Self::bool_to_internal($param_name)),*])
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
         }
     }

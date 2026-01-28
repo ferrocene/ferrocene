@@ -39,14 +39,8 @@ pub fn __crc32b(crc: u32, data: u8) -> u32 {
 }
 #[doc = "CRC32-C single round checksum for bytes (8 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32cb)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "crc")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(crc32cb))]
@@ -71,14 +65,8 @@ pub fn __crc32cb(crc: u32, data: u8) -> u32 {
 }
 #[doc = "CRC32-C single round checksum for quad words (64 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32cd)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "crc")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(crc32cw))]
@@ -97,14 +85,8 @@ pub fn __crc32cd(crc: u32, data: u64) -> u32 {
 }
 #[doc = "CRC32-C single round checksum for bytes (16 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32ch)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "crc")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(crc32ch))]
@@ -129,14 +111,8 @@ pub fn __crc32ch(crc: u32, data: u16) -> u32 {
 }
 #[doc = "CRC32-C single round checksum for bytes (32 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32cw)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "crc")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(crc32cw))]
@@ -180,14 +156,8 @@ pub fn __crc32d(crc: u32, data: u64) -> u32 {
 }
 #[doc = "CRC32 single round checksum for bytes (16 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32h)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "crc")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(crc32h))]
@@ -212,14 +182,8 @@ pub fn __crc32h(crc: u32, data: u16) -> u32 {
 }
 #[doc = "CRC32 single round checksum for bytes (32 bits)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/__crc32w)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "crc")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(crc32w))]
@@ -883,14 +847,8 @@ pub fn vabaq_u8(a: uint8x16_t, b: uint8x16_t, c: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "Absolute difference between the arguments of Floating"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vabd_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vabd.f16"))]
 #[cfg_attr(
@@ -920,14 +878,8 @@ pub fn vabd_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Absolute difference between the arguments of Floating"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vabdq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vabd.f16"))]
 #[cfg_attr(
@@ -1518,14 +1470,8 @@ pub fn vabdl_u32(a: uint32x2_t, b: uint32x2_t) -> uint64x2_t {
 }
 #[doc = "Floating-point absolute value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vabs_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vabs))]
 #[cfg_attr(
@@ -1547,14 +1493,8 @@ pub fn vabs_f16(a: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point absolute value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vabsq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vabs))]
 #[cfg_attr(
@@ -1776,14 +1716,8 @@ pub fn vabsq_s32(a: int32x4_t) -> int32x4_t {
 }
 #[doc = "Floating-point absolute value"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vabsh_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vabs))]
 #[cfg_attr(
@@ -1798,14 +1732,8 @@ pub fn vabsh_f16(a: f16) -> f16 {
 }
 #[doc = "Floating-point Add (vector)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vadd_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vadd.f16"))]
 #[cfg_attr(
@@ -1827,14 +1755,8 @@ pub fn vadd_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point Add (vector)."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vaddq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vadd.f16"))]
 #[cfg_attr(
@@ -2324,14 +2246,8 @@ pub fn vaddq_p64(a: poly64x2_t, b: poly64x2_t) -> poly64x2_t {
 }
 #[doc = "Add"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vaddh_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vadd.f16"))]
 #[cfg_attr(
@@ -3280,14 +3196,8 @@ pub fn vaddw_u8(a: uint16x8_t, b: uint8x8_t) -> uint16x8_t {
 }
 #[doc = "AES single round encryption."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vaesdq_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(aesd))]
@@ -3312,14 +3222,8 @@ pub fn vaesdq_u8(data: uint8x16_t, key: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "AES single round encryption."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vaeseq_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(aese))]
@@ -3344,14 +3248,8 @@ pub fn vaeseq_u8(data: uint8x16_t, key: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "AES inverse mix columns."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vaesimcq_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(aesimc))]
@@ -3376,14 +3274,8 @@ pub fn vaesimcq_u8(data: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "AES mix columns."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vaesmcq_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(aesmc))]
@@ -4128,14 +4020,8 @@ pub fn vbicq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "Bitwise Select."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vbsl_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,fp16")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vbsl))]
@@ -4163,14 +4049,8 @@ pub fn vbsl_f16(a: uint16x4_t, b: float16x4_t, c: float16x4_t) -> float16x4_t {
 }
 #[doc = "Bitwise Select."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vbslq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,fp16")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vbsl))]
@@ -4814,14 +4694,8 @@ pub fn vbslq_u8(a: uint8x16_t, b: uint8x16_t, c: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "Floating-point absolute compare greater than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcage_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacge.f16"))]
 #[cfg_attr(
@@ -4851,14 +4725,8 @@ pub fn vcage_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point absolute compare greater than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcageq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacge.f16"))]
 #[cfg_attr(
@@ -4948,14 +4816,8 @@ pub fn vcageq_f32(a: float32x4_t, b: float32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point absolute compare greater than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcagt_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacgt.f16"))]
 #[cfg_attr(
@@ -4985,14 +4847,8 @@ pub fn vcagt_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point absolute compare greater than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcagtq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacgt.f16"))]
 #[cfg_attr(
@@ -5082,14 +4938,8 @@ pub fn vcagtq_f32(a: float32x4_t, b: float32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point absolute compare less than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcale_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacge.f16"))]
 #[cfg_attr(
@@ -5111,14 +4961,8 @@ pub fn vcale_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point absolute compare less than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcaleq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacge.f16"))]
 #[cfg_attr(
@@ -5184,14 +5028,8 @@ pub fn vcaleq_f32(a: float32x4_t, b: float32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point absolute compare less than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcalt_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacgt.f16"))]
 #[cfg_attr(
@@ -5213,14 +5051,8 @@ pub fn vcalt_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point absolute compare less than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcaltq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vacgt.f16"))]
 #[cfg_attr(
@@ -5286,14 +5118,8 @@ pub fn vcaltq_f32(a: float32x4_t, b: float32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point compare equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vceq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vceq.f16"))]
 #[cfg_attr(
@@ -5315,14 +5141,8 @@ pub fn vceq_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vceqq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vceq.f16"))]
 #[cfg_attr(
@@ -5696,14 +5516,8 @@ pub fn vceqq_p8(a: poly8x16_t, b: poly8x16_t) -> uint8x16_t {
 }
 #[doc = "Floating-point compare greater than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcge_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcge.f16"))]
 #[cfg_attr(
@@ -5725,14 +5539,8 @@ pub fn vcge_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare greater than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgeq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcge.f16"))]
 #[cfg_attr(
@@ -6062,14 +5870,8 @@ pub fn vcgeq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point compare greater than or equal to zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgez_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcge.f16"))]
 #[cfg_attr(
@@ -6092,14 +5894,8 @@ pub fn vcgez_f16(a: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare greater than or equal to zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgezq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcge.f16"))]
 #[cfg_attr(
@@ -6122,14 +5918,8 @@ pub fn vcgezq_f16(a: float16x8_t) -> uint16x8_t {
 }
 #[doc = "Floating-point compare greater than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgt_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcgt.f16"))]
 #[cfg_attr(
@@ -6151,14 +5941,8 @@ pub fn vcgt_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare greater than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgtq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcgt.f16"))]
 #[cfg_attr(
@@ -6488,14 +6272,8 @@ pub fn vcgtq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point compare greater than zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgtz_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcgt.f16"))]
 #[cfg_attr(
@@ -6518,14 +6296,8 @@ pub fn vcgtz_f16(a: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare greater than zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcgtzq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcgt.f16"))]
 #[cfg_attr(
@@ -6548,14 +6320,8 @@ pub fn vcgtzq_f16(a: float16x8_t) -> uint16x8_t {
 }
 #[doc = "Floating-point compare less than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcle_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcge.f16"))]
 #[cfg_attr(
@@ -6577,14 +6343,8 @@ pub fn vcle_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare less than or equal"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcleq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcge.f16"))]
 #[cfg_attr(
@@ -6914,14 +6674,8 @@ pub fn vcleq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point compare less than or equal to zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vclez_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcle.f16"))]
 #[cfg_attr(
@@ -6944,14 +6698,8 @@ pub fn vclez_f16(a: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare less than or equal to zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vclezq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcle.f16"))]
 #[cfg_attr(
@@ -7286,14 +7034,8 @@ pub fn vclsq_u32(a: uint32x4_t) -> int32x4_t {
 }
 #[doc = "Floating-point compare less than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vclt_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcgt.f16"))]
 #[cfg_attr(
@@ -7315,14 +7057,8 @@ pub fn vclt_f16(a: float16x4_t, b: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare less than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcltq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcgt.f16"))]
 #[cfg_attr(
@@ -7652,14 +7388,8 @@ pub fn vcltq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point compare less than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcltz_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vclt.f16"))]
 #[cfg_attr(
@@ -7682,14 +7412,8 @@ pub fn vcltz_f16(a: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point compare less than"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcltzq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vclt.f16"))]
 #[cfg_attr(
@@ -9165,14 +8889,8 @@ pub fn vcreate_p16(a: u64) -> poly16x4_t {
 }
 #[doc = "Insert vector element from another vector element"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcreate_p64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -9217,14 +8935,8 @@ pub fn vcvt_f16_f32(a: float32x4_t) -> float16x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_f16_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -9246,14 +8958,8 @@ pub fn vcvt_f16_s16(a: int16x4_t) -> float16x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_f16_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -9275,14 +8981,8 @@ pub fn vcvtq_f16_s16(a: int16x8_t) -> float16x8_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_f16_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -9304,14 +9004,8 @@ pub fn vcvt_f16_u16(a: uint16x4_t) -> float16x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_f16_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -9445,14 +9139,8 @@ pub fn vcvtq_f32_u32(a: uint32x4_t) -> float32x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_f16_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -9487,14 +9175,8 @@ pub fn vcvt_n_f16_s16<const N: i32>(a: int16x4_t) -> float16x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_f16_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -9529,14 +9211,8 @@ pub fn vcvtq_n_f16_s16<const N: i32>(a: int16x8_t) -> float16x8_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_f16_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -9571,14 +9247,8 @@ pub fn vcvt_n_f16_u16<const N: i32>(a: uint16x4_t) -> float16x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_f16_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -9613,14 +9283,8 @@ pub fn vcvtq_n_f16_u16<const N: i32>(a: uint16x8_t) -> float16x8_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_f32_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -9639,14 +9303,8 @@ pub fn vcvt_n_f32_s32<const N: i32>(a: int32x2_t) -> float32x2_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_f32_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -9705,14 +9363,8 @@ pub fn vcvtq_n_f32_s32<const N: i32>(a: int32x4_t) -> float32x4_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_f32_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -9731,14 +9383,8 @@ pub fn vcvt_n_f32_u32<const N: i32>(a: uint32x2_t) -> float32x2_t {
 }
 #[doc = "Fixed-point convert to floating-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_f32_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -9797,14 +9443,8 @@ pub fn vcvtq_n_f32_u32<const N: i32>(a: uint32x4_t) -> float32x4_t {
 }
 #[doc = "Floating-point convert to signed fixed-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_s16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -9839,14 +9479,8 @@ pub fn vcvt_n_s16_f16<const N: i32>(a: float16x4_t) -> int16x4_t {
 }
 #[doc = "Floating-point convert to signed fixed-point"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_s16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -9881,14 +9515,8 @@ pub fn vcvtq_n_s16_f16<const N: i32>(a: float16x8_t) -> int16x8_t {
 }
 #[doc = "Floating-point convert to fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_s32_f32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -9907,14 +9535,8 @@ pub fn vcvt_n_s32_f32<const N: i32>(a: float32x2_t) -> int32x2_t {
 }
 #[doc = "Floating-point convert to fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_s32_f32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -9973,14 +9595,8 @@ pub fn vcvtq_n_s32_f32<const N: i32>(a: float32x4_t) -> int32x4_t {
 }
 #[doc = "Fixed-point convert to unsigned fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_u16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -10015,14 +9631,8 @@ pub fn vcvt_n_u16_f16<const N: i32>(a: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Fixed-point convert to unsigned fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_u16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vcvt", N = 1))]
 #[cfg_attr(
@@ -10057,14 +9667,8 @@ pub fn vcvtq_n_u16_f16<const N: i32>(a: float16x8_t) -> uint16x8_t {
 }
 #[doc = "Floating-point convert to fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_n_u32_f32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -10083,14 +9687,8 @@ pub fn vcvt_n_u32_f32<const N: i32>(a: float32x2_t) -> uint32x2_t {
 }
 #[doc = "Floating-point convert to fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_n_u32_f32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vcvt, N = 2))]
@@ -10149,14 +9747,8 @@ pub fn vcvtq_n_u32_f32<const N: i32>(a: float32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point convert to signed fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_s16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -10178,14 +9770,8 @@ pub fn vcvt_s16_f16(a: float16x4_t) -> int16x4_t {
 }
 #[doc = "Floating-point convert to signed fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_s16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -10267,14 +9853,8 @@ pub fn vcvtq_s32_f32(a: float32x4_t) -> int32x4_t {
 }
 #[doc = "Floating-point convert to unsigned fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvt_u16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -10296,14 +9876,8 @@ pub fn vcvt_u16_f16(a: float16x4_t) -> uint16x4_t {
 }
 #[doc = "Floating-point convert to unsigned fixed-point, rounding toward zero"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcvtq_u16_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vcvt))]
 #[cfg_attr(
@@ -10639,14 +10213,8 @@ pub fn vdotq_lane_u32<const LANE: i32>(a: uint32x4_t, b: uint8x16_t, c: uint8x8_
 }
 #[doc = "Dot product arithmetic (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdot_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsdot))]
@@ -10675,14 +10243,8 @@ pub fn vdot_s32(a: int32x2_t, b: int8x8_t, c: int8x8_t) -> int32x2_t {
 }
 #[doc = "Dot product arithmetic (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdotq_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vsdot))]
@@ -10711,14 +10273,8 @@ pub fn vdotq_s32(a: int32x4_t, b: int8x16_t, c: int8x16_t) -> int32x4_t {
 }
 #[doc = "Dot product arithmetic (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdot_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vudot))]
@@ -10747,14 +10303,8 @@ pub fn vdot_u32(a: uint32x2_t, b: uint8x8_t, c: uint8x8_t) -> uint32x2_t {
 }
 #[doc = "Dot product arithmetic (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vdotq_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,dotprod")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vudot))]
@@ -12953,14 +12503,8 @@ pub fn veorq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 }
 #[doc = "Extract vector from pair of vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vext_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vext.8", N = 3))]
 #[cfg_attr(
@@ -13350,14 +12894,8 @@ pub fn vextq_p16<const N: i32>(a: poly16x8_t, b: poly16x8_t) -> poly16x8_t {
 }
 #[doc = "Extract vector from pair of vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vextq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vext.8", N = 7))]
 #[cfg_attr(
@@ -13957,14 +13495,8 @@ pub fn vextq_p8<const N: i32>(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
 }
 #[doc = "Floating-point fused Multiply-Add to accumulator (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vfma_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "vfp4"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vfma))]
 #[cfg_attr(
@@ -13986,14 +13518,8 @@ pub fn vfma_f16(a: float16x4_t, b: float16x4_t, c: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point fused Multiply-Add to accumulator (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vfmaq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "vfp4"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vfma))]
 #[cfg_attr(
@@ -14101,14 +13627,8 @@ pub fn vfmaq_n_f32(a: float32x4_t, b: float32x4_t, c: f32) -> float32x4_t {
 }
 #[doc = "Floating-point fused multiply-subtract from accumulator"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vfms_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "vfp4"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -14134,14 +13654,8 @@ pub fn vfms_f16(a: float16x4_t, b: float16x4_t, c: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point fused multiply-subtract from accumulator"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vfmsq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "vfp4"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -16463,14 +15977,8 @@ pub unsafe fn vld1q_dup_u8(ptr: *const u8) -> uint8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_dup_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
@@ -16808,14 +16316,8 @@ pub unsafe fn vld1q_f16_x4(a: *const f16) -> float16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16828,14 +16330,8 @@ pub unsafe fn vld1_f32(ptr: *const f32) -> float32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16848,14 +16344,8 @@ pub unsafe fn vld1q_f32(ptr: *const f32) -> float32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16868,14 +16358,8 @@ pub unsafe fn vld1_u8(ptr: *const u8) -> uint8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16888,14 +16372,8 @@ pub unsafe fn vld1q_u8(ptr: *const u8) -> uint8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16908,14 +16386,8 @@ pub unsafe fn vld1_u16(ptr: *const u16) -> uint16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16928,14 +16400,8 @@ pub unsafe fn vld1q_u16(ptr: *const u16) -> uint16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16948,14 +16414,8 @@ pub unsafe fn vld1_u32(ptr: *const u32) -> uint32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16968,14 +16428,8 @@ pub unsafe fn vld1q_u32(ptr: *const u32) -> uint32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -16988,14 +16442,8 @@ pub unsafe fn vld1_u64(ptr: *const u64) -> uint64x1_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17008,14 +16456,8 @@ pub unsafe fn vld1q_u64(ptr: *const u64) -> uint64x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17028,14 +16470,8 @@ pub unsafe fn vld1_p8(ptr: *const p8) -> poly8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17048,14 +16484,8 @@ pub unsafe fn vld1q_p8(ptr: *const p8) -> poly8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17068,14 +16498,8 @@ pub unsafe fn vld1_p16(ptr: *const p16) -> poly16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17088,14 +16512,8 @@ pub unsafe fn vld1q_p16(ptr: *const p16) -> poly16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,aes")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17892,14 +17310,8 @@ pub unsafe fn vld1q_lane_u8<const LANE: i32>(ptr: *const u8, src: uint8x16_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_lane_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[rustc_legacy_const_generics(2)]
@@ -17924,14 +17336,8 @@ pub unsafe fn vld1_lane_p64<const LANE: i32>(ptr: *const p64, src: poly64x1_t) -
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_lane_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[rustc_legacy_const_generics(2)]
@@ -17956,14 +17362,8 @@ pub unsafe fn vld1q_lane_p64<const LANE: i32>(ptr: *const p64, src: poly64x2_t) 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,aes")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -17981,14 +17381,8 @@ pub unsafe fn vld1_p64(ptr: *const p64) -> poly64x1_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
@@ -18011,14 +17405,8 @@ pub unsafe fn vld1_p64_x2(a: *const p64) -> poly64x1x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -18041,14 +17429,8 @@ pub unsafe fn vld1_p64_x3(a: *const p64) -> poly64x1x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -18233,14 +17615,8 @@ pub unsafe fn vld1q_p64_x4(a: *const p64) -> poly64x2x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18253,14 +17629,8 @@ pub unsafe fn vld1_s8(ptr: *const i8) -> int8x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18273,14 +17643,8 @@ pub unsafe fn vld1q_s8(ptr: *const i8) -> int8x16_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18293,14 +17657,8 @@ pub unsafe fn vld1_s16(ptr: *const i16) -> int16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18313,14 +17671,8 @@ pub unsafe fn vld1q_s16(ptr: *const i16) -> int16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18333,14 +17685,8 @@ pub unsafe fn vld1_s32(ptr: *const i32) -> int32x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18353,14 +17699,8 @@ pub unsafe fn vld1q_s32(ptr: *const i32) -> int32x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -18373,14 +17713,8 @@ pub unsafe fn vld1_s64(ptr: *const i64) -> int64x1_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21119,14 +20453,8 @@ pub unsafe fn vld1q_p16_x4(a: *const p16) -> poly16x8x4_t {
     ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
     ret_val
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21139,14 +20467,8 @@ unsafe fn vld1_v1i64<const ALIGN: i32>(a: *const i8) -> int64x1_t {
     }
     _vld1_v1i64(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21159,14 +20481,8 @@ unsafe fn vld1_v2f32<const ALIGN: i32>(a: *const i8) -> float32x2_t {
     }
     _vld1_v2f32(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21179,14 +20495,8 @@ unsafe fn vld1_v2i32<const ALIGN: i32>(a: *const i8) -> int32x2_t {
     }
     _vld1_v2i32(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21199,14 +20509,8 @@ unsafe fn vld1_v4i16<const ALIGN: i32>(a: *const i8) -> int16x4_t {
     }
     _vld1_v4i16(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21219,14 +20523,8 @@ unsafe fn vld1_v8i8<const ALIGN: i32>(a: *const i8) -> int8x8_t {
     }
     _vld1_v8i8(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21239,14 +20537,8 @@ unsafe fn vld1q_v16i8<const ALIGN: i32>(a: *const i8) -> int8x16_t {
     }
     _vld1q_v16i8(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21259,14 +20551,8 @@ unsafe fn vld1q_v2i64<const ALIGN: i32>(a: *const i8) -> int64x2_t {
     }
     _vld1q_v2i64(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21279,14 +20565,8 @@ unsafe fn vld1q_v4f32<const ALIGN: i32>(a: *const i8) -> float32x4_t {
     }
     _vld1q_v4f32(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21299,14 +20579,8 @@ unsafe fn vld1q_v4i32<const ALIGN: i32>(a: *const i8) -> int32x4_t {
     }
     _vld1q_v4i32(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1)]
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
@@ -21319,14 +20593,8 @@ unsafe fn vld1q_v8i16<const ALIGN: i32>(a: *const i8) -> int16x8_t {
     }
     _vld1q_v8i16(a, ALIGN)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -21340,14 +20608,8 @@ unsafe fn vld1_v4f16(a: *const i8, b: i32) -> float16x4_t {
     }
     _vld1_v4f16(a, b)
 }
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -21365,14 +20627,8 @@ unsafe fn vld1q_v8f16(a: *const i8, b: i32) -> float16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_dup_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vldr))]
@@ -21486,14 +20742,8 @@ pub unsafe fn vld2q_dup_f16(a: *const f16) -> float16x8x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21509,14 +20759,8 @@ pub unsafe fn vld2_dup_f32(a: *const f32) -> float32x2x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_dup_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21532,14 +20776,8 @@ pub unsafe fn vld2q_dup_f32(a: *const f32) -> float32x4x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21555,14 +20793,8 @@ pub unsafe fn vld2_dup_s8(a: *const i8) -> int8x8x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_dup_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21578,14 +20810,8 @@ pub unsafe fn vld2q_dup_s8(a: *const i8) -> int8x16x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21601,14 +20827,8 @@ pub unsafe fn vld2_dup_s16(a: *const i16) -> int16x4x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_dup_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21624,14 +20844,8 @@ pub unsafe fn vld2q_dup_s16(a: *const i16) -> int16x8x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21647,14 +20861,8 @@ pub unsafe fn vld2_dup_s32(a: *const i32) -> int32x2x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_dup_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -21830,14 +21038,8 @@ pub unsafe fn vld2q_dup_s32(a: *const i32) -> int32x4x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -21860,14 +21062,8 @@ pub unsafe fn vld2_dup_p64(a: *const p64) -> poly64x1x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22571,14 +21767,8 @@ pub unsafe fn vld2q_f16(a: *const f16) -> float16x8x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22594,14 +21784,8 @@ pub unsafe fn vld2_f32(a: *const f32) -> float32x2x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22617,14 +21801,8 @@ pub unsafe fn vld2q_f32(a: *const f32) -> float32x4x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22640,14 +21818,8 @@ pub unsafe fn vld2_s8(a: *const i8) -> int8x8x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22663,14 +21835,8 @@ pub unsafe fn vld2q_s8(a: *const i8) -> int8x16x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22686,14 +21852,8 @@ pub unsafe fn vld2_s16(a: *const i16) -> int16x4x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22709,14 +21869,8 @@ pub unsafe fn vld2q_s16(a: *const i16) -> int16x8x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22732,14 +21886,8 @@ pub unsafe fn vld2_s32(a: *const i32) -> int32x2x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -22907,14 +22055,8 @@ pub unsafe fn vld2q_s32(a: *const i32) -> int32x4x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld2, LANE = 0))]
@@ -22940,14 +22082,8 @@ pub unsafe fn vld2_lane_f16<const LANE: i32>(a: *const f16, b: float16x4x2_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld2, LANE = 0))]
@@ -23188,14 +22324,8 @@ pub unsafe fn vld2q_lane_s32<const LANE: i32>(a: *const i32, b: int32x4x2_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23219,14 +22349,8 @@ pub unsafe fn vld2_lane_f32<const LANE: i32>(a: *const f32, b: float32x2x2_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23250,14 +22374,8 @@ pub unsafe fn vld2q_lane_f32<const LANE: i32>(a: *const f32, b: float32x4x2_t) -
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23281,14 +22399,8 @@ pub unsafe fn vld2q_lane_s16<const LANE: i32>(a: *const i16, b: int16x8x2_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23312,14 +22424,8 @@ pub unsafe fn vld2q_lane_s32<const LANE: i32>(a: *const i32, b: int32x4x2_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_lane_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23338,14 +22444,8 @@ pub unsafe fn vld2_lane_s8<const LANE: i32>(a: *const i8, b: int8x8x2_t) -> int8
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23369,14 +22469,8 @@ pub unsafe fn vld2_lane_s16<const LANE: i32>(a: *const i16, b: int16x4x2_t) -> i
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld2, LANE = 0))]
@@ -23608,14 +22702,8 @@ pub unsafe fn vld2q_lane_p16<const LANE: i32>(a: *const p16, b: poly16x8x2_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -23638,14 +22726,8 @@ pub unsafe fn vld2_p64(a: *const p64) -> poly64x1x2_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24529,14 +23611,8 @@ pub unsafe fn vld3_dup_s64(a: *const i64) -> int64x1x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24552,14 +23628,8 @@ pub unsafe fn vld3_dup_f32(a: *const f32) -> float32x2x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_dup_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24575,14 +23645,8 @@ pub unsafe fn vld3q_dup_f32(a: *const f32) -> float32x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24598,14 +23662,8 @@ pub unsafe fn vld3_dup_s8(a: *const i8) -> int8x8x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_dup_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24621,14 +23679,8 @@ pub unsafe fn vld3q_dup_s8(a: *const i8) -> int8x16x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24644,14 +23696,8 @@ pub unsafe fn vld3_dup_s16(a: *const i16) -> int16x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_dup_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24667,14 +23713,8 @@ pub unsafe fn vld3q_dup_s16(a: *const i16) -> int16x8x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24690,14 +23730,8 @@ pub unsafe fn vld3_dup_s32(a: *const i32) -> int32x2x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_dup_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -24713,14 +23747,8 @@ pub unsafe fn vld3q_dup_s32(a: *const i32) -> int32x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -24743,14 +23771,8 @@ pub unsafe fn vld3_dup_p64(a: *const p64) -> poly64x1x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25616,14 +24638,8 @@ pub unsafe fn vld3q_s32(a: *const i32) -> int32x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25639,14 +24655,8 @@ pub unsafe fn vld3_f32(a: *const f32) -> float32x2x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25662,14 +24672,8 @@ pub unsafe fn vld3q_f32(a: *const f32) -> float32x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25685,14 +24689,8 @@ pub unsafe fn vld3_s8(a: *const i8) -> int8x8x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25708,14 +24706,8 @@ pub unsafe fn vld3q_s8(a: *const i8) -> int8x16x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25731,14 +24723,8 @@ pub unsafe fn vld3_s16(a: *const i16) -> int16x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25754,14 +24740,8 @@ pub unsafe fn vld3q_s16(a: *const i16) -> int16x8x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25777,14 +24757,8 @@ pub unsafe fn vld3_s32(a: *const i32) -> int32x2x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -25800,14 +24774,8 @@ pub unsafe fn vld3q_s32(a: *const i32) -> int32x4x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld3, LANE = 0))]
@@ -25834,14 +24802,8 @@ pub unsafe fn vld3_lane_f16<const LANE: i32>(a: *const f16, b: float16x4x3_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld3, LANE = 0))]
@@ -25990,14 +24952,8 @@ pub unsafe fn vld3q_lane_f32<const LANE: i32>(a: *const f32, b: float32x4x3_t) -
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -26162,14 +25118,8 @@ pub unsafe fn vld3q_lane_s32<const LANE: i32>(a: *const i32, b: int32x4x3_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_lane_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -26194,14 +25144,8 @@ pub unsafe fn vld3_lane_s8<const LANE: i32>(a: *const i8, b: int8x8x3_t) -> int8
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -26226,14 +25170,8 @@ pub unsafe fn vld3_lane_s16<const LANE: i32>(a: *const i16, b: int16x4x3_t) -> i
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -26258,14 +25196,8 @@ pub unsafe fn vld3q_lane_s16<const LANE: i32>(a: *const i16, b: int16x8x3_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -26290,14 +25222,8 @@ pub unsafe fn vld3_lane_s32<const LANE: i32>(a: *const i32, b: int32x2x3_t) -> i
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -26530,14 +25456,8 @@ pub unsafe fn vld3q_lane_p16<const LANE: i32>(a: *const p16, b: poly16x8x3_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -26580,14 +25500,8 @@ pub unsafe fn vld3_s64(a: *const i64) -> int64x1x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -27203,14 +26117,8 @@ pub unsafe fn vld3q_p16(a: *const p16) -> poly16x8x3_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld3, LANE = 0))]
@@ -27235,14 +26143,8 @@ pub unsafe fn vld3q_lane_f32<const LANE: i32>(a: *const f32, b: float32x4x3_t) -
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld4))]
@@ -27260,14 +26162,8 @@ pub unsafe fn vld4_dup_f16(a: *const f16) -> float16x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_dup_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld4))]
@@ -27285,14 +26181,8 @@ pub unsafe fn vld4q_dup_f16(a: *const f16) -> float16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -27315,14 +26205,8 @@ pub unsafe fn vld4_dup_f16(a: *const f16) -> float16x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_dup_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -27345,14 +26229,8 @@ pub unsafe fn vld4q_dup_f16(a: *const f16) -> float16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27368,14 +26246,8 @@ pub unsafe fn vld4_dup_f32(a: *const f32) -> float32x2x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_dup_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27391,14 +26263,8 @@ pub unsafe fn vld4q_dup_f32(a: *const f32) -> float32x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27414,14 +26280,8 @@ pub unsafe fn vld4_dup_s8(a: *const i8) -> int8x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_dup_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27437,14 +26297,8 @@ pub unsafe fn vld4q_dup_s8(a: *const i8) -> int8x16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27460,14 +26314,8 @@ pub unsafe fn vld4_dup_s16(a: *const i16) -> int16x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_dup_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27483,14 +26331,8 @@ pub unsafe fn vld4q_dup_s16(a: *const i16) -> int16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27506,14 +26348,8 @@ pub unsafe fn vld4_dup_s32(a: *const i32) -> int32x2x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_dup_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vld4))]
@@ -27709,14 +26545,8 @@ pub unsafe fn vld4_dup_s64(a: *const i64) -> int64x1x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -27739,14 +26569,8 @@ pub unsafe fn vld4_dup_p64(a: *const p64) -> poly64x1x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(nop))]
@@ -28384,14 +27208,8 @@ pub unsafe fn vld4q_dup_p16(a: *const p16) -> poly16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld4))]
@@ -28409,14 +27227,8 @@ pub unsafe fn vld4_f16(a: *const f16) -> float16x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld4))]
@@ -28434,14 +27246,8 @@ pub unsafe fn vld4q_f16(a: *const f16) -> float16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -28464,14 +27270,8 @@ pub unsafe fn vld4_f16(a: *const f16) -> float16x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -28654,14 +27454,8 @@ pub unsafe fn vld4q_s32(a: *const i32) -> int32x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28677,14 +27471,8 @@ pub unsafe fn vld4_f32(a: *const f32) -> float32x2x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28700,14 +27488,8 @@ pub unsafe fn vld4q_f32(a: *const f32) -> float32x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28723,14 +27505,8 @@ pub unsafe fn vld4_s8(a: *const i8) -> int8x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28746,14 +27522,8 @@ pub unsafe fn vld4q_s8(a: *const i8) -> int8x16x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28769,14 +27539,8 @@ pub unsafe fn vld4_s16(a: *const i16) -> int16x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28792,14 +27556,8 @@ pub unsafe fn vld4q_s16(a: *const i16) -> int16x8x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28815,14 +27573,8 @@ pub unsafe fn vld4_s32(a: *const i32) -> int32x2x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -28838,14 +27590,8 @@ pub unsafe fn vld4q_s32(a: *const i32) -> int32x4x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld4, LANE = 0))]
@@ -28873,14 +27619,8 @@ pub unsafe fn vld4_lane_f16<const LANE: i32>(a: *const f16, b: float16x4x4_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld4, LANE = 0))]
@@ -28908,14 +27648,8 @@ pub unsafe fn vld4q_lane_f16<const LANE: i32>(a: *const f16, b: float16x8x4_t) -
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -28947,14 +27681,8 @@ pub unsafe fn vld4_lane_f16<const LANE: i32>(a: *const f16, b: float16x4x4_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_lane_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
@@ -29189,14 +27917,8 @@ pub unsafe fn vld4q_lane_s32<const LANE: i32>(a: *const i32, b: int32x4x4_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29222,14 +27944,8 @@ pub unsafe fn vld4_lane_f32<const LANE: i32>(a: *const f32, b: float32x2x4_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29255,14 +27971,8 @@ pub unsafe fn vld4q_lane_f32<const LANE: i32>(a: *const f32, b: float32x4x4_t) -
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29288,14 +27998,8 @@ pub unsafe fn vld4_lane_s8<const LANE: i32>(a: *const i8, b: int8x8x4_t) -> int8
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29321,14 +28025,8 @@ pub unsafe fn vld4_lane_s16<const LANE: i32>(a: *const i16, b: int16x4x4_t) -> i
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29354,14 +28052,8 @@ pub unsafe fn vld4q_lane_s16<const LANE: i32>(a: *const i16, b: int16x8x4_t) -> 
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29387,14 +28079,8 @@ pub unsafe fn vld4_lane_s32<const LANE: i32>(a: *const i32, b: int32x2x4_t) -> i
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[cfg_attr(test, assert_instr(vld4, LANE = 0))]
@@ -29628,14 +28314,8 @@ pub unsafe fn vld4q_lane_p16<const LANE: i32>(a: *const p16, b: poly16x8x4_t) ->
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -29678,14 +28358,8 @@ pub unsafe fn vld4_s64(a: *const i64) -> int64x1x4_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -30345,14 +29019,8 @@ pub unsafe fn vldrq_p128(a: *const p128) -> p128 {
 }
 #[doc = "Maximum (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmax_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmax))]
 #[cfg_attr(
@@ -30382,14 +29050,8 @@ pub fn vmax_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Maximum (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmaxq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmax))]
 #[cfg_attr(
@@ -30779,14 +29441,8 @@ pub fn vmaxq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point Maximum Number (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmaxnm_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp-armv8,v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmaxnm))]
 #[cfg_attr(
@@ -30808,14 +29464,8 @@ pub fn vmaxnm_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point Maximum Number (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmaxnmq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp-armv8,v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmaxnm))]
 #[cfg_attr(
@@ -30881,14 +29531,8 @@ pub fn vmaxnmq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 }
 #[doc = "Minimum (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmin_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmin))]
 #[cfg_attr(
@@ -30918,14 +29562,8 @@ pub fn vmin_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Minimum (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vminq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmin))]
 #[cfg_attr(
@@ -31315,14 +29953,8 @@ pub fn vminq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point Minimum Number (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vminnm_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp-armv8,v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vminnm))]
 #[cfg_attr(
@@ -31344,14 +29976,8 @@ pub fn vminnm_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point Minimum Number (vector)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vminnmq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp-armv8,v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vminnm))]
 #[cfg_attr(
@@ -34605,14 +33231,8 @@ pub fn vmlsl_u32(a: uint64x2_t, b: uint32x2_t, c: uint32x2_t) -> uint64x2_t {
 }
 #[doc = "8-bit integer matrix multiply-accumulate"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmmlaq_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -34641,14 +33261,8 @@ pub fn vmmlaq_s32(a: int32x4_t, b: int8x16_t, c: int8x16_t) -> int32x4_t {
 }
 #[doc = "8-bit integer matrix multiply-accumulate"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmmlaq_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -35521,14 +34135,8 @@ pub fn vmulq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 }
 #[doc = "Multiply"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_lane_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmul, LANE = 1))]
 #[cfg_attr(
@@ -35557,14 +34165,8 @@ pub fn vmul_lane_f16<const LANE: i32>(a: float16x4_t, v: float16x4_t) -> float16
 }
 #[doc = "Multiply"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_lane_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmul, LANE = 1))]
 #[cfg_attr(
@@ -36208,14 +34810,8 @@ pub fn vmulq_laneq_u32<const LANE: i32>(a: uint32x4_t, b: uint32x4_t) -> uint32x
 }
 #[doc = "Vector multiply by scalar"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmul_n_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmul))]
 #[cfg_attr(
@@ -36230,14 +34826,8 @@ pub fn vmul_n_f16(a: float16x4_t, b: f16) -> float16x4_t {
 }
 #[doc = "Vector multiply by scalar"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmulq_n_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vmul))]
 #[cfg_attr(
@@ -38920,14 +37510,8 @@ pub fn vpadalq_u32(a: uint64x2_t, b: uint32x4_t) -> uint64x2_t {
 }
 #[doc = "Floating-point add pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpadd_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vpadd))]
 #[cfg_attr(
@@ -42664,14 +41248,8 @@ pub fn vqrshlq_u64(a: uint64x2_t, b: int64x2_t) -> uint64x2_t {
 }
 #[doc = "Signed saturating rounded shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrn_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrn, N = 2))]
@@ -42687,14 +41265,8 @@ pub fn vqrshrn_n_s16<const N: i32>(a: int16x8_t) -> int8x8_t {
 }
 #[doc = "Signed saturating rounded shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrn_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrn, N = 2))]
@@ -42710,14 +41282,8 @@ pub fn vqrshrn_n_s32<const N: i32>(a: int32x4_t) -> int16x4_t {
 }
 #[doc = "Signed saturating rounded shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrn_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrn, N = 2))]
@@ -42793,14 +41359,8 @@ pub fn vqrshrn_n_s64<const N: i32>(a: int64x2_t) -> int32x2_t {
 }
 #[doc = "Unsigned signed saturating rounded shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrn_n_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrn, N = 2))]
@@ -42826,14 +41386,8 @@ pub fn vqrshrn_n_u16<const N: i32>(a: uint16x8_t) -> uint8x8_t {
 }
 #[doc = "Unsigned signed saturating rounded shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrn_n_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrn, N = 2))]
@@ -42854,14 +41408,8 @@ pub fn vqrshrn_n_u32<const N: i32>(a: uint32x4_t) -> uint16x4_t {
 }
 #[doc = "Unsigned signed saturating rounded shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrn_n_u64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrn, N = 2))]
@@ -42937,14 +41485,8 @@ pub fn vqrshrn_n_u64<const N: i32>(a: uint64x2_t) -> uint32x2_t {
 }
 #[doc = "Signed saturating rounded shift right unsigned narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrun_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrun, N = 2))]
@@ -42960,14 +41502,8 @@ pub fn vqrshrun_n_s16<const N: i32>(a: int16x8_t) -> uint8x8_t {
 }
 #[doc = "Signed saturating rounded shift right unsigned narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrun_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrun, N = 2))]
@@ -42983,14 +41519,8 @@ pub fn vqrshrun_n_s32<const N: i32>(a: int32x4_t) -> uint16x4_t {
 }
 #[doc = "Signed saturating rounded shift right unsigned narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqrshrun_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqrshrun, N = 2))]
@@ -43930,14 +42460,8 @@ pub fn vqshlq_u64(a: uint64x2_t, b: int64x2_t) -> uint64x2_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshlu_n_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -43953,14 +42477,8 @@ pub fn vqshlu_n_s8<const N: i32>(a: int8x8_t) -> uint8x8_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshluq_n_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -43976,14 +42494,8 @@ pub fn vqshluq_n_s8<const N: i32>(a: int8x16_t) -> uint8x16_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshlu_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -43999,14 +42511,8 @@ pub fn vqshlu_n_s16<const N: i32>(a: int16x4_t) -> uint16x4_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshluq_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -44022,14 +42528,8 @@ pub fn vqshluq_n_s16<const N: i32>(a: int16x8_t) -> uint16x8_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshlu_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -44045,14 +42545,8 @@ pub fn vqshlu_n_s32<const N: i32>(a: int32x2_t) -> uint32x2_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshluq_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -44068,14 +42562,8 @@ pub fn vqshluq_n_s32<const N: i32>(a: int32x4_t) -> uint32x4_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshlu_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -44091,14 +42579,8 @@ pub fn vqshlu_n_s64<const N: i32>(a: int64x1_t) -> uint64x1_t {
 }
 #[doc = "Signed saturating shift left unsigned"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshluq_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshlu, N = 2))]
@@ -44274,14 +42756,8 @@ pub fn vqshluq_n_s64<const N: i32>(a: int64x2_t) -> uint64x2_t {
 }
 #[doc = "Signed saturating shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrn_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrn, N = 2))]
@@ -44297,14 +42773,8 @@ pub fn vqshrn_n_s16<const N: i32>(a: int16x8_t) -> int8x8_t {
 }
 #[doc = "Signed saturating shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrn_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrn, N = 2))]
@@ -44320,14 +42790,8 @@ pub fn vqshrn_n_s32<const N: i32>(a: int32x4_t) -> int16x4_t {
 }
 #[doc = "Signed saturating shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrn_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrn, N = 2))]
@@ -44403,14 +42867,8 @@ pub fn vqshrn_n_s64<const N: i32>(a: int64x2_t) -> int32x2_t {
 }
 #[doc = "Unsigned saturating shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrn_n_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrn, N = 2))]
@@ -44436,14 +42894,8 @@ pub fn vqshrn_n_u16<const N: i32>(a: uint16x8_t) -> uint8x8_t {
 }
 #[doc = "Unsigned saturating shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrn_n_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrn, N = 2))]
@@ -44464,14 +42916,8 @@ pub fn vqshrn_n_u32<const N: i32>(a: uint32x4_t) -> uint16x4_t {
 }
 #[doc = "Unsigned saturating shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrn_n_u64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrn, N = 2))]
@@ -44547,14 +42993,8 @@ pub fn vqshrn_n_u64<const N: i32>(a: uint64x2_t) -> uint32x2_t {
 }
 #[doc = "Signed saturating shift right unsigned narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrun_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrun, N = 2))]
@@ -44570,14 +43010,8 @@ pub fn vqshrun_n_s16<const N: i32>(a: int16x8_t) -> uint8x8_t {
 }
 #[doc = "Signed saturating shift right unsigned narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrun_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrun, N = 2))]
@@ -44593,14 +43027,8 @@ pub fn vqshrun_n_s32<const N: i32>(a: int32x4_t) -> uint16x4_t {
 }
 #[doc = "Signed saturating shift right unsigned narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqshrun_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vqshrun, N = 2))]
@@ -45415,14 +43843,8 @@ pub fn vraddhn_u64(a: uint64x2_t, b: uint64x2_t) -> uint32x2_t {
 }
 #[doc = "Reciprocal estimate."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrecpe_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrecpe))]
 #[cfg_attr(
@@ -45452,14 +43874,8 @@ pub fn vrecpe_f16(a: float16x4_t) -> float16x4_t {
 }
 #[doc = "Reciprocal estimate."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrecpeq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrecpe))]
 #[cfg_attr(
@@ -45609,14 +44025,8 @@ pub fn vrecpeq_u32(a: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point reciprocal step"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrecps_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrecps))]
 #[cfg_attr(
@@ -45646,14 +44056,8 @@ pub fn vrecps_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point reciprocal step"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrecpsq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrecps))]
 #[cfg_attr(
@@ -62220,14 +60624,8 @@ pub fn vrev64q_u8(a: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "Reverse elements in 64-bit doublewords"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrev64_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrev64))]
 #[cfg_attr(
@@ -62249,14 +60647,8 @@ pub fn vrev64_f16(a: float16x4_t) -> float16x4_t {
 }
 #[doc = "Reverse elements in 64-bit doublewords"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrev64q_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrev64))]
 #[cfg_attr(
@@ -62638,14 +61030,8 @@ pub fn vrhaddq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point round to integral, to nearest with ties to even"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrndn_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp-armv8,v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrintn))]
 #[cfg_attr(
@@ -62674,14 +61060,8 @@ pub fn vrndn_f16(a: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point round to integral, to nearest with ties to even"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrndnq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "fp-armv8,v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrintn))]
 #[cfg_attr(
@@ -63632,14 +62012,8 @@ pub fn vrshrq_n_u64<const N: i32>(a: uint64x2_t) -> uint64x2_t {
 }
 #[doc = "Rounding shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrshrn_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vrshrn, N = 2))]
@@ -63655,14 +62029,8 @@ pub fn vrshrn_n_s16<const N: i32>(a: int16x8_t) -> int8x8_t {
 }
 #[doc = "Rounding shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrshrn_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vrshrn, N = 2))]
@@ -63678,14 +62046,8 @@ pub fn vrshrn_n_s32<const N: i32>(a: int32x4_t) -> int16x4_t {
 }
 #[doc = "Rounding shift right narrow"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrshrn_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vrshrn, N = 2))]
@@ -63833,14 +62195,8 @@ pub fn vrshrn_n_u64<const N: i32>(a: uint64x2_t) -> uint32x2_t {
 }
 #[doc = "Reciprocal square-root estimate."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrsqrte_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,fp16")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrsqrte))]
@@ -63870,14 +62226,8 @@ pub fn vrsqrte_f16(a: float16x4_t) -> float16x4_t {
 }
 #[doc = "Reciprocal square-root estimate."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrsqrteq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,fp16")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrsqrte))]
@@ -64027,14 +62377,8 @@ pub fn vrsqrteq_u32(a: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Floating-point reciprocal square root step"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrsqrts_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,fp16")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrsqrts))]
@@ -64064,14 +62408,8 @@ pub fn vrsqrts_f16(a: float16x4_t, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Floating-point reciprocal square root step"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrsqrtsq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,fp16")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vrsqrts))]
@@ -64788,14 +63126,8 @@ pub fn vrsubhn_u64(a: uint64x2_t, b: uint64x2_t) -> uint32x2_t {
 }
 #[doc = "Insert vector element from another vector element"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -64812,14 +63144,8 @@ pub fn vset_lane_f16<const LANE: i32>(a: f16, b: float16x4_t) -> float16x4_t {
 }
 #[doc = "Insert vector element from another vector element"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
 #[cfg_attr(
@@ -65296,14 +63622,8 @@ pub fn vsetq_lane_p16<const LANE: i32>(a: p16, b: poly16x8_t) -> poly16x8_t {
 }
 #[doc = "Insert vector element from another vector element"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vset_lane_p64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
@@ -65374,14 +63694,8 @@ pub fn vset_lane_u64<const LANE: i32>(a: u64, b: uint64x1_t) -> uint64x1_t {
 }
 #[doc = "Insert vector element from another vector element"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsetq_lane_p64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
@@ -65404,14 +63718,8 @@ pub fn vsetq_lane_p64<const LANE: i32>(a: p64, b: poly64x2_t) -> poly64x2_t {
 }
 #[doc = "SHA1 hash update accelerator, choose."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha1cq_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha1c))]
@@ -65436,14 +63744,8 @@ pub fn vsha1cq_u32(hash_abcd: uint32x4_t, hash_e: u32, wk: uint32x4_t) -> uint32
 }
 #[doc = "SHA1 fixed rotate."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha1h_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha1h))]
@@ -65468,14 +63770,8 @@ pub fn vsha1h_u32(hash_e: u32) -> u32 {
 }
 #[doc = "SHA1 hash update accelerator, majority"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha1mq_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha1m))]
@@ -65500,14 +63796,8 @@ pub fn vsha1mq_u32(hash_abcd: uint32x4_t, hash_e: u32, wk: uint32x4_t) -> uint32
 }
 #[doc = "SHA1 hash update accelerator, parity"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha1pq_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha1p))]
@@ -65532,14 +63822,8 @@ pub fn vsha1pq_u32(hash_abcd: uint32x4_t, hash_e: u32, wk: uint32x4_t) -> uint32
 }
 #[doc = "SHA1 schedule update accelerator, first part."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha1su0q_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha1su0))]
@@ -65564,14 +63848,8 @@ pub fn vsha1su0q_u32(w0_3: uint32x4_t, w4_7: uint32x4_t, w8_11: uint32x4_t) -> u
 }
 #[doc = "SHA1 schedule update accelerator, second part."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha1su1q_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha1su1))]
@@ -65596,14 +63874,8 @@ pub fn vsha1su1q_u32(tw0_3: uint32x4_t, w12_15: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "SHA1 schedule update accelerator, upper part."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha256h2q_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha256h2))]
@@ -65632,14 +63904,8 @@ pub fn vsha256h2q_u32(hash_abcd: uint32x4_t, hash_efgh: uint32x4_t, wk: uint32x4
 }
 #[doc = "SHA1 schedule update accelerator, first part."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha256hq_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha256h))]
@@ -65668,14 +63934,8 @@ pub fn vsha256hq_u32(hash_abcd: uint32x4_t, hash_efgh: uint32x4_t, wk: uint32x4_
 }
 #[doc = "SHA256 schedule update accelerator, first part."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha256su0q_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha256su0))]
@@ -65700,14 +63960,8 @@ pub fn vsha256su0q_u32(w0_3: uint32x4_t, w4_7: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "SHA256 schedule update accelerator, second part."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsha256su1q_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "sha2")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(test, assert_instr(sha256su1))]
@@ -67549,14 +65803,8 @@ pub fn vshrn_n_u64<const N: i32>(a: uint64x2_t) -> uint32x2_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67568,14 +65816,8 @@ pub fn vsli_n_s8<const N: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67587,14 +65829,8 @@ pub fn vsliq_n_s8<const N: i32>(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67606,14 +65842,8 @@ pub fn vsli_n_s16<const N: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67625,14 +65855,8 @@ pub fn vsliq_n_s16<const N: i32>(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67644,14 +65868,8 @@ pub fn vsli_n_s32<const N: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67663,14 +65881,8 @@ pub fn vsliq_n_s32<const N: i32>(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67682,14 +65894,8 @@ pub fn vsli_n_s64<const N: i32>(a: int64x1_t, b: int64x1_t) -> int64x1_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67701,14 +65907,8 @@ pub fn vsliq_n_s64<const N: i32>(a: int64x2_t, b: int64x2_t) -> int64x2_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67720,14 +65920,8 @@ pub fn vsli_n_u8<const N: i32>(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67739,14 +65933,8 @@ pub fn vsliq_n_u8<const N: i32>(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67758,14 +65946,8 @@ pub fn vsli_n_u16<const N: i32>(a: uint16x4_t, b: uint16x4_t) -> uint16x4_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67777,14 +65959,8 @@ pub fn vsliq_n_u16<const N: i32>(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67796,14 +65972,8 @@ pub fn vsli_n_u32<const N: i32>(a: uint32x2_t, b: uint32x2_t) -> uint32x2_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67815,14 +65985,8 @@ pub fn vsliq_n_u32<const N: i32>(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_u64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67834,14 +65998,8 @@ pub fn vsli_n_u64<const N: i32>(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_u64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67853,14 +66011,8 @@ pub fn vsliq_n_u64<const N: i32>(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_p8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67872,14 +66024,8 @@ pub fn vsli_n_p8<const N: i32>(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_p8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67891,14 +66037,8 @@ pub fn vsliq_n_p8<const N: i32>(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsli_n_p16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -67910,14 +66050,8 @@ pub fn vsli_n_p16<const N: i32>(a: poly16x4_t, b: poly16x4_t) -> poly16x4_t {
 }
 #[doc = "Shift Left and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsliq_n_p16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68313,14 +66447,8 @@ pub fn vsraq_n_u64<const N: i32>(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68332,14 +66460,8 @@ pub fn vsri_n_s8<const N: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68351,14 +66473,8 @@ pub fn vsriq_n_s8<const N: i32>(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68370,14 +66486,8 @@ pub fn vsri_n_s16<const N: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68389,14 +66499,8 @@ pub fn vsriq_n_s16<const N: i32>(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68408,14 +66512,8 @@ pub fn vsri_n_s32<const N: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68427,14 +66525,8 @@ pub fn vsriq_n_s32<const N: i32>(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68446,14 +66538,8 @@ pub fn vsri_n_s64<const N: i32>(a: int64x1_t, b: int64x1_t) -> int64x1_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68465,14 +66551,8 @@ pub fn vsriq_n_s64<const N: i32>(a: int64x2_t, b: int64x2_t) -> int64x2_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68484,14 +66564,8 @@ pub fn vsri_n_u8<const N: i32>(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_u8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68503,14 +66577,8 @@ pub fn vsriq_n_u8<const N: i32>(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68522,14 +66590,8 @@ pub fn vsri_n_u16<const N: i32>(a: uint16x4_t, b: uint16x4_t) -> uint16x4_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_u16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68541,14 +66603,8 @@ pub fn vsriq_n_u16<const N: i32>(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68560,14 +66616,8 @@ pub fn vsri_n_u32<const N: i32>(a: uint32x2_t, b: uint32x2_t) -> uint32x2_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_u32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68579,14 +66629,8 @@ pub fn vsriq_n_u32<const N: i32>(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_u64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68598,14 +66642,8 @@ pub fn vsri_n_u64<const N: i32>(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_u64)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68617,14 +66655,8 @@ pub fn vsriq_n_u64<const N: i32>(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_p8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68636,14 +66668,8 @@ pub fn vsri_n_p8<const N: i32>(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_p8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68655,14 +66681,8 @@ pub fn vsriq_n_p8<const N: i32>(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_p16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68674,14 +66694,8 @@ pub fn vsri_n_p16<const N: i32>(a: poly16x4_t, b: poly16x4_t) -> poly16x4_t {
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_p16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -68695,14 +66709,8 @@ pub fn vsriq_n_p16<const N: i32>(a: poly16x8_t, b: poly16x8_t) -> poly16x8_t {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[target_feature(enable = "neon,fp16")]
@@ -68720,14 +66728,8 @@ pub unsafe fn vst1_f16(ptr: *mut f16, a: float16x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[target_feature(enable = "neon,fp16")]
@@ -68745,14 +66747,8 @@ pub unsafe fn vst1q_f16(ptr: *mut f16, a: float16x8_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst1))]
@@ -68770,14 +66766,8 @@ pub unsafe fn vst1_f16_x2(a: *mut f16, b: float16x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst1))]
@@ -68795,14 +66785,8 @@ pub unsafe fn vst1q_f16_x2(a: *mut f16, b: float16x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(st1))]
 #[target_feature(enable = "neon,fp16")]
@@ -68822,14 +66806,8 @@ pub unsafe fn vst1_f16_x2(a: *mut f16, b: float16x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(st1))]
 #[target_feature(enable = "neon,fp16")]
@@ -68849,14 +66827,8 @@ pub unsafe fn vst1q_f16_x2(a: *mut f16, b: float16x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst1))]
@@ -68874,14 +66846,8 @@ pub unsafe fn vst1_f16_x3(a: *mut f16, b: float16x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(test, assert_instr(vst1))]
@@ -68899,14 +66865,8 @@ pub unsafe fn vst1q_f16_x3(a: *mut f16, b: float16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(st1))]
 #[target_feature(enable = "neon,fp16")]
@@ -68926,14 +66886,8 @@ pub unsafe fn vst1_f16_x3(a: *mut f16, b: float16x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(st1))]
 #[target_feature(enable = "neon,fp16")]
@@ -69005,14 +66959,8 @@ pub unsafe fn vst1q_f16_x4(a: *mut f16, b: float16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(st1))]
 #[target_feature(enable = "neon,fp16")]
@@ -69038,14 +66986,8 @@ pub unsafe fn vst1_f16_x4(a: *mut f16, b: float16x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(st1))]
 #[target_feature(enable = "neon,fp16")]
@@ -69431,14 +67373,8 @@ pub unsafe fn vst1q_p64(ptr: *mut p64, a: poly64x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst1))]
@@ -69454,14 +67390,8 @@ pub unsafe fn vst1_f32_x2(a: *mut f32, b: float32x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst1))]
@@ -69557,14 +67487,8 @@ pub unsafe fn vst1q_f32_x3(a: *mut f32, b: float32x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_f32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -69586,14 +67510,8 @@ pub unsafe fn vst1_f32_x4(a: *mut f32, b: float32x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_f32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70229,14 +68147,8 @@ pub unsafe fn vst1q_lane_p16<const LANE: i32>(a: *mut p16, b: poly16x8_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_lane_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
@@ -70313,14 +68225,8 @@ pub unsafe fn vst1_lane_u64<const LANE: i32>(a: *mut u64, b: uint64x1_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_p64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vst1))]
@@ -70343,14 +68249,8 @@ pub unsafe fn vst1_p64_x2(a: *mut p64, b: poly64x1x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_p64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -70373,14 +68273,8 @@ pub unsafe fn vst1_p64_x3(a: *mut p64, b: poly64x1x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_p64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -70403,14 +68297,8 @@ pub unsafe fn vst1_p64_x4(a: *mut p64, b: poly64x1x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_p64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -70433,14 +68321,8 @@ pub unsafe fn vst1q_p64_x2(a: *mut p64, b: poly64x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_p64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -70463,14 +68345,8 @@ pub unsafe fn vst1q_p64_x3(a: *mut p64, b: poly64x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_p64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -70653,14 +68529,8 @@ pub unsafe fn vst1q_s64_x2(a: *mut i64, b: int64x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70676,14 +68546,8 @@ pub unsafe fn vst1_s8_x2(a: *mut i8, b: int8x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70699,14 +68563,8 @@ pub unsafe fn vst1q_s8_x2(a: *mut i8, b: int8x16x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70722,14 +68580,8 @@ pub unsafe fn vst1_s16_x2(a: *mut i16, b: int16x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70745,14 +68597,8 @@ pub unsafe fn vst1q_s16_x2(a: *mut i16, b: int16x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70768,14 +68614,8 @@ pub unsafe fn vst1_s32_x2(a: *mut i32, b: int32x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70791,14 +68631,8 @@ pub unsafe fn vst1q_s32_x2(a: *mut i32, b: int32x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70814,14 +68648,8 @@ pub unsafe fn vst1_s64_x2(a: *mut i64, b: int64x1x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -70997,14 +68825,8 @@ pub unsafe fn vst1q_s64_x3(a: *mut i64, b: int64x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71020,14 +68842,8 @@ pub unsafe fn vst1_s8_x3(a: *mut i8, b: int8x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71043,14 +68859,8 @@ pub unsafe fn vst1q_s8_x3(a: *mut i8, b: int8x16x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71066,14 +68876,8 @@ pub unsafe fn vst1_s16_x3(a: *mut i16, b: int16x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71089,14 +68893,8 @@ pub unsafe fn vst1q_s16_x3(a: *mut i16, b: int16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s32_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71112,14 +68910,8 @@ pub unsafe fn vst1_s32_x3(a: *mut i32, b: int32x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s32_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71135,14 +68927,8 @@ pub unsafe fn vst1q_s32_x3(a: *mut i32, b: int32x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71158,14 +68944,8 @@ pub unsafe fn vst1_s64_x3(a: *mut i64, b: int64x1x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71341,14 +69121,8 @@ pub unsafe fn vst1q_s64_x4(a: *mut i64, b: int64x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71364,14 +69138,8 @@ pub unsafe fn vst1_s8_x4(a: *mut i8, b: int8x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71387,14 +69155,8 @@ pub unsafe fn vst1q_s8_x4(a: *mut i8, b: int8x16x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71410,14 +69172,8 @@ pub unsafe fn vst1_s16_x4(a: *mut i16, b: int16x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71433,14 +69189,8 @@ pub unsafe fn vst1q_s16_x4(a: *mut i16, b: int16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71456,14 +69206,8 @@ pub unsafe fn vst1_s32_x4(a: *mut i32, b: int32x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71479,14 +69223,8 @@ pub unsafe fn vst1q_s32_x4(a: *mut i32, b: int32x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_s64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -71502,14 +69240,8 @@ pub unsafe fn vst1_s64_x4(a: *mut i64, b: int64x1x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_s64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72539,14 +70271,8 @@ unsafe fn vst1q_v8i16<const ALIGN: i32>(addr: *const i8, val: int16x8_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1_v4f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[target_feature(enable = "neon,fp16")]
@@ -72564,14 +70290,8 @@ unsafe fn vst1_v4f16(addr: *const i8, val: float16x4_t, align: i32) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_v8f16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[target_feature(enable = "neon,fp16")]
@@ -72589,14 +70309,8 @@ unsafe fn vst1q_v8f16(addr: *const i8, val: float16x8_t, align: i32) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst1q_lane_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop, LANE = 0))]
@@ -72857,14 +70571,8 @@ pub unsafe fn vst2q_s32(a: *mut i32, b: int32x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72880,14 +70588,8 @@ pub unsafe fn vst2_f32(a: *mut f32, b: float32x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72903,14 +70605,8 @@ pub unsafe fn vst2q_f32(a: *mut f32, b: float32x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72926,14 +70622,8 @@ pub unsafe fn vst2_s8(a: *mut i8, b: int8x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72949,14 +70639,8 @@ pub unsafe fn vst2q_s8(a: *mut i8, b: int8x16x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72972,14 +70656,8 @@ pub unsafe fn vst2_s16(a: *mut i16, b: int16x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -72995,14 +70673,8 @@ pub unsafe fn vst2q_s16(a: *mut i16, b: int16x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -73018,14 +70690,8 @@ pub unsafe fn vst2_s32(a: *mut i32, b: int32x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -73287,14 +70953,8 @@ pub unsafe fn vst2q_lane_s32<const LANE: i32>(a: *mut i32, b: int32x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73312,14 +70972,8 @@ pub unsafe fn vst2_lane_f32<const LANE: i32>(a: *mut f32, b: float32x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73337,14 +70991,8 @@ pub unsafe fn vst2q_lane_f32<const LANE: i32>(a: *mut f32, b: float32x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_lane_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73362,14 +71010,8 @@ pub unsafe fn vst2_lane_s8<const LANE: i32>(a: *mut i8, b: int8x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73387,14 +71029,8 @@ pub unsafe fn vst2_lane_s16<const LANE: i32>(a: *mut i16, b: int16x4x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73412,14 +71048,8 @@ pub unsafe fn vst2q_lane_s16<const LANE: i32>(a: *mut i16, b: int16x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73437,14 +71067,8 @@ pub unsafe fn vst2_lane_s32<const LANE: i32>(a: *mut i32, b: int32x2x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2q_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst2, LANE = 0))]
@@ -73670,14 +71294,8 @@ pub unsafe fn vst2q_lane_p16<const LANE: i32>(a: *mut p16, b: poly16x8x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -73700,14 +71318,8 @@ pub unsafe fn vst2_p64(a: *mut p64, b: poly64x1x2_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst2_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74091,14 +71703,8 @@ pub unsafe fn vst3q_f16(a: *mut f16, b: float16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74114,14 +71720,8 @@ pub unsafe fn vst3_f32(a: *mut f32, b: float32x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74137,14 +71737,8 @@ pub unsafe fn vst3q_f32(a: *mut f32, b: float32x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74160,14 +71754,8 @@ pub unsafe fn vst3_s8(a: *mut i8, b: int8x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74183,14 +71771,8 @@ pub unsafe fn vst3q_s8(a: *mut i8, b: int8x16x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74206,14 +71788,8 @@ pub unsafe fn vst3_s16(a: *mut i16, b: int16x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74229,14 +71805,8 @@ pub unsafe fn vst3q_s16(a: *mut i16, b: int16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74252,14 +71822,8 @@ pub unsafe fn vst3_s32(a: *mut i32, b: int32x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -74541,14 +72105,8 @@ pub unsafe fn vst3q_lane_f16<const LANE: i32>(a: *mut f16, b: float16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -74573,14 +72131,8 @@ pub unsafe fn vst3_lane_f32<const LANE: i32>(a: *mut f32, b: float32x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -74605,14 +72157,8 @@ pub unsafe fn vst3q_lane_f32<const LANE: i32>(a: *mut f32, b: float32x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_lane_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -74630,14 +72176,8 @@ pub unsafe fn vst3_lane_s8<const LANE: i32>(a: *mut i8, b: int8x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -74662,14 +72202,8 @@ pub unsafe fn vst3_lane_s16<const LANE: i32>(a: *mut i16, b: int16x4x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -74694,14 +72228,8 @@ pub unsafe fn vst3q_lane_s16<const LANE: i32>(a: *mut i16, b: int16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -74726,14 +72254,8 @@ pub unsafe fn vst3_lane_s32<const LANE: i32>(a: *mut i32, b: int32x2x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3q_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst3, LANE = 0))]
@@ -75120,14 +72642,8 @@ pub unsafe fn vst3q_lane_p16<const LANE: i32>(a: *mut p16, b: poly16x8x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -75170,14 +72686,8 @@ pub unsafe fn vst3_s64(a: *mut i64, b: int64x1x3_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst3_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75555,14 +73065,8 @@ pub unsafe fn vst4q_f16(a: *mut f16, b: float16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75585,14 +73089,8 @@ pub unsafe fn vst4_f32(a: *mut f32, b: float32x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75615,14 +73113,8 @@ pub unsafe fn vst4q_f32(a: *mut f32, b: float32x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75638,14 +73130,8 @@ pub unsafe fn vst4_s8(a: *mut i8, b: int8x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75668,14 +73154,8 @@ pub unsafe fn vst4q_s8(a: *mut i8, b: int8x16x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75698,14 +73178,8 @@ pub unsafe fn vst4_s16(a: *mut i16, b: int16x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75728,14 +73202,8 @@ pub unsafe fn vst4q_s16(a: *mut i16, b: int16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -75758,14 +73226,8 @@ pub unsafe fn vst4_s32(a: *mut i32, b: int32x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -76070,14 +73532,8 @@ pub unsafe fn vst4q_lane_f16<const LANE: i32>(a: *mut f16, b: float16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76103,14 +73559,8 @@ pub unsafe fn vst4_lane_f32<const LANE: i32>(a: *mut f32, b: float32x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_lane_f32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76136,14 +73586,8 @@ pub unsafe fn vst4q_lane_f32<const LANE: i32>(a: *mut f32, b: float32x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_lane_s8)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76169,14 +73613,8 @@ pub unsafe fn vst4_lane_s8<const LANE: i32>(a: *mut i8, b: int8x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76202,14 +73640,8 @@ pub unsafe fn vst4_lane_s16<const LANE: i32>(a: *mut i16, b: int16x4x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_lane_s16)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76235,14 +73667,8 @@ pub unsafe fn vst4q_lane_s16<const LANE: i32>(a: *mut i16, b: int16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76268,14 +73694,8 @@ pub unsafe fn vst4_lane_s32<const LANE: i32>(a: *mut i32, b: int32x2x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4q_lane_s32)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[cfg_attr(test, assert_instr(vst4, LANE = 0))]
@@ -76705,14 +74125,8 @@ pub unsafe fn vst4q_lane_p16<const LANE: i32>(a: *mut p16, b: poly16x8x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_p64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -76735,14 +74149,8 @@ pub unsafe fn vst4_p64(a: *mut p64, b: poly64x1x4_t) {
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vst4_s64)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon instrinsic unsafe"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_arch = "arm")]
 #[target_feature(enable = "neon,v7")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78614,14 +76022,8 @@ pub fn vtbl4_p8(a: poly8x8x4_t, b: uint8x8_t) -> poly8x8_t {
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx1)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78635,14 +76037,8 @@ fn vtbx1(a: int8x8_t, b: int8x8_t, c: int8x8_t) -> int8x8_t {
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx1_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78712,14 +76108,8 @@ pub fn vtbx1_p8(a: poly8x8_t, b: poly8x8_t, c: uint8x8_t) -> poly8x8_t {
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78733,14 +76123,8 @@ fn vtbx2(a: int8x8_t, b: int8x8_t, c: int8x8_t, d: int8x8_t) -> int8x8_t {
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78838,14 +76222,8 @@ pub fn vtbx2_p8(a: poly8x8_t, b: poly8x8x2_t, c: uint8x8_t) -> poly8x8_t {
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78859,14 +76237,8 @@ fn vtbx3(a: int8x8_t, b: int8x8_t, c: int8x8_t, d: int8x8_t, e: int8x8_t) -> int
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_s8)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -78970,14 +76342,8 @@ pub fn vtbx3_p8(a: poly8x8_t, b: poly8x8x3_t, c: uint8x8_t) -> poly8x8_t {
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,v7")]
 #[cfg(target_arch = "arm")]
 #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
@@ -79148,14 +76514,8 @@ pub fn vtbx4_p8(a: poly8x8_t, b: poly8x8x4_t, c: uint8x8_t) -> poly8x8_t {
 }
 #[doc = "Transpose elements"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vtrn))]
 #[cfg_attr(
@@ -79185,14 +76545,8 @@ pub fn vtrn_f16(a: float16x4_t, b: float16x4_t) -> float16x4x2_t {
 }
 #[doc = "Transpose elements"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrnq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vtrn))]
 #[cfg_attr(
@@ -80329,14 +77683,8 @@ pub fn vusdotq_lane_s32<const LANE: i32>(a: int32x4_t, b: uint8x16_t, c: int8x8_
 }
 #[doc = "Dot product vector form with unsigned and signed integers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusdot_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vusdot))]
@@ -80365,14 +77713,8 @@ pub fn vusdot_s32(a: int32x2_t, b: uint8x8_t, c: int8x8_t) -> int32x2_t {
 }
 #[doc = "Dot product vector form with unsigned and signed integers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusdotq_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vusdot))]
@@ -80401,14 +77743,8 @@ pub fn vusdotq_s32(a: int32x4_t, b: uint8x16_t, c: int8x16_t) -> int32x4_t {
 }
 #[doc = "Unsigned and signed 8-bit integer matrix multiply-accumulate"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vusmmlaq_s32)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,i8mm")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -80437,14 +77773,8 @@ pub fn vusmmlaq_s32(a: int32x4_t, b: uint8x16_t, c: int8x16_t) -> int32x4_t {
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vuzp))]
 #[cfg_attr(
@@ -80474,14 +77804,8 @@ pub fn vuzp_f16(a: float16x4_t, b: float16x4_t) -> float16x4x2_t {
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzpq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(vuzp))]
 #[cfg_attr(
@@ -81075,14 +78399,8 @@ pub fn vuzpq_p16(a: poly16x8_t, b: poly16x8_t) -> poly16x8x2_t {
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vzip.16"))]
 #[cfg_attr(
@@ -81112,14 +78430,8 @@ pub fn vzip_f16(a: float16x4_t, b: float16x4_t) -> float16x4x2_t {
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzipq_f16)"]
-<<<<<<< HEAD
-#[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| b3cda168c8a
-#[inline]
-=======
 #[inline(always)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr("vzip.16"))]
 #[cfg_attr(

@@ -168,3 +168,32 @@ fn str_from_raw_parts_mut() {
 
     assert_eq!(c, "Hell");
 }
+
+// Covers `core::str::count::do_count_chars`
+#[test]
+fn test_do_count_chars() {
+    // s.len() needs to be at least 32 to call `do_count_chars`
+    let s = "";
+    assert_eq!(s.chars().count(), 0);
+
+    let (head, body, tail) = unsafe { s.as_bytes().align_to::<usize>() };
+    if body.is_empty() || head.len() > USIZE_SIZE || tail.len() > USIZE_SIZE {}
+}
+
+// try to brute force find a string:
+//
+// const USIZE_SIZE: usize = 8;
+// const S: &str = include_str!("../lotr.txt");
+//
+// pub fn main() {
+//     for s in S.split('\n') {
+//         if s.len() >= 32 && check_condition(s) {
+//             panic!("{s:?}");
+//         }
+//     }
+// }
+//
+// fn check_condition(s: &str) -> bool {
+//     let (head, body, tail) = unsafe { s.as_bytes().align_to::<usize>() };
+//     body.is_empty() || head.len() > USIZE_SIZE || tail.len() > USIZE_SIZE
+// }

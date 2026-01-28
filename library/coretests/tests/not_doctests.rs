@@ -14,6 +14,7 @@ mod ops;
 mod slice;
 mod str;
 mod time;
+mod unicode;
 
 use core::cmp::Ordering;
 use core::ops::{Bound, ControlFlow};

@@ -1329,6 +1329,8 @@
 <core::mem::type_info::Array as core::fmt::Debug>::fmt
 <core::mem::type_info::Bool as core::fmt::Debug>::fmt
 <core::mem::type_info::Char as core::fmt::Debug>::fmt
+<core::mem::type_info::DynTrait as core::fmt::Debug>::fmt
+<core::mem::type_info::DynTraitPredicate as core::fmt::Debug>::fmt
 <core::mem::type_info::Field as core::fmt::Debug>::fmt
 <core::mem::type_info::Float as core::fmt::Debug>::fmt
 <core::mem::type_info::Int as core::fmt::Debug>::fmt
@@ -1336,6 +1338,7 @@
 <core::mem::type_info::Reference as core::fmt::Debug>::fmt
 <core::mem::type_info::Slice as core::fmt::Debug>::fmt
 <core::mem::type_info::Str as core::fmt::Debug>::fmt
+<core::mem::type_info::Trait as core::fmt::Debug>::fmt
 <core::mem::type_info::Tuple as core::fmt::Debug>::fmt
 <core::mem::type_info::Type as core::fmt::Debug>::fmt
 <core::mem::type_info::TypeKind as core::fmt::Debug>::fmt

@@ -219,7 +219,11 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         let tcx = linter.tcx;
         let owner = instance.def_id();
 
-        if !tcx.is_mir_available(owner) {
+        if tcx.intrinsic(owner).is_some() {
+            // Instrinsics are qualified as part of the compiler, and don't have a body anyway.
+            info!("ignoring intrinsic {owner:?}");
+            return;
+        } if !tcx.is_mir_available(owner) {
             // We've already compiled this item in a previous crate and we didn't save the
             // MIR between crates.
             // We must have checked the item when it was compiled, so just ignore it.
@@ -285,8 +289,12 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                     span_bug!(span, "ferrocene::certified doesn't know how to check async drop");
                 }
 
+                let (ty, env) = self.monomorphize_args(place.ty(self.body, tcx), span);
+                if !ty.ty.needs_drop(tcx, env) {
+                    return None; // otherwise instance_mir panics
+                }
+
                 let drop_in_place = tcx.lang_items().drop_in_place_fn().unwrap();
-                let (ty, _) = self.monomorphize_args(place.ty(self.body, tcx), span);
                 let generics = tcx.mk_args(&[ty.ty.into()]);
                 // Use DropGlue directly rather than going through drop_in_place so that we get
                 // better spans.

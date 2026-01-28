@@ -3,7 +3,7 @@ use rustc_hir::{HirId, def_id::DefId};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
-use crate::ferrocene::{UNCERTIFIED, certified::{LintState, Use, UseKind}, post_mono::InstantiationSite};
+use crate::ferrocene::{UNCERTIFIED, LintState, Use, UseKind, post_mono::InstantiationSite};
 
 impl<'tcx> LintState<'tcx> {
     fn func_span(&self, def_id: DefId) -> Span {
@@ -91,7 +91,7 @@ impl<'tcx> LintState<'tcx> {
                 diag.note(format!("as a precaution, it must assume `{}` is unvalidated", tcx.def_path_str(assoc_fn)));
             }
             diag.note("once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated");
-            diag.note(format!("as a precaution, Ferrocene must assume you will eventually call `{}`", tcx.def_path_str(assoc_fn)));
+            diag.note(format!("as a precaution, it must assume you will eventually call `{}`", tcx.def_path_str(assoc_fn)));
         }
     }
 

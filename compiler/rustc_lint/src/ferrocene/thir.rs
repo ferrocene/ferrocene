@@ -14,7 +14,7 @@ use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext};
 use tracing::{debug, info};
 
-use crate::ferrocene::certified::{InstantiateResult, LintState, Use, UseKind};
+use crate::ferrocene::{InstantiateResult, LintState, Use, UseKind};
 
 pub(super) struct LintThir<'thir, 'tcx> {
     thir: &'thir Thir<'tcx>,

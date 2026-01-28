@@ -15,7 +15,7 @@ use rustc_middle::ty::{
 use rustc_span::Span;
 use tracing::{debug, info, trace};
 
-use crate::ferrocene::certified::{LintState, Use, UseKind};
+use crate::ferrocene::{LintState, Use, UseKind};
 
 struct LintPostMono<'a, 'tcx> {
     instance: Instance<'tcx>,

@@ -27,7 +27,8 @@ jobs:
           corepack install
           corepack enable yarn
           yarn -v
-          YARN_ENABLE_HARDENED_MODE=0 yarn install --immutable
+          YARN_ENABLE_HARDENED_MODE=0 yarn install
+          cat yarn.lock
 
       - name: Temp tools
         run: |

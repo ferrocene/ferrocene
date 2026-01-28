@@ -618,15 +618,15 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
         let fn_ptr = func.get_address(None);
         let fn_ty = fn_ptr.get_type();
 
-        let mut llargs = vec![];
+        let mut call_args = vec![];
 
         for arg in args {
             match arg.val {
                 OperandValue::ZeroSized => {}
-                OperandValue::Immediate(_) => llargs.push(arg.immediate()),
+                OperandValue::Immediate(_) => call_args.push(arg.immediate()),
                 OperandValue::Pair(a, b) => {
-                    llargs.push(a);
-                    llargs.push(b);
+                    call_args.push(a);
+                    call_args.push(b);
                 }
                 OperandValue::Ref(op_place_val) => {
                     let mut llval = op_place_val.llval;
@@ -643,13 +643,13 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
                         // We store bools as `i8` so we need to truncate to `i1`.
                         llval = self.to_immediate_scalar(llval, scalar);
                     }
-                    llargs.push(llval);
+                    call_args.push(llval);
                 }
             }
         }
 
         // FIXME directly use the llvm intrinsic adjustment functions here
-        let llret = self.call(fn_ty, None, None, fn_ptr, &llargs, None, None);
+        let llret = self.call(fn_ty, None, None, fn_ptr, &call_args, None, None);
         if is_cleanup {
             self.apply_attrs_to_cleanup_callsite(llret);
         }

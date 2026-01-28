@@ -88,7 +88,7 @@ use rustc_index::IndexVec;
 use rustc_lint_defs::LintId;
 use rustc_macros::rustc_queries;
 use rustc_query_system::ich::StableHashingContext;
-use rustc_query_system::query::{QueryMode, QueryState};
+use rustc_query_system::query::{QueryMode, QueryStackDeferred, QueryState};
 use rustc_session::Limits;
 use rustc_session::config::{EntryFnType, OptLevel, OutputFilenames, SymbolManglingVersion};
 use rustc_session::cstore::{
@@ -266,7 +266,7 @@ rustc_queries! {
     ///
     /// This can be conveniently accessed by `tcx.hir_*` methods.
     /// Avoid calling this query directly.
-    query hir_owner_parent(key: hir::OwnerId) -> hir::HirId {
+    query hir_owner_parent_q(key: hir::OwnerId) -> hir::HirId {
         desc { |tcx| "getting HIR parent of `{}`", tcx.def_path_str(key) }
     }
 

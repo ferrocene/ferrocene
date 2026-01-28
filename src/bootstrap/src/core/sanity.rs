@@ -60,6 +60,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-ferrocene-none",
     "thumbv7em-ferrocene-none-eabi",
     "thumbv7em-ferrocene-none-eabihf",
+    "aarch64v8r-unknown-ferrocene.facade",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

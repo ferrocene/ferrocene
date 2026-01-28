@@ -167,6 +167,7 @@ fn get_simple_function_f128<'gcc, 'tcx>(
     let f128_type = cx.type_f128();
     let func_name = match name {
         sym::ceilf128 => "ceilf128",
+        sym::fabsf128 => "fabsf128",
         sym::floorf128 => "floorf128",
         sym::truncf128 => "truncf128",
         sym::roundf128 => "roundf128",
@@ -221,6 +222,7 @@ fn f16_builtin<'gcc, 'tcx>(
     let builtin_name = match name {
         sym::ceilf16 => "__builtin_ceilf",
         sym::copysignf16 => "__builtin_copysignf",
+        sym::fabsf16 => "fabsf",
         sym::floorf16 => "__builtin_floorf",
         sym::fmaf16 => "fmaf",
         sym::maxnumf16 => "__builtin_fmaxf",
@@ -287,6 +289,7 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
             }
             sym::ceilf16
             | sym::copysignf16
+            | sym::fabsf16
             | sym::floorf16
             | sym::fmaf16
             | sym::maxnumf16
@@ -687,7 +690,8 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
     }
 
     fn va_end(&mut self, _va_list: RValue<'gcc>) -> RValue<'gcc> {
-        unimplemented!();
+        // TODO(antoyo): implement.
+        self.context.new_rvalue_from_int(self.int_type, 0)
     }
 }
 

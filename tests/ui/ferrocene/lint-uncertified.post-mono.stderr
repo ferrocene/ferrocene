@@ -40,16 +40,14 @@ LL | static CERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
 error: validated constant possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:95:76
    |
+LL |     fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
+   |        ----------- `<Unvalidated as PartialOrd>::partial_cmp` is unvalidated
+...
 LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |                                                                            ^^^^^^^^^^^^
    |
-  --> $SRC_DIR/core/src/cmp.rs:LL:COL
-   |
-   = note: `std::cmp::PartialOrd::partial_cmp` is unvalidated
-   |
-   = help: contact Ferrocene support to see if this method is possible to certify
-   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialOrd` is validated
-   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialOrd::partial_cmp`
+   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 note: `CERTIFIED_DYN_CONST` is validated
   --> $DIR/lint-uncertified.rs:95:7
    |
@@ -61,15 +59,14 @@ LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = 
 error: validated static possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:98:78
    |
+LL |     fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
+   |        ----------- `<Unvalidated as PartialOrd>::partial_cmp` is unvalidated
+...
 LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |                                                                              ^^^^^^^^^^^^
    |
-  --> $SRC_DIR/core/src/cmp.rs:LL:COL
-   |
-   = note: `std::cmp::PartialOrd::partial_cmp` is unvalidated
-   |
-   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialOrd` is validated
-   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialOrd::partial_cmp`
+   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 note: `CERTIFIED_DYN_STATIC` is validated
   --> $DIR/lint-uncertified.rs:98:8
    |
@@ -107,44 +104,29 @@ LL |     let trait_fn_type = <Unvalidated as Clone>::clone;
 error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:121:51
    |
+LL |     fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
+   |        ----------- `<Unvalidated as PartialOrd>::partial_cmp` is unvalidated
+...
 LL |     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated;
    |                                                   ^^^^^^^^^^^^
    |
-  --> $SRC_DIR/core/src/cmp.rs:LL:COL
-   |
-   = note: `std::cmp::PartialOrd::partial_cmp` is unvalidated
-   |
-   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialOrd` is validated
-   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialOrd::partial_cmp`
+   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 
 error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:124:70
    |
+LL |     fn ne(&self, _: &Self) -> bool {
+   |        -- `<Unvalidated as PartialEq>::ne` is unvalidated
+...
 LL |     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unvalidated;
    |                                                                      ^^^^^^^^^^^^
    |
-  --> $SRC_DIR/core/src/cmp.rs:LL:COL
-   |
-   = note: `std::cmp::PartialEq::eq` is unvalidated
-   |
-   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `PartialEq` is validated
-   = note: as a precaution, it must assume you will eventually call `std::cmp::PartialEq::eq`
-
-error: validated function possibly calls an unvalidated method
-  --> $DIR/lint-uncertified.rs:131:52
-   |
-LL |     let dyn_trait_fully_certified: &dyn ToString = &Unvalidated;
-   |                                                    ^^^^^^^^^^^^
-   |
-  --> $SRC_DIR/alloc/src/string.rs:LL:COL
-   |
-   = note: `to_string` is unvalidated
-   |
-   = note: Ferrocene cannot tell whether `&Unvalidated`'s implementation of `ToString` is validated
-   = note: as a precaution, it must assume you will eventually call `to_string`
+   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialEq>::ne`
 
 error: validated function uses an unvalidated method
-  --> $DIR/lint-uncertified.rs:136:17
+  --> $DIR/lint-uncertified.rs:134:17
    |
 LL |     fn inherent_fn(&self) {}
    |        ----------- `Unvalidated::inherent_fn` is unvalidated
@@ -153,7 +135,7 @@ LL |     Unvalidated.inherent_fn();
    |                 ^^^^^^^^^^^
 
 error: validated function uses an unvalidated constant
-  --> $DIR/lint-uncertified.rs:144:5
+  --> $DIR/lint-uncertified.rs:142:5
    |
 LL | const UNCERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |       ------------------------- `UNCERTIFIED_CLOSURE_CONST` is unvalidated
@@ -165,7 +147,7 @@ LL |     UNCERTIFIED_CLOSURE_CONST();
    = note: the Ferrocene compiler does not know if that function was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated static
-  --> $DIR/lint-uncertified.rs:145:5
+  --> $DIR/lint-uncertified.rs:143:5
    |
 LL | static UNCERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |        -------------------------- `UNCERTIFIED_CLOSURE_STATIC` is unvalidated
@@ -177,7 +159,7 @@ LL |     UNCERTIFIED_CLOSURE_STATIC();
    = note: the Ferrocene compiler does not know if that function was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated constant
-  --> $DIR/lint-uncertified.rs:146:5
+  --> $DIR/lint-uncertified.rs:144:5
    |
 LL | const UNCERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |       --------------------- `UNCERTIFIED_DYN_CONST` is unvalidated
@@ -189,7 +171,7 @@ LL |     UNCERTIFIED_DYN_CONST.partial_cmp(&Unvalidated);
    = note: the Ferrocene compiler does not know if that function was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated static
-  --> $DIR/lint-uncertified.rs:147:5
+  --> $DIR/lint-uncertified.rs:145:5
    |
 LL | static UNCERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |        ---------------------- `UNCERTIFIED_DYN_STATIC` is unvalidated
@@ -200,5 +182,5 @@ LL |     UNCERTIFIED_DYN_STATIC.partial_cmp(&Unvalidated);
    = note: `UNCERTIFIED_DYN_STATIC` contains a function pointer that might be called at runtime
    = note: the Ferrocene compiler does not know if that function was verified, so it must assume it is unverified
 
-error: aborting due to 14 previous errors
+error: aborting due to 13 previous errors
 

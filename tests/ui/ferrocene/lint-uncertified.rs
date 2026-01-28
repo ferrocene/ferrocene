@@ -66,7 +66,7 @@ impl PartialEq<Unvalidated> for Unvalidated {
     }
 }
 
-impl ToString for Unvalidated {
+impl ToString for Validated {
     #[ferrocene::prevalidated]
     fn to_string(&self) -> String {
         String::new()
@@ -126,9 +126,7 @@ fn certified() {
     dyn_trait_partially_certified.eq(&Unvalidated); // ok
     dyn_trait_partially_certified.ne(&Unvalidated); // ok
 
-    // TODO: this should be ok, it's a silly limitation that we can't allow this.
-    // see https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/569347473
-    let dyn_trait_fully_certified: &dyn ToString = &Unvalidated; //~ ERROR unvalidated
+    let dyn_trait_fully_certified: &dyn ToString = &Validated; // ok: this impl is validated
     dyn_trait_fully_certified.to_string(); // ok
 
     Ctor; // ok

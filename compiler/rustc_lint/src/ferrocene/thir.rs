@@ -1,13 +1,17 @@
 use std::ops::ControlFlow;
 
+use rustc_middle::ty::InstanceKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, OwnerId};
+use rustc_infer::traits::{ImplSource, Obligation, ObligationCause, ObligationCauseCode};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::span_bug;
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
-use rustc_middle::ty::{self, Binder, ExistentialPredicate, ExistentialTraitRef, GenericArgs, GenericArgsRef, Instance, InstanceKind, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv};
+use rustc_middle::ty::{self, Binder, ExistentialPredicate, ExistentialTraitRef, GenericArgs, GenericArgsRef, Instance, PolyTraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv};
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_span::Span;
+use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext};
 use tracing::{debug, info};
 
 use crate::ferrocene::certified::{InstantiateResult, LintState, Use, UseKind};
@@ -108,26 +112,80 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     }
 
     fn check_dyn_trait_coercion(&self, expr: &thir::Expr<'tcx>, source: thir::ExprId) -> Option<UseKind<'tcx>> {
+        let source_ref = self.thir[source].ty;
+        let source_ty = source_ref.peel_refs();
+        debug!("saw unsized coercion from {:?} to {:?}", source_ref, expr.ty);
+
         let tcx = self.linter.tcx;
-        let bound_traits = dyn_trait(expr.ty, expr.span);
+        let bound_traits = dyn_trait_refs(expr.ty);
         for trait_ in bound_traits {
-            for assoc_id in tcx.associated_item_def_ids(trait_.def_id()) {
-                if tcx.def_kind(assoc_id).is_fn_like() {
-                    // TODO: this is a giant hack and not even right lmao
-                    // in particular it says "not certified" when it should do the
-                    // same thing as fn pointers and say "the compiler can't
-                    // guarantee this is right".
-                    //
-                    // TODO: only error here if the implementation of the trait is uncertified
+            let Some(first_method) = tcx.associated_item_def_ids(trait_.def_id()).iter().find(|&id| tcx.def_kind(id).is_fn_like())
+            else {
+                // not possible to call any functions on this trait object, casting is always ok.
+                continue;
+            };
+            let trait_ref = trait_.with_self_ty(tcx, source_ty);
+            if let Some((impl_block, generics)) = self.find_trait_impl(trait_ref, expr.span) {
+                debug!("found impl {impl_block:?}");
+                for &impl_fn in tcx.associated_item_def_ids(impl_block) {
+                    if let Some(instance) = self.try_instantiate(impl_fn, generics, expr.span).instance() {
+                        if matches!(item_is_validated(tcx, instance.def_id()), ValidatedStatus::Validated { .. }) {
+                            continue;
+                        }
+                    }
+                    debug!("found unvalidated method {impl_fn:?}");
+                    // This function in the impl needs to be marked with `prevalidated`.
                     // TODO: list all uncertified functions
-                    // TODO: this shows the type of the trait object, not the type
-                    // of the object being cast.
-                    debug!("saw unsized coercion to {:?}", expr.ty);
-                    return Some(UseKind::TraitObjectCast(*assoc_id, self.thir[source].ty));
+                    return Some(UseKind::TraitObjectCast(impl_fn, source_ty));
                 }
+                return None;
             }
+            // We couldn't resolve the impl. We have to assume it's not validated.
+            return Some(UseKind::TraitObjectCast(*first_method, source_ty));
         }
         None
+    }
+
+    /// c.f. https://github.com/AeneasVerif/hax/blob/3c2b6f01af4a4362dd855b811aa910ad173d546f/frontend/exporter/src/traits/resolution.rs#L666
+    fn find_trait_impl(&self, trait_ref: PolyTraitRef<'tcx>, span: Span) -> Option<(DefId, GenericArgsRef<'tcx>)> {
+        use rustc_infer::infer::TyCtxtInferExt;
+
+        let tcx = self.linter.tcx;
+        let (infcx, param_env) = tcx.infer_ctxt().ignoring_regions().build_with_typing_env(self.typing_env());
+        debug!("resolving impl for {trait_ref:?}");
+
+        // Find the impl block.
+        let mut selcx = SelectionContext::new(&infcx);
+        // TODO: i think 'item' might not be correct when checking closures? does it matter?
+        // the docs say it's only used for region constraints ...
+        let cause = ObligationCause::new(span, self.linter.item, ObligationCauseCode::ExprAssignable);
+        let obligation = Obligation::new(tcx, cause, param_env, trait_ref);
+        let selection = match selcx.poly_select(&obligation) {
+            Ok(selection) => selection?,
+            Err(e) => {
+                tcx.dcx().span_delayed_bug(span, format!("type checking failed for trait upcast? {e:?}"));
+                return None;
+            }
+        };
+        debug!("selected {selection:?}");
+
+        // Resolve nested obligations, to make it more likely that `try_instantiate` succeeds.
+        let ocx = ObligationCtxt::new(&infcx);
+        // Discharge our obligations.
+        let impl_source = selection.map(|o| ocx.register_obligation(o));
+        let errors = ocx.evaluate_obligations_error_on_ambiguity();
+        if !errors.is_empty() {
+            tcx.dcx().span_delayed_bug(span, format!("impl obligations not met for trait upcast? {errors:?}"));
+        }
+
+        let normalized_impl = tcx.erase_and_anonymize_regions(infcx.resolve_vars_if_possible(impl_source));
+        debug!("found impl {normalized_impl:?}");
+        match normalized_impl {
+            ImplSource::UserDefined(data) => Some((data.impl_def_id, data.args)),
+            ImplSource::Param(_) => None,
+            // TODO: what to do here? this shouldn't actually prevent the cast ...
+            ImplSource::Builtin(..) => None,
+        }
     }
 
     fn instance_of_ty(&self, ty: Ty<'tcx>, span: Span) -> Option<Instance<'tcx>> {
@@ -169,13 +227,10 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         generic_args: GenericArgsRef<'tcx>,
         span: Span,
     ) -> Option<Instance<'tcx>> {
-        let callee = match self.try_instantiate(maybe_trait_fn, generic_args, span) {
-            InstantiateResult::Err => return None,
-            // This is handled later by a post-mono pass that checks the instantiation is verified.
-            // For now just ignore errors.
-            InstantiateResult::Indeterminate => return None,
-            InstantiateResult::Resolved(id) => id,
-        };
+        // Indeterminate results are handled later by a post-mono pass that checks the
+        // instantiation is verified. For now just ignore errors.
+        let callee = self.try_instantiate(maybe_trait_fn, generic_args, span).instance()?;
+
         // If this is a call to Fn/FnMut/FnOnce::call, then it's a type that implements
         // `fn_traits`, either a closure or a user-defined type. Allow closures but check
         // everything else.
@@ -202,18 +257,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     ) -> InstantiateResult<'tcx> {
         let tcx = self.linter.tcx;
 
-        use rustc_middle::ty::TypingMode;
-
-        // apparently the rest of THIR uses this? it has a comment saying it's wrong though...
-        //let typing_mode = TypingMode::non_body_analysis();
-        // this definitely works but there's scary comments about revealing opaque types
-        // let env = TypingEnv::post_analysis(tcx, self.linter.owner);
-
-        let typing_mode = TypingMode::typeck_for_body(tcx, self.linter.item);
-        let param_env = tcx.param_env(self.linter.item);
-        let env = TypingEnv { typing_mode, param_env };
-
-        match Instance::try_resolve(tcx, env, def_id, args) {
+        match Instance::try_resolve(tcx, self.typing_env(), def_id, args) {
             Err(_) => { // this happens when we hit the type length limit
                 tcx.dcx().span_delayed_bug(span, format!("could not resolve instance ({def_id:?}, {args:?})"));
                 InstantiateResult::Err
@@ -222,12 +266,26 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             Ok(Some(instance)) => InstantiateResult::Resolved(instance),
         }
     }
+
+    fn typing_env(&self) -> TypingEnv<'tcx> {
+        use rustc_middle::ty::TypingMode;
+        let tcx = self.linter.tcx;
+
+        // apparently the rest of THIR uses this? it has a comment saying it's wrong though...
+        //let typing_mode = TypingMode::non_body_analysis();
+        // this definitely works but there's scary comments about revealing opaque types
+        // let env = TypingEnv::post_analysis(tcx, self.linter.owner);
+
+        let typing_mode = TypingMode::typeck_for_body(tcx, self.linter.item);
+        let param_env = tcx.param_env(self.linter.item);
+        TypingEnv { typing_mode, param_env }
+    }
 }
 
-fn dyn_trait<'tcx>(ty: Ty<'tcx>, span: Span) -> Vec<Binder<'tcx, ExistentialTraitRef<'tcx>>> {
-    struct ContainsDynTraitVisitor(Span);
+fn dyn_trait_refs<'tcx>(ty: Ty<'tcx>) -> Vec<Binder<'tcx, ExistentialTraitRef<'tcx>>> {
+    struct FindDynTraitVisitor;
 
-    impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for ContainsDynTraitVisitor {
+    impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for FindDynTraitVisitor {
         type Result = ControlFlow<Vec<Binder<'tcx, ExistentialTraitRef<'tcx>>>>;
 
         fn visit_ty(&mut self, t: Ty<'tcx>) -> Self::Result {
@@ -262,7 +320,7 @@ fn dyn_trait<'tcx>(ty: Ty<'tcx>, span: Span) -> Vec<Binder<'tcx, ExistentialTrai
         }
     }
 
-    let cf = ty.visit_with(&mut ContainsDynTraitVisitor(span));
+    let cf = ty.visit_with(&mut FindDynTraitVisitor);
     cf.break_value().unwrap_or_default()
 }
 

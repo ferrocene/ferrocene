@@ -200,6 +200,15 @@ pub(super) enum InstantiateResult<'tcx> {
     Indeterminate,
 }
 
+impl<'tcx> InstantiateResult<'tcx> {
+    pub(super) fn instance(self) -> Option<Instance<'tcx>> {
+        match self {
+            InstantiateResult::Err | InstantiateResult::Indeterminate => None,
+            InstantiateResult::Resolved(instance) => Some(instance),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub(super) struct Use<'tcx> {
     pub(super) kind: UseKind<'tcx>,

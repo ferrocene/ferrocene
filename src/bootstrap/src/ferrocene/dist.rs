@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 pub(crate) mod flip_link;
+pub(crate) mod sbom;
 
 use std::collections::BTreeMap;
 use std::fs;

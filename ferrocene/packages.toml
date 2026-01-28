@@ -161,3 +161,7 @@ name = "ferrocene-docs-doctrees"
 # users should never need, and displaying it in the list of downloadable
 # packages would only cause confusion.
 subset = "internal"
+
+[[groups.hosts.packages]]
+name = "ferrocene-sbom"
+subset = "default"

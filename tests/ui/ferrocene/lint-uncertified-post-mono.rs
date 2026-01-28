@@ -71,14 +71,14 @@ pub fn instantiation_reachable() { //~ NOTE is validated
     uninstantiated_generic(Unvalidated);
     //~^ NOTE instantiated by
     //~^^ NOTE validated entrypoint
-    //~^^^ NOTE validated entrypoint
     uninstantiated_generic(Validated); // ok
 }
 
 // Currently *not* checked.
 // Nadrierel says it should be possible to lift this restriction by not running the
-// `SimplifyCfg-initial` MIR passes, if that's something we want.
-// We just ban our customers from having dead code though, lol.
+// `SimplifyCfg-initial` MIR passes, if that's something we want. I think we would also have to
+// modify our RootCollector to use the Eager collection strategy.
+// But right now we just ban our customers from having dead code, lol.
 #[ferrocene::prevalidated]
 fn instantiation_unreachable() {
     uninstantiated_generic(Unvalidated); // ok

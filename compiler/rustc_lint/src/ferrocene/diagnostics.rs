@@ -103,7 +103,7 @@ impl<'tcx> LintState<'tcx> {
             if let Some(multi) = validated_span {
                 multi.push_span_label(caller_span, msg);
             } else {
-                diag.span_note(
+                diag.span_note_once(
                     caller_span,
                     format!("{msg}, which is called from a validated entrypoint"),
                 );

@@ -1,11 +1,10 @@
-//! Query configuration and description traits.
-
 use std::fmt::Debug;
 use std::hash::Hash;
 
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_span::ErrorGuaranteed;
 
+use super::QueryStackFrameExtra;
 use crate::dep_graph::{DepKind, DepNode, DepNodeParams, SerializedDepNodeIndex};
 use crate::ich::StableHashingContext;
 use crate::query::caches::QueryCache;
@@ -13,7 +12,15 @@ use crate::query::{CycleError, CycleErrorHandling, DepNodeIndex, QueryContext, Q
 
 pub type HashResult<V> = Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>;
 
-pub trait QueryConfig<Qcx: QueryContext>: Copy {
+/// Trait that can be used as a vtable for a single query, providing operations
+/// and metadata for that query.
+///
+/// Implemented by `rustc_query_impl::SemiDynamicQueryDispatcher`, which
+/// mostly delegates to `rustc_middle::query::plumbing::QueryVTable`.
+/// Those types are not visible from this `rustc_query_system` crate.
+///
+/// "Dispatcher" should be understood as a near-synonym of "vtable".
+pub trait QueryDispatcher<Qcx: QueryContext>: Copy {
     fn name(self) -> &'static str;
 
     // `Key` and `Value` are `Copy` instead of `Clone` to ensure copying them stays cheap,
@@ -26,7 +33,7 @@ pub trait QueryConfig<Qcx: QueryContext>: Copy {
     fn format_value(self) -> fn(&Self::Value) -> String;
 
     // Don't use this method to access query results, instead use the methods on TyCtxt
-    fn query_state<'a>(self, tcx: Qcx) -> &'a QueryState<Self::Key>
+    fn query_state<'a>(self, tcx: Qcx) -> &'a QueryState<Self::Key, Qcx::QueryInfo>
     where
         Qcx: 'a;
 
@@ -56,7 +63,7 @@ pub trait QueryConfig<Qcx: QueryContext>: Copy {
     fn value_from_cycle_error(
         self,
         tcx: Qcx::DepContext,
-        cycle_error: &CycleError,
+        cycle_error: &CycleError<QueryStackFrameExtra>,
         guar: ErrorGuaranteed,
     ) -> Self::Value;
 

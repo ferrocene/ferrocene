@@ -110,7 +110,7 @@ impl Step for Sbom {
             });
         }
 
-        if !BootstrapCommand::new("yarn")
+        if !BootstrapCommand::new("yarnpkg")
             .current_dir(&self.root_dir)
             .arg("exec")
             .arg("cyclonedx-yarn")

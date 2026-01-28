@@ -1637,9 +1637,7 @@ commands:
       - run:
           name: Prepare yarn
           command: |
-            npm install -g corepack
-            corepack install
-            yarn install
+            yarnpkg install
       - run:
           name: Generate SBOMs
           command: ./x.py dist ferrocene-sbom

@@ -23,11 +23,9 @@ jobs:
 
       - name: Prepare yarn
         run: |
-          npm install -g corepack
-          corepack install
-          corepack enable yarn
-          yarn -v
-          YARN_ENABLE_HARDENED_MODE=0 yarn install
+          apt install yarnpkg
+          yarnpkg set version 4.12.0
+          yarnpkg install
           cat yarn.lock
 
       - name: Temp tools

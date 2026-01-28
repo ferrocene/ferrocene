@@ -26,8 +26,8 @@ struct LintPostMono<'a, 'tcx> {
     from_instantiation: Option<InstantiationSite<'tcx>>,
 }
 
-#[derive(Copy, Clone)]
-struct InstantiationSite<'tcx> {
+#[derive(Copy, Clone, Debug)]
+pub(super) struct InstantiationSite<'tcx> {
     /// NOTE: this points to the call site which causes the callee to be monomorphized.
     lint_node: HirId,
     caller_span: Span,
@@ -79,7 +79,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
     fn visit_terminator(&mut self, terminator: &Terminator<'tcx>, location: Location) {
         if let Some((callee_instance, pre_mono_call)) = self.get_call_def_mir(terminator, location)
         {
-            let use_ = Use { kind: UseKind::Called(callee_instance), span: terminator.source_info.span };
+            let use_ = self.use_(UseKind::Called(callee_instance), terminator.source_info.span);
             self.on_edge(use_, &terminator.source_info, pre_mono_call, |_| ());
         }
     }
@@ -104,7 +104,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
 
         let callee_instance = self.monomorphize_instance(pre_mono_call, generic_args, call_span);
         // TODO: need to also check this in THIR pass
-        let use_ = Use { kind: UseKind::Cast(callee_instance), span: call_span };
+        let use_ = self.use_(UseKind::Cast(callee_instance), call_span);
         let source_info = self.body.source_info(location);
         self.on_edge(use_, source_info, pre_mono_call, |diag| {
             diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
@@ -114,6 +114,10 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
 }
 
 impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
+    fn use_(&self, kind: UseKind<'tcx>, span: Span) -> Use<'tcx> {
+        Use { kind, span, from_instantiation: self.from_instantiation }
+    }
+
     fn on_edge(
         &mut self,
         use_: Use<'tcx>,

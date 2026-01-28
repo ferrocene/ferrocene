@@ -104,7 +104,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             _ => return None,
         };
 
-        Some(Use { kind: use_kind, span })
+        Some(Use { kind: use_kind, span, from_instantiation: None })
     }
 
     fn check_dyn_trait_coercion(&self, expr: &thir::Expr<'tcx>) -> Option<UseKind<'tcx>> {

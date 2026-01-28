@@ -99,6 +99,7 @@ use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::Span;
 use tracing::{debug, info};
 
+use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::thir::LintThir;
 use crate::{LateContext, LateLintPass};
 
@@ -205,6 +206,7 @@ pub(super) enum InstantiateResult<'tcx> {
 pub(super) struct Use<'tcx> {
     pub(super) kind: UseKind<'tcx>,
     pub(super) span: Span,
+    pub(super) from_instantiation: Option<InstantiationSite<'tcx>>,
 }
 
 #[derive(Copy, Clone, Debug)]

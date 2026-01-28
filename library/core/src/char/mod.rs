@@ -339,7 +339,7 @@ impl fmt::Display for EscapeDefault {
 ///
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
 impl EscapeDebug {

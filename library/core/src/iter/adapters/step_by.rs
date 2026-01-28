@@ -18,7 +18,7 @@ use crate::iter::from_fn;
 /// [`Iterator`]: trait.Iterator.html
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct StepBy<I> {
     /// This field is guaranteed to be preprocessed by the specialized `SpecRangeSetup::setup`
     /// in the constructor.

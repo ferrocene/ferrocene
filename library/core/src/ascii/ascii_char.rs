@@ -3,7 +3,8 @@
 //! suggestions from rustc if you get anything slightly wrong in here, and overall
 //! helps with clarity as we're also referring to `char` intentionally in here.
 
-#[cfg(not(feature = "ferrocene_subset"))]
+#[cfg(feature = "ferrocene_subset")]
+use crate::fmt;
 use crate::mem::transmute;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::{assert_unsafe_precondition, fmt};
@@ -480,7 +481,6 @@ impl AsciiChar {
     /// `b` must be in `0..=127`, or else this is UB.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn from_u8_unchecked(b: u8) -> Self {
         // SAFETY: Our safety precondition is that `b` is in-range.
         unsafe { transmute(b) }
@@ -555,7 +555,6 @@ impl AsciiChar {
     /// Views this ASCII character as a one-code-unit UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_str(&self) -> &str {
         crate::slice::from_ref(self).as_str()
     }
@@ -1220,7 +1219,6 @@ impl [AsciiChar] {
 }
 
 #[unstable(feature = "ascii_char", issue = "110998")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for AsciiChar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <str as fmt::Display>::fmt(self.as_str(), f)
@@ -1228,7 +1226,6 @@ impl fmt::Display for AsciiChar {
 }
 
 #[unstable(feature = "ascii_char", issue = "110998")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for AsciiChar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use AsciiChar::{Apostrophe, Null, ReverseSolidus as Backslash};

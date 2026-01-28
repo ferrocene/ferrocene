@@ -23,8 +23,7 @@ use crate::iter::{TrustedLen, UncheckedIterator};
 /// [`Iterator`]: trait.Iterator.html
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Clone))]
+#[derive(Clone, Debug)]
 pub struct Cloned<I> {
     it: I,
 }
@@ -83,7 +82,6 @@ where
 }
 
 #[stable(feature = "iter_cloned", since = "1.1.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, I, T: 'a> DoubleEndedIterator for Cloned<I>
 where
     I: DoubleEndedIterator<Item = &'a T>,

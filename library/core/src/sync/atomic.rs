@@ -249,13 +249,7 @@ use crate::cell::UnsafeCell;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hint::spin_loop;
 use crate::intrinsics::AtomicOrdering as AO;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, intrinsics};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::intrinsics;
 
 trait Sealed {}
 
@@ -461,8 +455,7 @@ unsafe impl<T> Sync for AtomicPtr<T> {}
 ///
 /// [nomicon]: ../../../nomicon/atomics.html
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Debug, Eq, PartialEq, Hash))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone))]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 #[non_exhaustive]
 #[rustc_diagnostic_item = "Ordering"]
 pub enum Ordering {
@@ -2730,7 +2723,6 @@ macro_rules! atomic_int {
         }
 
         #[$stable_debug]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl fmt::Debug for $atomic_type {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 fmt::Debug::fmt(&self.load(Ordering::Relaxed), f)
@@ -4661,7 +4653,6 @@ pub fn compiler_fence(order: Ordering) {
 
 #[cfg(target_has_atomic_load_store = "8")]
 #[stable(feature = "atomic_debug", since = "1.3.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for AtomicBool {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.load(Ordering::Relaxed), f)

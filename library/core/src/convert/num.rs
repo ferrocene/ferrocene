@@ -313,7 +313,6 @@ macro_rules! impl_try_from_unbounded {
 }
 
 // only negative bounds
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_try_from_lower_bounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
@@ -425,9 +424,7 @@ impl_try_from_lower_bounded!(i8 => u8, u16, u32, u64, u128);
 impl_try_from_both_bounded!(i16 => u8);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i16 => u16, u32, u64, u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i32 => u8, u16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i32 => u32, u64, u128);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i64 => u8, u16, u32);
@@ -465,7 +462,6 @@ mod ptr_try_from_impls {
     impl_try_from_unbounded!(isize => i16, i32, i64, i128);
 
     rev!(impl_try_from_upper_bounded, usize => u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16);
     rev!(impl_try_from_both_bounded, usize => i32, i64, i128);
 
@@ -497,7 +493,6 @@ mod ptr_try_from_impls {
 
     rev!(impl_try_from_unbounded, usize => u32);
     rev!(impl_try_from_upper_bounded, usize => u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32);
     rev!(impl_try_from_both_bounded, usize => i64, i128);
 
@@ -533,7 +528,6 @@ mod ptr_try_from_impls {
 
     rev!(impl_try_from_unbounded, usize => u32, u64);
     rev!(impl_try_from_upper_bounded, usize => u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32, i64);
     rev!(impl_try_from_both_bounded, usize => i128);
 

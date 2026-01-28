@@ -20,9 +20,7 @@ use crate::cell::UnsafeCell;
 use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::Debug;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::UnsafePinned;
@@ -823,7 +821,6 @@ impl<T: PointeeSized> !Sync for *mut T {}
 pub struct PhantomData<T: PointeeSized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> Hash for PhantomData<T> {
     #[inline]
     fn hash<H: Hasher>(&self, _: &mut H) {}
@@ -904,13 +901,7 @@ pub trait DiscriminantKind {
     /// The type of the discriminant, which must satisfy the trait
     /// bounds required by `mem::Discriminant`.
     #[lang = "discriminant_type"]
-    #[cfg(not(feature = "ferrocene_subset"))]
     type Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
-    /// The type of the discriminant, which must satisfy the trait
-    /// bounds required by `mem::Discriminant`.
-    #[lang = "discriminant_type"]
-    #[cfg(feature = "ferrocene_subset")]
-    type Discriminant: Clone + Copy + /* Debug */ Eq + PartialEq + /* Hash */ Send + Sync + Unpin;
 }
 
 /// Used to determine whether a type contains

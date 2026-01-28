@@ -18,7 +18,7 @@ use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{cmp, intrinsics, ptr};
+use crate::{cmp, fmt, intrinsics, ptr};
 
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
@@ -1123,7 +1123,6 @@ impl<T> hash::Hash for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> fmt::Debug for Discriminant<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_tuple("Discriminant").field(&self.0).finish()

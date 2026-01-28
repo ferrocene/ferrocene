@@ -5,7 +5,7 @@ use crate::any::TypeId;
 use crate::intrinsics::type_of;
 
 /// Compile-time type information.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[lang = "type_info"]
 #[unstable(feature = "type_info", issue = "146922")]
@@ -37,7 +37,7 @@ impl Type {
 }
 
 /// Compile-time type information.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub enum TypeKind {
@@ -66,7 +66,7 @@ pub enum TypeKind {
 }
 
 /// Compile-time type information about tuples.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Tuple {
@@ -75,7 +75,7 @@ pub struct Tuple {
 }
 
 /// Compile-time type information about fields of tuples, structs and enum variants.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Field {
@@ -86,7 +86,7 @@ pub struct Field {
 }
 
 /// Compile-time type information about arrays.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Array {
@@ -97,7 +97,7 @@ pub struct Array {
 }
 
 /// Compile-time type information about slices.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Slice {
@@ -106,7 +106,7 @@ pub struct Slice {
 }
 
 /// Compile-time type information about `bool`.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Bool {
@@ -114,7 +114,7 @@ pub struct Bool {
 }
 
 /// Compile-time type information about `char`.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Char {
@@ -122,7 +122,7 @@ pub struct Char {
 }
 
 /// Compile-time type information about signed and unsigned integer types.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Int {
@@ -133,7 +133,7 @@ pub struct Int {
 }
 
 /// Compile-time type information about floating-point types.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Float {
@@ -142,7 +142,7 @@ pub struct Float {
 }
 
 /// Compile-time type information about string slice types.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Str {
@@ -150,7 +150,7 @@ pub struct Str {
 }
 
 /// Compile-time type information about references.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Reference {
@@ -161,7 +161,7 @@ pub struct Reference {
 }
 
 /// Compile-time type information about pointers.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[non_exhaustive]
 #[unstable(feature = "type_info", issue = "146922")]
 pub struct Pointer {

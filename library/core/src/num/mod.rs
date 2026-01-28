@@ -6,16 +6,9 @@ use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::str::FromStr;
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ascii, intrinsics, mem};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{intrinsics, mem};
-
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! try_opt {
     ($e:expr) => {
         match $e {
@@ -37,16 +30,12 @@ macro_rules! sign_dependent_expr {
 
 // All these modules are technically private and only exposed for coretests:
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bignum;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod dec2flt;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod diy_float;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod flt2dec;
 pub mod fmt;
 
@@ -714,7 +703,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_alphabetic(&self) -> bool {
         matches!(*self, b'A'..=b'Z' | b'a'..=b'z')
     }
@@ -1092,7 +1080,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_control(&self) -> bool {
         matches!(*self, b'\0'..=b'\x1F' | b'\x7F')
     }
@@ -1118,7 +1105,6 @@ impl u8 {
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_ascii(self) -> ascii::EscapeDefault {
         ascii::escape_default(self)
     }
@@ -1393,7 +1379,6 @@ impl usize {
 /// ```
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum FpCategory {
     /// NaN (not a number): this value results from calculations like `(-1.0).sqrt()`.
     ///

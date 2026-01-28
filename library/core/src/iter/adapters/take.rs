@@ -13,7 +13,7 @@ use crate::ops::{ControlFlow, Try};
 ///
 /// [`take`]: Iterator::take
 /// [`Iterator`]: trait.Iterator.html
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Take<I> {

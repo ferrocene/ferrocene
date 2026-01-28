@@ -1,5 +1,4 @@
 #![stable(feature = "duration_core", since = "1.25.0")]
-#![cfg_attr(feature = "ferrocene_subset", allow(dead_code))]
 
 //! Temporal quantification.
 //!
@@ -20,7 +19,6 @@
 //! assert_eq!(total, Duration::new(10, 7));
 //! ```
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::Sum;
@@ -1010,7 +1008,6 @@ impl Duration {
     /// let res = Duration::from_secs_f32(0.999e-9);
     /// assert_eq!(res, Duration::new(0, 1));
     /// ```
-    #[cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
     #[inline]
@@ -1341,7 +1338,6 @@ impl<'a> Sum<&'a Duration> for Duration {
 }
 
 #[stable(feature = "duration_debug_impl", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Duration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         /// Formats a floating point number in decimal notation.
@@ -1563,14 +1559,13 @@ impl fmt::Debug for Duration {
 ///     println!("Failed conversion to Duration: {e}");
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, PartialEq, Eq))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
 pub struct TryFromFloatSecsError {
     kind: TryFromFloatSecsErrorKind,
 }
 
 #[stable(feature = "duration_checked_float", since = "1.66.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromFloatSecsError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
@@ -1585,7 +1580,7 @@ impl fmt::Display for TryFromFloatSecsError {
     }
 }
 
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, PartialEq, Eq))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum TryFromFloatSecsErrorKind {
     // Value is negative.
     Negative,

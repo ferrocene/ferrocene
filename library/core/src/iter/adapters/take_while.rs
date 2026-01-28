@@ -1,6 +1,9 @@
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused};
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ops::{ControlFlow, Try};
 
@@ -99,6 +102,7 @@ where
     impl_fold_via_try_fold! { fold -> try_fold }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<I, P> FusedIterator for TakeWhile<I, P>
 where
@@ -107,9 +111,11 @@ where
 {
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "trusted_fused")]
 unsafe impl<I: TrustedFused, P> TrustedFused for TakeWhile<I, P> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<P, I> SourceIter for TakeWhile<I, P>
 where
@@ -124,6 +130,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I: InPlaceIterable, F> InPlaceIterable for TakeWhile<I, F> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;

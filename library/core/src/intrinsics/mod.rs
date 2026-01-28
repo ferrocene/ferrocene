@@ -76,8 +76,7 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 /// `atomic::Ordering` so that we can make it `ConstParamTy` and fix the values used here without a
 /// risk of leaking that to stable code.
 #[allow(missing_docs)]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, ConstParamTy, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(ConstParamTy, PartialEq, Eq))]
+#[derive(Debug, ConstParamTy, PartialEq, Eq)]
 pub enum AtomicOrdering {
     // These values must match the compiler's `AtomicOrdering` defined in
     // `rustc_middle/src/ty/consts/int.rs`!
@@ -2018,7 +2017,6 @@ pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn carrying_mul_add<T: [const] fallback::CarryingMulAdd<Unsigned = U>, U>(
     multiplier: T,
     multiplicand: T,
@@ -3435,7 +3433,6 @@ pub const fn maximumf128(x: f128, y: f128) -> f128 {
 /// [`f16::abs`](../../std/primitive.f16.html#method.abs)
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fabsf16(x: f16) -> f16;
 
 /// Returns the absolute value of an `f32`.

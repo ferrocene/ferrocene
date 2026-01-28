@@ -13,7 +13,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::FloatToInt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::FpCategory;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
@@ -507,11 +506,9 @@ impl f64 {
     pub(crate) const SIGN_MASK: u64 = 0x8000_0000_0000_0000;
 
     /// Exponent mask
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const EXP_MASK: u64 = 0x7ff0_0000_0000_0000;
 
     /// Mantissa mask
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const MAN_MASK: u64 = 0x000f_ffff_ffff_ffff;
 
     /// Minimum representable positive value (min subnormal)
@@ -661,7 +658,6 @@ impl f64 {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn classify(self) -> FpCategory {
         // We used to have complicated logic here that avoids the simple bit-based tests to work
         // around buggy codegen for x87 targets (see

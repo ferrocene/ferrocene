@@ -2,7 +2,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 
 /// Errors which can occur when attempting to interpret a sequence of [`u8`]
@@ -44,7 +43,7 @@ use crate::fmt;
 ///     }
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Eq, PartialEq, Clone, Debug))]
+#[derive(Copy, Eq, PartialEq, Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Utf8Error {
     pub(super) valid_up_to: usize,
@@ -111,7 +110,6 @@ impl Utf8Error {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for Utf8Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(error_len) = self.error_len {

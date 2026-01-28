@@ -193,7 +193,7 @@ pub enum Utf8Pattern<'a> {
 // Searcher
 
 /// Result of calling [`Searcher::next()`] or [`ReverseSearcher::next_back()`].
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, Eq, PartialEq, Debug))]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum SearchStep {
     /// Expresses that a match of the pattern has been found at
     /// `haystack[a..b]`.
@@ -381,7 +381,7 @@ pub trait DoubleEndedSearcher<'a>: ReverseSearcher<'a> {}
 /////////////////////////////////////////////////////////////////////////////
 
 /// Associated type for `<char as Pattern>::Searcher<'a>`.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct CharSearcher<'a> {
     haystack: &'a str,
     // safety invariant: `finger`/`finger_back` must be a valid utf8 byte index of `haystack`
@@ -1118,7 +1118,7 @@ impl<'b> Pattern for &'b str {
 // Two Way substring searcher
 /////////////////////////////////////////////////////////////////////////////
 
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 /// Associated type for `<&str as Pattern>::Searcher<'a>`.
 pub struct StrSearcher<'a, 'b> {
     haystack: &'a str,
@@ -1127,12 +1127,12 @@ pub struct StrSearcher<'a, 'b> {
     searcher: StrSearcherImpl,
 }
 
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 enum StrSearcherImpl {
     Empty(EmptyNeedle),
     TwoWay(TwoWaySearcher),
 }
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 struct EmptyNeedle {
     position: usize,
     end: usize,
@@ -1339,7 +1339,7 @@ unsafe impl<'a, 'b> ReverseSearcher<'a> for StrSearcher<'a, 'b> {
 }
 
 /// The internal state of the two-way substring search algorithm.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 struct TwoWaySearcher {
     // constants
     /// critical factorization index

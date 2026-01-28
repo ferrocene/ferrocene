@@ -30,13 +30,12 @@ use crate::{ascii, mem};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use {
-    self::pattern::{Pattern, ReverseSearcher},
-    crate::{mem, slice::SliceIndex},
+    self::pattern::{Pattern, ReverseSearcher, Searcher},
+    crate::{char, mem, slice::SliceIndex},
 };
 
 pub mod pattern;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod lossy;
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
 pub use converts::{from_raw_parts, from_raw_parts_mut};
@@ -1521,7 +1520,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
         pat.into_searcher(self).next_match().map(|(i, _)| i)
     }

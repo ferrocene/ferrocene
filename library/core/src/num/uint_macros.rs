@@ -1583,7 +1583,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn ilog(self, base: Self) -> u32 {
             assert!(base >= 2, "base of integer logarithm must be at least 2");
             if let Some(log) = self.checked_ilog(base) {
@@ -1635,7 +1634,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn ilog10(self) -> u32 {
             if let Some(log) = self.checked_ilog10() {
                 log
@@ -1663,7 +1661,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_ilog(self, base: Self) -> Option<u32> {
             // Inform compiler of optimizations when the base is known at
             // compile time and there's a cheaper method available.
@@ -2204,7 +2201,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_pow(self, mut exp: u32) -> Option<Self> {
             if exp == 0 {
                 return Some(1);
@@ -2870,7 +2866,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carrying_add(self, rhs: Self, carry: bool) -> (Self, bool) {
             // note: longer-term this should be done via an intrinsic, but this has been shown
             //   to generate optimal code for now, and LLVM doesn't have an equivalent intrinsic
@@ -3099,7 +3094,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn widening_mul(self, rhs: Self) -> (Self, Self) {
             Self::carrying_mul_add(self, rhs, 0, 0)
         }
@@ -3183,7 +3177,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carrying_mul(self, rhs: Self, carry: Self) -> (Self, Self) {
             Self::carrying_mul_add(self, rhs, carry, 0)
         }
@@ -3250,7 +3243,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self, Self) {
             intrinsics::carrying_mul_add(self, rhs, carry, add)
         }
@@ -3501,7 +3493,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn pow(self, mut exp: u32) -> Self {
             if exp == 0 {
                 return 1;

@@ -10,22 +10,15 @@ use crate::iter::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, UncheckedIterator,
 };
 use crate::marker::PhantomData;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{self, SizedTypeProperties};
 use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{cmp, fmt};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{
-    cmp,
-    iter::{TrustedLen, UncheckedIterator},
-    mem,
-    mem::SizedTypeProperties,
-};
+use crate::iter::{TrustedLen, UncheckedIterator};
 
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
 impl<T> !Iterator for [T] {}
@@ -93,7 +86,6 @@ pub struct Iter<'a, T: 'a> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug> fmt::Debug for Iter<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("Iter").field(&self.as_slice()).finish()
@@ -165,7 +157,6 @@ iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, each_r
 }}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Clone for Iter<'_, T> {
     #[inline]
     fn clone(&self) -> Self {
@@ -222,7 +213,6 @@ pub struct IterMut<'a, T: 'a> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug> fmt::Debug for IterMut<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("IterMut").field(&self.make_slice()).finish()
@@ -1408,7 +1398,7 @@ forward_iterator! { RSplitNMut: T, &'a mut [T] }
 ///
 /// [`windows`]: slice::windows
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Windows<'a, T: 'a> {
@@ -1564,7 +1554,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Windows<'a, T> {
 ///
 /// [`chunks`]: slice::chunks
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Chunks<'a, T: 'a> {
@@ -1747,7 +1737,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Chunks<'a, T> {
 ///
 /// [`chunks_mut`]: slice::chunks_mut
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct ChunksMut<'a, T: 'a> {
@@ -1942,7 +1932,7 @@ unsafe impl<T> Sync for ChunksMut<'_, T> where T: Sync {}
 /// [`chunks_exact`]: slice::chunks_exact
 /// [`remainder`]: ChunksExact::remainder
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct ChunksExact<'a, T: 'a> {
@@ -2118,7 +2108,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for ChunksExact<'a, T> {
 /// [`chunks_exact_mut`]: slice::chunks_exact_mut
 /// [`into_remainder`]: ChunksExactMut::into_remainder
 /// [slices]: slice
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct ChunksExactMut<'a, T: 'a> {

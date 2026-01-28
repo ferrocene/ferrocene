@@ -87,26 +87,43 @@
     issue = "none"
 )]
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use self::common::BiasedFp;
+#[cfg(not(feature = "ferrocene_subset"))]
 use self::float::RawFloat;
+#[cfg(not(feature = "ferrocene_subset"))]
 use self::lemire::compute_float;
+#[cfg(not(feature = "ferrocene_subset"))]
 use self::parse::{parse_inf_nan, parse_number};
+#[cfg(not(feature = "ferrocene_subset"))]
 use self::slow::parse_long_mantissa;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::str::FromStr;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 mod common;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod decimal;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod decimal_seq;
+#[cfg(not(feature = "ferrocene_subset"))]
 mod fpu;
+#[cfg(not(feature = "ferrocene_subset"))]
 mod slow;
+#[cfg(not(feature = "ferrocene_subset"))]
 mod table;
 // float is used in flt2dec, and all are used in unit tests.
 pub mod float;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod lemire;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod parse;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! from_str_float_impl {
     ($t:ty) => {
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -175,14 +192,18 @@ macro_rules! from_str_float_impl {
 }
 
 #[cfg(target_has_reliable_f16)]
+#[cfg(not(feature = "ferrocene_subset"))]
 from_str_float_impl!(f16);
+#[cfg(not(feature = "ferrocene_subset"))]
 from_str_float_impl!(f32);
+#[cfg(not(feature = "ferrocene_subset"))]
 from_str_float_impl!(f64);
 
 // FIXME(f16): A fallback is used when the backend+target does not support f16 well, in order
 // to avoid ICEs.
 
 #[cfg(not(target_has_reliable_f16))]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl FromStr for f16 {
     type Err = ParseFloatError;
 
@@ -208,20 +229,24 @@ impl FromStr for f16 {
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub struct ParseFloatError {
     kind: FloatErrorKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg(not(feature = "ferrocene_subset"))]
 enum FloatErrorKind {
     Empty,
     Invalid,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for ParseFloatError {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for ParseFloatError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
@@ -233,6 +258,7 @@ impl fmt::Display for ParseFloatError {
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn pfe_empty() -> ParseFloatError {
     ParseFloatError { kind: FloatErrorKind::Empty }
 }
@@ -240,11 +266,13 @@ pub(super) fn pfe_empty() -> ParseFloatError {
 // Used in unit tests, keep public.
 // This is much better than making FloatErrorKind and ParseFloatError::kind public.
 #[inline]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn pfe_invalid() -> ParseFloatError {
     ParseFloatError { kind: FloatErrorKind::Invalid }
 }
 
 /// Converts a `BiasedFp` to the closest machine float type.
+#[cfg(not(feature = "ferrocene_subset"))]
 fn biased_fp_to_float<F: RawFloat>(x: BiasedFp) -> F {
     let mut word = x.m;
     word |= (x.p_biased as u64) << F::SIG_BITS;
@@ -253,6 +281,7 @@ fn biased_fp_to_float<F: RawFloat>(x: BiasedFp) -> F {
 
 /// Converts a decimal string into a floating point number.
 #[inline(always)] // Will be inlined into a function with `#[inline(never)]`, see above
+#[cfg(not(feature = "ferrocene_subset"))]
 pub fn dec2flt<F: RawFloat>(s: &str) -> Result<F, ParseFloatError> {
     let mut s = s.as_bytes();
     let Some(&c) = s.first() else { return Err(pfe_empty()) };

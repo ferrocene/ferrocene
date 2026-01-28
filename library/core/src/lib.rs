@@ -104,8 +104,8 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
 #![feature(cfg_select)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_target_has_reliable_f16_f128))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_carrying_mul_add))]
+#![feature(cfg_target_has_reliable_f16_f128)]
+#![feature(const_carrying_mul_add)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
@@ -159,13 +159,13 @@
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![feature(funnel_shifts)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(if_let_guard))]
+#![feature(if_let_guard)]
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
 #![feature(link_llvm_intrinsics)]
 #![feature(macro_metavar_expr)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(macro_metavar_expr_concat))]
+#![feature(macro_metavar_expr_concat)]
 #![feature(marker_trait_attr)]
 #![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
@@ -213,7 +213,6 @@
 // Ferrocene lints/features:
 #![cfg_attr(
     feature = "ferrocene_subset",
-    expect(missing_debug_implementations),
     expect(rustdoc::broken_intra_doc_links),
     expect(rustdoc::private_intra_doc_links)
 )]
@@ -296,7 +295,6 @@ pub use legacy_int_modules::{i128, u128};
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod f128;
 #[path = "num/f16.rs"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod f16;
 #[path = "num/f32.rs"]
 pub mod f32;
@@ -342,7 +340,6 @@ pub mod asserting;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bstr;
 pub mod cell;
 pub mod char;
@@ -400,7 +397,6 @@ pub mod alloc;
 mod bool;
 mod escape;
 mod tuple;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]

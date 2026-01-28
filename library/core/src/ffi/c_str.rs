@@ -19,7 +19,7 @@ use crate::{fmt, ops, slice, str};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::slice;
+use crate::{fmt, slice};
 
 // FIXME: because this is doc(inline)d, we *have* to use intra-doc links because the actual link
 //   depends on where the item is being documented. however, since this is libcore, we can't
@@ -99,7 +99,7 @@ use crate::slice;
 /// ```
 ///
 /// [str]: prim@str "str"
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq, Hash))]
+#[derive(PartialEq, Eq, Hash)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
 #[rustc_diagnostic_item = "cstr_type"]
 #[rustc_has_incoherent_inherent_impls]
@@ -133,7 +133,7 @@ pub struct CStr {
 ///
 /// let _: FromBytesWithNulError = CStr::from_bytes_with_nul(b"f\0oo").unwrap_err();
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Copy, PartialEq, Eq, Debug))]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
 pub enum FromBytesWithNulError {
     /// Data provided contains an interior nul byte at byte `position`.
@@ -183,7 +183,6 @@ impl fmt::Display for FromBytesUntilNulError {
 
 /// Shows the underlying bytes as a normal string, with invalid UTF-8
 /// presented as hex escape sequences.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "cstr_debug", since = "1.3.0")]
 impl fmt::Debug for CStr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -569,7 +568,6 @@ impl CStr {
     /// ```
     /// assert_eq!(c"foo".to_bytes(), b"foo");
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]

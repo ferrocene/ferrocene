@@ -20,7 +20,6 @@ pub use self::c_str::FromBytesUntilNulError;
 #[stable(feature = "core_c_str", since = "1.64.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::c_str::FromBytesWithNulError;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 
 #[stable(feature = "c_str_module", since = "1.88.0")]
@@ -81,7 +80,6 @@ pub enum c_void {
 }
 
 #[stable(feature = "std_debug", since = "1.16.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for c_void {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("c_void").finish()

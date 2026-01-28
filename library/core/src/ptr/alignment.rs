@@ -2,7 +2,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::MetaSized;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -11,7 +10,7 @@ use crate::{cmp, fmt, hash, mem, num};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::mem;
+use crate::{fmt, hash, mem};
 
 /// A type storing a `usize` which is a power of two, and thus
 /// represents a possible alignment in the Rust abstract machine.
@@ -19,15 +18,12 @@ use crate::mem;
 /// Note that particularly large alignments, while representable in this type,
 /// are likely not to be supported by actual allocators and linkers.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone))]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct Alignment(AlignmentEnum);
 
 // Alignment is `repr(usize)`, but via extra steps.
-#[cfg(not(feature = "ferrocene_subset"))]
 const _: () = assert!(size_of::<Alignment>() == size_of::<usize>());
-#[cfg(not(feature = "ferrocene_subset"))]
 const _: () = assert!(align_of::<Alignment>() == align_of::<usize>());
 
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -188,7 +184,6 @@ impl Alignment {
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_nonzero(self) -> NonZero<usize> {
         // This transmutes directly to avoid the UbCheck in `NonZero::new_unchecked`
         // since there's no way for the user to trip that check anyway -- the
@@ -214,7 +209,6 @@ impl Alignment {
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn log2(self) -> u32 {
         self.as_nonzero().trailing_zeros()
     }
@@ -258,7 +252,6 @@ impl Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Alignment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?} (1 << {:?})", self.as_nonzero(), self.log2())
@@ -328,7 +321,6 @@ impl cmp::PartialOrd for Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl hash::Hash for Alignment {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -347,8 +339,7 @@ impl const Default for Alignment {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -370,8 +361,7 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -409,8 +399,7 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,

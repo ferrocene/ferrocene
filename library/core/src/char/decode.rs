@@ -14,7 +14,7 @@ use crate::iter::FusedIterator;
 ///
 /// [`decode_utf16`]: char::decode_utf16
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct DecodeUtf16<I>
 where
     I: Iterator<Item = u16>,
@@ -27,7 +27,7 @@ where
 ///
 /// This `struct` is created when using the [`DecodeUtf16`] type.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Clone, Eq, PartialEq))]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DecodeUtf16Error {
     code: u16,
 }

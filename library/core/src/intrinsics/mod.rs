@@ -62,6 +62,8 @@ use crate::{mem, ptr};
 mod bounds;
 pub mod fallback;
 #[cfg(not(feature = "ferrocene_subset"))]
+pub mod gpu;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod mir;
 pub mod simd;
 
@@ -2865,10 +2867,6 @@ pub unsafe fn vtable_align(ptr: *const ()) -> usize;
 /// Determining whether `T` can be coerced to the trait object type `U` requires trait resolution by the compiler.
 /// In some cases, that resolution can exceed the recursion limit,
 /// and compilation will fail instead of this function returning `None`.
-///
-/// # Safety
-///
-/// `ptr` must point to a vtable.
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
@@ -2976,6 +2974,16 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
+
+/// Compute the type information of a concrete type.
+/// It can only be called at compile time, the backends do
+/// not implement it.
+#[cfg(not(feature = "ferrocene_subset"))]
+#[rustc_intrinsic]
+#[unstable(feature = "core_intrinsics", issue = "none")]
+pub const fn type_of(_id: crate::any::TypeId) -> crate::mem::type_info::Type {
+    panic!("`TypeId::info` can only be called at compile-time")
+}
 
 /// Gets a static string slice containing the name of a type.
 ///

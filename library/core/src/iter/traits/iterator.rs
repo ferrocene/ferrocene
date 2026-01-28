@@ -120,9 +120,9 @@ pub trait Iterator {
     /// assert_eq!(second, "all");
     /// assert_eq!(third, "those");
     /// ```
-    #[inline]
-    #[unstable(feature = "iter_next_chunk", reason = "recently added", issue = "98326")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "iter_next_chunk", issue = "98326")]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -313,7 +313,7 @@ pub trait Iterator {
     /// assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped
     /// ```
     #[inline]
-    #[unstable(feature = "iter_advance_by", reason = "recently added", issue = "77404")]
+    #[unstable(feature = "iter_advance_by", issue = "77404")]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         /// Helper trait to specialize `advance_by` via `try_fold` for `Sized` iterators.
         trait SpecAdvanceBy {
@@ -671,9 +671,9 @@ pub trait Iterator {
     ///
     /// [`Clone`]: crate::clone::Clone
     /// [`intersperse_with`]: Iterator::intersperse_with
-    #[inline]
-    #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "iter_intersperse", issue = "79524")]
     fn intersperse(self, separator: Self::Item) -> Intersperse<Self>
     where
         Self: Sized,
@@ -730,9 +730,9 @@ pub trait Iterator {
     /// ```
     /// [`Clone`]: crate::clone::Clone
     /// [`intersperse`]: Iterator::intersperse
-    #[inline]
-    #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "iter_intersperse", issue = "79524")]
     fn intersperse_with<G>(self, separator: G) -> IntersperseWith<Self, G>
     where
         Self: Sized,
@@ -1738,9 +1738,9 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), None);
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
-    #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "iter_map_windows", issue = "87155")]
     fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>
     where
         Self: Sized,
@@ -1935,9 +1935,12 @@ pub trait Iterator {
 
     /// Transforms an iterator into a collection.
     ///
-    /// `collect()` can take anything iterable, and turn it into a relevant
-    /// collection. This is one of the more powerful methods in the standard
-    /// library, used in a variety of contexts.
+    /// `collect()` takes ownership of an iterator and produces whichever
+    /// collection type you request. The iterator itself carries no knowledge of
+    /// the eventual container; the target collection is chosen entirely by the
+    /// type you ask `collect()` to return. This makes `collect()` one of the
+    /// more powerful methods in the standard library, and it shows up in a wide
+    /// variety of contexts.
     ///
     /// The most basic pattern in which `collect()` is used is to turn one
     /// collection into another. You take a collection, call [`iter`] on it,
@@ -2204,9 +2207,9 @@ pub trait Iterator {
     /// assert_eq!(count, vec.len());
     /// assert_eq!(vec, vec![1, 2, 3, 1, 2, 3]);
     /// ```
-    #[inline]
-    #[unstable(feature = "iter_collect_into", reason = "new API", issue = "94780")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "iter_collect_into", issue = "94780")]
     fn collect_into<E: Extend<Self::Item>>(self, collection: &mut E) -> &mut E
     where
         Self: Sized,
@@ -2301,8 +2304,8 @@ pub trait Iterator {
     /// assert!(a[..i].iter().all(|n| n % 2 == 0)); // evens
     /// assert!(a[i..].iter().all(|n| n % 2 == 1)); // odds
     /// ```
-    #[unstable(feature = "iter_partition_in_place", reason = "new API", issue = "62543")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[unstable(feature = "iter_partition_in_place", issue = "62543")]
     fn partition_in_place<'a, T: 'a, P>(mut self, ref mut predicate: P) -> usize
     where
         Self: Sized + DoubleEndedIterator<Item = &'a mut T>,
@@ -2359,8 +2362,8 @@ pub trait Iterator {
     /// assert!("Iterator".chars().is_partitioned(char::is_uppercase));
     /// assert!(!"IntoIterator".chars().is_partitioned(char::is_uppercase));
     /// ```
-    #[unstable(feature = "iter_is_partitioned", reason = "new API", issue = "62544")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[unstable(feature = "iter_is_partitioned", issue = "62544")]
     fn is_partitioned<P>(mut self, mut predicate: P) -> bool
     where
         Self: Sized,
@@ -2738,9 +2741,9 @@ pub trait Iterator {
     ///     });
     /// assert_eq!(max, Ok(Some("5")));
     /// ```
-    #[inline]
-    #[unstable(feature = "iterator_try_reduce", reason = "new API", issue = "87053")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "iterator_try_reduce", issue = "87053")]
     fn try_reduce<R>(
         &mut self,
         f: impl FnMut(Self::Item, Self::Item) -> R,
@@ -2898,6 +2901,17 @@ pub trait Iterator {
     /// assert_eq!(a.into_iter().find(|&x| x == 5), None);
     /// ```
     ///
+    /// Iterating over references:
+    ///
+    /// ```
+    /// let a = [1, 2, 3];
+    ///
+    /// // `iter()` yields references i.e. `&i32` and `find()` takes a
+    /// // reference to each element.
+    /// assert_eq!(a.iter().find(|&&x| x == 2), Some(&2));
+    /// assert_eq!(a.iter().find(|&&x| x == 5), None);
+    /// ```
+    ///
     /// Stopping at the first `true`:
     ///
     /// ```
@@ -3002,9 +3016,9 @@ pub trait Iterator {
     /// let result = a.into_iter().rev().try_find(|&x| NonZero::new(x).map(|y| y.is_power_of_two()));
     /// assert_eq!(result, None);
     /// ```
-    #[inline]
-    #[unstable(feature = "try_find", reason = "new API", issue = "63178")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[unstable(feature = "try_find", issue = "63178")]
     fn try_find<R>(
         &mut self,
         f: impl FnMut(&Self::Item) -> R,
@@ -3585,9 +3599,9 @@ pub trait Iterator {
     ///     assert_eq!(x + y + z, 4);
     /// }
     /// ```
-    #[track_caller]
-    #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
     #[cfg(not(feature = "ferrocene_subset"))]
+    #[track_caller]
+    #[unstable(feature = "iter_array_chunks", issue = "100450")]
     fn array_chunks<const N: usize>(self) -> ArrayChunks<Self, N>
     where
         Self: Sized,

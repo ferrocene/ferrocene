@@ -111,9 +111,10 @@ impl fmt::Display for AllocError {
 /// any method of the allocator that accepts such an argument.
 ///
 /// [*currently allocated*]: #currently-allocated-memory
-#[unstable(feature = "allocator_api", issue = "32838")]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe trait Allocator {
+#[unstable(feature = "allocator_api", issue = "32838")]
+#[rustc_const_unstable(feature = "const_heap", issue = "79597")]
+pub const unsafe trait Allocator {
     /// Attempts to allocate a block of memory.
     ///
     /// On success, returns a [`NonNull<[u8]>`][NonNull] meeting the size and alignment guarantees of `layout`.
@@ -378,11 +379,12 @@ pub unsafe trait Allocator {
     }
 }
 
-#[unstable(feature = "allocator_api", issue = "32838")]
 #[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<A> Allocator for &A
+#[unstable(feature = "allocator_api", issue = "32838")]
+#[rustc_const_unstable(feature = "const_heap", issue = "79597")]
+unsafe impl<A> const Allocator for &A
 where
-    A: Allocator + ?Sized,
+    A: [const] Allocator + ?Sized,
 {
     #[inline]
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {

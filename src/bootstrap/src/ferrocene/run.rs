@@ -6,6 +6,7 @@ pub(crate) mod update_certified_core_symbols;
 use std::path::{Path, PathBuf};
 
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
+use crate::core::build_steps::compile::ArtifactKeepMode;
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::build_steps::tool::{SourceType, Tool};
 use crate::core::config::flags::FerroceneCoverageFor;
@@ -180,7 +181,7 @@ impl Step for CertifiedCoreSymbols {
             Vec::new()
         };
 
-        run_cargo(builder, cargo, tail_args, &check_stamp, vec![], true, false);
+        run_cargo(builder, cargo, tail_args, &check_stamp, vec![], ArtifactKeepMode::BothRlibAndRmeta);
         drop(_guard);
 
         println!("Generated report at {}", report.display());

@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use crate::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::run_cargo;
+use crate::core::build_steps::compile::ArtifactKeepMode;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
 use crate::utils::build_stamp::BuildStamp;
@@ -180,7 +181,7 @@ impl Step for BuildOxidOS {
 
         let stamp =
             BuildStamp::new(&builder.cargo_out(compiler, mode, target)).with_prefix(self.name());
-        run_cargo(builder, cargo, Vec::new(), &stamp, Vec::new(), false, false);
+        run_cargo(builder, cargo, Vec::new(), &stamp, Vec::new(), ArtifactKeepMode::BothRlibAndRmeta);
 
         builder.cargo_out(compiler, mode, target)
     }

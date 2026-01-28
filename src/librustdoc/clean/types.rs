@@ -7,6 +7,7 @@ use std::{fmt, iter};
 use arrayvec::ArrayVec;
 use itertools::Either;
 use rustc_abi::{ExternAbi, VariantIdx};
+use rustc_ast::attr::AttributeExt;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_hir::attrs::{AttributeKind, DeprecatedSince, Deprecation, DocAttribute};
@@ -25,7 +26,7 @@ use rustc_resolve::rustdoc::{
 use rustc_session::Session;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::symbol::{Symbol, kw, sym};
-use rustc_span::{DUMMY_SP, FileName, Loc, RemapPathScopeComponents};
+use rustc_span::{DUMMY_SP, FileName, Ident, Loc, RemapPathScopeComponents};
 use tracing::{debug, trace};
 use {rustc_ast as ast, rustc_hir as hir};
 
@@ -417,7 +418,7 @@ impl Item {
             {
                 Some(Deprecation {
                     since: DeprecatedSince::Unspecified,
-                    note: Some(note),
+                    note: Some(Ident { name: note, span: DUMMY_SP }),
                     suggestion: None,
                 })
             } else {
@@ -450,7 +451,16 @@ impl Item {
     }
 
     pub(crate) fn attr_span(&self, tcx: TyCtxt<'_>) -> rustc_span::Span {
+        let deprecation_notes = self
+            .attrs
+            .other_attrs
+            .iter()
+            .filter_map(|attr| attr.deprecation_note().map(|note| note.span));
+
         span_of_fragments(&self.attrs.doc_strings)
+            .into_iter()
+            .chain(deprecation_notes)
+            .reduce(|a, b| a.to(b))
             .unwrap_or_else(|| self.span(tcx).map_or(DUMMY_SP, |span| span.inner()))
     }
 

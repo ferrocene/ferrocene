@@ -399,7 +399,7 @@ impl Config {
     ";
             self.download_file(&format!("{base}/{gcc_sha}/{filename}"), &tarball, help_on_error);
         }
-        self.unpack(&tarball, root_dir, "gcc");
+        self.unpack(&tarball, root_dir, "gcc-dev");
     }
 }
 

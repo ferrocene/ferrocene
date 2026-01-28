@@ -249,8 +249,14 @@ impl CodegenBackend for LlvmCodegenBackend {
 
             use crate::back::lto::enable_autodiff_settings;
             if sess.opts.unstable_opts.autodiff.contains(&AutoDiff::Enable) {
-                if let Err(_) = llvm::EnzymeWrapper::get_or_init(&sess.opts.sysroot) {
-                    sess.dcx().emit_fatal(crate::errors::AutoDiffComponentUnavailable);
+                match llvm::EnzymeWrapper::get_or_init(&sess.opts.sysroot) {
+                    Ok(_) => {}
+                    Err(llvm::EnzymeLibraryError::NotFound { err }) => {
+                        sess.dcx().emit_fatal(crate::errors::AutoDiffComponentMissing { err });
+                    }
+                    Err(llvm::EnzymeLibraryError::LoadFailed { err }) => {
+                        sess.dcx().emit_fatal(crate::errors::AutoDiffComponentUnavailable { err });
+                    }
                 }
                 enable_autodiff_settings(&sess.opts.unstable_opts.autodiff);
             }
@@ -258,7 +264,7 @@ impl CodegenBackend for LlvmCodegenBackend {
     }
 
     fn provide(&self, providers: &mut Providers) {
-        providers.global_backend_features =
+        providers.queries.global_backend_features =
             |tcx, ()| llvm_util::global_llvm_features(tcx.sess, false)
     }
 

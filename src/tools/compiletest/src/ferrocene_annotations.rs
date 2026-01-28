@@ -252,6 +252,7 @@ fn sample_config() -> Config {
         query_rustc_path: Default::default(),
         bypass_ignore_backends: Default::default(),
         override_codegen_backend: Default::default(),
+        jobs: Default::default(),
     }
 }
 

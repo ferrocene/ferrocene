@@ -59,7 +59,11 @@ function main() {
         }
 
         var totalLines = numLinesTested + numLinesUntested;
-        var percentileLinesTested = (numLinesTested / totalLines) * 100.0;
+        var percentileLinesTested = 100.0;
+
+        if (totalLines > 0) {
+            percentileLinesTested = (numLinesTested / totalLines) * 100.0;
+        }
 
         document.querySelector(".coverage-summary").children[0].textContent = `${percentileLinesTested.toFixed(2)}% (${numLinesTested}/${totalLines} lines)`;
     }

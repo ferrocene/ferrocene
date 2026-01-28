@@ -25,6 +25,8 @@ const fn marked_certified() {}
 
 const fn const_fn() {}
 
+extern "C" { fn extern_fn(); }
+
 macro_rules! mbe {
     () => { normal_def() }
     //[no-dedup]~^ ERROR unvalidated
@@ -153,6 +155,8 @@ fn certified() {
     rename();
     //[no-dedup]~^ ERROR unvalidated
     //[no-dedup]~^^ ERROR unvalidated
+
+    unsafe { extern_fn(); } // TODO this should lint
 }
 
 #[ferrocene::prevalidated]

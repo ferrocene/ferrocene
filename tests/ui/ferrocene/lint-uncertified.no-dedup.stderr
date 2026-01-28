@@ -65,7 +65,7 @@ LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = 
    |                                                                            ^^^^^^^^^^^^
    |
    = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
-   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
+   = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 note: `CERTIFIED_DYN_CONST` is validated
   --> $DIR/lint-uncertified.rs:95:7
    |
@@ -84,7 +84,7 @@ LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) 
    |                                                                              ^^^^^^^^^^^^
    |
    = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
-   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
+   = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 note: `CERTIFIED_DYN_STATIC` is validated
   --> $DIR/lint-uncertified.rs:98:8
    |
@@ -156,7 +156,7 @@ LL |     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated;
    |                                                   ^^^^^^^^^^^^
    |
    = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
-   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
+   = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 
 error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:124:70
@@ -168,7 +168,7 @@ LL |     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unval
    |                                                                      ^^^^^^^^^^^^
    |
    = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
-   = note: as a precaution, Ferrocene must assume you will eventually call `<Unvalidated as PartialEq>::ne`
+   = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialEq>::ne`
 
 error: validated function uses an unvalidated function
   --> $DIR/lint-uncertified.rs:29:13

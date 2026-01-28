@@ -1,5 +1,4 @@
 use rustc_data_structures::fx::FxHashSet;
-use rustc_errors::Diag;
 use rustc_hir::{CRATE_HIR_ID, HirId};
 use rustc_hir::def_id::DefId;
 use rustc_middle::mir::mono::MonoItem;
@@ -81,7 +80,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
         if let Some((callee_instance, pre_mono_call)) = self.get_call_def_mir(terminator, location)
         {
             let use_ = self.use_(UseKind::Called(callee_instance), terminator.source_info.span);
-            self.on_edge(use_, &terminator.source_info, pre_mono_call, |_| ());
+            self.on_edge(use_, &terminator.source_info, pre_mono_call);
         }
     }
 
@@ -107,10 +106,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
         // TODO: need to also check this in THIR pass
         let use_ = self.use_(UseKind::Cast(callee_instance), call_span);
         let source_info = self.body.source_info(location);
-        self.on_edge(use_, source_info, pre_mono_call, |diag| {
-            diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
-            diag.note("as a precaution, it must assume you will eventually call the function");
-        });
+        self.on_edge(use_, source_info, pre_mono_call);
     }
 }
 
@@ -124,7 +120,6 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         use_: Use<'tcx>,
         source_info: &SourceInfo,
         pre_mono_call: DefId,
-        decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
     ) {
         let callee_instance = use_.expect_instance();
 
@@ -145,7 +140,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             },
         };
 
-        self.lint_at(lint_node, use_, decorate);
+        self.lint_at(lint_node, use_);
 
         let site = if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_in_place_fn() {
             // We want to show a better span; drop_in_place is never interesting since the body is
@@ -162,7 +157,6 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         &mut self,
         lint_node: HirId,
         use_: Use<'tcx>,
-        decorate: impl for<'d> FnOnce(&mut Diag<'d, ()>),
     ) {
         if self.from_instantiation.is_none() {
             // TODO: i think this is wrong? it's assuming THIR will catch all issues in the
@@ -176,9 +170,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         // not the callee that actually caused the error.
         // This is so people can `allow` individual instantiations rather than having to
         // blanket-allow all of them.
-        self.linter.check_use(lint_node, use_, |diag: &mut Diag<'_, _>, _validated_span| {
-            decorate(diag);
-        });
+        self.linter.check_use(lint_node, use_);
     }
 
     fn visit_instance(

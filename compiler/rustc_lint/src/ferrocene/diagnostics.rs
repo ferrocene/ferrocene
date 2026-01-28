@@ -17,7 +17,6 @@ impl<'tcx> LintState<'tcx> {
         &mut self,
         lint_node: HirId,
         use_: Use<'tcx>,
-        extra_info: impl FnOnce(&mut Diag<'_, ()>, Option<&mut MultiSpan>),
     ) {
         let Self { tcx, item: owner, .. } = *self;
         let (callee, receiver_span) = (use_.def_id(), use_.span);
@@ -63,7 +62,7 @@ impl<'tcx> LintState<'tcx> {
                     validated_span.push_span_label(annotation, "marked as validated here");
                 }
 
-                extra_info(diag, Some(&mut validated_span));
+                self.decorate_cast(use_, diag);
                 self.decorate_instantiation(use_, diag, Some(&mut validated_span));
 
                 diag.span_note(
@@ -74,10 +73,17 @@ impl<'tcx> LintState<'tcx> {
                     diag.note("main functions are assumed to be validated");
                 }
             } else {
-                extra_info(diag, None);
+                self.decorate_cast(use_, diag);
                 self.decorate_instantiation(use_, diag, None);
             }
         });
+    }
+
+    fn decorate_cast(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) {
+        if matches!(use_.kind, UseKind::Cast(..)) {
+            diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
+            diag.note("as a precaution, it must assume you will eventually call the function");
+        }
     }
 
     fn decorate_instantiation(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>, validated_span: Option<&mut MultiSpan>) {

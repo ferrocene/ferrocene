@@ -30,7 +30,7 @@ impl<'thir, 'tcx: 'thir> thir::visit::Visitor<'thir, 'tcx> for LintThir<'thir, '
         };
         let hir_id = HirId { owner: self.owner, local_id: expr.temp_scope_id };
         debug!("id={hir_id:?}, kind={:?}", expr.kind);
-        self.linter.check_use(hir_id, use_, |_, _| ());
+        self.linter.check_use(hir_id, use_);
     }
 }
 

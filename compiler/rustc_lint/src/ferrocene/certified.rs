@@ -88,7 +88,6 @@
 //! We get these type variables from a `ParamEnv`.
 
 use rustc_data_structures::fx::FxHashSet;
-use rustc_errors::{Diag, MultiSpan};
 use rustc_hir::{HirId, Item};
 use rustc_hir::def::DefKind;
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
@@ -171,7 +170,6 @@ impl<'tcx> LintState<'tcx> {
         &mut self,
         lint_node: HirId,
         use_: Use<'tcx>,
-        extra_info: impl FnOnce(&mut Diag<'_, ()>, Option<&mut MultiSpan>),
     ) {
         let tcx = self.tcx;
         let callee = use_.def_id();
@@ -188,7 +186,7 @@ impl<'tcx> LintState<'tcx> {
             return;
         }
 
-        self.lint_use(lint_node, use_, extra_info);
+        self.lint_use(lint_node, use_);
     }
 }
 

@@ -1,7 +1,7 @@
 //@ build-fail
 
 #![feature(c_variadic)]
-#![feature(c_variadic_const)]
+#![feature(const_c_variadic)]
 #![feature(const_trait_impl)]
 #![feature(const_destruct)]
 #![feature(const_clone)]

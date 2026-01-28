@@ -531,6 +531,19 @@ pub struct NonConstClosure {
     pub non_or_conditionally: &'static str,
 }
 
+#[derive(Diagnostic)]
+#[diag(r#"calling const c-variadic functions is unstable in {$kind ->
+    [const] constant
+    [static] static
+    [const_fn] constant function
+    *[other] {""}
+}s"#, code = E0015)]
+pub struct NonConstCVariadicCall {
+    #[primary_span]
+    pub span: Span,
+    pub kind: ConstContext,
+}
+
 #[derive(Subdiagnostic)]
 pub enum NonConstClosureNote {
     #[note("function defined here, but it is not `const`")]

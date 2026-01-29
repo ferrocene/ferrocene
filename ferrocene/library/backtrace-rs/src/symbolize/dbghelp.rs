@@ -19,9 +19,10 @@
 
 use super::super::{dbghelp, windows_sys::*};
 use super::{BytesOrWideString, ResolveWhat, SymbolName};
+use core::cmp;
 use core::ffi::c_void;
 use core::marker;
-use core::mem;
+use core::mem::{self, MaybeUninit};
 use core::ptr;
 use core::slice;
 
@@ -217,19 +218,23 @@ unsafe fn resolve_with_inline(
     Some(())
 }
 
+/// This function is only meant to be called with certain Windows API functions as its arguments,
+/// using closures to simplify away here-unspecified arguments:
+/// - `sym_from_addr`: either `SymFromAddrW` or `SymFromInlineContextW`
+/// - `get_line_from_addr`: `SymGetLineFromAddrW64` or `SymGetLineFromInlineContextW`
 unsafe fn do_resolve(
     sym_from_addr: impl FnOnce(*mut SYMBOL_INFOW) -> BOOL,
     get_line_from_addr: impl FnOnce(&mut IMAGEHLP_LINEW64) -> BOOL,
     cb: &mut dyn FnMut(&super::Symbol),
 ) {
     const SIZE: usize = 2 * MAX_SYM_NAME as usize + mem::size_of::<SYMBOL_INFOW>();
-    let mut data = Aligned8([0u8; SIZE]);
-    let info = unsafe { &mut *data.0.as_mut_ptr().cast::<SYMBOL_INFOW>() };
-    info.MaxNameLen = MAX_SYM_NAME as u32;
+    let mut data = MaybeUninit::<Aligned8<[u8; SIZE]>>::zeroed();
+    let info = data.as_mut_ptr().cast::<SYMBOL_INFOW>();
+    unsafe { (*info).MaxNameLen = MAX_SYM_NAME as u32 };
     // the struct size in C.  the value is different to
     // `size_of::<SYMBOL_INFOW>() - MAX_SYM_NAME + 1` (== 81)
     // due to struct alignment.
-    info.SizeOfStruct = 88;
+    unsafe { (*info).SizeOfStruct = 88 };
 
     if sym_from_addr(info) != TRUE {
         return;
@@ -238,8 +243,10 @@ unsafe fn do_resolve(
     // If the symbol name is greater than MaxNameLen, SymFromAddrW will
     // give a buffer of (MaxNameLen - 1) characters and set NameLen to
     // the real value.
-    let name_len = ::core::cmp::min(info.NameLen as usize, info.MaxNameLen as usize - 1);
-    let name_ptr = info.Name.as_ptr().cast::<u16>();
+    // SAFETY: We assume NameLen has been initialized by SymFromAddrW, and we initialized MaxNameLen
+    let name_len = unsafe { cmp::min((*info).NameLen as usize, (*info).MaxNameLen as usize - 1) };
+    // SAFETY: Name must be initialized by SymFromAddrW, but we only interact with it as a pointer anyways.
+    let name_ptr = unsafe { (&raw const (*info).Name).cast::<u16>() };
 
     // Reencode the utf-16 symbol to utf-8 so we can use `SymbolName::new` like
     // all other platforms
@@ -296,7 +303,8 @@ unsafe fn do_resolve(
     cb(&super::Symbol {
         inner: Symbol {
             name,
-            addr: info.Address as *mut _,
+            // SAFETY: we assume Address has been initialized by SymFromAddrW
+            addr: unsafe { (*info).Address } as *mut _,
             line: lineno,
             filename,
             _filename_cache: unsafe { cache(filename) },

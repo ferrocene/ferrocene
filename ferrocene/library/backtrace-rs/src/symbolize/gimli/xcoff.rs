@@ -1,17 +1,17 @@
 use super::mystd::ffi::OsStr;
 use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::Path;
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
+use super::{Context, Endian, EndianSlice, Mapping, Stash, gimli};
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::ops::Deref;
 use core::str;
-use object::read::archive::ArchiveFile;
-use object::read::xcoff::{FileHeader, SectionHeader, XcoffFile, XcoffSymbol};
 use object::Object as _;
 use object::ObjectSection as _;
 use object::ObjectSymbol as _;
 use object::SymbolFlags;
+use object::read::archive::ArchiveFile;
+use object::read::xcoff::{FileHeader, SectionHeader, XcoffFile, XcoffSymbol};
 
 #[cfg(target_pointer_width = "32")]
 type Xcoff = object::xcoff::FileHeader32;
@@ -64,13 +64,7 @@ pub fn parse_xcoff(data: &[u8]) -> Option<Image> {
     let header = Xcoff::parse(data, &mut offset).ok()?;
     let _ = header.aux_header(data, &mut offset).ok()?;
     let sections = header.sections(data, &mut offset).ok()?;
-    if let Some(section) = sections.iter().find(|s| {
-        if let Ok(name) = str::from_utf8(&s.s_name()[0..5]) {
-            name == ".text"
-        } else {
-            false
-        }
-    }) {
+    if let Some(section) = sections.iter().find(|s| s.s_name().get(0..5) == b".text") {
         Some(Image {
             offset: section.s_scnptr() as usize,
             base: section.s_paddr() as u64,

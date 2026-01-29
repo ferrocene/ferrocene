@@ -77,17 +77,6 @@ macro_rules! dbghelp {
             // either read the cached function pointer or load it and return the
             // loaded value. Loads are asserted to succeed.
             $(pub fn $name(&mut self) -> Option<$name> {
-                // Assert that windows_sys::$name is declared to have the same
-                // argument types and return type as our declaration, although
-                // it might be either extern "C" or extern "system".
-                cfg_if::cfg_if! {
-                    if #[cfg(any(target_arch = "x86", not(windows_raw_dylib)))] {
-                        let _: unsafe extern "system" fn($($argty),*) -> $ret = super::windows_sys::$name;
-                    } else {
-                        let _: unsafe extern "C" fn($($argty),*) -> $ret = super::windows_sys::$name;
-                    }
-                }
-
                 unsafe {
                     if self.$name == 0 {
                         let name = concat!(stringify!($name), "\0");

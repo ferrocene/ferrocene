@@ -1,5 +1,5 @@
 use super::mystd::path::Path;
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
+use super::{Context, Endian, EndianSlice, Mapping, Stash, gimli};
 use alloc::boxed::Box;
 use alloc::sync::Arc;
 use alloc::vec::Vec;

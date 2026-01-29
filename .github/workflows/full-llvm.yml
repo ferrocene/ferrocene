@@ -123,6 +123,8 @@ jobs:
       - name: Run
         if: ${{ steps.check.outputs.state != 'hit' }}
         uses: ./.github/actions/run/
+        env:
+          AWS_PROFILE: ${{ inputs.use-minio == true && 'minio' || ''}}
         with:
           container: ${{ inputs.container }}
           script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url ${{ steps.check.outputs.uri }}

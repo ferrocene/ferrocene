@@ -44,6 +44,7 @@ struct Validated;
 
 impl Unvalidated {
     fn inherent_fn(&self) {}
+    fn generic_inherent_fn<T>(x: T) {}
 }
 
 impl Copy for Unvalidated {}
@@ -123,9 +124,9 @@ fn certified() {
     Unvalidated.inherent_fn(); //~ ERROR unvalidated
     Unvalidated.clone();
     //[no-dedup]~^ ERROR unvalidated
-    marked_certified(); // ok
+   Unvalidated::generic_inherent_fn::<usize>(); //~ ERROR unvalidated
 
-    // TODO: test turbofish
+    marked_certified(); // ok
 
     UNCERTIFIED_CONST; // ok
     UNCERTIFIED_CLOSURE_CONST(); //~ ERROR unvalidated
@@ -143,8 +144,7 @@ fn certified() {
     //[no-dedup]~^ ERROR unvalidated
 
     unsafe { extern_fn(); } // TODO this should lint
-    // TODO: specialization
-    // TODO: test trait defaults both ways
+    // TODO: test trait defaults when casting to `dyn Trait`
     // TODO: panic hooks are likely broken
 }
 

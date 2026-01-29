@@ -1,0 +1,33 @@
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:33:5
+   |
+LL |     fn bar(&self) {}
+   |        --- `<OverridesDefault as CertifiedDefault>::bar` is unvalidated
+...
+LL |     OverridesDefault.bar();
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+note: `test` is validated
+  --> $DIR/lint-uncertified-default-trait-fns.rs:31:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn test() {
+   |    ^^^^
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-default-trait-fns.rs:6:9
+   |
+LL | #![deny(ferrocene::uncertified)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:34:5
+   |
+LL |     fn foo(&self) {}
+   |        --- `<UsesDefault as UncertifiedDefault>::foo` is unvalidated
+...
+LL |     UsesDefault.foo();
+   |     ^^^^^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

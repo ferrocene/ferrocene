@@ -3,7 +3,7 @@ extern crate cpp_smoke_test;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-extern "C" {
+unsafe extern "C" {
     fn cpp_trampoline(func: extern "C" fn()) -> ();
 }
 

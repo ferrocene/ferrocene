@@ -1,11 +1,11 @@
 #![allow(clippy::useless_conversion)]
 
+use super::Either;
 use super::mystd::ffi::OsStr;
 use super::mystd::fs;
 use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::{Path, PathBuf};
-use super::Either;
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
+use super::{Context, Endian, EndianSlice, Mapping, Stash, gimli};
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -13,9 +13,9 @@ use core::convert::{TryFrom, TryInto};
 use core::str;
 #[cfg(feature = "ruzstd")]
 use object::elf::ELFCOMPRESS_ZSTD;
-use object::elf::{ELFCOMPRESS_ZLIB, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED};
-use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
+use object::elf::{ELF_NOTE_GNU, ELFCOMPRESS_ZLIB, NT_GNU_BUILD_ID, SHF_COMPRESSED};
 use object::read::StringTable;
+use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::{BigEndian, Bytes, NativeEndian};
 
 #[cfg(target_pointer_width = "32")]
@@ -340,11 +340,11 @@ impl<'a> Object<'a> {
 }
 
 fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
+    use miniz_oxide::inflate::TINFLStatus;
     use miniz_oxide::inflate::core::inflate_flags::{
         TINFL_FLAG_PARSE_ZLIB_HEADER, TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF,
     };
-    use miniz_oxide::inflate::core::{decompress, DecompressorOxide};
-    use miniz_oxide::inflate::TINFLStatus;
+    use miniz_oxide::inflate::core::{DecompressorOxide, decompress};
 
     let (status, in_read, out_read) = decompress(
         &mut DecompressorOxide::new(),

@@ -5,6 +5,7 @@ mod borrow;
 mod cell;
 mod cmp;
 mod floats;
+mod fmt;
 mod hash;
 mod intrinsics;
 mod iter;

@@ -3181,3 +3181,13 @@ impl<T: ?Sized> Debug for SyncUnsafeCell<T> {
 // If you expected tests to be here, look instead at coretests/tests/fmt/;
 // it's a lot easier than creating all of the rt::Piece structures here.
 // There are also tests in alloctests/tests/fmt.rs, for those that need allocations.
+
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod ferrocene_test {
+    pub fn test_rt_argument_as_u16_none() {
+        assert_eq!(super::rt::Argument::new_debug(&10).as_u16(), None);
+    }
+}

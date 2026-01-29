@@ -110,3 +110,30 @@ test_uint_checked_pow! {
     u128 => u128_checked_pow,
     usize => usize_checked_pow,
 }
+
+// Covers
+// - core::num::<impl i8>::ilog
+// - core::num::<impl i16>::ilog
+// - core::num::<impl i32>::ilog
+// - core::num::<impl i64>::ilog
+// - core::num::<impl i128>::ilog
+// - core::num::<impl isize>::ilog
+macro_rules! test_int_ilog_panic_nonpositive_argument {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic = "argument of integer logarithm must be positive"]
+            fn $fn() {
+                assert_eq!(<$T>::ilog(-1, 2), 0);
+            }
+        )*
+    };
+}
+test_int_ilog_panic_nonpositive_argument! {
+    i8 => i8_ilog_panic_nonpositive_argument,
+    i16 => i16_ilog_panic_nonpositive_argument,
+    i32 => i32_ilog_panic_nonpositive_argument,
+    i64 => i64_ilog_panic_nonpositive_argument,
+    i128 => i128_ilog_panic_nonpositive_argument,
+    isize => isize_ilog_panic_nonpositive_argument,
+}

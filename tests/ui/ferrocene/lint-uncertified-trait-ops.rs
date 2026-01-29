@@ -83,40 +83,23 @@ impl_traits! {
 fn ops() {
     let mut x = Unvalidated;
     x + x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x += x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x - x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x * x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x / x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x | x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x & x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x ^ x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x % x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x << x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x >> x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     -x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     !x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     x == x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     *x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     *x = Unvalidated; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
 
     x != x; //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
 
     // A `x..x` range does not actually call `start_bound`, so we can't test it here.
 }
@@ -138,7 +121,5 @@ fn ops2() -> Unvalidated {
     x?;
     //~^ ERROR unvalidated
     //~^^ ERROR unvalidated
-    //[no-dedup]~^^^ ERROR unvalidated
-    //[no-dedup]~^^^^ ERROR unvalidated
     loop {}
 }

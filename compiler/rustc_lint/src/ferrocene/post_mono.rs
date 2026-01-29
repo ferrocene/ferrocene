@@ -14,6 +14,9 @@
 //!    'caller'.
 //! 3. The functions that instantiated it (recursively, back to the mono root), which we call the
 //!    [`InstantiationSite`].
+//!
+//! ## Recommended reading
+//! - [MIR Debugging](https://rustc-dev-guide.rust-lang.org/mir/debugging.html)
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def_id::DefId;
@@ -71,7 +74,7 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>)
     trace!("all roots: {roots:?}");
 
     let mut visited = FxHashSet::default();
-    // TODO: reuse linter across roots so we don't emit duplicate diagnostics.
+    // FIXME: reuse linter across roots so we don't emit duplicate diagnostics.
     // let linter = LintHelper::new(tcx, local);
     for root in roots {
         let instance = match root {
@@ -92,7 +95,7 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>)
                     continue;
                 } else if !def.is_local() && Some(def) == tcx.entry_fn(()).map(|(id, _)| id) {
                     // it's possible to have main functions that came from another crate!
-                    // TODO: do we need to lint this somehow?
+                    // FIXME: do we need to lint this somehow?
                     // i think main is required to be fully monomorphic so we would have checked it
                     // when compiling the dependency?
                     continue;
@@ -136,7 +139,7 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
         };
 
         let callee_instance = self.monomorphize_instance(pre_mono_call, generic_args, call_span);
-        // TODO: need to also check this in THIR pass
+        // FIXME: want to also check this in THIR pass
         let use_ = self.use_(UseKind::FnPtrCast(callee_instance), call_span);
         let source_info = self.body.source_info(location);
         self.on_edge(use_, source_info, pre_mono_call);
@@ -267,7 +270,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                         _ => {
                             // If this is anything other than a function item, it can't have generics and
                             // therefore must have been checked by the THIR pass.
-                            // TODO: are we sure is this true when we're passed an `impl Fn`?
+                            // FIXME: are we sure is this true when we're passed an `impl Fn`?
                             tcx.dcx()
                                 .span_delayed_bug(span, format!("called a non-function? {func:?}"));
                         }
@@ -300,8 +303,8 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                 let generics = tcx.mk_args(&[ty.ty.into()]);
                 // We can't use DropGlue directly because `create_coroutine_drop_shim` treats
                 // coroutines specially and we'll crash if we try to avoid going through it.
-                // TODO: skip drop_in_place when iterating roots, it's never interesting and we want
-                // to show a different instantiation site in diagnostics.
+                // Instead we skip drop_in_place when iterating roots, it's never interesting and
+                // we want to show a different instantiation site in diagnostics.
                 let def = InstanceKind::Item(drop_in_place);
                 let instance = Instance { def, args: generics };
                 debug!("resolve drop glue => instance={instance:?}, ty={ty:?}");

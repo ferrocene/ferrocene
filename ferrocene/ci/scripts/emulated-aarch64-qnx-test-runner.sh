@@ -66,6 +66,11 @@ start_vm() {
     rm -f "${emulatordir}"/pipe.*
     mkfifo "${emulatordir}"/pipe.in "${emulatordir}"/pipe.out
 
+    KVM_ARG=""
+    if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+        KVM_ARG="-accel kvm"
+    fi
+
     # NOTE(-net nic): the (real) ZCU102 has 4 NICs; only the 4th one can be used in QEMU
     # the unused NICs need to be listed in the command line invocation
     qemu-system-aarch64 \
@@ -80,6 +85,7 @@ start_vm() {
         -net nic,model=cadence_gem,netdev=net0 -netdev bridge,br=br0,id=net0 \
         -no-reboot \
         -nographic \
+        ${KVM_ARG} \
         -pidfile "${emulatordir}"/qemu.pid \
         -serial pipe:"${emulatordir}"/pipe &
 

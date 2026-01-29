@@ -34,3 +34,9 @@ fn test_range_inclusive_iterator_impl() {
     let mut ri3 = ri.clone();
     assert_eq!(Some(10), ri3.try_rfold(0, |acc, x| Some(acc + x.0)));
 }
+
+// Covers `core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::RangeInclusive<A>>::count`
+#[test]
+fn range_inclusve_count_empty() {
+    assert_eq!((3..=2).count(), 0);
+}

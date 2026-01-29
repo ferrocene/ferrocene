@@ -1,0 +1,59 @@
+error: validated function calls an unvalidated method
+  --> $DIR/auxiliary/uncertified-post-mono.rs:3:5
+   |
+LL |     x.clone();
+   |     ^^^^^^^^^
+   |
+  ::: $DIR/lint-uncertified-post-mono-cross-crate.rs:30:8
+   |
+LL |     fn clone(&self) -> Self { Unvalidated }
+   |        ----- `<Unvalidated as Clone>::clone` is unvalidated
+   |
+note: `instantiation_reachable` is validated
+  --> $DIR/lint-uncertified-post-mono-cross-crate.rs:19:8
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | pub fn instantiation_reachable() {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^
+LL |     uninstantiated_generic(Unvalidated);
+   |     ----------------------------------- generic function `uncertified_post_mono::uninstantiated_generic` instantiated by `instantiation_reachable`
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-post-mono-cross-crate.rs:1:9
+   |
+LL | #![deny(ferrocene::uncertified)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function calls an unvalidated associated function
+  --> $DIR/auxiliary/uncertified-post-mono.rs:5:17
+   |
+LL |     let mut y = fn_type();
+   |                 ^^^^^^^^^
+   |
+  ::: $DIR/lint-uncertified-post-mono-cross-crate.rs:49:8
+   |
+LL |     fn default() -> Self { Unvalidated }
+   |        ------- `<Unvalidated as Default>::default` is unvalidated
+   |
+note: generic function `uncertified_post_mono::uninstantiated_generic` instantiated by `instantiation_reachable`, which is called from a validated entrypoint
+  --> $DIR/lint-uncertified-post-mono-cross-crate.rs:20:5
+   |
+LL |     uninstantiated_generic(Unvalidated);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function possibly calls an unvalidated method
+  --> $DIR/auxiliary/uncertified-post-mono.rs:7:34
+   |
+LL |     let fn_ptr: fn(&mut T, &T) = T::clone_from;
+   |                                  ^^^^^^^^^^^^^
+   |
+  ::: $DIR/lint-uncertified-post-mono-cross-crate.rs:33:8
+   |
+LL |     fn clone_from(&mut self, other: &Self) {
+   |        ---------- `<Unvalidated as Clone>::clone_from` is unvalidated
+   |
+   = note: once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call the function
+
+error: aborting due to 3 previous errors
+

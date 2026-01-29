@@ -3249,7 +3249,7 @@ mod sealed {
         unsafe fn vec_round(self) -> Self;
     }
 
-    test_impl! { vec_vrfin(a: vector_float) -> vector_float [vrfin, xvrspic] }
+    test_impl! { vec_vrfin(a: vector_float) -> vector_float [vrfin, vrfin] }
 
     #[unstable(feature = "stdarch_powerpc", issue = "111145")]
     impl VectorRound for vector_float {

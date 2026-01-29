@@ -8,14 +8,20 @@ defaults:
 on:
   workflow_call:
     inputs:
+      build-metrics-artifact:
+        type: string
+        required: true
+        description: The artifact name of the build metrics
       host-triple:
         type: string
+        required: true
         description: The Rust triple of the host platform
       triple:
         type: string
         description: The target triple to test on
       runner:
         type: string
+        required: true
         description: The GitHub Runner to run on
       use-minio:
         type: boolean

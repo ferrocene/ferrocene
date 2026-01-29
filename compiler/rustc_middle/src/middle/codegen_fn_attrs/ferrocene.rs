@@ -22,7 +22,7 @@ pub enum ValidatedStatus {
     Unvalidated,
 }
 
-// Shared between rustc_lint and rustc_codegen_ssa attr parsing.
+/// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.
 pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // A closure is validated if the function it's defined in is validated.
     let owner = tcx.typeck_root_def_id(def_id);

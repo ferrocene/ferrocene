@@ -9,12 +9,10 @@ fn normal_def() {}
 pub fn validated() {
     normal_def();
     //~^ ERROR unvalidated
-    //~^^ ERROR unvalidated
-    // TODO: deduplicate this between THIR and post-mono pass
 }
 
 #[cfg(test)]
 #[test]
 fn some_test() {
-    normal_def(); // ok: tests assumed unvalidated
+    normal_def(); // ok: tests are assumed to be unvalidated
 }

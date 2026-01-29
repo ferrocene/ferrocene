@@ -4,9 +4,8 @@
 // In particular do NOT use numerics anywhere here,
 // nor any syntax in core::ops unless it's with an ADT.
 
-//@ revisions: dedup no-dedup post-mono
+//@ revisions: dedup no-dedup
 //@[dedup] compile-flags: -Z deduplicate-diagnostics=yes
-//@[post-mono] compile-flags: -Z deduplicate-diagnostics=yes
 
 #![crate_type = "lib"]
 #![deny(ferrocene::uncertified)]
@@ -30,7 +29,6 @@ extern "C" { fn extern_fn(); }
 macro_rules! mbe {
     () => { normal_def() }
     //[no-dedup]~^ ERROR unvalidated
-    //[no-dedup]~^^ ERROR unvalidated
 }
 
 struct Ctor;
@@ -89,10 +87,8 @@ static UNCERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &
 
 #[ferrocene::prevalidated]
 const CERTIFIED_CLOSURE_CONST: fn() = || normal_def(); //~ ERROR unvalidated
-//[no-dedup]~^ ERROR unvalidated
 #[ferrocene::prevalidated]
 static CERTIFIED_CLOSURE_STATIC: fn() = || normal_def(); //~ ERROR unvalidated
-//[no-dedup]~^ ERROR unvalidated
 #[ferrocene::prevalidated]
 const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
 //~^ ERROR unvalidated
@@ -100,23 +96,14 @@ const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unva
 static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
 //~^ ERROR unvalidated
 
-#[cfg(post_mono)]
-#[ferrocene::prevalidated]
-pub fn reachable() {
-    certified();
-}
-
 #[ferrocene::prevalidated]
 fn certified() {
     normal_def(); //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
-    let fn_ptr: fn() = normal_def;
-    //[no-dedup]~^ ERROR unvalidated
+    let fn_ptr: fn() = normal_def; // FIXME: currently only caught post-mono
     fn_ptr(); // ok
 
-    let trait_fn_type = <Unvalidated as Clone>::clone; //~ ERROR unvalidated
-    trait_fn_type(&Unvalidated);
-    //[no-dedup]~^ ERROR unvalidated
+    let trait_fn_type = <Unvalidated as Clone>::clone;
+    trait_fn_type(&Unvalidated); //~ ERROR unvalidated
     let trait_fn_ptr: fn(&Unvalidated) -> Unvalidated = trait_fn_type;
     trait_fn_ptr(&Unvalidated); // ok
 
@@ -134,10 +121,8 @@ fn certified() {
     Ctor; // ok
     mbe!(); // caught in macro definition above; maybe we should have both spans?
     Unvalidated.inherent_fn(); //~ ERROR unvalidated
-    //[no-dedup]~^ ERROR unvalidated
     Unvalidated.clone();
     //[no-dedup]~^ ERROR unvalidated
-    //[no-dedup]~^^ ERROR unvalidated
     marked_certified(); // ok
 
     // TODO: test turbofish
@@ -156,7 +141,6 @@ fn certified() {
     use normal_def as rename;
     rename();
     //[no-dedup]~^ ERROR unvalidated
-    //[no-dedup]~^^ ERROR unvalidated
 
     unsafe { extern_fn(); } // TODO this should lint
     // TODO: specialization

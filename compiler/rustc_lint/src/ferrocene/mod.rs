@@ -212,7 +212,7 @@ impl<'tcx> LintState<'tcx> {
 
         if tcx.hir_node_by_def_id(item).associated_body().is_none() {
             match tcx.def_kind(item) {
-                // TODO: do we need to check if an ADT uses an unvalidated type?
+                // We don't care if types are unvalidated, only the functions that are called.
                 DefKind::Struct | DefKind::Enum | DefKind::Union => {}
                 kind => {
                     let item_span = tcx.def_span(item);
@@ -220,6 +220,7 @@ impl<'tcx> LintState<'tcx> {
                         Some(ref span) => span.with_hi(item_span.hi()),
                         None => item_span,
                     };
+                    // FIXME: this should probably be `WARN unused attibute` instead?
                     span_bug!(span, "annotated certified with no body? {kind:?} {item:?}");
                 }
             }
@@ -292,14 +293,13 @@ enum UseKind<'tcx> {
     TraitObjectCast(DefId, Ty<'tcx>),
     /// Only occurs for consts and statics.
     ContainsFnPtr(DefId, Ty<'tcx>),
-    Named(DefId),
 }
 
 impl<'tcx> Use<'tcx> {
     fn def_id(self) -> DefId {
         match self.kind {
             UseKind::Called(instance) | UseKind::FnPtrCast(instance) => instance.def_id(),
-            UseKind::Named(id) | UseKind::ContainsFnPtr(id, _) => id,
+            UseKind::ContainsFnPtr(id, _) => id,
             UseKind::TraitObjectCast(assoc_fn, _) => assoc_fn,
         }
     }
@@ -307,7 +307,7 @@ impl<'tcx> Use<'tcx> {
     fn opt_instance(self) -> Option<Instance<'tcx>> {
         match self.kind {
             UseKind::FnPtrCast(instance) | UseKind::Called(instance) => Some(instance),
-            UseKind::TraitObjectCast(..) | UseKind::ContainsFnPtr(..) | UseKind::Named(..) => None,
+            UseKind::TraitObjectCast(..) | UseKind::ContainsFnPtr(..) => None,
         }
     }
 }

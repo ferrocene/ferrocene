@@ -95,16 +95,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // checked.
                 UseKind::ContainsFnPtr(def_id, unknown_fn)
             }
-            // TODO: maybe this is ok actually? We'll still check it when it's actually called...
-            thir::ExprKind::ZstLiteral { .. } => match expr.ty.kind() {
-                ty::FnDef(maybe_trait_fn, generic_args) => {
-                    debug!("saw zst {:?}", expr.ty);
-                    let fn_def =
-                        self.get_concrete_fn_def(*maybe_trait_fn, generic_args, expr.span)?;
-                    UseKind::Named(fn_def.def_id())
-                }
-                _ => span_bug!(expr.span, "called ZST literals should always be named functions"),
-            },
             thir::ExprKind::Call { ty, .. } => {
                 let instance = self.instance_of_ty(ty, expr.span)?;
                 // we use a custom narrowed span here. it's the receiver that's unvalidated, not the
@@ -158,7 +148,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         // c.f. https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962
         let (coerce_src, coerce_dst) =
             tcx.struct_lockstep_tails_for_codegen(source_ty, dest.ty, self.typing_env());
-        // TODO: this is *not* correct for types other than references
+        // FIXME: this is *not* correct for types other than references
         // see https://doc.rust-lang.org/std/ops/trait.CoerceUnsized.html for a full list of types
         // we need to handle here. i think just raw pointers?
         let coerce_src = coerce_src.peel_refs();
@@ -201,7 +191,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
-    /// TODO: list all uncertified functions, not just the first.
+    /// FIXME: list all uncertified functions, not just the first.
     fn find_unvalidated_impl_fn(
         &self,
         impl_block: DefId,
@@ -257,9 +247,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
         // Find the impl block.
         let mut selcx = SelectionContext::new(&infcx);
-        // TODO: i think 'item' might not be correct when checking closures? does it matter?
-        // the docs say it's only used for region constraints ...
-        // lcnr says this is fine because `cause` is only used for diagnostics anyway.
         let cause =
             ObligationCause::new(span, self.linter.item, ObligationCauseCode::ExprAssignable);
         // method selection doesn't care about regions.
@@ -295,7 +282,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         match normalized_impl {
             ImplSource::UserDefined(data) => Some((data.impl_def_id, data.args)),
             ImplSource::Param(_) => None,
-            // TODO: what to do here? this shouldn't actually prevent the cast ...
+            // FIXME: what to do here? this shouldn't actually prevent the cast ...
             ImplSource::Builtin(..) => None,
         }
     }
@@ -333,7 +320,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             //   - It was passed as an argument, which is ok by 3).
             //   - It is a global const/static, so we catch it in NamedConst/StaticRef above.
             ty::FnPtr(..) => None,
-            // TODO: do we need to handle closures?
+            // FIXME: do we need to handle closures?
             other => span_bug!(span, "unsupported call kind {other:?}"),
         }
     }

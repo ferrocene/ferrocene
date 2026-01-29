@@ -37,9 +37,6 @@ impl<'tcx> LintState<'tcx> {
                 None => tcx.def_path_str(callee),
                 Some(instance) => tcx.def_path_str_with_args(callee, instance.args),
             };
-            // TODO: this is horrible for `Cast` or `ContainsTy`. Need to rewrite all this
-            // logic to bring the appropriate data into `lint` and then actually look at
-            // the discriminant instead of just collapsing it to `name`.
             diag.span_label(self.func_span(callee), format!("`{name}` is unvalidated"));
 
             if let UseKind::ContainsFnPtr(_, ty) = use_.kind {
@@ -151,7 +148,6 @@ impl<'tcx> Use<'tcx> {
     pub(super) fn present_tense(self) -> &'static str {
         match self.kind {
             UseKind::Called(..) => "calls",
-            UseKind::Named(..) => "uses",
             // originally this said "type-erases" but that's unfamiliar jargon, and it's not clear
             // that it actually helps understanding.
             UseKind::TraitObjectCast(..) | UseKind::FnPtrCast(..) => "possibly calls",

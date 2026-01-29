@@ -1,4 +1,4 @@
-error: validated function uses an unvalidated function
+error: validated function calls an unvalidated function
   --> $DIR/lint-uncertified-duplicates.rs:35:5
    |
 LL | fn normal_def() {}
@@ -20,20 +20,20 @@ note: the lint level is defined here
 LL | #![deny(ferrocene::uncertified)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
-error: validated function uses an unvalidated method
-  --> $DIR/lint-uncertified-duplicates.rs:38:17
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-duplicates.rs:38:5
    |
 LL |     fn inherent_fn(&self) {}
    |        ----------- `Unvalidated::inherent_fn` is unvalidated
 ...
 LL |     Unvalidated.inherent_fn();
-   |                 ^^^^^^^^^^^
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
 
-error: validated function uses an unvalidated associated function
+error: validated function calls an unvalidated associated function
   --> $DIR/lint-uncertified-duplicates.rs:42:5
    |
 LL |     fn fancy_clone() {}
-   |        ----------- `<T as FancyClone>::fancy_clone` is unvalidated
+   |        ----------- `<Unvalidated as FancyClone>::fancy_clone` is unvalidated
 ...
 LL |     Unvalidated::fancy_clone();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^

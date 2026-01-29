@@ -100,6 +100,39 @@ Language changes in Rust 1.91.0
 
 - `Lower pattern bindings in the order they're written and base drop order on primary bindings' order <https://github.com/rust-lang/rust/pull/143764>`_
 
+  - Changed paragraphs:
+
+    - :p:`fls_g07zq3n55094`
+    - :p:`fls_8luyomzppck`
+    - :p:`fls_kv533rntni1x`
+    - :p:`fls_62626ws222op`
+    - :p:`fls_q0z46h1gnzez`
+    - :p:`fls_1r0vm6rg13o9`
+    - :p:`fls_am5h8r887bz5`
+    - :p:`fls_eppmiloh7bgg`
+    - :p:`fls_gwc08xayno7q`
+    - :p:`fls_19iygu12s315`
+    - :p:`fls_r307spfk6cs9`
+    - :p:`fls_qhdofvbso3gl`
+    - :p:`fls_drb114dtvlpt`
+    - :p:`fls_uxysntb3u03j`
+    - :p:`fls_vstdqifqipbh`
+
+  - New paragraphs:
+
+    - :p:`fls_W2S2FrkuedYC`
+    - :p:`fls_dhfIPP4yR3Tt`
+    - :p:`fls_zxFM7EoE2Xq8`
+    - :p:`fls_093YxG6YXQz2`
+    - :p:`fls_gNWXh61ZXXt8`
+    - :p:`fls_VQMmveZUfNTn`
+    - :p:`fls_72JHo343O7jp`
+    - :p:`fls_YDVgFaTQwcL8`
+    - :p:`fls_zv73CR8rplIa`
+    - :p:`fls_tZJgZDWVChJV`
+
+  - Removed paragraph: :p:`fls_67ajub7d2b4c`
+
 - `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
   This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
 

@@ -696,7 +696,7 @@ pub mod alloc;
 // Private support modules
 mod panicking;
 
-#[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
+#[path = "../../backtrace/src/lib.rs"]
 #[allow(dead_code, unused_attributes, fuzzy_provenance_casts, unsafe_op_in_unsafe_fn)]
 mod backtrace_rs;
 

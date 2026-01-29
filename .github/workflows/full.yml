@@ -151,6 +151,7 @@ jobs:
       triples: "x86_64-unknown-linux-gnu"
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
+      build-metrics-artifact: dist-x86_64-unknown-linux-gnu-${{ matrix-run-name }}
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
@@ -176,6 +177,7 @@ jobs:
           - run-name: Tools
             script: uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     with:
+      build-metrics-artifact: dist-aarch64-unknown-linux-gnu-${{ matrix-run-name }}
       run-name: ${{ matrix.run-name }}
       script: ${{ matrix.script }}
       host-triple: aarch64-unknown-linux-gnu
@@ -216,6 +218,7 @@ jobs:
       # - targets
     secrets: inherit
     with:
+      build-metrics-artifact: test-x86_64-unknown-linux-gnu-on-${{ matrix.host }}-${{ matrix.suite }}
       run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
@@ -248,6 +251,7 @@ jobs:
     secrets: inherit
     with:
       run-name: core & alloc (${{ matrix.variant }})
+      build-metrics-artifact: test-certified-x86_64-unknown-linux-gnu-on-${{ matrix.host }}-${{ matrix.suite }}
       script: |
         uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
       host-triple: ${{ matrix.host }}
@@ -284,6 +288,7 @@ jobs:
       run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+      build-metrics-artifact: test-aarch64-unknown-linux-gnu-on-${{ matrix.host }}-${{ matrix.suite }}
       host-triple: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
       use-minio: true
@@ -315,6 +320,7 @@ jobs:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
+      build-metrics-artifact: test-certified-x86_64-unknown-linux-gnu-on-${{ matrix.host }}-${{ matrix.suite }}
       host-triple: ${{ matrix.host }}
       triples: ${{ matrix.host }}
       runner: ${{ matrix.runner }}
@@ -350,6 +356,7 @@ jobs:
       run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+      build-metrics-artifact: test-thumbv7em-none-eabi-on-${{ matrix.host }}-${{ matrix.suite }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -381,6 +388,7 @@ jobs:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabi  --test-variant ${{ matrix.variant }}
+      build-metrics-artifact: test-certified-thumbv7em-none-eabi-on-${{ matrix.host }}-${{ matrix.suite }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -415,6 +423,7 @@ jobs:
       run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+      build-metrics-artifact: test-thumbv7em-none-eabihf-on-${{ matrix.host }}-${{ matrix.suite }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -446,6 +455,7 @@ jobs:
       run-name: core & alloc (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 1 test library/core library/alloc --no-doc --ferrocene-test-one-crate-per-cargo-call --target thumbv7em-ferrocene.facade-eabihf --test-variant ${{ matrix.variant }}
+      build-metrics-artifact: test-certified-thumbv7em-none-eabihf-on-${{ matrix.host }}-${{ matrix.suite }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
       use-minio: true
@@ -469,6 +479,7 @@ jobs:
       run-name: Coverage (x86_64-unknown-linux-gnu)
       script: |
         ./x.py test --coverage=library library/core library/alloc --no-doc
+      build-metrics-artifact: coverage-x86_64-unknown-linux-gnu-${{ matrix.suite }}
       host-triple: x86_64-unknown-linux-gnu
       triples: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -496,6 +507,7 @@ jobs:
       script: |
         ./x.py build --stage 2 library/core
         ./x.py doc   --stage 2 library/core
+      build-metrics-artifact: certified-subsets-x86_64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       triples: ${{ needs.calculate-envs.outputs.subset-targets }}
       runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -540,6 +552,7 @@ jobs:
         ferrocene.test-outcomes=custom
         --set
         ferrocene.test-outcomes-dir=/tmp/test-outcomes
+      build-metrics-artifact: docs-x86_64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       triples: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -562,6 +575,7 @@ jobs:
     with:
       run-name: Dist (source)
       script: ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
+      build-metrics-artifact: source-x86_64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       triples: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
@@ -586,6 +600,7 @@ jobs:
       script: |
         uvx reuse@5.1.1 --include-submodules lint
         ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
+      build-metrics-artifact: checks-x86_64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
@@ -612,6 +627,7 @@ jobs:
         export QNX_LICENSE_FILE="qnx710-472/license/licenses"
         source qnx710-472/qnxsdp-env.sh
         ./x.py --stage 2 dist rust-std
+      build-metrics-artifact: targets-x86_64-unknown-linux-gnu
       use-minio: true
       qnx-version: "710-472"
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -647,7 +663,8 @@ jobs:
         --set
         ferrocene.test-outcomes=custom
         --set
-        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+        ferrocene.test-outcomes-dir=/tmp/test-outcome\
+      build-metrics-artifact: traceability-matrix-x86_64-unknown-linux-gnu
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}

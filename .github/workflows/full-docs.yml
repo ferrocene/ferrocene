@@ -11,17 +11,24 @@ defaults:
 on:
   workflow_call:
     inputs:
+      build-metrics-artifact:
+        type: string
+        required: true
+        description: The artifact name of the build metrics
       run-name:
         type: string
+        required: true
         description: The `run-name` to use
       script:
         type: string
+        required: true
         description: The script to run.
       configure:
         type: string
         description: Any extra configure args to pass to the `ferrocene/ci/configure.sh` script.
       host-triple:
         type: string
+        required: true
         description: The Rust triple of the host platform
       triples:
         type: string

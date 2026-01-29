@@ -256,20 +256,15 @@ enum Emit {
     LinkArgsAsm,
 }
 
-<<<<<<< HEAD
-// Ferrocene addition: have two separate consts ensures that we get a `dead_code` warning if a merge
-// conflict is resolved incorrectly and stops using this override.
-const DEFAULT_UI_TEST_OPT_LEVEL: &str = "-Copt-level=2";
-const DEFAULT_SUITE_TEST_OPT_LEVEL: &str = "-Copt-level=2";
-||||||| b3cda168c8a
-=======
-/// Indicates whether we are using `rustc` or `rustdoc` to compile an input file.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CompilerKind {
     Rustc,
     Rustdoc,
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+// Ferrocene addition: have two separate consts ensures that we get a `dead_code` warning if a merge
+// conflict is resolved incorrectly and stops using this override.
+const DEFAULT_UI_TEST_OPT_LEVEL: &str = "-Copt-level=2";
+const DEFAULT_SUITE_TEST_OPT_LEVEL: &str = "-Copt-level=2";
 
 impl<'test> TestCx<'test> {
     /// Code executed for each revision in turn (or, if there are no
@@ -1711,14 +1706,8 @@ impl<'test> TestCx<'test> {
                             .iter()
                             .any(|arg| arg == "-O" || arg.contains("opt-level"))
                     {
-<<<<<<< HEAD
                         // Ferrocene addition: always test `opt-level=2`, not the default for `-O`.
-                        rustc.arg(DEFAULT_UI_TEST_OPT_LEVEL);
-||||||| b3cda168c8a
-                        rustc.arg("-O");
-=======
-                        compiler.arg("-O");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                        compiler.arg(DEFAULT_UI_TEST_OPT_LEVEL);
                     }
                 }
                 TestMode::DebugInfo => { /* debuginfo tests must be unoptimized */ }
@@ -1729,14 +1718,8 @@ impl<'test> TestCx<'test> {
                     // compile flags (below) or in per-test `compile-flags`.
                 }
                 _ => {
-<<<<<<< HEAD
                     // Ferrocene addition: always test `opt-level=2`, not the default for `-O`.
-                    rustc.arg(DEFAULT_SUITE_TEST_OPT_LEVEL);
-||||||| b3cda168c8a
-                    rustc.arg("-O");
-=======
-                    compiler.arg("-O");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                    compiler.arg(DEFAULT_SUITE_TEST_OPT_LEVEL);
                 }
             }
         }

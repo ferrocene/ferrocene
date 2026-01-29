@@ -541,6 +541,7 @@ jobs:
         --set
         ferrocene.test-outcomes-dir=/tmp/test-outcomes
       host-triple: x86_64-unknown-linux-gnu
+      triples: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -562,7 +563,7 @@ jobs:
       run-name: Dist (source)
       script: ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
       host-triple: x86_64-unknown-linux-gnu
-      triples: "x86_64-unknown-linux-gnu"
+      triples: x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -610,7 +611,6 @@ jobs:
       script: |
         export QNX_LICENSE_FILE="qnx710-472/license/licenses"
         source qnx710-472/qnxsdp-env.sh
-
         ./x.py --stage 2 dist rust-std
       use-minio: true
       qnx-version: "710-472"

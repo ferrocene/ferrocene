@@ -71,7 +71,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 12
+      LLVM_BUILD_PARALLELISM: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4

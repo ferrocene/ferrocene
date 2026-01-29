@@ -62,7 +62,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      runner: ubuntu-20-llvm-20core-30gb-amd64
       use-minio: true
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
@@ -77,7 +77,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: aarch64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-20-arm64
+      runner: ubuntu-20-llvm-20core-30gb-arm64
       use-minio: true
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}

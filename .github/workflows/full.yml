@@ -620,6 +620,7 @@ jobs:
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
+      run-name: Build additional targets
       host-triple: x86_64-unknown-linux-gnu
       triples: ${{ format('{0},{1},{2},{3}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets, needs.calculate-envs.outputs.subset-targets) }}
       runner: ferrocene-arc-runners-ubuntu-20-amd64

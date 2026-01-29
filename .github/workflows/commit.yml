@@ -135,7 +135,7 @@ jobs:
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           SCRIPT: |
             set -e
-            # Note that `x test symbol-report` also verifies that core builds with `ferrocene_certified` set.
+            # Note that `x test symbol-report` also verifies that core builds with `ferrocene_subset` set.
             ./x test --stage 1 ferrocene/doc/symbol-report.csv
             ./x test --stage 1 tests/ui/ferrocene
             # HACK: work around incorrect caching for profiler_builtins.

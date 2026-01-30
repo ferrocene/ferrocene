@@ -127,11 +127,11 @@ impl<'tcx, K> Default for QueryState<'tcx, K> {
 
 /// A type representing the responsibility to execute the job in the `job` field.
 /// This will poison the relevant query if dropped.
-struct JobOwner<'a, 'tcx, K>
+struct JobOwner<'tcx, K>
 where
     K: Eq + Hash + Copy,
 {
-    state: &'a QueryState<'tcx, K>,
+    state: &'tcx QueryState<'tcx, K>,
     key: K,
 }
 
@@ -181,7 +181,7 @@ where
     }
 }
 
-impl<'a, 'tcx, K> JobOwner<'a, 'tcx, K>
+impl<'tcx, K> JobOwner<'tcx, K>
 where
     K: Eq + Hash + Copy,
 {
@@ -218,7 +218,7 @@ where
     }
 }
 
-impl<'a, 'tcx, K> Drop for JobOwner<'a, 'tcx, K>
+impl<'tcx, K> Drop for JobOwner<'tcx, K>
 where
     K: Eq + Hash + Copy,
 {
@@ -422,7 +422,7 @@ where
 fn execute_job<'tcx, Q, const INCR: bool>(
     query: Q,
     qcx: Q::Qcx,
-    state: &QueryState<'tcx, Q::Key>,
+    state: &'tcx QueryState<'tcx, Q::Key>,
     key: Q::Key,
     key_hash: u64,
     id: QueryJobId,

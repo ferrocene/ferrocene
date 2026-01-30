@@ -82,7 +82,7 @@ jobs:
     steps:
       - continuation/continue:
           configuration_path: .circleci/workflows.yml
-          parameters: {}
+          parameters: '{}'
 
 workflows:
   version: 2

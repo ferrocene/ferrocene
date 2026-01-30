@@ -21,23 +21,18 @@ jobs:
           build-dependencies: 'false'
           setup-uv: 'true'
 
-      - name: Prepare yarn
-        run: |
-          # apt install yarnpkg
-          yarnpkg set version 4.12.0
-          yarnpkg install
-          cat yarn.lock
+      - name: Install syft
+        run: curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin v1.41.1
 
-      - name: Temp tools
-        run: |
-          cargo install cargo-sbom
-          curl -LsSf https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.29.2/cyclonedx-linux-x64 -o ~/.cargo/bin/cyclonedx
+      - name: Generate SBOM
+        run: ferrocene/ci/run.sh
+        env:
+          FERROCENE_UNPRIVILEGED_CI: 1
+          FERROCENE_HOST: x86_64-unknown-linux-gnu
+          SCRIPT: ./x.py dist ferrocene-sbom
 
-      - name: Generate SBOMs
-        run: ./x.py dist ferrocene-sbom
-
-      - name: Upload generated SBOMs
+      - name: Upload generated SBOM
         uses: actions/upload-artifact@v4
         with:
-          name: Generated-SBOMs
-          path: build/ferrocene-sboms/*
+          name: Generated-SBOM
+          path: build/ferrocene-sbom/*

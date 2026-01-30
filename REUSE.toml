@@ -247,7 +247,7 @@ path = [
     "CODEOWNERS",
     "ferrocene/tools/Cargo.toml",
     "ferrocene/tools/Cargo.lock",
-    "ferrocene/tools/sbom-gen/**",
+    "ferrocene/README.md",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

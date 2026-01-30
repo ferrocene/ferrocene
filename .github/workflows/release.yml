@@ -5,9 +5,9 @@
 
 name: Release
 on:
-  # Run nightly releases every day at midnight UTC.
+  # Run nightly releases every day at 3:15AM UTC.
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "15 3 * * *"
 
   # Allow team members to manually trigger new releases through the GitHub UI.
   workflow_dispatch:

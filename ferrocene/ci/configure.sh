@@ -122,7 +122,10 @@ add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
+add --set 'target."aarch64v8r-unknown-none".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64v8r-unknown-none-softfloat".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64v8r-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."aarch64-unknown-ferrocene.subset".cc=aarch64-linux-gnu-gcc'
@@ -142,6 +145,7 @@ add --set target.x86_64-unknown-linux-musl.sanitizers=false
 
 # experiment to enable code coverage
 add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
+add --set 'target."aarch64v8r-unknown-ferrocene.facade".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
 

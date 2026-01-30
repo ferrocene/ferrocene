@@ -1252,7 +1252,20 @@ workflows:
     when:
       or:
         - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
-    jobs: [sbom-gen]
+    jobs: 
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-20--x86_64
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-24--x86_64
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+
+      - sbom-gen
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen

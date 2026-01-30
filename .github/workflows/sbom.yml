@@ -17,9 +17,12 @@ jobs:
       - name: Setup submodules and uv
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: 'false'
+          llvm-subset: 'true'
           build-dependencies: 'false'
           setup-uv: 'true'
+
+      - name: Ferrocene-dist bootstrap
+        run: ./x.py setup ferrocene-dist
 
       - name: Install syft
         run: curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin v1.41.1

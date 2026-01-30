@@ -13,14 +13,18 @@ use std::ops::ControlFlow;
 use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, LangItem, OwnerId};
-use rustc_infer::traits::{ImplSource, ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode};
+use rustc_infer::traits::{
+    ImplSource, ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
+};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::span_bug;
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
 use rustc_middle::ty::adjustment::{CoerceUnsizedInfo, CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::{
-    self, AdtDef, AdtDefData, Binder, ExistentialPredicate, ExistentialTraitRef, FieldDef, GenericArgs, GenericArgsRef, Instance, InstanceKind, PolyTraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv
+    self, AdtDef, AdtDefData, Binder, ExistentialPredicate, ExistentialTraitRef, FieldDef,
+    GenericArgs, GenericArgsRef, Instance, InstanceKind, PolyTraitRef, Ty, TyCtxt,
+    TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv,
 };
 use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext};
@@ -112,7 +116,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 LintThir::check_item(tcx, self.owner, expr.closure_id);
                 return None;
             }
-            thir::ExprKind::PointerCoercion { cast: PointerCoercion::ReifyFnPointer(_) | PointerCoercion::ClosureFnPointer(_), source, .. } => {
+            thir::ExprKind::PointerCoercion {
+                cast: PointerCoercion::ReifyFnPointer(_) | PointerCoercion::ClosureFnPointer(_),
+                source,
+                ..
+            } => {
                 let source_ty = self.thir[source].ty;
                 self.check_fn_ptr_coercion(source_ty, expr.span)?
             }
@@ -130,10 +138,12 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let tcx = self.linter.tcx;
 
         match self.instance_of_ty(source, span) {
-            Some(instance) => if item_is_validated(tcx, instance.def_id()).validated() {
-                None
-            } else {
-                Some(UseKind::FnPtrCast(instance))
+            Some(instance) => {
+                if item_is_validated(tcx, instance.def_id()).validated() {
+                    None
+                } else {
+                    Some(UseKind::FnPtrCast(instance))
+                }
             }
             None => None,
             // TODO: buggy!!
@@ -274,9 +284,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                             // slice.
                             // assert!(dyn_trait_refs(dst_inner).is_empty());
                             break;
-                        }
-                        // Ok(CoerceUnsizedInfo { custom_kind: Some(CustomCoerceUnsized::Struct(idx)) }) => idx,
-                        // other => span_bug!(span, "don't know how to coerce unsized {src_def:?}: {other:?}"),
+                        } // Ok(CoerceUnsizedInfo { custom_kind: Some(CustomCoerceUnsized::Struct(idx)) }) => idx,
+                          // other => span_bug!(span, "don't know how to coerce unsized {src_def:?}: {other:?}"),
                     };
                     src_inner = get_adt_field(*src_def, src_args, field);
                     dst_inner = get_adt_field(*dst_def, dst_args, field);
@@ -300,7 +309,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         //     }
         // };
 
-            // One last time for raw pointer casts.
+        // One last time for raw pointer casts.
         self.peel_derefs(src_inner, dst_inner, span)
 
         // tcx.struct_lockstep_tails_for_codegen(src_inner, dst_inner, self.typing_env())
@@ -320,24 +329,28 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             [source_ty, target_ty],
         );
 
-        match tcx
-            .codegen_select_candidate(ty::TypingEnv::fully_monomorphized().as_query_input(trait_ref))
-            {
-                Ok(ImplSource::UserDefined(ImplSourceUserDefinedData {
-                    impl_def_id,
-                    ..
-                })) => Some(tcx.coerce_unsized_info(impl_def_id).unwrap().custom_kind.unwrap()),
-                _ => None,
-                // impl_source => {
-                //     span_bug!(span,
-                //         "invalid `CoerceUnsized` from {source_ty} to {target_ty}: impl_source: {:?}",
-                //         impl_source
-                //     );
-                // }
+        match tcx.codegen_select_candidate(
+            ty::TypingEnv::fully_monomorphized().as_query_input(trait_ref),
+        ) {
+            Ok(ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, .. })) => {
+                Some(tcx.coerce_unsized_info(impl_def_id).unwrap().custom_kind.unwrap())
             }
+            _ => None,
+            // impl_source => {
+            //     span_bug!(span,
+            //         "invalid `CoerceUnsized` from {source_ty} to {target_ty}: impl_source: {:?}",
+            //         impl_source
+            //     );
+            // }
+        }
     }
 
-    fn peel_derefs(&self, mut src: Ty<'tcx>, mut dst: Ty<'tcx>, span: Span) -> (Ty<'tcx>, Ty<'tcx>) {
+    fn peel_derefs(
+        &self,
+        mut src: Ty<'tcx>,
+        mut dst: Ty<'tcx>,
+        span: Span,
+    ) -> (Ty<'tcx>, Ty<'tcx>) {
         loop {
             if matches!(dst.kind(), ty::Dynamic(..)) {
                 return (src, dst);
@@ -351,7 +364,10 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     dst = b;
                 }
                 (None, None) => return (src, dst),
-                _ => span_bug!(span, "don't know how to peel tys for unsizing cast from {src:?} => {dst:?}"),
+                _ => span_bug!(
+                    span,
+                    "don't know how to peel tys for unsizing cast from {src:?} => {dst:?}"
+                ),
             }
         }
     }

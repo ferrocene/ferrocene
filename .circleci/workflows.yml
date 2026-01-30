@@ -117,7 +117,7 @@ jobs:
     resource_class: medium
     steps:
       - ferrocene-checkout:
-          llvm-subset: true
+          llvm-subset: false
       - ferrocene-sbom
 
   # x86_64-unknown-linux-gnu jobs
@@ -1187,6 +1187,28 @@ workflows:
             - aarch64-darwin-test-library-std
             - aarch64-darwin-compiletest
 
+  sbom:
+    when:
+      or:
+        - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
+    jobs: 
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-20--x86_64
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-24--x86_64
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+
+      - sbom-gen:
+          requires:
+            - build-docker--ubuntu-20--x86_64
+            - build-docker--ubuntu-24--x86_64
+
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
   # for the branches bors lands code in, as those branches are not meant to run
@@ -1592,12 +1614,8 @@ commands:
           command: aws sts get-caller-identity
 
   ferrocene-sbom:
-    description: Generate SBOMs of the repository
+    description: Generate the Ferrocene SBOM of the repository
     steps:
-      - run:
-          name: Prepare yarn
-          command: |
-            yarnpkg install
       - run:
           name: Generate SBOMs
           command: ./x.py dist ferrocene-sbom
@@ -1626,6 +1644,3 @@ executors:
   linux-vm:
     machine:
       image: default
-  docker-cyclonedx:
-    docker:
-      - image: cyclonedx/cyclonedx-cli:latest

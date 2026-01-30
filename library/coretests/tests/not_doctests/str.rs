@@ -166,3 +166,12 @@ fn str_from_raw_parts_mut() {
 
     assert_eq!(c, "Hell");
 }
+
+// covers `<core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next`.
+#[test]
+fn test_utf8_chunks_next() {
+    let replacement_character = [0xEF, 0xBF, 0xBD];
+    let mut chunks = replacement_character.utf8_chunks();
+    assert_eq!("�", chunks.next().unwrap().valid());
+    assert!(chunks.next().is_none());
+}

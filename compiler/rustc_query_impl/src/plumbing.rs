@@ -104,13 +104,6 @@ impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
         if complete { Ok(jobs) } else { Err(jobs) }
     }
 
-    fn lift_query_info(
-        self,
-        info: &QueryStackDeferred<'tcx>,
-    ) -> rustc_query_system::query::QueryStackFrameExtra {
-        info.extract()
-    }
-
     // Interactions with on_disk_cache
     fn load_side_effect(
         self,
@@ -174,10 +167,7 @@ impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
 
         self.tcx.sess.dcx().emit_fatal(QueryOverflow {
             span: info.job.span,
-            note: QueryOverflowNote {
-                desc: self.lift_query_info(&info.query.info).description,
-                depth,
-            },
+            note: QueryOverflowNote { desc: info.query.info.extract().description, depth },
             suggested_limit,
             crate_name: self.tcx.crate_name(LOCAL_CRATE),
         });

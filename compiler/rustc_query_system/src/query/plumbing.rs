@@ -253,10 +253,10 @@ pub struct CycleError<I = QueryStackFrameExtra> {
 }
 
 impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
-    fn lift<Qcx: QueryContext<'tcx>>(&self, qcx: Qcx) -> CycleError<QueryStackFrameExtra> {
+    fn lift(&self) -> CycleError<QueryStackFrameExtra> {
         CycleError {
-            usage: self.usage.as_ref().map(|(span, frame)| (*span, frame.lift(qcx))),
-            cycle: self.cycle.iter().map(|info| info.lift(qcx)).collect(),
+            usage: self.usage.as_ref().map(|(span, frame)| (*span, frame.lift())),
+            cycle: self.cycle.iter().map(|info| info.lift()).collect(),
         }
     }
 }
@@ -297,7 +297,7 @@ where
     let query_map = qcx.collect_active_jobs(false).ok().expect("failed to collect active queries");
 
     let error = try_execute.find_cycle_in_stack(query_map, &qcx.current_query_job(), span);
-    (mk_cycle(query, qcx, error.lift(qcx)), None)
+    (mk_cycle(query, qcx, error.lift()), None)
 }
 
 #[inline(always)]
@@ -345,7 +345,7 @@ where
 
             (v, Some(index))
         }
-        Err(cycle) => (mk_cycle(query, qcx, cycle.lift(qcx)), None),
+        Err(cycle) => (mk_cycle(query, qcx, cycle.lift()), None),
     }
 }
 

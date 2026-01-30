@@ -27,11 +27,8 @@ pub struct QueryInfo<I> {
 }
 
 impl<'tcx> QueryInfo<QueryStackDeferred<'tcx>> {
-    pub(crate) fn lift<Qcx: QueryContext<'tcx>>(
-        &self,
-        qcx: Qcx,
-    ) -> QueryInfo<QueryStackFrameExtra> {
-        QueryInfo { span: self.span, query: self.query.lift(qcx) }
+    pub(crate) fn lift(&self) -> QueryInfo<QueryStackFrameExtra> {
+        QueryInfo { span: self.span, query: self.query.lift() }
     }
 }
 
@@ -628,7 +625,7 @@ pub fn print_query_stack<'tcx, Qcx: QueryContext<'tcx>>(
         let Some(query_info) = query_map.get(&query) else {
             break;
         };
-        let query_extra = qcx.lift_query_info(&query_info.query.info);
+        let query_extra = query_info.query.info.extract();
         if Some(count_printed) < limit_frames || limit_frames.is_none() {
             // Only print to stderr as many stack frames as `num_frames` when present.
             dcx.struct_failure_note(format!(

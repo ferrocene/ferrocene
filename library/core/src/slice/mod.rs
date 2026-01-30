@@ -4535,7 +4535,6 @@ impl<T> [T] {
     where
         Simd<T, LANES>: AsRef<[T; LANES]>,
         T: simd::SimdElement,
-        simd::LaneCount<LANES>: simd::SupportedLaneCount,
     {
         // These are expected to always match, as vector types are laid out like
         // arrays per <https://llvm.org/docs/LangRef.html#vector-type>, but we
@@ -4572,7 +4571,6 @@ impl<T> [T] {
     where
         Simd<T, LANES>: AsMut<[T; LANES]>,
         T: simd::SimdElement,
-        simd::LaneCount<LANES>: simd::SupportedLaneCount,
     {
         // These are expected to always match, as vector types are laid out like
         // arrays per <https://llvm.org/docs/LangRef.html#vector-type>, but we

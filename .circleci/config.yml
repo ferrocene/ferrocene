@@ -75,15 +75,6 @@ jobs:
           configuration_path: .circleci/workflows.yml
           parameters: /tmp/continue-parameters.json
 
-  sbom-gen:
-    docker:
-      - image: cimg/python:3.12
-    resource_class: small # 1-core
-    steps:
-      - continuation/continue:
-          configuration_path: .circleci/workflows.yml
-          parameters: '{}'
-
 workflows:
   version: 2
   setup:
@@ -91,10 +82,5 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
-    jobs: [setup]
-
-  sbom-test:
-    when:
-      or:
         - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
-    jobs: [sbom-gen]
+    jobs: [setup]

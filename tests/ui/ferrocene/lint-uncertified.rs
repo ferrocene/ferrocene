@@ -111,6 +111,9 @@ fn certified() {
     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated; //~ ERROR unvalidated
     dyn_trait.partial_cmp(&Unvalidated); // ok
 
+    // TODO: catch ptr-to-int casts?
+    // "vector table"
+
     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unvalidated;
     //~^ ERROR unvalidated
     dyn_trait_partially_certified.eq(&Unvalidated); // ok

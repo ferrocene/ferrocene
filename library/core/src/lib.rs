@@ -241,7 +241,6 @@ mod macros;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "assert_matches", issue = "82775")]
 pub use crate::macros::{assert_matches, debug_assert_matches};
 

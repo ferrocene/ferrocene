@@ -1,17 +1,21 @@
 mod array;
+mod ascii;
 mod atomic;
 mod borrow;
 mod cell;
 mod cmp;
 mod floats;
+mod fmt;
 mod hash;
 mod intrinsics;
 mod iter;
+mod macros;
 mod num;
 mod ops;
 mod slice;
 mod str;
 mod time;
+mod unicode;
 
 use core::cmp::Ordering;
 use core::ops::{Bound, ControlFlow};

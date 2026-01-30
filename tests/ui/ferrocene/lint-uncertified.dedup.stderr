@@ -114,7 +114,7 @@ LL |     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated;
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 
 error: validated function possibly calls an unvalidated method
-  --> $DIR/lint-uncertified.rs:114:70
+  --> $DIR/lint-uncertified.rs:117:70
    |
 LL |     fn ne(&self, _: &Self) -> bool {
    |        -- `<Unvalidated as PartialEq>::ne` is unvalidated
@@ -126,7 +126,7 @@ LL |     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unval
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialEq>::ne`
 
 error: validated function calls an unvalidated method
-  --> $DIR/lint-uncertified.rs:124:5
+  --> $DIR/lint-uncertified.rs:127:5
    |
 LL |     fn inherent_fn(&self) {}
    |        ----------- `Unvalidated::inherent_fn` is unvalidated
@@ -135,7 +135,7 @@ LL |     Unvalidated.inherent_fn();
    |     ^^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function calls an unvalidated associated function
-  --> $DIR/lint-uncertified.rs:127:4
+  --> $DIR/lint-uncertified.rs:130:4
    |
 LL |     fn generic_inherent_fn<T>(x: T) {}
    |        ------------------- `Unvalidated::generic_inherent_fn::<usize>` is unvalidated
@@ -144,7 +144,7 @@ LL |    Unvalidated::generic_inherent_fn::<usize>(1);
    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function uses an unvalidated constant
-  --> $DIR/lint-uncertified.rs:132:5
+  --> $DIR/lint-uncertified.rs:135:5
    |
 LL | const UNCERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |       ------------------------- `UNCERTIFIED_CLOSURE_CONST` is unvalidated
@@ -156,7 +156,7 @@ LL |     UNCERTIFIED_CLOSURE_CONST();
    = note: the Ferrocene compiler does not know if the `fn()` was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated static
-  --> $DIR/lint-uncertified.rs:133:5
+  --> $DIR/lint-uncertified.rs:136:5
    |
 LL | static UNCERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |        -------------------------- `UNCERTIFIED_CLOSURE_STATIC` is unvalidated
@@ -168,7 +168,7 @@ LL |     UNCERTIFIED_CLOSURE_STATIC();
    = note: the Ferrocene compiler does not know if the `fn()` was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated constant
-  --> $DIR/lint-uncertified.rs:134:5
+  --> $DIR/lint-uncertified.rs:137:5
    |
 LL | const UNCERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |       --------------------- `UNCERTIFIED_DYN_CONST` is unvalidated
@@ -180,7 +180,7 @@ LL |     UNCERTIFIED_DYN_CONST.partial_cmp(&Unvalidated);
    = note: the Ferrocene compiler does not know if the `dyn PartialOrd<Unvalidated> + Sync` was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated static
-  --> $DIR/lint-uncertified.rs:135:5
+  --> $DIR/lint-uncertified.rs:138:5
    |
 LL | static UNCERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |        ---------------------- `UNCERTIFIED_DYN_STATIC` is unvalidated

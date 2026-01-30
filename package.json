@@ -7,8 +7,5 @@
     "es-check": "^9.4.4",
     "eslint": "^8.57.1",
     "typescript": "^5.8.3"
-  },
-  "devDependencies": {
-    "@cyclonedx/yarn-plugin-cyclonedx": "^3.2.1"
   }
 }

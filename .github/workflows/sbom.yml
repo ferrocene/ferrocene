@@ -17,22 +17,13 @@ jobs:
       - name: Setup submodules and uv
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: 'true'
+          llvm-subset: 'false'
           build-dependencies: 'false'
           setup-uv: 'true'
 
-      - name: Prepare yarn
-        run: |
-          # apt install yarnpkg
-          yarnpkg set version 4.12.0
-          yarnpkg install
-          cat yarn.lock
-
-      - name: Temp tools
-        run: |
-          cargo install cargo-sbom
-          curl -LsSf https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.29.2/cyclonedx-linux-x64 -o ~/.cargo/bin/cyclonedx
-
+      - name: Install syft
+        run: curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin v1.41.1
+          
       - name: Generate SBOMs
         run: ./x.py dist ferrocene-sbom
 
@@ -40,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Generated-SBOMs
-          path: build/ferrocene-sboms/*
+          path: build/ferrocene-sbom/*

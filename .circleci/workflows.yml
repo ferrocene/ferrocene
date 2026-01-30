@@ -120,7 +120,7 @@ jobs:
     resource_class: medium
     steps:
       - ferrocene-checkout:
-          llvm-subset: true
+          llvm-subset: false
       - ferrocene-sbom
 
   # x86_64-unknown-linux-gnu jobs
@@ -1632,12 +1632,8 @@ commands:
           command: aws sts get-caller-identity
 
   ferrocene-sbom:
-    description: Generate SBOMs of the repository
+    description: Generate the Ferrocene SBOM of the repository
     steps:
-      - run:
-          name: Prepare yarn
-          command: |
-            yarnpkg install
       - run:
           name: Generate SBOMs
           command: ./x.py dist ferrocene-sbom
@@ -1666,6 +1662,3 @@ executors:
   linux-vm:
     machine:
       image: default
-  docker-cyclonedx:
-    docker:
-      - image: cyclonedx/cyclonedx-cli:latest

@@ -673,3 +673,15 @@ fn test_nth_back_for_range_inclusive() {
 fn test_double_ended_default_nth_back() {
     assert_eq!(None, IterWrapper(0..0).nth_back(10));
 }
+
+// covers `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::count`.
+#[test]
+fn test_chain_count_zero() {
+    let mut iter = (0..2).chain(10..12);
+
+    // ensure both fields a and b of Chain are None
+    iter.nth(100);
+    iter.nth_back(100);
+
+    assert_eq!(0, iter.count());
+}

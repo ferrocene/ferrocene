@@ -1650,8 +1650,8 @@ commands:
     description: Generate the Ferrocene SBOM of the repository
     steps:
       - run:
-          name: Generate SBOMs
-          command: ./x.py dist ferrocene-sbom
+          name: Generate SBOM
+          command: FERROCENE_UNPRIVILEGED_CI=1 FERROCENE_HOST=x86_64-unknown-linux-gnu SCRIPT="./x.py dist ferrocene-sbom" ferrocene/ci/run.sh
 
 executors:
   docker-x86_64-ubuntu-20:

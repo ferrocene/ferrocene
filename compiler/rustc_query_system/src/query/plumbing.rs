@@ -82,7 +82,7 @@ where
     pub fn collect_active_jobs<Qcx: Copy>(
         &self,
         qcx: Qcx,
-        make_query: fn(Qcx, K) -> QueryStackFrame<QueryStackDeferred<'tcx>>,
+        make_frame: fn(Qcx, K) -> QueryStackFrame<QueryStackDeferred<'tcx>>,
         jobs: &mut QueryMap<'tcx>,
         require_complete: bool,
     ) -> Option<()> {
@@ -108,11 +108,11 @@ where
             }
         }
 
-        // Call `make_query` while we're not holding a `self.active` lock as `make_query` may call
+        // Call `make_frame` while we're not holding a `self.active` lock as `make_frame` may call
         // queries leading to a deadlock.
         for (key, job) in active {
-            let query = make_query(qcx, key);
-            jobs.insert(job.id, QueryJobInfo { query, job });
+            let frame = make_frame(qcx, key);
+            jobs.insert(job.id, QueryJobInfo { frame, job });
         }
 
         Some(())
@@ -170,7 +170,7 @@ where
         }
         CycleErrorHandling::Stash => {
             let guar = if let Some(root) = cycle_error.cycle.first()
-                && let Some(span) = root.query.info.span
+                && let Some(span) = root.frame.info.span
             {
                 error.stash(span, StashKey::Cycle).unwrap()
             } else {

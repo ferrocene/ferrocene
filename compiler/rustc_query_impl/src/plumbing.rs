@@ -167,7 +167,7 @@ impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
 
         self.tcx.sess.dcx().emit_fatal(QueryOverflow {
             span: info.job.span,
-            note: QueryOverflowNote { desc: info.query.info.extract().description, depth },
+            note: QueryOverflowNote { desc: info.frame.info.extract().description, depth },
             suggested_limit,
             crate_name: self.tcx.crate_name(LOCAL_CRATE),
         });
@@ -728,14 +728,14 @@ macro_rules! define_queries {
                 qmap: &mut QueryMap<'tcx>,
                 require_complete: bool,
             ) -> Option<()> {
-                let make_query = |tcx, key| {
+                let make_frame = |tcx, key| {
                     let kind = rustc_middle::dep_graph::dep_kinds::$name;
                     let name = stringify!($name);
                     $crate::plumbing::create_query_frame(tcx, rustc_middle::query::descs::$name, key, kind, name)
                 };
                 let res = tcx.query_system.states.$name.collect_active_jobs(
                     tcx,
-                    make_query,
+                    make_frame,
                     qmap,
                     require_complete,
                 );

@@ -22,6 +22,15 @@ pub enum ValidatedStatus {
     Unvalidated,
 }
 
+impl ValidatedStatus {
+    pub fn validated(self) -> bool {
+        match self {
+            ValidatedStatus::Validated { .. } => true,
+            ValidatedStatus::Unvalidated => false,
+        }
+    }
+}
+
 /// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.
 pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // A closure is validated if the function it's defined in is validated.

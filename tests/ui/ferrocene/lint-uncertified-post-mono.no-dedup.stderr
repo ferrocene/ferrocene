@@ -1,5 +1,5 @@
 error: validated function calls an unvalidated method
-  --> $DIR/lint-uncertified-post-mono.rs:49:5
+  --> $DIR/lint-uncertified-post-mono.rs:48:5
    |
 LL |     fn clone(&self) -> Self { Unvalidated }
    |        ----- `<Unvalidated as Clone>::clone` is unvalidated
@@ -8,7 +8,7 @@ LL |     x.clone();
    |     ^^^^^^^^^
    |
 note: `instantiation_reachable` is validated
-  --> $DIR/lint-uncertified-post-mono.rs:70:8
+  --> $DIR/lint-uncertified-post-mono.rs:69:8
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -23,7 +23,7 @@ LL | #![deny(ferrocene::uncertified)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function calls an unvalidated associated function
-  --> $DIR/lint-uncertified-post-mono.rs:51:17
+  --> $DIR/lint-uncertified-post-mono.rs:50:17
    |
 LL |     fn default() -> Self { Unvalidated }
    |        ------- `<Unvalidated as Default>::default` is unvalidated
@@ -32,13 +32,13 @@ LL |     let mut y = fn_type();
    |                 ^^^^^^^^^
    |
 note: generic function `uninstantiated_generic` instantiated by `instantiation_reachable`, which is called from a validated entrypoint
-  --> $DIR/lint-uncertified-post-mono.rs:71:5
+  --> $DIR/lint-uncertified-post-mono.rs:70:5
    |
 LL |     uninstantiated_generic(Unvalidated);
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function possibly calls an unvalidated method
-  --> $DIR/lint-uncertified-post-mono.rs:53:34
+  --> $DIR/lint-uncertified-post-mono.rs:52:34
    |
 LL |     fn clone_from(&mut self, other: &Self) {
    |        ---------- `<Unvalidated as Clone>::clone_from` is unvalidated
@@ -59,7 +59,7 @@ LL |         *self = other.clone();
    |                 ^^^^^^^^^^^^^
    |
 note: generic method `std::clone::Clone::clone_from` instantiated by `uninstantiated_generic::<Unvalidated>`, which is called from a validated entrypoint
-  --> $DIR/lint-uncertified-post-mono.rs:53:34
+  --> $DIR/lint-uncertified-post-mono.rs:52:34
    |
 LL |     let fn_ptr: fn(&mut T, &T) = T::clone_from;
    |                                  ^^^^^^^^^^^^^

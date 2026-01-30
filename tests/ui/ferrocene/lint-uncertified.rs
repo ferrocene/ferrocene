@@ -124,7 +124,7 @@ fn certified() {
     Unvalidated.inherent_fn(); //~ ERROR unvalidated
     Unvalidated.clone();
     //[no-dedup]~^ ERROR unvalidated
-   Unvalidated::generic_inherent_fn::<usize>(); //~ ERROR unvalidated
+   Unvalidated::generic_inherent_fn::<usize>(1); //~ ERROR unvalidated
 
     marked_certified(); // ok
 

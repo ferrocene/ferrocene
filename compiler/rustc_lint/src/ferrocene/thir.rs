@@ -171,32 +171,15 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let tcx = self.linter.tcx;
 
         let source_ty = self.thir[source].ty;
-        // this doesn't actually do what we want:
-        // if there's multiple generic parameters it ignores all but the last.
-        // let (coerce_src, _coerce_dst) =
-        //     tcx.struct_lockstep_tails_for_codegen(source_ty, dest.ty, self.typing_env());
-
-        // FIXME: this is *not* correct for types other than references
-        // see https://doc.rust-lang.org/std/ops/trait.CoerceUnsized.html for a full list of types
-        // we need to handle here.
-        // let coerce_src = source_ty.peel_refs();
-        let (coerce_src, coerce_dst) = self.peel_unsized_tys(source_ty, dest.ty, dest.span);
+        let (coerce_src, coerce_dst) = self.peel_unsized_tys(source_ty, dest.ty, dest.span)?;
         debug!(
             "saw unsized coercion from {source_ty:?} -> {:?} (peeled: {coerce_src:?} -> {coerce_dst:?})",
             dest.ty
         );
 
-        if coerce_src.is_array() && coerce_dst.is_slice() {
-            // There's only ever one unsizing coercion at once.
-            // Even if this is a `[dyn Trait; N]`, we would have checked it earlier.
-            // Return now so we don't crash trying to prove that the array implements `Trait`.
-            return None;
-        }
-
         if matches!(coerce_src.kind(), ty::Dynamic(..)) {
             // upcasting from a `dyn Trait` to a `dyn SuperTrait`.
             // We already checked this when we originally cast to `dyn Trait`.
-            // TODO: I think we forget to check supertraits currently?
             return None;
         }
 
@@ -221,11 +204,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // not possible to call any functions on this trait object, casting is always ok.
                 continue;
             };
-            let (impl_block, generics) = match self.find_trait_impl(trait_ref, dest.span) {
-                Some(impl_) => impl_,
-                // If we couldn't resolve the impl, we have to assume it's not validated.
-                None => return Some(UseKind::TraitObjectCast(*first_method, coerce_src)),
-            };
+            let (impl_block, generics) = self.find_trait_impl(trait_ref, dest.span);
             if let Some(unvalidated) =
                 self.find_unvalidated_impl_fn(impl_block, generics, dest.span)
             {
@@ -236,28 +215,27 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     }
 
     /// Given an `Unsize` coersion from `src_ty` to `dst_ty`, return the innermost "difference"
-    /// between the two.
+    /// between the two. Returns `None` if this isn't a cast to a trait object.
     ///
     /// This is quite similar to `struct_lockstep_tails_for_codegen`, except it considers all ZSTs,
     /// not just those at the tail.
     ///
     /// c.f. [Zulip](https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962)
     ///
-    /// This code is mostly copied from `hax::exporter::types::ty::PointerCoercion::sfrom`.
+    /// See [`CoerceUnsized`](https://doc.rust-lang.org/std/ops/trait.CoerceUnsized.html) for a full
+    /// list of types we need to handle here.
     fn peel_unsized_tys(
         &self,
         src_ty: Ty<'tcx>,
         dst_ty: Ty<'tcx>,
         span: Span,
-    ) -> (Ty<'tcx>, Ty<'tcx>) {
+    ) -> Option<(Ty<'tcx>, Ty<'tcx>)> {
         let tcx = self.linter.tcx;
         let typing_env = self.typing_env();
 
         debug!("unsize_ptr: {:?} => {:?}", src_ty, dst_ty);
 
         let (mut src_inner, mut dst_inner) = (src_ty, dst_ty);
-
-        (src_inner, dst_inner) = self.peel_derefs(src_inner, dst_inner, span);
 
         let get_adt_field = |adt_def: AdtDef<'_>, args, idx: FieldIdx| {
             let variant = adt_def.variant(VariantIdx::ZERO);
@@ -268,51 +246,48 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         loop {
             debug!("check adts: src={src_inner:?}, dst={dst_inner:?}");
             match (src_inner.kind(), dst_inner.kind()) {
-                (_, ty::Dynamic(..)) => break,
+                (_, ty::Dynamic(..)) => return Some((src_inner, dst_inner)),
+                // There's only ever one unsizing coercion at once.
+                // Even if this is a `[dyn Trait; N]`, we would have checked it earlier.
+                // Return now so we don't crash trying to prove that the array implements `Trait`.
+                (ty::Array(..), ty::Slice(..)) => return None,
+
+                (ty::Ref(_, a, _), ty::Ref(_, b, _)) | (ty::RawPtr(a, _), ty::RawPtr(b, _)) => {
+                    src_inner = *a;
+                    dst_inner = *b;
+                }
+
                 (ty::Adt(src_def, src_args), ty::Adt(dst_def, dst_args)) => {
                     assert_eq!(src_def.did(), dst_def.did());
 
-                    // let field = match tcx.coerce_unsized_info(src_def.did()) {
+                    if let Some(boxed) = src_inner.boxed_ty() {
+                        src_inner = boxed;
+                        dst_inner = dst_inner.boxed_ty().unwrap();
+                        continue;
+                    }
+
                     let field = match self.custom_coerce_unsize_info(src_inner, dst_inner, span) {
                         Some(CustomCoerceUnsized::Struct(idx)) => idx,
                         None => {
-                            // TODO: this is possibly buggy !!
-                            // need to check if this is an unsizing cast from array to
-                            // slice.
-                            // see tests/ui/unsized/unchanged-param.rs for an example of a test
-                            // that breaks these assertions.
-                            // assert!(src_inner.is_array() && dst_inner.is_slice());
-                            // assert!(dyn_trait_refs(dst_inner).is_empty());
-                            break;
-                        } // Ok(CoerceUnsizedInfo { custom_kind: Some(CustomCoerceUnsized::Struct(idx)) }) => idx,
-                          // other => span_bug!(span, "don't know how to coerce unsized {src_def:?}: {other:?}"),
+                            // Iterate this struct looking for a `!Sized` field.
+                            let mut unsized_field = None;
+                            for (idx, def) in dst_def.variant(VariantIdx::ZERO).fields.iter_enumerated() {
+                                if !def.ty(tcx, dst_args).is_sized(tcx, typing_env) {
+                                    unsized_field = Some(idx);
+                                    break;
+                                }
+                            }
+                            unsized_field.unwrap_or_else(|| {
+                                span_bug!(span, "Adt with no CoerceUnsized impl and no !Sized field? {dst_inner:?}");
+                            })
+                        }
                     };
                     src_inner = get_adt_field(*src_def, src_args, field);
                     dst_inner = get_adt_field(*dst_def, dst_args, field);
                 }
-                // (ty::Adt(..), _) | (_, ty::Adt(..)) => span_bug!(span, "mismatched types for {src_inner:?} and {dst_inner:?}"),
-                _ => break,
+                _ => span_bug!(span, "mismatched types trying to coerce from {src_inner:?} to {dst_inner:?}"),
             }
         }
-
-        // (src_inner, dst_inner)
-
-        // loop {
-        //     debug!("check derefs: src={src_inner:?}, dst={dst_inner:?}");
-        //     match (src_inner.builtin_deref(true), dst_inner.builtin_deref(true)) {
-        //         (Some(a), Some(b)) => {
-        //             src_inner = a;
-        //             dst_inner = b;
-        //         }
-        //         (None, None) => break,
-        //         _ => span_bug!(span, "don't know how to peel tys for unsizing cast from {src_ty:?} => {dst_ty:?}"),
-        //     }
-        // };
-
-        // One last time for raw pointer casts.
-        self.peel_derefs(src_inner, dst_inner, span)
-
-        // tcx.struct_lockstep_tails_for_codegen(src_inner, dst_inner, self.typing_env())
     }
 
     // copied from rustc_monomorphize
@@ -336,90 +311,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 Some(tcx.coerce_unsized_info(impl_def_id).unwrap().custom_kind.unwrap())
             }
             _ => None,
-            // impl_source => {
-            //     span_bug!(span,
-            //         "invalid `CoerceUnsized` from {source_ty} to {target_ty}: impl_source: {:?}",
-            //         impl_source
-            //     );
-            // }
         }
     }
-
-    fn peel_derefs(
-        &self,
-        mut src: Ty<'tcx>,
-        mut dst: Ty<'tcx>,
-        span: Span,
-    ) -> (Ty<'tcx>, Ty<'tcx>) {
-        let autoderef = Autoderef::new();
-
-        loop {
-            if matches!(dst.kind(), ty::Dynamic(..)) {
-                return (src, dst);
-            }
-
-            debug!("check derefs: src={src:?}, dst={dst:?}");
-            // TODO: doesn't handle `impl Deref` in user code
-            match (src.builtin_deref(true), dst.builtin_deref(true)) {
-                (Some(a), Some(b)) => {
-                    src = a;
-                    dst = b;
-                }
-                (None, None) => return (src, dst),
-                _ => span_bug!(
-                    span,
-                    "don't know how to peel tys for unsizing cast from {src:?} => {dst:?}"
-                ),
-            }
-        }
-    }
-
-    // fn peel_unsized_tys(
-    //     &self,
-    //     src_ty: Ty<'tcx>,
-    //     dst_ty: Ty<'tcx>,
-    //     span: Span,
-    // ) -> (Ty<'tcx>, Ty<'tcx>) {
-    //     let tcx = self.linter.tcx;
-    //
-    //     debug!("unsize_ptr: {:?} => {:?}", src_ty, dst_ty);
-    //     match (src_ty.kind(), dst_ty.kind()) {
-    //         (&ty::Pat(a, _), &ty::Pat(b, _)) => self.peel_unsized_tys(a, b, span),
-    //         (&ty::Ref(_, a, _), &ty::Ref(_, b, _) | &ty::RawPtr(b, _))
-    //             | (&ty::RawPtr(a, _), &ty::RawPtr(b, _)) => {
-    //                 (a, b)
-    //             }
-    //         (&ty::Adt(def_a, _), &ty::Adt(def_b, _)) => {
-    //             let mismatched_fields = ;
-    //             // assert_eq!(def_a, def_b); // implies same number of fields
-    //             // let src_layout = tcx.layout_of(src_ty);
-    //             // let dst_layout = tcx.layout_of(dst_ty);
-    //             // if src_ty == dst_ty {
-    //             //     span_bug!(span, "unreachable: cast from source to dest are the same type? {src_ty:?}");
-    //             //     // return (src, old_info.unwrap());
-    //             // }
-    //             // let mut result = None;
-    //             // for i in 0..src_layout.fields.count() {
-    //             //     let src_f = src_layout.field(tcx, i);
-    //             //     if src_f.is_1zst() {
-    //             //         // We are looking for the one non-1-ZST field; this is not it.
-    //             //         continue;
-    //             //     }
-    //             //
-    //             //     assert_eq!(src_layout.fields.offset(i).bytes(), 0);
-    //             //     assert_eq!(dst_layout.fields.offset(i).bytes(), 0);
-    //             //     assert_eq!(src_layout.size, src_f.size);
-    //             //
-    //             //     let dst_f = dst_layout.field(tcx, i);
-    //             //     assert_ne!(src_f.ty, dst_f.ty);
-    //             //     assert_eq!(result, None);
-    //             //     result = Some((src_f.ty, dst_f.ty));
-    //             // }
-    //             // result.unwrap()
-    //         }
-    //         _ => span_bug!(span, "peel_unsized_tys: called on bad types"),
-    //     }
-    // }
 
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
@@ -455,6 +348,17 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         return None;
     }
 
+    fn find_trait_impl(
+        &self,
+        trait_ref: PolyTraitRef<'tcx>,
+        span: Span,
+    ) -> (DefId, GenericArgsRef<'tcx>) {
+        match self.try_find_trait_impl(trait_ref, span) {
+            Some(found) => found,
+            None => span_bug!(span, "failed to resolve impl: {trait_ref:?}"),
+        }
+    }
+
     /// Given a `Trait<Ty>` reference, find `impl Trait for Ty`.
     ///
     /// This calls into the [trait solver] to select a suitable impl block.
@@ -465,7 +369,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     /// only degrade the diagnostic, they don't cause soundness issues.
     ///
     /// [trait solver]: https://rustc-dev-guide.rust-lang.org/traits/resolution.html
-    fn find_trait_impl(
+    fn try_find_trait_impl(
         &self,
         trait_ref: PolyTraitRef<'tcx>,
         span: Span,
@@ -487,11 +391,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let selection = match selcx.select(&obligation) {
             Ok(selection) => selection?,
             Err(e) => {
-                // this can happen if our `peel_refs` above was buggy. these errors are only for better
-                // diagnostics, so just ignore the bug for now. we're going to lint later anyway.
-                info!("type checking failed for trait upcast? {e:?}");
-                // TODO: buggy!! matters for casts to `dyn Fn`
-                // tcx.dcx().span_delayed_bug(span, format!("type checking failed for trait upcast? {e:?}"));
+                debug!("type checking failed for trait upcast? {e:?}");
                 return None;
             }
         };
@@ -505,10 +405,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         });
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
         if !errors.is_empty() {
-            // ditto as for our selection failure
-            info!("impl obligations not met for trait upcast? {errors:?}");
-            // TODO: buggy!! matters for casts to `dyn Fn`
-            // tcx.dcx().span_delayed_bug(span, format!("impl obligations not met for trait upcast? {errors:?}"));
+            debug!("impl obligations not met for trait upcast: {errors:?}");
             return None;
         }
 

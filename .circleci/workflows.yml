@@ -1265,8 +1265,7 @@ workflows:
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
 
-      - sbom-geneneration:
-        job: sbom-gen
+      - sbom-gen:
         requires:
           - build-docker--ubuntu-20--x86_64
           - build-docker--ubuntu-24--x86_64

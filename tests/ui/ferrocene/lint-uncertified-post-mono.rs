@@ -43,7 +43,6 @@ impl Default for Validated {
 }
 
 // has to be checked post-mono
-// TODO: test this across a crate boundary
 #[ferrocene::prevalidated]
 fn uninstantiated_generic<T: Clone + Default>(x: T) {
     x.clone(); //~ ERROR calls an unvalidated

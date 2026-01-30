@@ -21,14 +21,15 @@ jobs:
           build-dependencies: 'false'
           setup-uv: 'true'
 
-      - name: Ferrocene-dist bootstrap
-        run: ./x.py setup ferrocene-dist
-
       - name: Install syft
         run: curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin v1.41.1
-          
+
       - name: Generate SBOMs
-        run: ./x.py dist ferrocene-sbom
+        run: ferrocene/ci/run.sh
+        env:
+          FERROCENE_UNPRIVILEGED_CI: 1
+          FERROCENE_HOST: x86_64-unknown-linux-gnu
+          SCRIPT: ./x.py dist ferrocene-sbom
 
       - name: Upload generated SBOMs
         uses: actions/upload-artifact@v4

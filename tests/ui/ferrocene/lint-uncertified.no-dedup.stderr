@@ -92,6 +92,18 @@ LL | #[ferrocene::prevalidated]
 LL | fn certified() {
    |    ^^^^^^^^^
 
+error: validated function possibly calls an unvalidated function
+  --> $DIR/lint-uncertified.rs:103:24
+   |
+LL | fn normal_def() {
+   |    ---------- `normal_def` is unvalidated
+...
+LL |     let fn_ptr: fn() = normal_def;
+   |                        ^^^^^^^^^^
+   |
+   = note: once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call the function
+
 error: validated function calls an unvalidated method
   --> $DIR/lint-uncertified.rs:107:5
    |
@@ -100,6 +112,18 @@ LL | #[derive(Clone)]
 ...
 LL |     trait_fn_type(&Unvalidated);
    |     ^^^^^^^^^^^^^
+
+error: validated function possibly calls an unvalidated method
+  --> $DIR/lint-uncertified.rs:108:57
+   |
+LL | #[derive(Clone)]
+   |          ----- `<Unvalidated as Clone>::clone` is unvalidated
+...
+LL |     let trait_fn_ptr: fn(&Unvalidated) -> Unvalidated = trait_fn_type;
+   |                                                         ^^^^^^^^^^^^^
+   |
+   = note: once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call the function
 
 error: validated function possibly calls an unvalidated method
   --> $DIR/lint-uncertified.rs:111:51
@@ -223,5 +247,5 @@ LL | fn normal_def() {
 LL |     rename();
    |     ^^^^^^
 
-error: aborting due to 17 previous errors
+error: aborting due to 19 previous errors
 

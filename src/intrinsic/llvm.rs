@@ -585,7 +585,7 @@ pub fn adjust_intrinsic_arguments<'a, 'b, 'gcc, 'tcx>(
             "__builtin_ia32_encodekey128_u32" => {
                 let mut new_args = args.to_vec();
                 let m128i = builder.context.new_vector_type(builder.i64_type, 2);
-                let array_type = builder.context.new_array_type(None, m128i, 6);
+                let array_type = builder.context.new_array_type_u64(None, m128i, 6);
                 let result = builder.current_func().new_local(None, array_type, "result");
                 new_args.push(result.get_address(None));
                 args = new_args.into();
@@ -593,7 +593,7 @@ pub fn adjust_intrinsic_arguments<'a, 'b, 'gcc, 'tcx>(
             "__builtin_ia32_encodekey256_u32" => {
                 let mut new_args = args.to_vec();
                 let m128i = builder.context.new_vector_type(builder.i64_type, 2);
-                let array_type = builder.context.new_array_type(None, m128i, 7);
+                let array_type = builder.context.new_array_type_u64(None, m128i, 7);
                 let result = builder.current_func().new_local(None, array_type, "result");
                 new_args.push(result.get_address(None));
                 args = new_args.into();
@@ -620,7 +620,7 @@ pub fn adjust_intrinsic_arguments<'a, 'b, 'gcc, 'tcx>(
                 let first_value = old_args.swap_remove(0);
 
                 let element_type = first_value.get_type();
-                let array_type = builder.context.new_array_type(None, element_type, 8);
+                let array_type = builder.context.new_array_type_u64(None, element_type, 8);
                 let result = builder.current_func().new_local(None, array_type, "result");
                 new_args.push(result.get_address(None));
 
@@ -869,7 +869,7 @@ pub fn adjust_intrinsic_return_value<'a, 'gcc, 'tcx>(
             builder.llbb().add_assignment(None, field1, return_value);
             let field2 = result.access_field(None, field2);
             let field2_type = field2.to_rvalue().get_type();
-            let array_type = builder.context.new_array_type(None, field2_type, 6);
+            let array_type = builder.context.new_array_type_u64(None, field2_type, 6);
             let ptr = builder.context.new_cast(None, args[2], array_type.make_pointer());
             let field2_ptr =
                 builder.context.new_cast(None, field2.get_address(None), array_type.make_pointer());
@@ -891,7 +891,7 @@ pub fn adjust_intrinsic_return_value<'a, 'gcc, 'tcx>(
             builder.llbb().add_assignment(None, field1, return_value);
             let field2 = result.access_field(None, field2);
             let field2_type = field2.to_rvalue().get_type();
-            let array_type = builder.context.new_array_type(None, field2_type, 7);
+            let array_type = builder.context.new_array_type_u64(None, field2_type, 7);
             let ptr = builder.context.new_cast(None, args[3], array_type.make_pointer());
             let field2_ptr =
                 builder.context.new_cast(None, field2.get_address(None), array_type.make_pointer());
@@ -937,7 +937,7 @@ pub fn adjust_intrinsic_return_value<'a, 'gcc, 'tcx>(
             builder.llbb().add_assignment(None, field1, return_value);
             let field2 = result.access_field(None, field2);
             let field2_type = field2.to_rvalue().get_type();
-            let array_type = builder.context.new_array_type(None, field2_type, 8);
+            let array_type = builder.context.new_array_type_u64(None, field2_type, 8);
             let ptr = builder.context.new_cast(None, args[0], array_type.make_pointer());
             let field2_ptr =
                 builder.context.new_cast(None, field2.get_address(None), array_type.make_pointer());

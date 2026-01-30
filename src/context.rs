@@ -201,8 +201,8 @@ impl<'gcc, 'tcx> CodegenCx<'gcc, 'tcx> {
 
             // TODO(antoyo): re-enable the alignment when libgccjit fixed the issue in
             // gcc_jit_context_new_array_constructor (it should not use reinterpret_cast).
-            let i128_type = context.new_array_type(None, i64_type, 2)/*.get_aligned(i128_align)*/;
-            let u128_type = context.new_array_type(None, u64_type, 2)/*.get_aligned(u128_align)*/;
+            let i128_type = context.new_array_type_u64(None, i64_type, 2)/*.get_aligned(i128_align)*/;
+            let u128_type = context.new_array_type_u64(None, u64_type, 2)/*.get_aligned(u128_align)*/;
             (i128_type, u128_type)
         };
 

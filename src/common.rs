@@ -55,7 +55,7 @@ pub fn bytes_in_context<'gcc, 'tcx>(cx: &CodegenCx<'gcc, 'tcx>, bytes: &[u8]) ->
         0 => {
             let context = &cx.context;
             let byte_type = context.new_type::<u64>();
-            let typ = context.new_array_type(None, byte_type, bytes.len() as u64 / 8);
+            let typ = context.new_array_type_u64(None, byte_type, bytes.len() as u64 / 8);
             let elements: Vec<_> = bytes
                 .chunks_exact(8)
                 .map(|arr| {
@@ -76,7 +76,7 @@ pub fn bytes_in_context<'gcc, 'tcx>(cx: &CodegenCx<'gcc, 'tcx>, bytes: &[u8]) ->
         4 => {
             let context = &cx.context;
             let byte_type = context.new_type::<u32>();
-            let typ = context.new_array_type(None, byte_type, bytes.len() as u64 / 4);
+            let typ = context.new_array_type_u64(None, byte_type, bytes.len() as u64 / 4);
             let elements: Vec<_> = bytes
                 .chunks_exact(4)
                 .map(|arr| {
@@ -95,7 +95,7 @@ pub fn bytes_in_context<'gcc, 'tcx>(cx: &CodegenCx<'gcc, 'tcx>, bytes: &[u8]) ->
         _ => {
             let context = cx.context;
             let byte_type = context.new_type::<u8>();
-            let typ = context.new_array_type(None, byte_type, bytes.len() as u64);
+            let typ = context.new_array_type_u64(None, byte_type, bytes.len() as u64);
             let elements: Vec<_> = bytes
                 .iter()
                 .map(|&byte| context.new_rvalue_from_int(byte_type, byte as i32))

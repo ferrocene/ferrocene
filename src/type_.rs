@@ -311,7 +311,7 @@ impl<'gcc, 'tcx> BaseTypeCodegenMethods for CodegenCx<'gcc, 'tcx> {
             len = 0;
         }
 
-        self.context.new_array_type(None, ty, len)
+        self.context.new_array_type_u64(None, ty, len)
     }
 }
 

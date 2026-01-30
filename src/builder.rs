@@ -1503,7 +1503,7 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         let element_type = vector_type.get_element_type();
         let vec_num_units = vector_type.get_num_units();
         let array_type =
-            self.context.new_array_type(self.location, element_type, vec_num_units as u64);
+            self.context.new_array_type_u64(self.location, element_type, vec_num_units as u64);
         let array = self.context.new_bitcast(self.location, vec, array_type).to_rvalue();
         self.context.new_array_access(self.location, array, idx).to_rvalue()
     }

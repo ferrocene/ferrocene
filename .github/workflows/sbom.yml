@@ -17,7 +17,7 @@ jobs:
       - name: Setup submodules and uv
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: 'true'
+          llvm-subset: 'false'
           build-dependencies: 'false'
           setup-uv: 'true'
 

@@ -685,3 +685,11 @@ fn test_chain_count_zero() {
 
     assert_eq!(0, iter.count());
 }
+
+// covers `<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::size_hint`.
+#[test]
+fn test_take_while_size_hint_zero() {
+    let mut iter = (0..2).take_while(|_| false);
+    while iter.next().is_some() {}
+    assert_eq!((0, Some(0)), iter.size_hint());
+}

@@ -20,14 +20,12 @@ use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is
 use rustc_middle::span_bug;
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
-use rustc_middle::ty::adjustment::{CoerceUnsizedInfo, CustomCoerceUnsized, PointerCoercion};
+use rustc_middle::ty::adjustment::{CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::{
-    self, AdtDef, AdtDefData, Binder, ExistentialPredicate, ExistentialTraitRef, FieldDef,
-    GenericArgs, GenericArgsRef, Instance, InstanceKind, PolyTraitRef, Ty, TyCtxt,
-    TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv,
+    self, AdtDef, Binder, ExistentialPredicate, GenericArgs, GenericArgsRef, Instance, PolyTraitRef, TraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv
 };
 use rustc_span::Span;
-use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext};
+use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
 use tracing::{debug, info};
 
 use crate::ferrocene::{InstantiateResult, LintState, Use, UseKind};
@@ -202,12 +200,12 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             return None;
         }
 
-        let bound_traits = dyn_trait_refs(coerce_dst);
-        for trait_ in bound_traits {
+        let bound_traits = dyn_trait_refs(tcx, coerce_src, coerce_dst);
+        for trait_ref in bound_traits {
             // First, check if we are casting to a `dyn Fn*` trait.
             // If so, this is disallowed no matter what, for the same reason as casting
             // to a function pointer.
-            if tcx.fn_trait_kind_from_def_id(trait_.def_id()).is_some() {
+            if tcx.fn_trait_kind_from_def_id(trait_ref.def_id()).is_some() {
                 if let Some(use_) = self.check_fn_ptr_coercion(coerce_src, dest.span) {
                     return Some(use_);
                 } else {
@@ -216,14 +214,13 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             }
 
             let Some(first_method) = tcx
-                .associated_item_def_ids(trait_.def_id())
+                .associated_item_def_ids(trait_ref.def_id())
                 .iter()
                 .find(|&id| tcx.def_kind(id).is_fn_like())
             else {
                 // not possible to call any functions on this trait object, casting is always ok.
                 continue;
             };
-            let trait_ref = trait_.with_self_ty(tcx, coerce_src);
             let (impl_block, generics) = match self.find_trait_impl(trait_ref, dest.span) {
                 Some(impl_) => impl_,
                 // If we couldn't resolve the impl, we have to assume it's not validated.
@@ -244,7 +241,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     /// This is quite similar to `struct_lockstep_tails_for_codegen`, except it considers all ZSTs,
     /// not just those at the tail.
     ///
-    /// c.f. https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962
+    /// c.f. [Zulip](https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962)
     ///
     /// This code is mostly copied from `hax::exporter::types::ty::PointerCoercion::sfrom`.
     fn peel_unsized_tys(
@@ -282,6 +279,9 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                             // TODO: this is possibly buggy !!
                             // need to check if this is an unsizing cast from array to
                             // slice.
+                            // see tests/ui/unsized/unchanged-param.rs for an example of a test
+                            // that breaks these assertions.
+                            // assert!(src_inner.is_array() && dst_inner.is_slice());
                             // assert!(dyn_trait_refs(dst_inner).is_empty());
                             break;
                         } // Ok(CoerceUnsizedInfo { custom_kind: Some(CustomCoerceUnsized::Struct(idx)) }) => idx,
@@ -351,6 +351,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         mut dst: Ty<'tcx>,
         span: Span,
     ) -> (Ty<'tcx>, Ty<'tcx>) {
+        let autoderef = Autoderef::new();
+
         loop {
             if matches!(dst.kind(), ty::Dynamic(..)) {
                 return (src, dst);
@@ -526,7 +528,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     ///
     /// Panics if given a type that isn't callable.
     fn instance_of_ty(&self, ty: Ty<'tcx>, span: Span) -> Option<Instance<'tcx>> {
-        let tcx = self.linter.tcx;
+        // let tcx = self.linter.tcx;
 
         match ty.kind() {
             ty::FnDef(maybe_trait_fn, generic_args) => {
@@ -545,7 +547,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             //     ))
             // }
             // Manual impl of FnOnce.
-            ty::Adt(adt_def, args) => {
+            ty::Adt(..) => {
                 None // TODO: currently not supported
             }
             // Reference to a function or function pointer.
@@ -599,7 +601,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
         // Skip trait functions. These happen when we're calling the vtable of a `dyn` unsized
         // object. This case is caught below in `PointerCoercion::Unsize`.
-        if matches!(callee.def, InstanceKind::Virtual(..)) {
+        if matches!(callee.def, ty::InstanceKind::Virtual(..)) {
             info!("skipping dyn assoc item {callee:?}");
             return None;
         }
@@ -648,11 +650,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 /// Given a Rust type, find (at any level of nesting) `dyn Trait` objects contained within it that
 /// have at least one method.
 /// For example, `dyn Send + Sync + Display + Clone` would return `[Display, Clone]`.
-fn dyn_trait_refs<'tcx>(ty: Ty<'tcx>) -> Vec<Binder<'tcx, ExistentialTraitRef<'tcx>>> {
-    struct FindDynTraitVisitor;
+fn dyn_trait_refs<'tcx>(tcx: TyCtxt<'tcx>, source_ty: Ty<'tcx>, dst_ty: Ty<'tcx>) -> Vec<Binder<'tcx, TraitRef<'tcx>>> {
+    struct FindDynTraitVisitor<'tcx>(TyCtxt<'tcx>, Ty<'tcx>);
 
-    impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for FindDynTraitVisitor {
-        type Result = ControlFlow<Vec<Binder<'tcx, ExistentialTraitRef<'tcx>>>>;
+    impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for FindDynTraitVisitor<'tcx> {
+        type Result = ControlFlow<Vec<Binder<'tcx, TraitRef<'tcx>>>>;
 
         fn visit_ty(&mut self, t: Ty<'tcx>) -> Self::Result {
             match t.kind() {
@@ -674,8 +676,9 @@ fn dyn_trait_refs<'tcx>(ty: Ty<'tcx>) -> Vec<Binder<'tcx, ExistentialTraitRef<'t
                             })
                             .transpose();
                         if let Some(t) = trait_ {
-                            // TODO: handle supertraits
+                            let t = t.with_self_ty(self.0, self.1);
                             traits.push(t);
+                            traits.extend(supertraits(self.0, t));
                         }
                     }
                     // TODO: is it possible to have multiple Dynamic types in a single top-level
@@ -687,7 +690,7 @@ fn dyn_trait_refs<'tcx>(ty: Ty<'tcx>) -> Vec<Binder<'tcx, ExistentialTraitRef<'t
         }
     }
 
-    let cf = ty.visit_with(&mut FindDynTraitVisitor);
+    let cf = dst_ty.visit_with(&mut FindDynTraitVisitor(tcx, source_ty));
     cf.break_value().unwrap_or_default()
 }
 

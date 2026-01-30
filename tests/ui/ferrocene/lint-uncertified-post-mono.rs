@@ -46,7 +46,7 @@ impl Default for Validated {
 #[ferrocene::prevalidated]
 fn uninstantiated_generic<T: Clone + Default>(x: T) {
     x.clone(); //~ ERROR calls an unvalidated
-    let fn_type = T::default; // ok -- not actually called, and can't be resolved by HIR pass
+    let fn_type = T::default; // ok -- not actually called, and can't be resolved by THIR pass
     let mut y = fn_type(); //~ ERROR unvalidated
 
     let fn_ptr: fn(&mut T, &T) = T::clone_from; //~ ERROR unvalidated

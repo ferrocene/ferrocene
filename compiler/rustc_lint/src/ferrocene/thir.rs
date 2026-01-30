@@ -10,18 +10,17 @@
 
 use std::ops::ControlFlow;
 
+use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{HirId, OwnerId};
-use rustc_infer::traits::{ImplSource, Obligation, ObligationCause, ObligationCauseCode};
+use rustc_hir::{HirId, LangItem, OwnerId};
+use rustc_infer::traits::{ImplSource, ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::span_bug;
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
-use rustc_middle::ty::adjustment::PointerCoercion;
+use rustc_middle::ty::adjustment::{CoerceUnsizedInfo, CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::{
-    self, Binder, ExistentialPredicate, ExistentialTraitRef, GenericArgs, GenericArgsRef, Instance,
-    InstanceKind, PolyTraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _,
-    TypeVisitor, TypingEnv,
+    self, AdtDef, AdtDefData, Binder, ExistentialPredicate, ExistentialTraitRef, FieldDef, GenericArgs, GenericArgsRef, Instance, InstanceKind, PolyTraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv
 };
 use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext};
@@ -113,6 +112,10 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 LintThir::check_item(tcx, self.owner, expr.closure_id);
                 return None;
             }
+            thir::ExprKind::PointerCoercion { cast: PointerCoercion::ReifyFnPointer(_) | PointerCoercion::ClosureFnPointer(_), source, .. } => {
+                let source_ty = self.thir[source].ty;
+                self.check_fn_ptr_coercion(source_ty, expr.span)?
+            }
             thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, source, .. } => {
                 self.check_dyn_trait_coercion(expr, source)?
             }
@@ -121,6 +124,19 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         };
 
         Some(Use { kind: use_kind, span, from_instantiation: None })
+    }
+
+    fn check_fn_ptr_coercion(&self, source: Ty<'tcx>, span: Span) -> Option<UseKind<'tcx>> {
+        let tcx = self.linter.tcx;
+
+        match self.instance_of_ty(source, span) {
+            Some(instance) => if item_is_validated(tcx, instance.def_id()).validated() {
+                None
+            } else {
+                Some(UseKind::FnPtrCast(instance))
+            }
+            None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
+        }
     }
 
     /// Given a `source` expression that has an unsizing cast to `dest`, determine
@@ -145,17 +161,27 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let tcx = self.linter.tcx;
 
         let source_ty = self.thir[source].ty;
-        // c.f. https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962
-        let (coerce_src, coerce_dst) =
-            tcx.struct_lockstep_tails_for_codegen(source_ty, dest.ty, self.typing_env());
+        // this doesn't actually do what we want:
+        // if there's multiple generic parameters it ignores all but the last.
+        // let (coerce_src, _coerce_dst) =
+        //     tcx.struct_lockstep_tails_for_codegen(source_ty, dest.ty, self.typing_env());
+
         // FIXME: this is *not* correct for types other than references
         // see https://doc.rust-lang.org/std/ops/trait.CoerceUnsized.html for a full list of types
-        // we need to handle here. i think just raw pointers?
-        let coerce_src = coerce_src.peel_refs();
+        // we need to handle here.
+        // let coerce_src = source_ty.peel_refs();
+        let (coerce_src, coerce_dst) = self.peel_unsized_tys(source_ty, dest.ty, dest.span);
         debug!(
             "saw unsized coercion from {source_ty:?} -> {:?} (peeled: {coerce_src:?} -> {coerce_dst:?})",
             dest.ty
         );
+
+        if coerce_src.is_array() && coerce_dst.is_slice() {
+            // There's only ever one unsizing coercion at once.
+            // Even if this is a `[dyn Trait; N]`, we would have checked it earlier.
+            // Return now so we don't crash trying to prove that the array implements `Trait`.
+            return None;
+        }
 
         if matches!(coerce_src.kind(), ty::Dynamic(..)) {
             // upcasting from a `dyn Trait` to a `dyn SuperTrait`.
@@ -166,6 +192,15 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
         let bound_traits = dyn_trait_refs(coerce_dst);
         for trait_ in bound_traits {
+            // First, check if we are casting to a `dyn Fn*` trait.
+            // If so, this is disallowed no matter what, for the same reason as casting
+            // to a function pointer.
+            if tcx.fn_trait_kind_from_def_id(trait_.def_id()).is_some() {
+                if let Some(use_) = self.check_fn_ptr_coercion(coerce_src, dest.span) {
+                    return Some(use_);
+                }
+            }
+
             let Some(first_method) = tcx
                 .associated_item_def_ids(trait_.def_id())
                 .iter()
@@ -188,6 +223,177 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         }
         None
     }
+
+    /// Given an `Unsize` coersion from `src_ty` to `dst_ty`, return the innermost "difference"
+    /// between the two.
+    ///
+    /// This is quite similar to `struct_lockstep_tails_for_codegen`, except it considers all ZSTs,
+    /// not just those at the tail.
+    ///
+    /// c.f. https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962
+    ///
+    /// This code is mostly copied from `hax::exporter::types::ty::PointerCoercion::sfrom`.
+    fn peel_unsized_tys(
+        &self,
+        src_ty: Ty<'tcx>,
+        dst_ty: Ty<'tcx>,
+        span: Span,
+    ) -> (Ty<'tcx>, Ty<'tcx>) {
+        let tcx = self.linter.tcx;
+        let typing_env = self.typing_env();
+
+        debug!("unsize_ptr: {:?} => {:?}", src_ty, dst_ty);
+
+        let (mut src_inner, mut dst_inner) = (src_ty, dst_ty);
+
+        (src_inner, dst_inner) = self.peel_derefs(src_inner, dst_inner, span);
+
+        let get_adt_field = |adt_def: AdtDef<'_>, args, idx: FieldIdx| {
+            let variant = adt_def.variant(VariantIdx::ZERO);
+            let field_ty = variant.fields[idx].ty(tcx, args);
+            tcx.normalize_erasing_regions(typing_env, field_ty)
+        };
+
+        loop {
+            debug!("check adts: src={src_inner:?}, dst={dst_inner:?}");
+            match (src_inner.kind(), dst_inner.kind()) {
+                (_, ty::Dynamic(..)) => break,
+                (ty::Adt(src_def, src_args), ty::Adt(dst_def, dst_args)) => {
+                    assert_eq!(src_def.did(), dst_def.did());
+
+                    // let field = match tcx.coerce_unsized_info(src_def.did()) {
+                    let field = match self.custom_coerce_unsize_info(src_inner, dst_inner, span) {
+                        Some(CustomCoerceUnsized::Struct(idx)) => idx,
+                        None => {
+                            assert!(dyn_trait_refs(dst_inner).is_empty());
+                            break;
+                        }
+                        // Ok(CoerceUnsizedInfo { custom_kind: Some(CustomCoerceUnsized::Struct(idx)) }) => idx,
+                        // other => span_bug!(span, "don't know how to coerce unsized {src_def:?}: {other:?}"),
+                    };
+                    src_inner = get_adt_field(*src_def, src_args, field);
+                    dst_inner = get_adt_field(*dst_def, dst_args, field);
+                }
+                // (ty::Adt(..), _) | (_, ty::Adt(..)) => span_bug!(span, "mismatched types for {src_inner:?} and {dst_inner:?}"),
+                _ => break,
+            }
+        }
+
+        // (src_inner, dst_inner)
+
+        // loop {
+        //     debug!("check derefs: src={src_inner:?}, dst={dst_inner:?}");
+        //     match (src_inner.builtin_deref(true), dst_inner.builtin_deref(true)) {
+        //         (Some(a), Some(b)) => {
+        //             src_inner = a;
+        //             dst_inner = b;
+        //         }
+        //         (None, None) => break,
+        //         _ => span_bug!(span, "don't know how to peel tys for unsizing cast from {src_ty:?} => {dst_ty:?}"),
+        //     }
+        // };
+
+            // One last time for raw pointer casts.
+        self.peel_derefs(src_inner, dst_inner, span)
+
+        // tcx.struct_lockstep_tails_for_codegen(src_inner, dst_inner, self.typing_env())
+    }
+
+    // copied from rustc_monomorphize
+    fn custom_coerce_unsize_info(
+        &self,
+        source_ty: Ty<'tcx>,
+        target_ty: Ty<'tcx>,
+        span: Span,
+    ) -> Option<CustomCoerceUnsized> {
+        let tcx = self.linter.tcx;
+        let trait_ref = ty::TraitRef::new(
+            tcx,
+            tcx.require_lang_item(LangItem::CoerceUnsized, span),
+            [source_ty, target_ty],
+        );
+
+        match tcx
+            .codegen_select_candidate(ty::TypingEnv::fully_monomorphized().as_query_input(trait_ref))
+            {
+                Ok(ImplSource::UserDefined(ImplSourceUserDefinedData {
+                    impl_def_id,
+                    ..
+                })) => Some(tcx.coerce_unsized_info(impl_def_id).unwrap().custom_kind.unwrap()),
+                _ => None,
+                // impl_source => {
+                //     span_bug!(span,
+                //         "invalid `CoerceUnsized` from {source_ty} to {target_ty}: impl_source: {:?}",
+                //         impl_source
+                //     );
+                // }
+            }
+    }
+
+    fn peel_derefs(&self, mut src: Ty<'tcx>, mut dst: Ty<'tcx>, span: Span) -> (Ty<'tcx>, Ty<'tcx>) {
+        loop {
+            if matches!(dst.kind(), ty::Dynamic(..)) {
+                return (src, dst);
+            }
+
+            debug!("check derefs: src={src:?}, dst={dst:?}");
+            match (src.builtin_deref(true), dst.builtin_deref(true)) {
+                (Some(a), Some(b)) => {
+                    src = a;
+                    dst = b;
+                }
+                (None, None) => return (src, dst),
+                _ => span_bug!(span, "don't know how to peel tys for unsizing cast from {src:?} => {dst:?}"),
+            }
+        }
+    }
+
+    // fn peel_unsized_tys(
+    //     &self,
+    //     src_ty: Ty<'tcx>,
+    //     dst_ty: Ty<'tcx>,
+    //     span: Span,
+    // ) -> (Ty<'tcx>, Ty<'tcx>) {
+    //     let tcx = self.linter.tcx;
+    //
+    //     debug!("unsize_ptr: {:?} => {:?}", src_ty, dst_ty);
+    //     match (src_ty.kind(), dst_ty.kind()) {
+    //         (&ty::Pat(a, _), &ty::Pat(b, _)) => self.peel_unsized_tys(a, b, span),
+    //         (&ty::Ref(_, a, _), &ty::Ref(_, b, _) | &ty::RawPtr(b, _))
+    //             | (&ty::RawPtr(a, _), &ty::RawPtr(b, _)) => {
+    //                 (a, b)
+    //             }
+    //         (&ty::Adt(def_a, _), &ty::Adt(def_b, _)) => {
+    //             let mismatched_fields = ;
+    //             // assert_eq!(def_a, def_b); // implies same number of fields
+    //             // let src_layout = tcx.layout_of(src_ty);
+    //             // let dst_layout = tcx.layout_of(dst_ty);
+    //             // if src_ty == dst_ty {
+    //             //     span_bug!(span, "unreachable: cast from source to dest are the same type? {src_ty:?}");
+    //             //     // return (src, old_info.unwrap());
+    //             // }
+    //             // let mut result = None;
+    //             // for i in 0..src_layout.fields.count() {
+    //             //     let src_f = src_layout.field(tcx, i);
+    //             //     if src_f.is_1zst() {
+    //             //         // We are looking for the one non-1-ZST field; this is not it.
+    //             //         continue;
+    //             //     }
+    //             //
+    //             //     assert_eq!(src_layout.fields.offset(i).bytes(), 0);
+    //             //     assert_eq!(dst_layout.fields.offset(i).bytes(), 0);
+    //             //     assert_eq!(src_layout.size, src_f.size);
+    //             //
+    //             //     let dst_f = dst_layout.field(tcx, i);
+    //             //     assert_ne!(src_f.ty, dst_f.ty);
+    //             //     assert_eq!(result, None);
+    //             //     result = Some((src_f.ty, dst_f.ty));
+    //             // }
+    //             // result.unwrap()
+    //         }
+    //         _ => span_bug!(span, "peel_unsized_tys: called on bad types"),
+    //     }
+    // }
 
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
@@ -258,6 +464,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // this can happen if our `peel_refs` above was buggy. these errors are only for better
                 // diagnostics, so just ignore the bug for now. we're going to lint later anyway.
                 info!("type checking failed for trait upcast? {e:?}");
+                tcx.dcx().span_delayed_bug(span, format!("type checking failed for trait upcast? {e:?}"));
                 return None;
             }
         };
@@ -272,7 +479,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
         if !errors.is_empty() {
             // ditto as for our selection failure
-            info!("impl obligations not met for trait upcast? {errors:?}");
+            // info!("impl obligations not met for trait upcast? {errors:?}");
+            tcx.dcx().span_delayed_bug(span, format!("impl obligations not met for trait upcast? {errors:?}"));
             return None;
         }
 
@@ -292,10 +500,20 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     ///
     /// Panics if given a type that isn't callable.
     fn instance_of_ty(&self, ty: Ty<'tcx>, span: Span) -> Option<Instance<'tcx>> {
+        let tcx = self.linter.tcx;
+
         match ty.kind() {
             ty::FnDef(maybe_trait_fn, generic_args) => {
                 let callee = self.get_concrete_fn_def(*maybe_trait_fn, generic_args, span)?;
                 Some(callee)
+            }
+            ty::Closure(def_id, args) => {
+                Some(Instance::resolve_closure(
+                    tcx,
+                    *def_id,
+                    args,
+                    ty::ClosureKind::FnOnce,
+                ))
             }
             // Reference to a function or function pointer.
             ty::Ref(_, ty, _) => self.instance_of_ty(*ty, span),
@@ -340,6 +558,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         // If this is a call to Fn/FnMut/FnOnce::call, then it's a type that implements
         // `fn_traits`, either a closure or a user-defined type. Allow closures but check
         // everything else.
+        // TODO: i think this is wrong for unsizing casts? maybe we need to check if the owner is
+        // validated instead?
         if self.linter.tcx.is_closure_like(callee.def_id()) {
             debug!("skipping closure {callee:?}");
             return None;

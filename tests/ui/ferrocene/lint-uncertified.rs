@@ -100,12 +100,12 @@ static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Un
 #[ferrocene::prevalidated]
 fn certified() {
     normal_def(); //~ ERROR unvalidated
-    let fn_ptr: fn() = normal_def; // FIXME: currently only caught post-mono
+    let fn_ptr: fn() = normal_def; //[no-dedup]~ ERROR unvalidated
     fn_ptr(); // ok
 
     let trait_fn_type = <Unvalidated as Clone>::clone;
     trait_fn_type(&Unvalidated); //~ ERROR unvalidated
-    let trait_fn_ptr: fn(&Unvalidated) -> Unvalidated = trait_fn_type;
+    let trait_fn_ptr: fn(&Unvalidated) -> Unvalidated = trait_fn_type; //[no-dedup]~ ERROR unvalidated
     trait_fn_ptr(&Unvalidated); // ok
 
     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated; //~ ERROR unvalidated

@@ -135,7 +135,9 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             } else {
                 Some(UseKind::FnPtrCast(instance))
             }
-            None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
+            None => None,
+            // TODO: buggy!!
+            // None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
         }
     }
 
@@ -198,6 +200,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             if tcx.fn_trait_kind_from_def_id(trait_.def_id()).is_some() {
                 if let Some(use_) = self.check_fn_ptr_coercion(coerce_src, dest.span) {
                     return Some(use_);
+                } else {
+                    continue;
                 }
             }
 
@@ -265,7 +269,10 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     let field = match self.custom_coerce_unsize_info(src_inner, dst_inner, span) {
                         Some(CustomCoerceUnsized::Struct(idx)) => idx,
                         None => {
-                            assert!(dyn_trait_refs(dst_inner).is_empty());
+                            // TODO: this is possibly buggy !!
+                            // need to check if this is an unsizing cast from array to
+                            // slice.
+                            // assert!(dyn_trait_refs(dst_inner).is_empty());
                             break;
                         }
                         // Ok(CoerceUnsizedInfo { custom_kind: Some(CustomCoerceUnsized::Struct(idx)) }) => idx,
@@ -337,6 +344,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             }
 
             debug!("check derefs: src={src:?}, dst={dst:?}");
+            // TODO: doesn't handle `impl Deref` in user code
             match (src.builtin_deref(true), dst.builtin_deref(true)) {
                 (Some(a), Some(b)) => {
                     src = a;
@@ -464,7 +472,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // this can happen if our `peel_refs` above was buggy. these errors are only for better
                 // diagnostics, so just ignore the bug for now. we're going to lint later anyway.
                 info!("type checking failed for trait upcast? {e:?}");
-                tcx.dcx().span_delayed_bug(span, format!("type checking failed for trait upcast? {e:?}"));
+                // TODO: buggy!! matters for casts to `dyn Fn`
+                // tcx.dcx().span_delayed_bug(span, format!("type checking failed for trait upcast? {e:?}"));
                 return None;
             }
         };
@@ -479,8 +488,9 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
         if !errors.is_empty() {
             // ditto as for our selection failure
-            // info!("impl obligations not met for trait upcast? {errors:?}");
-            tcx.dcx().span_delayed_bug(span, format!("impl obligations not met for trait upcast? {errors:?}"));
+            info!("impl obligations not met for trait upcast? {errors:?}");
+            // TODO: buggy!! matters for casts to `dyn Fn`
+            // tcx.dcx().span_delayed_bug(span, format!("impl obligations not met for trait upcast? {errors:?}"));
             return None;
         }
 
@@ -507,13 +517,20 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 let callee = self.get_concrete_fn_def(*maybe_trait_fn, generic_args, span)?;
                 Some(callee)
             }
-            ty::Closure(def_id, args) => {
-                Some(Instance::resolve_closure(
-                    tcx,
-                    *def_id,
-                    args,
-                    ty::ClosureKind::FnOnce,
-                ))
+            // TODO: check this logic. I think it's right since we'll check the closure body in a
+            // second anyway?
+            ty::Closure(..) => None,
+            // ty::Closure(def_id, args) => {
+            //     Some(Instance::resolve_closure(
+            //         tcx,
+            //         *def_id,
+            //         args,
+            //         ty::ClosureKind::FnOnce,
+            //     ))
+            // }
+            // Manual impl of FnOnce.
+            ty::Adt(adt_def, args) => {
+                None // TODO: currently not supported
             }
             // Reference to a function or function pointer.
             ty::Ref(_, ty, _) => self.instance_of_ty(*ty, span),
@@ -538,7 +555,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             //   - It was passed as an argument, which is ok by 3).
             //   - It is a global const/static, so we catch it in NamedConst/StaticRef above.
             ty::FnPtr(..) => None,
-            // FIXME: do we need to handle closures?
             other => span_bug!(span, "unsupported call kind {other:?}"),
         }
     }

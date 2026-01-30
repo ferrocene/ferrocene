@@ -1248,6 +1248,12 @@ workflows:
             - aarch64-darwin-test-library-std
             - aarch64-darwin-compiletest
 
+  sbom:
+    when:
+      or:
+        - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
+    jobs: [sbom-gen]
+
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
   # for the branches bors lands code in, as those branches are not meant to run

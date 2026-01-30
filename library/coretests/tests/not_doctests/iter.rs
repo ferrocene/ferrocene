@@ -693,3 +693,11 @@ fn test_take_while_size_hint_zero() {
     while iter.next().is_some() {}
     assert_eq!((0, Some(0)), iter.size_hint());
 }
+
+// covers `<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold`.
+#[test]
+fn test_take_while_try_fold() {
+    let mut iter = (0..2).take_while(|_| false);
+    while iter.next().is_some() {}
+    assert_eq!(Some(0), iter.try_fold(0, |a, b| Some(a + b)));
+}

@@ -41,8 +41,10 @@
     dead_code
 )]
 
-#[cfg(target_arch = "hexagon")]
-use core_arch::arch::hexagon::*;
+#[cfg(all(target_arch = "hexagon", not(target_feature = "hvx-length128b")))]
+use core_arch::arch::hexagon::v64::*;
+#[cfg(all(target_arch = "hexagon", target_feature = "hvx-length128b"))]
+use core_arch::arch::hexagon::v128::*;
 
 /// Vector length in bytes for HVX 128-byte mode
 #[cfg(all(target_arch = "hexagon", target_feature = "hvx-length128b"))]

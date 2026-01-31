@@ -1,13 +1,20 @@
 //! Hexagon HVX Code Generator
 //!
-//! This generator creates hvx.rs from scratch using the LLVM HVX header file
-//! as the sole source of truth. It parses the C intrinsic prototypes and
-//! generates Rust wrapper functions with appropriate attributes.
+//! This generator creates v64.rs and v128.rs from scratch using the LLVM HVX
+//! header file as the sole source of truth. It parses the C intrinsic prototypes
+//! and generates Rust wrapper functions with appropriate attributes.
+//!
+//! The two generated files provide:
+//! - v64.rs: 64-byte vector mode intrinsics (512-bit vectors)
+//! - v128.rs: 128-byte vector mode intrinsics (1024-bit vectors)
+//!
+//! Both modules are available unconditionally, but require the appropriate
+//! target features to actually use the intrinsics.
 //!
 //! Usage:
 //!     cd crates/stdarch-gen-hexagon
 //!     cargo run
-//!     # Output is written directly to ../core_arch/src/hexagon/hvx.rs
+//!     # Output is written to ../core_arch/src/hexagon/v64.rs and v128.rs
 
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -31,6 +38,46 @@ fn get_simd_intrinsic_mappings() -> HashMap<&'static str, &'static str> {
 
 /// The tracking issue number for the stdarch_hexagon feature
 const TRACKING_ISSUE: &str = "151523";
+
+/// HVX vector length mode
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum VectorMode {
+    /// 64-byte vectors (512 bits)
+    V64,
+    /// 128-byte vectors (1024 bits)
+    V128,
+}
+
+impl VectorMode {
+    fn bytes(&self) -> u32 {
+        match self {
+            VectorMode::V64 => 64,
+            VectorMode::V128 => 128,
+        }
+    }
+
+    fn bits(&self) -> u32 {
+        self.bytes() * 8
+    }
+
+    fn lanes(&self) -> u32 {
+        self.bytes() / 4 // 32-bit lanes
+    }
+
+    fn module_name(&self) -> &'static str {
+        match self {
+            VectorMode::V64 => "v64",
+            VectorMode::V128 => "v128",
+        }
+    }
+
+    fn target_feature(&self) -> &'static str {
+        match self {
+            VectorMode::V64 => "hvx-length64b",
+            VectorMode::V128 => "hvx-length128b",
+        }
+    }
+}
 
 /// LLVM tag to fetch the header from
 const LLVM_TAG: &str = "llvmorg-22.1.0-rc1";
@@ -484,26 +531,24 @@ fn q6_to_rust_name(q6_name: &str) -> String {
 }
 
 /// Generate the module documentation
-fn generate_module_doc() -> String {
-    r#"//! Hexagon HVX intrinsics
+fn generate_module_doc(mode: VectorMode) -> String {
+    format!(
+        r#"//! Hexagon HVX {bytes}-byte vector mode intrinsics
 //!
-//! This module provides intrinsics for the Hexagon Vector Extensions (HVX).
+//! This module provides intrinsics for the Hexagon Vector Extensions (HVX)
+//! in {bytes}-byte vector mode ({bits}-bit vectors).
+//!
 //! HVX is a wide vector extension designed for high-performance signal processing.
 //! [Hexagon HVX Programmer's Reference Manual](https://docs.qualcomm.com/doc/80-N2040-61)
 //!
 //! ## Vector Types
 //!
-//! HVX supports different vector lengths depending on the configuration:
-//! - 128-byte mode: `HvxVector` is 1024 bits (128 bytes)
-//! - 64-byte mode: `HvxVector` is 512 bits (64 bytes)
+//! In {bytes}-byte mode:
+//! - `HvxVector` is {bits} bits ({bytes} bytes) containing {lanes} x 32-bit values
+//! - `HvxVectorPair` is {pair_bits} bits ({pair_bytes} bytes)
+//! - `HvxVectorPred` is {bits} bits ({bytes} bytes) for predicate operations
 //!
-//! This implementation targets 128-byte mode by default. To change the vector
-//! length mode, use the appropriate target feature when compiling:
-//! - For 128-byte mode: `-C target-feature=+hvx-length128b`
-//! - For 64-byte mode: `-C target-feature=+hvx-length64b`
-//!
-//! Note that HVX v66 and later default to 128-byte mode, while earlier versions
-//! default to 64-byte mode.
+//! To use this module, compile with `-C target-feature=+{target_feature}`.
 //!
 //! ## Architecture Versions
 //!
@@ -517,15 +562,27 @@ fn generate_module_doc() -> String {
 //! - HVX v69: `-C target-feature=+hvxv69`
 //! - HVX v73: `-C target-feature=+hvxv73`
 //! - HVX v79: `-C target-feature=+hvxv79`
-//! - HVX v81: `-C target-feature=+hvxv81`
 //!
 //! Each version includes all features from previous versions.
-"#
-    .to_string()
+"#,
+        bytes = mode.bytes(),
+        bits = mode.bits(),
+        lanes = mode.lanes(),
+        pair_bytes = mode.bytes() * 2,
+        pair_bits = mode.bits() * 2,
+        target_feature = mode.target_feature(),
+    )
 }
 
-/// Generate the type definitions
-fn generate_types() -> String {
+/// Generate the type definitions for a specific vector mode
+fn generate_types(mode: VectorMode) -> String {
+    let lanes = mode.lanes();
+    let pair_lanes = lanes * 2;
+    let bits = mode.bits();
+    let bytes = mode.bytes();
+    let pair_bits = bits * 2;
+    let pair_bytes = bytes * 2;
+
     format!(
         r#"
 #![allow(non_camel_case_types)]
@@ -535,54 +592,35 @@ use stdarch_test::assert_instr;
 
 use crate::intrinsics::simd::{{simd_add, simd_and, simd_or, simd_sub, simd_xor}};
 
-// HVX type definitions for 128-byte vector mode (default for v66+)
-// Use -C target-feature=+hvx-length128b to enable
-#[cfg(target_feature = "hvx-length128b")]
+// HVX type definitions for {bytes}-byte vector mode
 types! {{
     #![unstable(feature = "stdarch_hexagon", issue = "{TRACKING_ISSUE}")]
 
-    /// HVX vector type (1024 bits / 128 bytes)
+    /// HVX vector type ({bits} bits / {bytes} bytes)
     ///
-    /// This type represents a single HVX vector register containing 32 x 32-bit values.
-    pub struct HvxVector(32 x i32);
+    /// This type represents a single HVX vector register containing {lanes} x 32-bit values.
+    pub struct HvxVector({lanes} x i32);
 
-    /// HVX vector pair type (2048 bits / 256 bytes)
-    ///
-    /// This type represents a pair of HVX vector registers, often used for
-    /// operations that produce double-width results.
-    pub struct HvxVectorPair(64 x i32);
-
-    /// HVX vector predicate type (1024 bits / 128 bytes)
-    ///
-    /// This type represents a predicate vector used for conditional operations.
-    /// Each bit corresponds to a lane in the vector.
-    pub struct HvxVectorPred(32 x i32);
-}}
-
-// HVX type definitions for 64-byte vector mode (default for v60-v65)
-// Use -C target-feature=+hvx-length64b to enable, or omit hvx-length128b
-#[cfg(not(target_feature = "hvx-length128b"))]
-types! {{
-    #![unstable(feature = "stdarch_hexagon", issue = "{TRACKING_ISSUE}")]
-
-    /// HVX vector type (512 bits / 64 bytes)
-    ///
-    /// This type represents a single HVX vector register containing 16 x 32-bit values.
-    pub struct HvxVector(16 x i32);
-
-    /// HVX vector pair type (1024 bits / 128 bytes)
+    /// HVX vector pair type ({pair_bits} bits / {pair_bytes} bytes)
     ///
     /// This type represents a pair of HVX vector registers, often used for
     /// operations that produce double-width results.
-    pub struct HvxVectorPair(32 x i32);
+    pub struct HvxVectorPair({pair_lanes} x i32);
 
-    /// HVX vector predicate type (512 bits / 64 bytes)
+    /// HVX vector predicate type ({bits} bits / {bytes} bytes)
     ///
     /// This type represents a predicate vector used for conditional operations.
     /// Each bit corresponds to a lane in the vector.
-    pub struct HvxVectorPred(16 x i32);
+    pub struct HvxVectorPred({lanes} x i32);
 }}
-"#
+"#,
+        bytes = bytes,
+        bits = bits,
+        lanes = lanes,
+        pair_bits = pair_bits,
+        pair_bytes = pair_bytes,
+        pair_lanes = pair_lanes,
+        TRACKING_ISSUE = TRACKING_ISSUE,
     )
 }
 
@@ -1160,8 +1198,8 @@ fn get_compound_helper_signatures() -> HashMap<String, BuiltinSignature> {
     map
 }
 
-/// Generate extern declarations for all intrinsics
-fn generate_extern_block(intrinsics: &[IntrinsicInfo]) -> String {
+/// Generate extern declarations for all intrinsics for a specific vector mode
+fn generate_extern_block(intrinsics: &[IntrinsicInfo], mode: VectorMode) -> String {
     let mut output = String::new();
 
     // Collect unique builtins to avoid duplicates
@@ -1226,54 +1264,22 @@ fn generate_extern_block(intrinsics: &[IntrinsicInfo]) -> String {
     // Sort by builtin name for consistent output
     decls.sort_by(|a, b| a.0.cmp(&b.0));
 
-    // Generate 128-byte mode intrinsics (default for v66+)
-    output.push_str("// LLVM intrinsic declarations for 128-byte vector mode\n");
-    output.push_str("#[cfg(target_feature = \"hvx-length128b\")]\n");
+    // Generate intrinsic declarations for the specified mode
+    output.push_str(&format!(
+        "// LLVM intrinsic declarations for {}-byte vector mode\n",
+        mode.bytes()
+    ));
     output.push_str("#[allow(improper_ctypes)]\n");
     output.push_str("unsafe extern \"unadjusted\" {\n");
 
     for (builtin_name, instr_name, return_type, param_types) in &decls {
         let base_link = builtin_name.replace('_', ".");
-        let link_name = if builtin_name.starts_with("V6_") {
+        // 128-byte mode uses .128B suffix, 64-byte mode doesn't
+        let link_name = if builtin_name.starts_with("V6_") && mode == VectorMode::V128 {
             format!("llvm.hexagon.{}.128B", base_link)
         } else {
             format!("llvm.hexagon.{}", base_link)
         };
-
-        let params_str = if param_types.is_empty() {
-            String::new()
-        } else {
-            param_types
-                .iter()
-                .map(|t| format!("_: {}", t.to_extern_str()))
-                .collect::<Vec<_>>()
-                .join(", ")
-        };
-
-        let return_str = if *return_type == RustType::Unit {
-            " -> ()".to_string()
-        } else {
-            format!(" -> {}", return_type.to_extern_str())
-        };
-
-        output.push_str(&format!(
-            "    #[link_name = \"{}\"]\n    fn {}({}){};\n",
-            link_name, instr_name, params_str, return_str
-        ));
-    }
-
-    output.push_str("}\n\n");
-
-    // Generate 64-byte mode intrinsics (default for v60-v65)
-    output.push_str("// LLVM intrinsic declarations for 64-byte vector mode\n");
-    output.push_str("#[cfg(not(target_feature = \"hvx-length128b\"))]\n");
-    output.push_str("#[allow(improper_ctypes)]\n");
-    output.push_str("unsafe extern \"unadjusted\" {\n");
-
-    for (builtin_name, instr_name, return_type, param_types) in &decls {
-        let base_link = builtin_name.replace('_', ".");
-        // 64-byte mode uses intrinsics without the .128B suffix
-        let link_name = format!("llvm.hexagon.{}", base_link);
 
         let params_str = if param_types.is_empty() {
             String::new()
@@ -1596,14 +1602,18 @@ fn generate_functions(intrinsics: &[IntrinsicInfo]) -> String {
     output
 }
 
-/// Generate the complete hvx.rs file
-fn generate_hvx_rs(intrinsics: &[IntrinsicInfo], output_path: &Path) -> Result<(), String> {
+/// Generate a module file for a specific vector mode
+fn generate_module_file(
+    intrinsics: &[IntrinsicInfo],
+    output_path: &Path,
+    mode: VectorMode,
+) -> Result<(), String> {
     let mut output =
         File::create(output_path).map_err(|e| format!("Failed to create output: {}", e))?;
 
-    writeln!(output, "{}", generate_module_doc()).map_err(|e| e.to_string())?;
-    writeln!(output, "{}", generate_types()).map_err(|e| e.to_string())?;
-    writeln!(output, "{}", generate_extern_block(intrinsics)).map_err(|e| e.to_string())?;
+    writeln!(output, "{}", generate_module_doc(mode)).map_err(|e| e.to_string())?;
+    writeln!(output, "{}", generate_types(mode)).map_err(|e| e.to_string())?;
+    writeln!(output, "{}", generate_extern_block(intrinsics, mode)).map_err(|e| e.to_string())?;
     writeln!(output, "{}", generate_functions(intrinsics)).map_err(|e| e.to_string())?;
 
     // Ensure file is flushed before running rustfmt
@@ -1677,21 +1687,39 @@ fn main() -> Result<(), String> {
         println!("    HVX v{}: {} intrinsics", arch, count);
     }
 
-    // Generate output
+    // Generate output files
     let crate_dir = std::env::var("CARGO_MANIFEST_DIR")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|_| std::env::current_dir().unwrap());
 
-    let output_path = crate_dir.join("../core_arch/src/hexagon/hvx.rs");
+    let hexagon_dir = crate_dir.join("../core_arch/src/hexagon");
 
-    println!("\nStep 3: Generating hvx.rs...");
-    generate_hvx_rs(&intrinsics, &output_path)?;
+    // Generate v64.rs (64-byte vector mode)
+    let v64_path = hexagon_dir.join("v64.rs");
+    println!("\nStep 3: Generating v64.rs (64-byte mode)...");
+    generate_module_file(&intrinsics, &v64_path, VectorMode::V64)?;
+    println!("  Output: {}", v64_path.display());
+
+    // Generate v128.rs (128-byte vector mode)
+    let v128_path = hexagon_dir.join("v128.rs");
+    println!("\nStep 4: Generating v128.rs (128-byte mode)...");
+    generate_module_file(&intrinsics, &v128_path, VectorMode::V128)?;
+    println!("  Output: {}", v128_path.display());
 
     println!("\n=== Results ===");
-    println!("  Generated {} simple wrapper functions", simple_count);
-    println!("  Generated {} compound wrapper functions", compound_count);
-    println!("  Total: {} functions", simple_count + compound_count);
-    println!("  Output: {}", output_path.display());
+    println!(
+        "  Generated {} simple wrapper functions per module",
+        simple_count
+    );
+    println!(
+        "  Generated {} compound wrapper functions per module",
+        compound_count
+    );
+    println!(
+        "  Total: {} functions per module",
+        simple_count + compound_count
+    );
+    println!("  Output files: v64.rs, v128.rs");
 
     Ok(())
 }

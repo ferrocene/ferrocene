@@ -131,8 +131,17 @@ impl DocParser {
                     return;
                 }
 
-                if self.attribute.no_crate_inject.is_some() {
-                    cx.duplicate_key(path.span(), sym::no_crate_inject);
+                if let Some(used_span) = self.attribute.no_crate_inject {
+                    let unused_span = path.span();
+                    cx.emit_lint(
+                        rustc_session::lint::builtin::INVALID_DOC_ATTRIBUTES,
+                        AttributeLintKind::UnusedDuplicate {
+                            this: unused_span,
+                            other: used_span,
+                            warning: true,
+                        },
+                        unused_span,
+                    );
                     return;
                 }
 

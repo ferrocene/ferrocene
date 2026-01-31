@@ -822,6 +822,7 @@ pub enum AttributeLintKind {
     DocTestLiteral,
     AttrCrateLevelOnly,
     DoNotRecommendDoesNotExpectArgs,
+    MalformedDoc,
 }
 
 pub type RegisteredTools = FxIndexSet<Ident>;

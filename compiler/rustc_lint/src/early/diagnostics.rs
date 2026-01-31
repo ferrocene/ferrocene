@@ -423,5 +423,7 @@ pub fn decorate_attribute_lint(
         &AttributeLintKind::DoNotRecommendDoesNotExpectArgs => {
             lints::DoNotRecommendDoesNotExpectArgs.decorate_lint(diag)
         }
+
+        &AttributeLintKind::MalformedDoc => lints::MalformedDoc.decorate_lint(diag),
     }
 }

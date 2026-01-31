@@ -591,7 +591,7 @@ impl DocParser {
                 let suggestions = cx.suggestions();
                 let span = cx.attr_span;
                 cx.emit_lint(
-                    rustc_session::lint::builtin::ILL_FORMED_ATTRIBUTE_INPUT,
+                    rustc_session::lint::builtin::INVALID_DOC_ATTRIBUTES,
                     AttributeLintKind::IllFormedAttributeInput { suggestions, docs: None },
                     span,
                 );
@@ -604,14 +604,27 @@ impl DocParser {
                             self.parse_single_doc_attr_item(cx, mip);
                         }
                         MetaItemOrLitParser::Lit(lit) => {
-                            cx.expected_name_value(lit.span, None);
+                            // FIXME: Remove the lint and uncomment line after beta backport is
+                            // done.
+                            // cx.expected_name_value(lit.span, None);
+                            cx.emit_lint(
+                                rustc_session::lint::builtin::INVALID_DOC_ATTRIBUTES,
+                                AttributeLintKind::MalformedDoc,
+                                lit.span,
+                            );
                         }
                     }
                 }
             }
             ArgParser::NameValue(nv) => {
                 if nv.value_as_str().is_none() {
-                    cx.expected_string_literal(nv.value_span, Some(nv.value_as_lit()));
+                    // FIXME: Remove the lint and uncomment line after beta backport is done.
+                    // cx.expected_string_literal(nv.value_span, Some(nv.value_as_lit()));
+                    cx.emit_lint(
+                        rustc_session::lint::builtin::INVALID_DOC_ATTRIBUTES,
+                        AttributeLintKind::MalformedDoc,
+                        nv.value_span,
+                    );
                 } else {
                     unreachable!(
                         "Should have been handled at the same time as sugar-syntaxed doc comments"

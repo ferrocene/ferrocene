@@ -35,6 +35,17 @@ Language changes in Rust 1.93.0
   - No change: this bug was not documented in FLS
 
 - `Stabilize asm_cfg <https://github.com/rust-lang/rust/pull/147736>`_
+
+  - Changed syntax: :s:`AssemblyCodeBlock`, :s:`AsmArguments`, :s:`GlobalAsmArguments`
+  - New syntax: :s:`AsmTemplate`, :s:`AsmAttrRegisterArgument`, :s:`AsmAttrAbiClobber`, :s:`AsmAttrAssemblyOption`
+
+  - New paragraphs:
+
+    - :p:`fls_m0SBtonaNppV`
+    - :p:`fls_nLBhw2w6uznH`
+    - :p:`fls_xzDPz2zfRfoI`
+    - :p:`fls_cTEiqjf6haEg`
+
 - `During const-evaluation, support copying pointers byte-by-byte <https://github.com/rust-lang/rust/pull/148259>`_
 
   * No change: Already covered by the classification of :t:`[constant expression]s`.

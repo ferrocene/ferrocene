@@ -963,7 +963,10 @@ Assembly Instructions
 .. syntax::
 
    AssemblyCodeBlock ::=
-       AssemblyInstruction ($$,$$ AssemblyInstruction)*
+       AsmTemplate ($$,$$ AsmTemplate)*
+
+   AsmTemplate ::=
+       OuterAttribute* AssemblyInstruction
 
    AssemblyInstruction ::=
        StringLiteral
@@ -1615,6 +1618,49 @@ It is undefined behavior if control reaches the end of an
 
    options(nomem, pure)
 
+.. _fls_tWub9IMeq68B:
+
+Attributes
+----------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_m0SBtonaNppV`
+The :s:`AssemblyInstruction`, :s:`RegisterArgument`, :s:`AbiClobber`, and
+:s:`AssemblyOption` arguments in :s:`AsmArguments` and :s:`GlobalAsmArguments`
+may be preceded by :t:`outer attribute` instances.
+
+:dp:`fls_nLBhw2w6uznH`
+Only the :t:`attribute` :c:`cfg` and the :t:`attribute` :c:`cfg_attr` are
+accepted on inline assembly arguments. All other attributes are rejected.
+
+:dp:`fls_xzDPz2zfRfoI`
+If a :s:`AssemblyInstruction`, :s:`RegisterArgument`, :s:`AbiClobber`, or
+:s:`AssemblyOption` is annotated with :c:`cfg` or :c:`cfg_attr` and the related
+:t:`configuration predicate` evaluates to ``false``, the annotated argument has
+no effect and is ignored.
+
+:dp:`fls_cTEiqjf6haEg`
+It is a static error for a :s:`RegisterArgument`, :s:`AbiClobber`, or
+:s:`AssemblyOption` to appear before the first :s:`AssemblyInstruction`, even if
+the argument is ignored by :t:`conditional compilation`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   unsafe {
+       core::arch::asm!(
+           "nop",
+           #[cfg(target_feature = "sse2")]
+           "nop",
+           #[cfg(target_feature = "sse2")]
+           in(reg) 0_u32,
+           #[cfg(target_feature = "sse2")]
+           options(nomem, nostack),
+       );
+   }
+
 .. _fls_qezwyridmjob:
 
 Macros: asm, global_asm, and naked_asm
@@ -1625,10 +1671,19 @@ Macros: asm, global_asm, and naked_asm
 .. syntax::
 
    AsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ RegisterArgument)* ($$,$$ AbiClobber)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ AsmAttrRegisterArgument)* ($$,$$ AsmAttrAbiClobber)* ($$,$$ AsmAttrAssemblyOption)* $$,$$? $$)$$
 
    GlobalAsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ AsmAttrRegisterArgument)* ($$,$$ AsmAttrAssemblyOption)* $$,$$? $$)$$
+
+   AsmAttrRegisterArgument ::=
+       OuterAttribute* RegisterArgument
+
+   AsmAttrAbiClobber ::=
+       OuterAttribute* AbiClobber
+
+   AsmAttrAssemblyOption ::=
+       OuterAttribute* AssemblyOption
 
    LabelBlock ::=
        $$block$$ $${$$ StatementList $$}$$

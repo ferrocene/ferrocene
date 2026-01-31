@@ -177,8 +177,6 @@ unsafe extern "C" {
         b: vector_signed_short,
         c: vector_signed_int,
     ) -> vector_signed_int;
-    #[link_name = "llvm.ppc.altivec.vnmsubfp"]
-    fn vnmsubfp(a: vector_float, b: vector_float, c: vector_float) -> vector_float;
     #[link_name = "llvm.ppc.altivec.vsum2sws"]
     fn vsum2sws(a: vector_signed_int, b: vector_signed_int) -> vector_signed_int;
     #[link_name = "llvm.ppc.altivec.vsum4ubs"]
@@ -1929,9 +1927,9 @@ mod sealed {
 
     #[inline]
     #[target_feature(enable = "altivec")]
-    #[cfg_attr(test, assert_instr(vnmsubfp))]
-    unsafe fn vec_vnmsubfp(a: vector_float, b: vector_float, c: vector_float) -> vector_float {
-        vnmsubfp(a, b, c)
+    #[cfg_attr(test, assert_instr(xvnmsubasp))]
+    pub unsafe fn vec_vnmsubfp(a: vector_float, b: vector_float, c: vector_float) -> vector_float {
+        simd_neg(simd_fma(a, b, simd_neg(c)))
     }
 
     #[inline]
@@ -4329,7 +4327,7 @@ pub unsafe fn vec_madd(a: vector_float, b: vector_float, c: vector_float) -> vec
 #[target_feature(enable = "altivec")]
 #[unstable(feature = "stdarch_powerpc", issue = "111145")]
 pub unsafe fn vec_nmsub(a: vector_float, b: vector_float, c: vector_float) -> vector_float {
-    vnmsubfp(a, b, c)
+    sealed::vec_vnmsubfp(a, b, c)
 }
 
 /// Vector Select

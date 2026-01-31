@@ -1654,25 +1654,16 @@ Macros: asm, global_asm, and naked_asm
 :std:`core::arch::naked_asm`.
 
 :dp:`fls_m0SBtonaNppV`
-The :t:`[assembly instruction]s`, :t:`[register argument]s`,
-:t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and
-:s:`GlobalAsmArguments` may be preceded by :t:`outer attribute` instances.
+The :t:`[assembly instruction]s`, :t:`[register argument]s`, :t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments` may be preceded by :t:`outer attribute` instances.
 
 :dp:`fls_nLBhw2w6uznH`
-Only the :t:`attribute` :c:`cfg` and the :t:`attribute` :c:`cfg_attr` are
-accepted on inline assembly arguments. All other attributes are rejected.
+Only the :t:`attribute` :c:`cfg` and the :t:`attribute` :c:`cfg_attr` are accepted on inline assembly arguments. All other attributes are rejected.
 
 :dp:`fls_xzDPz2zfRfoI`
-If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or
-:t:`assembly option` is annotated with :c:`cfg` or :c:`cfg_attr` and the related
-:t:`configuration predicate` evaluates to ``false``, the annotated argument is
-not considered part of the related macro invocation, consistent with
-:t:`conditional compilation`.
+If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` is annotated with :c:`cfg` or :c:`cfg_attr` and the related :t:`configuration predicate` evaluates to ``false``, the annotated argument is not considered part of the related macro invocation, consistent with :t:`conditional compilation`.
 
 :dp:`fls_cTEiqjf6haEg`
-It is a static error for a :t:`register argument`, :t:`ABI clobber`, or
-:t:`assembly option` to appear before the first :t:`assembly instruction`, even
-if the argument is ignored by :t:`conditional compilation`.
+It is a static error for a :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` to appear before the first :t:`assembly instruction`, even if the argument is ignored by :t:`conditional compilation`.
 
 :dp:`fls_1ikzov7cxic1`
 When invoking :t:`macro` :std:`core::arch::asm`, the :s:`DelimitedTokenTree` of

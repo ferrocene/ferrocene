@@ -244,7 +244,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         };
 
         loop {
-            debug!("check adts: src={src_inner:?}, dst={dst_inner:?}");
+            debug!("peel_tys step: src={src_inner:?}, dst={dst_inner:?}");
             match (src_inner.kind(), dst_inner.kind()) {
                 (_, ty::Dynamic(..)) => return Some((src_inner, dst_inner)),
                 // There's only ever one unsizing coercion at once.
@@ -325,20 +325,23 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     ) -> Option<DefId> {
         let tcx = self.linter.tcx;
 
-        // TODO: I don't think this handles default functions in trait items
-        for &impl_fn in tcx.associated_item_def_ids(impl_block) {
-            if !tcx.def_kind(impl_fn).is_fn_like() {
-                debug!("ignoring non-fn {impl_fn:?}");
+        let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
+        for trait_item in tcx.associated_item_def_ids(tcx.impl_trait_id(impl_block)) {
+            debug!("considering {trait_item:?}");
+            if !tcx.def_kind(trait_item).is_fn_like() {
+                debug!("ignoring non-fn {trait_item:?}");
                 continue;
             }
 
-            if let Some(instance) = self.try_instantiate(impl_fn, generics, span).instance() {
-                if matches!(
-                    item_is_validated(tcx, instance.def_id()),
-                    ValidatedStatus::Validated { .. }
-                ) {
-                    continue;
-                }
+            // Need this map so we consider default trait fns even if they're not mentioned in the
+            // impl block.
+            let impl_fn = *trait_to_impl_map.get(trait_item).unwrap_or(trait_item);
+
+            if matches!(
+                item_is_validated(tcx, impl_fn),
+                ValidatedStatus::Validated { .. }
+            ) {
+                continue;
             }
 
             debug!("found unvalidated method {impl_fn:?}");

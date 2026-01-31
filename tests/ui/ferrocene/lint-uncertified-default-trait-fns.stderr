@@ -1,5 +1,5 @@
 error: validated function calls an unvalidated method
-  --> $DIR/lint-uncertified-default-trait-fns.rs:33:5
+  --> $DIR/lint-uncertified-default-trait-fns.rs:34:5
    |
 LL |     fn bar(&self) {}
    |        --- `<OverridesDefault as CertifiedDefault>::bar` is unvalidated
@@ -8,7 +8,7 @@ LL |     OverridesDefault.bar();
    |     ^^^^^^^^^^^^^^^^^^^^
    |
 note: `test` is validated
-  --> $DIR/lint-uncertified-default-trait-fns.rs:31:4
+  --> $DIR/lint-uncertified-default-trait-fns.rs:32:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -21,7 +21,7 @@ LL | #![deny(ferrocene::uncertified)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/lint-uncertified-default-trait-fns.rs:34:5
+  --> $DIR/lint-uncertified-default-trait-fns.rs:35:5
    |
 LL |     fn foo(&self) {}
    |        --- `<UsesDefault as UncertifiedDefault>::foo` is unvalidated
@@ -29,5 +29,31 @@ LL |     fn foo(&self) {}
 LL |     UsesDefault.foo();
    |     ^^^^^^^^^^^^^^^
 
-error: aborting due to 2 previous errors
+error: validated function possibly calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:39:38
+   |
+LL |     fn foo(&self) {}
+   |        --- `UncertifiedDefault::foo` is unvalidated
+...
+LL |     let _: &dyn UncertifiedDefault = &UsesDefault;
+   |                                      ^^^^^^^^^^^^
+   |
+   = note: Ferrocene cannot tell whether `UsesDefault`'s implementation of `UncertifiedDefault` is validated
+   = note: as a precaution, it must assume `UncertifiedDefault::foo` is unvalidated
+   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call `UncertifiedDefault::foo`
+
+error: validated function possibly calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:42:36
+   |
+LL |     fn bar(&self) {}
+   |        --- `<OverridesDefault as CertifiedDefault>::bar` is unvalidated
+...
+LL |     let _: &dyn CertifiedDefault = &OverridesDefault;
+   |                                    ^^^^^^^^^^^^^^^^^
+   |
+   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call `<OverridesDefault as CertifiedDefault>::bar`
+
+error: aborting due to 4 previous errors
 

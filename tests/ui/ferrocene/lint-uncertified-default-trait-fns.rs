@@ -21,6 +21,7 @@ impl UncertifiedDefault for OverridesDefault {
 }
 impl CertifiedDefault for OverridesDefault {
     fn bar(&self) {} //~ NOTE unvalidated
+    //~^ NOTE unvalidated
 }
 
 struct UsesDefault;
@@ -33,4 +34,13 @@ fn test() { //~ NOTE is validated
     OverridesDefault.bar(); //~ ERROR unvalidated
     UsesDefault.foo(); //~ ERROR unvalidated
     UsesDefault.bar(); // ok
+
+    let _: &dyn UncertifiedDefault = &OverridesDefault; // ok
+    let _: &dyn UncertifiedDefault = &UsesDefault; //~ ERROR unvalidated
+    //~^ NOTE trait object
+    //~^^ NOTE must assume
+    let _: &dyn CertifiedDefault = &OverridesDefault; //~ ERROR unvalidated
+    //~^ NOTE trait object
+    //~^^ NOTE must assume
+    let _: &dyn CertifiedDefault = &UsesDefault; // ok
 }

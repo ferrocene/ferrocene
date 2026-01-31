@@ -172,7 +172,7 @@ mod tests {
     use stdarch_test::simd_test;
 
     #[simd_test(enable = "sse2")]
-    unsafe fn test_mm_cvtsd_si64() {
+    fn test_mm_cvtsd_si64() {
         let r = _mm_cvtsd_si64(_mm_setr_pd(-2.0, 5.0));
         assert_eq!(r, -2_i64);
 
@@ -181,20 +181,20 @@ mod tests {
     }
 
     #[simd_test(enable = "sse2")]
-    unsafe fn test_mm_cvtsd_si64x() {
+    fn test_mm_cvtsd_si64x() {
         let r = _mm_cvtsd_si64x(_mm_setr_pd(f64::NAN, f64::NAN));
         assert_eq!(r, i64::MIN);
     }
 
     #[simd_test(enable = "sse2")]
-    unsafe fn test_mm_cvttsd_si64() {
+    fn test_mm_cvttsd_si64() {
         let a = _mm_setr_pd(-1.1, 2.2);
         let r = _mm_cvttsd_si64(a);
         assert_eq!(r, -1_i64);
     }
 
     #[simd_test(enable = "sse2")]
-    unsafe fn test_mm_cvttsd_si64x() {
+    fn test_mm_cvttsd_si64x() {
         let a = _mm_setr_pd(f64::NEG_INFINITY, f64::NAN);
         let r = _mm_cvttsd_si64x(a);
         assert_eq!(r, i64::MIN);
@@ -204,28 +204,30 @@ mod tests {
     // Miri cannot support this until it is clear how it fits in the Rust memory model
     // (non-temporal store)
     #[cfg_attr(miri, ignore)]
-    unsafe fn test_mm_stream_si64() {
+    fn test_mm_stream_si64() {
         let a: i64 = 7;
         let mut mem = boxed::Box::<i64>::new(-1);
-        _mm_stream_si64(ptr::addr_of_mut!(*mem), a);
+        unsafe {
+            _mm_stream_si64(ptr::addr_of_mut!(*mem), a);
+        }
         _mm_sfence();
         assert_eq!(a, *mem);
     }
 
     #[simd_test(enable = "sse2")]
-    const unsafe fn test_mm_cvtsi64_si128() {
+    const fn test_mm_cvtsi64_si128() {
         let r = _mm_cvtsi64_si128(5);
         assert_eq_m128i(r, _mm_setr_epi64x(5, 0));
     }
 
     #[simd_test(enable = "sse2")]
-    const unsafe fn test_mm_cvtsi128_si64() {
+    const fn test_mm_cvtsi128_si64() {
         let r = _mm_cvtsi128_si64(_mm_setr_epi64x(5, 0));
         assert_eq!(r, 5);
     }
 
     #[simd_test(enable = "sse2")]
-    const unsafe fn test_mm_cvtsi64_sd() {
+    const fn test_mm_cvtsi64_sd() {
         let a = _mm_set1_pd(3.5);
         let r = _mm_cvtsi64_sd(a, 5);
         assert_eq_m128d(r, _mm_setr_pd(5.0, 3.5));

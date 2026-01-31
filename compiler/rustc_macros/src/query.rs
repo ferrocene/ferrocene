@@ -93,7 +93,7 @@ struct QueryModifiers {
     cache: Option<(Option<Pat>, Block)>,
 
     /// A cycle error for this query aborting the compilation with a fatal error.
-    fatal_cycle: Option<Ident>,
+    cycle_fatal: Option<Ident>,
 
     /// A cycle error results in a delay_bug call
     cycle_delay_bug: Option<Ident>,
@@ -136,7 +136,7 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
     let mut arena_cache = None;
     let mut cache = None;
     let mut desc = None;
-    let mut fatal_cycle = None;
+    let mut cycle_fatal = None;
     let mut cycle_delay_bug = None;
     let mut cycle_stash = None;
     let mut no_hash = None;
@@ -189,8 +189,8 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
             try_insert!(cache = (args, block));
         } else if modifier == "arena_cache" {
             try_insert!(arena_cache = modifier);
-        } else if modifier == "fatal_cycle" {
-            try_insert!(fatal_cycle = modifier);
+        } else if modifier == "cycle_fatal" {
+            try_insert!(cycle_fatal = modifier);
         } else if modifier == "cycle_delay_bug" {
             try_insert!(cycle_delay_bug = modifier);
         } else if modifier == "cycle_stash" {
@@ -220,7 +220,7 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
         arena_cache,
         cache,
         desc,
-        fatal_cycle,
+        cycle_fatal,
         cycle_delay_bug,
         cycle_stash,
         no_hash,
@@ -280,31 +280,21 @@ fn add_query_desc_cached_impl(
         let crate::query::Providers { #name: _, .. };
     };
 
-    // Find out if we should cache the query on disk
-    let cache = if let Some((args, expr)) = modifiers.cache.as_ref() {
+    // Generate a function to check whether we should cache the query to disk, for some key.
+    if let Some((args, expr)) = modifiers.cache.as_ref() {
         let tcx = args.as_ref().map(|t| quote! { #t }).unwrap_or_else(|| quote! { _ });
         // expr is a `Block`, meaning that `{ #expr }` gets expanded
         // to `{ { stmts... } }`, which triggers the `unused_braces` lint.
         // we're taking `key` by reference, but some rustc types usually prefer being passed by value
-        quote! {
+        cached.extend(quote! {
             #[allow(unused_variables, unused_braces, rustc::pass_by_value)]
             #[inline]
             pub fn #name<'tcx>(#tcx: TyCtxt<'tcx>, #key: &crate::query::queries::#name::Key<'tcx>) -> bool {
                 #ra_hint
                 #expr
             }
-        }
-    } else {
-        quote! {
-            // we're taking `key` by reference, but some rustc types usually prefer being passed by value
-            #[allow(rustc::pass_by_value)]
-            #[inline]
-            pub fn #name<'tcx>(_: TyCtxt<'tcx>, _: &crate::query::queries::#name::Key<'tcx>) -> bool {
-                #ra_hint
-                false
-            }
-        }
-    };
+        });
+    }
 
     let (tcx, desc) = &modifiers.desc;
     let tcx = tcx.as_ref().map_or_else(|| quote! { _ }, |t| quote! { #t });
@@ -321,10 +311,6 @@ fn add_query_desc_cached_impl(
 
     descs.extend(quote! {
         #desc
-    });
-
-    cached.extend(quote! {
-        #cache
     });
 }
 
@@ -366,8 +352,8 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
         }
 
         passthrough!(
-            fatal_cycle,
             arena_cache,
+            cycle_fatal,
             cycle_delay_bug,
             cycle_stash,
             no_hash,
@@ -378,9 +364,6 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
             return_result_from_ensure_ok,
         );
 
-        if modifiers.cache.is_some() {
-            attributes.push(quote! { (cache) });
-        }
         // Pass on the cache modifier
         if modifiers.cache.is_some() {
             attributes.push(quote! { (cache) });

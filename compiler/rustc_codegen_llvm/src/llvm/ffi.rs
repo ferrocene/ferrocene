@@ -167,6 +167,7 @@ pub(crate) enum CallConv {
     PreserveMost = 14,
     PreserveAll = 15,
     Tail = 18,
+    PreserveNone = 21,
     X86StdcallCallConv = 64,
     X86FastcallCallConv = 65,
     ArmAapcsCallConv = 67,
@@ -1675,7 +1676,11 @@ mod Offload {
             _M: &'a Module,
             _host_out: *const c_char,
         ) -> bool;
-        pub(crate) fn LLVMRustOffloadMapper<'a>(OldFn: &'a Value, NewFn: &'a Value);
+        pub(crate) fn LLVMRustOffloadMapper<'a>(
+            OldFn: &'a Value,
+            NewFn: &'a Value,
+            RebuiltArgs: *const &Value,
+        );
     }
 }
 
@@ -1702,7 +1707,11 @@ mod Offload_fallback {
         unimplemented!("This rustc version was not built with LLVM Offload support!");
     }
     #[allow(unused_unsafe)]
-    pub(crate) unsafe fn LLVMRustOffloadMapper<'a>(_OldFn: &'a Value, _NewFn: &'a Value) {
+    pub(crate) unsafe fn LLVMRustOffloadMapper<'a>(
+        _OldFn: &'a Value,
+        _NewFn: &'a Value,
+        _RebuiltArgs: *const &Value,
+    ) {
         unimplemented!("This rustc version was not built with LLVM Offload support!");
     }
 }
@@ -1959,6 +1968,7 @@ unsafe extern "C" {
         Metadata: &'a Metadata,
     );
     pub(crate) fn LLVMRustIsNonGVFunctionPointerTy(Val: &Value) -> bool;
+    pub(crate) fn LLVMRustStripPointerCasts<'a>(Val: &'a Value) -> &'a Value;
 
     // Operations on scalar constants
     pub(crate) fn LLVMRustConstIntGetZExtValue(ConstantVal: &ConstantInt, Value: &mut u64) -> bool;
@@ -2338,6 +2348,7 @@ unsafe extern "C" {
         DebugInfoCompression: CompressionKind,
         UseEmulatedTls: bool,
         UseWasmEH: bool,
+        LargeDataThreshold: u64,
     ) -> *mut TargetMachine;
 
     pub(crate) fn LLVMRustAddLibraryInfo<'a>(
@@ -2443,8 +2454,6 @@ unsafe extern "C" {
 
     pub(crate) fn LLVMRustPositionBuilderPastAllocas<'a>(B: &Builder<'a>, Fn: &'a Value);
     pub(crate) fn LLVMRustPositionBuilderAtStart<'a>(B: &Builder<'a>, BB: &'a BasicBlock);
-    pub(crate) fn LLVMRustGetInsertPoint<'a>(B: &Builder<'a>) -> &'a Value;
-    pub(crate) fn LLVMRustRestoreInsertPoint<'a>(B: &Builder<'a>, IP: &'a Value);
 
     pub(crate) fn LLVMRustSetModulePICLevel(M: &Module);
     pub(crate) fn LLVMRustSetModulePIELevel(M: &Module);
@@ -2454,7 +2463,7 @@ unsafe extern "C" {
     pub(crate) fn LLVMRustModuleBufferLen(p: &ModuleBuffer) -> usize;
     pub(crate) fn LLVMRustModuleBufferFree(p: &'static mut ModuleBuffer);
     pub(crate) fn LLVMRustModuleCost(M: &Module) -> u64;
-    pub(crate) fn LLVMRustModuleInstructionStats(M: &Module, Str: &RustString);
+    pub(crate) fn LLVMRustModuleInstructionStats(M: &Module) -> u64;
 
     pub(crate) fn LLVMRustThinLTOBufferCreate(
         M: &Module,

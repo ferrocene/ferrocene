@@ -539,10 +539,19 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                     );
                 }
                 MustUsePath::Def(span, def_id, reason) => {
-                    let span = span.find_ancestor_not_from_macro().unwrap_or(*span);
+                    let ancenstor_span = span.find_ancestor_not_from_macro().unwrap_or(*span);
+                    let is_redundant_let_ignore = cx
+                        .sess()
+                        .source_map()
+                        .span_to_prev_source(ancenstor_span)
+                        .ok()
+                        .map(|prev| prev.trim_end().ends_with("let _ ="))
+                        .unwrap_or(false);
+                    let suggestion_span =
+                        if is_redundant_let_ignore { *span } else { ancenstor_span };
                     cx.emit_span_lint(
                         UNUSED_MUST_USE,
-                        span,
+                        ancenstor_span,
                         UnusedDef {
                             pre: descr_pre,
                             post: descr_post,
@@ -551,11 +560,13 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                             note: *reason,
                             suggestion: (!is_inner).then_some(if expr_is_from_block {
                                 UnusedDefSuggestion::BlockTailExpr {
-                                    before_span: span.shrink_to_lo(),
-                                    after_span: span.shrink_to_hi(),
+                                    before_span: suggestion_span.shrink_to_lo(),
+                                    after_span: suggestion_span.shrink_to_hi(),
                                 }
                             } else {
-                                UnusedDefSuggestion::NormalExpr { span: span.shrink_to_lo() }
+                                UnusedDefSuggestion::NormalExpr {
+                                    span: suggestion_span.shrink_to_lo(),
+                                }
                             }),
                         },
                     );
@@ -794,7 +805,10 @@ trait UnusedDelimLint {
 
                 ExprKind::Break(_label, None) => return false,
                 ExprKind::Break(_label, Some(break_expr)) => {
-                    return matches!(break_expr.kind, ExprKind::Block(..));
+                    // `if (break 'label i) { ... }` removing parens would make `i { ... }`
+                    // be parsed as a struct literal, so keep parentheses if the break value
+                    // ends with a path (which could be mistaken for a struct name).
+                    return matches!(break_expr.kind, ExprKind::Block(..) | ExprKind::Path(..));
                 }
 
                 ExprKind::Range(_lhs, Some(rhs), _limits) => {
@@ -1190,6 +1204,8 @@ impl UnusedParens {
                 // `&(a..=b)`, there is a recursive `check_pat` on `a` and `b`, but we will assume
                 // that if there are unnecessary parens they serve a purpose of readability.
                 PatKind::Range(..) => return,
+                // Parentheses may be necessary to disambiguate precedence in guard patterns.
+                PatKind::Guard(..) => return,
                 // Avoid `p0 | .. | pn` if we should.
                 PatKind::Or(..) if avoid_or => return,
                 // Avoid `mut x` and `mut x @ p` if we should:

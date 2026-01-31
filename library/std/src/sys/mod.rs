@@ -1,16 +1,9 @@
 #![allow(unsafe_op_in_unsafe_fn)]
 
-/// The configure builtins provides runtime support compiler-builtin features
-/// which require dynamic initialization to work as expected, e.g. aarch64
-/// outline-atomics.
-mod configure_builtins;
-
-/// The PAL (platform abstraction layer) contains platform-specific abstractions
-/// for implementing the features in the other submodules, e.g. UNIX file
-/// descriptors.
-mod pal;
-
 mod alloc;
+mod configure_builtins;
+mod helpers;
+mod pal;
 mod personality;
 
 pub mod args;
@@ -33,6 +26,7 @@ pub mod stdio;
 pub mod sync;
 pub mod thread;
 pub mod thread_local;
+pub mod time;
 
 // FIXME(117276): remove this, move feature implementations into individual
 //                submodules.

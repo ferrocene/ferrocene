@@ -601,7 +601,7 @@ pub(crate) struct ProcMacroDeriveResolutionFallback {
     #[label]
     pub span: Span,
     pub ns_descr: &'static str,
-    pub ident: Ident,
+    pub ident: Symbol,
 }
 
 #[derive(LintDiagnostic)]
@@ -865,6 +865,19 @@ pub(crate) struct UnexpectedResChangeTyToConstParamSugg {
     pub span: Span,
     #[applicability]
     pub applicability: Applicability,
+}
+
+#[derive(Subdiagnostic)]
+#[multipart_suggestion(
+    resolve_unexpected_res_change_ty_to_const_param_sugg,
+    applicability = "has-placeholders",
+    style = "verbose"
+)]
+pub(crate) struct UnexpectedResChangeTyParamToConstParamSugg {
+    #[suggestion_part(code = "const ")]
+    pub before: Span,
+    #[suggestion_part(code = ": /* Type */")]
+    pub after: Span,
 }
 
 #[derive(Subdiagnostic)]
@@ -1138,7 +1151,7 @@ pub(crate) struct CannotUseThroughAnImport {
 pub(crate) struct NameReservedInAttributeNamespace {
     #[primary_span]
     pub(crate) span: Span,
-    pub(crate) ident: Ident,
+    pub(crate) ident: Symbol,
 }
 
 #[derive(Diagnostic)]
@@ -1451,6 +1464,7 @@ pub(crate) struct UnknownDiagnosticAttributeTypoSugg {
 pub(crate) struct Ambiguity {
     pub ident: Ident,
     pub kind: &'static str,
+    pub help: Option<&'static [&'static str]>,
     pub b1_note: Spanned<String>,
     pub b1_help_msgs: Vec<String>,
     pub b2_note: Spanned<String>,
@@ -1463,6 +1477,11 @@ impl Ambiguity {
         diag.span_label(self.ident.span, "ambiguous name");
         diag.note(format!("ambiguous because of {}", self.kind));
         diag.span_note(self.b1_note.span, self.b1_note.node);
+        if let Some(help) = self.help {
+            for help in help {
+                diag.help(*help);
+            }
+        }
         for help_msg in self.b1_help_msgs {
             diag.help(help_msg);
         }

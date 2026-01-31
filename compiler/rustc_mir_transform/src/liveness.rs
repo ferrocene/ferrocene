@@ -986,7 +986,7 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
             // warn twice, for the unused local and for the unused assignment. Therefore, we remove
             // from the list of assignments the ones that happen at the definition site.
             statements.retain(|source_info, _| {
-                source_info.span.find_ancestor_inside(binding.pat_span).is_none()
+                !binding.introductions.iter().any(|intro| intro.span == source_info.span)
             });
 
             // Extra assignments that we recognize thanks to the initialization span. We need to
@@ -1112,6 +1112,11 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                 let Some(hir_id) = source_info.scope.lint_root(&self.body.source_scopes) else {
                     continue;
                 };
+
+                // By convention, underscore-prefixed bindings are allowed to be unused explicitly
+                if name.as_str().starts_with('_') {
+                    break;
+                }
 
                 match kind {
                     AccessKind::Assign => {

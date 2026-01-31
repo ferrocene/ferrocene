@@ -309,6 +309,7 @@
 #![feature(staged_api)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance_lints)]
+#![feature(target_feature_inline_always)]
 #![feature(thread_local)]
 #![feature(try_blocks)]
 #![feature(try_trait_v2)]
@@ -326,6 +327,7 @@
 #![feature(const_convert)]
 #![feature(core_intrinsics)]
 #![feature(core_io_borrowed_buf)]
+#![feature(cstr_display)]
 #![feature(drop_guard)]
 #![feature(duration_constants)]
 #![feature(error_generic_member_access)]
@@ -367,7 +369,6 @@
 //
 // Library features (alloc):
 // tidy-alphabetical-start
-#![feature(alloc_layout_extra)]
 #![feature(allocator_api)]
 #![feature(clone_from_ref)]
 #![feature(get_mut_unchecked)]
@@ -468,7 +469,9 @@ extern crate std as realstd;
 
 // The standard macros that are not built-in to the compiler.
 #[macro_use]
-mod macros;
+#[doc(hidden)]
+#[unstable(feature = "std_internals", issue = "none")]
+pub mod macros;
 
 // The runtime entry point and a few unstable public functions used by the
 // compiler
@@ -681,9 +684,7 @@ pub mod arch {
 #[stable(feature = "simd_x86", since = "1.27.0")]
 pub use std_detect::is_x86_feature_detected;
 
-// Platform-abstraction modules
 mod sys;
-mod sys_common;
 
 pub mod alloc;
 
@@ -713,9 +714,9 @@ pub use core::todo;
 // Re-export built-in macros defined through core.
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 pub use core::{
-    assert, assert_matches, cfg, column, compile_error, concat, const_format_args, env, file,
-    format_args, format_args_nl, include, include_bytes, include_str, line, log_syntax,
-    module_path, option_env, stringify, trace_macros,
+    assert, cfg, column, compile_error, concat, const_format_args, env, file, format_args,
+    format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
+    stringify, trace_macros,
 };
 // Re-export macros defined in core.
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -724,6 +725,8 @@ pub use core::{
     assert_eq, assert_ne, debug_assert, debug_assert_eq, debug_assert_ne, r#try, unimplemented,
     unreachable, write, writeln,
 };
+#[unstable(feature = "assert_matches", issue = "82775")]
+pub use core::{assert_matches, debug_assert_matches};
 
 // Re-export unstable derive macro defined through core.
 #[unstable(feature = "derive_from", issue = "144889")]

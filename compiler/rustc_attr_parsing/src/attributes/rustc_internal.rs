@@ -1,4 +1,5 @@
 use rustc_ast::{LitIntType, LitKind, MetaItemLit};
+use rustc_hir::attrs::RustcLayoutType;
 use rustc_session::errors;
 
 use super::prelude::*;
@@ -164,21 +165,6 @@ impl<S: Stage> SingleAttributeParser<S> for RustcLegacyConstGenericsParser {
     }
 }
 
-pub(crate) struct RustcLintDiagnosticsParser;
-
-impl<S: Stage> NoArgsAttributeParser<S> for RustcLintDiagnosticsParser {
-    const PATH: &[Symbol] = &[sym::rustc_lint_diagnostics];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
-        Allow(Target::Fn),
-        Allow(Target::Method(MethodKind::Inherent)),
-        Allow(Target::Method(MethodKind::Trait { body: false })),
-        Allow(Target::Method(MethodKind::Trait { body: true })),
-        Allow(Target::Method(MethodKind::TraitImpl)),
-    ]);
-    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcLintDiagnostics;
-}
-
 pub(crate) struct RustcLintOptDenyFieldAccessParser;
 
 impl<S: Stage> SingleAttributeParser<S> for RustcLintOptDenyFieldAccessParser {
@@ -304,4 +290,113 @@ impl<S: Stage> SingleAttributeParser<S> for RustcScalableVectorParser {
         };
         Some(AttributeKind::RustcScalableVector { element_count: Some(n), span: cx.attr_span })
     }
+}
+
+pub(crate) struct RustcHasIncoherentInherentImplsParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcHasIncoherentInherentImplsParser {
+    const PATH: &[Symbol] = &[sym::rustc_has_incoherent_inherent_impls];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Trait),
+        Allow(Target::Struct),
+        Allow(Target::Enum),
+        Allow(Target::Union),
+        Allow(Target::ForeignTy),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcHasIncoherentInherentImpls;
+}
+
+pub(crate) struct RustcNounwindParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcNounwindParser {
+    const PATH: &[Symbol] = &[sym::rustc_nounwind];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Fn),
+        Allow(Target::ForeignFn),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcNounwind;
+}
+
+pub(crate) struct RustcOffloadKernelParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcOffloadKernelParser {
+    const PATH: &[Symbol] = &[sym::rustc_offload_kernel];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Fn)]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcOffloadKernel;
+}
+
+pub(crate) struct RustcLayoutParser;
+
+impl<S: Stage> CombineAttributeParser<S> for RustcLayoutParser {
+    const PATH: &[rustc_span::Symbol] = &[sym::rustc_layout];
+
+    type Item = RustcLayoutType;
+
+    const CONVERT: ConvertFn<Self::Item> = |items, _| AttributeKind::RustcLayout(items);
+
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Struct),
+        Allow(Target::Enum),
+        Allow(Target::Union),
+        Allow(Target::TyAlias),
+    ]);
+
+    const TEMPLATE: AttributeTemplate =
+        template!(List: &["abi", "align", "size", "homogenous_aggregate", "debug"]);
+
+    fn extend(
+        cx: &mut AcceptContext<'_, '_, S>,
+        args: &ArgParser,
+    ) -> impl IntoIterator<Item = Self::Item> {
+        let ArgParser::List(items) = args else {
+            cx.expected_list(cx.attr_span, args);
+            return vec![];
+        };
+
+        let mut result = Vec::new();
+        for item in items.mixed() {
+            let Some(arg) = item.meta_item() else {
+                cx.unexpected_literal(item.span());
+                continue;
+            };
+            let Some(ident) = arg.ident() else {
+                cx.expected_identifier(arg.span());
+                return vec![];
+            };
+            let ty = match ident.name {
+                sym::abi => RustcLayoutType::Abi,
+                sym::align => RustcLayoutType::Align,
+                sym::size => RustcLayoutType::Size,
+                sym::homogeneous_aggregate => RustcLayoutType::HomogenousAggregate,
+                sym::debug => RustcLayoutType::Debug,
+                _ => {
+                    cx.expected_specific_argument(
+                        ident.span,
+                        &[sym::abi, sym::align, sym::size, sym::homogeneous_aggregate, sym::debug],
+                    );
+                    continue;
+                }
+            };
+            result.push(ty);
+        }
+        result
+    }
+}
+
+pub(crate) struct RustcNonConstTraitMethodParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcNonConstTraitMethodParser {
+    const PATH: &'static [Symbol] = &[sym::rustc_non_const_trait_method];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcNonConstTraitMethod;
 }

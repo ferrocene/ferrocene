@@ -54,7 +54,7 @@ use rustc_middle::ty::adjustment::{
 };
 use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt};
-use rustc_span::{BytePos, DUMMY_SP, DesugaringKind, Span};
+use rustc_span::{BytePos, DUMMY_SP, Span};
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::solve::inspect::{self, InferCtxtProofTreeExt, ProofTreeVisitor};
 use rustc_trait_selection::solve::{Certainty, Goal, NoSolution};
@@ -1365,6 +1365,7 @@ pub fn can_coerce<'tcx>(
 ///   - WARNING: I don't believe this final type is guaranteed to be
 ///     related to your initial `expected_ty` in any particular way,
 ///     although it will typically be a subtype, so you should check it.
+///     Check the note below for more details.
 ///   - Invoking `complete()` may cause us to go and adjust the "adjustments" on
 ///     previously coerced expressions.
 ///
@@ -1378,6 +1379,28 @@ pub fn can_coerce<'tcx>(
 /// }
 /// let final_ty = coerce.complete(fcx);
 /// ```
+///
+/// NOTE: Why does the `expected_ty` participate in the LUB?
+/// When coercing, each branch should use the following expectations for type inference:
+/// - The branch can be coerced to the expected type of the match/if/whatever.
+/// - The branch can be coercion lub'd with the types of the previous branches.
+/// Ideally we'd have some sort of `Expectation::ParticipatesInCoerceLub(ongoing_lub_ty, final_ty)`,
+/// but adding and using this feels very challenging.
+/// What we instead do is to use the expected type of the match/if/whatever as
+/// the initial coercion lub. This allows us to use the lub of "expected type of match" with
+/// "types from previous branches" as the coercion target, which can contains both expectations.
+///
+/// Two concerns with this approach:
+/// - We may have incompatible `final_ty` if that lub is different from the expected
+///   type of the match. However, in this case coercing the final type of the
+///   `CoerceMany` to its expected type would have error'd anyways, so we don't care.
+/// - We may constrain the `expected_ty` too early. For some branches with
+///   type `a` and `b`, we end up with `(a lub expected_ty) lub b` instead of
+///   `(a lub b) lub expected_ty`. They should be the same type. However,
+///   `a lub expected_ty` may constrain inference variables in `expected_ty`.
+///   In this case the difference does matter and we get actually incorrect results.
+/// FIXME: Ideally we'd compute the final type without unnecessarily constraining
+/// the expected type of the match when computing the types of its branches.
 pub(crate) struct CoerceMany<'tcx> {
     expected_ty: Ty<'tcx>,
     final_ty: Option<Ty<'tcx>>,
@@ -1828,10 +1851,9 @@ impl<'tcx> CoerceMany<'tcx> {
                 // If the block is from an external macro or try (`?`) desugaring, then
                 // do not suggest adding a semicolon, because there's nowhere to put it.
                 // See issues #81943 and #87051.
-                && matches!(
-                    cond_expr.span.desugaring_kind(),
-                    None | Some(DesugaringKind::WhileLoop)
-                )
+                // Similarly, if the block is from a loop desugaring, then also do not
+                // suggest adding a semicolon. See issue #150850.
+                && cond_expr.span.desugaring_kind().is_none()
                 && !cond_expr.span.in_external_macro(fcx.tcx.sess.source_map())
                 && !matches!(
                     cond_expr.kind,

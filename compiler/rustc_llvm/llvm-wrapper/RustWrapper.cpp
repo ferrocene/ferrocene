@@ -223,7 +223,12 @@ extern "C" bool LLVMRustOffloadEmbedBufferInModule(LLVMModuleRef HostM,
   return true;
 }
 
-extern "C" void LLVMRustOffloadMapper(LLVMValueRef OldFn, LLVMValueRef NewFn) {
+// Clone OldFn into NewFn, remapping its arguments to RebuiltArgs.
+// Each arg of OldFn is replaced with the corresponding value in RebuiltArgs.
+// For scalars, RebuiltArgs contains the value cast and/or truncated to the
+// original type.
+extern "C" void LLVMRustOffloadMapper(LLVMValueRef OldFn, LLVMValueRef NewFn,
+                                      const LLVMValueRef *RebuiltArgs) {
   llvm::Function *oldFn = llvm::unwrap<llvm::Function>(OldFn);
   llvm::Function *newFn = llvm::unwrap<llvm::Function>(NewFn);
 
@@ -232,15 +237,25 @@ extern "C" void LLVMRustOffloadMapper(LLVMValueRef OldFn, LLVMValueRef NewFn) {
   llvm::ValueToValueMapTy vmap;
   auto newArgIt = newFn->arg_begin();
   newArgIt->setName("dyn_ptr");
-  ++newArgIt; // skip %dyn_ptr
+
+  unsigned i = 0;
   for (auto &oldArg : oldFn->args()) {
-    vmap[&oldArg] = &*newArgIt++;
+    vmap[&oldArg] = unwrap<Value>(RebuiltArgs[i++]);
   }
 
   llvm::SmallVector<llvm::ReturnInst *, 8> returns;
   llvm::CloneFunctionInto(newFn, oldFn, vmap,
                           llvm::CloneFunctionChangeType::LocalChangesOnly,
                           returns);
+
+  BasicBlock &entry = newFn->getEntryBlock();
+  BasicBlock &clonedEntry = *std::next(newFn->begin());
+
+  if (entry.getTerminator())
+    entry.getTerminator()->eraseFromParent();
+
+  IRBuilder<> B(&entry);
+  B.CreateBr(&clonedEntry);
 }
 #endif
 
@@ -511,6 +526,12 @@ LLVMRustCreateAttrNoValue(LLVMContextRef C, LLVMRustAttributeKind RustAttr) {
     return wrap(Attribute::getWithCaptureInfo(
         *unwrap(C), CaptureInfo(CaptureComponents::Address |
                                 CaptureComponents::ReadProvenance)));
+  }
+#endif
+#if LLVM_VERSION_GE(23, 0)
+  if (RustAttr == LLVMRustAttributeKind::DeadOnReturn) {
+    return wrap(Attribute::getWithDeadOnReturnInfo(*unwrap(C),
+                                                   llvm::DeadOnReturnInfo()));
   }
 #endif
   return wrap(Attribute::get(*unwrap(C), fromRust(RustAttr)));
@@ -1458,39 +1479,6 @@ extern "C" void LLVMRustPositionAfter(LLVMBuilderRef B, LLVMValueRef Instr) {
   }
 }
 
-extern "C" LLVMValueRef LLVMRustGetInsertPoint(LLVMBuilderRef B) {
-  llvm::IRBuilderBase &IRB = *unwrap(B);
-
-  llvm::IRBuilderBase::InsertPoint ip = IRB.saveIP();
-  llvm::BasicBlock *BB = ip.getBlock();
-
-  if (!BB)
-    return nullptr;
-
-  auto it = ip.getPoint();
-
-  if (it == BB->end())
-    return nullptr;
-
-  llvm::Instruction *I = &*it;
-  return wrap(I);
-}
-
-extern "C" void LLVMRustRestoreInsertPoint(LLVMBuilderRef B,
-                                           LLVMValueRef Instr) {
-  llvm::IRBuilderBase &IRB = *unwrap(B);
-
-  if (!Instr) {
-    llvm::BasicBlock *BB = IRB.GetInsertBlock();
-    if (BB)
-      IRB.SetInsertPoint(BB);
-    return;
-  }
-
-  llvm::Instruction *I = unwrap<llvm::Instruction>(Instr);
-  IRB.SetInsertPoint(I);
-}
-
 extern "C" LLVMValueRef
 LLVMRustGetFunctionCall(LLVMValueRef Fn, const char *Name, size_t NameLen) {
   auto targetName = StringRef(Name, NameLen);
@@ -1572,16 +1560,8 @@ extern "C" uint64_t LLVMRustModuleCost(LLVMModuleRef M) {
   return std::distance(std::begin(f), std::end(f));
 }
 
-extern "C" void LLVMRustModuleInstructionStats(LLVMModuleRef M,
-                                               RustStringRef Str) {
-  auto OS = RawRustStringOstream(Str);
-  auto JOS = llvm::json::OStream(OS);
-  auto Module = unwrap(M);
-
-  JOS.object([&] {
-    JOS.attribute("module", Module->getName());
-    JOS.attribute("total", Module->getInstructionCount());
-  });
+extern "C" uint64_t LLVMRustModuleInstructionStats(LLVMModuleRef M) {
+  return unwrap(M)->getInstructionCount();
 }
 
 // Transfers ownership of DiagnosticHandler unique_ptr to the caller.
@@ -1784,6 +1764,10 @@ extern "C" bool LLVMRustIsNonGVFunctionPointerTy(LLVMValueRef V) {
     return true;
   }
   return false;
+}
+
+extern "C" LLVMValueRef LLVMRustStripPointerCasts(LLVMValueRef V) {
+  return wrap(unwrap(V)->stripPointerCasts());
 }
 
 extern "C" bool LLVMRustLLVMHasZlibCompression() {

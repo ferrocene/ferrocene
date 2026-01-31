@@ -26,10 +26,10 @@ pub enum ConstKind<I: Interner> {
     Infer(InferConst),
 
     /// Bound const variable, used only when preparing a trait query.
-    Bound(BoundVarIndexKind, I::BoundConst),
+    Bound(BoundVarIndexKind, ty::BoundConst<I>),
 
     /// A placeholder const - universally quantified higher-ranked const.
-    Placeholder(I::PlaceholderConst),
+    Placeholder(ty::PlaceholderConst<I>),
 
     /// An unnormalized const item such as an anon const or assoc const or free const item.
     /// Right now anything other than anon consts does not actually work properly but this
@@ -103,7 +103,7 @@ rustc_index::newtype_index! {
 pub enum InferConst {
     /// Infer the value of the const.
     Var(ConstVid),
-    /// A fresh const variable. See `infer::freshen` for more details.
+    /// A fresh const variable. See `TypeFreshener` for more details.
     Fresh(u32),
 }
 

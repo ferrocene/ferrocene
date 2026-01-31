@@ -29,14 +29,15 @@ use crate::{mem, ptr};
 /// mem::forget(boxed); // <-- this is UB!
 /// ```
 ///
-/// Even though the `Box`e's destructor is not run (and thus we don't have a double free bug), this
+/// Even though the `Box`'s destructor is not run (and thus we don't have a double free bug), this
 /// code is still UB. This is because when moving `boxed` into `forget`, its validity invariants
 /// are asserted, causing UB since the `Box` is dangling. The safety comment is as such wrong, as
 /// moving the `boxed` variable as part of the `forget` call *is* a use.
 ///
 /// To fix this we could use `MaybeDangling`:
 ///
-/// ```rust
+// FIXME: remove `no_run` once the semantics are actually implemented
+/// ```rust,no_run
 /// #![feature(maybe_dangling, box_as_ptr)]
 /// # use std::alloc::{dealloc, Layout};
 /// # use std::mem::{self, MaybeDangling};

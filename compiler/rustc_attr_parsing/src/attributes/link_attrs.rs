@@ -141,8 +141,6 @@ impl<S: Stage> CombineAttributeParser<S> for LinkParser {
 
                 macro report_unstable_modifier($feature: ident) {
                     if !features.$feature() {
-                        // FIXME: make this translatable
-                        #[expect(rustc::untranslatable_diagnostic)]
                         feature_err(
                             sess,
                             sym::$feature,
@@ -531,7 +529,7 @@ impl<S: Stage> NoArgsAttributeParser<S> for StdInternalSymbolParser {
         Allow(Target::Static),
         Allow(Target::ForeignStatic),
     ]);
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::StdInternalSymbol;
+    const CREATE: fn(Span) -> AttributeKind = AttributeKind::RustcStdInternalSymbol;
 }
 
 pub(crate) struct LinkOrdinalParser;
@@ -657,4 +655,22 @@ impl<S: Stage> SingleAttributeParser<S> for LinkageParser {
 
         Some(AttributeKind::Linkage(linkage, cx.attr_span))
     }
+}
+
+pub(crate) struct NeedsAllocatorParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for NeedsAllocatorParser {
+    const PATH: &[Symbol] = &[sym::needs_allocator];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::NeedsAllocator;
+}
+
+pub(crate) struct CompilerBuiltinsParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for CompilerBuiltinsParser {
+    const PATH: &[Symbol] = &[sym::compiler_builtins];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::CompilerBuiltins;
 }

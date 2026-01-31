@@ -23,7 +23,11 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Object/ObjectFile.h"
 #include "llvm/Passes/PassBuilder.h"
+#if LLVM_VERSION_GE(22, 0)
+#include "llvm/Plugins/PassPlugin.h"
+#else
 #include "llvm/Passes/PassPlugin.h"
+#endif
 #include "llvm/Passes/StandardInstrumentations.h"
 #include "llvm/Support/CBindingWrapping.h"
 #include "llvm/Support/FileSystem.h"
@@ -301,7 +305,7 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
     bool EmitStackSizeSection, bool RelaxELFRelocations, bool UseInitArray,
     const char *SplitDwarfFile, const char *OutputObjFile,
     LLVMRustCompressionKind DebugInfoCompression, bool UseEmulatedTls,
-    bool UseWasmEH) {
+    bool UseWasmEH, uint64_t LargeDataThreshold) {
 
   auto OptLevel = fromRust(RustOptLevel);
   auto RM = fromRust(RustReloc);
@@ -377,6 +381,11 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
   TargetMachine *TM = TheTarget->createTargetMachine(
       Trip.getTriple(), CPU, Feature, Options, RM, CM, OptLevel);
 #endif
+
+  if (LargeDataThreshold != 0) {
+    TM->setLargeDataThreshold(LargeDataThreshold);
+  }
+
   return wrap(TM);
 }
 

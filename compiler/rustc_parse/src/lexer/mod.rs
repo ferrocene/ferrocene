@@ -36,6 +36,10 @@ use unescape_error_reporting::{emit_unescape_error, escaped_char};
 #[cfg(target_pointer_width = "64")]
 rustc_data_structures::static_assert_size!(rustc_lexer::Token, 12);
 
+const INVISIBLE_CHARACTERS: [char; 8] = [
+    '\u{200b}', '\u{200c}', '\u{2060}', '\u{2061}', '\u{2062}', '\u{00ad}', '\u{034f}', '\u{061c}',
+];
+
 #[derive(Clone, Debug)]
 pub(crate) struct UnmatchedDelim {
     pub found_delim: Option<Delimiter>,
@@ -456,6 +460,7 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                         escaped: escaped_char(c),
                         sugg,
                         null: if c == '\x00' { Some(errors::UnknownTokenNull) } else { None },
+                        invisible: if INVISIBLE_CHARACTERS.contains(&c) { Some(errors::InvisibleCharacter) } else { None },
                         repeat: if repeats > 0 {
                             swallow_next_invalid = repeats;
                             Some(errors::UnknownTokenRepeat { repeats })
@@ -593,9 +598,9 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
         let s = self.str_from(start);
         let real_start = s.find("---").unwrap();
         let frontmatter_opening_pos = BytePos(real_start as u32) + start;
-        let s_new = &s[real_start..];
-        let within = s_new.trim_start_matches('-');
-        let len_opening = s_new.len() - within.len();
+        let real_s = &s[real_start..];
+        let within = real_s.trim_start_matches('-');
+        let len_opening = real_s.len() - within.len();
 
         let frontmatter_opening_end_pos = frontmatter_opening_pos + BytePos(len_opening as u32);
         if has_invalid_preceding_whitespace {
@@ -609,8 +614,8 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
             });
         }
 
+        let line_end = real_s.find('\n').unwrap_or(real_s.len());
         if invalid_infostring {
-            let line_end = s[real_start..].find('\n').unwrap_or(s[real_start..].len());
             let span = self.mk_sp(
                 frontmatter_opening_end_pos,
                 frontmatter_opening_pos + BytePos(line_end as u32),
@@ -618,10 +623,18 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
             self.dcx().emit_err(errors::FrontmatterInvalidInfostring { span });
         }
 
-        let last_line_start = within.rfind('\n').map_or(0, |i| i + 1);
-        let last_line = &within[last_line_start..];
+        let last_line_start = real_s.rfind('\n').map_or(0, |i| i + 1);
+
+        let content = &real_s[line_end..last_line_start];
+        if let Some(cr_offset) = content.find('\r') {
+            let cr_pos = start + BytePos((real_start + line_end + cr_offset) as u32);
+            let span = self.mk_sp(cr_pos, cr_pos + BytePos(1 as u32));
+            self.dcx().emit_err(errors::BareCrFrontmatter { span });
+        }
+
+        let last_line = &real_s[last_line_start..];
         let last_line_trimmed = last_line.trim_start_matches(is_horizontal_whitespace);
-        let last_line_start_pos = frontmatter_opening_end_pos + BytePos(last_line_start as u32);
+        let last_line_start_pos = frontmatter_opening_pos + BytePos(last_line_start as u32);
 
         let frontmatter_span = self.mk_sp(frontmatter_opening_pos, self.pos);
         self.psess.gated_spans.gate(sym::frontmatter, frontmatter_span);

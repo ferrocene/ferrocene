@@ -11,7 +11,6 @@
 
 #![allow(rustc::usage_of_ty_tykind)]
 
-use std::assert_matches::assert_matches;
 use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -31,6 +30,7 @@ use rustc_ast::AttrVec;
 use rustc_ast::expand::typetree::{FncTree, Kind, Type, TypeTree};
 use rustc_ast::node_id::NodeMap;
 pub use rustc_ast_ir::{Movability, Mutability, try_visit};
+use rustc_data_structures::assert_matches;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
@@ -51,7 +51,7 @@ use rustc_query_system::ich::StableHashingContext;
 use rustc_serialize::{Decodable, Encodable};
 pub use rustc_session::lint::RegisteredTools;
 use rustc_span::hygiene::MacroKind;
-use rustc_span::{DUMMY_SP, ExpnId, ExpnKind, Ident, Span, Symbol, sym};
+use rustc_span::{DUMMY_SP, ExpnId, ExpnKind, Ident, Span, Symbol};
 pub use rustc_type_ir::data_structures::{DelayedMap, DelayedSet};
 pub use rustc_type_ir::fast_reject::DeepRejectCtxt;
 #[allow(
@@ -97,13 +97,13 @@ pub use self::predicate::{
     RegionOutlivesPredicate, SubtypePredicate, TraitPredicate, TraitRef, TypeOutlivesPredicate,
 };
 pub use self::region::{
-    BoundRegion, BoundRegionKind, EarlyParamRegion, LateParamRegion, LateParamRegionKind, Region,
-    RegionKind, RegionVid,
+    EarlyParamRegion, LateParamRegion, LateParamRegionKind, Region, RegionKind, RegionVid,
 };
 pub use self::sty::{
-    AliasTy, Article, Binder, BoundTy, BoundTyKind, BoundVariableKind, CanonicalPolyFnSig,
-    CoroutineArgsExt, EarlyBinder, FnSig, InlineConstArgs, InlineConstArgsParts, ParamConst,
-    ParamTy, PolyFnSig, TyKind, TypeAndMut, TypingMode, UpvarArgs,
+    AliasTy, Article, Binder, BoundConst, BoundRegion, BoundRegionKind, BoundTy, BoundTyKind,
+    BoundVariableKind, CanonicalPolyFnSig, CoroutineArgsExt, EarlyBinder, FnSig, InlineConstArgs,
+    InlineConstArgsParts, ParamConst, ParamTy, PlaceholderConst, PlaceholderRegion,
+    PlaceholderType, PolyFnSig, TyKind, TypeAndMut, TypingMode, UpvarArgs,
 };
 pub use self::trait_def::TraitDef;
 pub use self::typeck_results::{
@@ -911,100 +911,6 @@ impl<'tcx> DefinitionSiteHiddenType<'tcx> {
             other_span: other.span,
             sub: sub_diag,
         }))
-    }
-}
-
-pub type PlaceholderRegion<'tcx> = ty::Placeholder<TyCtxt<'tcx>, BoundRegion>;
-
-impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderRegion<'tcx> {
-    type Bound = BoundRegion;
-
-    fn universe(self) -> UniverseIndex {
-        self.universe
-    }
-
-    fn var(self) -> BoundVar {
-        self.bound.var
-    }
-
-    fn with_updated_universe(self, ui: UniverseIndex) -> Self {
-        ty::Placeholder::new(ui, self.bound)
-    }
-
-    fn new(ui: UniverseIndex, bound: BoundRegion) -> Self {
-        ty::Placeholder::new(ui, bound)
-    }
-
-    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
-        ty::Placeholder::new(ui, BoundRegion { var, kind: BoundRegionKind::Anon })
-    }
-}
-
-pub type PlaceholderType<'tcx> = ty::Placeholder<TyCtxt<'tcx>, BoundTy>;
-
-impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderType<'tcx> {
-    type Bound = BoundTy;
-
-    fn universe(self) -> UniverseIndex {
-        self.universe
-    }
-
-    fn var(self) -> BoundVar {
-        self.bound.var
-    }
-
-    fn with_updated_universe(self, ui: UniverseIndex) -> Self {
-        ty::Placeholder::new(ui, self.bound)
-    }
-
-    fn new(ui: UniverseIndex, bound: BoundTy) -> Self {
-        ty::Placeholder::new(ui, bound)
-    }
-
-    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
-        ty::Placeholder::new(ui, BoundTy { var, kind: BoundTyKind::Anon })
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, HashStable)]
-#[derive(TyEncodable, TyDecodable)]
-pub struct BoundConst {
-    pub var: BoundVar,
-}
-
-impl<'tcx> rustc_type_ir::inherent::BoundVarLike<TyCtxt<'tcx>> for BoundConst {
-    fn var(self) -> BoundVar {
-        self.var
-    }
-
-    fn assert_eq(self, var: ty::BoundVariableKind) {
-        var.expect_const()
-    }
-}
-
-pub type PlaceholderConst<'tcx> = ty::Placeholder<TyCtxt<'tcx>, BoundConst>;
-
-impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderConst<'tcx> {
-    type Bound = BoundConst;
-
-    fn universe(self) -> UniverseIndex {
-        self.universe
-    }
-
-    fn var(self) -> BoundVar {
-        self.bound.var
-    }
-
-    fn with_updated_universe(self, ui: UniverseIndex) -> Self {
-        ty::Placeholder::new(ui, self.bound)
-    }
-
-    fn new(ui: UniverseIndex, bound: BoundConst) -> Self {
-        ty::Placeholder::new(ui, bound)
-    }
-
-    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
-        ty::Placeholder::new(ui, BoundConst { var })
     }
 }
 
@@ -1819,37 +1725,6 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    /// Get an attribute from the diagnostic attribute namespace
-    ///
-    /// This function requests an attribute with the following structure:
-    ///
-    /// `#[diagnostic::$attr]`
-    ///
-    /// This function performs feature checking, so if an attribute is returned
-    /// it can be used by the consumer
-    pub fn get_diagnostic_attr(
-        self,
-        did: impl Into<DefId>,
-        attr: Symbol,
-    ) -> Option<&'tcx hir::Attribute> {
-        let did: DefId = did.into();
-        if did.as_local().is_some() {
-            // it's a crate local item, we need to check feature flags
-            if rustc_feature::is_stable_diagnostic_attribute(attr, self.features()) {
-                self.get_attrs_by_path(did, &[sym::diagnostic, sym::do_not_recommend]).next()
-            } else {
-                None
-            }
-        } else {
-            // we filter out unstable diagnostic attributes before
-            // encoding attributes
-            debug_assert!(rustc_feature::encode_cross_crate(attr));
-            self.attrs_for_def(did)
-                .iter()
-                .find(|a| matches!(a.path().as_ref(), [sym::diagnostic, a] if *a == attr))
-        }
-    }
-
     pub fn get_attrs_by_path(
         self,
         did: DefId,
@@ -2211,8 +2086,16 @@ impl<'tcx> TyCtxt<'tcx> {
                     DefKind::Impl { of_trait: false } => {
                         self.constness(def_id) == hir::Constness::Const
                     }
-                    DefKind::Impl { of_trait: true } | DefKind::Trait => {
-                        self.is_conditionally_const(parent_def_id)
+                    DefKind::Impl { of_trait: true } => {
+                        let Some(trait_method_did) = self.trait_item_of(def_id) else {
+                            return false;
+                        };
+                        self.constness(trait_method_did) == hir::Constness::Const
+                            && self.is_conditionally_const(parent_def_id)
+                    }
+                    DefKind::Trait => {
+                        self.constness(def_id) == hir::Constness::Const
+                            && self.is_conditionally_const(parent_def_id)
                     }
                     _ => bug!("unexpected parent item of associated fn: {parent_def_id:?}"),
                 }
@@ -2331,8 +2214,8 @@ impl<'tcx> fmt::Debug for SymbolName<'tcx> {
 
 /// The constituent parts of a type level constant of kind ADT or array.
 #[derive(Copy, Clone, Debug, HashStable)]
-pub struct DestructuredConst<'tcx> {
-    pub variant: Option<VariantIdx>,
+pub struct DestructuredAdtConst<'tcx> {
+    pub variant: VariantIdx,
     pub fields: &'tcx [ty::Const<'tcx>],
 }
 

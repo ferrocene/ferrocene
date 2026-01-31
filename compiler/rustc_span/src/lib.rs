@@ -17,7 +17,6 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
-#![cfg_attr(bootstrap, feature(array_windows))]
 #![cfg_attr(target_arch = "loongarch64", feature(stdarch_loongarch))]
 #![feature(cfg_select)]
 #![feature(core_io_borrowed_buf)]
@@ -39,6 +38,7 @@ use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_serialize::opaque::{FileEncoder, MemDecoder};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use tracing::debug;
+pub use unicode_width::UNICODE_VERSION;
 
 mod caching_source_map_view;
 pub mod source_map;
@@ -63,8 +63,7 @@ pub use span_encoding::{DUMMY_SP, Span};
 
 pub mod symbol;
 pub use symbol::{
-    ByteSymbol, Ident, MacroRulesNormalizedIdent, Macros20NormalizedIdent, STDLIB_STABLE_CRATES,
-    Symbol, kw, sym,
+    ByteSymbol, Ident, MacroRulesNormalizedIdent, STDLIB_STABLE_CRATES, Symbol, kw, sym,
 };
 
 mod analyze_source_file;
@@ -233,6 +232,8 @@ bitflags::bitflags! {
         const DEBUGINFO = 1 << 3;
         /// Apply remappings to coverage information
         const COVERAGE = 1 << 4;
+        /// Apply remappings to documentation information
+        const DOCUMENTATION = 1 << 5;
 
         /// An alias for `macro`, `debuginfo` and `coverage`. This ensures all paths in compiled
         /// executables, libraries and objects are remapped but not elsewhere.
@@ -1305,30 +1306,6 @@ impl Span {
         let mut mark = None;
         *self = self.map_ctxt(|mut ctxt| {
             mark = ctxt.normalize_to_macros_2_0_and_adjust(expn_id);
-            ctxt
-        });
-        mark
-    }
-
-    #[inline]
-    pub fn glob_adjust(&mut self, expn_id: ExpnId, glob_span: Span) -> Option<Option<ExpnId>> {
-        let mut mark = None;
-        *self = self.map_ctxt(|mut ctxt| {
-            mark = ctxt.glob_adjust(expn_id, glob_span);
-            ctxt
-        });
-        mark
-    }
-
-    #[inline]
-    pub fn reverse_glob_adjust(
-        &mut self,
-        expn_id: ExpnId,
-        glob_span: Span,
-    ) -> Option<Option<ExpnId>> {
-        let mut mark = None;
-        *self = self.map_ctxt(|mut ctxt| {
-            mark = ctxt.reverse_glob_adjust(expn_id, glob_span);
             ctxt
         });
         mark
@@ -2830,7 +2807,7 @@ pub trait HashStableContext {
     fn span_data_to_lines_and_cols(
         &mut self,
         span: &SpanData,
-    ) -> Option<(StableSourceFileId, usize, BytePos, usize, BytePos)>;
+    ) -> Option<(&SourceFile, usize, BytePos, usize, BytePos)>;
     fn hashing_controls(&self) -> HashingControls;
 }
 
@@ -2848,6 +2825,8 @@ where
     /// codepoint offsets. For the purpose of the hash that's sufficient.
     /// Also, hashing filenames is expensive so we avoid doing it twice when the
     /// span starts and ends in the same file, which is almost always the case.
+    ///
+    /// IMPORTANT: changes to this method should be reflected in implementations of `SpanEncoder`.
     fn hash_stable(&self, ctx: &mut CTX, hasher: &mut StableHasher) {
         const TAG_VALID_SPAN: u8 = 0;
         const TAG_INVALID_SPAN: u8 = 1;
@@ -2866,15 +2845,17 @@ where
             return;
         }
 
-        if let Some(parent) = span.parent {
-            let def_span = ctx.def_span(parent).data_untracked();
-            if def_span.contains(span) {
-                // This span is enclosed in a definition: only hash the relative position.
-                Hash::hash(&TAG_RELATIVE_SPAN, hasher);
-                (span.lo - def_span.lo).to_u32().hash_stable(ctx, hasher);
-                (span.hi - def_span.lo).to_u32().hash_stable(ctx, hasher);
-                return;
-            }
+        let parent = span.parent.map(|parent| ctx.def_span(parent).data_untracked());
+        if let Some(parent) = parent
+            && parent.contains(span)
+        {
+            // This span is enclosed in a definition: only hash the relative position.
+            // This catches a subset of the cases from the `file.contains(parent.lo)`,
+            // But we can do this check cheaply without the expensive `span_data_to_lines_and_cols` query.
+            Hash::hash(&TAG_RELATIVE_SPAN, hasher);
+            (span.lo - parent.lo).to_u32().hash_stable(ctx, hasher);
+            (span.hi - parent.lo).to_u32().hash_stable(ctx, hasher);
+            return;
         }
 
         // If this is not an empty or invalid span, we want to hash the last
@@ -2886,8 +2867,19 @@ where
             return;
         };
 
+        if let Some(parent) = parent
+            && file.contains(parent.lo)
+        {
+            // This span is relative to another span in the same file,
+            // only hash the relative position.
+            Hash::hash(&TAG_RELATIVE_SPAN, hasher);
+            Hash::hash(&(span.lo.0.wrapping_sub(parent.lo.0)), hasher);
+            Hash::hash(&(span.hi.0.wrapping_sub(parent.lo.0)), hasher);
+            return;
+        }
+
         Hash::hash(&TAG_VALID_SPAN, hasher);
-        Hash::hash(&file, hasher);
+        Hash::hash(&file.stable_id, hasher);
 
         // Hash both the length and the end location (line/column) of a span. If we
         // hash only the length, for example, then two otherwise equal spans with

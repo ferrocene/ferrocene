@@ -3,7 +3,6 @@
 //! type, and vice versa.
 
 use std::hash::{Hash, Hasher};
-use std::ops::Deref;
 use std::{fmt, str};
 
 use rustc_arena::DroplessArena;
@@ -162,6 +161,7 @@ symbols! {
         Arc,
         ArcWeak,
         Argument,
+        Array,
         ArrayIntoIter,
         AsMut,
         AsRef,
@@ -185,10 +185,12 @@ symbols! {
         AtomicU64,
         AtomicU128,
         AtomicUsize,
+        AutoTrait,
         BTreeEntry,
         BTreeMap,
         BTreeSet,
         BinaryHeap,
+        Bool,
         Borrow,
         BorrowMut,
         Break,
@@ -201,6 +203,7 @@ symbols! {
         Capture,
         Cell,
         Center,
+        Char,
         Child,
         Cleanup,
         Clone,
@@ -228,6 +231,7 @@ symbols! {
         Display,
         DoubleEndedIterator,
         Duration,
+        DynTrait,
         Encodable,
         Encoder,
         Enumerate,
@@ -237,6 +241,7 @@ symbols! {
         Error,
         File,
         FileType,
+        Float,
         FmtArgumentsNew,
         FmtWrite,
         Fn,
@@ -262,9 +267,11 @@ symbols! {
         IndexOutput,
         Input,
         Instant,
+        Int,
         Into,
         IntoFuture,
         IntoIterator,
+        IntoIteratorItem,
         IoBufRead,
         IoLines,
         IoRead,
@@ -302,6 +309,7 @@ symbols! {
         Ordering,
         OsStr,
         OsString,
+        Other,
         Output,
         Param,
         ParamSet,
@@ -337,6 +345,7 @@ symbols! {
         RefCell,
         RefCellRef,
         RefCellRefMut,
+        Reference,
         Relaxed,
         Release,
         Result,
@@ -355,11 +364,13 @@ symbols! {
         Send,
         SeqCst,
         Sized,
+        Slice,
         SliceIndex,
         SliceIter,
         Some,
         SpanCtxt,
         Stdin,
+        Str,
         String,
         StructuralPartialEq,
         SubdiagMessage,
@@ -380,6 +391,7 @@ symbols! {
         TryCapturePrintable,
         TryFrom,
         TryInto,
+        Tuple,
         Ty,
         TyCtxt,
         TyKind,
@@ -454,6 +466,7 @@ symbols! {
         alu32,
         always,
         amdgpu,
+        amdgpu_dispatch_ptr,
         analysis,
         and,
         and_then,
@@ -472,6 +485,8 @@ symbols! {
         arith_offset,
         arm,
         arm64ec,
+        arm_a32: "arm::a32",
+        arm_t32: "arm::t32",
         arm_target_feature,
         array,
         as_dash_needed: "as-needed",
@@ -583,6 +598,7 @@ symbols! {
         bitor,
         bitor_assign,
         bitreverse,
+        bits,
         bitxor,
         bitxor_assign,
         black_box,
@@ -717,6 +733,7 @@ symbols! {
         console,
         const_allocate,
         const_async_blocks,
+        const_block_items,
         const_closures,
         const_compare_raw_pointers,
         const_constructor,
@@ -930,10 +947,11 @@ symbols! {
         eh_catch_typeinfo,
         eh_personality,
         eii,
-        eii_extern_target,
+        eii_declaration,
         eii_impl,
         eii_internals,
         eii_shared_macro,
+        element_ty,
         emit,
         emit_enum,
         emit_enum_variant,
@@ -1280,6 +1298,7 @@ symbols! {
         io_stdout,
         irrefutable_let_patterns,
         is,
+        is_auto,
         is_val_statically_known,
         isa_attribute,
         isize,
@@ -1508,6 +1527,7 @@ symbols! {
         must_use,
         mut_preserve_binding_mode_2024,
         mut_ref,
+        mutable,
         naked,
         naked_asm,
         naked_functions,
@@ -1718,7 +1738,6 @@ symbols! {
         postfix_match,
         powerpc,
         powerpc64,
-        powerpc64le,
         powerpc_target_feature,
         powf16,
         powf32,
@@ -1733,6 +1752,7 @@ symbols! {
         precise_capturing_in_traits,
         precise_pointer_size_matching,
         precision,
+        predicates,
         pref_align_of,
         prefetch_read_data,
         prefetch_read_instruction,
@@ -1786,6 +1806,8 @@ symbols! {
         ptr_slice_from_raw_parts_mut,
         ptr_swap,
         ptr_swap_nonoverlapping,
+        ptr_without_provenance,
+        ptr_without_provenance_mut,
         ptr_write,
         ptr_write_bytes,
         ptr_write_unaligned,
@@ -1900,6 +1922,7 @@ symbols! {
         rust_future,
         rust_logo,
         rust_out,
+        rust_preserve_none_cc,
         rustc,
         rustc_abi,
         // FIXME(#82232, #143834): temporary name to mitigate `#[align]` nameres ambiguity
@@ -1934,7 +1957,6 @@ symbols! {
         rustc_diagnostic_macros,
         rustc_dirty,
         rustc_do_not_const_check,
-        rustc_do_not_implement_via_object,
         rustc_doc_primitive,
         rustc_driver,
         rustc_dummy,
@@ -1943,8 +1965,9 @@ symbols! {
         rustc_dump_predicates,
         rustc_dump_user_args,
         rustc_dump_vtable,
+        rustc_dyn_incompatible_trait,
         rustc_effective_visibility,
-        rustc_eii_extern_item,
+        rustc_eii_foreign_item,
         rustc_evaluate_where_clauses,
         rustc_expected_cgu_reuse,
         rustc_force_inline,
@@ -1959,7 +1982,6 @@ symbols! {
         rustc_layout_scalar_valid_range_end,
         rustc_layout_scalar_valid_range_start,
         rustc_legacy_const_generics,
-        rustc_lint_diagnostics,
         rustc_lint_opt_deny_field_access,
         rustc_lint_opt_ty,
         rustc_lint_query_instability,
@@ -1973,6 +1995,7 @@ symbols! {
         rustc_no_implicit_autorefs,
         rustc_no_implicit_bounds,
         rustc_no_mir_inline,
+        rustc_non_const_trait_method,
         rustc_nonnull_optimization_guaranteed,
         rustc_nounwind,
         rustc_objc_class,
@@ -2037,7 +2060,6 @@ symbols! {
         self_in_typedefs,
         self_struct_ctor,
         semiopaque,
-        semitransparent,
         sha2,
         sha3,
         sha512_sm_x86,
@@ -2052,6 +2074,7 @@ symbols! {
         shr_assign,
         sig_dfl,
         sig_ign,
+        signed,
         simd,
         simd_add,
         simd_and,
@@ -2124,6 +2147,7 @@ symbols! {
         simd_shr,
         simd_shuffle,
         simd_shuffle_const_generic,
+        simd_splat,
         simd_sub,
         simd_trunc,
         simd_with_exposed_provenance,
@@ -2277,6 +2301,7 @@ symbols! {
         trace_macros,
         track_caller,
         trait_alias,
+        trait_ty,
         trait_upcasting,
         transmute,
         transmute_generic_consts,
@@ -2315,6 +2340,7 @@ symbols! {
         type_const,
         type_id,
         type_id_eq,
+        type_info,
         type_ir,
         type_ir_infer_ctxt_like,
         type_ir_inherent,
@@ -2322,6 +2348,7 @@ symbols! {
         type_length_limit,
         type_macros,
         type_name,
+        type_of,
         type_privacy_lints,
         typed_swap_nonoverlapping,
         u8,
@@ -2726,7 +2753,7 @@ impl fmt::Display for IdentPrinter {
     }
 }
 
-/// An newtype around `Ident` that calls [Ident::normalize_to_macro_rules] on
+/// A newtype around `Ident` that calls [Ident::normalize_to_macro_rules] on
 /// construction for "local variable hygiene" comparisons.
 ///
 /// Use this type when you need to compare identifiers according to macro_rules hygiene.
@@ -2750,48 +2777,6 @@ impl fmt::Debug for MacroRulesNormalizedIdent {
 impl fmt::Display for MacroRulesNormalizedIdent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.0, f)
-    }
-}
-
-/// An newtype around `Ident` that calls [Ident::normalize_to_macros_2_0] on
-/// construction for "item hygiene" comparisons.
-///
-/// Identifiers with same string value become same if they came from the same macro 2.0 macro
-/// (e.g., `macro` item, but not `macro_rules` item) and stay different if they came from
-/// different macro 2.0 macros.
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
-pub struct Macros20NormalizedIdent(pub Ident);
-
-impl Macros20NormalizedIdent {
-    #[inline]
-    pub fn new(ident: Ident) -> Self {
-        Macros20NormalizedIdent(ident.normalize_to_macros_2_0())
-    }
-
-    // dummy_span does not need to be normalized, so we can use `Ident` directly
-    pub fn with_dummy_span(name: Symbol) -> Self {
-        Macros20NormalizedIdent(Ident::with_dummy_span(name))
-    }
-}
-
-impl fmt::Debug for Macros20NormalizedIdent {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(&self.0, f)
-    }
-}
-
-impl fmt::Display for Macros20NormalizedIdent {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.0, f)
-    }
-}
-
-/// By impl Deref, we can access the wrapped Ident as if it were a normal Ident
-/// such as `norm_ident.name` instead of `norm_ident.0.name`.
-impl Deref for Macros20NormalizedIdent {
-    type Target = Ident;
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 

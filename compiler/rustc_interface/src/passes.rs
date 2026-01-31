@@ -5,10 +5,11 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, LazyLock, OnceLock};
 use std::{env, fs, iter};
 
-use rustc_ast as ast;
-use rustc_attr_parsing::{AttributeParser, ShouldEmit};
+use rustc_ast::{self as ast, CRATE_NODE_ID};
+use rustc_attr_parsing::{AttributeParser, Early, ShouldEmit};
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_codegen_ssa::{CodegenResults, CrateInfo};
+use rustc_data_structures::indexmap::IndexMap;
 use rustc_data_structures::jobserver::Proxy;
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::sync::{AppendOnlyIndexVec, FreezeLock, WorkerLocal};
@@ -17,6 +18,7 @@ use rustc_errors::timings::TimingSection;
 use rustc_expand::base::{ExtCtxt, LintStoreExpand};
 use rustc_feature::Features;
 use rustc_fs_util::try_canonicalize;
+use rustc_hir::Attribute;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{LOCAL_CRATE, StableCrateId, StableCrateIdMap};
 use rustc_hir::definitions::Definitions;
@@ -26,7 +28,6 @@ use rustc_lint::{BufferedEarlyLint, EarlyCheckNode, LintStore, unerased_lint_sto
 use rustc_metadata::EncodedMetadata;
 use rustc_metadata::creader::CStore;
 use rustc_middle::arena::Arena;
-use rustc_middle::dep_graph::DepsType;
 use rustc_middle::ty::{self, CurrentGcx, GlobalCtxt, RegisteredTools, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_parse::lexer::StripTokens;
@@ -36,7 +37,7 @@ use rustc_resolve::{Resolver, ResolverOutputs};
 use rustc_session::Session;
 use rustc_session::config::{CrateType, Input, OutFileName, OutputFilenames, OutputType};
 use rustc_session::cstore::Untracked;
-use rustc_session::output::{collect_crate_types, filename_for_input};
+use rustc_session::output::{filename_for_input, invalid_output_for_target};
 use rustc_session::parse::feature_err;
 use rustc_session::search_paths::PathKind;
 use rustc_span::{
@@ -159,8 +160,6 @@ fn configure_and_expand(
             features,
         )
     });
-
-    util::check_attr_crate_type(sess, pre_configured_attrs, resolver.lint_buffer());
 
     // Expand all macros
     krate = sess.time("macro_expand_crate", || {
@@ -586,7 +585,7 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
     let result: io::Result<()> = try {
         // Build a list of files used to compile the output and
         // write Makefile-compatible dependency rules
-        let mut files: Vec<(String, u64, Option<SourceFileHash>)> = sess
+        let mut files: IndexMap<String, (u64, Option<SourceFileHash>)> = sess
             .source_map()
             .files()
             .iter()
@@ -595,10 +594,12 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
             .map(|fmap| {
                 (
                     escape_dep_filename(&fmap.name.prefer_local_unconditionally().to_string()),
-                    // This needs to be unnormalized,
-                    // as external tools wouldn't know how rustc normalizes them
-                    fmap.unnormalized_source_len as u64,
-                    fmap.checksum_hash,
+                    (
+                        // This needs to be unnormalized,
+                        // as external tools wouldn't know how rustc normalizes them
+                        fmap.unnormalized_source_len as u64,
+                        fmap.checksum_hash,
+                    ),
                 )
             })
             .collect();
@@ -616,7 +617,7 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
         fn hash_iter_files<P: AsRef<Path>>(
             it: impl Iterator<Item = P>,
             checksum_hash_algo: Option<SourceFileHashAlgorithm>,
-        ) -> impl Iterator<Item = (P, u64, Option<SourceFileHash>)> {
+        ) -> impl Iterator<Item = (P, (u64, Option<SourceFileHash>))> {
             it.map(move |path| {
                 match checksum_hash_algo.and_then(|algo| {
                     fs::File::open(path.as_ref())
@@ -632,8 +633,8 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
                         })
                         .ok()
                 }) {
-                    Some((file_len, checksum)) => (path, file_len, Some(checksum)),
-                    None => (path, 0, None),
+                    Some((file_len, checksum)) => (path, (file_len, Some(checksum))),
+                    None => (path, (0, None)),
                 }
             })
         }
@@ -707,18 +708,14 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
                     file,
                     "{}: {}\n",
                     path.display(),
-                    files
-                        .iter()
-                        .map(|(path, _file_len, _checksum_hash_algo)| path.as_str())
-                        .intersperse(" ")
-                        .collect::<String>()
+                    files.keys().map(String::as_str).intersperse(" ").collect::<String>()
                 )?;
             }
 
             // Emit a fake target for each input file to the compilation. This
             // prevents `make` from spitting out an error if a file is later
             // deleted. For more info see #28735
-            for (path, _file_len, _checksum_hash_algo) in &files {
+            for path in files.keys() {
                 writeln!(file, "{path}:")?;
             }
 
@@ -747,7 +744,7 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
             if sess.opts.unstable_opts.checksum_hash_algorithm().is_some() {
                 files
                     .iter()
-                    .filter_map(|(path, file_len, hash_algo)| {
+                    .filter_map(|(path, (file_len, hash_algo))| {
                         hash_algo.map(|hash_algo| (path, file_len, hash_algo))
                     })
                     .try_for_each(|(path, file_len, checksum_hash)| {
@@ -880,36 +877,37 @@ pub fn write_interface<'tcx>(tcx: TyCtxt<'tcx>) {
 
 pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     let providers = &mut Providers::default();
-    providers.analysis = analysis;
-    providers.hir_crate = rustc_ast_lowering::lower_to_hir;
-    providers.resolver_for_lowering_raw = resolver_for_lowering_raw;
-    providers.stripped_cfg_items = |tcx, _| &tcx.resolutions(()).stripped_cfg_items[..];
-    providers.resolutions = |tcx, ()| tcx.resolver_for_lowering_raw(()).1;
-    providers.early_lint_checks = early_lint_checks;
-    providers.env_var_os = env_var_os;
-    limits::provide(providers);
-    proc_macro_decls::provide(providers);
+    providers.queries.analysis = analysis;
+    providers.queries.hir_crate = rustc_ast_lowering::lower_to_hir;
+    providers.queries.resolver_for_lowering_raw = resolver_for_lowering_raw;
+    providers.queries.stripped_cfg_items = |tcx, _| &tcx.resolutions(()).stripped_cfg_items[..];
+    providers.queries.resolutions = |tcx, ()| tcx.resolver_for_lowering_raw(()).1;
+    providers.queries.early_lint_checks = early_lint_checks;
+    providers.queries.env_var_os = env_var_os;
+    limits::provide(&mut providers.queries);
+    proc_macro_decls::provide(&mut providers.queries);
+    rustc_expand::provide(&mut providers.queries);
     rustc_const_eval::provide(providers);
-    rustc_middle::hir::provide(providers);
-    rustc_borrowck::provide(providers);
+    rustc_middle::hir::provide(&mut providers.queries);
+    rustc_borrowck::provide(&mut providers.queries);
     rustc_incremental::provide(providers);
     rustc_mir_build::provide(providers);
     rustc_mir_transform::provide(providers);
     rustc_monomorphize::provide(providers);
-    rustc_privacy::provide(providers);
+    rustc_privacy::provide(&mut providers.queries);
     rustc_query_impl::provide(providers);
-    rustc_resolve::provide(providers);
-    rustc_hir_analysis::provide(providers);
-    rustc_hir_typeck::provide(providers);
-    ty::provide(providers);
-    traits::provide(providers);
-    solve::provide(providers);
-    rustc_passes::provide(providers);
-    rustc_traits::provide(providers);
-    rustc_ty_utils::provide(providers);
+    rustc_resolve::provide(&mut providers.queries);
+    rustc_hir_analysis::provide(&mut providers.queries);
+    rustc_hir_typeck::provide(&mut providers.queries);
+    ty::provide(&mut providers.queries);
+    traits::provide(&mut providers.queries);
+    solve::provide(&mut providers.queries);
+    rustc_passes::provide(&mut providers.queries);
+    rustc_traits::provide(&mut providers.queries);
+    rustc_ty_utils::provide(&mut providers.queries);
     rustc_metadata::provide(providers);
-    rustc_lint::provide(providers);
-    rustc_symbol_mangling::provide(providers);
+    rustc_lint::provide(&mut providers.queries);
+    rustc_symbol_mangling::provide(&mut providers.queries);
     rustc_codegen_ssa::provide(providers);
     *providers
 });
@@ -929,6 +927,7 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
         &compiler.codegen_backend.supported_crate_types(sess),
         compiler.codegen_backend.name(),
         &pre_configured_attrs,
+        krate.spans.inner_span,
     );
     let stable_crate_id = StableCrateId::new(
         crate_name,
@@ -939,8 +938,7 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
 
     let outputs = util::build_output_filenames(&pre_configured_attrs, sess);
 
-    let dep_type = DepsType { dep_names: rustc_query_impl::dep_kind_names() };
-    let dep_graph = setup_dep_graph(sess, crate_name, stable_crate_id, &dep_type);
+    let dep_graph = setup_dep_graph(sess, crate_name, stable_crate_id);
 
     let cstore =
         FreezeLock::new(Box::new(CStore::new(compiler.codegen_backend.metadata_loader())) as _);
@@ -993,7 +991,7 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
             hir_arena,
             untracked,
             dep_graph,
-            rustc_query_impl::query_callbacks(arena),
+            rustc_query_impl::make_dep_kind_vtables(arena),
             rustc_query_impl::query_system(
                 providers.queries,
                 providers.extern_queries,
@@ -1346,6 +1344,94 @@ pub(crate) fn parse_crate_name(
     };
 
     Some((name, name_span))
+}
+
+pub fn collect_crate_types(
+    session: &Session,
+    backend_crate_types: &[CrateType],
+    codegen_backend_name: &'static str,
+    attrs: &[ast::Attribute],
+    crate_span: Span,
+) -> Vec<CrateType> {
+    // If we're generating a test executable, then ignore all other output
+    // styles at all other locations
+    if session.opts.test {
+        if !session.target.executables {
+            session.dcx().emit_warn(errors::UnsupportedCrateTypeForTarget {
+                crate_type: CrateType::Executable,
+                target_triple: &session.opts.target_triple,
+            });
+            return Vec::new();
+        }
+        return vec![CrateType::Executable];
+    }
+
+    // Shadow `sdylib` crate type in interface build.
+    if session.opts.unstable_opts.build_sdylib_interface {
+        return vec![CrateType::Rlib];
+    }
+
+    // Only check command line flags if present. If no types are specified by
+    // command line, then reuse the empty `base` Vec to hold the types that
+    // will be found in crate attributes.
+    // JUSTIFICATION: before wrapper fn is available
+    #[allow(rustc::bad_opt_access)]
+    let mut base = session.opts.crate_types.clone();
+    if base.is_empty() {
+        if let Some(Attribute::Parsed(AttributeKind::CrateType(crate_type))) =
+            AttributeParser::<Early>::parse_limited_should_emit(
+                session,
+                attrs,
+                sym::crate_type,
+                crate_span,
+                CRATE_NODE_ID,
+                None,
+                ShouldEmit::EarlyFatal { also_emit_lints: false },
+            )
+        {
+            base.extend(crate_type);
+        }
+
+        if base.is_empty() {
+            base.push(default_output_for_target(session));
+        } else {
+            base.sort();
+            base.dedup();
+        }
+    }
+
+    base.retain(|crate_type| {
+        if invalid_output_for_target(session, *crate_type) {
+            session.dcx().emit_warn(errors::UnsupportedCrateTypeForTarget {
+                crate_type: *crate_type,
+                target_triple: &session.opts.target_triple,
+            });
+            false
+        } else if !backend_crate_types.contains(crate_type) {
+            session.dcx().emit_warn(errors::UnsupportedCrateTypeForCodegenBackend {
+                crate_type: *crate_type,
+                codegen_backend: codegen_backend_name,
+            });
+            false
+        } else {
+            true
+        }
+    });
+
+    base
+}
+
+/// Returns default crate type for target
+///
+/// Default crate type is used when crate type isn't provided neither
+/// through cmd line arguments nor through crate attributes
+///
+/// It is CrateType::Executable for all platforms but iOS as there is no
+/// way to run iOS binaries anyway without jailbreaking and
+/// interaction with Rust code through static library is the only
+/// option for now
+fn default_output_for_target(sess: &Session) -> CrateType {
+    if !sess.target.executables { CrateType::StaticLib } else { CrateType::Executable }
 }
 
 fn get_recursion_limit(krate_attrs: &[ast::Attribute], sess: &Session) -> Limit {

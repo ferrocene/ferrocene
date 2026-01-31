@@ -1,6 +1,6 @@
-use std::assert_matches::debug_assert_matches;
 use std::cell::LazyCell;
 
+use rustc_data_structures::debug_assert_matches;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::{LintDiagnostic, Subdiagnostic};
@@ -211,7 +211,7 @@ where
         // When we get into a binder, we need to add its own bound vars to the scope.
         let mut added = vec![];
         for arg in t.bound_vars() {
-            let arg: ty::BoundVariableKind = arg;
+            let arg: ty::BoundVariableKind<'tcx> = arg;
             match arg {
                 ty::BoundVariableKind::Region(ty::BoundRegionKind::Named(def_id))
                 | ty::BoundVariableKind::Ty(ty::BoundTyKind::Param(def_id)) => {

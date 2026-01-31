@@ -46,6 +46,7 @@ aarch64_be-unknown-linux-gnu_ilp32
 aarch64_be-unknown-linux-musl
 aarch64_be-unknown-netbsd
 aarch64_be-unknown-none-softfloat
+aarch64v8r-unknown-ferrocene.facade
 aarch64v8r-unknown-none
 aarch64v8r-unknown-none-softfloat
 amdgcn-amd-amdhsa

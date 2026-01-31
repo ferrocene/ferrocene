@@ -37,7 +37,7 @@ Language changes in Rust 1.93.0
 - `Stabilize asm_cfg <https://github.com/rust-lang/rust/pull/147736>`_
 
   - Changed syntax: :s:`AssemblyCodeBlock`, :s:`AsmArguments`, :s:`GlobalAsmArguments`
-  - New syntax: :s:`AsmTemplate`, :s:`AsmAttrRegisterArgument`, :s:`AsmAttrAbiClobber`, :s:`AsmAttrAssemblyOption`
+  - New syntax: :s:`AssemblyTemplate`, :s:`AssemblyAttributeRegisterArgument`, :s:`AssemblyAttributeAbiClobber`, :s:`AssemblyAttributeAssemblyOption`
 
   - New paragraphs:
 

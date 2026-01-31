@@ -963,9 +963,9 @@ Assembly Instructions
 .. syntax::
 
    AssemblyCodeBlock ::=
-       AsmTemplate ($$,$$ AsmTemplate)*
+       AssemblyTemplate ($$,$$ AssemblyTemplate)*
 
-   AsmTemplate ::=
+   AssemblyTemplate ::=
        OuterAttribute* AssemblyInstruction
 
    AssemblyInstruction ::=
@@ -1628,18 +1628,18 @@ Macros: asm, global_asm, and naked_asm
 .. syntax::
 
    AsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ AsmAttrRegisterArgument)* ($$,$$ AsmAttrAbiClobber)* ($$,$$ AsmAttrAssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ AssemblyAttributeRegisterArgument)* ($$,$$ AssemblyAttributeAbiClobber)* ($$,$$ AssemblyAttributeAssemblyOption)* $$,$$? $$)$$
 
    GlobalAsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ AsmAttrRegisterArgument)* ($$,$$ AsmAttrAssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ AssemblyAttributeRegisterArgument)* ($$,$$ AssemblyAttributeAssemblyOption)* $$,$$? $$)$$
 
-   AsmAttrRegisterArgument ::=
+   AssemblyAttributeRegisterArgument ::=
        OuterAttribute* RegisterArgument
 
-   AsmAttrAbiClobber ::=
+   AssemblyAttributeAbiClobber ::=
        OuterAttribute* AbiClobber
 
-   AsmAttrAssemblyOption ::=
+   AssemblyAttributeAssemblyOption ::=
        OuterAttribute* AssemblyOption
 
    LabelBlock ::=

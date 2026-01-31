@@ -1626,25 +1626,25 @@ Attributes
 .. rubric:: Legality Rules
 
 :dp:`fls_m0SBtonaNppV`
-The :s:`AssemblyInstruction`, :s:`RegisterArgument`, :s:`AbiClobber`, and
-:s:`AssemblyOption` arguments in :s:`AsmArguments` and :s:`GlobalAsmArguments`
-may be preceded by :t:`outer attribute` instances.
+The :t:`[assembly instruction]s`, :t:`[register argument]s`,
+:t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and
+:s:`GlobalAsmArguments` may be preceded by :t:`outer attribute` instances.
 
 :dp:`fls_nLBhw2w6uznH`
 Only the :t:`attribute` :c:`cfg` and the :t:`attribute` :c:`cfg_attr` are
 accepted on inline assembly arguments. All other attributes are rejected.
 
 :dp:`fls_xzDPz2zfRfoI`
-If a :s:`AssemblyInstruction`, :s:`RegisterArgument`, :s:`AbiClobber`, or
-:s:`AssemblyOption` is annotated with :c:`cfg` or :c:`cfg_attr` and the related
+If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or
+:t:`assembly option` is annotated with :c:`cfg` or :c:`cfg_attr` and the related
 :t:`configuration predicate` evaluates to ``false``, the annotated argument is
 not considered part of the related macro invocation, consistent with
 :t:`conditional compilation`.
 
 :dp:`fls_cTEiqjf6haEg`
-It is a static error for a :s:`RegisterArgument`, :s:`AbiClobber`, or
-:s:`AssemblyOption` to appear before the first :s:`AssemblyInstruction`, even if
-the argument is ignored by :t:`conditional compilation`.
+It is a static error for a :t:`register argument`, :t:`ABI clobber`, or
+:t:`assembly option` to appear before the first :t:`assembly instruction`, even
+if the argument is ignored by :t:`conditional compilation`.
 
 .. rubric:: Examples
 

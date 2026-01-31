@@ -558,6 +558,10 @@ lint_macro_expr_fragment_specifier_2024_migration =
 
 lint_malformed_attribute = malformed lint attribute input
 
+lint_malformed_doc =
+    malformed `doc` attribute input
+    .warn = {-lint_previously_accepted}
+
 lint_map_unit_fn = `Iterator::map` call that discard the iterator's values
     .note = `Iterator::map`, like many of the methods on `Iterator`, gets executed lazily, meaning that its effects won't be visible until it is iterated
     .function_label = this function returns `()`, which is likely not what you wanted

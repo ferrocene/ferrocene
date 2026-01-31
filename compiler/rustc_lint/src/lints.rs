@@ -3186,6 +3186,11 @@ pub(crate) struct UnusedDuplicate {
 }
 
 #[derive(LintDiagnostic)]
+#[diag(lint_malformed_doc)]
+#[warning]
+pub(crate) struct MalformedDoc;
+
+#[derive(LintDiagnostic)]
 #[diag(lint_unsafe_attr_outside_unsafe)]
 pub(crate) struct UnsafeAttrOutsideUnsafeLint {
     #[label]

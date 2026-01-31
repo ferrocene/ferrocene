@@ -75,13 +75,13 @@ use crate::attributes::rustc_dump::{
     RustcDumpVtable,
 };
 use crate::attributes::rustc_internal::{
-    RustcHasIncoherentInherentImplsParser, RustcLayoutScalarValidRangeEndParser,
+    RustcHasIncoherentInherentImplsParser, RustcLayoutParser, RustcLayoutScalarValidRangeEndParser,
     RustcLayoutScalarValidRangeStartParser, RustcLegacyConstGenericsParser,
     RustcLintOptDenyFieldAccessParser, RustcLintOptTyParser, RustcLintQueryInstabilityParser,
     RustcLintUntrackedQueryInformationParser, RustcMainParser, RustcMustImplementOneOfParser,
-    RustcNeverReturnsNullPointerParser, RustcNoImplicitAutorefsParser, RustcNounwindParser,
-    RustcObjectLifetimeDefaultParser, RustcOffloadKernelParser, RustcScalableVectorParser,
-    RustcSimdMonomorphizeLaneLimitParser,
+    RustcNeverReturnsNullPointerParser, RustcNoImplicitAutorefsParser,
+    RustcNonConstTraitMethodParser, RustcNounwindParser, RustcObjectLifetimeDefaultParser,
+    RustcOffloadKernelParser, RustcScalableVectorParser, RustcSimdMonomorphizeLaneLimitParser,
 };
 use crate::attributes::semantics::MayDangleParser;
 use crate::attributes::stability::{
@@ -198,6 +198,7 @@ attribute_parsers!(
         Combine<ForceTargetFeatureParser>,
         Combine<LinkParser>,
         Combine<ReprParser>,
+        Combine<RustcLayoutParser>,
         Combine<TargetFeatureParser>,
         Combine<UnstableFeatureBoundParser>,
         // tidy-alphabetical-end
@@ -304,6 +305,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcMainParser>>,
         Single<WithoutArgs<RustcNeverReturnsNullPointerParser>>,
         Single<WithoutArgs<RustcNoImplicitAutorefsParser>>,
+        Single<WithoutArgs<RustcNonConstTraitMethodParser>>,
         Single<WithoutArgs<RustcNounwindParser>>,
         Single<WithoutArgs<RustcOffloadKernelParser>>,
         Single<WithoutArgs<RustcPassIndirectlyInNonRusticAbisParser>>,

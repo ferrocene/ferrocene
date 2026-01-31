@@ -1637,8 +1637,9 @@ accepted on inline assembly arguments. All other attributes are rejected.
 :dp:`fls_xzDPz2zfRfoI`
 If a :s:`AssemblyInstruction`, :s:`RegisterArgument`, :s:`AbiClobber`, or
 :s:`AssemblyOption` is annotated with :c:`cfg` or :c:`cfg_attr` and the related
-:t:`configuration predicate` evaluates to ``false``, the annotated argument has
-no effect and is ignored.
+:t:`configuration predicate` evaluates to ``false``, the annotated argument is
+not considered part of the related macro invocation, consistent with
+:t:`conditional compilation`.
 
 :dp:`fls_cTEiqjf6haEg`
 It is a static error for a :s:`RegisterArgument`, :s:`AbiClobber`, or

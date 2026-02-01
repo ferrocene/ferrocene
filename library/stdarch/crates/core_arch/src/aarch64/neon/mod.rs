@@ -994,868 +994,412 @@ mod tests {
         assert_eq!(vals[2], 2.);
     }
 
+    macro_rules! wide_store_load_roundtrip {
+        ($elem_ty:ty, $len:expr, $vec_ty:ty, $store:expr, $load:expr) => {
+            let vals: [$elem_ty; $len] = crate::array::from_fn(|i| i as $elem_ty);
+            let a: $vec_ty = transmute(vals);
+            let mut tmp = [0 as $elem_ty; $len];
+            $store(tmp.as_mut_ptr().cast(), a);
+            let r: $vec_ty = $load(tmp.as_ptr().cast());
+            let out: [$elem_ty; $len] = transmute(r);
+            assert_eq!(out, vals);
+        };
+    }
+
     #[simd_test(enable = "neon,fp16")]
     #[cfg(not(target_arch = "arm64ec"))]
     unsafe fn test_vld1_f16_x2() {
-        let vals: [f16; 8] = crate::array::from_fn(|i| i as f16);
-        let a: float16x4x2_t = transmute(vals);
-        let mut tmp = [0_f16; 8];
-        vst1_f16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: float16x4x2_t = vld1_f16_x2(tmp.as_ptr().cast());
-        let out: [f16; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f16, 8, float16x4x2_t, vst1_f16_x2, vld1_f16_x2);
     }
 
     #[simd_test(enable = "neon,fp16")]
     #[cfg(not(target_arch = "arm64ec"))]
     unsafe fn test_vld1_f16_x3() {
-        let vals: [f16; 12] = crate::array::from_fn(|i| i as f16);
-        let a: float16x4x3_t = transmute(vals);
-        let mut tmp = [0_f16; 12];
-        vst1_f16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: float16x4x3_t = vld1_f16_x3(tmp.as_ptr().cast());
-        let out: [f16; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f16, 12, float16x4x3_t, vst1_f16_x3, vld1_f16_x3);
     }
 
     #[simd_test(enable = "neon,fp16")]
     #[cfg(not(target_arch = "arm64ec"))]
     unsafe fn test_vld1_f16_x4() {
-        let vals: [f16; 16] = crate::array::from_fn(|i| i as f16);
-        let a: float16x4x4_t = transmute(vals);
-        let mut tmp = [0_f16; 16];
-        vst1_f16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: float16x4x4_t = vld1_f16_x4(tmp.as_ptr().cast());
-        let out: [f16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f16, 16, float16x4x4_t, vst1_f16_x4, vld1_f16_x4);
     }
 
     #[simd_test(enable = "neon,fp16")]
     #[cfg(not(target_arch = "arm64ec"))]
     unsafe fn test_vld1q_f16_x2() {
-        let vals: [f16; 16] = crate::array::from_fn(|i| i as f16);
-        let a: float16x8x2_t = transmute(vals);
-        let mut tmp = [0_f16; 16];
-        vst1q_f16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: float16x8x2_t = vld1q_f16_x2(tmp.as_ptr().cast());
-        let out: [f16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f16, 16, float16x8x2_t, vst1q_f16_x2, vld1q_f16_x2);
     }
 
     #[simd_test(enable = "neon,fp16")]
     #[cfg(not(target_arch = "arm64ec"))]
     unsafe fn test_vld1q_f16_x3() {
-        let vals: [f16; 24] = crate::array::from_fn(|i| i as f16);
-        let a: float16x8x3_t = transmute(vals);
-        let mut tmp = [0_f16; 24];
-        vst1q_f16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: float16x8x3_t = vld1q_f16_x3(tmp.as_ptr().cast());
-        let out: [f16; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f16, 24, float16x8x3_t, vst1q_f16_x3, vld1q_f16_x3);
     }
 
     #[simd_test(enable = "neon,fp16")]
     #[cfg(not(target_arch = "arm64ec"))]
     unsafe fn test_vld1q_f16_x4() {
-        let vals: [f16; 32] = crate::array::from_fn(|i| i as f16);
-        let a: float16x8x4_t = transmute(vals);
-        let mut tmp = [0_f16; 32];
-        vst1q_f16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: float16x8x4_t = vld1q_f16_x4(tmp.as_ptr().cast());
-        let out: [f16; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f16, 32, float16x8x4_t, vst1q_f16_x4, vld1q_f16_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_f32_x2() {
-        let vals: [f32; 4] = crate::array::from_fn(|i| i as f32);
-        let a: float32x2x2_t = transmute(vals);
-        let mut tmp = [0_f32; 4];
-        vst1_f32_x2(tmp.as_mut_ptr().cast(), a);
-        let r: float32x2x2_t = vld1_f32_x2(tmp.as_ptr().cast());
-        let out: [f32; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f32, 4, float32x2x2_t, vst1_f32_x2, vld1_f32_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_f32_x3() {
-        let vals: [f32; 6] = crate::array::from_fn(|i| i as f32);
-        let a: float32x2x3_t = transmute(vals);
-        let mut tmp = [0_f32; 6];
-        vst1_f32_x3(tmp.as_mut_ptr().cast(), a);
-        let r: float32x2x3_t = vld1_f32_x3(tmp.as_ptr().cast());
-        let out: [f32; 6] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f32, 6, float32x2x3_t, vst1_f32_x3, vld1_f32_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_f32_x4() {
-        let vals: [f32; 8] = crate::array::from_fn(|i| i as f32);
-        let a: float32x2x4_t = transmute(vals);
-        let mut tmp = [0_f32; 8];
-        vst1_f32_x4(tmp.as_mut_ptr().cast(), a);
-        let r: float32x2x4_t = vld1_f32_x4(tmp.as_ptr().cast());
-        let out: [f32; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f32, 8, float32x2x4_t, vst1_f32_x4, vld1_f32_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_f32_x2() {
-        let vals: [f32; 8] = crate::array::from_fn(|i| i as f32);
-        let a: float32x4x2_t = transmute(vals);
-        let mut tmp = [0_f32; 8];
-        vst1q_f32_x2(tmp.as_mut_ptr().cast(), a);
-        let r: float32x4x2_t = vld1q_f32_x2(tmp.as_ptr().cast());
-        let out: [f32; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f32, 8, float32x4x2_t, vst1q_f32_x2, vld1q_f32_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_f32_x3() {
-        let vals: [f32; 12] = crate::array::from_fn(|i| i as f32);
-        let a: float32x4x3_t = transmute(vals);
-        let mut tmp = [0_f32; 12];
-        vst1q_f32_x3(tmp.as_mut_ptr().cast(), a);
-        let r: float32x4x3_t = vld1q_f32_x3(tmp.as_ptr().cast());
-        let out: [f32; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f32, 12, float32x4x3_t, vst1q_f32_x3, vld1q_f32_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_f32_x4() {
-        let vals: [f32; 16] = crate::array::from_fn(|i| i as f32);
-        let a: float32x4x4_t = transmute(vals);
-        let mut tmp = [0_f32; 16];
-        vst1q_f32_x4(tmp.as_mut_ptr().cast(), a);
-        let r: float32x4x4_t = vld1q_f32_x4(tmp.as_ptr().cast());
-        let out: [f32; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(f32, 16, float32x4x4_t, vst1q_f32_x4, vld1q_f32_x4);
     }
 
     #[simd_test(enable = "neon,aes")]
     unsafe fn test_vld1_p64_x2() {
-        let vals: [p64; 2] = crate::array::from_fn(|i| i as p64);
-        let a: poly64x1x2_t = transmute(vals);
-        let mut tmp = [0 as p64; 2];
-        vst1_p64_x2(tmp.as_mut_ptr().cast(), a);
-        let r: poly64x1x2_t = vld1_p64_x2(tmp.as_ptr().cast());
-        let out: [p64; 2] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p64, 2, poly64x1x2_t, vst1_p64_x2, vld1_p64_x2);
     }
 
     #[simd_test(enable = "neon,aes")]
     unsafe fn test_vld1_p64_x3() {
-        let vals: [p64; 3] = crate::array::from_fn(|i| i as p64);
-        let a: poly64x1x3_t = transmute(vals);
-        let mut tmp = [0 as p64; 3];
-        vst1_p64_x3(tmp.as_mut_ptr().cast(), a);
-        let r: poly64x1x3_t = vld1_p64_x3(tmp.as_ptr().cast());
-        let out: [p64; 3] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p64, 3, poly64x1x3_t, vst1_p64_x3, vld1_p64_x3);
     }
 
     #[simd_test(enable = "neon,aes")]
     unsafe fn test_vld1_p64_x4() {
-        let vals: [p64; 4] = crate::array::from_fn(|i| i as p64);
-        let a: poly64x1x4_t = transmute(vals);
-        let mut tmp = [0 as p64; 4];
-        vst1_p64_x4(tmp.as_mut_ptr().cast(), a);
-        let r: poly64x1x4_t = vld1_p64_x4(tmp.as_ptr().cast());
-        let out: [p64; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p64, 4, poly64x1x4_t, vst1_p64_x4, vld1_p64_x4);
     }
 
     #[simd_test(enable = "neon,aes")]
     unsafe fn test_vld1q_p64_x2() {
-        let vals: [p64; 4] = crate::array::from_fn(|i| i as p64);
-        let a: poly64x2x2_t = transmute(vals);
-        let mut tmp = [0 as p64; 4];
-        vst1q_p64_x2(tmp.as_mut_ptr().cast(), a);
-        let r: poly64x2x2_t = vld1q_p64_x2(tmp.as_ptr().cast());
-        let out: [p64; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p64, 4, poly64x2x2_t, vst1q_p64_x2, vld1q_p64_x2);
     }
 
     #[simd_test(enable = "neon,aes")]
     unsafe fn test_vld1q_p64_x3() {
-        let vals: [p64; 6] = crate::array::from_fn(|i| i as p64);
-        let a: poly64x2x3_t = transmute(vals);
-        let mut tmp = [0 as p64; 6];
-        vst1q_p64_x3(tmp.as_mut_ptr().cast(), a);
-        let r: poly64x2x3_t = vld1q_p64_x3(tmp.as_ptr().cast());
-        let out: [p64; 6] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p64, 6, poly64x2x3_t, vst1q_p64_x3, vld1q_p64_x3);
     }
 
     #[simd_test(enable = "neon,aes")]
     unsafe fn test_vld1q_p64_x4() {
-        let vals: [p64; 8] = crate::array::from_fn(|i| i as p64);
-        let a: poly64x2x4_t = transmute(vals);
-        let mut tmp = [0 as p64; 8];
-        vst1q_p64_x4(tmp.as_mut_ptr().cast(), a);
-        let r: poly64x2x4_t = vld1q_p64_x4(tmp.as_ptr().cast());
-        let out: [p64; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p64, 8, poly64x2x4_t, vst1q_p64_x4, vld1q_p64_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s8_x2() {
-        let vals: [i8; 16] = crate::array::from_fn(|i| i as i8);
-        let a: int8x8x2_t = transmute(vals);
-        let mut tmp = [0_i8; 16];
-        vst1_s8_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int8x8x2_t = vld1_s8_x2(tmp.as_ptr().cast());
-        let out: [i8; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i8, 16, int8x8x2_t, vst1_s8_x2, vld1_s8_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s8_x3() {
-        let vals: [i8; 24] = crate::array::from_fn(|i| i as i8);
-        let a: int8x8x3_t = transmute(vals);
-        let mut tmp = [0_i8; 24];
-        vst1_s8_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int8x8x3_t = vld1_s8_x3(tmp.as_ptr().cast());
-        let out: [i8; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i8, 24, int8x8x3_t, vst1_s8_x3, vld1_s8_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s8_x4() {
-        let vals: [i8; 32] = crate::array::from_fn(|i| i as i8);
-        let a: int8x8x4_t = transmute(vals);
-        let mut tmp = [0_i8; 32];
-        vst1_s8_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int8x8x4_t = vld1_s8_x4(tmp.as_ptr().cast());
-        let out: [i8; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i8, 32, int8x8x4_t, vst1_s8_x4, vld1_s8_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s8_x2() {
-        let vals: [i8; 32] = crate::array::from_fn(|i| i as i8);
-        let a: int8x16x2_t = transmute(vals);
-        let mut tmp = [0_i8; 32];
-        vst1q_s8_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int8x16x2_t = vld1q_s8_x2(tmp.as_ptr().cast());
-        let out: [i8; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i8, 32, int8x16x2_t, vst1q_s8_x2, vld1q_s8_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s8_x3() {
-        let vals: [i8; 48] = crate::array::from_fn(|i| i as i8);
-        let a: int8x16x3_t = transmute(vals);
-        let mut tmp = [0_i8; 48];
-        vst1q_s8_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int8x16x3_t = vld1q_s8_x3(tmp.as_ptr().cast());
-        let out: [i8; 48] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i8, 48, int8x16x3_t, vst1q_s8_x3, vld1q_s8_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s8_x4() {
-        let vals: [i8; 64] = crate::array::from_fn(|i| i as i8);
-        let a: int8x16x4_t = transmute(vals);
-        let mut tmp = [0_i8; 64];
-        vst1q_s8_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int8x16x4_t = vld1q_s8_x4(tmp.as_ptr().cast());
-        let out: [i8; 64] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i8, 64, int8x16x4_t, vst1q_s8_x4, vld1q_s8_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s16_x2() {
-        let vals: [i16; 8] = crate::array::from_fn(|i| i as i16);
-        let a: int16x4x2_t = transmute(vals);
-        let mut tmp = [0_i16; 8];
-        vst1_s16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int16x4x2_t = vld1_s16_x2(tmp.as_ptr().cast());
-        let out: [i16; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i16, 8, int16x4x2_t, vst1_s16_x2, vld1_s16_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s16_x3() {
-        let vals: [i16; 12] = crate::array::from_fn(|i| i as i16);
-        let a: int16x4x3_t = transmute(vals);
-        let mut tmp = [0_i16; 12];
-        vst1_s16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int16x4x3_t = vld1_s16_x3(tmp.as_ptr().cast());
-        let out: [i16; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i16, 12, int16x4x3_t, vst1_s16_x3, vld1_s16_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s16_x4() {
-        let vals: [i16; 16] = crate::array::from_fn(|i| i as i16);
-        let a: int16x4x4_t = transmute(vals);
-        let mut tmp = [0_i16; 16];
-        vst1_s16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int16x4x4_t = vld1_s16_x4(tmp.as_ptr().cast());
-        let out: [i16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i16, 16, int16x4x4_t, vst1_s16_x4, vld1_s16_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s16_x2() {
-        let vals: [i16; 16] = crate::array::from_fn(|i| i as i16);
-        let a: int16x8x2_t = transmute(vals);
-        let mut tmp = [0_i16; 16];
-        vst1q_s16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int16x8x2_t = vld1q_s16_x2(tmp.as_ptr().cast());
-        let out: [i16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i16, 16, int16x8x2_t, vst1q_s16_x2, vld1q_s16_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s16_x3() {
-        let vals: [i16; 24] = crate::array::from_fn(|i| i as i16);
-        let a: int16x8x3_t = transmute(vals);
-        let mut tmp = [0_i16; 24];
-        vst1q_s16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int16x8x3_t = vld1q_s16_x3(tmp.as_ptr().cast());
-        let out: [i16; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i16, 24, int16x8x3_t, vst1q_s16_x3, vld1q_s16_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s16_x4() {
-        let vals: [i16; 32] = crate::array::from_fn(|i| i as i16);
-        let a: int16x8x4_t = transmute(vals);
-        let mut tmp = [0_i16; 32];
-        vst1q_s16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int16x8x4_t = vld1q_s16_x4(tmp.as_ptr().cast());
-        let out: [i16; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i16, 32, int16x8x4_t, vst1q_s16_x4, vld1q_s16_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s32_x2() {
-        let vals: [i32; 4] = crate::array::from_fn(|i| i as i32);
-        let a: int32x2x2_t = transmute(vals);
-        let mut tmp = [0_i32; 4];
-        vst1_s32_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int32x2x2_t = vld1_s32_x2(tmp.as_ptr().cast());
-        let out: [i32; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i32, 4, int32x2x2_t, vst1_s32_x2, vld1_s32_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s32_x3() {
-        let vals: [i32; 6] = crate::array::from_fn(|i| i as i32);
-        let a: int32x2x3_t = transmute(vals);
-        let mut tmp = [0_i32; 6];
-        vst1_s32_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int32x2x3_t = vld1_s32_x3(tmp.as_ptr().cast());
-        let out: [i32; 6] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i32, 6, int32x2x3_t, vst1_s32_x3, vld1_s32_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s32_x4() {
-        let vals: [i32; 8] = crate::array::from_fn(|i| i as i32);
-        let a: int32x2x4_t = transmute(vals);
-        let mut tmp = [0_i32; 8];
-        vst1_s32_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int32x2x4_t = vld1_s32_x4(tmp.as_ptr().cast());
-        let out: [i32; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i32, 8, int32x2x4_t, vst1_s32_x4, vld1_s32_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s32_x2() {
-        let vals: [i32; 8] = crate::array::from_fn(|i| i as i32);
-        let a: int32x4x2_t = transmute(vals);
-        let mut tmp = [0_i32; 8];
-        vst1q_s32_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int32x4x2_t = vld1q_s32_x2(tmp.as_ptr().cast());
-        let out: [i32; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i32, 8, int32x4x2_t, vst1q_s32_x2, vld1q_s32_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s32_x3() {
-        let vals: [i32; 12] = crate::array::from_fn(|i| i as i32);
-        let a: int32x4x3_t = transmute(vals);
-        let mut tmp = [0_i32; 12];
-        vst1q_s32_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int32x4x3_t = vld1q_s32_x3(tmp.as_ptr().cast());
-        let out: [i32; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i32, 12, int32x4x3_t, vst1q_s32_x3, vld1q_s32_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s32_x4() {
-        let vals: [i32; 16] = crate::array::from_fn(|i| i as i32);
-        let a: int32x4x4_t = transmute(vals);
-        let mut tmp = [0_i32; 16];
-        vst1q_s32_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int32x4x4_t = vld1q_s32_x4(tmp.as_ptr().cast());
-        let out: [i32; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i32, 16, int32x4x4_t, vst1q_s32_x4, vld1q_s32_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s64_x2() {
-        let vals: [i64; 2] = crate::array::from_fn(|i| i as i64);
-        let a: int64x1x2_t = transmute(vals);
-        let mut tmp = [0_i64; 2];
-        vst1_s64_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int64x1x2_t = vld1_s64_x2(tmp.as_ptr().cast());
-        let out: [i64; 2] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i64, 2, int64x1x2_t, vst1_s64_x2, vld1_s64_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s64_x3() {
-        let vals: [i64; 3] = crate::array::from_fn(|i| i as i64);
-        let a: int64x1x3_t = transmute(vals);
-        let mut tmp = [0_i64; 3];
-        vst1_s64_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int64x1x3_t = vld1_s64_x3(tmp.as_ptr().cast());
-        let out: [i64; 3] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i64, 3, int64x1x3_t, vst1_s64_x3, vld1_s64_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_s64_x4() {
-        let vals: [i64; 4] = crate::array::from_fn(|i| i as i64);
-        let a: int64x1x4_t = transmute(vals);
-        let mut tmp = [0_i64; 4];
-        vst1_s64_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int64x1x4_t = vld1_s64_x4(tmp.as_ptr().cast());
-        let out: [i64; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i64, 4, int64x1x4_t, vst1_s64_x4, vld1_s64_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s64_x2() {
-        let vals: [i64; 4] = crate::array::from_fn(|i| i as i64);
-        let a: int64x2x2_t = transmute(vals);
-        let mut tmp = [0_i64; 4];
-        vst1q_s64_x2(tmp.as_mut_ptr().cast(), a);
-        let r: int64x2x2_t = vld1q_s64_x2(tmp.as_ptr().cast());
-        let out: [i64; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i64, 4, int64x2x2_t, vst1q_s64_x2, vld1q_s64_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s64_x3() {
-        let vals: [i64; 6] = crate::array::from_fn(|i| i as i64);
-        let a: int64x2x3_t = transmute(vals);
-        let mut tmp = [0_i64; 6];
-        vst1q_s64_x3(tmp.as_mut_ptr().cast(), a);
-        let r: int64x2x3_t = vld1q_s64_x3(tmp.as_ptr().cast());
-        let out: [i64; 6] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i64, 6, int64x2x3_t, vst1q_s64_x3, vld1q_s64_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_s64_x4() {
-        let vals: [i64; 8] = crate::array::from_fn(|i| i as i64);
-        let a: int64x2x4_t = transmute(vals);
-        let mut tmp = [0_i64; 8];
-        vst1q_s64_x4(tmp.as_mut_ptr().cast(), a);
-        let r: int64x2x4_t = vld1q_s64_x4(tmp.as_ptr().cast());
-        let out: [i64; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(i64, 8, int64x2x4_t, vst1q_s64_x4, vld1q_s64_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u8_x2() {
-        let vals: [u8; 16] = crate::array::from_fn(|i| i as u8);
-        let a: uint8x8x2_t = transmute(vals);
-        let mut tmp = [0_u8; 16];
-        vst1_u8_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint8x8x2_t = vld1_u8_x2(tmp.as_ptr().cast());
-        let out: [u8; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u8, 16, uint8x8x2_t, vst1_u8_x2, vld1_u8_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u8_x3() {
-        let vals: [u8; 24] = crate::array::from_fn(|i| i as u8);
-        let a: uint8x8x3_t = transmute(vals);
-        let mut tmp = [0_u8; 24];
-        vst1_u8_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint8x8x3_t = vld1_u8_x3(tmp.as_ptr().cast());
-        let out: [u8; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u8, 24, uint8x8x3_t, vst1_u8_x3, vld1_u8_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u8_x4() {
-        let vals: [u8; 32] = crate::array::from_fn(|i| i as u8);
-        let a: uint8x8x4_t = transmute(vals);
-        let mut tmp = [0_u8; 32];
-        vst1_u8_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint8x8x4_t = vld1_u8_x4(tmp.as_ptr().cast());
-        let out: [u8; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u8, 32, uint8x8x4_t, vst1_u8_x4, vld1_u8_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u8_x2() {
-        let vals: [u8; 32] = crate::array::from_fn(|i| i as u8);
-        let a: uint8x16x2_t = transmute(vals);
-        let mut tmp = [0_u8; 32];
-        vst1q_u8_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint8x16x2_t = vld1q_u8_x2(tmp.as_ptr().cast());
-        let out: [u8; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u8, 32, uint8x16x2_t, vst1q_u8_x2, vld1q_u8_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u8_x3() {
-        let vals: [u8; 48] = crate::array::from_fn(|i| i as u8);
-        let a: uint8x16x3_t = transmute(vals);
-        let mut tmp = [0_u8; 48];
-        vst1q_u8_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint8x16x3_t = vld1q_u8_x3(tmp.as_ptr().cast());
-        let out: [u8; 48] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u8, 48, uint8x16x3_t, vst1q_u8_x3, vld1q_u8_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u8_x4() {
-        let vals: [u8; 64] = crate::array::from_fn(|i| i as u8);
-        let a: uint8x16x4_t = transmute(vals);
-        let mut tmp = [0_u8; 64];
-        vst1q_u8_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint8x16x4_t = vld1q_u8_x4(tmp.as_ptr().cast());
-        let out: [u8; 64] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u8, 64, uint8x16x4_t, vst1q_u8_x4, vld1q_u8_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u16_x2() {
-        let vals: [u16; 8] = crate::array::from_fn(|i| i as u16);
-        let a: uint16x4x2_t = transmute(vals);
-        let mut tmp = [0_u16; 8];
-        vst1_u16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint16x4x2_t = vld1_u16_x2(tmp.as_ptr().cast());
-        let out: [u16; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u16, 8, uint16x4x2_t, vst1_u16_x2, vld1_u16_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u16_x3() {
-        let vals: [u16; 12] = crate::array::from_fn(|i| i as u16);
-        let a: uint16x4x3_t = transmute(vals);
-        let mut tmp = [0_u16; 12];
-        vst1_u16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint16x4x3_t = vld1_u16_x3(tmp.as_ptr().cast());
-        let out: [u16; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u16, 12, uint16x4x3_t, vst1_u16_x3, vld1_u16_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u16_x4() {
-        let vals: [u16; 16] = crate::array::from_fn(|i| i as u16);
-        let a: uint16x4x4_t = transmute(vals);
-        let mut tmp = [0_u16; 16];
-        vst1_u16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint16x4x4_t = vld1_u16_x4(tmp.as_ptr().cast());
-        let out: [u16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u16, 16, uint16x4x4_t, vst1_u16_x4, vld1_u16_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u16_x2() {
-        let vals: [u16; 16] = crate::array::from_fn(|i| i as u16);
-        let a: uint16x8x2_t = transmute(vals);
-        let mut tmp = [0_u16; 16];
-        vst1q_u16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint16x8x2_t = vld1q_u16_x2(tmp.as_ptr().cast());
-        let out: [u16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u16, 16, uint16x8x2_t, vst1q_u16_x2, vld1q_u16_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u16_x3() {
-        let vals: [u16; 24] = crate::array::from_fn(|i| i as u16);
-        let a: uint16x8x3_t = transmute(vals);
-        let mut tmp = [0_u16; 24];
-        vst1q_u16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint16x8x3_t = vld1q_u16_x3(tmp.as_ptr().cast());
-        let out: [u16; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u16, 24, uint16x8x3_t, vst1q_u16_x3, vld1q_u16_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u16_x4() {
-        let vals: [u16; 32] = crate::array::from_fn(|i| i as u16);
-        let a: uint16x8x4_t = transmute(vals);
-        let mut tmp = [0_u16; 32];
-        vst1q_u16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint16x8x4_t = vld1q_u16_x4(tmp.as_ptr().cast());
-        let out: [u16; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u16, 32, uint16x8x4_t, vst1q_u16_x4, vld1q_u16_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u32_x2() {
-        let vals: [u32; 4] = crate::array::from_fn(|i| i as u32);
-        let a: uint32x2x2_t = transmute(vals);
-        let mut tmp = [0_u32; 4];
-        vst1_u32_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint32x2x2_t = vld1_u32_x2(tmp.as_ptr().cast());
-        let out: [u32; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u32, 4, uint32x2x2_t, vst1_u32_x2, vld1_u32_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u32_x3() {
-        let vals: [u32; 6] = crate::array::from_fn(|i| i as u32);
-        let a: uint32x2x3_t = transmute(vals);
-        let mut tmp = [0_u32; 6];
-        vst1_u32_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint32x2x3_t = vld1_u32_x3(tmp.as_ptr().cast());
-        let out: [u32; 6] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u32, 6, uint32x2x3_t, vst1_u32_x3, vld1_u32_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u32_x4() {
-        let vals: [u32; 8] = crate::array::from_fn(|i| i as u32);
-        let a: uint32x2x4_t = transmute(vals);
-        let mut tmp = [0_u32; 8];
-        vst1_u32_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint32x2x4_t = vld1_u32_x4(tmp.as_ptr().cast());
-        let out: [u32; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u32, 8, uint32x2x4_t, vst1_u32_x4, vld1_u32_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u32_x2() {
-        let vals: [u32; 8] = crate::array::from_fn(|i| i as u32);
-        let a: uint32x4x2_t = transmute(vals);
-        let mut tmp = [0_u32; 8];
-        vst1q_u32_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint32x4x2_t = vld1q_u32_x2(tmp.as_ptr().cast());
-        let out: [u32; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u32, 8, uint32x4x2_t, vst1q_u32_x2, vld1q_u32_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u32_x3() {
-        let vals: [u32; 12] = crate::array::from_fn(|i| i as u32);
-        let a: uint32x4x3_t = transmute(vals);
-        let mut tmp = [0_u32; 12];
-        vst1q_u32_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint32x4x3_t = vld1q_u32_x3(tmp.as_ptr().cast());
-        let out: [u32; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u32, 12, uint32x4x3_t, vst1q_u32_x3, vld1q_u32_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u32_x4() {
-        let vals: [u32; 16] = crate::array::from_fn(|i| i as u32);
-        let a: uint32x4x4_t = transmute(vals);
-        let mut tmp = [0_u32; 16];
-        vst1q_u32_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint32x4x4_t = vld1q_u32_x4(tmp.as_ptr().cast());
-        let out: [u32; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u32, 16, uint32x4x4_t, vst1q_u32_x4, vld1q_u32_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u64_x2() {
-        let vals: [u64; 2] = crate::array::from_fn(|i| i as u64);
-        let a: uint64x1x2_t = transmute(vals);
-        let mut tmp = [0_u64; 2];
-        vst1_u64_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint64x1x2_t = vld1_u64_x2(tmp.as_ptr().cast());
-        let out: [u64; 2] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u64, 2, uint64x1x2_t, vst1_u64_x2, vld1_u64_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u64_x3() {
-        let vals: [u64; 3] = crate::array::from_fn(|i| i as u64);
-        let a: uint64x1x3_t = transmute(vals);
-        let mut tmp = [0_u64; 3];
-        vst1_u64_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint64x1x3_t = vld1_u64_x3(tmp.as_ptr().cast());
-        let out: [u64; 3] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u64, 3, uint64x1x3_t, vst1_u64_x3, vld1_u64_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_u64_x4() {
-        let vals: [u64; 4] = crate::array::from_fn(|i| i as u64);
-        let a: uint64x1x4_t = transmute(vals);
-        let mut tmp = [0_u64; 4];
-        vst1_u64_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint64x1x4_t = vld1_u64_x4(tmp.as_ptr().cast());
-        let out: [u64; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u64, 4, uint64x1x4_t, vst1_u64_x4, vld1_u64_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u64_x2() {
-        let vals: [u64; 4] = crate::array::from_fn(|i| i as u64);
-        let a: uint64x2x2_t = transmute(vals);
-        let mut tmp = [0_u64; 4];
-        vst1q_u64_x2(tmp.as_mut_ptr().cast(), a);
-        let r: uint64x2x2_t = vld1q_u64_x2(tmp.as_ptr().cast());
-        let out: [u64; 4] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u64, 4, uint64x2x2_t, vst1q_u64_x2, vld1q_u64_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u64_x3() {
-        let vals: [u64; 6] = crate::array::from_fn(|i| i as u64);
-        let a: uint64x2x3_t = transmute(vals);
-        let mut tmp = [0_u64; 6];
-        vst1q_u64_x3(tmp.as_mut_ptr().cast(), a);
-        let r: uint64x2x3_t = vld1q_u64_x3(tmp.as_ptr().cast());
-        let out: [u64; 6] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u64, 6, uint64x2x3_t, vst1q_u64_x3, vld1q_u64_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_u64_x4() {
-        let vals: [u64; 8] = crate::array::from_fn(|i| i as u64);
-        let a: uint64x2x4_t = transmute(vals);
-        let mut tmp = [0_u64; 8];
-        vst1q_u64_x4(tmp.as_mut_ptr().cast(), a);
-        let r: uint64x2x4_t = vld1q_u64_x4(tmp.as_ptr().cast());
-        let out: [u64; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(u64, 8, uint64x2x4_t, vst1q_u64_x4, vld1q_u64_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_p8_x2() {
-        let vals: [p8; 16] = crate::array::from_fn(|i| i as p8);
-        let a: poly8x8x2_t = transmute(vals);
-        let mut tmp = [0 as p8; 16];
-        vst1_p8_x2(tmp.as_mut_ptr().cast(), a);
-        let r: poly8x8x2_t = vld1_p8_x2(tmp.as_ptr().cast());
-        let out: [p8; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p8, 16, poly8x8x2_t, vst1_p8_x2, vld1_p8_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_p8_x3() {
-        let vals: [p8; 24] = crate::array::from_fn(|i| i as p8);
-        let a: poly8x8x3_t = transmute(vals);
-        let mut tmp = [0 as p8; 24];
-        vst1_p8_x3(tmp.as_mut_ptr().cast(), a);
-        let r: poly8x8x3_t = vld1_p8_x3(tmp.as_ptr().cast());
-        let out: [p8; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p8, 24, poly8x8x3_t, vst1_p8_x3, vld1_p8_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_p8_x4() {
-        let vals: [p8; 32] = crate::array::from_fn(|i| i as p8);
-        let a: poly8x8x4_t = transmute(vals);
-        let mut tmp = [0 as p8; 32];
-        vst1_p8_x4(tmp.as_mut_ptr().cast(), a);
-        let r: poly8x8x4_t = vld1_p8_x4(tmp.as_ptr().cast());
-        let out: [p8; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p8, 32, poly8x8x4_t, vst1_p8_x4, vld1_p8_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_p8_x2() {
-        let vals: [p8; 32] = crate::array::from_fn(|i| i as p8);
-        let a: poly8x16x2_t = transmute(vals);
-        let mut tmp = [0 as p8; 32];
-        vst1q_p8_x2(tmp.as_mut_ptr().cast(), a);
-        let r: poly8x16x2_t = vld1q_p8_x2(tmp.as_ptr().cast());
-        let out: [p8; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p8, 32, poly8x16x2_t, vst1q_p8_x2, vld1q_p8_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_p8_x3() {
-        let vals: [p8; 48] = crate::array::from_fn(|i| i as p8);
-        let a: poly8x16x3_t = transmute(vals);
-        let mut tmp = [0 as p8; 48];
-        vst1q_p8_x3(tmp.as_mut_ptr().cast(), a);
-        let r: poly8x16x3_t = vld1q_p8_x3(tmp.as_ptr().cast());
-        let out: [p8; 48] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p8, 48, poly8x16x3_t, vst1q_p8_x3, vld1q_p8_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_p8_x4() {
-        let vals: [p8; 64] = crate::array::from_fn(|i| i as p8);
-        let a: poly8x16x4_t = transmute(vals);
-        let mut tmp = [0 as p8; 64];
-        vst1q_p8_x4(tmp.as_mut_ptr().cast(), a);
-        let r: poly8x16x4_t = vld1q_p8_x4(tmp.as_ptr().cast());
-        let out: [p8; 64] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p8, 64, poly8x16x4_t, vst1q_p8_x4, vld1q_p8_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_p16_x2() {
-        let vals: [p16; 8] = crate::array::from_fn(|i| i as p16);
-        let a: poly16x4x2_t = transmute(vals);
-        let mut tmp = [0 as p16; 8];
-        vst1_p16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: poly16x4x2_t = vld1_p16_x2(tmp.as_ptr().cast());
-        let out: [p16; 8] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p16, 8, poly16x4x2_t, vst1_p16_x2, vld1_p16_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_p16_x3() {
-        let vals: [p16; 12] = crate::array::from_fn(|i| i as p16);
-        let a: poly16x4x3_t = transmute(vals);
-        let mut tmp = [0 as p16; 12];
-        vst1_p16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: poly16x4x3_t = vld1_p16_x3(tmp.as_ptr().cast());
-        let out: [p16; 12] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p16, 12, poly16x4x3_t, vst1_p16_x3, vld1_p16_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1_p16_x4() {
-        let vals: [p16; 16] = crate::array::from_fn(|i| i as p16);
-        let a: poly16x4x4_t = transmute(vals);
-        let mut tmp = [0 as p16; 16];
-        vst1_p16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: poly16x4x4_t = vld1_p16_x4(tmp.as_ptr().cast());
-        let out: [p16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p16, 16, poly16x4x4_t, vst1_p16_x4, vld1_p16_x4);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_p16_x2() {
-        let vals: [p16; 16] = crate::array::from_fn(|i| i as p16);
-        let a: poly16x8x2_t = transmute(vals);
-        let mut tmp = [0 as p16; 16];
-        vst1q_p16_x2(tmp.as_mut_ptr().cast(), a);
-        let r: poly16x8x2_t = vld1q_p16_x2(tmp.as_ptr().cast());
-        let out: [p16; 16] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p16, 16, poly16x8x2_t, vst1q_p16_x2, vld1q_p16_x2);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_p16_x3() {
-        let vals: [p16; 24] = crate::array::from_fn(|i| i as p16);
-        let a: poly16x8x3_t = transmute(vals);
-        let mut tmp = [0 as p16; 24];
-        vst1q_p16_x3(tmp.as_mut_ptr().cast(), a);
-        let r: poly16x8x3_t = vld1q_p16_x3(tmp.as_ptr().cast());
-        let out: [p16; 24] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p16, 24, poly16x8x3_t, vst1q_p16_x3, vld1q_p16_x3);
     }
 
     #[simd_test(enable = "neon")]
     unsafe fn test_vld1q_p16_x4() {
-        let vals: [p16; 32] = crate::array::from_fn(|i| i as p16);
-        let a: poly16x8x4_t = transmute(vals);
-        let mut tmp = [0 as p16; 32];
-        vst1q_p16_x4(tmp.as_mut_ptr().cast(), a);
-        let r: poly16x8x4_t = vld1q_p16_x4(tmp.as_ptr().cast());
-        let out: [p16; 32] = transmute(r);
-        assert_eq!(out, vals);
+        wide_store_load_roundtrip!(p16, 32, poly16x8x4_t, vst1q_p16_x4, vld1q_p16_x4);
     }
 }
 

@@ -8,10 +8,13 @@
 pub fn foo() {}
 
 #[doc(123)]
-//~^ ERROR malformed `doc` attribute
+//~^ ERROR
+//~| WARN
 #[doc("hello", "bar")]
-//~^ ERROR malformed `doc` attribute
-//~| ERROR malformed `doc` attribute
+//~^ ERROR
+//~| ERROR
+//~| WARN
+//~| WARN
 #[doc(foo::bar, crate::bar::baz = "bye")]
 //~^ ERROR unknown `doc` attribute
 //~| ERROR unknown `doc` attribute

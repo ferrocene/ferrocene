@@ -4669,6 +4669,16 @@ mod tests {
         assert_eq_m256i(r, e);
     }
 
+    #[target_feature(enable = "avx2")]
+    #[cfg_attr(test, assert_instr(vpmaddwd))]
+    unsafe fn test_mm256_madd_epi16_mul_one(mad: __m256i) -> __m256i {
+        // This is a trick used in the adler32 algorithm to get a widening addition. The
+        // multiplication by 1 is trivial, but must not be optimized out because then the vpmaddwd
+        // instruction is no longer selected. The assert_instr verifies that this is the case.
+        let one_v = _mm256_set1_epi16(1);
+        _mm256_madd_epi16(mad, one_v)
+    }
+
     #[simd_test(enable = "avx2")]
     const fn test_mm256_inserti128_si256() {
         let a = _mm256_setr_epi64x(1, 2, 3, 4);

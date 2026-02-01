@@ -425,5 +425,9 @@ pub fn decorate_attribute_lint(
         }
 
         &AttributeLintKind::MalformedDoc => lints::MalformedDoc.decorate_lint(diag),
+
+        &AttributeLintKind::ExpectedNoArgs => lints::ExpectedNoArgs.decorate_lint(diag),
+
+        &AttributeLintKind::ExpectedNameValue => lints::ExpectedNameValue.decorate_lint(diag),
     }
 }

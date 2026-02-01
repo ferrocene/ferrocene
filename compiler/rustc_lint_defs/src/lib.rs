@@ -823,6 +823,8 @@ pub enum AttributeLintKind {
     AttrCrateLevelOnly,
     DoNotRecommendDoesNotExpectArgs,
     MalformedDoc,
+    ExpectedNoArgs,
+    ExpectedNameValue,
 }
 
 pub type RegisteredTools = FxIndexSet<Ident>;

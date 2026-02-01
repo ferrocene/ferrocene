@@ -1445,9 +1445,9 @@ impl Literal {
         })
     }
 
-    /// Returns the unescaped char value if the current literal is a char.
+    /// Returns the unescaped character value if the current literal is a byte character literal.
     #[unstable(feature = "proc_macro_value", issue = "136652")]
-    pub fn byte_value(&self) -> Result<u8, ConversionErrorKind> {
+    pub fn byte_character_value(&self) -> Result<u8, ConversionErrorKind> {
         self.0.symbol.with(|symbol| match self.0.kind {
             bridge::LitKind::Char => {
                 unescape_byte(symbol).map_err(ConversionErrorKind::FailedToUnescape)
@@ -1456,9 +1456,9 @@ impl Literal {
         })
     }
 
-    /// Returns the unescaped char value if the current literal is a char.
+    /// Returns the unescaped character value if the current literal is a character literal.
     #[unstable(feature = "proc_macro_value", issue = "136652")]
-    pub fn char_value(&self) -> Result<char, ConversionErrorKind> {
+    pub fn character_value(&self) -> Result<char, ConversionErrorKind> {
         self.0.symbol.with(|symbol| match self.0.kind {
             bridge::LitKind::Char => {
                 unescape_char(symbol).map_err(ConversionErrorKind::FailedToUnescape)

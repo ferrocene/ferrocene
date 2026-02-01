@@ -181,6 +181,4 @@ pub trait QueryContext<'tcx>: HasDepContext {
     /// new query job while it executes.
     fn start_query<R>(self, token: QueryJobId, depth_limit: bool, compute: impl FnOnce() -> R)
     -> R;
-
-    fn depth_limit_error(self, job: QueryJobId);
 }

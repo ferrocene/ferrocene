@@ -48,6 +48,23 @@ impl<'tcx> QueryCtxt<'tcx> {
     pub fn new(tcx: TyCtxt<'tcx>) -> Self {
         QueryCtxt { tcx }
     }
+
+    fn depth_limit_error(self, job: QueryJobId) {
+        let query_map = self.collect_active_jobs(true).expect("failed to collect active queries");
+        let (info, depth) = job.find_dep_kind_root(query_map);
+
+        let suggested_limit = match self.tcx.recursion_limit() {
+            Limit(0) => Limit(2),
+            limit => limit * 2,
+        };
+
+        self.tcx.sess.dcx().emit_fatal(QueryOverflow {
+            span: info.job.span,
+            note: QueryOverflowNote { desc: info.frame.info.extract().description, depth },
+            suggested_limit,
+            crate_name: self.tcx.crate_name(LOCAL_CRATE),
+        });
+    }
 }
 
 impl<'tcx> HasDepContext for QueryCtxt<'tcx> {
@@ -154,23 +171,6 @@ impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
             // Use the `ImplicitCtxt` while we execute the query.
             tls::enter_context(&new_icx, compute)
         })
-    }
-
-    fn depth_limit_error(self, job: QueryJobId) {
-        let query_map = self.collect_active_jobs(true).expect("failed to collect active queries");
-        let (info, depth) = job.find_dep_kind_root(query_map);
-
-        let suggested_limit = match self.tcx.recursion_limit() {
-            Limit(0) => Limit(2),
-            limit => limit * 2,
-        };
-
-        self.tcx.sess.dcx().emit_fatal(QueryOverflow {
-            span: info.job.span,
-            note: QueryOverflowNote { desc: info.frame.info.extract().description, depth },
-            suggested_limit,
-            crate_name: self.tcx.crate_name(LOCAL_CRATE),
-        });
     }
 }
 

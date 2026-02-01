@@ -3629,7 +3629,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             }
                         }
                         err.span_note(spans, msg);
-                        if derived {
+                        if derived && trait_name != "Copy" {
                             err.help(format!(
                                 "consider manually implementing `{trait_name}` to avoid undesired \
                                  bounds",

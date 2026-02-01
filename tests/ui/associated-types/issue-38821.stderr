@@ -159,7 +159,6 @@ LL | pub enum ColumnInsertValue<Col, Expr> where
 ...
 LL |     Expr: Expression<SqlType=<Col::SqlType as IntoNullable>::Nullable>,
    |                      ------------------------------------------------ unsatisfied trait bound
-   = help: consider manually implementing `Copy` to avoid undesired bounds
 help: consider further restricting the associated type
    |
 LL |     Expr: Expression<SqlType=<Col::SqlType as IntoNullable>::Nullable>, <Col as Expression>::SqlType: NotNull,

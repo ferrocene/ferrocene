@@ -13,7 +13,6 @@ LL | #[derive(Copy, Clone)]
    |          ---- in this derive macro expansion
 LL | struct B<T> {
    |        ^ - type parameter would need to implement `Copy`
-   = help: consider manually implementing `Copy` to avoid undesired bounds
 note: required by a bound in `is_copy`
   --> $DIR/deriving-copyclone.rs:18:15
    |
@@ -65,7 +64,6 @@ LL | #[derive(Copy, Clone)]
    |          ---- in this derive macro expansion
 LL | struct B<T> {
    |        ^ - type parameter would need to implement `Copy`
-   = help: consider manually implementing `Copy` to avoid undesired bounds
 note: required by a bound in `is_copy`
   --> $DIR/deriving-copyclone.rs:18:15
    |

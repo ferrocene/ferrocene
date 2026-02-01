@@ -1,4 +1,6 @@
-// compile-flags: -O
+//@ only-x86_64
+//@ compile-flags: -O
+
 #![crate_type = "lib"]
 
 // CHECK-LABEL: mul3

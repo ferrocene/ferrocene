@@ -690,6 +690,15 @@ impl IntoDiagArg for CrateType {
     }
 }
 
+#[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub enum RustcLayoutType {
+    Abi,
+    Align,
+    Size,
+    HomogenousAggregate,
+    Debug,
+}
+
 /// Represents parsed *built-in* inert attributes.
 ///
 /// ## Overview
@@ -1048,6 +1057,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_has_incoherent_inherent_impls]`
     RustcHasIncoherentInherentImpls,
 
+    /// Represents `#[rustc_layout]`
+    RustcLayout(ThinVec<RustcLayoutType>),
+
     /// Represents `#[rustc_layout_scalar_valid_range_end]`.
     RustcLayoutScalarValidRangeEnd(Box<u128>, Span),
 
@@ -1083,6 +1095,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_no_implicit_autorefs]`
     RustcNoImplicitAutorefs,
+
+    /// Represents `#[rustc_non_const_trait_method]`.
+    RustcNonConstTraitMethod,
 
     /// Represents `#[rustc_nounwind]`
     RustcNounwind,

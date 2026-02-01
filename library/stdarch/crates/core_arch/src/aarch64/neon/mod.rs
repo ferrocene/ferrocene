@@ -1006,400 +1006,148 @@ mod tests {
         };
     }
 
-    #[simd_test(enable = "neon,fp16")]
-    #[cfg(not(target_arch = "arm64ec"))]
-    unsafe fn test_vld1_f16_x2() {
-        wide_store_load_roundtrip!(f16, 8, float16x4x2_t, vst1_f16_x2, vld1_f16_x2);
-    }
-
-    #[simd_test(enable = "neon,fp16")]
-    #[cfg(not(target_arch = "arm64ec"))]
-    unsafe fn test_vld1_f16_x3() {
-        wide_store_load_roundtrip!(f16, 12, float16x4x3_t, vst1_f16_x3, vld1_f16_x3);
-    }
-
-    #[simd_test(enable = "neon,fp16")]
-    #[cfg(not(target_arch = "arm64ec"))]
-    unsafe fn test_vld1_f16_x4() {
-        wide_store_load_roundtrip!(f16, 16, float16x4x4_t, vst1_f16_x4, vld1_f16_x4);
-    }
-
-    #[simd_test(enable = "neon,fp16")]
-    #[cfg(not(target_arch = "arm64ec"))]
-    unsafe fn test_vld1q_f16_x2() {
-        wide_store_load_roundtrip!(f16, 16, float16x8x2_t, vst1q_f16_x2, vld1q_f16_x2);
-    }
-
-    #[simd_test(enable = "neon,fp16")]
-    #[cfg(not(target_arch = "arm64ec"))]
-    unsafe fn test_vld1q_f16_x3() {
-        wide_store_load_roundtrip!(f16, 24, float16x8x3_t, vst1q_f16_x3, vld1q_f16_x3);
-    }
-
-    #[simd_test(enable = "neon,fp16")]
-    #[cfg(not(target_arch = "arm64ec"))]
-    unsafe fn test_vld1q_f16_x4() {
-        wide_store_load_roundtrip!(f16, 32, float16x8x4_t, vst1q_f16_x4, vld1q_f16_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_f32_x2() {
-        wide_store_load_roundtrip!(f32, 4, float32x2x2_t, vst1_f32_x2, vld1_f32_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_f32_x3() {
-        wide_store_load_roundtrip!(f32, 6, float32x2x3_t, vst1_f32_x3, vld1_f32_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_f32_x4() {
-        wide_store_load_roundtrip!(f32, 8, float32x2x4_t, vst1_f32_x4, vld1_f32_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_f32_x2() {
-        wide_store_load_roundtrip!(f32, 8, float32x4x2_t, vst1q_f32_x2, vld1q_f32_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_f32_x3() {
-        wide_store_load_roundtrip!(f32, 12, float32x4x3_t, vst1q_f32_x3, vld1q_f32_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_f32_x4() {
-        wide_store_load_roundtrip!(f32, 16, float32x4x4_t, vst1q_f32_x4, vld1q_f32_x4);
-    }
-
-    #[simd_test(enable = "neon,aes")]
-    unsafe fn test_vld1_p64_x2() {
-        wide_store_load_roundtrip!(p64, 2, poly64x1x2_t, vst1_p64_x2, vld1_p64_x2);
-    }
-
-    #[simd_test(enable = "neon,aes")]
-    unsafe fn test_vld1_p64_x3() {
-        wide_store_load_roundtrip!(p64, 3, poly64x1x3_t, vst1_p64_x3, vld1_p64_x3);
-    }
-
-    #[simd_test(enable = "neon,aes")]
-    unsafe fn test_vld1_p64_x4() {
-        wide_store_load_roundtrip!(p64, 4, poly64x1x4_t, vst1_p64_x4, vld1_p64_x4);
-    }
-
-    #[simd_test(enable = "neon,aes")]
-    unsafe fn test_vld1q_p64_x2() {
-        wide_store_load_roundtrip!(p64, 4, poly64x2x2_t, vst1q_p64_x2, vld1q_p64_x2);
-    }
-
-    #[simd_test(enable = "neon,aes")]
-    unsafe fn test_vld1q_p64_x3() {
-        wide_store_load_roundtrip!(p64, 6, poly64x2x3_t, vst1q_p64_x3, vld1q_p64_x3);
-    }
-
-    #[simd_test(enable = "neon,aes")]
-    unsafe fn test_vld1q_p64_x4() {
-        wide_store_load_roundtrip!(p64, 8, poly64x2x4_t, vst1q_p64_x4, vld1q_p64_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s8_x2() {
-        wide_store_load_roundtrip!(i8, 16, int8x8x2_t, vst1_s8_x2, vld1_s8_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s8_x3() {
-        wide_store_load_roundtrip!(i8, 24, int8x8x3_t, vst1_s8_x3, vld1_s8_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s8_x4() {
-        wide_store_load_roundtrip!(i8, 32, int8x8x4_t, vst1_s8_x4, vld1_s8_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s8_x2() {
-        wide_store_load_roundtrip!(i8, 32, int8x16x2_t, vst1q_s8_x2, vld1q_s8_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s8_x3() {
-        wide_store_load_roundtrip!(i8, 48, int8x16x3_t, vst1q_s8_x3, vld1q_s8_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s8_x4() {
-        wide_store_load_roundtrip!(i8, 64, int8x16x4_t, vst1q_s8_x4, vld1q_s8_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s16_x2() {
-        wide_store_load_roundtrip!(i16, 8, int16x4x2_t, vst1_s16_x2, vld1_s16_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s16_x3() {
-        wide_store_load_roundtrip!(i16, 12, int16x4x3_t, vst1_s16_x3, vld1_s16_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s16_x4() {
-        wide_store_load_roundtrip!(i16, 16, int16x4x4_t, vst1_s16_x4, vld1_s16_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s16_x2() {
-        wide_store_load_roundtrip!(i16, 16, int16x8x2_t, vst1q_s16_x2, vld1q_s16_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s16_x3() {
-        wide_store_load_roundtrip!(i16, 24, int16x8x3_t, vst1q_s16_x3, vld1q_s16_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s16_x4() {
-        wide_store_load_roundtrip!(i16, 32, int16x8x4_t, vst1q_s16_x4, vld1q_s16_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s32_x2() {
-        wide_store_load_roundtrip!(i32, 4, int32x2x2_t, vst1_s32_x2, vld1_s32_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s32_x3() {
-        wide_store_load_roundtrip!(i32, 6, int32x2x3_t, vst1_s32_x3, vld1_s32_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s32_x4() {
-        wide_store_load_roundtrip!(i32, 8, int32x2x4_t, vst1_s32_x4, vld1_s32_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s32_x2() {
-        wide_store_load_roundtrip!(i32, 8, int32x4x2_t, vst1q_s32_x2, vld1q_s32_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s32_x3() {
-        wide_store_load_roundtrip!(i32, 12, int32x4x3_t, vst1q_s32_x3, vld1q_s32_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s32_x4() {
-        wide_store_load_roundtrip!(i32, 16, int32x4x4_t, vst1q_s32_x4, vld1q_s32_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s64_x2() {
-        wide_store_load_roundtrip!(i64, 2, int64x1x2_t, vst1_s64_x2, vld1_s64_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s64_x3() {
-        wide_store_load_roundtrip!(i64, 3, int64x1x3_t, vst1_s64_x3, vld1_s64_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_s64_x4() {
-        wide_store_load_roundtrip!(i64, 4, int64x1x4_t, vst1_s64_x4, vld1_s64_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s64_x2() {
-        wide_store_load_roundtrip!(i64, 4, int64x2x2_t, vst1q_s64_x2, vld1q_s64_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s64_x3() {
-        wide_store_load_roundtrip!(i64, 6, int64x2x3_t, vst1q_s64_x3, vld1q_s64_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_s64_x4() {
-        wide_store_load_roundtrip!(i64, 8, int64x2x4_t, vst1q_s64_x4, vld1q_s64_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u8_x2() {
-        wide_store_load_roundtrip!(u8, 16, uint8x8x2_t, vst1_u8_x2, vld1_u8_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u8_x3() {
-        wide_store_load_roundtrip!(u8, 24, uint8x8x3_t, vst1_u8_x3, vld1_u8_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u8_x4() {
-        wide_store_load_roundtrip!(u8, 32, uint8x8x4_t, vst1_u8_x4, vld1_u8_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u8_x2() {
-        wide_store_load_roundtrip!(u8, 32, uint8x16x2_t, vst1q_u8_x2, vld1q_u8_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u8_x3() {
-        wide_store_load_roundtrip!(u8, 48, uint8x16x3_t, vst1q_u8_x3, vld1q_u8_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u8_x4() {
-        wide_store_load_roundtrip!(u8, 64, uint8x16x4_t, vst1q_u8_x4, vld1q_u8_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u16_x2() {
-        wide_store_load_roundtrip!(u16, 8, uint16x4x2_t, vst1_u16_x2, vld1_u16_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u16_x3() {
-        wide_store_load_roundtrip!(u16, 12, uint16x4x3_t, vst1_u16_x3, vld1_u16_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u16_x4() {
-        wide_store_load_roundtrip!(u16, 16, uint16x4x4_t, vst1_u16_x4, vld1_u16_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u16_x2() {
-        wide_store_load_roundtrip!(u16, 16, uint16x8x2_t, vst1q_u16_x2, vld1q_u16_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u16_x3() {
-        wide_store_load_roundtrip!(u16, 24, uint16x8x3_t, vst1q_u16_x3, vld1q_u16_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u16_x4() {
-        wide_store_load_roundtrip!(u16, 32, uint16x8x4_t, vst1q_u16_x4, vld1q_u16_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u32_x2() {
-        wide_store_load_roundtrip!(u32, 4, uint32x2x2_t, vst1_u32_x2, vld1_u32_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u32_x3() {
-        wide_store_load_roundtrip!(u32, 6, uint32x2x3_t, vst1_u32_x3, vld1_u32_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u32_x4() {
-        wide_store_load_roundtrip!(u32, 8, uint32x2x4_t, vst1_u32_x4, vld1_u32_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u32_x2() {
-        wide_store_load_roundtrip!(u32, 8, uint32x4x2_t, vst1q_u32_x2, vld1q_u32_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u32_x3() {
-        wide_store_load_roundtrip!(u32, 12, uint32x4x3_t, vst1q_u32_x3, vld1q_u32_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u32_x4() {
-        wide_store_load_roundtrip!(u32, 16, uint32x4x4_t, vst1q_u32_x4, vld1q_u32_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u64_x2() {
-        wide_store_load_roundtrip!(u64, 2, uint64x1x2_t, vst1_u64_x2, vld1_u64_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u64_x3() {
-        wide_store_load_roundtrip!(u64, 3, uint64x1x3_t, vst1_u64_x3, vld1_u64_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_u64_x4() {
-        wide_store_load_roundtrip!(u64, 4, uint64x1x4_t, vst1_u64_x4, vld1_u64_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u64_x2() {
-        wide_store_load_roundtrip!(u64, 4, uint64x2x2_t, vst1q_u64_x2, vld1q_u64_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u64_x3() {
-        wide_store_load_roundtrip!(u64, 6, uint64x2x3_t, vst1q_u64_x3, vld1q_u64_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_u64_x4() {
-        wide_store_load_roundtrip!(u64, 8, uint64x2x4_t, vst1q_u64_x4, vld1q_u64_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_p8_x2() {
-        wide_store_load_roundtrip!(p8, 16, poly8x8x2_t, vst1_p8_x2, vld1_p8_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_p8_x3() {
-        wide_store_load_roundtrip!(p8, 24, poly8x8x3_t, vst1_p8_x3, vld1_p8_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_p8_x4() {
-        wide_store_load_roundtrip!(p8, 32, poly8x8x4_t, vst1_p8_x4, vld1_p8_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_p8_x2() {
-        wide_store_load_roundtrip!(p8, 32, poly8x16x2_t, vst1q_p8_x2, vld1q_p8_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_p8_x3() {
-        wide_store_load_roundtrip!(p8, 48, poly8x16x3_t, vst1q_p8_x3, vld1q_p8_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_p8_x4() {
-        wide_store_load_roundtrip!(p8, 64, poly8x16x4_t, vst1q_p8_x4, vld1q_p8_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_p16_x2() {
-        wide_store_load_roundtrip!(p16, 8, poly16x4x2_t, vst1_p16_x2, vld1_p16_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_p16_x3() {
-        wide_store_load_roundtrip!(p16, 12, poly16x4x3_t, vst1_p16_x3, vld1_p16_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1_p16_x4() {
-        wide_store_load_roundtrip!(p16, 16, poly16x4x4_t, vst1_p16_x4, vld1_p16_x4);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_p16_x2() {
-        wide_store_load_roundtrip!(p16, 16, poly16x8x2_t, vst1q_p16_x2, vld1q_p16_x2);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_p16_x3() {
-        wide_store_load_roundtrip!(p16, 24, poly16x8x3_t, vst1q_p16_x3, vld1q_p16_x3);
-    }
-
-    #[simd_test(enable = "neon")]
-    unsafe fn test_vld1q_p16_x4() {
-        wide_store_load_roundtrip!(p16, 32, poly16x8x4_t, vst1q_p16_x4, vld1q_p16_x4);
+    macro_rules! wide_store_load_roundtrip_fp16 {
+        ($( $name:ident $args:tt);* $(;)?) => {
+            $(
+                #[simd_test(enable = "neon,fp16")]
+                #[cfg(not(target_arch = "arm64ec"))]
+                unsafe fn $name() {
+                    wide_store_load_roundtrip! $args;
+                }
+            )*
+        };
+    }
+
+    wide_store_load_roundtrip_fp16! {
+        test_vld1_f16_x2(f16, 8, float16x4x2_t, vst1_f16_x2, vld1_f16_x2);
+        test_vld1_f16_x3(f16, 12, float16x4x3_t, vst1_f16_x3, vld1_f16_x3);
+        test_vld1_f16_x4(f16, 16, float16x4x4_t, vst1_f16_x4, vld1_f16_x4);
+
+        test_vld1q_f16_x2(f16, 16, float16x8x2_t, vst1q_f16_x2, vld1q_f16_x2);
+        test_vld1q_f16_x3(f16, 24, float16x8x3_t, vst1q_f16_x3, vld1q_f16_x3);
+        test_vld1q_f16_x4(f16, 32, float16x8x4_t, vst1q_f16_x4, vld1q_f16_x4);
+    }
+
+    macro_rules! wide_store_load_roundtrip_aes {
+        ($( $name:ident $args:tt);* $(;)?) => {
+            $(
+                #[simd_test(enable = "neon,aes")]
+                unsafe fn $name() {
+                    wide_store_load_roundtrip! $args;
+                }
+            )*
+        };
+    }
+
+    wide_store_load_roundtrip_aes! {
+        test_vld1_p64_x2(p64, 2, poly64x1x2_t, vst1_p64_x2, vld1_p64_x2);
+        test_vld1_p64_x3(p64, 3, poly64x1x3_t, vst1_p64_x3, vld1_p64_x3);
+        test_vld1_p64_x4(p64, 4, poly64x1x4_t, vst1_p64_x4, vld1_p64_x4);
+
+        test_vld1q_p64_x2(p64, 4, poly64x2x2_t, vst1q_p64_x2, vld1q_p64_x2);
+        test_vld1q_p64_x3(p64, 6, poly64x2x3_t, vst1q_p64_x3, vld1q_p64_x3);
+        test_vld1q_p64_x4(p64, 8, poly64x2x4_t, vst1q_p64_x4, vld1q_p64_x4);
+    }
+
+    macro_rules! wide_store_load_roundtrip_neon {
+        ($( $name:ident $args:tt);* $(;)?) => {
+            $(
+                #[simd_test(enable = "neon")]
+                unsafe fn $name() {
+                    wide_store_load_roundtrip! $args;
+                }
+            )*
+        };
+    }
+
+    wide_store_load_roundtrip_neon! {
+        test_vld1_f32_x2(f32, 4, float32x2x2_t, vst1_f32_x2, vld1_f32_x2);
+        test_vld1_f32_x3(f32, 6, float32x2x3_t, vst1_f32_x3, vld1_f32_x3);
+        test_vld1_f32_x4(f32, 8, float32x2x4_t, vst1_f32_x4, vld1_f32_x4);
+
+        test_vld1q_f32_x2(f32, 8, float32x4x2_t, vst1q_f32_x2, vld1q_f32_x2);
+        test_vld1q_f32_x3(f32, 12, float32x4x3_t, vst1q_f32_x3, vld1q_f32_x3);
+        test_vld1q_f32_x4(f32, 16, float32x4x4_t, vst1q_f32_x4, vld1q_f32_x4);
+
+        test_vld1_s8_x2(i8, 16, int8x8x2_t, vst1_s8_x2, vld1_s8_x2);
+        test_vld1_s8_x3(i8, 24, int8x8x3_t, vst1_s8_x3, vld1_s8_x3);
+        test_vld1_s8_x4(i8, 32, int8x8x4_t, vst1_s8_x4, vld1_s8_x4);
+
+        test_vld1q_s8_x2(i8, 32, int8x16x2_t, vst1q_s8_x2, vld1q_s8_x2);
+        test_vld1q_s8_x3(i8, 48, int8x16x3_t, vst1q_s8_x3, vld1q_s8_x3);
+        test_vld1q_s8_x4(i8, 64, int8x16x4_t, vst1q_s8_x4, vld1q_s8_x4);
+
+        test_vld1_s16_x2(i16, 8, int16x4x2_t, vst1_s16_x2, vld1_s16_x2);
+        test_vld1_s16_x3(i16, 12, int16x4x3_t, vst1_s16_x3, vld1_s16_x3);
+        test_vld1_s16_x4(i16, 16, int16x4x4_t, vst1_s16_x4, vld1_s16_x4);
+
+        test_vld1q_s16_x2(i16, 16, int16x8x2_t, vst1q_s16_x2, vld1q_s16_x2);
+        test_vld1q_s16_x3(i16, 24, int16x8x3_t, vst1q_s16_x3, vld1q_s16_x3);
+        test_vld1q_s16_x4(i16, 32, int16x8x4_t, vst1q_s16_x4, vld1q_s16_x4);
+
+        test_vld1_s32_x2(i32, 4, int32x2x2_t, vst1_s32_x2, vld1_s32_x2);
+        test_vld1_s32_x3(i32, 6, int32x2x3_t, vst1_s32_x3, vld1_s32_x3);
+        test_vld1_s32_x4(i32, 8, int32x2x4_t, vst1_s32_x4, vld1_s32_x4);
+
+        test_vld1q_s32_x2(i32, 8, int32x4x2_t, vst1q_s32_x2, vld1q_s32_x2);
+        test_vld1q_s32_x3(i32, 12, int32x4x3_t, vst1q_s32_x3, vld1q_s32_x3);
+        test_vld1q_s32_x4(i32, 16, int32x4x4_t, vst1q_s32_x4, vld1q_s32_x4);
+
+        test_vld1_s64_x2(i64, 2, int64x1x2_t, vst1_s64_x2, vld1_s64_x2);
+        test_vld1_s64_x3(i64, 3, int64x1x3_t, vst1_s64_x3, vld1_s64_x3);
+        test_vld1_s64_x4(i64, 4, int64x1x4_t, vst1_s64_x4, vld1_s64_x4);
+
+        test_vld1q_s64_x2(i64, 4, int64x2x2_t, vst1q_s64_x2, vld1q_s64_x2);
+        test_vld1q_s64_x3(i64, 6, int64x2x3_t, vst1q_s64_x3, vld1q_s64_x3);
+        test_vld1q_s64_x4(i64, 8, int64x2x4_t, vst1q_s64_x4, vld1q_s64_x4);
+
+        test_vld1_u8_x2(u8, 16, uint8x8x2_t, vst1_u8_x2, vld1_u8_x2);
+        test_vld1_u8_x3(u8, 24, uint8x8x3_t, vst1_u8_x3, vld1_u8_x3);
+        test_vld1_u8_x4(u8, 32, uint8x8x4_t, vst1_u8_x4, vld1_u8_x4);
+
+        test_vld1q_u8_x2(u8, 32, uint8x16x2_t, vst1q_u8_x2, vld1q_u8_x2);
+        test_vld1q_u8_x3(u8, 48, uint8x16x3_t, vst1q_u8_x3, vld1q_u8_x3);
+        test_vld1q_u8_x4(u8, 64, uint8x16x4_t, vst1q_u8_x4, vld1q_u8_x4);
+
+        test_vld1_u16_x2(u16, 8, uint16x4x2_t, vst1_u16_x2, vld1_u16_x2);
+        test_vld1_u16_x3(u16, 12, uint16x4x3_t, vst1_u16_x3, vld1_u16_x3);
+        test_vld1_u16_x4(u16, 16, uint16x4x4_t, vst1_u16_x4, vld1_u16_x4);
+
+        test_vld1q_u16_x2(u16, 16, uint16x8x2_t, vst1q_u16_x2, vld1q_u16_x2);
+        test_vld1q_u16_x3(u16, 24, uint16x8x3_t, vst1q_u16_x3, vld1q_u16_x3);
+        test_vld1q_u16_x4(u16, 32, uint16x8x4_t, vst1q_u16_x4, vld1q_u16_x4);
+
+        test_vld1_u32_x2(u32, 4, uint32x2x2_t, vst1_u32_x2, vld1_u32_x2);
+        test_vld1_u32_x3(u32, 6, uint32x2x3_t, vst1_u32_x3, vld1_u32_x3);
+        test_vld1_u32_x4(u32, 8, uint32x2x4_t, vst1_u32_x4, vld1_u32_x4);
+
+        test_vld1q_u32_x2(u32, 8, uint32x4x2_t, vst1q_u32_x2, vld1q_u32_x2);
+        test_vld1q_u32_x3(u32, 12, uint32x4x3_t, vst1q_u32_x3, vld1q_u32_x3);
+        test_vld1q_u32_x4(u32, 16, uint32x4x4_t, vst1q_u32_x4, vld1q_u32_x4);
+
+        test_vld1_u64_x2(u64, 2, uint64x1x2_t, vst1_u64_x2, vld1_u64_x2);
+        test_vld1_u64_x3(u64, 3, uint64x1x3_t, vst1_u64_x3, vld1_u64_x3);
+        test_vld1_u64_x4(u64, 4, uint64x1x4_t, vst1_u64_x4, vld1_u64_x4);
+
+        test_vld1q_u64_x2(u64, 4, uint64x2x2_t, vst1q_u64_x2, vld1q_u64_x2);
+        test_vld1q_u64_x3(u64, 6, uint64x2x3_t, vst1q_u64_x3, vld1q_u64_x3);
+        test_vld1q_u64_x4(u64, 8, uint64x2x4_t, vst1q_u64_x4, vld1q_u64_x4);
+
+        test_vld1_p8_x2(p8, 16, poly8x8x2_t, vst1_p8_x2, vld1_p8_x2);
+        test_vld1_p8_x3(p8, 24, poly8x8x3_t, vst1_p8_x3, vld1_p8_x3);
+        test_vld1_p8_x4(p8, 32, poly8x8x4_t, vst1_p8_x4, vld1_p8_x4);
+
+        test_vld1q_p8_x2(p8, 32, poly8x16x2_t, vst1q_p8_x2, vld1q_p8_x2);
+        test_vld1q_p8_x3(p8, 48, poly8x16x3_t, vst1q_p8_x3, vld1q_p8_x3);
+        test_vld1q_p8_x4(p8, 64, poly8x16x4_t, vst1q_p8_x4, vld1q_p8_x4);
+
+        test_vld1_p16_x2(p16, 8, poly16x4x2_t, vst1_p16_x2, vld1_p16_x2);
+        test_vld1_p16_x3(p16, 12, poly16x4x3_t, vst1_p16_x3, vld1_p16_x3);
+        test_vld1_p16_x4(p16, 16, poly16x4x4_t, vst1_p16_x4, vld1_p16_x4);
+
+        test_vld1q_p16_x2(p16, 16, poly16x8x2_t, vst1q_p16_x2, vld1q_p16_x2);
+        test_vld1q_p16_x3(p16, 24, poly16x8x3_t, vst1q_p16_x3, vld1q_p16_x3);
+        test_vld1q_p16_x4(p16, 32, poly16x8x4_t, vst1q_p16_x4, vld1q_p16_x4);
     }
 }
 

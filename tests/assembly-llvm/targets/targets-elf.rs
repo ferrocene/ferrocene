@@ -811,6 +811,9 @@
 //@ revisions: aarch64_unknown_ferrocene_facade
 //@ [aarch64_unknown_ferrocene_facade] compile-flags: --target aarch64-unknown-ferrocene.facade
 //@ [aarch64_unknown_ferrocene_facade] needs-llvm-components: aarch64
+//@ revisions: aarch64v8r_unknown_ferrocene_facade
+//@ [aarch64v8r_unknown_ferrocene_facade] compile-flags: --target aarch64v8r-unknown-ferrocene.facade
+//@ [aarch64v8r_unknown_ferrocene_facade] needs-llvm-components: aarch64
 //@ revisions: thumbv7em_ferrocene_facade_eabi
 //@ [thumbv7em_ferrocene_facade_eabi] compile-flags: --target thumbv7em-ferrocene.facade-eabi
 //@ [thumbv7em_ferrocene_facade_eabi] needs-llvm-components: arm

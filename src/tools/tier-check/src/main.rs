@@ -53,6 +53,7 @@ fn main() {
         "thumbv8m.main-nuttx-eabi",
         "thumbv8m.main-nuttx-eabihf",
         "aarch64-unknown-ferrocene.facade",
+        "aarch64v8r-unknown-ferrocene.facade",
         "thumbv7em-ferrocene.facade-eabihf",
         "thumbv7em-ferrocene.facade-eabi",
         "x86_64-unknown-ferrocene.subset",

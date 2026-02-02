@@ -253,7 +253,14 @@ pub(crate) fn test_rng() -> rand_xorshift::XorShiftRng {
 fn check_that_qemu_cpu_was_set() {
     let qemu_cpu = std::env::var("QEMU_CPU").expect("QEMU_CPU env var was not set");
     if cfg!(target_arch = "aarch64") {
-        assert_eq!("cortex-a53", qemu_cpu);
+        if cfg!(target_feature = "ras") {
+            // this target feature indicates that this is the aarch64v8r-unknown-* target
+            // in QEMU 8.2.2, this is the CPU closest to the Armv8-R AArch64 ISA as
+            // it implements the Armv8.4-A extensions
+            assert_eq!("neoverse-v1", qemu_cpu);
+        } else {
+            assert_eq!("cortex-a53", qemu_cpu);
+        }
     } else if cfg!(target_arch = "arm") {
         assert_eq!("cortex-m4", qemu_cpu);
     } else {

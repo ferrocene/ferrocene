@@ -317,6 +317,8 @@ ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
+# FIXME replace 'armv8-a' with 'armv8-r' when GCC version is bumped to 11+
+ENV CFLAGS_aarch64v8r_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 
 COPY --from=noble /ferrocene/packages/ubuntu-24.04 /ferrocene/packages/ubuntu-24.04
 RUN <<-EOF

@@ -44,3 +44,16 @@ fn test_formatting_options_align_none() {
     let alignment = None;
     assert_eq!(fo.align(alignment).get_align(), alignment);
 }
+
+// Covers `core::fmt::Arguments::<'a>::estimated_capacity`
+#[test]
+fn test_arguments_estimated_capacity_n_128() {
+    fn how_dare_you() -> &'static str {
+        "How dare you!"
+    }
+    let args = format_args!(
+        "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. {}",
+        how_dare_you()
+    );
+    assert_eq!(args.estimated_capacity(), 380);
+}

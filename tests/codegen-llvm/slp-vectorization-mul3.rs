@@ -1,3 +1,4 @@
+//! Regression test for #142519
 //@ only-x86_64
 //@ compile-flags: -O
 

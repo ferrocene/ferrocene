@@ -32,10 +32,6 @@ if isMacOS; then
     # to the real Clang binary directly above, we need to also set this
     # variable ourselves.
     ciCommandSetEnv SDKROOT "$(xcrun --sdk macosx --show-sdk-path)"
-
-    # Configure `AR` specifically so bootstrap doesn't try to infer it as
-    # `clang-ar` by accident.
-    ciCommandSetEnv AR "ar"
 elif isWindows && ! isKnownToBeMingwBuild; then
     # If we're compiling for MSVC then we, like most other distribution builders,
     # switch to clang as the compiler. This'll allow us eventually to enable LTO

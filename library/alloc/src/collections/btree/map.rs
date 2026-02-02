@@ -1240,6 +1240,81 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
         )
     }
 
+    /// Moves all elements from `other` into `self`, leaving `other` empty.
+    ///
+    /// If a key from `other` is already present in `self`, then the `conflict`
+    /// closure is used to return a value to `self`. The `conflict`
+    /// closure takes in a borrow of `self`'s key, `self`'s value, and `other`'s value
+    /// in that order.
+    ///
+    /// An example of why one might use this method over [`append`]
+    /// is to combine `self`'s value with `other`'s value when their keys conflict.
+    ///
+    /// Similar to [`insert`], though, the key is not overwritten,
+    /// which matters for types that can be `==` without being identical.
+    ///
+    ///
+    /// [`insert`]: BTreeMap::insert
+    /// [`append`]: BTreeMap::append
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(btree_merge)]
+    /// use std::collections::BTreeMap;
+    ///
+    /// let mut a = BTreeMap::new();
+    /// a.insert(1, String::from("a"));
+    /// a.insert(2, String::from("b"));
+    /// a.insert(3, String::from("c")); // Note: Key (3) also present in b.
+    ///
+    /// let mut b = BTreeMap::new();
+    /// b.insert(3, String::from("d")); // Note: Key (3) also present in a.
+    /// b.insert(4, String::from("e"));
+    /// b.insert(5, String::from("f"));
+    ///
+    /// // concatenate a's value and b's value
+    /// a.merge(b, |_, a_val, b_val| {
+    ///     format!("{a_val}{b_val}")
+    /// });
+    ///
+    /// assert_eq!(a.len(), 5); // all of b's keys in a
+    ///
+    /// assert_eq!(a[&1], "a");
+    /// assert_eq!(a[&2], "b");
+    /// assert_eq!(a[&3], "cd"); // Note: "c" has been combined with "d".
+    /// assert_eq!(a[&4], "e");
+    /// assert_eq!(a[&5], "f");
+    /// ```
+    #[unstable(feature = "btree_merge", issue = "152152")]
+    pub fn merge(&mut self, mut other: Self, conflict: impl FnMut(&K, V, V) -> V)
+    where
+        K: Ord,
+        A: Clone,
+    {
+        // Do we have to append anything at all?
+        if other.is_empty() {
+            return;
+        }
+
+        // We can just swap `self` and `other` if `self` is empty.
+        if self.is_empty() {
+            mem::swap(self, &mut other);
+            return;
+        }
+
+        let self_iter = mem::replace(self, Self::new_in((*self.alloc).clone())).into_iter();
+        let other_iter = mem::replace(&mut other, Self::new_in((*self.alloc).clone())).into_iter();
+        let root = self.root.get_or_insert_with(|| Root::new((*self.alloc).clone()));
+        root.merge_from_sorted_iters_with(
+            self_iter,
+            other_iter,
+            &mut self.length,
+            (*self.alloc).clone(),
+            conflict,
+        )
+    }
+
     /// Constructs a double-ended iterator over a sub-range of elements in the map.
     /// The simplest way is to use the range syntax `min..max`, thus `range(min..max)` will
     /// yield elements from min (inclusive) to max (exclusive).

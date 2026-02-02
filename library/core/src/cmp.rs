@@ -353,7 +353,7 @@ pub const trait Eq: [const] PartialEq<Self> + PointeeSized {
 /// Derive macro generating an impl of the trait [`Eq`].
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[allow_internal_unstable(core_intrinsics, derive_eq, structural_match)]
+#[allow_internal_unstable(core_intrinsics, derive_eq_internals, structural_match)]
 #[allow_internal_unstable(coverage_attribute)]
 pub macro Eq($item:item) {
     /* compiler built-in */
@@ -365,7 +365,11 @@ pub macro Eq($item:item) {
 // This struct should never appear in user code.
 #[doc(hidden)]
 #[allow(missing_debug_implementations)]
-#[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
+#[unstable(
+    feature = "derive_eq_internals",
+    reason = "deriving hack, should not be public",
+    issue = "none"
+)]
 pub struct AssertParamIsEq<T: Eq + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -383,7 +387,7 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 ///
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
+#[derive(Copy, Debug, Hash)]
 #[derive_const(Clone, Eq, PartialOrd, Ord, PartialEq)]
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.
@@ -1193,7 +1197,7 @@ pub macro Ord($item:item) {
 /// every `a`. This isn't always the case for types that implement `PartialOrd`, for example:
 ///
 /// ```
-/// let a = f64::sqrt(-1.0);
+/// let a = f64::NAN;
 /// assert_eq!(a <= a, false);
 /// ```
 ///

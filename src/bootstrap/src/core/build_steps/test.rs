@@ -17,7 +17,7 @@ use std::{env, fs, iter};
 
 use build_helper::exit;
 
-use crate::core::build_steps::compile::{Std, run_cargo};
+use crate::core::build_steps::compile::{ArtifactKeepMode, Std, run_cargo};
 use crate::core::build_steps::doc::{DocumentationFormat, prepare_doc_compiler};
 use crate::core::build_steps::gcc::{Gcc, GccTargetPair, add_cg_gcc_cargo_flags};
 use crate::core::build_steps::llvm::get_llvm_version;
@@ -531,6 +531,12 @@ impl Step for RustAnalyzer {
         cargo.arg("--workspace");
         cargo.arg("--exclude=xtask");
 
+        if build_compiler.stage == 0 {
+            // This builds a proc macro against the bootstrap libproc_macro, which is not ABI
+            // compatible with the ABI proc-macro-srv expects to load.
+            cargo.arg("--exclude=proc-macro-srv");
+        }
+
         let mut skip_tests = vec![];
 
         // NOTE: the following test skips is a bit cheeky in that it assumes there are no
@@ -949,8 +955,9 @@ impl Step for Clippy {
 
         cargo.env("RUSTC_TEST_SUITE", builder.rustc(build_compiler));
         cargo.env("RUSTC_LIB_PATH", builder.rustc_libdir(build_compiler));
-        let host_libs =
-            builder.stage_out(build_compiler, Mode::ToolRustcPrivate).join(builder.cargo_dir());
+        let host_libs = builder
+            .stage_out(build_compiler, Mode::ToolRustcPrivate)
+            .join(builder.cargo_dir(Mode::ToolRustcPrivate));
         cargo.env("HOST_LIBS", host_libs);
 
         // Build the standard library that the tests can use.
@@ -1604,10 +1611,10 @@ test!(UiFullDeps {
     IS_HOST: true,
 });
 
-test!(Rustdoc {
-    path: "tests/rustdoc",
-    mode: CompiletestMode::Rustdoc,
-    suite: "rustdoc",
+test!(RustdocHtml {
+    path: "tests/rustdoc-html",
+    mode: CompiletestMode::RustdocHtml,
+    suite: "rustdoc-html",
     default: true,
     IS_HOST: true,
 });
@@ -1646,6 +1653,12 @@ test!(RunMakeCargo {
     mode: CompiletestMode::RunMake,
     suite: "run-make-cargo",
     default: true
+});
+test!(BuildStd {
+    path: "tests/build-std",
+    mode: CompiletestMode::RunMake,
+    suite: "build-std",
+    default: false
 });
 
 test!(AssemblyLlvm {
@@ -1973,7 +1986,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             let stage0_rustc_path = builder.compiler(0, test_compiler.host);
             cmd.arg("--stage0-rustc-path").arg(builder.rustc(stage0_rustc_path));
 
-            if suite == "run-make-cargo" {
+            if matches!(suite, "run-make-cargo" | "build-std") {
                 let cargo_path = if test_compiler.stage == 0 {
                     // If we're using `--stage 0`, we should provide the bootstrap cargo.
                     builder.initial_cargo.clone()
@@ -1994,7 +2007,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         if matches!(
             mode,
             CompiletestMode::RunMake
-                | CompiletestMode::Rustdoc
+                | CompiletestMode::RustdocHtml
                 | CompiletestMode::RustdocJs
                 | CompiletestMode::RustdocJson
         ) || matches!(suite, "rustdoc-ui" | "coverage-run-rustdoc")
@@ -2294,6 +2307,8 @@ Please disable assertions with `rust.debug-assertions = false`.
         if builder.config.rust_remap_debuginfo {
             cmd.arg("--with-std-remap-debuginfo");
         }
+
+        cmd.arg("--jobs").arg(builder.jobs().to_string());
 
         let mut llvm_components_passed = false;
         let mut copts_passed = false;
@@ -2634,7 +2649,8 @@ impl BookTest {
                 let stamp = BuildStamp::new(&builder.cargo_out(test_compiler, mode, target))
                     .with_prefix(PathBuf::from(dep).file_name().and_then(|v| v.to_str()).unwrap());
 
-                let output_paths = run_cargo(builder, cargo, vec![], &stamp, vec![], false, false);
+                let output_paths =
+                    run_cargo(builder, cargo, vec![], &stamp, vec![], ArtifactKeepMode::OnlyRlib);
                 let directories = output_paths
                     .into_iter()
                     .filter_map(|p| p.parent().map(ToOwned::to_owned))
@@ -2807,7 +2823,7 @@ impl Step for ErrorIndex {
     fn make_run(run: RunConfig<'_>) {
         // error_index_generator depends on librustdoc. Use the compiler that
         // is normally used to build rustdoc for other tests (like compiletest
-        // tests in tests/rustdoc) so that it shares the same artifacts.
+        // tests in tests/rustdoc-html) so that it shares the same artifacts.
         let compilers = RustcPrivateCompilers::new(
             run.builder,
             run.builder.top_stage,
@@ -3174,16 +3190,9 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut ferrocene_certified_runtime = builder
-            .config
-            .rust_std_features
-            .contains("ferrocene_certified_runtime")
-            || builder.config.cmd.test_variant().map_or(false, |x| x.contains("certified-panic"));
-
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {
                 instrument_coverage(builder, &mut cargo, build_compiler);
-                ferrocene_certified_runtime = true;
             }
 
             measure_coverage(builder, cargo.as_mut(), build_compiler, target, coverage_for);
@@ -3196,15 +3205,9 @@ impl Step for Crate {
         // alloc themself for doctests
         if crates.iter().any(|crate_| crate_ == "core") {
             crates.push("coretests".to_owned());
-            if ferrocene_certified_runtime {
-                cargo.arg("--features=coretests/ferrocene_certified_runtime");
-            }
         }
         if crates.iter().any(|crate_| crate_ == "alloc") {
             crates.push("alloctests".to_owned());
-            if ferrocene_certified_runtime {
-                cargo.arg("--features=alloctests/ferrocene_certified_runtime");
-            }
         }
 
         // Ferrocene annotation:
@@ -3263,7 +3266,7 @@ impl Step for CrateRustdoc {
             builder.compiler(builder.top_stage, target)
         } else {
             // Use the previous stage compiler to reuse the artifacts that are
-            // created when running compiletest for tests/rustdoc. If this used
+            // created when running compiletest for tests/rustdoc-html. If this used
             // `compiler`, then it would cause rustdoc to be built *again*, which
             // isn't really necessary.
             builder.compiler_for(builder.top_stage, target, target)

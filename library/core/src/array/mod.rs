@@ -14,8 +14,6 @@ use crate::convert::Infallible;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{self, Hash};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::transmute_unchecked;
@@ -26,17 +24,16 @@ use crate::mem::{self, ManuallyDrop, MaybeUninit};
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
-use crate::ptr;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
+use crate::{fmt, ptr};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use crate::iter::UncheckedIterator;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod ascii;
 mod drain;
 mod equality;
@@ -195,11 +192,10 @@ pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
 
 /// The error type returned when a conversion from a slice to an array fails.
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug, Copy, Clone))]
+#[derive(Debug, Copy, Clone)]
 pub struct TryFromSliceError(());
 
 #[stable(feature = "core_array", since = "1.35.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -375,7 +371,6 @@ impl<T: Hash, const N: usize> Hash for [T; N] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for [T; N] {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&&self[..], f)

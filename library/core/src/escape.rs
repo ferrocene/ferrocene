@@ -246,6 +246,7 @@ impl<const N: usize, ESCAPING> EscapeIterInner<N, ESCAPING> {
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.alive.advance_back_by(n)
     }

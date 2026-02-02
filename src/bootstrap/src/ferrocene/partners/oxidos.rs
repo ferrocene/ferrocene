@@ -180,7 +180,14 @@ impl Step for BuildOxidOS {
 
         let stamp =
             BuildStamp::new(&builder.cargo_out(compiler, mode, target)).with_prefix(self.name());
-        run_cargo(builder, cargo, Vec::new(), &stamp, Vec::new(), false, false);
+        run_cargo(
+            builder,
+            cargo,
+            Vec::new(),
+            &stamp,
+            Vec::new(),
+            crate::core::build_steps::compile::ArtifactKeepMode::BothRlibAndRmeta,
+        );
 
         builder.cargo_out(compiler, mode, target)
     }

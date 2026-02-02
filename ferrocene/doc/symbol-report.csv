@@ -1,7 +1,19 @@
+<! as core::fmt::Debug>::fmt
+<! as core::fmt::Display>::fmt
 <&'b str as core::str::pattern::Pattern>::into_searcher
 <&'b str as core::str::pattern::Pattern>::is_prefix_of
+<&'b str as core::str::pattern::Pattern>::is_suffix_of
 <&T as core::borrow::Borrow<T>>::borrow
 <&T as core::convert::AsRef<U>>::as_ref
+<&T as core::fmt::Binary>::fmt
+<&T as core::fmt::Debug>::fmt
+<&T as core::fmt::Display>::fmt
+<&T as core::fmt::LowerExp>::fmt
+<&T as core::fmt::LowerHex>::fmt
+<&T as core::fmt::Octal>::fmt
+<&T as core::fmt::Pointer>::fmt
+<&T as core::fmt::UpperExp>::fmt
+<&T as core::fmt::UpperHex>::fmt
 <&T as core::ops::deref::Deref>::deref
 <&bool as core::ops::bit::BitAnd<&bool>>::bitand
 <&bool as core::ops::bit::BitAnd<bool>>::bitand
@@ -462,8 +474,22 @@
 <&mut T as core::borrow::BorrowMut<T>>::borrow_mut
 <&mut T as core::convert::AsMut<U>>::as_mut
 <&mut T as core::convert::AsRef<U>>::as_ref
+<&mut T as core::fmt::Binary>::fmt
+<&mut T as core::fmt::Debug>::fmt
+<&mut T as core::fmt::Display>::fmt
+<&mut T as core::fmt::LowerExp>::fmt
+<&mut T as core::fmt::LowerHex>::fmt
+<&mut T as core::fmt::Octal>::fmt
+<&mut T as core::fmt::Pointer>::fmt
+<&mut T as core::fmt::UpperExp>::fmt
+<&mut T as core::fmt::UpperHex>::fmt
 <&mut T as core::ops::deref::Deref>::deref
 <&mut T as core::ops::deref::DerefMut>::deref_mut
+<&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt
+<&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt
+<&mut W as core::fmt::Write>::write_char
+<&mut W as core::fmt::Write>::write_fmt
+<&mut W as core::fmt::Write>::write_str
 <&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnMut<(usize,)>>::call_mut
 <&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnOnce<(usize,)>>::call_once
 <&u128 as core::ops::arith::Add<&u128>>::add
@@ -857,6 +883,20 @@
 <&usize as core::ops::bit::Shr<u8>>::shr
 <&usize as core::ops::bit::Shr<usize>>::shr
 <() as core::default::Default>::default
+<() as core::fmt::Debug>::fmt
+<() as core::unit::IsUnit>::is_unit
+<(A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(D, C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(E, D, C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(T,) as core::fmt::Debug>::fmt
+<(U, T) as core::fmt::Debug>::fmt
+<(V, U, T) as core::fmt::Debug>::fmt
+<(W, V, U, T) as core::fmt::Debug>::fmt
+<(X, W, V, U, T) as core::fmt::Debug>::fmt
+<(Y, X, W, V, U, T) as core::fmt::Debug>::fmt
+<(Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
 <(core::ops::range::Bound<T>, core::ops::range::Bound<T>) as core::ops::range::IntoBounds<T>>::into_bounds
 <(core::ops::range::Bound<T>, core::ops::range::Bound<T>) as core::ops::range::RangeBounds<T>>::end_bound
 <(core::ops::range::Bound<T>, core::ops::range::Bound<T>) as core::ops::range::RangeBounds<T>>::start_bound
@@ -866,8 +906,17 @@
 <(core::ops::range::Bound<usize>, core::ops::range::Bound<usize>) as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut
 <(core::ops::range::Bound<usize>, core::ops::range::Bound<usize>) as core::slice::index::SliceIndex<[T]>>::index
 <(core::ops::range::Bound<usize>, core::ops::range::Bound<usize>) as core::slice::index::SliceIndex<[T]>>::index_mut
+<(dyn core::any::Any + 'static) as core::fmt::Debug>::fmt
+<(dyn core::any::Any + core::marker::Send + 'static) as core::fmt::Debug>::fmt
+<(dyn core::any::Any + core::marker::Send + core::marker::Sync + 'static) as core::fmt::Debug>::fmt
+<*const T as core::fmt::Debug>::fmt
+<*const T as core::fmt::Pointer>::fmt
+<*mut T as core::fmt::Debug>::fmt
+<*mut T as core::fmt::Pointer>::fmt
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
+<I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
+<I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::traits::collect::IntoIterator>::into_iter
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
@@ -882,12 +931,16 @@
 <T as core::convert::TryFrom<U>>::try_from
 <T as core::convert::TryInto<U>>::try_into
 <T as core::iter::adapters::step_by::SpecRangeSetup<T>>::setup
+<T as core::unit::IsUnit>::is_unit
 <[A] as core::slice::cmp::SlicePartialEq<B>>::equal
 <[T] as core::convert::AsMut<[T]>>::as_mut
 <[T] as core::convert::AsRef<[T]>>::as_ref
+<[T] as core::fmt::Debug>::fmt
 <[T] as core::slice::CloneFromSpec<T>>::spec_clone_from
 <[T] as core::slice::specialize::SpecFill<T>>::spec_fill
 <[T] as core::slice::specialize::SpecFill<T>>::spec_fill
+<[core::ascii::ascii_char::AsciiChar]>::as_bytes
+<[core::ascii::ascii_char::AsciiChar]>::as_str
 <[core::mem::maybe_uninit::MaybeUninit<T>; N] as core::array::iter::iter_inner::PartialDrop>::partial_drop
 <[core::mem::maybe_uninit::MaybeUninit<T>; N]>::transpose
 <[core::mem::maybe_uninit::MaybeUninit<T>] as core::array::iter::iter_inner::PartialDrop>::partial_drop
@@ -895,6 +948,8 @@
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_mut
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_ref
 <bool as core::default::Default>::default
+<bool as core::fmt::Debug>::fmt
+<bool as core::fmt::Display>::fmt
 <bool as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <bool as core::ops::bit::BitAnd<&bool>>::bitand
 <bool as core::ops::bit::BitAnd>::bitand
@@ -910,18 +965,36 @@
 <bool as core::ops::bit::BitXorAssign>::bitxor_assign
 <bool as core::ops::bit::Not>::not
 <char as core::default::Default>::default
+<char as core::fmt::Debug>::fmt
+<char as core::fmt::Display>::fmt
+<char as core::str::pattern::Pattern>::into_searcher
+<char as core::str::pattern::Pattern>::is_prefix_of
+<char as core::str::pattern::Pattern>::is_suffix_of
+<core::alloc::layout::Layout as core::clone::Clone>::clone
+<core::alloc::layout::Layout as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::alloc::layout::Layout as core::cmp::PartialEq>::eq
+<core::alloc::layout::Layout as core::fmt::Debug>::fmt
+<core::alloc::layout::Layout as core::hash::Hash>::hash
 <core::any::TypeId as core::clone::Clone>::clone
 <core::any::TypeId as core::cmp::PartialEq>::eq
 <core::any::TypeId as core::cmp::PartialEq>::eq::compiletime
 <core::any::TypeId as core::cmp::PartialEq>::eq::runtime
+<core::any::TypeId as core::fmt::Debug>::fmt
 <core::array::Guard<'_, T> as core::ops::drop::Drop>::drop
+<core::array::TryFromSliceError as core::clone::Clone>::clone
+<core::array::TryFromSliceError as core::fmt::Debug>::fmt
+<core::array::TryFromSliceError as core::fmt::Display>::fmt
 <core::array::drain::Drain<'_, '_, T, N, F> as core::ops::drop::Drop>::drop
 <core::array::iter::IntoIter<T, N> as core::clone::Clone>::clone
+<core::array::iter::IntoIter<T, N> as core::fmt::Debug>::fmt
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+<core::array::iter::IntoIter<T, N> as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
+<core::array::iter::IntoIter<T, N> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::array::iter::IntoIter<T, N> as core::iter::traits::iterator::Iterator>::advance_by
+<core::array::iter::IntoIter<T, N> as core::iter::traits::iterator::Iterator>::count
 <core::array::iter::IntoIter<T, N> as core::iter::traits::iterator::Iterator>::fold
 <core::array::iter::IntoIter<T, N> as core::iter::traits::iterator::Iterator>::last
 <core::array::iter::IntoIter<T, N> as core::iter::traits::iterator::Iterator>::next
@@ -931,23 +1004,137 @@
 <core::array::iter::iter_inner::PolymorphicIter<DATA> as core::ops::drop::Drop>::drop
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone::clone_into_new
+<core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>]> as core::fmt::Debug>::fmt
+<core::ascii::EscapeDefault as core::clone::Clone>::clone
+<core::ascii::EscapeDefault as core::fmt::Debug>::fmt
+<core::ascii::EscapeDefault as core::fmt::Display>::fmt
+<core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::advance_by
+<core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::count
+<core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::last
+<core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::next
+<core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::size_hint
+<core::ascii::ascii_char::AsciiChar as core::clone::Clone>::clone
+<core::ascii::ascii_char::AsciiChar as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ascii::ascii_char::AsciiChar as core::cmp::Ord>::cmp
+<core::ascii::ascii_char::AsciiChar as core::cmp::PartialEq>::eq
+<core::ascii::ascii_char::AsciiChar as core::cmp::PartialOrd>::partial_cmp
+<core::ascii::ascii_char::AsciiChar as core::fmt::Debug>::fmt
+<core::ascii::ascii_char::AsciiChar as core::fmt::Debug>::fmt::backslash
+<core::ascii::ascii_char::AsciiChar as core::fmt::Display>::fmt
+<core::ascii::ascii_char::AsciiChar as core::hash::Hash>::hash
+<core::bstr::ByteStr as core::fmt::Debug>::fmt
+<core::bstr::ByteStr as core::ops::deref::Deref>::deref
+<core::bstr::ByteStr as core::ops::deref::DerefMut>::deref_mut
+<core::cell::BorrowError as core::fmt::Debug>::fmt
+<core::cell::BorrowError as core::fmt::Display>::fmt
+<core::cell::BorrowMutError as core::fmt::Debug>::fmt
+<core::cell::BorrowMutError as core::fmt::Display>::fmt
 <core::cell::BorrowRef<'_> as core::ops::drop::Drop>::drop
 <core::cell::BorrowRefMut<'_> as core::ops::drop::Drop>::drop
+<core::cell::Cell<T> as core::fmt::Debug>::fmt
+<core::cell::Ref<'_, T> as core::fmt::Debug>::fmt
 <core::cell::Ref<'_, T> as core::ops::deref::Deref>::deref
+<core::cell::RefCell<T> as core::fmt::Debug>::fmt
+<core::cell::RefMut<'_, T> as core::fmt::Debug>::fmt
 <core::cell::RefMut<'_, T> as core::ops::deref::Deref>::deref
 <core::cell::RefMut<'_, T> as core::ops::deref::DerefMut>::deref_mut
+<core::cell::SyncUnsafeCell<T> as core::fmt::Debug>::fmt
+<core::cell::UnsafeCell<T> as core::fmt::Debug>::fmt
+<core::char::EscapeDebug as core::clone::Clone>::clone
+<core::char::EscapeDebug as core::fmt::Debug>::fmt
+<core::char::EscapeDebug as core::fmt::Display>::fmt
+<core::char::EscapeDebug as core::iter::traits::exact_size::ExactSizeIterator>::len
+<core::char::EscapeDebug as core::iter::traits::iterator::Iterator>::count
+<core::char::EscapeDebug as core::iter::traits::iterator::Iterator>::next
+<core::char::EscapeDebug as core::iter::traits::iterator::Iterator>::size_hint
+<core::char::convert::CharTryFromError as core::clone::Clone>::clone
+<core::char::convert::CharTryFromError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::char::convert::CharTryFromError as core::cmp::PartialEq>::eq
+<core::char::convert::CharTryFromError as core::fmt::Debug>::fmt
+<core::char::decode::DecodeUtf16<I> as core::clone::Clone>::clone
+<core::char::decode::DecodeUtf16<I> as core::fmt::Debug>::fmt
 <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::next
 <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
+<core::char::decode::DecodeUtf16Error as core::clone::Clone>::clone
+<core::char::decode::DecodeUtf16Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::char::decode::DecodeUtf16Error as core::cmp::PartialEq>::eq
+<core::char::decode::DecodeUtf16Error as core::fmt::Debug>::fmt
 <core::cmp::Ordering as core::clone::Clone>::clone
 <core::cmp::Ordering as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::cmp::Ordering as core::cmp::Ord>::cmp
 <core::cmp::Ordering as core::cmp::PartialEq>::eq
 <core::cmp::Ordering as core::cmp::PartialOrd>::partial_cmp
+<core::cmp::Ordering as core::fmt::Debug>::fmt
+<core::cmp::Ordering as core::hash::Hash>::hash
 <core::convert::Infallible as core::clone::Clone>::clone
 <core::convert::Infallible as core::cmp::PartialEq>::eq
+<core::convert::Infallible as core::fmt::Debug>::fmt
+<core::convert::Infallible as core::fmt::Display>::fmt
+<core::escape::AlwaysEscaped as core::clone::Clone>::clone
+<core::escape::EscapeIterInner<N, ESCAPING> as core::clone::Clone>::clone
+<core::escape::EscapeIterInner<N, core::escape::AlwaysEscaped> as core::fmt::Debug>::fmt
+<core::escape::EscapeIterInner<N, core::escape::AlwaysEscaped> as core::fmt::Display>::fmt
+<core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Debug>::fmt
+<core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Display>::fmt
+<core::escape::MaybeEscaped as core::clone::Clone>::clone
+<core::escape::MaybeEscapedCharacter<N> as core::clone::Clone>::clone
+<core::ffi::c_str::CStr as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ffi::c_str::CStr as core::cmp::PartialEq>::eq
+<core::ffi::c_str::CStr as core::fmt::Debug>::fmt
+<core::ffi::c_str::CStr as core::hash::Hash>::hash
+<core::ffi::c_str::FromBytesWithNulError as core::clone::Clone>::clone
+<core::ffi::c_str::FromBytesWithNulError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ffi::c_str::FromBytesWithNulError as core::cmp::PartialEq>::eq
+<core::ffi::c_str::FromBytesWithNulError as core::fmt::Debug>::fmt
+<core::ffi::c_void as core::fmt::Debug>::fmt
+<core::fmt::Alignment as core::clone::Clone>::clone
+<core::fmt::Alignment as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Alignment as core::cmp::PartialEq>::eq
+<core::fmt::Alignment as core::fmt::Debug>::fmt
+<core::fmt::Arguments<'_> as core::fmt::Debug>::fmt
+<core::fmt::Arguments<'_> as core::fmt::Display>::fmt
+<core::fmt::Arguments<'a> as core::clone::Clone>::clone
+<core::fmt::DebugAsHex as core::clone::Clone>::clone
+<core::fmt::DebugAsHex as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::DebugAsHex as core::cmp::PartialEq>::eq
+<core::fmt::DebugAsHex as core::fmt::Debug>::fmt
+<core::fmt::Error as core::clone::Clone>::clone
+<core::fmt::Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Error as core::cmp::Ord>::cmp
+<core::fmt::Error as core::cmp::PartialEq>::eq
+<core::fmt::Error as core::cmp::PartialOrd>::partial_cmp
+<core::fmt::Error as core::default::Default>::default
+<core::fmt::Error as core::fmt::Debug>::fmt
+<core::fmt::Error as core::fmt::Display>::fmt
+<core::fmt::Error as core::hash::Hash>::hash
+<core::fmt::Formatter<'_> as core::fmt::Write>::write_char
+<core::fmt::Formatter<'_> as core::fmt::Write>::write_fmt
+<core::fmt::Formatter<'_> as core::fmt::Write>::write_str
+<core::fmt::FormattingOptions as core::clone::Clone>::clone
+<core::fmt::FormattingOptions as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::FormattingOptions as core::cmp::PartialEq>::eq
+<core::fmt::FormattingOptions as core::default::Default>::default
+<core::fmt::FormattingOptions as core::fmt::Debug>::fmt
+<core::fmt::Sign as core::clone::Clone>::clone
+<core::fmt::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Sign as core::cmp::PartialEq>::eq
+<core::fmt::Sign as core::fmt::Debug>::fmt
+<core::fmt::builders::FromFn<F> as core::fmt::Debug>::fmt
+<core::fmt::builders::FromFn<F> as core::fmt::Display>::fmt
+<core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char
+<core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_str
+<core::fmt::builders::PadAdapterState as core::default::Default>::default
+<core::fmt::num_buffer::NumBuffer<T> as core::fmt::Debug>::fmt
+<core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
+<core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
+<core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>::drop
 <core::intrinsics::AtomicOrdering as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::intrinsics::AtomicOrdering as core::cmp::PartialEq>::eq
+<core::intrinsics::AtomicOrdering as core::fmt::Debug>::fmt
+<core::iter::adapters::chain::Chain<A, B> as core::clone::Clone>::clone
+<core::iter::adapters::chain::Chain<A, B> as core::fmt::Debug>::fmt
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
+<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::count
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::find
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::last
@@ -956,19 +1143,35 @@
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::cloned::Cloned<I> as core::clone::Clone>::clone
+<core::iter::adapters::cloned::Cloned<I> as core::fmt::Debug>::fmt
+<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
+<core::iter::adapters::copied::Copied<I> as core::clone::Clone>::clone
+<core::iter::adapters::copied::Copied<I> as core::fmt::Debug>::fmt
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::advance_by
+<core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::count
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::last
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::nth
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::enumerate::Enumerate<I> as core::clone::Clone>::clone
+<core::iter::adapters::enumerate::Enumerate<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::advance_by
+<core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::count
 <core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::fold::enumerate
 <core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::next
@@ -977,11 +1180,24 @@
 <core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::enumerate::Enumerate<I> as core::iter::traits::iterator::Iterator>::try_fold::enumerate
 <core::iter::adapters::filter::Filter<I, P> as core::clone::Clone>::clone
+<core::iter::adapters::filter::Filter<I, P> as core::fmt::Debug>::fmt
+<core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::count
+<core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::count::to_usize
 <core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::filter::Filter<I, P> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::flatten::FlatMap<I, U, F> as core::clone::Clone>::clone
+<core::iter::adapters::flatten::FlatMap<I, U, F> as core::fmt::Debug>::fmt
+<core::iter::adapters::flatten::FlattenCompat<I, U> as core::clone::Clone>::clone
+<core::iter::adapters::flatten::FlattenCompat<I, U> as core::fmt::Debug>::fmt
+<core::iter::adapters::fuse::Fuse<I> as core::clone::Clone>::clone
+<core::iter::adapters::fuse::Fuse<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::map::Map<I, F> as core::clone::Clone>::clone
+<core::iter::adapters::map::Map<I, F> as core::fmt::Debug>::fmt
+<core::iter::adapters::map::Map<I, F> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::map::Map<I, F> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::map::Map<I, F> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::size_hint
@@ -1000,13 +1216,26 @@
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::nth
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::rev::Rev<T> as core::clone::Clone>::clone
+<core::iter::adapters::rev::Rev<T> as core::fmt::Debug>::fmt
+<core::iter::adapters::skip::Skip<I> as core::clone::Clone>::clone
+<core::iter::adapters::skip::Skip<I> as core::fmt::Debug>::fmt
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold::check
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::advance_by
+<core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::count
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::last
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::nth
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::step_by::StepBy<I> as core::clone::Clone>::clone
+<core::iter::adapters::step_by::StepBy<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_fold
 <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_fold::nth
 <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_next
@@ -1046,6 +1275,8 @@
 <core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_nth
 <core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_size_hint
 <core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_try_fold
+<core::iter::adapters::take::Take<I> as core::clone::Clone>::clone
+<core::iter::adapters::take::Take<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::take::Take<I> as core::iter::adapters::take::SpecTake>::spec_fold
 <core::iter::adapters::take::Take<I> as core::iter::adapters::take::SpecTake>::spec_for_each
 <core::iter::adapters::take::Take<I> as core::iter::adapters::take::SpecTake>::spec_for_each::check
@@ -1057,8 +1288,18 @@
 <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::try_fold::check
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::clone::Clone>::clone
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::fmt::Debug>::fmt
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::fold
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::next
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::size_hint
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold::check
 <core::iter::adapters::zip::Zip<A, B> as core::clone::Clone>::clone
+<core::iter::adapters::zip::Zip<A, B> as core::fmt::Debug>::fmt
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::SpecFold>::spec_fold
+<core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipFmt<A, B>>::fmt
+<core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipFmt<A, B>>::fmt
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::fold
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::new
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::next
@@ -1069,115 +1310,197 @@
 <core::iter::adapters::zip::Zip<A, B> as core::iter::traits::iterator::Iterator>::nth
 <core::iter::adapters::zip::Zip<A, B> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::sources::from_fn::FromFn<F> as core::clone::Clone>::clone
+<core::iter::sources::from_fn::FromFn<F> as core::fmt::Debug>::fmt
 <core::iter::sources::from_fn::FromFn<F> as core::iter::traits::iterator::Iterator>::next
 <core::marker::PhantomData<T> as core::clone::Clone>::clone
+<core::marker::PhantomData<T> as core::fmt::Debug>::fmt
+<core::marker::PhantomData<T> as core::hash::Hash>::hash
 <core::mem::Discriminant<T> as core::cmp::PartialEq>::eq
+<core::mem::Discriminant<T> as core::fmt::Debug>::fmt
 <core::mem::manually_drop::ManuallyDrop<T> as core::clone::Clone>::clone
 <core::mem::manually_drop::ManuallyDrop<T> as core::cmp::PartialEq>::eq
+<core::mem::manually_drop::ManuallyDrop<T> as core::default::Default>::default
+<core::mem::manually_drop::ManuallyDrop<T> as core::fmt::Debug>::fmt
 <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::Deref>::deref
 <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::DerefMut>::deref_mut
 <core::mem::maybe_dangling::MaybeDangling<P> as core::clone::Clone>::clone
+<core::mem::maybe_dangling::MaybeDangling<P> as core::default::Default>::default
+<core::mem::maybe_dangling::MaybeDangling<P> as core::fmt::Debug>::fmt
 <core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone
+<core::mem::maybe_uninit::MaybeUninit<T> as core::fmt::Debug>::fmt
+<core::num::FpCategory as core::clone::Clone>::clone
+<core::num::FpCategory as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::FpCategory as core::cmp::PartialEq>::eq
+<core::num::FpCategory as core::fmt::Debug>::fmt
+<core::num::bignum::Big32x40 as core::clone::Clone>::clone
+<core::num::bignum::Big32x40 as core::cmp::Ord>::cmp
+<core::num::bignum::Big32x40 as core::cmp::PartialEq>::eq
+<core::num::bignum::Big32x40 as core::cmp::PartialOrd>::partial_cmp
+<core::num::bignum::Big32x40 as core::fmt::Debug>::fmt
+<core::num::diy_float::Fp as core::clone::Clone>::clone
+<core::num::diy_float::Fp as core::fmt::Debug>::fmt
+<core::num::error::IntErrorKind as core::clone::Clone>::clone
+<core::num::error::IntErrorKind as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::error::IntErrorKind as core::cmp::PartialEq>::eq
+<core::num::error::IntErrorKind as core::fmt::Debug>::fmt
+<core::num::error::IntErrorKind as core::hash::Hash>::hash
+<core::num::error::ParseIntError as core::clone::Clone>::clone
+<core::num::error::ParseIntError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::error::ParseIntError as core::cmp::PartialEq>::eq
+<core::num::error::ParseIntError as core::fmt::Debug>::fmt
+<core::num::error::ParseIntError as core::fmt::Display>::fmt
+<core::num::error::TryFromIntError as core::clone::Clone>::clone
+<core::num::error::TryFromIntError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::error::TryFromIntError as core::cmp::PartialEq>::eq
+<core::num::error::TryFromIntError as core::convert::From<!>>::from
+<core::num::error::TryFromIntError as core::convert::From<core::convert::Infallible>>::from
+<core::num::error::TryFromIntError as core::fmt::Debug>::fmt
+<core::num::error::TryFromIntError as core::fmt::Display>::fmt
+<core::num::flt2dec::Sign as core::clone::Clone>::clone
+<core::num::flt2dec::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::Sign as core::cmp::PartialEq>::eq
+<core::num::flt2dec::Sign as core::fmt::Debug>::fmt
+<core::num::flt2dec::decoder::Decoded as core::clone::Clone>::clone
+<core::num::flt2dec::decoder::Decoded as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::decoder::Decoded as core::cmp::PartialEq>::eq
+<core::num::flt2dec::decoder::Decoded as core::fmt::Debug>::fmt
+<core::num::flt2dec::decoder::FullDecoded as core::clone::Clone>::clone
+<core::num::flt2dec::decoder::FullDecoded as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::decoder::FullDecoded as core::cmp::PartialEq>::eq
+<core::num::flt2dec::decoder::FullDecoded as core::fmt::Debug>::fmt
+<core::num::fmt::Formatted<'a> as core::clone::Clone>::clone
+<core::num::fmt::Part<'a> as core::clone::Clone>::clone
+<core::num::fmt::Part<'a> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::fmt::Part<'a> as core::cmp::PartialEq>::eq
+<core::num::fmt::Part<'a> as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::clone::Clone>::clone
 <core::num::niche_types::Nanoseconds as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::Nanoseconds as core::cmp::Ord>::cmp
 <core::num::niche_types::Nanoseconds as core::cmp::PartialEq>::eq
 <core::num::niche_types::Nanoseconds as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::Nanoseconds as core::default::Default>::default
+<core::num::niche_types::Nanoseconds as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroCharInner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroCharInner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroCharInner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroCharInner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroCharInner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroCharInner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroCharInner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI128Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroI128Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI128Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI128Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI128Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroI128Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI128Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI16Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroI16Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI16Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI16Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI16Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroI16Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI16Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI32Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroI32Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI32Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI32Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI32Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroI32Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI32Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI64Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroI64Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI64Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI64Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI64Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroI64Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI64Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI8Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroI8Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI8Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI8Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI8Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroI8Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI8Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroIsizeInner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroIsizeInner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroIsizeInner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU128Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroU128Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU128Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU128Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU128Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroU128Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU128Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU16Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroU16Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU16Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU16Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU16Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroU16Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU16Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU32Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroU32Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU32Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU32Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU32Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroU32Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU32Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU64Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroU64Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU64Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU64Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU64Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroU64Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU64Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU8Inner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroU8Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU8Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU8Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU8Inner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroU8Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU8Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroUsizeInner as core::clone::Clone>::clone
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::NonZeroUsizeInner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroUsizeInner as core::hash::Hash>::hash
 <core::num::niche_types::UsizeNoHighBit as core::clone::Clone>::clone
 <core::num::niche_types::UsizeNoHighBit as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::UsizeNoHighBit as core::cmp::Ord>::cmp
 <core::num::niche_types::UsizeNoHighBit as core::cmp::PartialEq>::eq
 <core::num::niche_types::UsizeNoHighBit as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::UsizeNoHighBit as core::fmt::Debug>::fmt
 <core::num::niche_types::UsizeNoHighBit as core::hash::Hash>::hash
 <core::num::nonzero::NonZero<T> as core::clone::Clone>::clone
+<core::num::nonzero::NonZero<T> as core::fmt::Binary>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::Debug>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::Display>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::LowerExp>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::LowerHex>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::Octal>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::UpperExp>::fmt
+<core::num::nonzero::NonZero<T> as core::fmt::UpperHex>::fmt
+<core::num::nonzero::NonZero<T> as core::hash::Hash>::hash
 <core::ops::control_flow::ControlFlow<B, C> as core::clone::Clone>::clone
 <core::ops::control_flow::ControlFlow<B, C> as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::ops::control_flow::ControlFlow<B, C> as core::cmp::PartialEq>::eq
+<core::ops::control_flow::ControlFlow<B, C> as core::fmt::Debug>::fmt
+<core::ops::control_flow::ControlFlow<B, C> as core::hash::Hash>::hash
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::FromResidual<core::ops::control_flow::ControlFlow<B, core::convert::Infallible>>>::from_residual
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::Try>::branch
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::Try>::from_output
 <core::ops::index_range::IndexRange as core::clone::Clone>::clone
+<core::ops::index_range::IndexRange as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::ops::index_range::IndexRange as core::cmp::PartialEq>::eq
+<core::ops::index_range::IndexRange as core::fmt::Debug>::fmt
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
@@ -1195,6 +1518,11 @@
 <core::ops::index_range::IndexRange as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut::precondition_check
 <core::ops::index_range::IndexRange as core::slice::index::SliceIndex<[T]>>::index
 <core::ops::index_range::IndexRange as core::slice::index::SliceIndex<[T]>>::index_mut
+<core::ops::range::Bound<T> as core::clone::Clone>::clone
+<core::ops::range::Bound<T> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::Bound<T> as core::cmp::PartialEq>::eq
+<core::ops::range::Bound<T> as core::fmt::Debug>::fmt
+<core::ops::range::Bound<T> as core::hash::Hash>::hash
 <core::ops::range::Range<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::Range<&T> as core::ops::range::RangeBounds<T>>::start_bound
 <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_advance_back_by
@@ -1204,8 +1532,11 @@
 <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
 <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back
 <core::ops::range::Range<Idx> as core::clone::Clone>::clone
+<core::ops::range::Range<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::ops::range::Range<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::Range<Idx> as core::default::Default>::default
+<core::ops::range::Range<Idx> as core::fmt::Debug>::fmt
+<core::ops::range::Range<Idx> as core::hash::Hash>::hash
 <core::ops::range::Range<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::start_bound
@@ -1225,7 +1556,10 @@
 <core::ops::range::RangeFrom<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeFrom<&T> as core::ops::range::RangeBounds<T>>::start_bound
 <core::ops::range::RangeFrom<Idx> as core::clone::Clone>::clone
+<core::ops::range::RangeFrom<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::ops::range::RangeFrom<Idx> as core::cmp::PartialEq>::eq
+<core::ops::range::RangeFrom<Idx> as core::fmt::Debug>::fmt
+<core::ops::range::RangeFrom<Idx> as core::hash::Hash>::hash
 <core::ops::range::RangeFrom<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::RangeFrom<T> as core::ops::range::OneSidedRange<T>>::bound
 <core::ops::range::RangeFrom<T> as core::ops::range::RangeBounds<T>>::end_bound
@@ -1236,6 +1570,12 @@
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::index
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::index_mut
+<core::ops::range::RangeFull as core::clone::Clone>::clone
+<core::ops::range::RangeFull as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeFull as core::cmp::PartialEq>::eq
+<core::ops::range::RangeFull as core::default::Default>::default
+<core::ops::range::RangeFull as core::fmt::Debug>::fmt
+<core::ops::range::RangeFull as core::hash::Hash>::hash
 <core::ops::range::RangeFull as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::RangeFull as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeFull as core::ops::range::RangeBounds<T>>::start_bound
@@ -1251,6 +1591,11 @@
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold
+<core::ops::range::RangeInclusive<Idx> as core::clone::Clone>::clone
+<core::ops::range::RangeInclusive<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeInclusive<Idx> as core::cmp::PartialEq>::eq
+<core::ops::range::RangeInclusive<Idx> as core::fmt::Debug>::fmt
+<core::ops::range::RangeInclusive<Idx> as core::hash::Hash>::hash
 <core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next
 <core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back
 <core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold
@@ -1266,6 +1611,11 @@
 <core::ops::range::RangeInclusive<usize> as core::slice::index::SliceIndex<[T]>>::index_mut
 <core::ops::range::RangeTo<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeTo<&T> as core::ops::range::RangeBounds<T>>::start_bound
+<core::ops::range::RangeTo<Idx> as core::clone::Clone>::clone
+<core::ops::range::RangeTo<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeTo<Idx> as core::cmp::PartialEq>::eq
+<core::ops::range::RangeTo<Idx> as core::fmt::Debug>::fmt
+<core::ops::range::RangeTo<Idx> as core::hash::Hash>::hash
 <core::ops::range::RangeTo<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::RangeTo<T> as core::ops::range::OneSidedRange<T>>::bound
 <core::ops::range::RangeTo<T> as core::ops::range::RangeBounds<T>>::end_bound
@@ -1278,6 +1628,11 @@
 <core::ops::range::RangeTo<usize> as core::slice::index::SliceIndex<[T]>>::index_mut
 <core::ops::range::RangeToInclusive<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeToInclusive<&T> as core::ops::range::RangeBounds<T>>::start_bound
+<core::ops::range::RangeToInclusive<Idx> as core::clone::Clone>::clone
+<core::ops::range::RangeToInclusive<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeToInclusive<Idx> as core::cmp::PartialEq>::eq
+<core::ops::range::RangeToInclusive<Idx> as core::fmt::Debug>::fmt
+<core::ops::range::RangeToInclusive<Idx> as core::hash::Hash>::hash
 <core::ops::range::RangeToInclusive<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::RangeToInclusive<T> as core::ops::range::OneSidedRange<T>>::bound
 <core::ops::range::RangeToInclusive<T> as core::ops::range::RangeBounds<T>>::end_bound
@@ -1293,52 +1648,107 @@
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::from_output
 <core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnMut<(A,)>>::call_mut
 <core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnOnce<(A,)>>::call_once
+<core::option::IntoIter<A> as core::clone::Clone>::clone
+<core::option::IntoIter<A> as core::fmt::Debug>::fmt
 <core::option::IntoIter<A> as core::iter::traits::iterator::Iterator>::next
 <core::option::IntoIter<A> as core::iter::traits::iterator::Iterator>::size_hint
+<core::option::Item<A> as core::clone::Clone>::clone
+<core::option::Item<A> as core::fmt::Debug>::fmt
 <core::option::Item<A> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::option::Item<A> as core::iter::traits::iterator::Iterator>::next
 <core::option::Item<A> as core::iter::traits::iterator::Iterator>::size_hint
+<core::option::Iter<'a, A> as core::fmt::Debug>::fmt
+<core::option::IterMut<'a, A> as core::fmt::Debug>::fmt
 <core::option::Option<&'a T> as core::convert::From<&'a core::option::Option<T>>>::from
 <core::option::Option<&'a mut T> as core::convert::From<&'a mut core::option::Option<T>>>::from
 <core::option::Option<T> as core::clone::Clone>::clone
 <core::option::Option<T> as core::clone::Clone>::clone_from
+<core::option::Option<T> as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::option::Option<T> as core::cmp::PartialEq>::eq
 <core::option::Option<T> as core::convert::From<T>>::from
 <core::option::Option<T> as core::default::Default>::default
+<core::option::Option<T> as core::fmt::Debug>::fmt
+<core::option::Option<T> as core::hash::Hash>::hash
 <core::option::Option<T> as core::iter::traits::collect::IntoIterator>::into_iter
 <core::option::Option<T> as core::ops::try_trait::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual
 <core::option::Option<T> as core::ops::try_trait::Try>::branch
 <core::option::Option<T> as core::ops::try_trait::Try>::from_output
+<core::panic::location::Location<'_> as core::fmt::Debug>::fmt
+<core::panic::location::Location<'_> as core::fmt::Display>::fmt
+<core::panic::location::Location<'a> as core::clone::Clone>::clone
+<core::panic::panic_info::PanicInfo<'_> as core::fmt::Display>::fmt
+<core::panic::panic_info::PanicInfo<'a> as core::fmt::Debug>::fmt
+<core::panic::panic_info::PanicMessage<'_> as core::fmt::Debug>::fmt
+<core::panic::panic_info::PanicMessage<'_> as core::fmt::Display>::fmt
+<core::panicking::AssertKind as core::fmt::Debug>::fmt
+<core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>::fmt
 <core::ptr::alignment::Alignment as core::clone::Clone>::clone
+<core::ptr::alignment::Alignment as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ptr::alignment::Alignment as core::cmp::PartialEq>::eq
+<core::ptr::alignment::Alignment as core::fmt::Debug>::fmt
+<core::ptr::alignment::Alignment as core::hash::Hash>::hash
 <core::ptr::alignment::AlignmentEnum as core::clone::Clone>::clone
+<core::ptr::alignment::AlignmentEnum as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ptr::alignment::AlignmentEnum as core::cmp::PartialEq>::eq
+<core::ptr::metadata::DynMetadata<Dyn> as core::clone::Clone>::clone
+<core::ptr::metadata::DynMetadata<Dyn> as core::fmt::Debug>::fmt
 <core::ptr::non_null::NonNull<T> as core::clone::Clone>::clone
 <core::ptr::non_null::NonNull<T> as core::cmp::PartialEq>::eq
 <core::ptr::non_null::NonNull<T> as core::convert::From<&mut T>>::from
+<core::ptr::non_null::NonNull<T> as core::fmt::Debug>::fmt
+<core::ptr::non_null::NonNull<T> as core::fmt::Pointer>::fmt
+<core::result::Result<T, E> as core::clone::Clone>::clone
+<core::result::Result<T, E> as core::clone::Clone>::clone_from
+<core::result::Result<T, E> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::result::Result<T, E> as core::cmp::Ord>::cmp
+<core::result::Result<T, E> as core::cmp::PartialEq>::eq
+<core::result::Result<T, E> as core::cmp::PartialOrd>::partial_cmp
+<core::result::Result<T, E> as core::fmt::Debug>::fmt
+<core::result::Result<T, E> as core::hash::Hash>::hash
 <core::result::Result<T, E> as core::ops::try_trait::Try>::branch
 <core::result::Result<T, E> as core::ops::try_trait::Try>::from_output
 <core::result::Result<T, F> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible, E>>>::from_residual
+<core::slice::ascii::EscapeAscii<'a> as core::clone::Clone>::clone
+<core::slice::ascii::EscapeAscii<'a> as core::fmt::Debug>::fmt
+<core::slice::ascii::EscapeAscii<'a> as core::fmt::Display>::fmt
+<core::slice::ascii::EscapeAscii<'a> as core::fmt::Display>::fmt::needs_escape
+<core::slice::ascii::EscapeByte as core::clone::Clone>::clone
+<core::slice::ascii::EscapeByte as core::ops::function::Fn<(&u8,)>>::call
+<core::slice::ascii::EscapeByte as core::ops::function::FnMut<(&u8,)>>::call_mut
+<core::slice::ascii::EscapeByte as core::ops::function::FnOnce<(&u8,)>>::call_once
+<core::slice::iter::Chunks<'a, T> as core::fmt::Debug>::fmt
+<core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::last
 <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
 <core::slice::iter::ChunksExact<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
+<core::slice::iter::ChunksExact<'a, T> as core::fmt::Debug>::fmt
 <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::last
 <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
 <core::slice::iter::ChunksExactMut<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
+<core::slice::iter::ChunksExactMut<'a, T> as core::fmt::Debug>::fmt
 <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::last
 <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
+<core::slice::iter::ChunksMut<'a, T> as core::fmt::Debug>::fmt
+<core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::last
 <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
+<core::slice::iter::Iter<'_, T> as core::clone::Clone>::clone
+<core::slice::iter::Iter<'_, T> as core::default::Default>::default
+<core::slice::iter::Iter<'_, T> as core::fmt::Debug>::fmt
 <core::slice::iter::Iter<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
@@ -1346,6 +1756,7 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::advance_by
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::all
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::any
+<core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::find
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::fold
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::for_each
@@ -1353,7 +1764,10 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::position
+<core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::Iter<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
+<core::slice::iter::IterMut<'_, T> as core::default::Default>::default
+<core::slice::iter::IterMut<'_, T> as core::fmt::Debug>::fmt
 <core::slice::iter::IterMut<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
@@ -1361,6 +1775,7 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::advance_by
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::all
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::any
+<core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::find
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::fold
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::for_each
@@ -1368,49 +1783,128 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::position
+<core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
+<core::slice::iter::Windows<'a, T> as core::fmt::Debug>::fmt
+<core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::next
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
+<core::str::error::Utf8Error as core::clone::Clone>::clone
+<core::str::error::Utf8Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::str::error::Utf8Error as core::cmp::PartialEq>::eq
+<core::str::error::Utf8Error as core::fmt::Debug>::fmt
+<core::str::error::Utf8Error as core::fmt::Display>::fmt
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::all
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::any
+<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::count
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::find
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::last
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::nth
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::position
+<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::rposition
 <core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::size_hint
+<core::str::iter::Bytes<'a> as core::clone::Clone>::clone
+<core::str::iter::Bytes<'a> as core::fmt::Debug>::fmt
+<core::str::iter::CharIndices<'a> as core::clone::Clone>::clone
+<core::str::iter::CharIndices<'a> as core::fmt::Debug>::fmt
+<core::str::iter::CharIndices<'a> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::count
+<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::last
+<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::next
+<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::size_hint
+<core::str::iter::Chars<'_> as core::fmt::Debug>::fmt
+<core::str::iter::Chars<'a> as core::clone::Clone>::clone
 <core::str::iter::Chars<'a> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::advance_by
+<core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::count
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::last
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::size_hint
+<core::str::iter::SplitInclusive<'a, P> as core::fmt::Debug>::fmt
+<core::str::iter::SplitInclusive<'a, P> as core::iter::traits::iterator::Iterator>::next
+<core::str::iter::SplitInternal<'a, P> as core::fmt::Debug>::fmt
+<core::str::lossy::Debug<'_> as core::fmt::Debug>::fmt
+<core::str::lossy::Utf8Chunk<'a> as core::clone::Clone>::clone
+<core::str::lossy::Utf8Chunk<'a> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::str::lossy::Utf8Chunk<'a> as core::cmp::PartialEq>::eq
+<core::str::lossy::Utf8Chunk<'a> as core::fmt::Debug>::fmt
+<core::str::lossy::Utf8Chunks<'_> as core::fmt::Debug>::fmt
+<core::str::lossy::Utf8Chunks<'a> as core::clone::Clone>::clone
+<core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next
+<core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next::safe_get
+<core::str::pattern::CharSearcher<'a> as core::clone::Clone>::clone
+<core::str::pattern::CharSearcher<'a> as core::fmt::Debug>::fmt
+<core::str::pattern::CharSearcher<'a> as core::str::pattern::ReverseSearcher<'a>>::next_back
+<core::str::pattern::CharSearcher<'a> as core::str::pattern::Searcher<'a>>::haystack
+<core::str::pattern::CharSearcher<'a> as core::str::pattern::Searcher<'a>>::next
+<core::str::pattern::CharSearcher<'a> as core::str::pattern::Searcher<'a>>::next_match
+<core::str::pattern::EmptyNeedle as core::clone::Clone>::clone
+<core::str::pattern::EmptyNeedle as core::fmt::Debug>::fmt
+<core::str::pattern::MatchOnly as core::str::pattern::TwoWayStrategy>::matching
+<core::str::pattern::MatchOnly as core::str::pattern::TwoWayStrategy>::rejecting
+<core::str::pattern::MatchOnly as core::str::pattern::TwoWayStrategy>::use_early_reject
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::matching
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::rejecting
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::use_early_reject
+<core::str::pattern::SearchStep as core::clone::Clone>::clone
+<core::str::pattern::SearchStep as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::str::pattern::SearchStep as core::cmp::PartialEq>::eq
+<core::str::pattern::SearchStep as core::fmt::Debug>::fmt
+<core::str::pattern::StrSearcher<'a, 'b> as core::clone::Clone>::clone
+<core::str::pattern::StrSearcher<'a, 'b> as core::fmt::Debug>::fmt
+<core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::ReverseSearcher<'a>>::next_back
+<core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::Searcher<'a>>::haystack
 <core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::Searcher<'a>>::next
+<core::str::pattern::StrSearcher<'a, 'b> as core::str::pattern::Searcher<'a>>::next_match
+<core::str::pattern::StrSearcherImpl as core::clone::Clone>::clone
+<core::str::pattern::StrSearcherImpl as core::fmt::Debug>::fmt
+<core::str::pattern::TwoWaySearcher as core::clone::Clone>::clone
+<core::str::pattern::TwoWaySearcher as core::fmt::Debug>::fmt
+<core::sync::atomic::AtomicBool as core::fmt::Debug>::fmt
 <core::sync::atomic::AtomicU16 as core::convert::From<u16>>::from
 <core::sync::atomic::AtomicU16 as core::default::Default>::default
+<core::sync::atomic::AtomicU16 as core::fmt::Debug>::fmt
 <core::sync::atomic::AtomicU32 as core::convert::From<u32>>::from
 <core::sync::atomic::AtomicU32 as core::default::Default>::default
+<core::sync::atomic::AtomicU32 as core::fmt::Debug>::fmt
 <core::sync::atomic::AtomicU64 as core::convert::From<u64>>::from
 <core::sync::atomic::AtomicU64 as core::default::Default>::default
+<core::sync::atomic::AtomicU64 as core::fmt::Debug>::fmt
 <core::sync::atomic::AtomicU8 as core::convert::From<u8>>::from
 <core::sync::atomic::AtomicU8 as core::default::Default>::default
+<core::sync::atomic::AtomicU8 as core::fmt::Debug>::fmt
 <core::sync::atomic::AtomicUsize as core::convert::From<usize>>::from
 <core::sync::atomic::AtomicUsize as core::default::Default>::default
+<core::sync::atomic::AtomicUsize as core::fmt::Debug>::fmt
 <core::sync::atomic::Ordering as core::clone::Clone>::clone
+<core::sync::atomic::Ordering as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::sync::atomic::Ordering as core::cmp::PartialEq>::eq
+<core::sync::atomic::Ordering as core::fmt::Debug>::fmt
+<core::sync::atomic::Ordering as core::hash::Hash>::hash
 <core::time::Duration as core::clone::Clone>::clone
 <core::time::Duration as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::time::Duration as core::cmp::Ord>::cmp
 <core::time::Duration as core::cmp::PartialEq>::eq
 <core::time::Duration as core::cmp::PartialOrd>::partial_cmp
 <core::time::Duration as core::default::Default>::default
+<core::time::Duration as core::fmt::Debug>::fmt
+<core::time::Duration as core::fmt::Debug>::fmt::fmt_decimal
 <core::time::Duration as core::hash::Hash>::hash
 <core::time::Duration as core::ops::arith::Add>::add
 <core::time::Duration as core::ops::arith::Div<u32>>::div
 <core::time::Duration as core::ops::arith::Sub>::sub
+<core::time::TryFromFloatSecsError as core::clone::Clone>::clone
+<core::time::TryFromFloatSecsError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::time::TryFromFloatSecsError as core::cmp::PartialEq>::eq
+<core::time::TryFromFloatSecsError as core::fmt::Debug>::fmt
+<core::time::TryFromFloatSecsError as core::fmt::Display>::fmt
+<core::time::TryFromFloatSecsErrorKind as core::clone::Clone>::clone
+<core::time::TryFromFloatSecsErrorKind as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::time::TryFromFloatSecsErrorKind as core::cmp::PartialEq>::eq
+<core::time::TryFromFloatSecsErrorKind as core::fmt::Debug>::fmt
 <f128 as core::default::Default>::default
 <f128 as core::iter::traits::accum::Sum<&'a f128>>::sum
 <f128 as core::iter::traits::accum::Sum>::sum
@@ -1436,8 +1930,15 @@
 <f128 as core::ops::arith::SubAssign<&f128>>::sub_assign
 <f128 as core::ops::arith::SubAssign>::sub_assign
 <f16 as core::default::Default>::default
+<f16 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f16 as core::iter::traits::accum::Sum<&'a f16>>::sum
 <f16 as core::iter::traits::accum::Sum>::sum
+<f16 as core::num::dec2flt::float::RawFloat>::classify
+<f16 as core::num::dec2flt::float::RawFloat>::from_u64
+<f16 as core::num::dec2flt::float::RawFloat>::from_u64_bits
+<f16 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
+<f16 as core::num::dec2flt::float::RawFloat>::to_bits
+<f16 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f16 as core::ops::arith::Add<&f16>>::add
 <f16 as core::ops::arith::Add>::add
 <f16 as core::ops::arith::AddAssign<&f16>>::add_assign
@@ -1460,8 +1961,15 @@
 <f16 as core::ops::arith::SubAssign<&f16>>::sub_assign
 <f16 as core::ops::arith::SubAssign>::sub_assign
 <f32 as core::default::Default>::default
+<f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
+<f32 as core::num::dec2flt::float::RawFloat>::classify
+<f32 as core::num::dec2flt::float::RawFloat>::from_u64
+<f32 as core::num::dec2flt::float::RawFloat>::from_u64_bits
+<f32 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
+<f32 as core::num::dec2flt::float::RawFloat>::to_bits
+<f32 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f32 as core::ops::arith::Add<&f32>>::add
 <f32 as core::ops::arith::Add>::add
 <f32 as core::ops::arith::AddAssign<&f32>>::add_assign
@@ -1484,8 +1992,15 @@
 <f32 as core::ops::arith::SubAssign<&f32>>::sub_assign
 <f32 as core::ops::arith::SubAssign>::sub_assign
 <f64 as core::default::Default>::default
+<f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
+<f64 as core::num::dec2flt::float::RawFloat>::classify
+<f64 as core::num::dec2flt::float::RawFloat>::from_u64
+<f64 as core::num::dec2flt::float::RawFloat>::from_u64_bits
+<f64 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
+<f64 as core::num::dec2flt::float::RawFloat>::to_bits
+<f64 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f64 as core::ops::arith::Add<&f64>>::add
 <f64 as core::ops::arith::Add>::add
 <f64 as core::ops::arith::AddAssign<&f64>>::add_assign
@@ -1508,6 +2023,7 @@
 <f64 as core::ops::arith::SubAssign<&f64>>::sub_assign
 <f64 as core::ops::arith::SubAssign>::sub_assign
 <i128 as core::default::Default>::default
+<i128 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i128 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i128 as core::iter::range::Step>::backward
 <i128 as core::iter::range::Step>::backward_checked
@@ -1649,6 +2165,7 @@
 <i128 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i128 as core::ops::bit::ShrAssign>::shr_assign
 <i16 as core::default::Default>::default
+<i16 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i16 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i16 as core::iter::range::Step>::backward
 <i16 as core::iter::range::Step>::backward_checked
@@ -1790,6 +2307,7 @@
 <i16 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i16 as core::ops::bit::ShrAssign>::shr_assign
 <i32 as core::default::Default>::default
+<i32 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i32 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i32 as core::iter::range::Step>::backward
 <i32 as core::iter::range::Step>::backward_checked
@@ -1931,6 +2449,7 @@
 <i32 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i32 as core::ops::bit::ShrAssign>::shr_assign
 <i64 as core::default::Default>::default
+<i64 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i64 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i64 as core::iter::range::Step>::backward
 <i64 as core::iter::range::Step>::backward_checked
@@ -2072,6 +2591,7 @@
 <i64 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i64 as core::ops::bit::ShrAssign>::shr_assign
 <i8 as core::default::Default>::default
+<i8 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i8 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <i8 as core::iter::range::Step>::backward
 <i8 as core::iter::range::Step>::backward_checked
@@ -2213,6 +2733,7 @@
 <i8 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i8 as core::ops::bit::ShrAssign>::shr_assign
 <isize as core::default::Default>::default
+<isize as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <isize as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <isize as core::iter::range::Step>::backward
 <isize as core::iter::range::Step>::backward_checked
@@ -2354,7 +2875,11 @@
 <isize as core::ops::bit::ShrAssign<usize>>::shr_assign
 <isize as core::ops::bit::ShrAssign>::shr_assign
 <str as core::convert::AsMut<str>>::as_mut
+<str as core::fmt::Debug>::fmt
+<str as core::fmt::Debug>::fmt::needs_escape
+<str as core::fmt::Display>::fmt
 <u128 as core::default::Default>::default
+<u128 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u128 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u128 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u128 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2497,6 +3022,7 @@
 <u128 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u128 as core::ops::bit::ShrAssign>::shr_assign
 <u16 as core::default::Default>::default
+<u16 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u16 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u16 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u16 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2509,6 +3035,9 @@
 <u16 as core::iter::range::Step>::steps_between
 <u16 as core::iter::traits::accum::Sum<&'a u16>>::sum
 <u16 as core::iter::traits::accum::Sum>::sum
+<u16 as core::num::bignum::FullOps>::full_div_rem
+<u16 as core::num::bignum::FullOps>::full_mul_add
+<u16 as core::num::dec2flt::float::CastInto<i16>>::cast
 <u16 as core::ops::arith::Add<&u16>>::add
 <u16 as core::ops::arith::Add>::add
 <u16 as core::ops::arith::AddAssign<&u16>>::add_assign
@@ -2639,6 +3168,7 @@
 <u16 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u16 as core::ops::bit::ShrAssign>::shr_assign
 <u32 as core::default::Default>::default
+<u32 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u32 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u32 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u32 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2651,6 +3181,9 @@
 <u32 as core::iter::range::Step>::steps_between
 <u32 as core::iter::traits::accum::Sum<&'a u32>>::sum
 <u32 as core::iter::traits::accum::Sum>::sum
+<u32 as core::num::bignum::FullOps>::full_div_rem
+<u32 as core::num::bignum::FullOps>::full_mul_add
+<u32 as core::num::dec2flt::float::CastInto<i16>>::cast
 <u32 as core::ops::arith::Add<&u32>>::add
 <u32 as core::ops::arith::Add>::add
 <u32 as core::ops::arith::AddAssign<&u32>>::add_assign
@@ -2781,6 +3314,7 @@
 <u32 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u32 as core::ops::bit::ShrAssign>::shr_assign
 <u64 as core::default::Default>::default
+<u64 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u64 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u64 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u64 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2793,6 +3327,9 @@
 <u64 as core::iter::range::Step>::steps_between
 <u64 as core::iter::traits::accum::Sum<&'a u64>>::sum
 <u64 as core::iter::traits::accum::Sum>::sum
+<u64 as core::num::bignum::FullOps>::full_div_rem
+<u64 as core::num::bignum::FullOps>::full_mul_add
+<u64 as core::num::dec2flt::float::CastInto<i16>>::cast
 <u64 as core::ops::arith::Add<&u64>>::add
 <u64 as core::ops::arith::Add>::add
 <u64 as core::ops::arith::AddAssign<&u64>>::add_assign
@@ -2923,6 +3460,7 @@
 <u64 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u64 as core::ops::bit::ShrAssign>::shr_assign
 <u8 as core::default::Default>::default
+<u8 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <u8 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u8 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u8 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -2935,6 +3473,8 @@
 <u8 as core::iter::range::Step>::steps_between
 <u8 as core::iter::traits::accum::Sum<&'a u8>>::sum
 <u8 as core::iter::traits::accum::Sum>::sum
+<u8 as core::num::bignum::FullOps>::full_div_rem
+<u8 as core::num::bignum::FullOps>::full_mul_add
 <u8 as core::ops::arith::Add<&u8>>::add
 <u8 as core::ops::arith::Add>::add
 <u8 as core::ops::arith::AddAssign<&u8>>::add_assign
@@ -3065,6 +3605,7 @@
 <u8 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u8 as core::ops::bit::ShrAssign>::shr_assign
 <usize as core::default::Default>::default
+<usize as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <usize as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <usize as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <usize as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3217,10 +3758,14 @@
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
+core::alloc::layout::Layout::from_size_alignment_unchecked
+core::alloc::layout::Layout::from_size_alignment_unchecked::precondition_check
 core::alloc::layout::Layout::is_size_align_valid
-core::alloc::layout::Layout::max_size_for_align
+core::alloc::layout::Layout::is_size_alignment_valid
+core::alloc::layout::Layout::max_size_for_alignment
 core::alloc::layout::Layout::new
 core::alloc::layout::Layout::size
+core::any::TypeId::as_u128
 core::any::TypeId::of
 core::any::type_name
 core::any::type_name_of_val
@@ -3234,11 +3779,14 @@ core::array::<impl core::convert::TryFrom<&'a [T]> for &'a [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&'a mut [T]> for &'a mut [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&[T]> for [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&mut [T]> for [T; N]>::try_from
+core::array::<impl core::fmt::Debug for [T; N]>::fmt
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a [T; N]>::into_iter
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a mut [T; N]>::into_iter
 core::array::<impl core::ops::index::Index<I> for [T; N]>::index
 core::array::<impl core::ops::index::IndexMut<I> for [T; N]>::index_mut
 core::array::Guard::<'_, T>::push_unchecked
+core::array::ascii::<impl [u8; N]>::as_ascii
+core::array::ascii::<impl [u8; N]>::as_ascii_unchecked
 core::array::drain::Drain::<'l, 'f, T, N, F>::new
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::eq
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::ne
@@ -3278,10 +3826,17 @@ core::array::try_from_fn
 core::array::try_from_fn_erased
 core::array::try_from_trusted_iterator
 core::array::try_from_trusted_iterator::next
+core::ascii::EscapeDefault::empty
+core::ascii::EscapeDefault::new
+core::ascii::ascii_char::AsciiChar::as_str
+core::ascii::ascii_char::AsciiChar::from_u8_unchecked
+core::ascii::ascii_char::AsciiChar::to_u8
+core::ascii::escape_default
 core::bool::<impl bool>::ok_or
 core::bool::<impl bool>::ok_or_else
 core::bool::<impl bool>::then
 core::bool::<impl bool>::then_some
+core::bstr::ByteStr::from_bytes
 core::cell::BorrowRef::<'b>::new
 core::cell::BorrowRefMut::<'b>::new
 core::cell::Cell::<T>::get
@@ -3311,6 +3866,10 @@ core::cell::panic_already_mutably_borrowed
 core::cell::panic_already_mutably_borrowed::do_panic
 core::cell::panic_already_mutably_borrowed::do_panic::compiletime
 core::cell::panic_already_mutably_borrowed::do_panic::runtime
+core::char::EscapeDebug::backslash
+core::char::EscapeDebug::printable
+core::char::EscapeDebug::unicode
+core::char::convert::<impl core::convert::From<u8> for char>::from
 core::char::convert::char_try_from_u32
 core::char::convert::from_u32_unchecked
 core::char::convert::from_u32_unchecked::precondition_check
@@ -3318,7 +3877,11 @@ core::char::decode::DecodeUtf16Error::unpaired_surrogate
 core::char::decode::decode_utf16
 core::char::methods::<impl char>::decode_utf16
 core::char::methods::<impl char>::encode_utf8
+core::char::methods::<impl char>::escape_debug
+core::char::methods::<impl char>::escape_debug_ext
 core::char::methods::<impl char>::from_u32_unchecked
+core::char::methods::<impl char>::is_ascii
+core::char::methods::<impl char>::is_grapheme_extended
 core::char::methods::<impl char>::len_utf8
 core::char::methods::<impl char>::to_digit
 core::char::methods::encode_utf8_raw
@@ -3653,6 +4216,11 @@ core::convert::num::<impl core::convert::From<u8> for u16>::from
 core::convert::num::<impl core::convert::From<u8> for u32>::from
 core::convert::num::<impl core::convert::From<u8> for u64>::from
 core::convert::num::<impl core::convert::From<u8> for usize>::from
+core::convert::num::<impl core::convert::TryFrom<i32> for u128>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u16>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u32>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u64>::try_from
+core::convert::num::<impl core::convert::TryFrom<i32> for u8>::try_from
 core::convert::num::<impl core::convert::TryFrom<u128> for u16>::try_from
 core::convert::num::<impl core::convert::TryFrom<u128> for u32>::try_from
 core::convert::num::<impl core::convert::TryFrom<u128> for u64>::try_from
@@ -3664,6 +4232,10 @@ core::convert::num::<impl core::convert::TryFrom<u64> for u16>::try_from
 core::convert::num::<impl core::convert::TryFrom<u64> for u32>::try_from
 core::convert::num::<impl core::convert::TryFrom<u64> for u8>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i128> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i16> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i32> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i64> for usize>::try_from
+core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<i8> for usize>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u128> for usize>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u32> for usize>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<u64> for usize>::try_from
@@ -3672,7 +4244,30 @@ core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for 
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u32>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u64>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u8>::try_from
+core::escape::EscapeIterInner::<N, ESCAPING>::advance_by
+core::escape::EscapeIterInner::<N, ESCAPING>::ascii
+core::escape::EscapeIterInner::<N, ESCAPING>::backslash
+core::escape::EscapeIterInner::<N, ESCAPING>::empty
+core::escape::EscapeIterInner::<N, ESCAPING>::len
+core::escape::EscapeIterInner::<N, ESCAPING>::new
+core::escape::EscapeIterInner::<N, ESCAPING>::to_char
+core::escape::EscapeIterInner::<N, ESCAPING>::to_str_unchecked
+core::escape::EscapeIterInner::<N, ESCAPING>::unicode
+core::escape::EscapeIterInner::<N, core::escape::AlwaysEscaped>::next
+core::escape::EscapeIterInner::<N, core::escape::AlwaysEscaped>::next_back
+core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::next
+core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::printable
+core::escape::backslash
+core::escape::escape_ascii
+core::escape::escape_unicode
+core::escape::hex_escape
+core::escape::verbatim
+core::f16::<impl f16>::abs
+core::f16::<impl f16>::classify
+core::f16::<impl f16>::from_bits
+core::f16::<impl f16>::to_bits
 core::f32::<impl f32>::abs
+core::f32::<impl f32>::classify
 core::f32::<impl f32>::copysign
 core::f32::<impl f32>::from_bits
 core::f32::<impl f32>::from_le_bytes
@@ -3685,6 +4280,7 @@ core::f32::<impl f32>::signum
 core::f32::<impl f32>::to_bits
 core::f32::<impl f32>::to_le_bytes
 core::f64::<impl f64>::abs
+core::f64::<impl f64>::classify
 core::f64::<impl f64>::copysign
 core::f64::<impl f64>::from_bits
 core::f64::<impl f64>::from_le_bytes
@@ -3701,11 +4297,281 @@ core::ffi::c_str::CStr::from_bytes_with_nul_unchecked
 core::ffi::c_str::CStr::from_bytes_with_nul_unchecked::compiletime
 core::ffi::c_str::CStr::from_bytes_with_nul_unchecked::runtime
 core::ffi::c_str::CStr::from_ptr
+core::ffi::c_str::CStr::to_bytes
 core::ffi::c_str::CStr::to_bytes_with_nul
 core::ffi::c_str::strlen
 core::ffi::c_str::strlen::compiletime
 core::ffi::c_str::strlen::runtime
 core::ffi::c_str::strlen::runtime::strlen
+core::fmt::Arguments::<'a>::as_statically_known_str
+core::fmt::Arguments::<'a>::as_str
+core::fmt::Arguments::<'a>::estimated_capacity
+core::fmt::Arguments::<'a>::from_str
+core::fmt::Arguments::<'a>::from_str_nonconst
+core::fmt::Arguments::<'a>::new
+core::fmt::Formatter::<'a>::align
+core::fmt::Formatter::<'a>::alternate
+core::fmt::Formatter::<'a>::debug_list
+core::fmt::Formatter::<'a>::debug_lower_hex
+core::fmt::Formatter::<'a>::debug_map
+core::fmt::Formatter::<'a>::debug_set
+core::fmt::Formatter::<'a>::debug_struct
+core::fmt::Formatter::<'a>::debug_struct_field1_finish
+core::fmt::Formatter::<'a>::debug_struct_field2_finish
+core::fmt::Formatter::<'a>::debug_struct_field3_finish
+core::fmt::Formatter::<'a>::debug_struct_field4_finish
+core::fmt::Formatter::<'a>::debug_struct_field5_finish
+core::fmt::Formatter::<'a>::debug_struct_fields_finish
+core::fmt::Formatter::<'a>::debug_tuple
+core::fmt::Formatter::<'a>::debug_tuple_field1_finish
+core::fmt::Formatter::<'a>::debug_tuple_field2_finish
+core::fmt::Formatter::<'a>::debug_tuple_field3_finish
+core::fmt::Formatter::<'a>::debug_tuple_field4_finish
+core::fmt::Formatter::<'a>::debug_tuple_field5_finish
+core::fmt::Formatter::<'a>::debug_tuple_fields_finish
+core::fmt::Formatter::<'a>::debug_upper_hex
+core::fmt::Formatter::<'a>::fill
+core::fmt::Formatter::<'a>::flags
+core::fmt::Formatter::<'a>::new
+core::fmt::Formatter::<'a>::options
+core::fmt::Formatter::<'a>::pad
+core::fmt::Formatter::<'a>::pad_formatted_parts
+core::fmt::Formatter::<'a>::pad_integral
+core::fmt::Formatter::<'a>::pad_integral::write_prefix
+core::fmt::Formatter::<'a>::padding
+core::fmt::Formatter::<'a>::precision
+core::fmt::Formatter::<'a>::sign
+core::fmt::Formatter::<'a>::sign_aware_zero_pad
+core::fmt::Formatter::<'a>::sign_minus
+core::fmt::Formatter::<'a>::sign_plus
+core::fmt::Formatter::<'a>::width
+core::fmt::Formatter::<'a>::with_options
+core::fmt::Formatter::<'a>::wrap_buf
+core::fmt::Formatter::<'a>::write_fmt
+core::fmt::Formatter::<'a>::write_formatted_parts
+core::fmt::Formatter::<'a>::write_formatted_parts::write_bytes
+core::fmt::Formatter::<'a>::write_str
+core::fmt::FormattingOptions::align
+core::fmt::FormattingOptions::alternate
+core::fmt::FormattingOptions::create_formatter
+core::fmt::FormattingOptions::debug_as_hex
+core::fmt::FormattingOptions::fill
+core::fmt::FormattingOptions::get_align
+core::fmt::FormattingOptions::get_alternate
+core::fmt::FormattingOptions::get_debug_as_hex
+core::fmt::FormattingOptions::get_fill
+core::fmt::FormattingOptions::get_precision
+core::fmt::FormattingOptions::get_sign
+core::fmt::FormattingOptions::get_sign_aware_zero_pad
+core::fmt::FormattingOptions::get_width
+core::fmt::FormattingOptions::new
+core::fmt::FormattingOptions::precision
+core::fmt::FormattingOptions::sign
+core::fmt::FormattingOptions::sign_aware_zero_pad
+core::fmt::FormattingOptions::width
+core::fmt::PostPadding::new
+core::fmt::PostPadding::write
+core::fmt::Write::write_char
+core::fmt::Write::write_fmt
+core::fmt::builders::DebugInner::<'a, 'b>::entry_with
+core::fmt::builders::DebugInner::<'a, 'b>::is_pretty
+core::fmt::builders::DebugList::<'a, 'b>::entries
+core::fmt::builders::DebugList::<'a, 'b>::entry
+core::fmt::builders::DebugList::<'a, 'b>::entry_with
+core::fmt::builders::DebugList::<'a, 'b>::finish
+core::fmt::builders::DebugList::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugMap::<'a, 'b>::entries
+core::fmt::builders::DebugMap::<'a, 'b>::entry
+core::fmt::builders::DebugMap::<'a, 'b>::finish
+core::fmt::builders::DebugMap::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugMap::<'a, 'b>::is_pretty
+core::fmt::builders::DebugMap::<'a, 'b>::key
+core::fmt::builders::DebugMap::<'a, 'b>::key_with
+core::fmt::builders::DebugMap::<'a, 'b>::value
+core::fmt::builders::DebugMap::<'a, 'b>::value_with
+core::fmt::builders::DebugSet::<'a, 'b>::entries
+core::fmt::builders::DebugSet::<'a, 'b>::entry
+core::fmt::builders::DebugSet::<'a, 'b>::entry_with
+core::fmt::builders::DebugSet::<'a, 'b>::finish
+core::fmt::builders::DebugSet::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugStruct::<'a, 'b>::field
+core::fmt::builders::DebugStruct::<'a, 'b>::field_with
+core::fmt::builders::DebugStruct::<'a, 'b>::finish
+core::fmt::builders::DebugStruct::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugStruct::<'a, 'b>::is_pretty
+core::fmt::builders::DebugTuple::<'a, 'b>::field
+core::fmt::builders::DebugTuple::<'a, 'b>::field_with
+core::fmt::builders::DebugTuple::<'a, 'b>::finish
+core::fmt::builders::DebugTuple::<'a, 'b>::finish_non_exhaustive
+core::fmt::builders::DebugTuple::<'a, 'b>::is_pretty
+core::fmt::builders::PadAdapter::<'buf, 'state>::wrap
+core::fmt::builders::debug_list_new
+core::fmt::builders::debug_map_new
+core::fmt::builders::debug_set_new
+core::fmt::builders::debug_struct_new
+core::fmt::builders::debug_tuple_new
+core::fmt::builders::from_fn
+core::fmt::float::<impl core::fmt::Debug for f16>::fmt
+core::fmt::float::<impl core::fmt::Debug for f32>::fmt
+core::fmt::float::<impl core::fmt::Debug for f64>::fmt
+core::fmt::float::<impl core::fmt::Display for f16>::fmt
+core::fmt::float::<impl core::fmt::Display for f32>::fmt
+core::fmt::float::<impl core::fmt::Display for f64>::fmt
+core::fmt::float::<impl core::fmt::LowerExp for f16>::fmt
+core::fmt::float::<impl core::fmt::LowerExp for f32>::fmt
+core::fmt::float::<impl core::fmt::LowerExp for f64>::fmt
+core::fmt::float::<impl core::fmt::UpperExp for f16>::fmt
+core::fmt::float::<impl core::fmt::UpperExp for f32>::fmt
+core::fmt::float::<impl core::fmt::UpperExp for f64>::fmt
+core::fmt::float::float_to_decimal_common_exact
+core::fmt::float::float_to_decimal_common_shortest
+core::fmt::float::float_to_decimal_display
+core::fmt::float::float_to_exponential_common
+core::fmt::float::float_to_exponential_common_exact
+core::fmt::float::float_to_exponential_common_shortest
+core::fmt::float::float_to_general_debug
+core::fmt::num::<impl core::fmt::Binary for i128>::fmt
+core::fmt::num::<impl core::fmt::Binary for i16>::fmt
+core::fmt::num::<impl core::fmt::Binary for i32>::fmt
+core::fmt::num::<impl core::fmt::Binary for i64>::fmt
+core::fmt::num::<impl core::fmt::Binary for i8>::fmt
+core::fmt::num::<impl core::fmt::Binary for isize>::fmt
+core::fmt::num::<impl core::fmt::Binary for u128>::fmt
+core::fmt::num::<impl core::fmt::Binary for u16>::fmt
+core::fmt::num::<impl core::fmt::Binary for u32>::fmt
+core::fmt::num::<impl core::fmt::Binary for u64>::fmt
+core::fmt::num::<impl core::fmt::Binary for u8>::fmt
+core::fmt::num::<impl core::fmt::Binary for usize>::fmt
+core::fmt::num::<impl core::fmt::Debug for i128>::fmt
+core::fmt::num::<impl core::fmt::Debug for i16>::fmt
+core::fmt::num::<impl core::fmt::Debug for i32>::fmt
+core::fmt::num::<impl core::fmt::Debug for i64>::fmt
+core::fmt::num::<impl core::fmt::Debug for i8>::fmt
+core::fmt::num::<impl core::fmt::Debug for isize>::fmt
+core::fmt::num::<impl core::fmt::Debug for u128>::fmt
+core::fmt::num::<impl core::fmt::Debug for u16>::fmt
+core::fmt::num::<impl core::fmt::Debug for u32>::fmt
+core::fmt::num::<impl core::fmt::Debug for u64>::fmt
+core::fmt::num::<impl core::fmt::Debug for u8>::fmt
+core::fmt::num::<impl core::fmt::Debug for usize>::fmt
+core::fmt::num::<impl core::fmt::Display for i128>::fmt
+core::fmt::num::<impl core::fmt::Display for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerExp for i128>::fmt
+core::fmt::num::<impl core::fmt::LowerExp for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i16>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i32>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i64>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for i8>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for isize>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u16>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u32>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u64>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u8>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for usize>::fmt
+core::fmt::num::<impl core::fmt::Octal for i128>::fmt
+core::fmt::num::<impl core::fmt::Octal for i16>::fmt
+core::fmt::num::<impl core::fmt::Octal for i32>::fmt
+core::fmt::num::<impl core::fmt::Octal for i64>::fmt
+core::fmt::num::<impl core::fmt::Octal for i8>::fmt
+core::fmt::num::<impl core::fmt::Octal for isize>::fmt
+core::fmt::num::<impl core::fmt::Octal for u128>::fmt
+core::fmt::num::<impl core::fmt::Octal for u16>::fmt
+core::fmt::num::<impl core::fmt::Octal for u32>::fmt
+core::fmt::num::<impl core::fmt::Octal for u64>::fmt
+core::fmt::num::<impl core::fmt::Octal for u8>::fmt
+core::fmt::num::<impl core::fmt::Octal for usize>::fmt
+core::fmt::num::<impl core::fmt::UpperExp for i128>::fmt
+core::fmt::num::<impl core::fmt::UpperExp for u128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i16>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i32>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i64>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for i8>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for isize>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u16>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u32>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u64>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u8>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for usize>::fmt
+core::fmt::num::<impl i128>::format_into
+core::fmt::num::<impl u128>::_fmt
+core::fmt::num::<impl u128>::_fmt_inner
+core::fmt::num::<impl u128>::format_into
+core::fmt::num::div_rem_1e16
+core::fmt::num::enc_16lsd
+core::fmt::num::exp_u128
+core::fmt::num::imp::<impl core::fmt::Display for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for usize>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::LowerExp for usize>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::UpperExp for usize>::fmt
+core::fmt::num::imp::<impl i16>::format_into
+core::fmt::num::imp::<impl i32>::format_into
+core::fmt::num::imp::<impl i64>::format_into
+core::fmt::num::imp::<impl i8>::format_into
+core::fmt::num::imp::<impl isize>::format_into
+core::fmt::num::imp::<impl u16>::_fmt
+core::fmt::num::imp::<impl u16>::_fmt_inner
+core::fmt::num::imp::<impl u16>::format_into
+core::fmt::num::imp::<impl u32>::_fmt
+core::fmt::num::imp::<impl u32>::_fmt_inner
+core::fmt::num::imp::<impl u32>::format_into
+core::fmt::num::imp::<impl u64>::_fmt
+core::fmt::num::imp::<impl u64>::_fmt_inner
+core::fmt::num::imp::<impl u64>::format_into
+core::fmt::num::imp::<impl u8>::_fmt
+core::fmt::num::imp::<impl u8>::_fmt_inner
+core::fmt::num::imp::<impl u8>::format_into
+core::fmt::num::imp::<impl usize>::_fmt
+core::fmt::num::imp::<impl usize>::_fmt_inner
+core::fmt::num::imp::<impl usize>::format_into
+core::fmt::num::imp::exp_u64
+core::fmt::num::slice_buffer_to_str
+core::fmt::num_buffer::NumBuffer::<T>::capacity
+core::fmt::num_buffer::NumBuffer::<T>::new
+core::fmt::pointer_fmt_inner
+core::fmt::rt::Argument::<'_>::as_u16
+core::fmt::rt::Argument::<'_>::fmt
+core::fmt::rt::Argument::<'_>::from_usize
+core::fmt::rt::Argument::<'_>::new_binary
+core::fmt::rt::Argument::<'_>::new_debug
+core::fmt::rt::Argument::<'_>::new_debug_noop
+core::fmt::rt::Argument::<'_>::new_display
+core::fmt::rt::Argument::<'_>::new_lower_exp
+core::fmt::rt::Argument::<'_>::new_lower_hex
+core::fmt::rt::Argument::<'_>::new_octal
+core::fmt::rt::Argument::<'_>::new_pointer
+core::fmt::rt::Argument::<'_>::new_upper_exp
+core::fmt::rt::Argument::<'_>::new_upper_hex
+core::fmt::write
 core::hash::Hash::hash_slice
 core::hash::Hasher::write_i128
 core::hash::Hasher::write_i16
@@ -3769,17 +4635,25 @@ core::hash::impls::<impl core::hash::Hash for usize>::hash
 core::hash::impls::<impl core::hash::Hash for usize>::hash_slice
 core::hint::assert_unchecked
 core::hint::assert_unchecked::precondition_check
+core::hint::select_unpredictable
 core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
 core::intrinsics::assume
+core::intrinsics::carrying_mul_add
 core::intrinsics::cold_path
 core::intrinsics::const_make_global
 core::intrinsics::disjoint_bitor
+core::intrinsics::fallback::wide_mul_u128
+core::intrinsics::fallback::wide_mul_u128::from_low_high
+core::intrinsics::fallback::wide_mul_u128::scalar_mul
+core::intrinsics::fallback::wide_mul_u128::to_low_high
+core::intrinsics::is_val_statically_known
 core::intrinsics::likely
 core::intrinsics::overflow_checks
 core::intrinsics::ptr_guaranteed_cmp
 core::intrinsics::rotate_left
 core::intrinsics::rotate_right
+core::intrinsics::select_unpredictable
 core::intrinsics::type_id_eq
 core::intrinsics::typed_swap_nonoverlapping
 core::intrinsics::ub_checks
@@ -3797,6 +4671,12 @@ core::iter::adapters::enumerate::Enumerate::<I>::new
 core::iter::adapters::filter::Filter::<I, P>::new
 core::iter::adapters::filter::filter_fold
 core::iter::adapters::filter::filter_try_fold
+core::iter::adapters::flatten::FlatMap::<I, U, F>::into_parts
+core::iter::adapters::flatten::FlatMap::<I, U, F>::new
+core::iter::adapters::flatten::FlattenCompat::<I, U>::new
+core::iter::adapters::fuse::Fuse::<I>::into_inner
+core::iter::adapters::fuse::Fuse::<I>::new
+core::iter::adapters::map::Map::<I, F>::into_inner
 core::iter::adapters::map::Map::<I, F>::new
 core::iter::adapters::map::map_fold
 core::iter::adapters::map::map_try_fold
@@ -3805,6 +4685,8 @@ core::iter::adapters::skip::Skip::<I>::new
 core::iter::adapters::step_by::StepBy::<I>::new
 core::iter::adapters::step_by::StepBy::<I>::original_step
 core::iter::adapters::take::Take::<I>::new
+core::iter::adapters::take_while::TakeWhile::<I, P>::new
+core::iter::adapters::zip::TrustedRandomAccessNoCoerce::size
 core::iter::adapters::zip::Zip::<A, B>::new
 core::iter::adapters::zip::Zip::<A, B>::super_nth
 core::iter::adapters::zip::zip
@@ -3816,10 +4698,12 @@ core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator f
 core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::rfold
 core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::try_rfold
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::advance_by
+core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::count
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::last
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::next
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::nth
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::size_hint
+core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::RangeInclusive<A>>::count
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::RangeInclusive<A>>::fold
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::RangeInclusive<A>>::last
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::RangeInclusive<A>>::next
@@ -3850,8 +4734,12 @@ core::iter::traits::iterator::Iterator::any::check
 core::iter::traits::iterator::Iterator::by_ref
 core::iter::traits::iterator::Iterator::chain
 core::iter::traits::iterator::Iterator::cloned
+core::iter::traits::iterator::Iterator::cmp
+core::iter::traits::iterator::Iterator::cmp_by
+core::iter::traits::iterator::Iterator::cmp_by::compare
 core::iter::traits::iterator::Iterator::collect
 core::iter::traits::iterator::Iterator::copied
+core::iter::traits::iterator::Iterator::count
 core::iter::traits::iterator::Iterator::enumerate
 core::iter::traits::iterator::Iterator::eq
 core::iter::traits::iterator::Iterator::eq_by
@@ -3859,9 +4747,11 @@ core::iter::traits::iterator::Iterator::eq_by::compare
 core::iter::traits::iterator::Iterator::filter
 core::iter::traits::iterator::Iterator::find
 core::iter::traits::iterator::Iterator::find::check
+core::iter::traits::iterator::Iterator::flat_map
 core::iter::traits::iterator::Iterator::fold
 core::iter::traits::iterator::Iterator::for_each
 core::iter::traits::iterator::Iterator::for_each::call
+core::iter::traits::iterator::Iterator::fuse
 core::iter::traits::iterator::Iterator::last
 core::iter::traits::iterator::Iterator::last::some
 core::iter::traits::iterator::Iterator::map
@@ -3872,11 +4762,14 @@ core::iter::traits::iterator::Iterator::position
 core::iter::traits::iterator::Iterator::position::check
 core::iter::traits::iterator::Iterator::reduce
 core::iter::traits::iterator::Iterator::rev
+core::iter::traits::iterator::Iterator::rposition
+core::iter::traits::iterator::Iterator::rposition::check
 core::iter::traits::iterator::Iterator::size_hint
 core::iter::traits::iterator::Iterator::skip
 core::iter::traits::iterator::Iterator::step_by
 core::iter::traits::iterator::Iterator::sum
 core::iter::traits::iterator::Iterator::take
+core::iter::traits::iterator::Iterator::take_while
 core::iter::traits::iterator::Iterator::try_fold
 core::iter::traits::iterator::Iterator::try_for_each
 core::iter::traits::iterator::Iterator::try_for_each::call
@@ -3927,8 +4820,10 @@ core::mem::transmute_copy
 core::mem::zeroed
 core::num::<impl i128>::abs
 core::num::<impl i128>::abs_diff
+core::num::<impl i128>::cast_unsigned
 core::num::<impl i128>::checked_add
 core::num::<impl i128>::checked_add_unsigned
+core::num::<impl i128>::checked_ilog
 core::num::<impl i128>::checked_ilog2
 core::num::<impl i128>::checked_mul
 core::num::<impl i128>::checked_sub
@@ -3938,6 +4833,7 @@ core::num::<impl i128>::count_zeros
 core::num::<impl i128>::from_le
 core::num::<impl i128>::from_le_bytes
 core::num::<impl i128>::from_ne_bytes
+core::num::<impl i128>::ilog
 core::num::<impl i128>::ilog2
 core::num::<impl i128>::is_negative
 core::num::<impl i128>::leading_zeros
@@ -3967,8 +4863,10 @@ core::num::<impl i128>::wrapping_shr
 core::num::<impl i128>::wrapping_sub
 core::num::<impl i16>::abs
 core::num::<impl i16>::abs_diff
+core::num::<impl i16>::cast_unsigned
 core::num::<impl i16>::checked_add
 core::num::<impl i16>::checked_add_unsigned
+core::num::<impl i16>::checked_ilog
 core::num::<impl i16>::checked_ilog2
 core::num::<impl i16>::checked_mul
 core::num::<impl i16>::checked_sub
@@ -3978,6 +4876,7 @@ core::num::<impl i16>::count_zeros
 core::num::<impl i16>::from_le
 core::num::<impl i16>::from_le_bytes
 core::num::<impl i16>::from_ne_bytes
+core::num::<impl i16>::ilog
 core::num::<impl i16>::ilog2
 core::num::<impl i16>::is_negative
 core::num::<impl i16>::leading_zeros
@@ -4007,8 +4906,10 @@ core::num::<impl i16>::wrapping_shr
 core::num::<impl i16>::wrapping_sub
 core::num::<impl i32>::abs
 core::num::<impl i32>::abs_diff
+core::num::<impl i32>::cast_unsigned
 core::num::<impl i32>::checked_add
 core::num::<impl i32>::checked_add_unsigned
+core::num::<impl i32>::checked_ilog
 core::num::<impl i32>::checked_ilog2
 core::num::<impl i32>::checked_mul
 core::num::<impl i32>::checked_sub
@@ -4018,6 +4919,7 @@ core::num::<impl i32>::count_zeros
 core::num::<impl i32>::from_le
 core::num::<impl i32>::from_le_bytes
 core::num::<impl i32>::from_ne_bytes
+core::num::<impl i32>::ilog
 core::num::<impl i32>::ilog2
 core::num::<impl i32>::is_negative
 core::num::<impl i32>::leading_zeros
@@ -4047,8 +4949,10 @@ core::num::<impl i32>::wrapping_shr
 core::num::<impl i32>::wrapping_sub
 core::num::<impl i64>::abs
 core::num::<impl i64>::abs_diff
+core::num::<impl i64>::cast_unsigned
 core::num::<impl i64>::checked_add
 core::num::<impl i64>::checked_add_unsigned
+core::num::<impl i64>::checked_ilog
 core::num::<impl i64>::checked_ilog2
 core::num::<impl i64>::checked_mul
 core::num::<impl i64>::checked_sub
@@ -4058,6 +4962,7 @@ core::num::<impl i64>::count_zeros
 core::num::<impl i64>::from_le
 core::num::<impl i64>::from_le_bytes
 core::num::<impl i64>::from_ne_bytes
+core::num::<impl i64>::ilog
 core::num::<impl i64>::ilog2
 core::num::<impl i64>::is_negative
 core::num::<impl i64>::leading_zeros
@@ -4087,8 +4992,10 @@ core::num::<impl i64>::wrapping_shr
 core::num::<impl i64>::wrapping_sub
 core::num::<impl i8>::abs
 core::num::<impl i8>::abs_diff
+core::num::<impl i8>::cast_unsigned
 core::num::<impl i8>::checked_add
 core::num::<impl i8>::checked_add_unsigned
+core::num::<impl i8>::checked_ilog
 core::num::<impl i8>::checked_ilog2
 core::num::<impl i8>::checked_mul
 core::num::<impl i8>::checked_sub
@@ -4098,6 +5005,7 @@ core::num::<impl i8>::count_zeros
 core::num::<impl i8>::from_le
 core::num::<impl i8>::from_le_bytes
 core::num::<impl i8>::from_ne_bytes
+core::num::<impl i8>::ilog
 core::num::<impl i8>::ilog2
 core::num::<impl i8>::is_negative
 core::num::<impl i8>::leading_zeros
@@ -4127,8 +5035,10 @@ core::num::<impl i8>::wrapping_shr
 core::num::<impl i8>::wrapping_sub
 core::num::<impl isize>::abs
 core::num::<impl isize>::abs_diff
+core::num::<impl isize>::cast_unsigned
 core::num::<impl isize>::checked_add
 core::num::<impl isize>::checked_add_unsigned
+core::num::<impl isize>::checked_ilog
 core::num::<impl isize>::checked_ilog2
 core::num::<impl isize>::checked_mul
 core::num::<impl isize>::checked_sub
@@ -4138,6 +5048,7 @@ core::num::<impl isize>::count_zeros
 core::num::<impl isize>::from_le
 core::num::<impl isize>::from_le_bytes
 core::num::<impl isize>::from_ne_bytes
+core::num::<impl isize>::ilog
 core::num::<impl isize>::ilog2
 core::num::<impl isize>::is_negative
 core::num::<impl isize>::leading_zeros
@@ -4166,9 +5077,15 @@ core::num::<impl isize>::wrapping_shl
 core::num::<impl isize>::wrapping_shr
 core::num::<impl isize>::wrapping_sub
 core::num::<impl u128>::abs_diff
+core::num::<impl u128>::carrying_add
+core::num::<impl u128>::carrying_mul
+core::num::<impl u128>::carrying_mul_add
 core::num::<impl u128>::checked_add
+core::num::<impl u128>::checked_ilog
+core::num::<impl u128>::checked_ilog10
 core::num::<impl u128>::checked_ilog2
 core::num::<impl u128>::checked_mul
+core::num::<impl u128>::checked_pow
 core::num::<impl u128>::checked_sub
 core::num::<impl u128>::count_ones
 core::num::<impl u128>::count_zeros
@@ -4180,6 +5097,8 @@ core::num::<impl u128>::from_le
 core::num::<impl u128>::from_le_bytes
 core::num::<impl u128>::from_ne_bytes
 core::num::<impl u128>::from_str_radix
+core::num::<impl u128>::ilog
+core::num::<impl u128>::ilog10
 core::num::<impl u128>::ilog2
 core::num::<impl u128>::is_multiple_of
 core::num::<impl u128>::is_power_of_two
@@ -4189,6 +5108,7 @@ core::num::<impl u128>::overflowing_add
 core::num::<impl u128>::overflowing_add_signed
 core::num::<impl u128>::overflowing_mul
 core::num::<impl u128>::overflowing_sub
+core::num::<impl u128>::pow
 core::num::<impl u128>::reverse_bits
 core::num::<impl u128>::rotate_left
 core::num::<impl u128>::rotate_right
@@ -4210,6 +5130,7 @@ core::num::<impl u128>::unchecked_shr
 core::num::<impl u128>::unchecked_shr::precondition_check
 core::num::<impl u128>::unchecked_sub
 core::num::<impl u128>::unchecked_sub::precondition_check
+core::num::<impl u128>::widening_mul
 core::num::<impl u128>::wrapping_add
 core::num::<impl u128>::wrapping_add_signed
 core::num::<impl u128>::wrapping_mul
@@ -4218,9 +5139,15 @@ core::num::<impl u128>::wrapping_shl
 core::num::<impl u128>::wrapping_shr
 core::num::<impl u128>::wrapping_sub
 core::num::<impl u16>::abs_diff
+core::num::<impl u16>::carrying_add
+core::num::<impl u16>::carrying_mul
+core::num::<impl u16>::carrying_mul_add
 core::num::<impl u16>::checked_add
+core::num::<impl u16>::checked_ilog
+core::num::<impl u16>::checked_ilog10
 core::num::<impl u16>::checked_ilog2
 core::num::<impl u16>::checked_mul
+core::num::<impl u16>::checked_pow
 core::num::<impl u16>::checked_sub
 core::num::<impl u16>::count_ones
 core::num::<impl u16>::count_zeros
@@ -4232,6 +5159,8 @@ core::num::<impl u16>::from_le
 core::num::<impl u16>::from_le_bytes
 core::num::<impl u16>::from_ne_bytes
 core::num::<impl u16>::from_str_radix
+core::num::<impl u16>::ilog
+core::num::<impl u16>::ilog10
 core::num::<impl u16>::ilog2
 core::num::<impl u16>::is_multiple_of
 core::num::<impl u16>::is_power_of_two
@@ -4242,6 +5171,7 @@ core::num::<impl u16>::overflowing_add
 core::num::<impl u16>::overflowing_add_signed
 core::num::<impl u16>::overflowing_mul
 core::num::<impl u16>::overflowing_sub
+core::num::<impl u16>::pow
 core::num::<impl u16>::reverse_bits
 core::num::<impl u16>::rotate_left
 core::num::<impl u16>::rotate_right
@@ -4263,6 +5193,7 @@ core::num::<impl u16>::unchecked_shr
 core::num::<impl u16>::unchecked_shr::precondition_check
 core::num::<impl u16>::unchecked_sub
 core::num::<impl u16>::unchecked_sub::precondition_check
+core::num::<impl u16>::widening_mul
 core::num::<impl u16>::wrapping_add
 core::num::<impl u16>::wrapping_add_signed
 core::num::<impl u16>::wrapping_mul
@@ -4271,9 +5202,15 @@ core::num::<impl u16>::wrapping_shl
 core::num::<impl u16>::wrapping_shr
 core::num::<impl u16>::wrapping_sub
 core::num::<impl u32>::abs_diff
+core::num::<impl u32>::carrying_add
+core::num::<impl u32>::carrying_mul
+core::num::<impl u32>::carrying_mul_add
 core::num::<impl u32>::checked_add
+core::num::<impl u32>::checked_ilog
+core::num::<impl u32>::checked_ilog10
 core::num::<impl u32>::checked_ilog2
 core::num::<impl u32>::checked_mul
+core::num::<impl u32>::checked_pow
 core::num::<impl u32>::checked_sub
 core::num::<impl u32>::count_ones
 core::num::<impl u32>::count_zeros
@@ -4285,6 +5222,8 @@ core::num::<impl u32>::from_le
 core::num::<impl u32>::from_le_bytes
 core::num::<impl u32>::from_ne_bytes
 core::num::<impl u32>::from_str_radix
+core::num::<impl u32>::ilog
+core::num::<impl u32>::ilog10
 core::num::<impl u32>::ilog2
 core::num::<impl u32>::is_multiple_of
 core::num::<impl u32>::is_power_of_two
@@ -4294,6 +5233,7 @@ core::num::<impl u32>::overflowing_add
 core::num::<impl u32>::overflowing_add_signed
 core::num::<impl u32>::overflowing_mul
 core::num::<impl u32>::overflowing_sub
+core::num::<impl u32>::pow
 core::num::<impl u32>::reverse_bits
 core::num::<impl u32>::rotate_left
 core::num::<impl u32>::rotate_right
@@ -4315,6 +5255,7 @@ core::num::<impl u32>::unchecked_shr
 core::num::<impl u32>::unchecked_shr::precondition_check
 core::num::<impl u32>::unchecked_sub
 core::num::<impl u32>::unchecked_sub::precondition_check
+core::num::<impl u32>::widening_mul
 core::num::<impl u32>::wrapping_add
 core::num::<impl u32>::wrapping_add_signed
 core::num::<impl u32>::wrapping_mul
@@ -4323,9 +5264,15 @@ core::num::<impl u32>::wrapping_shl
 core::num::<impl u32>::wrapping_shr
 core::num::<impl u32>::wrapping_sub
 core::num::<impl u64>::abs_diff
+core::num::<impl u64>::carrying_add
+core::num::<impl u64>::carrying_mul
+core::num::<impl u64>::carrying_mul_add
 core::num::<impl u64>::checked_add
+core::num::<impl u64>::checked_ilog
+core::num::<impl u64>::checked_ilog10
 core::num::<impl u64>::checked_ilog2
 core::num::<impl u64>::checked_mul
+core::num::<impl u64>::checked_pow
 core::num::<impl u64>::checked_sub
 core::num::<impl u64>::count_ones
 core::num::<impl u64>::count_zeros
@@ -4337,6 +5284,8 @@ core::num::<impl u64>::from_le
 core::num::<impl u64>::from_le_bytes
 core::num::<impl u64>::from_ne_bytes
 core::num::<impl u64>::from_str_radix
+core::num::<impl u64>::ilog
+core::num::<impl u64>::ilog10
 core::num::<impl u64>::ilog2
 core::num::<impl u64>::is_multiple_of
 core::num::<impl u64>::is_power_of_two
@@ -4346,6 +5295,7 @@ core::num::<impl u64>::overflowing_add
 core::num::<impl u64>::overflowing_add_signed
 core::num::<impl u64>::overflowing_mul
 core::num::<impl u64>::overflowing_sub
+core::num::<impl u64>::pow
 core::num::<impl u64>::reverse_bits
 core::num::<impl u64>::rotate_left
 core::num::<impl u64>::rotate_right
@@ -4367,6 +5317,7 @@ core::num::<impl u64>::unchecked_shr
 core::num::<impl u64>::unchecked_shr::precondition_check
 core::num::<impl u64>::unchecked_sub
 core::num::<impl u64>::unchecked_sub::precondition_check
+core::num::<impl u64>::widening_mul
 core::num::<impl u64>::wrapping_add
 core::num::<impl u64>::wrapping_add_signed
 core::num::<impl u64>::wrapping_mul
@@ -4375,14 +5326,21 @@ core::num::<impl u64>::wrapping_shl
 core::num::<impl u64>::wrapping_shr
 core::num::<impl u64>::wrapping_sub
 core::num::<impl u8>::abs_diff
+core::num::<impl u8>::carrying_add
+core::num::<impl u8>::carrying_mul
+core::num::<impl u8>::carrying_mul_add
 core::num::<impl u8>::checked_add
+core::num::<impl u8>::checked_ilog
+core::num::<impl u8>::checked_ilog10
 core::num::<impl u8>::checked_ilog2
 core::num::<impl u8>::checked_mul
+core::num::<impl u8>::checked_pow
 core::num::<impl u8>::checked_sub
 core::num::<impl u8>::count_ones
 core::num::<impl u8>::count_zeros
 core::num::<impl u8>::div_ceil
 core::num::<impl u8>::eq_ignore_ascii_case
+core::num::<impl u8>::escape_ascii
 core::num::<impl u8>::from_ascii_radix
 core::num::<impl u8>::from_be
 core::num::<impl u8>::from_be_bytes
@@ -4390,7 +5348,12 @@ core::num::<impl u8>::from_le
 core::num::<impl u8>::from_le_bytes
 core::num::<impl u8>::from_ne_bytes
 core::num::<impl u8>::from_str_radix
+core::num::<impl u8>::ilog
+core::num::<impl u8>::ilog10
 core::num::<impl u8>::ilog2
+core::num::<impl u8>::is_ascii
+core::num::<impl u8>::is_ascii_alphabetic
+core::num::<impl u8>::is_ascii_control
 core::num::<impl u8>::is_ascii_uppercase
 core::num::<impl u8>::is_multiple_of
 core::num::<impl u8>::is_power_of_two
@@ -4401,6 +5364,7 @@ core::num::<impl u8>::overflowing_add
 core::num::<impl u8>::overflowing_add_signed
 core::num::<impl u8>::overflowing_mul
 core::num::<impl u8>::overflowing_sub
+core::num::<impl u8>::pow
 core::num::<impl u8>::reverse_bits
 core::num::<impl u8>::rotate_left
 core::num::<impl u8>::rotate_right
@@ -4423,6 +5387,7 @@ core::num::<impl u8>::unchecked_shr
 core::num::<impl u8>::unchecked_shr::precondition_check
 core::num::<impl u8>::unchecked_sub
 core::num::<impl u8>::unchecked_sub::precondition_check
+core::num::<impl u8>::widening_mul
 core::num::<impl u8>::wrapping_add
 core::num::<impl u8>::wrapping_add_signed
 core::num::<impl u8>::wrapping_mul
@@ -4431,9 +5396,15 @@ core::num::<impl u8>::wrapping_shl
 core::num::<impl u8>::wrapping_shr
 core::num::<impl u8>::wrapping_sub
 core::num::<impl usize>::abs_diff
+core::num::<impl usize>::carrying_add
+core::num::<impl usize>::carrying_mul
+core::num::<impl usize>::carrying_mul_add
 core::num::<impl usize>::checked_add
+core::num::<impl usize>::checked_ilog
+core::num::<impl usize>::checked_ilog10
 core::num::<impl usize>::checked_ilog2
 core::num::<impl usize>::checked_mul
+core::num::<impl usize>::checked_pow
 core::num::<impl usize>::checked_sub
 core::num::<impl usize>::count_ones
 core::num::<impl usize>::count_zeros
@@ -4445,6 +5416,8 @@ core::num::<impl usize>::from_le
 core::num::<impl usize>::from_le_bytes
 core::num::<impl usize>::from_ne_bytes
 core::num::<impl usize>::from_str_radix
+core::num::<impl usize>::ilog
+core::num::<impl usize>::ilog10
 core::num::<impl usize>::ilog2
 core::num::<impl usize>::is_multiple_of
 core::num::<impl usize>::is_power_of_two
@@ -4454,6 +5427,8 @@ core::num::<impl usize>::overflowing_add
 core::num::<impl usize>::overflowing_add_signed
 core::num::<impl usize>::overflowing_mul
 core::num::<impl usize>::overflowing_sub
+core::num::<impl usize>::pow
+core::num::<impl usize>::repeat_u16
 core::num::<impl usize>::repeat_u8
 core::num::<impl usize>::reverse_bits
 core::num::<impl usize>::rotate_left
@@ -4476,6 +5451,7 @@ core::num::<impl usize>::unchecked_shr
 core::num::<impl usize>::unchecked_shr::precondition_check
 core::num::<impl usize>::unchecked_sub
 core::num::<impl usize>::unchecked_sub::precondition_check
+core::num::<impl usize>::widening_mul
 core::num::<impl usize>::wrapping_add
 core::num::<impl usize>::wrapping_add_signed
 core::num::<impl usize>::wrapping_mul
@@ -4483,12 +5459,67 @@ core::num::<impl usize>::wrapping_neg
 core::num::<impl usize>::wrapping_shl
 core::num::<impl usize>::wrapping_shr
 core::num::<impl usize>::wrapping_sub
+core::num::bignum::Big32x40::add
+core::num::bignum::Big32x40::digits
+core::num::bignum::Big32x40::div_rem_small
+core::num::bignum::Big32x40::from_small
+core::num::bignum::Big32x40::from_u64
+core::num::bignum::Big32x40::is_zero
+core::num::bignum::Big32x40::mul_digits
+core::num::bignum::Big32x40::mul_digits::mul_inner
+core::num::bignum::Big32x40::mul_pow2
+core::num::bignum::Big32x40::mul_small
+core::num::bignum::Big32x40::sub
 core::num::can_not_overflow
+core::num::dec2flt::float::RawFloat::integer_decode
+core::num::dec2flt::float::pow2_to_pow10
+core::num::diy_float::Fp::mul
+core::num::diy_float::Fp::normalize
+core::num::diy_float::Fp::normalize_to
+core::num::error::ParseIntError::kind
+core::num::flt2dec::decoder::decode
+core::num::flt2dec::determine_sign
+core::num::flt2dec::digits_to_dec_str
+core::num::flt2dec::digits_to_exp_str
+core::num::flt2dec::estimate_max_buf_len
+core::num::flt2dec::estimator::estimate_scaling_factor
+core::num::flt2dec::round_up
+core::num::flt2dec::strategy::dragon::div_2pow10
+core::num::flt2dec::strategy::dragon::div_rem_upto_16
+core::num::flt2dec::strategy::dragon::format_exact
+core::num::flt2dec::strategy::dragon::format_shortest
+core::num::flt2dec::strategy::dragon::mul_pow10
+core::num::flt2dec::strategy::grisu::cached_power
+core::num::flt2dec::strategy::grisu::format_exact
+core::num::flt2dec::strategy::grisu::format_exact_opt
+core::num::flt2dec::strategy::grisu::format_exact_opt::possibly_round
+core::num::flt2dec::strategy::grisu::format_shortest
+core::num::flt2dec::strategy::grisu::format_shortest_opt
+core::num::flt2dec::strategy::grisu::format_shortest_opt::round_and_weed
+core::num::flt2dec::strategy::grisu::max_pow10_no_more_than
+core::num::flt2dec::to_exact_exp_str
+core::num::flt2dec::to_exact_fixed_str
+core::num::flt2dec::to_shortest_exp_str
+core::num::flt2dec::to_shortest_str
+core::num::fmt::Formatted::<'a>::len
+core::num::fmt::Part::<'a>::len
 core::num::from_ascii_radix_panic
 core::num::from_ascii_radix_panic::do_panic
 core::num::from_ascii_radix_panic::do_panic::compiletime
 core::num::from_ascii_radix_panic::do_panic::runtime
+core::num::int_log10::less_than_5
 core::num::int_log10::panic_for_nonpositive_argument
+core::num::int_log10::u128
+core::num::int_log10::u128_impl
+core::num::int_log10::u16
+core::num::int_log10::u16_impl
+core::num::int_log10::u32
+core::num::int_log10::u32_impl
+core::num::int_log10::u64
+core::num::int_log10::u64_impl
+core::num::int_log10::u8
+core::num::int_log10::u8_impl
+core::num::int_log10::usize
 core::num::niche_types::Nanoseconds::as_inner
 core::num::niche_types::Nanoseconds::new
 core::num::niche_types::Nanoseconds::new_unchecked
@@ -4544,18 +5575,30 @@ core::num::nonzero::NonZero::<T>::get
 core::num::nonzero::NonZero::<T>::new
 core::num::nonzero::NonZero::<T>::new_unchecked
 core::num::nonzero::NonZero::<T>::new_unchecked::precondition_check
+core::num::nonzero::NonZero::<u128>::ilog10
 core::num::nonzero::NonZero::<u128>::ilog2
 core::num::nonzero::NonZero::<u128>::leading_zeros
+core::num::nonzero::NonZero::<u128>::trailing_zeros
+core::num::nonzero::NonZero::<u16>::ilog10
 core::num::nonzero::NonZero::<u16>::ilog2
 core::num::nonzero::NonZero::<u16>::leading_zeros
+core::num::nonzero::NonZero::<u16>::trailing_zeros
+core::num::nonzero::NonZero::<u32>::ilog10
 core::num::nonzero::NonZero::<u32>::ilog2
 core::num::nonzero::NonZero::<u32>::leading_zeros
+core::num::nonzero::NonZero::<u32>::trailing_zeros
+core::num::nonzero::NonZero::<u64>::ilog10
 core::num::nonzero::NonZero::<u64>::ilog2
 core::num::nonzero::NonZero::<u64>::leading_zeros
+core::num::nonzero::NonZero::<u64>::trailing_zeros
+core::num::nonzero::NonZero::<u8>::ilog10
 core::num::nonzero::NonZero::<u8>::ilog2
 core::num::nonzero::NonZero::<u8>::leading_zeros
+core::num::nonzero::NonZero::<u8>::trailing_zeros
+core::num::nonzero::NonZero::<usize>::ilog10
 core::num::nonzero::NonZero::<usize>::ilog2
 core::num::nonzero::NonZero::<usize>::leading_zeros
+core::num::nonzero::NonZero::<usize>::trailing_zeros
 core::ops::control_flow::ControlFlow::<B, C>::break_ok
 core::ops::control_flow::ControlFlow::<B, C>::break_value
 core::ops::control_flow::ControlFlow::<B, C>::continue_ok
@@ -4613,6 +5656,7 @@ core::option::Option::<T>::as_mut
 core::option::Option::<T>::as_ref
 core::option::Option::<T>::expect
 core::option::Option::<T>::filter
+core::option::Option::<T>::insert
 core::option::Option::<T>::inspect
 core::option::Option::<T>::is_none
 core::option::Option::<T>::is_none_or
@@ -4641,6 +5685,7 @@ core::option::Option::<T>::xor
 core::option::Option::<T>::zip
 core::option::Option::<core::option::Option<T>>::flatten
 core::option::Option::<core::result::Result<T, E>>::transpose
+core::option::expect_failed
 core::option::unwrap_failed
 core::panic::location::Location::<'a>::caller
 core::panic::location::Location::<'a>::column
@@ -4650,8 +5695,9 @@ core::panic::panic_info::PanicInfo::<'a>::location
 core::panic::panic_info::PanicInfo::<'a>::message
 core::panic::panic_info::PanicInfo::<'a>::new
 core::panic::panic_info::PanicMessage::<'a>::as_str
-core::panicking::PanicArguments::<'a>::as_str
-core::panicking::PanicArguments::<'a>::from_str
+core::panicking::assert_failed
+core::panicking::assert_failed_inner
+core::panicking::assert_matches_failed
 core::panicking::panic
 core::panicking::panic_bounds_check
 core::panicking::panic_cannot_unwind
@@ -4689,11 +5735,15 @@ core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
+core::panicking::panic_str_2015
+core::panicking::unreachable_display
 core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset
 core::ptr::align_offset::mod_inv
+core::ptr::alignment::Alignment::as_nonzero
 core::ptr::alignment::Alignment::as_usize
+core::ptr::alignment::Alignment::log2
 core::ptr::alignment::Alignment::new
 core::ptr::alignment::Alignment::new_unchecked
 core::ptr::alignment::Alignment::new_unchecked::precondition_check
@@ -4707,6 +5757,7 @@ core::ptr::const_ptr::<impl *const T>::align_offset
 core::ptr::const_ptr::<impl *const T>::byte_add
 core::ptr::const_ptr::<impl *const T>::cast
 core::ptr::const_ptr::<impl *const T>::cast_array
+core::ptr::const_ptr::<impl *const T>::expose_provenance
 core::ptr::const_ptr::<impl *const T>::guaranteed_eq
 core::ptr::const_ptr::<impl *const T>::is_aligned_to
 core::ptr::const_ptr::<impl *const T>::is_null
@@ -4723,9 +5774,12 @@ core::ptr::const_ptr::<impl *const T>::offset_from_unsigned::runtime_ptr_ge
 core::ptr::const_ptr::<impl *const T>::offset_from_unsigned::runtime_ptr_ge::compiletime
 core::ptr::const_ptr::<impl *const T>::offset_from_unsigned::runtime_ptr_ge::runtime
 core::ptr::const_ptr::<impl *const T>::read
+core::ptr::const_ptr::<impl *const T>::read_unaligned
 core::ptr::const_ptr::<impl *const T>::to_raw_parts
 core::ptr::const_ptr::<impl *const T>::try_cast_aligned
 core::ptr::const_ptr::<impl *const T>::with_metadata_of
+core::ptr::const_ptr::<impl *const T>::wrapping_add
+core::ptr::const_ptr::<impl *const T>::wrapping_offset
 core::ptr::const_ptr::<impl *const [T]>::as_array
 core::ptr::const_ptr::<impl *const [T]>::as_ptr
 core::ptr::const_ptr::<impl *const [T]>::is_empty
@@ -4743,6 +5797,7 @@ core::ptr::copy_nonoverlapping
 core::ptr::copy_nonoverlapping::precondition_check
 core::ptr::drop_in_place
 core::ptr::from_ref
+core::ptr::metadata::DynMetadata::<Dyn>::vtable_ptr
 core::ptr::metadata::from_raw_parts
 core::ptr::metadata::from_raw_parts_mut
 core::ptr::metadata::metadata
@@ -4756,6 +5811,7 @@ core::ptr::mut_ptr::<impl *mut T>::as_mut
 core::ptr::mut_ptr::<impl *mut T>::cast
 core::ptr::mut_ptr::<impl *mut T>::cast_array
 core::ptr::mut_ptr::<impl *mut T>::cast_const
+core::ptr::mut_ptr::<impl *mut T>::drop_in_place
 core::ptr::mut_ptr::<impl *mut T>::is_null
 core::ptr::mut_ptr::<impl *mut T>::offset
 core::ptr::mut_ptr::<impl *mut T>::offset::precondition_check
@@ -4788,6 +5844,7 @@ core::ptr::non_null::NonNull::<T>::as_mut
 core::ptr::non_null::NonNull::<T>::as_ptr
 core::ptr::non_null::NonNull::<T>::as_ref
 core::ptr::non_null::NonNull::<T>::cast
+core::ptr::non_null::NonNull::<T>::cast_array
 core::ptr::non_null::NonNull::<T>::from_mut
 core::ptr::non_null::NonNull::<T>::from_ref
 core::ptr::non_null::NonNull::<T>::new_unchecked
@@ -4837,6 +5894,7 @@ core::result::Result::<T, E>::as_deref_mut
 core::result::Result::<T, E>::as_mut
 core::result::Result::<T, E>::as_ref
 core::result::Result::<T, E>::err
+core::result::Result::<T, E>::expect
 core::result::Result::<T, E>::inspect
 core::result::Result::<T, E>::inspect_err
 core::result::Result::<T, E>::is_err
@@ -4857,6 +5915,7 @@ core::result::Result::<T, E>::unwrap_or_default
 core::result::Result::<T, E>::unwrap_or_else
 core::result::Result::<T, E>::unwrap_unchecked
 core::result::Result::<core::option::Option<T>, E>::transpose
+core::result::unwrap_failed
 core::slice::<impl [T]>::align_to
 core::slice::<impl [T]>::align_to_mut
 core::slice::<impl [T]>::align_to_offsets
@@ -4868,12 +5927,15 @@ core::slice::<impl [T]>::as_chunks_unchecked::precondition_check
 core::slice::<impl [T]>::as_mut_array
 core::slice::<impl [T]>::as_mut_ptr
 core::slice::<impl [T]>::as_ptr
+core::slice::<impl [T]>::binary_search_by
+core::slice::<impl [T]>::binary_search_by_key
 core::slice::<impl [T]>::chunks
 core::slice::<impl [T]>::chunks_exact
 core::slice::<impl [T]>::chunks_exact_mut
 core::slice::<impl [T]>::chunks_mut
 core::slice::<impl [T]>::clone_from_slice
 core::slice::<impl [T]>::copy_from_slice
+core::slice::<impl [T]>::ends_with
 core::slice::<impl [T]>::fill
 core::slice::<impl [T]>::first
 core::slice::<impl [T]>::first_chunk
@@ -4907,9 +5969,15 @@ core::slice::<impl [T]>::starts_with
 core::slice::<impl [T]>::swap
 core::slice::<impl [T]>::windows
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_simple
+core::slice::ascii::<impl [u8]>::escape_ascii
+core::slice::ascii::<impl [u8]>::is_ascii
+core::slice::ascii::is_ascii
+core::slice::ascii::is_ascii::compiletime
+core::slice::ascii::is_ascii::runtime
+core::slice::ascii::is_ascii::runtime::contains_nonascii
+core::slice::ascii::is_ascii_simple
 core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::eq
-core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::ne
-core::slice::cmp::SlicePartialEq::not_equal
 core::slice::copy_from_slice_impl
 core::slice::copy_from_slice_impl::len_mismatch_fail
 core::slice::copy_from_slice_impl::len_mismatch_fail::do_panic
@@ -4981,8 +6049,11 @@ core::str::<impl str>::as_mut_ptr
 core::str::<impl str>::as_ptr
 core::str::<impl str>::as_str
 core::str::<impl str>::bytes
+core::str::<impl str>::char_indices
 core::str::<impl str>::chars
+core::str::<impl str>::ends_with
 core::str::<impl str>::eq_ignore_ascii_case
+core::str::<impl str>::find
 core::str::<impl str>::floor_char_boundary
 core::str::<impl str>::from_utf8
 core::str::<impl str>::from_utf8_mut
@@ -4993,21 +6064,41 @@ core::str::<impl str>::is_char_boundary
 core::str::<impl str>::is_empty
 core::str::<impl str>::len
 core::str::<impl str>::parse
+core::str::<impl str>::split_inclusive
 core::str::<impl str>::starts_with
+core::str::converts::from_raw_parts
+core::str::converts::from_raw_parts_mut
 core::str::converts::from_utf8
 core::str::converts::from_utf8_mut
 core::str::converts::from_utf8_unchecked
 core::str::converts::from_utf8_unchecked_mut
+core::str::count::char_count_general_case
+core::str::count::contains_non_continuation_byte
+core::str::count::count_chars
+core::str::count::do_count_chars
+core::str::count::sum_bytes_in_usize
 core::str::error::Utf8Error::error_len
 core::str::error::Utf8Error::valid_up_to
+core::str::iter::CharIndices::<'a>::as_str
+core::str::iter::CharIndices::<'a>::offset
 core::str::iter::Chars::<'a>::as_str
+core::str::iter::SplitInternal::<'a, P>::get_end
+core::str::iter::SplitInternal::<'a, P>::next_inclusive
+core::str::lossy::<impl [u8]>::utf8_chunks
+core::str::lossy::Utf8Chunk::<'a>::invalid
+core::str::lossy::Utf8Chunk::<'a>::valid
+core::str::lossy::Utf8Chunks::<'a>::debug
+core::str::pattern::CharSearcher::<'_>::utf8_size
 core::str::pattern::Pattern::is_prefix_of
+core::str::pattern::Pattern::is_suffix_of
+core::str::pattern::Searcher::next_match
 core::str::pattern::StrSearcher::<'a, 'b>::new
 core::str::pattern::TwoWaySearcher::byteset_contains
 core::str::pattern::TwoWaySearcher::byteset_create
 core::str::pattern::TwoWaySearcher::maximal_suffix
 core::str::pattern::TwoWaySearcher::new
 core::str::pattern::TwoWaySearcher::next
+core::str::pattern::TwoWaySearcher::next_back
 core::str::pattern::TwoWaySearcher::reverse_maximal_suffix
 core::str::slice_error_fail
 core::str::slice_error_fail_ct
@@ -5255,3 +6346,12 @@ core::ub_checks::maybe_is_aligned_and_not_null
 core::ub_checks::maybe_is_nonoverlapping
 core::ub_checks::maybe_is_nonoverlapping::compiletime
 core::ub_checks::maybe_is_nonoverlapping::runtime
+core::unicode::printable::check
+core::unicode::printable::is_printable
+core::unicode::unicode_data::ShortOffsetRunHeader::new
+core::unicode::unicode_data::ShortOffsetRunHeader::prefix_sum
+core::unicode::unicode_data::ShortOffsetRunHeader::start_index
+core::unicode::unicode_data::grapheme_extend::lookup
+core::unicode::unicode_data::grapheme_extend::lookup_slow
+core::unicode::unicode_data::skip_search
+core::unit::<impl core::iter::traits::collect::FromIterator<()> for ()>::from_iter

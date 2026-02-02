@@ -11,10 +11,13 @@
 
 #![unstable(feature = "f16", issue = "116909")]
 
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::FloatToInt;
 use crate::num::FpCategory;
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
 use crate::num::libm;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
 use crate::{intrinsics, mem};
 
@@ -36,13 +39,11 @@ pub mod consts {
 
     /// The golden ratio (φ)
     #[unstable(feature = "f16", issue = "116909")]
-    // Also, #[unstable(feature = "more_float_constants", issue = "146939")]
-    pub const PHI: f16 = 1.618033988749894848204586834365638118_f16;
+    pub const GOLDEN_RATIO: f16 = 1.618033988749894848204586834365638118_f16;
 
     /// The Euler-Mascheroni constant (γ)
     #[unstable(feature = "f16", issue = "116909")]
-    // Also, #[unstable(feature = "more_float_constants", issue = "146939")]
-    pub const EGAMMA: f16 = 0.577215664901532860606512090082402431_f16;
+    pub const EULER_GAMMA: f16 = 0.577215664901532860606512090082402431_f16;
 
     /// π/2
     #[unstable(feature = "f16", issue = "116909")]
@@ -134,10 +135,8 @@ pub mod consts {
     pub const LN_10: f16 = 2.30258509299404568401799145468436421_f16;
 }
 
+#[doc(test(attr(feature(cfg_target_has_reliable_f16_f128), allow(internal_features))))]
 impl f16 {
-    // FIXME(f16_f128): almost all methods in this `impl` are missing examples and a const
-    // implementation. Add these once we can run code on all platforms and have f16/f128 in CTFE.
-
     /// The radix or base of the internal representation of `f16`.
     #[unstable(feature = "f16", issue = "116909")]
     pub const RADIX: u32 = 2;
@@ -256,6 +255,7 @@ impl f16 {
     pub const NEG_INFINITY: f16 = -1.0_f16 / 0.0_f16;
 
     /// Sign bit
+    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const SIGN_MASK: u16 = 0x8000;
 
     /// Exponent mask
@@ -265,16 +265,18 @@ impl f16 {
     pub(crate) const MAN_MASK: u16 = 0x03ff;
 
     /// Minimum representable positive value (min subnormal)
+    #[cfg(not(feature = "ferrocene_subset"))]
     const TINY_BITS: u16 = 0x1;
 
     /// Minimum representable negative value (min negative subnormal)
+    #[cfg(not(feature = "ferrocene_subset"))]
     const NEG_TINY_BITS: u16 = Self::TINY_BITS | Self::SIGN_MASK;
 
     /// Returns `true` if this value is NaN.
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let nan = f16::NAN;
     /// let f = 7.0_f16;
@@ -283,6 +285,7 @@ impl f16 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -296,7 +299,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 7.0f16;
     /// let inf = f16::INFINITY;
@@ -310,6 +313,7 @@ impl f16 {
     /// assert!(neg_inf.is_infinite());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -321,7 +325,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 7.0f16;
     /// let inf: f16 = f16::INFINITY;
@@ -335,6 +339,7 @@ impl f16 {
     /// assert!(!neg_inf.is_finite());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -349,7 +354,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let min = f16::MIN_POSITIVE; // 6.1035e-5
     /// let max = f16::MAX;
@@ -367,6 +372,7 @@ impl f16 {
     /// # }
     /// ```
     /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -378,7 +384,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let min = f16::MIN_POSITIVE; // 6.1035e-5
     /// let max = f16::MAX;
@@ -396,6 +402,7 @@ impl f16 {
     /// # }
     /// ```
     /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -409,7 +416,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// use std::num::FpCategory;
     ///
@@ -445,8 +452,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): LLVM crashes on s390x, llvm/llvm-project#50374
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 7.0_f16;
     /// let g = -7.0_f16;
@@ -455,6 +461,7 @@ impl f16 {
     /// assert!(!g.is_sign_positive());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -474,8 +481,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): LLVM crashes on s390x, llvm/llvm-project#50374
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 7.0_f16;
     /// let g = -7.0_f16;
@@ -484,6 +490,7 @@ impl f16 {
     /// assert!(g.is_sign_negative());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -509,8 +516,7 @@ impl f16 {
     ///
     /// ```rust
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): ABI issues on MSVC
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// // f16::EPSILON is the difference between 1.0 and the next number up.
     /// assert_eq!(1.0f16.next_up(), 1.0 + f16::EPSILON);
@@ -526,6 +532,7 @@ impl f16 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[doc(alias = "nextUp")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -564,8 +571,7 @@ impl f16 {
     ///
     /// ```rust
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): ABI issues on MSVC
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 1.0f16;
     /// // Clamp value into range [0, 1).
@@ -581,6 +587,7 @@ impl f16 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[doc(alias = "nextDown")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -608,8 +615,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): extendhfsf2, truncsfhf2, __gnu_h2f_ieee, __gnu_f2h_ieee missing for many platforms
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 2.0_f16;
     /// let abs_difference = (x.recip() - (1.0 / x)).abs();
@@ -617,6 +623,7 @@ impl f16 {
     /// assert!(abs_difference <= f16::EPSILON);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -635,8 +642,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): extendhfsf2, truncsfhf2, __gnu_h2f_ieee, __gnu_f2h_ieee missing for many platforms
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let angle = std::f16::consts::PI;
     ///
@@ -644,6 +650,7 @@ impl f16 {
     /// assert!(abs_difference <= 0.5);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -665,8 +672,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): extendhfsf2, truncsfhf2, __gnu_h2f_ieee, __gnu_f2h_ieee missing for many platforms
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let angle = 180.0f16;
     ///
@@ -675,6 +681,7 @@ impl f16 {
     /// assert!(abs_difference <= 0.01);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -699,7 +706,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(target_arch = "aarch64")] { // FIXME(f16_F128): rust-lang/rust#123885
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 1.0f16;
     /// let y = 2.0f16;
@@ -708,6 +715,7 @@ impl f16 {
     /// assert_eq!(x.max(f16::NAN), x);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -730,7 +738,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(target_arch = "aarch64")] { // FIXME(f16_F128): rust-lang/rust#123885
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 1.0f16;
     /// let y = 2.0f16;
@@ -739,6 +747,7 @@ impl f16 {
     /// assert_eq!(x.min(f16::NAN), x);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -762,7 +771,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(float_minimum_maximum)]
-    /// # #[cfg(target_arch = "aarch64")] { // FIXME(f16_F128): rust-lang/rust#123885
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 1.0f16;
     /// let y = 2.0f16;
@@ -771,6 +780,7 @@ impl f16 {
     /// assert!(x.maximum(f16::NAN).is_nan());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
@@ -794,7 +804,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(float_minimum_maximum)]
-    /// # #[cfg(target_arch = "aarch64")] { // FIXME(f16_F128): rust-lang/rust#123885
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 1.0f16;
     /// let y = 2.0f16;
@@ -803,6 +813,7 @@ impl f16 {
     /// assert!(x.minimum(f16::NAN).is_nan());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
@@ -820,12 +831,13 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(target_arch = "aarch64")] { // FIXME(f16_F128): rust-lang/rust#123885
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// assert_eq!(1f16.midpoint(4.0), 2.5);
     /// assert_eq!((-5.5f16).midpoint(8.0), 1.25);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[doc(alias = "average")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -850,7 +862,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let value = 4.6_f16;
     /// let rounded = unsafe { value.to_int_unchecked::<u16>() };
@@ -869,6 +881,7 @@ impl f16 {
     /// * Not be `NaN`
     /// * Not be infinite
     /// * Be representable in the return type `Int`, after truncating off its fractional part
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -893,10 +906,9 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
-    /// # // FIXME(f16_f128): enable this once const casting works
-    /// # // assert_ne!((1f16).to_bits(), 1f16 as u128); // to_bits() is not casting!
+    /// assert_ne!((1f16).to_bits(), 1f16 as u16); // to_bits() is not casting!
     /// assert_eq!((12.5f16).to_bits(), 0x4a40);
     /// # }
     /// ```
@@ -941,7 +953,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let v = f16::from_bits(0x4a40);
     /// assert_eq!(v, 12.5);
@@ -967,13 +979,13 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): LLVM crashes on s390x, llvm/llvm-project#50374
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let bytes = 12.5f16.to_be_bytes();
     /// assert_eq!(bytes, [0x4a, 0x40]);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -991,13 +1003,13 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): LLVM crashes on s390x, llvm/llvm-project#50374
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let bytes = 12.5f16.to_le_bytes();
     /// assert_eq!(bytes, [0x40, 0x4a]);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -1021,8 +1033,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): LLVM crashes on s390x, llvm/llvm-project#50374
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let bytes = 12.5f16.to_ne_bytes();
     /// assert_eq!(
@@ -1035,6 +1046,7 @@ impl f16 {
     /// );
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -1051,12 +1063,13 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let value = f16::from_be_bytes([0x4a, 0x40]);
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1073,12 +1086,13 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let value = f16::from_le_bytes([0x40, 0x4a]);
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1102,7 +1116,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let value = f16::from_ne_bytes(if cfg!(target_endian = "big") {
     ///     [0x4a, 0x40]
@@ -1112,6 +1126,7 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1152,8 +1167,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # // FIXME(f16_f128): extendhfsf2, truncsfhf2, __gnu_h2f_ieee, __gnu_f2h_ieee missing for many platforms
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// struct GoodBoy {
     ///     name: &'static str,
@@ -1183,6 +1197,7 @@ impl f16 {
     /// }
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1236,7 +1251,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// assert!((-3.0f16).clamp(-2.0, 1.0) == -2.0);
     /// assert!((0.0f16).clamp(-2.0, 1.0) == 0.0);
@@ -1250,6 +1265,7 @@ impl f16 {
     /// assert!((-1.0f16).clamp(-0.0, 1.0).is_sign_negative());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1287,13 +1303,14 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(clamp_magnitude)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     /// assert_eq!(5.0f16.clamp_magnitude(3.0), 3.0);
     /// assert_eq!((-5.0f16).clamp_magnitude(3.0), -3.0);
     /// assert_eq!(2.0f16.clamp_magnitude(3.0), 2.0);
     /// assert_eq!((-2.0f16).clamp_magnitude(3.0), -2.0);
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "clamp_magnitude", issue = "148519")]
     #[must_use = "this returns the clamped value and does not modify the original"]
@@ -1311,7 +1328,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 3.5_f16;
     /// let y = -3.5_f16;
@@ -1327,8 +1344,7 @@ impl f16 {
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub const fn abs(self) -> Self {
-        // FIXME(f16_f128): replace with `intrinsics::fabsf16` when available
-        Self::from_bits(self.to_bits() & !(1 << 15))
+        intrinsics::fabsf16(self)
     }
 
     /// Returns a number that represents the sign of `self`.
@@ -1341,7 +1357,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.5_f16;
     ///
@@ -1351,6 +1367,7 @@ impl f16 {
     /// assert!(f16::NAN.signum().is_nan());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1377,7 +1394,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 3.5_f16;
     ///
@@ -1389,6 +1406,7 @@ impl f16 {
     /// assert!(f16::NAN.copysign(1.0).is_nan());
     /// # }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1400,6 +1418,7 @@ impl f16 {
     /// Float addition that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1411,6 +1430,7 @@ impl f16 {
     /// Float subtraction that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1422,6 +1442,7 @@ impl f16 {
     /// Float multiplication that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1433,6 +1454,7 @@ impl f16 {
     /// Float division that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1444,6 +1466,7 @@ impl f16 {
     /// Float remainder that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1455,6 +1478,7 @@ impl f16 {
 
 // Functions in this module fall into `core_float_math`
 // #[unstable(feature = "core_float_math", issue = "137578")]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
 #[doc(test(attr(feature(cfg_target_has_reliable_f16_f128), expect(internal_features))))]
 impl f16 {
@@ -1467,7 +1491,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.7_f16;
     /// let g = 3.0_f16;
@@ -1496,7 +1520,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.01_f16;
     /// let g = 4.0_f16;
@@ -1525,7 +1549,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.3_f16;
     /// let g = -3.3_f16;
@@ -1559,7 +1583,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.3_f16;
     /// let g = -3.3_f16;
@@ -1591,7 +1615,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.7_f16;
     /// let g = 3.0_f16;
@@ -1621,7 +1645,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 3.6_f16;
     /// let y = -3.6_f16;
@@ -1660,7 +1684,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let m = 10.0_f16;
     /// let x = 4.0_f16;
@@ -1705,7 +1729,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let a: f16 = 7.0;
     /// let b = 4.0;
@@ -1749,7 +1773,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let a: f16 = 7.0;
     /// let b = 4.0;
@@ -1792,7 +1816,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 2.0_f16;
     /// let abs_difference = (x.powi(2) - (x * x)).abs();
@@ -1825,7 +1849,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let positive = 4.0_f16;
     /// let negative = -4.0_f16;
@@ -1860,7 +1884,7 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 8.0f16;
     ///

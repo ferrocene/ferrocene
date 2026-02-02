@@ -10,7 +10,6 @@ from sphinx.environment.collectors import EnvironmentCollector
 from sphinx.transforms import SphinxTransform
 import sphinx
 
-
 # Marker to use inside the informational storage to signal the whole page, and
 # not just a section, is informational
 WHOLE_PAGE = "{{{whole-page}}}"

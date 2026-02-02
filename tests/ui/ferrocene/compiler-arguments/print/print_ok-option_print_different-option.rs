@@ -1,6 +1,5 @@
 //@ check-pass
 //@ compile-flags: --print crate-name --print target-list
-//@ compare-output-lines-by-subset
 
 fn main() {}
 

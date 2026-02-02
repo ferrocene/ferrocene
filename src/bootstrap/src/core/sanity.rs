@@ -36,8 +36,6 @@ pub struct Finder {
 /// Targets can be removed from this list during the usual release process bootstrap compiler bumps,
 /// when the newly-bumped stage 0 compiler now knows about the formerly-missing targets.
 const STAGE0_MISSING_TARGETS: &[&str] = &[
-    // just a dummy comment so the list doesn't get onelined
-    "riscv64im-unknown-none-elf",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -46,10 +44,18 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
-    "aarch64-ferrocene-none",
-    "x86_64-ferrocene-none",
-    "thumbv7em-ferrocene-none-eabi",
-    "thumbv7em-ferrocene-none-eabihf",
+    // just a dummy comment so the list doesn't get onelined
+    "x86_64-unknown-linux-gnuasan",
+    "thumbv7a-none-eabi",
+    "thumbv7a-none-eabihf",
+    "thumbv7r-none-eabi",
+    "thumbv7r-none-eabihf",
+    "thumbv8r-none-eabihf",
+    "armv6-none-eabi",
+    "armv6-none-eabihf",
+    "thumbv6-none-eabi",
+    "aarch64v8r-unknown-none",
+    "aarch64v8r-unknown-none-softfloat",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

@@ -18,9 +18,7 @@ mod enumerate;
 mod filter;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod filter_map;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod flatten;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod fuse;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod inspect;
@@ -41,12 +39,11 @@ mod skip;
 mod skip_while;
 mod step_by;
 mod take;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod take_while;
 mod zip;
 
-#[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "iter_array_chunks", issue = "100450")]
 pub use self::array_chunks::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -61,14 +58,14 @@ pub use self::copied::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::flatten::Flatten;
-#[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "iter_intersperse", issue = "79524")]
 pub use self::intersperse::{Intersperse, IntersperseWith};
 #[stable(feature = "iter_map_while", since = "1.57.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::map_while::MapWhile;
-#[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "iter_map_windows", issue = "87155")]
 pub use self::map_windows::MapWindows;
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -77,7 +74,6 @@ pub use self::step_by::StepBy;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::zip::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::zip::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_zip", since = "1.59.0")]
 pub use self::zip::zip;
@@ -94,8 +90,8 @@ pub use self::{
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 pub use self::{
-    chain::Chain, enumerate::Enumerate, filter::Filter, map::Map, rev::Rev, skip::Skip,
-    step_by::StepBy, take::Take, zip::Zip,
+    chain::Chain, enumerate::Enumerate, filter::Filter, flatten::FlatMap, fuse::Fuse, map::Map,
+    rev::Rev, skip::Skip, step_by::StepBy, take::Take, take_while::TakeWhile, zip::Zip,
 };
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline

@@ -1,5 +1,5 @@
 #![feature(allocator_api)]
-#![feature(alloc_layout_extra)]
+#![feature(const_heap)]
 #![feature(deque_extend_front)]
 #![feature(iter_array_chunks)]
 #![feature(assert_matches)]
@@ -20,6 +20,8 @@
 #![feature(binary_heap_into_iter_sorted)]
 #![feature(binary_heap_drain_sorted)]
 #![feature(slice_ptr_get)]
+#![feature(slice_range)]
+#![feature(slice_partial_sort_unstable)]
 #![feature(inplace_iteration)]
 #![feature(iter_advance_by)]
 #![feature(iter_next_chunk)]
@@ -45,9 +47,6 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
-// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
-// panics in the certified runtime
-#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 
 extern crate alloc;
 

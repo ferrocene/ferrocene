@@ -6,10 +6,14 @@ use crate::slice;
 use crate::str::from_utf8_unchecked_mut;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::printable::is_printable;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::{self, conversions};
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+use crate::unicode;
 
 impl char {
     /// The lowest valid code point a `char` can have, `'\0'`.
@@ -479,7 +483,6 @@ impl char {
     /// at the start of a string, and allows escaping single quotes in
     /// characters, and double quotes in strings.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn escape_debug_ext(self, args: EscapeDebugExtArgs) -> EscapeDebug {
         match self {
             '\0' => EscapeDebug::backslash(ascii::Char::Digit0),
@@ -535,7 +538,6 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "char_escape_debug", since = "1.20.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_debug(self) -> EscapeDebug {
         self.escape_debug_ext(EscapeDebugExtArgs::ESCAPE_ALL)
     }
@@ -987,7 +989,6 @@ impl char {
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) fn is_grapheme_extended(self) -> bool {
         !self.is_ascii() && unicode::Grapheme_Extend(self)
     }
@@ -1167,11 +1168,12 @@ impl char {
     /// [Unicode Standard]: https://www.unicode.org/versions/latest/
     ///
     /// # Examples
+    /// `'ﬅ'` (U+FB05) is a single Unicode code point (a ligature) that maps to "ST" in uppercase.
     ///
     /// As an iterator:
     ///
     /// ```
-    /// for c in 'ß'.to_uppercase() {
+    /// for c in 'ﬅ'.to_uppercase() {
     ///     print!("{c}");
     /// }
     /// println!();
@@ -1180,13 +1182,13 @@ impl char {
     /// Using `println!` directly:
     ///
     /// ```
-    /// println!("{}", 'ß'.to_uppercase());
+    /// println!("{}", 'ﬅ'.to_uppercase());
     /// ```
     ///
     /// Both are equivalent to:
     ///
     /// ```
-    /// println!("SS");
+    /// println!("ST");
     /// ```
     ///
     /// Using [`to_string`](../std/string/trait.ToString.html#tymethod.to_string):
@@ -1195,7 +1197,7 @@ impl char {
     /// assert_eq!('c'.to_uppercase().to_string(), "C");
     ///
     /// // Sometimes the result is more than one character:
-    /// assert_eq!('ß'.to_uppercase().to_string(), "SS");
+    /// assert_eq!('ﬅ'.to_uppercase().to_string(), "ST");
     ///
     /// // Characters that do not have both uppercase and lowercase
     /// // convert into themselves.
@@ -1251,7 +1253,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_is_ascii", since = "1.32.0")]
     #[rustc_diagnostic_item = "char_is_ascii"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii(&self) -> bool {
         *self as u32 <= 0x7F
     }
@@ -1862,7 +1863,6 @@ impl char {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) struct EscapeDebugExtArgs {
     /// Escape Extended Grapheme codepoints?
     pub(crate) escape_grapheme_extended: bool,
@@ -1874,7 +1874,6 @@ pub(crate) struct EscapeDebugExtArgs {
     pub(crate) escape_double_quote: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeDebugExtArgs {
     pub(crate) const ESCAPE_ALL: Self = Self {
         escape_grapheme_extended: true,

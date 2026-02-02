@@ -11,8 +11,6 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs, mem};
 
-use build_helper::ferrocene_targets::has_certified_runtime;
-
 use crate::core::build_steps::compile;
 use crate::core::build_steps::tool::{
     self, RustcPrivateCompilers, SourceType, Tool, prepare_tool_cargo,
@@ -77,7 +75,7 @@ book!(
     EditionGuide, "src/doc/edition-guide", "edition-guide", &[];
     EmbeddedBook, "src/doc/embedded-book", "embedded-book", &[];
     Nomicon, "src/doc/nomicon", "nomicon", &[];
-    RustByExample, "src/doc/rust-by-example", "rust-by-example", &["es", "ja", "zh"];
+    RustByExample, "src/doc/rust-by-example", "rust-by-example", &["es", "ja", "zh", "ko"];
     RustdocBook, "src/doc/rustdoc", "rustdoc", &[];
     StyleGuide, "src/doc/style-guide", "style-guide", &[];
 );
@@ -846,10 +844,6 @@ fn doc_std(
         cargo.arg("--features").arg("ferrocene_subset");
     }
     // Ferrocene addition
-    if has_certified_runtime(target.triple) {
-        cargo.arg("--features").arg("ferrocene_certified_runtime");
-    }
-    // Ferrocene addition
     if builder.config.library_docs_private_items {
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
     }
@@ -965,6 +959,13 @@ impl Step for Rustc {
         // see https://github.com/rust-lang/rust/pull/122066#issuecomment-1983049222
         // If there is any bug, please comment out the next line.
         cargo.rustdocflag("--generate-link-to-definition");
+        // FIXME: Currently, `--generate-macro-expansion` option is buggy in `beta` rustdoc. To
+        // allow CI to pass, we only enable the option in stage 2 and higher.
+        // cfg(bootstrap)
+        // ^ Adding this so it's not forgotten when the new release is done.
+        if builder.top_stage > 1 {
+            cargo.rustdocflag("--generate-macro-expansion");
+        }
 
         compile::rustc_cargo(builder, &mut cargo, target, &build_compiler, &self.crates);
         cargo.arg("-Zskip-rustdoc-fingerprint");

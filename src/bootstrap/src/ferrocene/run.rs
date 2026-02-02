@@ -180,7 +180,14 @@ impl Step for CertifiedCoreSymbols {
             Vec::new()
         };
 
-        run_cargo(builder, cargo, tail_args, &check_stamp, vec![], true, false);
+        run_cargo(
+            builder,
+            cargo,
+            tail_args,
+            &check_stamp,
+            vec![],
+            crate::core::build_steps::compile::ArtifactKeepMode::BothRlibAndRmeta,
+        );
         drop(_guard);
 
         println!("Generated report at {}", report.display());

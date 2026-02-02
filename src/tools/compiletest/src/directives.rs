@@ -8,14 +8,14 @@ use tracing::*;
 
 use crate::common::{CodegenBackend, Config, Debugger, FailMode, PassMode, RunFailMode, TestMode};
 use crate::debuggers::{extract_cdb_version, extract_gdb_version};
-pub(crate) use crate::directives::auxiliary::AuxProps;
 use crate::directives::auxiliary::parse_and_update_aux;
+pub(crate) use crate::directives::auxiliary::{AuxCrate, AuxProps};
 use crate::directives::directive_names::{
     KNOWN_DIRECTIVE_NAMES_SET, KNOWN_HTMLDOCCK_DIRECTIVE_NAMES, KNOWN_JSONDOCCK_DIRECTIVE_NAMES,
 };
 pub(crate) use crate::directives::file::FileDirectives;
 use crate::directives::handlers::DIRECTIVE_HANDLERS_MAP;
-use crate::directives::line::{DirectiveLine, line_directive};
+use crate::directives::line::DirectiveLine;
 use crate::directives::needs::CachedNeedsConditions;
 use crate::edition::{Edition, parse_edition};
 use crate::errors::ErrorKind;
@@ -29,6 +29,7 @@ mod directive_names;
 mod file;
 mod handlers;
 mod line;
+pub(crate) use line::line_directive;
 mod line_number;
 pub(crate) use line_number::LineNumber;
 mod needs;
@@ -124,9 +125,6 @@ pub(crate) struct TestProps {
     pub dont_check_compiler_stdout: bool,
     // For UI tests, allows compiler to generate arbitrary output to stderr
     pub dont_check_compiler_stderr: bool,
-    // When checking the output of stdout or stderr check
-    // that the lines of expected output are a subset of the actual output.
-    pub compare_output_lines_by_subset: bool,
     // Don't force a --crate-type=dylib flag on the command line
     //
     // Set this for example if you have an auxiliary test file that contains
@@ -208,7 +206,7 @@ pub(crate) struct TestProps {
     pub add_minicore: bool,
     /// Add these flags to the build of `minicore`.
     pub minicore_compile_flags: Vec<String>,
-    /// Whether line annotatins are required for the given error kind.
+    /// Whether line annotations are required for the given error kind.
     pub dont_require_annotations: HashSet<ErrorKind>,
     /// Whether pretty printers should be disabled in gdb.
     pub disable_gdb_pretty_printers: bool,
@@ -258,7 +256,6 @@ mod directives {
     pub const KNOWN_BUG: &'static str = "known-bug";
     pub const TEST_MIR_PASS: &'static str = "test-mir-pass";
     pub const REMAP_SRC_BASE: &'static str = "remap-src-base";
-    pub const COMPARE_OUTPUT_LINES_BY_SUBSET: &'static str = "compare-output-lines-by-subset";
     pub const LLVM_COV_FLAGS: &'static str = "llvm-cov-flags";
     pub const FILECHECK_FLAGS: &'static str = "filecheck-flags";
     pub const NO_AUTO_CHECK_CFG: &'static str = "no-auto-check-cfg";
@@ -295,7 +292,6 @@ impl TestProps {
             check_run_results: false,
             dont_check_compiler_stdout: false,
             dont_check_compiler_stderr: false,
-            compare_output_lines_by_subset: false,
             no_prefer_dynamic: false,
             pretty_mode: "normal".to_string(),
             pretty_compare_only: false,
@@ -560,7 +556,7 @@ fn check_directive<'a>(
 
     let is_known_directive = KNOWN_DIRECTIVE_NAMES_SET.contains(&directive_name)
         || match mode {
-            TestMode::Rustdoc => KNOWN_HTMLDOCCK_DIRECTIVE_NAMES.contains(&directive_name),
+            TestMode::RustdocHtml => KNOWN_HTMLDOCCK_DIRECTIVE_NAMES.contains(&directive_name),
             TestMode::RustdocJson => KNOWN_JSONDOCCK_DIRECTIVE_NAMES.contains(&directive_name),
             _ => false,
         };
@@ -606,6 +602,19 @@ fn iter_directives(
                 .unwrap_or_else(|| panic!("bad extra-directive line: {directive_str:?}"));
             it(&directive_line);
         }
+    }
+
+    // Note: affects all codegen test suites under test mode `codegen`, e.g. `codegen-llvm`.
+    //
+    // Codegen tests automatically receive implied `//@ needs-target-std`, unless
+    // `#![no_std]`/`#![no_core]` attribute was explicitly seen. The rationale is basically to avoid
+    // having to manually maintain a bunch of `//@ needs-target-std` directives esp. for targets
+    // tested/built out-of-tree.
+    if mode == TestMode::Codegen && !file_directives.has_explicit_no_std_core_attribute {
+        let implied_needs_target_std_line =
+            line_directive(testfile, LineNumber::ZERO, "//@ needs-target-std")
+                .expect("valid `needs-target-std` directive line");
+        it(&implied_needs_target_std_line);
     }
 
     for directive_line in &file_directives.lines {

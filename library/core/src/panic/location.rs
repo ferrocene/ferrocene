@@ -2,7 +2,6 @@
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ffi::CStr;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
@@ -39,7 +38,7 @@ use crate::ptr::NonNull;
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone))]
+#[derive(Copy, Clone)]
 pub struct Location<'a> {
     // A raw pointer is used rather than a reference because the pointer is valid for one more byte
     // than the length stored in this pointer; the additional byte is the NUL-terminator used by
@@ -94,7 +93,6 @@ impl Hash for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Location<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Location")
@@ -307,7 +305,6 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

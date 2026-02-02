@@ -63,6 +63,7 @@ impl_full_ops! {
 
 /// Table of powers of 5 representable in digits. Specifically, the largest {u8, u16, u32} value
 /// that's a power of five, plus the corresponding exponent. Used in `mul_pow5`.
+#[cfg(not(feature = "ferrocene_subset"))]
 const SMALL_POW5: [(u64, usize); 3] = [(125, 3), (15625, 6), (1_220_703_125, 13)];
 
 macro_rules! define_bignum {
@@ -115,6 +116,7 @@ macro_rules! define_bignum {
 
             /// Returns the `i`-th bit where bit 0 is the least significant one.
             /// In other words, the bit with weight `2^i`.
+            #[cfg(not(feature = "ferrocene_subset"))]
             pub fn get_bit(&self, i: usize) -> u8 {
                 let digitbits = <$ty>::BITS as usize;
                 let d = i / digitbits;
@@ -129,6 +131,7 @@ macro_rules! define_bignum {
 
             /// Returns the number of bits necessary to represent this value. Note that zero
             /// is considered to need 0 bits.
+            #[cfg(not(feature = "ferrocene_subset"))]
             pub fn bit_length(&self) -> usize {
                 let digitbits = <$ty>::BITS as usize;
                 let digits = self.digits();
@@ -160,6 +163,7 @@ macro_rules! define_bignum {
                 self
             }
 
+            #[cfg(not(feature = "ferrocene_subset"))]
             pub fn add_small(&mut self, other: $ty) -> &mut $name {
                 let (v, mut carry) = self.base[0].carrying_add(other, false);
                 self.base[0] = v;
@@ -250,6 +254,7 @@ macro_rules! define_bignum {
             }
 
             /// Multiplies itself by `5^e` and returns its own mutable reference.
+            #[cfg(not(feature = "ferrocene_subset"))]
             pub fn mul_pow5(&mut self, mut e: usize) -> &mut $name {
                 use crate::num::bignum::SMALL_POW5;
 
@@ -365,6 +370,7 @@ macro_rules! define_bignum {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_subset"))]
         impl crate::clone::UseCloned for $name {}
 
         impl crate::fmt::Debug for $name {
@@ -389,6 +395,7 @@ define_bignum!(Big32x40: type=Digit32, n=40);
 
 // this one is used for testing only.
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod tests {
     define_bignum!(Big8x3: type=u8, n=3);
 }

@@ -9,13 +9,7 @@ use crate::iter::{
     TrustedRandomAccessNoCoerce,
 };
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{ControlFlow, Try};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::ops::Try;
 
 /// An iterator that skips over `n` elements of `iter`.
 ///
@@ -24,7 +18,7 @@ use crate::ops::Try;
 ///
 /// [`skip`]: Iterator::skip
 /// [`Iterator`]: trait.Iterator.html
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Skip<I> {
@@ -77,7 +71,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(mut self) -> usize {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -196,11 +189,9 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> ExactSizeIterator for Skip<I> where I: ExactSizeIterator {}
 
 #[stable(feature = "double_ended_skip_iterator", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> DoubleEndedIterator for Skip<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,

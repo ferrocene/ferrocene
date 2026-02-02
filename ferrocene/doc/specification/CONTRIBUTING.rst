@@ -71,4 +71,9 @@ to match the tone, style and format of the FLS.
 Again, we thank you for your patience as we address the suggested changes and,
 last but not least, thank you for your interest and contributions to the FLS!
 
+Line length
+-----------
+
+Be sure that the paragraphs in your PRs occupy a single line. If a change modifies existing text that is not formatted to match this rule (*unwrapping*), split the semantic change and the one that unwraps the paragraph into separate commits, to ease review.
+
 .. _FLS team: https://rust-lang.org/governance/teams/lang/#team-fls

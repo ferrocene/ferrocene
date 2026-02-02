@@ -20,7 +20,7 @@ use crate::{array, ptr};
 /// [`Iterator`]: trait.Iterator.html
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 pub struct Copied<I> {
     it: I,
 }
@@ -96,7 +96,6 @@ where
         self.it.last().copied()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.it.count()
     }
@@ -117,7 +116,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> DoubleEndedIterator for Copied<I>
 where
@@ -150,7 +148,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> ExactSizeIterator for Copied<I>
 where

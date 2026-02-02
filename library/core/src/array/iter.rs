@@ -13,7 +13,10 @@ use crate::{fmt, ptr};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::ops::{Deref as _, DerefMut as _, IndexRange, Try};
+use crate::{
+    fmt,
+    ops::{Deref as _, DerefMut as _, IndexRange, Try},
+};
 
 mod iter_inner;
 
@@ -74,7 +77,7 @@ impl<T, const N: usize> IntoIterator for [T; N] {
         // FIXME: If normal `transmute` ever gets smart enough to allow this
         // directly, use it instead of `transmute_unchecked`.
         let data: [MaybeUninit<T>; N] = unsafe { transmute_unchecked(self) };
-        // SAFETY: The original array was entirely initialized and the the alive
+        // SAFETY: The original array was entirely initialized and the alive
         // range we're passing here represents that fact.
         let inner = unsafe { InnerSized::new_unchecked(IndexRange::zero_to(N), data) };
         IntoIter { inner: ManuallyDrop::new(inner) }
@@ -274,7 +277,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         self.len()
     }
@@ -350,7 +352,6 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {
     #[inline]
     fn len(&self) -> usize {
@@ -397,7 +398,6 @@ where
 }
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for IntoIter<T, N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.unsize().fmt(f)

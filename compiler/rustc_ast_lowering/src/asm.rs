@@ -51,8 +51,18 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                     | asm::InlineAsmArch::LoongArch32
                     | asm::InlineAsmArch::LoongArch64
                     | asm::InlineAsmArch::S390x
+                    | asm::InlineAsmArch::PowerPC
+                    | asm::InlineAsmArch::PowerPC64
             );
-            if !is_stable && !self.tcx.features().asm_experimental_arch() {
+            if !is_stable
+                && !self.tcx.features().asm_experimental_arch()
+                && sp
+                    .ctxt()
+                    .outer_expn_data()
+                    .allow_internal_unstable
+                    .filter(|features| features.contains(&sym::asm_experimental_arch))
+                    .is_none()
+            {
                 feature_err(
                     &self.tcx.sess,
                     sym::asm_experimental_arch,

@@ -1430,7 +1430,6 @@ impl<T: PointeeSized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn drop_in_place(self)
     where
         T: [const] Destruct,
@@ -1789,7 +1788,7 @@ impl<T> *mut [T] {
     /// that is at least `mid * size_of::<T>()` bytes long. Not upholding these
     /// requirements is *[undefined behavior]* even if the resulting pointers are not used.
     ///
-    /// Since `len` being in-bounds it is not a safety invariant of `*mut [T]` the
+    /// Since `len` being in-bounds is not a safety invariant of `*mut [T]` the
     /// safety requirements of this method are the same as for [`split_at_mut_unchecked`].
     /// The explicit bounds check is only as useful as `len` is correct.
     ///

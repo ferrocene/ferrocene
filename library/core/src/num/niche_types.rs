@@ -5,7 +5,6 @@
 )]
 
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 use crate::hash::{Hash, Hasher};
 use crate::marker::StructuralPartialEq;
@@ -96,7 +95,6 @@ macro_rules! define_valid_range_type {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl fmt::Debug for $name {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 <$int as fmt::Debug>::fmt(&self.as_inner(), f)

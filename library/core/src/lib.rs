@@ -104,12 +104,12 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
 #![feature(cfg_select)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_target_has_reliable_f16_f128))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_carrying_mul_add))]
+#![feature(cfg_target_has_reliable_f16_f128)]
+#![feature(const_carrying_mul_add)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_select_unpredictable))]
+#![feature(const_select_unpredictable)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
@@ -126,6 +126,7 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(type_info))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![feature(ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
@@ -140,7 +141,7 @@
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_sanitize))]
+#![feature(cfg_sanitize)]
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
@@ -158,13 +159,13 @@
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![feature(funnel_shifts)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(if_let_guard))]
+#![feature(if_let_guard)]
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
 #![feature(link_llvm_intrinsics)]
 #![feature(macro_metavar_expr)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(macro_metavar_expr_concat))]
+#![feature(macro_metavar_expr_concat)]
 #![feature(marker_trait_attr)]
 #![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
@@ -218,13 +219,6 @@
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
 #![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
-// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
-// panics in the certified runtime
-#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
-
-// Ferrocene addition: ensure we don't instrument core without the certified panic
-#[cfg(all(ferrocene_coverage, not(feature = "ferrocene_certified_runtime")))]
-compile_error!("Cannot instrument core without the \"ferrocene_certified_runtime\" feature");
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
@@ -247,13 +241,9 @@ mod macros;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
-#[unstable(feature = "assert_matches", issue = "82775")]
-/// Unstable module containing the unstable `assert_matches` macro.
 #[cfg(not(feature = "ferrocene_subset"))]
-pub mod assert_matches {
-    #[unstable(feature = "assert_matches", issue = "82775")]
-    pub use crate::macros::{assert_matches, debug_assert_matches};
-}
+#[unstable(feature = "assert_matches", issue = "82775")]
+pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]
 /// Unstable module containing the unstable `From` derive macro.
@@ -298,7 +288,6 @@ pub use legacy_int_modules::{i128, u128};
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod f128;
 #[path = "num/f16.rs"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod f16;
 #[path = "num/f32.rs"]
 pub mod f32;
@@ -337,7 +326,6 @@ pub mod ops;
 
 pub mod any;
 pub mod array;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ascii;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod asserting;
@@ -345,7 +333,6 @@ pub mod asserting;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bstr;
 pub mod cell;
 pub mod char;
@@ -387,7 +374,6 @@ pub mod time;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod wtf8;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod unicode;
 
 /* Async */
@@ -402,10 +388,8 @@ pub mod alloc;
 
 // note: does not need to be public
 mod bool;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod escape;
 mod tuple;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]

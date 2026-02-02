@@ -37,7 +37,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
@@ -312,8 +311,8 @@ pub const trait AsRef<T: PointeeSized>: PointeeSized {
 /// both `AsMut<Vec<T>>` and `AsMut<[T]>`.
 ///
 /// In the following, the example functions `caesar` and `null_terminate` provide a generic
-/// interface which work with any type that can be converted by cheap mutable-to-mutable conversion
-/// into a byte slice (`[u8]`) or byte vector (`Vec<u8>`), respectively.
+/// interface which works with any type that can be converted by cheap mutable-to-mutable conversion
+/// into a byte slice (`[u8]`) or a byte vector (`Vec<u8>`), respectively.
 ///
 /// [dereference]: core::ops::DerefMut
 /// [target type]: core::ops::Deref::Target
@@ -944,7 +943,6 @@ impl const Clone for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
@@ -952,7 +950,6 @@ impl fmt::Debug for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}

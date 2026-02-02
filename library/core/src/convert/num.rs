@@ -171,7 +171,7 @@ impl_from!(i16 => isize, #[stable(feature = "lossless_iusize_conv", since = "1.2
 // * 53 bits in f64
 // * 113 bits in f128
 // Lossy float conversions are not implemented at this time.
-// FIXME(f16_f128): The `f16`/`f128` impls `#[stable]` attributes should be changed to reference
+// FIXME(f16,f128): The `f16`/`f128` impls `#[stable]` attributes should be changed to reference
 // `f16`/`f128` when they are stabilised (trait impls have to have a `#[stable]` attribute, but none
 // of the `f16`/`f128` impls can be used on stable as the `f16` and `f128` types are unstable).
 
@@ -194,7 +194,7 @@ impl_from!(i16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0
 impl_from!(i32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-// FIXME(f16_f128): This impl would allow using `f128` on stable before it is stabilised.
+// FIXME(f128): This impl would allow using `f128` on stable before it is stabilised.
 // impl_from!(i64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 
 // unsigned integer -> float
@@ -216,11 +216,11 @@ impl_from!(u16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0
 impl_from!(u32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-// FIXME(f16_f128): This impl would allow using `f128` on stable before it is stabilised.
+// FIXME(f128): This impl would allow using `f128` on stable before it is stabilised.
 // impl_from!(u64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 
 // float -> float
-// FIXME(f16_f128): adding additional `From<{float}>` impls to `f32` breaks inference. See
+// FIXME(f16,f128): adding additional `From<{float}>` impls to `f32` breaks inference. See
 // <https://github.com/rust-lang/rust/issues/123831>
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f16 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
@@ -313,7 +313,6 @@ macro_rules! impl_try_from_unbounded {
 }
 
 // only negative bounds
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_try_from_lower_bounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
@@ -425,9 +424,7 @@ impl_try_from_lower_bounded!(i8 => u8, u16, u32, u64, u128);
 impl_try_from_both_bounded!(i16 => u8);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i16 => u16, u32, u64, u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i32 => u8, u16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i32 => u32, u64, u128);
 #[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i64 => u8, u16, u32);
@@ -465,7 +462,6 @@ mod ptr_try_from_impls {
     impl_try_from_unbounded!(isize => i16, i32, i64, i128);
 
     rev!(impl_try_from_upper_bounded, usize => u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16);
     rev!(impl_try_from_both_bounded, usize => i32, i64, i128);
 
@@ -497,7 +493,6 @@ mod ptr_try_from_impls {
 
     rev!(impl_try_from_unbounded, usize => u32);
     rev!(impl_try_from_upper_bounded, usize => u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32);
     rev!(impl_try_from_both_bounded, usize => i64, i128);
 
@@ -533,7 +528,6 @@ mod ptr_try_from_impls {
 
     rev!(impl_try_from_unbounded, usize => u32, u64);
     rev!(impl_try_from_upper_bounded, usize => u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32, i64);
     rev!(impl_try_from_both_bounded, usize => i128);
 

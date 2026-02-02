@@ -143,13 +143,17 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
             continue;
         }
 
-        let (filename, start_line, end_line) = get_span(tcx, &mut vis, def);
+        let (filename, mut start_line, end_line) = get_span(tcx, &mut vis, def);
 
         // We don't check for annotations those inside the `Visitor` implementation so we do it
         // here.
         if let Some(attr) = has_ferrocene_annotation(tcx, def) {
             vis.report.add_annotation(filename.clone(), start_line, end_line);
             vis.visited_attrs.insert(attr.id());
+            // Set the start line of the function as the minimum between the start line of the
+            // function and the start of the annotation so it can be seen in the coverage report.
+            let (_, span_start_line, _) = vis.convert_span(attr.span());
+            start_line = start_line.min(span_start_line);
         }
 
         vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });

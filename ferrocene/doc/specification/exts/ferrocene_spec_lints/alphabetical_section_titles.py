@@ -4,7 +4,6 @@
 import re
 from docutils import nodes
 
-
 SPLIT_NUMBERS = re.compile(r"([0-9]+)")
 
 

@@ -93,6 +93,28 @@ macro_rules! uint_impl {
         #[doc = concat!("let max = ", stringify!($SelfT),"::MAX;")]
         /// assert_eq!(max.count_zeros(), 0);
         /// ```
+        ///
+        /// This is heavily dependent on the width of the type, and thus
+        /// might give surprising results depending on type inference:
+        /// ```
+        /// # fn foo(_: u8) {}
+        /// # fn bar(_: u16) {}
+        /// let lucky = 7;
+        /// foo(lucky);
+        /// assert_eq!(lucky.count_zeros(), 5);
+        /// assert_eq!(lucky.count_ones(), 3);
+        ///
+        /// let lucky = 7;
+        /// bar(lucky);
+        /// assert_eq!(lucky.count_zeros(), 13);
+        /// assert_eq!(lucky.count_ones(), 3);
+        /// ```
+        /// You might want to use [`Self::count_ones`] instead, or emphasize
+        /// the type you're using in the call rather than method syntax:
+        /// ```
+        /// let small = 1;
+        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::count_zeros(small), ", stringify!($BITS_MINUS_ONE) ,");")]
+        /// ```
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_math", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
@@ -494,16 +516,16 @@ macro_rules! uint_impl {
         /// #![feature(uint_gather_scatter_bits)]
         #[doc = concat!("let n: ", stringify!($SelfT), " = 0b1011_1100;")]
         ///
-        /// assert_eq!(n.gather_bits(0b0010_0100), 0b0000_0011);
-        /// assert_eq!(n.gather_bits(0xF0), 0b0000_1011);
+        /// assert_eq!(n.extract_bits(0b0010_0100), 0b0000_0011);
+        /// assert_eq!(n.extract_bits(0xF0), 0b0000_1011);
         /// ```
         #[cfg(not(feature = "ferrocene_subset"))]
         #[unstable(feature = "uint_gather_scatter_bits", issue = "149069")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn gather_bits(self, mask: Self) -> Self {
-            crate::num::int_bits::$ActualT::gather_impl(self as $ActualT, mask as $ActualT) as $SelfT
+        pub const fn extract_bits(self, mask: Self) -> Self {
+            crate::num::int_bits::$ActualT::extract_impl(self as $ActualT, mask as $ActualT) as $SelfT
         }
 
         /// Returns an integer with the least significant bits of `self`
@@ -512,16 +534,16 @@ macro_rules! uint_impl {
         /// #![feature(uint_gather_scatter_bits)]
         #[doc = concat!("let n: ", stringify!($SelfT), " = 0b1010_1101;")]
         ///
-        /// assert_eq!(n.scatter_bits(0b0101_0101), 0b0101_0001);
-        /// assert_eq!(n.scatter_bits(0xF0), 0b1101_0000);
+        /// assert_eq!(n.deposit_bits(0b0101_0101), 0b0101_0001);
+        /// assert_eq!(n.deposit_bits(0xF0), 0b1101_0000);
         /// ```
         #[cfg(not(feature = "ferrocene_subset"))]
         #[unstable(feature = "uint_gather_scatter_bits", issue = "149069")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        pub const fn scatter_bits(self, mask: Self) -> Self {
-            crate::num::int_bits::$ActualT::scatter_impl(self as $ActualT, mask as $ActualT) as $SelfT
+        pub const fn deposit_bits(self, mask: Self) -> Self {
+            crate::num::int_bits::$ActualT::deposit_impl(self as $ActualT, mask as $ActualT) as $SelfT
         }
 
         /// Reverses the order of bits in the integer. The least significant bit becomes the most significant bit,
@@ -1561,7 +1583,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn ilog(self, base: Self) -> u32 {
             assert!(base >= 2, "base of integer logarithm must be at least 2");
             if let Some(log) = self.checked_ilog(base) {
@@ -1613,7 +1634,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn ilog10(self) -> u32 {
             if let Some(log) = self.checked_ilog10() {
                 log
@@ -1641,7 +1661,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_ilog(self, base: Self) -> Option<u32> {
             // Inform compiler of optimizations when the base is known at
             // compile time and there's a cheaper method available.
@@ -1723,7 +1742,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_ilog10(self) -> Option<u32> {
             match NonZero::new(self) {
                 Some(x) => Some(x.ilog10()),
@@ -2183,7 +2201,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_pow(self, mut exp: u32) -> Option<Self> {
             if exp == 0 {
                 return Some(1);
@@ -2849,7 +2866,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carrying_add(self, rhs: Self, carry: bool) -> (Self, bool) {
             // note: longer-term this should be done via an intrinsic, but this has been shown
             //   to generate optimal code for now, and LLVM doesn't have an equivalent intrinsic
@@ -3078,7 +3094,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn widening_mul(self, rhs: Self) -> (Self, Self) {
             Self::carrying_mul_add(self, rhs, 0, 0)
         }
@@ -3162,7 +3177,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carrying_mul(self, rhs: Self, carry: Self) -> (Self, Self) {
             Self::carrying_mul_add(self, rhs, carry, 0)
         }
@@ -3229,7 +3243,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self, Self) {
             intrinsics::carrying_mul_add(self, rhs, carry, add)
         }
@@ -3480,7 +3493,6 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn pow(self, mut exp: u32) -> Self {
             if exp == 0 {
                 return 1;

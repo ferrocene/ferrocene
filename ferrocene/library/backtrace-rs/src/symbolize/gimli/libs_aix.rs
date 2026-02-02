@@ -6,7 +6,7 @@ use super::{Library, LibrarySegment};
 use alloc::borrow::ToOwned;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::ffi::{c_int, CStr};
+use core::ffi::{CStr, c_int};
 use core::mem;
 
 const EXE_IMAGE_BASE: u64 = 0x100000000;

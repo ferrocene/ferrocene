@@ -1,21 +1,8 @@
-mod plumbing;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::transmute;
 use std::sync::Arc;
 
-pub use self::plumbing::*;
-
-mod job;
-pub use self::job::{
-    QueryInfo, QueryJob, QueryJobId, QueryJobInfo, QueryMap, break_query_cycles, print_query_stack,
-    report_cycle,
-};
-
-mod caches;
-pub use self::caches::{DefIdCache, DefaultCache, QueryCache, SingleCache, VecCache};
-
-mod config;
 use rustc_data_structures::jobserver::Proxy;
 use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_errors::DiagInner;
@@ -25,8 +12,31 @@ use rustc_macros::{Decodable, Encodable};
 use rustc_span::Span;
 use rustc_span::def_id::DefId;
 
+pub use self::caches::{DefIdCache, DefaultCache, QueryCache, SingleCache, VecCache};
 pub use self::config::{HashResult, QueryConfig};
+pub use self::job::{
+    QueryInfo, QueryJob, QueryJobId, QueryJobInfo, QueryMap, break_query_cycles, print_query_stack,
+    report_cycle,
+};
+pub use self::plumbing::*;
 use crate::dep_graph::{DepKind, DepNodeIndex, HasDepContext, SerializedDepNodeIndex};
+
+mod caches;
+mod config;
+mod job;
+mod plumbing;
+
+/// How a particular query deals with query cycle errors.
+///
+/// Inspected by the code that actually handles cycle errors, to decide what
+/// approach to use.
+#[derive(Copy, Clone)]
+pub enum CycleErrorHandling {
+    Error,
+    Fatal,
+    DelayBug,
+    Stash,
+}
 
 /// Description of a frame in the query stack.
 ///

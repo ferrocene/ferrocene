@@ -13,7 +13,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::FloatToInt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::FpCategory;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
@@ -301,12 +300,12 @@ pub mod consts {
     pub const TAU: f32 = 6.28318530717958647692528676655900577_f32;
 
     /// The golden ratio (φ)
-    #[unstable(feature = "more_float_constants", issue = "146939")]
-    pub const PHI: f32 = 1.618033988749894848204586834365638118_f32;
+    #[stable(feature = "euler_gamma_golden_ratio", since = "1.94.0")]
+    pub const GOLDEN_RATIO: f32 = 1.618033988749894848204586834365638118_f32;
 
     /// The Euler-Mascheroni constant (γ)
-    #[unstable(feature = "more_float_constants", issue = "146939")]
-    pub const EGAMMA: f32 = 0.577215664901532860606512090082402431_f32;
+    #[stable(feature = "euler_gamma_golden_ratio", since = "1.94.0")]
+    pub const EULER_GAMMA: f32 = 0.577215664901532860606512090082402431_f32;
 
     /// π/2
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -515,11 +514,9 @@ impl f32 {
     pub(crate) const SIGN_MASK: u32 = 0x8000_0000;
 
     /// Exponent mask
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const EXP_MASK: u32 = 0x7f80_0000;
 
     /// Mantissa mask
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const MAN_MASK: u32 = 0x007f_ffff;
 
     /// Minimum representable positive value (min subnormal)
@@ -669,7 +666,6 @@ impl f32 {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn classify(self) -> FpCategory {
         // We used to have complicated logic here that avoids the simple bit-based tests to work
         // around buggy codegen for x87 targets (see

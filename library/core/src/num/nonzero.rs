@@ -6,7 +6,6 @@ use super::{IntErrorKind, ParseIntError};
 use crate::clone::{TrivialClone, UseCloned};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, Freeze, StructuralPartialEq};
@@ -22,7 +21,7 @@ use crate::{fmt, intrinsics, ptr, ub_checks};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{intrinsics, ops::Div, ub_checks};
+use crate::{fmt, intrinsics, ops::Div, ub_checks};
 
 /// A marker trait for primitive types which can be zero.
 ///
@@ -140,7 +139,6 @@ impl_zeroable_primitive!(
 #[rustc_diagnostic_item = "NonZero"]
 pub struct NonZero<T: ZeroablePrimitive>(T::NonZeroInner);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_nonzero_fmt {
     ($(#[$Attribute:meta] $Trait:ident)*) => {
         $(
@@ -158,7 +156,6 @@ macro_rules! impl_nonzero_fmt {
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_fmt! {
     #[stable(feature = "nonzero", since = "1.28.0")]
     Debug
@@ -322,7 +319,6 @@ where
 }
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Hash for NonZero<T>
 where
     T: ZeroablePrimitive + Hash,
@@ -677,7 +673,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn trailing_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `cttz_nonzero`.
                 unsafe {
@@ -1730,7 +1725,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn ilog10(self) -> u32 {
             super::int_log10::$Int(self)
         }

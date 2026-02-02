@@ -1,6 +1,7 @@
 #![allow(clippy::enum_clike_unportable_variant)]
 
 #[cfg(not(feature = "ferrocene_subset"))]
+use crate::marker::MetaSized;
 use crate::num::NonZero;
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -9,7 +10,7 @@ use crate::{cmp, fmt, hash, mem, num};
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::mem;
+use crate::{fmt, hash, mem};
 
 /// A type storing a `usize` which is a power of two, and thus
 /// represents a possible alignment in the Rust abstract machine.
@@ -17,15 +18,12 @@ use crate::mem;
 /// Note that particularly large alignments, while representable in this type,
 /// are likely not to be supported by actual allocators and linkers.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Clone, PartialEq, Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy, Clone))]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct Alignment(AlignmentEnum);
 
 // Alignment is `repr(usize)`, but via extra steps.
-#[cfg(not(feature = "ferrocene_subset"))]
 const _: () = assert!(size_of::<Alignment>() == size_of::<usize>());
-#[cfg(not(feature = "ferrocene_subset"))]
 const _: () = assert!(align_of::<Alignment>() == align_of::<usize>());
 
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -61,6 +59,81 @@ impl Alignment {
     pub const fn of<T>() -> Self {
         // This can't actually panic since type alignment is always a power of two.
         const { Alignment::new(align_of::<T>()).unwrap() }
+    }
+
+    /// Returns the [ABI]-required minimum alignment of the type of the value that `val` points to.
+    ///
+    /// Every reference to a value of the type `T` must be a multiple of this number.
+    ///
+    /// [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(ptr_alignment_type)]
+    /// use std::ptr::Alignment;
+    ///
+    /// assert_eq!(Alignment::of_val(&5i32).as_usize(), 4);
+    /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[must_use]
+    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    pub const fn of_val<T: MetaSized>(val: &T) -> Self {
+        let align = mem::align_of_val(val);
+        // SAFETY: `align_of_val` returns valid alignment
+        unsafe { Alignment::new_unchecked(align) }
+    }
+
+    /// Returns the [ABI]-required minimum alignment of the type of the value that `val` points to.
+    ///
+    /// Every reference to a value of the type `T` must be a multiple of this number.
+    ///
+    /// [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface
+    ///
+    /// # Safety
+    ///
+    /// This function is only safe to call if the following conditions hold:
+    ///
+    /// - If `T` is `Sized`, this function is always safe to call.
+    /// - If the unsized tail of `T` is:
+    ///     - a [slice], then the length of the slice tail must be an initialized
+    ///       integer, and the size of the *entire value*
+    ///       (dynamic tail length + statically sized prefix) must fit in `isize`.
+    ///       For the special case where the dynamic tail length is 0, this function
+    ///       is safe to call.
+    ///     - a [trait object], then the vtable part of the pointer must point
+    ///       to a valid vtable acquired by an unsizing coercion, and the size
+    ///       of the *entire value* (dynamic tail length + statically sized prefix)
+    ///       must fit in `isize`.
+    ///     - an (unstable) [extern type], then this function is always safe to
+    ///       call, but may panic or otherwise return the wrong value, as the
+    ///       extern type's layout is not known. This is the same behavior as
+    ///       [`Alignment::of_val`] on a reference to a type with an extern type tail.
+    ///     - otherwise, it is conservatively not allowed to call this function.
+    ///
+    /// [trait object]: ../../book/ch17-02-trait-objects.html
+    /// [extern type]: ../../unstable-book/language-features/extern-types.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(ptr_alignment_type)]
+    /// #![feature(layout_for_ptr)]
+    /// use std::ptr::Alignment;
+    ///
+    /// assert_eq!(unsafe { Alignment::of_val_raw(&5i32) }.as_usize(), 4);
+    /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
+    #[inline]
+    #[must_use]
+    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    // #[unstable(feature = "layout_for_ptr", issue = "69835")]
+    pub const unsafe fn of_val_raw<T: MetaSized>(val: *const T) -> Self {
+        // SAFETY: precondition propagated to the caller
+        let align = unsafe { mem::align_of_val_raw(val) };
+        // SAFETY: `align_of_val_raw` returns valid alignment
+        unsafe { Alignment::new_unchecked(align) }
     }
 
     /// Creates an `Alignment` from a `usize`, or returns `None` if it's
@@ -111,7 +184,6 @@ impl Alignment {
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_nonzero(self) -> NonZero<usize> {
         // This transmutes directly to avoid the UbCheck in `NonZero::new_unchecked`
         // since there's no way for the user to trip that check anyway -- the
@@ -137,7 +209,6 @@ impl Alignment {
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn log2(self) -> u32 {
         self.as_nonzero().trailing_zeros()
     }
@@ -181,7 +252,6 @@ impl Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Debug for Alignment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?} (1 << {:?})", self.as_nonzero(), self.log2())
@@ -251,7 +321,6 @@ impl cmp::PartialOrd for Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl hash::Hash for Alignment {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -270,8 +339,7 @@ impl const Default for Alignment {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -293,8 +361,7 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -332,8 +399,7 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,

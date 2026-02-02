@@ -226,7 +226,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn count(self) -> usize {
                 len!(self)
             }
@@ -403,7 +402,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
                 P: FnMut(Self::Item) -> bool,
                 Self: Sized + ExactSizeIterator + DoubleEndedIterator
@@ -502,7 +500,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "default_iters", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl<T> Default for $name<'_, T> {
             /// Creates an empty slice iterator.
             ///

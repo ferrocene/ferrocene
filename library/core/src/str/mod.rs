@@ -7,7 +7,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 mod converts;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod count;
 mod error;
 mod iter;
@@ -31,16 +30,14 @@ use crate::{ascii, mem};
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 use {
-    self::pattern::Pattern,
-    crate::{mem, slice::SliceIndex},
+    self::pattern::{Pattern, ReverseSearcher, Searcher},
+    crate::{char, mem, slice::SliceIndex},
 };
 
 pub mod pattern;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod lossy;
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use converts::{from_raw_parts, from_raw_parts_mut};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use converts::{from_utf8, from_utf8_unchecked};
@@ -60,7 +57,6 @@ pub use iter::LinesAny;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use iter::SplitAsciiWhitespace;
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use iter::SplitInclusive;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -95,8 +91,12 @@ pub use validations::{next_code_point, utf8_char_width};
 #[rustfmt::skip]
 pub use {
     error::Utf8Error,
-    iter::{Bytes, Chars},
+    iter::{Bytes, CharIndices, Chars},
 };
+
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+use iter::SplitInternal;
 
 #[inline(never)]
 #[cold]
@@ -1156,7 +1156,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn char_indices(&self) -> CharIndices<'_> {
         CharIndices { front_offset: 0, iter: self.chars() }
     }
@@ -1470,7 +1469,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_ends_with"]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn ends_with<P: Pattern>(&self, pat: P) -> bool
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1522,7 +1520,6 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
         pat.into_searcher(self).next_match().map(|(i, _)| i)
     }
@@ -1740,7 +1737,6 @@ impl str {
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn split_inclusive<P: Pattern>(&self, pat: P) -> SplitInclusive<'_, P> {
         SplitInclusive(SplitInternal {
             start: 0,

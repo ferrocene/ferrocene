@@ -1,5 +1,4 @@
 use crate::cmp;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Debug};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
@@ -508,26 +507,22 @@ unsafe impl<A: InPlaceIterable, B> InPlaceIterable for Zip<A, B> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Debug, B: Debug> Debug for Zip<A, B> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         ZipFmt::fmt(self, f)
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait ZipFmt<A, B> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Debug, B: Debug> ZipFmt<A, B> for Zip<A, B> {
     default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Zip").field("a", &self.a).field("b", &self.b).finish()
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Debug + TrustedRandomAccessNoCoerce, B: Debug + TrustedRandomAccessNoCoerce> ZipFmt<A, B>
     for Zip<A, B>
 {
@@ -608,7 +603,6 @@ pub unsafe trait TrustedRandomAccess: TrustedRandomAccessNoCoerce {}
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[rustc_specialization_trait]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
     // Convenience method.
     fn size(&self) -> usize

@@ -382,8 +382,8 @@ macro_rules! impl_fold_via_try_fold {
     };
 }
 
-#[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "iter_array_chunks", issue = "100450")]
 pub use self::adapters::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -398,8 +398,8 @@ pub use self::adapters::Flatten;
 #[stable(feature = "iter_map_while", since = "1.57.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::MapWhile;
-#[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "iter_map_windows", issue = "87155")]
 pub use self::adapters::MapWindows;
 #[unstable(feature = "inplace_iteration", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -411,7 +411,6 @@ pub use self::adapters::StepBy;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_chain", since = "1.91.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -426,7 +425,7 @@ pub use self::adapters::{
     Chain, Cycle, Enumerate, Filter, FilterMap, FlatMap, Fuse, Inspect, Map, Peekable, Rev, Scan,
     Skip, SkipWhile, Take, TakeWhile, Zip,
 };
-#[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
+#[unstable(feature = "iter_intersperse", issue = "79524")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::{Intersperse, IntersperseWith};
 #[unstable(
@@ -495,7 +494,9 @@ pub use self::traits::{
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
 pub use self::{
-    adapters::{Chain, Enumerate, Filter, Map, Rev, Skip, StepBy, Take, Zip},
+    adapters::{
+        Chain, Enumerate, Filter, FlatMap, Fuse, Map, Rev, Skip, StepBy, Take, TakeWhile, Zip,
+    },
     traits::{
         DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator, Sum,
     },

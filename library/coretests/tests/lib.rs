@@ -1,7 +1,6 @@
 // tidy-alphabetical-start
 #![cfg_attr(target_has_atomic = "128", feature(integer_atomics))]
 #![cfg_attr(test, feature(cfg_select))]
-#![feature(alloc_layout_extra)]
 #![feature(array_ptr_get)]
 #![feature(array_try_from_fn)]
 #![feature(array_try_map)]
@@ -22,12 +21,16 @@
 #![feature(clamp_magnitude)]
 #![feature(clone_to_uninit)]
 #![feature(const_array)]
+#![feature(const_bool)]
 #![feature(const_cell_traits)]
+#![feature(const_clone)]
 #![feature(const_cmp)]
 #![feature(const_convert)]
+#![feature(const_default)]
 #![feature(const_destruct)]
 #![feature(const_drop_in_place)]
 #![feature(const_eval_select)]
+#![feature(const_index)]
 #![feature(const_ops)]
 #![feature(const_option_ops)]
 #![feature(const_raw_ptr_comparison)]
@@ -99,7 +102,6 @@
 #![feature(one_sided_range)]
 #![feature(option_reduce)]
 #![feature(pattern)]
-#![feature(peekable_next_if_map)]
 #![feature(pointer_is_aligned_to)]
 #![feature(pointer_try_cast_aligned)]
 #![feature(portable_simd)]
@@ -128,6 +130,7 @@
 #![feature(try_blocks)]
 #![feature(try_find)]
 #![feature(try_trait_v2)]
+#![feature(type_info)]
 #![feature(uint_bit_width)]
 #![feature(uint_gather_scatter_bits)]
 #![feature(unsize)]
@@ -136,9 +139,6 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
-// Ferrocene addition: deals with all the unused code due to the lack of formatting machinery for
-// panics in the certified runtime
-#![cfg_attr(feature = "ferrocene_certified_runtime", expect(unused_variables))]
 // Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
 #![feature(cfg_target_has_atomic)]
 

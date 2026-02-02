@@ -1,6 +1,5 @@
 //@ check-pass
 //@ compile-flags: --help
-//@ compare-output-lines-by-subset
 
 fn main() {}
 

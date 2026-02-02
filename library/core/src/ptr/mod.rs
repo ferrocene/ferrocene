@@ -893,6 +893,7 @@ pub const fn null_mut<T: PointeeSized + Thin>() -> *mut T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
+#[rustc_diagnostic_item = "ptr_without_provenance"]
 pub const fn without_provenance<T>(addr: usize) -> *const T {
     without_provenance_mut(addr)
 }
@@ -932,6 +933,7 @@ pub const fn dangling<T>() -> *const T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
+#[rustc_diagnostic_item = "ptr_without_provenance_mut"]
 #[allow(integer_to_ptr_transmutes)] // Expected semantics here.
 pub const fn without_provenance_mut<T>(addr: usize) -> *mut T {
     // An int-to-pointer transmute currently has exactly the intended semantics: it creates a
@@ -1493,10 +1495,7 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
             )+};
         }
         swap_prefix!(4 2 1);
-        #[cfg(not(feature = "ferrocene_certified_runtime"))]
         debug_assert_eq!(i, bytes);
-        #[cfg(feature = "ferrocene_certified_runtime")]
-        debug_assert!(i == bytes);
     }
 
     const CHUNK_SIZE: usize = size_of::<*const ()>();
@@ -2695,7 +2694,7 @@ impl<F: FnPtr> fmt::Debug for F {
 /// same requirements apply to field projections, even inside `addr_of!`. (In particular, it makes
 /// no difference whether the pointer is null or dangling.)
 #[stable(feature = "raw_ref_macros", since = "1.51.0")]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_macro_transparency = "semiopaque"]
 pub macro addr_of($place:expr) {
     &raw const $place
 }
@@ -2785,7 +2784,7 @@ pub macro addr_of($place:expr) {
 /// same requirements apply to field projections, even inside `addr_of_mut!`. (In particular, it
 /// makes no difference whether the pointer is null or dangling.)
 #[stable(feature = "raw_ref_macros", since = "1.51.0")]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_macro_transparency = "semiopaque"]
 pub macro addr_of_mut($place:expr) {
     &raw mut $place
 }

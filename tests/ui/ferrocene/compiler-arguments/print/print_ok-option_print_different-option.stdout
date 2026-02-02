@@ -9,7 +9,6 @@ aarch64-apple-visionos
 aarch64-apple-visionos-sim
 aarch64-apple-watchos
 aarch64-apple-watchos-sim
-aarch64-ferrocene-none
 aarch64-kmc-solid_asp3
 aarch64-linux-android
 aarch64-nintendo-switch-freestanding
@@ -48,6 +47,8 @@ aarch64_be-unknown-linux-gnu_ilp32
 aarch64_be-unknown-linux-musl
 aarch64_be-unknown-netbsd
 aarch64_be-unknown-none-softfloat
+aarch64v8r-unknown-none
+aarch64v8r-unknown-none-softfloat
 amdgcn-amd-amdhsa
 arm-linux-androideabi
 arm-unknown-linux-gnueabi
@@ -68,6 +69,8 @@ armv5te-none-eabi
 armv5te-unknown-linux-gnueabi
 armv5te-unknown-linux-musleabi
 armv5te-unknown-linux-uclibceabi
+armv6-none-eabi
+armv6-none-eabihf
 armv6-unknown-freebsd
 armv6-unknown-netbsd-eabihf
 armv6k-nintendo-3ds
@@ -230,14 +233,15 @@ sparc64-unknown-openbsd
 sparcv9-sun-solaris
 thumbv4t-none-eabi
 thumbv5te-none-eabi
+thumbv6-none-eabi
 thumbv6m-none-eabi
 thumbv6m-nuttx-eabi
+thumbv7a-none-eabi
+thumbv7a-none-eabihf
 thumbv7a-nuttx-eabi
 thumbv7a-nuttx-eabihf
 thumbv7a-pc-windows-msvc
 thumbv7a-uwp-windows-msvc
-thumbv7em-ferrocene-none-eabi
-thumbv7em-ferrocene-none-eabihf
 thumbv7em-ferrocene.facade-eabi
 thumbv7em-ferrocene.facade-eabihf
 thumbv7em-ferrocene.subset-eabi
@@ -251,12 +255,15 @@ thumbv7m-nuttx-eabi
 thumbv7neon-linux-androideabi
 thumbv7neon-unknown-linux-gnueabihf
 thumbv7neon-unknown-linux-musleabihf
+thumbv7r-none-eabi
+thumbv7r-none-eabihf
 thumbv8m.base-none-eabi
 thumbv8m.base-nuttx-eabi
 thumbv8m.main-none-eabi
 thumbv8m.main-none-eabihf
 thumbv8m.main-nuttx-eabi
 thumbv8m.main-nuttx-eabihf
+thumbv8r-none-eabihf
 wasm32-unknown-emscripten
 wasm32-unknown-unknown
 wasm32-wali-linux-musl
@@ -271,7 +278,6 @@ x86_64-apple-ios
 x86_64-apple-ios-macabi
 x86_64-apple-tvos
 x86_64-apple-watchos-sim
-x86_64-ferrocene-none
 x86_64-fortanix-unknown-sgx
 x86_64-linux-android
 x86_64-lynx-lynxos178
@@ -295,6 +301,7 @@ x86_64-unknown-hurd-gnu
 x86_64-unknown-illumos
 x86_64-unknown-l4re-uclibc
 x86_64-unknown-linux-gnu
+x86_64-unknown-linux-gnuasan
 x86_64-unknown-linux-gnux32
 x86_64-unknown-linux-musl
 x86_64-unknown-linux-none

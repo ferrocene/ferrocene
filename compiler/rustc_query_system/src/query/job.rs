@@ -631,9 +631,6 @@ pub fn print_query_stack<Qcx: QueryContext>(
         let query_extra = qcx.lift_query_info(&query_info.query.info);
         if Some(count_printed) < limit_frames || limit_frames.is_none() {
             // Only print to stderr as many stack frames as `num_frames` when present.
-            // FIXME: needs translation
-            #[allow(rustc::diagnostic_outside_of_impl)]
-            #[allow(rustc::untranslatable_diagnostic)]
             dcx.struct_failure_note(format!(
                 "#{} [{:?}] {}",
                 count_printed, query_info.query.dep_kind, query_extra.description
@@ -648,7 +645,7 @@ pub fn print_query_stack<Qcx: QueryContext>(
                 file,
                 "#{} [{}] {}",
                 count_total,
-                qcx.dep_context().dep_kind_info(query_info.query.dep_kind).name,
+                qcx.dep_context().dep_kind_vtable(query_info.query.dep_kind).name,
                 query_extra.description
             );
         }

@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::Arc;
 
-use rustc_ast::attr::{AttributeExt, MarkedAttrs};
+use rustc_ast::attr::MarkedAttrs;
 use rustc_ast::token::MetaVarKind;
 use rustc_ast::tokenstream::TokenStream;
 use rustc_ast::visit::{AssocCtxt, Visitor};
@@ -16,15 +16,14 @@ use rustc_data_structures::sync;
 use rustc_errors::{BufferedEarlyLint, DiagCtxtHandle, ErrorGuaranteed, PResult};
 use rustc_feature::Features;
 use rustc_hir as hir;
-use rustc_hir::attrs::{AttributeKind, CfgEntry, Deprecation};
+use rustc_hir::attrs::{AttributeKind, CfgEntry, CollapseMacroDebuginfo, Deprecation};
 use rustc_hir::def::MacroKinds;
 use rustc_hir::limit::Limit;
 use rustc_hir::{Stability, find_attr};
 use rustc_lint_defs::RegisteredTools;
 use rustc_parse::MACRO_ARGUMENTS;
-use rustc_parse::parser::{ForceCollect, Parser};
+use rustc_parse::parser::{AllowConstBlockItems, ForceCollect, Parser};
 use rustc_session::Session;
-use rustc_session::config::CollapseMacroDebuginfo;
 use rustc_session::parse::ParseSess;
 use rustc_span::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_span::edition::Edition;
@@ -34,7 +33,6 @@ use rustc_span::{DUMMY_SP, FileName, Ident, Span, Symbol, kw, sym};
 use smallvec::{SmallVec, smallvec};
 use thin_vec::ThinVec;
 
-use crate::base::ast::MetaItemInner;
 use crate::errors;
 use crate::expand::{self, AstFragment, Invocation};
 use crate::mbe::macro_rules::ParserAnyMacro;
@@ -851,6 +849,9 @@ pub struct SyntaxExtension {
     /// Should debuginfo for the macro be collapsed to the outermost expansion site (in other
     /// words, was the macro definition annotated with `#[collapse_debuginfo]`)?
     pub collapse_debuginfo: bool,
+    /// Suppresses the "this error originates in the macro" note when a diagnostic points at this
+    /// macro.
+    pub hide_backtrace: bool,
 }
 
 impl SyntaxExtension {
@@ -884,25 +885,7 @@ impl SyntaxExtension {
             allow_internal_unsafe: false,
             local_inner_macros: false,
             collapse_debuginfo: false,
-        }
-    }
-
-    fn collapse_debuginfo_by_name(
-        attr: &impl AttributeExt,
-    ) -> Result<CollapseMacroDebuginfo, Span> {
-        let list = attr.meta_item_list();
-        let Some([MetaItemInner::MetaItem(item)]) = list.as_deref() else {
-            return Err(attr.span());
-        };
-        if !item.is_word() {
-            return Err(item.span);
-        }
-
-        match item.name() {
-            Some(sym::no) => Ok(CollapseMacroDebuginfo::No),
-            Some(sym::external) => Ok(CollapseMacroDebuginfo::External),
-            Some(sym::yes) => Ok(CollapseMacroDebuginfo::Yes),
-            _ => Err(item.path.span),
+            hide_backtrace: false,
         }
     }
 
@@ -914,21 +897,15 @@ impl SyntaxExtension {
     /// | yes           | yes | yes           | yes      | yes |
     fn get_collapse_debuginfo(sess: &Session, attrs: &[hir::Attribute], ext: bool) -> bool {
         let flag = sess.opts.cg.collapse_macro_debuginfo;
-        let attr = ast::attr::find_by_name(attrs, sym::collapse_debuginfo)
-            .and_then(|attr| {
-                Self::collapse_debuginfo_by_name(attr)
-                    .map_err(|span| {
-                        sess.dcx().emit_err(errors::CollapseMacroDebuginfoIllegal { span })
-                    })
-                    .ok()
-            })
-            .unwrap_or_else(|| {
-                if find_attr!(attrs, AttributeKind::RustcBuiltinMacro { .. }) {
-                    CollapseMacroDebuginfo::Yes
-                } else {
-                    CollapseMacroDebuginfo::Unspecified
-                }
-            });
+        let attr =
+            if let Some(info) = find_attr!(attrs, AttributeKind::CollapseDebugInfo(info) => info) {
+                info.clone()
+            } else if find_attr!(attrs, AttributeKind::RustcBuiltinMacro { .. }) {
+                CollapseMacroDebuginfo::Yes
+            } else {
+                CollapseMacroDebuginfo::Unspecified
+            };
+
         #[rustfmt::skip]
         let collapse_table = [
             [false, false, false, false],
@@ -937,6 +914,12 @@ impl SyntaxExtension {
             [true,  true,  true,  true],
         ];
         collapse_table[flag as usize][attr as usize]
+    }
+
+    fn get_hide_backtrace(attrs: &[hir::Attribute]) -> bool {
+        // FIXME(estebank): instead of reusing `#[rustc_diagnostic_item]` as a proxy, introduce a
+        // new attribute purely for this under the `#[diagnostic]` namespace.
+        ast::attr::find_by_name(attrs, sym::rustc_diagnostic_item).is_some()
     }
 
     /// Constructs a syntax extension with the given properties
@@ -975,6 +958,7 @@ impl SyntaxExtension {
             // Not a built-in macro
             None => (None, helper_attrs),
         };
+        let hide_backtrace = builtin_name.is_some() || Self::get_hide_backtrace(attrs);
 
         let stability = find_attr!(attrs, AttributeKind::Stability { stability, .. } => *stability);
 
@@ -1009,6 +993,7 @@ impl SyntaxExtension {
             allow_internal_unsafe,
             local_inner_macros,
             collapse_debuginfo,
+            hide_backtrace,
         }
     }
 
@@ -1088,7 +1073,7 @@ impl SyntaxExtension {
             self.allow_internal_unsafe,
             self.local_inner_macros,
             self.collapse_debuginfo,
-            self.builtin_name.is_some(),
+            self.hide_backtrace,
         )
     }
 }
@@ -1200,6 +1185,10 @@ pub trait ResolverExpand {
     /// Record the name of an opaque `Ty::ImplTrait` pre-expansion so that it can be used
     /// to generate an item name later that does not reference placeholder macros.
     fn insert_impl_trait_name(&mut self, id: NodeId, name: Symbol);
+
+    /// Mark the scope as having a compile error so that error for lookup in this scope
+    /// should be suppressed
+    fn mark_scope_with_compile_error(&mut self, parent_node: NodeId);
 }
 
 pub trait LintStoreExpand {
@@ -1378,8 +1367,6 @@ impl<'a> ExtCtxt<'a> {
         for (span, notes) in self.expansions.iter() {
             let mut db = self.dcx().create_note(errors::TraceMacro { span: *span });
             for note in notes {
-                // FIXME: make this translatable
-                #[allow(rustc::untranslatable_diagnostic)]
                 db.note(note.clone());
             }
             db.emit();
@@ -1497,7 +1484,7 @@ pub(crate) fn stream_pretty_printing_compatibility_hack(
             let mut parser = Parser::new(psess, stream.clone(), None);
             // No need to collect tokens for this simple check.
             parser
-                .parse_item(ForceCollect::No)
+                .parse_item(ForceCollect::No, AllowConstBlockItems::No)
                 .expect("failed to reparse item")
                 .expect("an actual item")
         }

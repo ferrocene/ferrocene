@@ -56,8 +56,15 @@ pub(crate) fn generate(
     let percentile_lines_tested = (num_lines_tested / (total_lines)) * 100.0;
     let summary = maud::html!(
         header {
-            h1 { "Core library line coverage report" }
-            a href="../index.html" { "Go back to the documentation index" }
+            div class="header-title" {
+                h1 { "Core library line coverage report" }
+                a href="../index.html" { "Go back to the documentation index" }
+            }
+            div class="search-bar" {
+                    input type="text" name = "search-bar" placeholder = "Regex Search ...";
+                    " "
+                    button name="search-button" { "Search" }
+            }
         }
         div class="coverage-summary" {
             h1 {
@@ -71,21 +78,21 @@ pub(crate) fn generate(
         }
         div class="picker-buttons" {
                 button class=(fully_tested_class) data-filter=(fully_tested_class) {
-                    (fully_tested.len()) " Fully Tested"
+                    span class="count" { (fully_tested.len()) } " Fully Tested"
                 }
                 button class=(partially_tested_class) data-filter=(partially_tested_class) {
-                    (partially_tested.len()) " Partially Tested"
+                    span class="count" { (partially_tested.len()) } " Partially Tested"
                 }
                 button class=(fully_untested_class) data-filter=(fully_untested_class) {
-                    (fully_untested.len()) " Fully Untested"
+                    span class="count" { (fully_untested.len()) } " Fully Untested"
                 }
                 button class=(fully_ignored_class) data-filter=(fully_ignored_class) {
-                    (fully_ignored.len()) " Fully Ignored"
+                    span class="count" { (fully_ignored.len()) } " Fully Ignored"
                 }
         }
         div class="misc-checkboxes" {
                 input type="checkbox" name="annotated-checkbox" unchecked;
-                "Line-through annotated functions"
+                "count annotated lines as tested"
         }
     );
 
@@ -136,7 +143,7 @@ fn generate_section(
     let human = status.to_human();
     let section = maud::html!(
         section class=(class) data-status=(class)  {
-            h1 { (functions.len()) " " (human) }
+            h1 { span class="count" { (functions.len()) } " " (human) }
             div class="list" {
                 @for fragment in fragments {
                     (fragment)
@@ -161,12 +168,22 @@ fn generate_function(
     class_set.insert(function_css_class);
 
     let mut lines = Vec::with_capacity(line_coverage.len());
+    let mut tested_lines = 0;
+    let mut untested_lines = 0;
+    let mut annotated_lines = 0;
+    let mut ignored_lines = 0;
     for (linenum, line) in file.lines().enumerate() {
         let linenum = linenum + 1; // `enumerate()` starts at 0, lines start at 1.
         let maybe_line =
             line_coverage.iter().find(|(covered_linenum, _)| linenum == *covered_linenum);
         if let Some((actual_linenum, status)) = maybe_line {
             lines.push((actual_linenum, line, status));
+            match status {
+                LineCoverageStatus::Tested => tested_lines += 1,
+                LineCoverageStatus::Untested => untested_lines += 1,
+                LineCoverageStatus::Annotated => annotated_lines += 1,
+                LineCoverageStatus::Ignored => ignored_lines += 1,
+            }
         }
     }
 
@@ -183,7 +200,7 @@ fn generate_function(
     let filename = function.relative_path.display();
     let html = maud::html!(
         details class=(class_set.into_iter().collect::<Vec<_>>().join(" ")) data-status=(function_css_class) {
-            summary {
+            summary tested-lines=(tested_lines) untested-lines=(untested_lines) annotated-lines=(annotated_lines) ignored-lines=(ignored_lines) {
                 code {
                     (function.source_name)
                 }

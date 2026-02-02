@@ -11,12 +11,14 @@ use crate::clone::TrivialClone;
 use crate::marker::{Destruct, DiscriminantKind};
 use crate::panic::const_assert;
 #[cfg(not(feature = "ferrocene_subset"))]
+use crate::ptr::Alignment;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
 #[rustfmt::skip]
-use crate::{cmp, intrinsics, ptr};
+use crate::{cmp, fmt, intrinsics, ptr};
 
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
@@ -47,6 +49,10 @@ pub use drop_guard::DropGuard;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(inline)]
 pub use crate::intrinsics::transmute;
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "type_info", issue = "146922")]
+pub mod type_info;
 
 /// Takes ownership and "forgets" about the value **without running its destructor**.
 ///
@@ -1118,7 +1124,6 @@ impl<T> hash::Hash for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> fmt::Debug for Discriminant<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_tuple("Discriminant").field(&self.0).finish()
@@ -1277,6 +1282,11 @@ pub trait SizedTypeProperties: Sized {
     #[unstable(feature = "sized_type_properties", issue = "none")]
     #[lang = "mem_align_const"]
     const ALIGN: usize = intrinsics::align_of::<Self>();
+
+    #[cfg(not(feature = "ferrocene_subset"))]
+    #[doc(hidden)]
+    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    const ALIGNMENT: Alignment = Alignment::of::<Self>();
 
     /// `true` if this type requires no storage.
     /// `false` if its [size](size_of) is greater than zero.

@@ -222,7 +222,7 @@ declare_features! (
     /// Allows writing custom MIR
     (internal, custom_mir, "1.65.0", None),
     /// Implementation details of externally implementable items
-    (internal, eii_internals, "CURRENT_RUSTC_VERSION", None),
+    (internal, eii_internals, "1.94.0", None),
     /// Outputs useful `assert!` messages
     (unstable, generic_assert, "1.63.0", None),
     /// Allows using the #[rustc_intrinsic] attribute.
@@ -233,28 +233,20 @@ declare_features! (
     (internal, link_cfg, "1.14.0", None),
     /// Allows using `?Trait` trait bounds in more contexts.
     (internal, more_maybe_bounds, "1.82.0", None),
-    /// Allows the `multiple_supertrait_upcastable` lint.
-    (unstable, multiple_supertrait_upcastable, "1.69.0", None),
     /// Allow negative trait bounds. This is an internal-only feature for testing the trait solver!
     (internal, negative_bounds, "1.71.0", None),
     /// Set the maximum pattern complexity allowed (not limited by default).
     (internal, pattern_complexity_limit, "1.78.0", None),
-    /// Allows using pattern types.
-    (internal, pattern_types, "1.79.0", Some(123646)),
     /// Allows using `#[prelude_import]` on glob `use` items.
     (internal, prelude_import, "1.2.0", None),
     /// Used to identify crates that contain the profiler runtime.
     (internal, profiler_runtime, "1.18.0", None),
     /// Allows using `rustc_*` attributes (RFC 572).
     (internal, rustc_attrs, "1.0.0", None),
-    /// Introduces a hierarchy of `Sized` traits (RFC 3729).
-    (unstable, sized_hierarchy, "1.89.0", None),
     /// Allows using the `#[stable]` and `#[unstable]` attributes.
     (internal, staged_api, "1.0.0", None),
     /// Added for testing unstable lints; perma-unstable.
     (internal, test_unstable_lint, "1.60.0", None),
-    /// Helps with formatting for `group_imports = "StdExternalCrate"`.
-    (unstable, unqualified_local_imports, "1.83.0", Some(138299)),
     /// Use for stable + negative coherence and strict coherence depending on trait's
     /// rustc_strict_coherence value.
     (unstable, with_negative_coherence, "1.60.0", None),
@@ -295,6 +287,8 @@ declare_features! (
     (internal, needs_panic_runtime, "1.10.0", Some(32837)),
     /// Allows using the `#![panic_runtime]` attribute.
     (internal, panic_runtime, "1.10.0", Some(32837)),
+    /// Allows using pattern types.
+    (internal, pattern_types, "1.79.0", Some(123646)),
     /// Allows using `#[rustc_allow_const_fn_unstable]`.
     /// This is an attribute on `const fn` for the same
     /// purpose as `#[allow_internal_unstable]`.
@@ -305,12 +299,16 @@ declare_features! (
     (internal, rustdoc_internals, "1.58.0", Some(90418)),
     /// Allows using the `rustdoc::missing_doc_code_examples` lint
     (unstable, rustdoc_missing_doc_code_examples, "1.31.0", Some(101730)),
+    /// Introduces a hierarchy of `Sized` traits (RFC 3729).
+    (unstable, sized_hierarchy, "1.89.0", Some(144404)),
     /// Allows using `#[structural_match]` which indicates that a type is structurally matchable.
     /// FIXME: Subsumed by trait `StructuralPartialEq`, cannot move to removed until a library
     /// feature with the same name exists.
     (unstable, structural_match, "1.8.0", Some(31434)),
     /// Allows using the `rust-call` ABI.
     (unstable, unboxed_closures, "1.0.0", Some(29625)),
+    /// Helps with formatting for `group_imports = "StdExternalCrate"`.
+    (unstable, unqualified_local_imports, "1.83.0", Some(138299)),
     // !!!!    !!!!    !!!!    !!!!   !!!!    !!!!    !!!!    !!!!    !!!!    !!!!    !!!!
     // Features are listed in alphabetical order. Tidy will fail if you don't keep it this way.
     // !!!!    !!!!    !!!!    !!!!   !!!!    !!!!    !!!!    !!!!    !!!!    !!!!    !!!!
@@ -363,8 +361,6 @@ declare_features! (
     (unstable, asm_goto_with_outputs, "1.85.0", Some(119364)),
     /// Allows the `may_unwind` option in inline assembly.
     (unstable, asm_unwind, "1.58.0", Some(93334)),
-    /// Allows users to enforce equality of associated constants `TraitImpl<AssocConst=3>`.
-    (unstable, associated_const_equality, "1.58.0", Some(92827)),
     /// Allows associated type defaults.
     (unstable, associated_type_defaults, "1.2.0", Some(29661)),
     /// Allows implementing `AsyncDrop`.
@@ -418,6 +414,8 @@ declare_features! (
     (unstable, cmse_nonsecure_entry, "1.48.0", Some(75835)),
     /// Allows `async {}` expressions in const contexts.
     (unstable, const_async_blocks, "1.53.0", Some(85368)),
+    /// Allows `const { ... }` as a shorthand for `const _: () = const { ... };` for module items.
+    (unstable, const_block_items, "CURRENT_RUSTC_VERSION", Some(149226)),
     /// Allows `const || {}` closures in const contexts.
     (incomplete, const_closures, "1.68.0", Some(106003)),
     /// Allows using `[const] Destruct` bounds and calling drop impls in const contexts.
@@ -481,7 +479,7 @@ declare_features! (
     /// Allows using `#[export_stable]` which indicates that an item is exportable.
     (incomplete, export_stable, "1.88.0", Some(139939)),
     /// Externally implementable items
-    (unstable, extern_item_impls, "CURRENT_RUSTC_VERSION", Some(125418)),
+    (unstable, extern_item_impls, "1.94.0", Some(125418)),
     /// Allows defining `extern type`s.
     (unstable, extern_types, "1.23.0", Some(43467)),
     /// Allow using 128-bit (quad precision) floating point numbers.
@@ -571,6 +569,8 @@ declare_features! (
     (unstable, more_qualified_paths, "1.54.0", Some(86935)),
     /// The `movrs` target feature on x86.
     (unstable, movrs_target_feature, "1.88.0", Some(137976)),
+    /// Allows the `multiple_supertrait_upcastable` lint.
+    (unstable, multiple_supertrait_upcastable, "1.69.0", Some(150833)),
     /// Allows the `#[must_not_suspend]` attribute.
     (unstable, must_not_suspend, "1.57.0", Some(83310)),
     /// Allows `mut ref` and `mut ref mut` identifier patterns.
@@ -634,6 +634,8 @@ declare_features! (
     (unstable, rtm_target_feature, "1.35.0", Some(150258)),
     /// Allows `extern "rust-cold"`.
     (unstable, rust_cold_cc, "1.63.0", Some(97544)),
+    /// Allows `extern "rust-preserve-none"`.
+    (unstable, rust_preserve_none_cc, "CURRENT_RUSTC_VERSION", Some(151401)),
     /// Target features on s390x.
     (unstable, s390x_target_feature, "1.82.0", Some(150259)),
     /// Allows the use of the `sanitize` attribute.
@@ -669,7 +671,7 @@ declare_features! (
     /// Allows using `try {...}` expressions.
     (unstable, try_blocks, "1.29.0", Some(31436)),
     /// Allows using `try bikeshed TargetType {...}` expressions.
-    (unstable, try_blocks_heterogeneous, "CURRENT_RUSTC_VERSION", Some(149488)),
+    (unstable, try_blocks_heterogeneous, "1.94.0", Some(149488)),
     /// Allows `impl Trait` to be used inside type aliases (RFC 2515).
     (unstable, type_alias_impl_trait, "1.38.0", Some(63063)),
     /// Allows creation of instances of a struct by moving fields that have

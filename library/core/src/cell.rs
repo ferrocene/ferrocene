@@ -27,10 +27,9 @@
 //!
 //! ## `Cell<T>`
 //!
-//! [`Cell<T>`] implements interior mutability by moving values in and out of the cell. That is, an
-//! `&mut T` to the inner value can never be obtained, and the value itself cannot be directly
-//! obtained without replacing it with something else. Both of these rules ensure that there is
-//! never more than one reference pointing to the inner value. This type provides the following
+//! [`Cell<T>`] implements interior mutability by moving values in and out of the cell. That is, a
+//! `&T` to the inner value can never be obtained, and the value itself cannot be directly
+//! obtained without replacing it with something else. This type provides the following
 //! methods:
 //!
 //!  - For types that implement [`Copy`], the [`get`](Cell::get) method retrieves the current
@@ -252,7 +251,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Debug, Display};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, PhantomData, Unsize};
@@ -885,14 +883,13 @@ pub struct RefCell<T: ?Sized> {
 /// An error returned by [`RefCell::try_borrow`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct BorrowError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
@@ -912,14 +909,13 @@ impl Display for BorrowError {
 /// An error returned by [`RefCell::try_borrow_mut`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct BorrowMutError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Display for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
@@ -2673,13 +2669,11 @@ impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<UnsafeCell<U>> for UnsafeCell<T> 
 #[repr(transparent)]
 #[rustc_diagnostic_item = "SyncUnsafeCell"]
 #[rustc_pub_transparent]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SyncUnsafeCell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: ?Sized + Sync> Sync for SyncUnsafeCell<T> {}
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]

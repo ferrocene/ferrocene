@@ -191,7 +191,6 @@ impl<T: PointeeSized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -475,7 +474,6 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -1077,7 +1075,6 @@ impl<T: PointeeSized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1236,7 +1233,6 @@ impl<T: PointeeSized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,

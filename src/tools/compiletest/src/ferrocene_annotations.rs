@@ -173,6 +173,7 @@ fn sample_config() -> Config {
         default_codegen_backend: crate::common::CodegenBackend::Llvm,
 
         // Dummy values
+        jobs: Default::default(),
         edition: Default::default(),
         bless: Default::default(),
         fail_fast: Default::default(),

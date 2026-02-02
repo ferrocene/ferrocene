@@ -599,9 +599,8 @@ use crate::{convert, hint, mem};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy))]
+#[derive(Copy, Debug, Hash)]
+#[derive_const(Eq)]
 #[rustc_diagnostic_item = "Option"]
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -978,17 +977,10 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_expect"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-    pub const fn expect(
-        self,
-        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
-    ) -> T {
+    pub const fn expect(self, msg: &str) -> T {
         match self {
             Some(val) => val,
-            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             None => expect_failed(msg),
-            #[cfg(feature = "ferrocene_certified_runtime")]
-            None => panic_display(&msg),
         }
     }
 
@@ -1742,7 +1734,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn insert(&mut self, value: T) -> &mut T
     where
         T: [const] Destruct,
@@ -2133,10 +2124,7 @@ impl<T> Option<&T> {
     where
         T: Clone,
     {
-        match self {
-            Some(t) => Some(t.clone()),
-            None => None,
-        }
+        self.map(T::clone)
     }
 }
 
@@ -2184,10 +2172,7 @@ impl<T> Option<&mut T> {
     where
         T: Clone,
     {
-        match self {
-            Some(t) => Some(t.clone()),
-            None => None,
-        }
+        self.as_deref().map(T::clone)
     }
 }
 
@@ -2234,7 +2219,6 @@ const fn unwrap_failed() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-#[cfg(not(feature = "ferrocene_certified_runtime"))]
 const fn expect_failed(msg: &str) -> ! {
     panic_display(&msg)
 }
@@ -2467,7 +2451,7 @@ impl<T: [const] Ord> const Ord for Option<T> {
 // The Option Iterators
 /////////////////////////////////////////////////////////////////////////////
 
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 struct Item<A> {
     #[allow(dead_code)]
     opt: Option<A>,
@@ -2513,7 +2497,7 @@ unsafe impl<A> TrustedLen for Item<A> {}
 ///
 /// This `struct` is created by the [`Option::iter`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct Iter<'a, A: 'a> {
     #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a A>,
@@ -2570,7 +2554,7 @@ impl<A> Clone for Iter<'_, A> {
 ///
 /// This `struct` is created by the [`Option::iter_mut`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Debug))]
+#[derive(Debug)]
 pub struct IterMut<'a, A: 'a> {
     #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a mut A>,
@@ -2616,7 +2600,7 @@ unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 /// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
 ///
 /// This `struct` is created by the [`Option::into_iter`] function.
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Clone, Debug))]
+#[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct IntoIter<A> {
     inner: Item<A>,

@@ -31,6 +31,13 @@ unsafe_impl_trusted_step![AsciiChar char i8 i16 i32 i64 i128 isize u8 u16 u32 u6
 /// The *successor* operation moves towards values that compare greater.
 /// The *predecessor* operation moves towards values that compare lesser.
 #[rustc_diagnostic_item = "range_step"]
+#[rustc_on_unimplemented(
+    message = "`std::ops::Range<{Self}>` is not an iterator",
+    label = "`Range<{Self}>` is not an iterator",
+    note = "`Range` only implements `Iterator` for select types in the standard library, \
+            particularly integers; to see the full list of types, see the documentation for the \
+            unstable `Step` trait"
+)]
 #[unstable(feature = "step_trait", issue = "42168")]
 pub trait Step: Clone + PartialOrd + Sized {
     /// Returns the bounds on the number of *successor* steps required to get from `start` to `end`
@@ -264,7 +271,7 @@ macro_rules! step_integer_impls {
     } => {
         $(
             #[allow(unreachable_patterns)]
-            #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+            #[unstable(feature = "step_trait", issue = "42168")]
             impl Step for $u_narrower {
                 step_identical_methods!();
                 step_unsigned_methods!();
@@ -298,7 +305,7 @@ macro_rules! step_integer_impls {
             }
 
             #[allow(unreachable_patterns)]
-            #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+            #[unstable(feature = "step_trait", issue = "42168")]
             impl Step for $i_narrower {
                 step_identical_methods!();
                 step_signed_methods!($u_narrower);
@@ -364,7 +371,7 @@ macro_rules! step_integer_impls {
 
         $(
             #[allow(unreachable_patterns)]
-            #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+            #[unstable(feature = "step_trait", issue = "42168")]
             impl Step for $u_wider {
                 step_identical_methods!();
                 step_unsigned_methods!();
@@ -394,7 +401,7 @@ macro_rules! step_integer_impls {
             }
 
             #[allow(unreachable_patterns)]
-            #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+            #[unstable(feature = "step_trait", issue = "42168")]
             impl Step for $i_wider {
                 step_identical_methods!();
                 step_signed_methods!($u_wider);
@@ -451,7 +458,7 @@ step_integer_impls! {
     wider than usize: [u32 i32], [u64 i64], [u128 i128];
 }
 
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+#[unstable(feature = "step_trait", issue = "42168")]
 #[cfg(not(feature = "ferrocene_subset"))]
 impl Step for char {
     #[inline]
@@ -539,7 +546,7 @@ impl Step for char {
     }
 }
 
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+#[unstable(feature = "step_trait", issue = "42168")]
 #[cfg(not(feature = "ferrocene_subset"))]
 impl Step for AsciiChar {
     #[inline]
@@ -582,8 +589,8 @@ impl Step for AsciiChar {
     }
 }
 
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
 #[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "step_trait", issue = "42168")]
 impl Step for Ipv4Addr {
     #[inline]
     fn steps_between(&start: &Ipv4Addr, &end: &Ipv4Addr) -> (usize, Option<usize>) {
@@ -615,7 +622,7 @@ impl Step for Ipv4Addr {
     }
 }
 
-#[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
+#[unstable(feature = "step_trait", issue = "42168")]
 #[cfg(not(feature = "ferrocene_subset"))]
 impl Step for Ipv6Addr {
     #[inline]
@@ -877,7 +884,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn count(self) -> usize {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end).1.expect("count overflowed usize")
@@ -1294,7 +1300,6 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         (hint.0.saturating_add(1), hint.1.and_then(|steps| steps.checked_add(1)))
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         if self.is_empty() {

@@ -694,11 +694,16 @@ Drop Order
 When a :t:`drop scope` is left, all :t:`[value]s` associated with that
 :t:`drop scope` are :t:`dropped` as follows:
 
-* :dp:`fls_g07zq3n55094`
-  :t:`[Binding]s` are :t:`dropped` in reverse declaration order.
+* :dp:`fls_W2S2FrkuedYC`
+  :t:`[Binding]s` introduced by an :t:`or-pattern` are dropped in reverse
+  declaration order, where the declaration order is defined by the first
+  :t:`pattern-without-alternation`.
 
 * :dp:`fls_a5tmilqxdb6f`
   :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.
+
+* :dp:`fls_g07zq3n55094`
+  All other :t:`bindings` are :t:`dropped` in reverse declaration order.
 
 :dp:`fls_zQGkVGWIzMQ7`
 When a :t:`drop scope` of a :t:`function` is left, then each
@@ -747,4 +752,25 @@ proceeds as follows:
        let b = PrintOnDrop("1");
    }
    let c = PrintOnDrop("2");
+
+:dp:`fls_dhfIPP4yR3Tt`
+In the following example, the drop order is ``b``, ``a`` for both calls.
+Dropping proceeds as follows:
+
+#. :dp:`fls_zxFM7EoE2Xq8`
+   The first :t:`pattern-without-alternation` ``Ok([a, b])`` declares ``a`` before ``b``.
+
+#. :dp:`fls_093YxG6YXQz2`
+   When the first call matches ``Ok([a, b])``, the :t:`[binding]s` are dropped in reverse declaration order: ``b`` then ``a``.
+
+#. :dp:`fls_gNWXh61ZXXt8`
+   When the second call matches ``Err([b, a])``, the drop order remains ``b`` then ``a`` since it is determined by the first :t:`pattern-without-alternation`.
+
+.. code-block:: rust
+
+   fn drop_order<T>((Ok([a, b]) | Err([b, a])): Result<[T; 2], [T; 2]>) {}
+
+   drop_order(Ok([PrintOnDrop("1"), PrintOnDrop("2")]));
+
+   drop_order(Err([PrintOnDrop("2"), PrintOnDrop("1")]));
 

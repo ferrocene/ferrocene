@@ -3741,6 +3741,15 @@ tests for a less-than-or-equals relationship.
 :dp:`fls_ft5aeo4ilgwc`
 See :s:`LessThanOrEqualsExpression`.
 
+
+.. _fls_DdZ1ZwjLZTeG:
+
+let binding
+^^^^^^^^^^^
+
+:dp:`fls_sw6HrsxsnG2y`
+A :dt:`let binding` is the :t:`binding` introduced by a :t:`let statement`, an :t:`if let expression`, or a :t:`while let loop expression`.
+
 .. _fls_hqj80jHcxEBB:
 
 let initializer
@@ -4713,6 +4722,18 @@ opt-out trait bound
 An :dt:`opt-out trait bound` is a :t:`trait bound` with :s:`Punctuation` ``?``
 that nullifies an implicitly added :t:`trait bound`.
 
+
+.. _fls_LnPDQW3bnNUw:
+
+or-pattern
+^^^^^^^^^^
+
+:dp:`fls_LnPDQW3bnNUw`
+An :dt:`or-pattern` is a :t:`pattern` that matches on one of two or more :t:`[pattern-without-alternation]s` and or-s them using character 0x7C (vertical line, i.e. ``|``).
+
+:dp:`fls_urIJ5JNHLhm6`
+See :s:`Pattern`.
+
 .. _fls_gllzixm9yt9w:
 
 outer attribute
@@ -4969,8 +4990,7 @@ pattern matching
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_y3oputy9e0sz`
-:dt:`Pattern matching` is the process of matching a :t:`pattern` against a
-:t:`value`.
+:t:`Pattern matching` is the process of matching a :t:`pattern` against a :t:`value`.
 
 .. _fls_cptagvgpgnze:
 

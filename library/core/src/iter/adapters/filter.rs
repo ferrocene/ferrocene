@@ -5,7 +5,6 @@ use core::mem::MaybeUninit;
 #[cfg(not(feature = "ferrocene_subset"))]
 use core::ops::ControlFlow;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
@@ -14,6 +13,11 @@ use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ops::Try;
+
+// Ferrocene addition: imports for the certified subset
+#[rustfmt::skip]
+#[cfg(feature = "ferrocene_subset")]
+use crate::iter::TrustedLen;
 
 /// An iterator that filters the elements of `iter` with `predicate`.
 ///
@@ -73,7 +77,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<I: fmt::Debug, P> fmt::Debug for Filter<I, P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -141,7 +144,6 @@ where
     //
     // Using the branchless version will also simplify the LLVM byte code, thus
     // leaving more budget for LLVM optimizations.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn count(self) -> usize {
         #[inline]
@@ -237,7 +239,6 @@ unsafe impl<I: InPlaceIterable, P> InPlaceIterable for Filter<I, P> {
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait SpecAssumeCount {
     /// # Safety
     ///
@@ -249,7 +250,6 @@ trait SpecAssumeCount {
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator> SpecAssumeCount for I {
     #[inline]
     #[rustc_inherit_overflow_checks]
@@ -262,7 +262,6 @@ impl<I: Iterator> SpecAssumeCount for I {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: TrustedLen> SpecAssumeCount for I {
     #[inline]
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {

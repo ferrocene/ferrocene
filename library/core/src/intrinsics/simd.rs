@@ -39,11 +39,7 @@ pub const unsafe fn simd_extract<T, U>(x: T, idx: u32) -> U;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn simd_insert_dyn<T, U>(mut x: T, idx: u32, val: U) -> T {
-    // SAFETY: `idx` must be in-bounds
-    unsafe { (&raw mut x).cast::<U>().add(idx as usize).write(val) }
-    x
-}
+pub const unsafe fn simd_insert_dyn<T, U>(x: T, idx: u32, val: U) -> T;
 
 /// Extracts an element from a vector.
 ///
@@ -57,10 +53,14 @@ pub unsafe fn simd_insert_dyn<T, U>(mut x: T, idx: u32, val: U) -> T {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U {
-    // SAFETY: `idx` must be in-bounds
-    unsafe { (&raw const x).cast::<U>().add(idx as usize).read() }
-}
+pub const unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U;
+
+/// Creates a vector where every lane has the provided value.
+///
+/// `T` must be a vector with element type `U`.
+#[rustc_nounwind]
+#[rustc_intrinsic]
+pub const unsafe fn simd_splat<T, U>(value: U) -> T;
 
 /// Adds two simd vectors elementwise.
 ///

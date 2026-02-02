@@ -43,9 +43,7 @@ pub use self::methods::encode_utf16_raw; // perma-unstable
 pub use self::methods::{encode_utf8_raw, encode_utf8_raw_unchecked}; // perma-unstable
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use self::methods::EscapeDebugExtArgs;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
@@ -57,6 +55,14 @@ use crate::fmt::{self, Write};
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
+
+// Ferrocene addition: imports for certified subset
+#[cfg(feature = "ferrocene_subset")]
+#[rustfmt::skip]
+use crate::{
+    escape::{EscapeIterInner, MaybeEscaped},
+    fmt,
+};
 
 // UTF-8 ranges and tags for encoding characters
 const TAG_CONT: u8 = 0b1000_0000;
@@ -334,10 +340,8 @@ impl fmt::Display for EscapeDefault {
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 #[derive(Clone, Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct EscapeDebug(EscapeIterInner<10, MaybeEscaped>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl EscapeDebug {
     #[inline]
     const fn printable(chr: char) -> Self {
@@ -356,7 +360,6 @@ impl EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Iterator for EscapeDebug {
     type Item = char;
 
@@ -378,7 +381,6 @@ impl Iterator for EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDebug {
     fn len(&self) -> usize {
         self.0.len()
@@ -390,7 +392,6 @@ impl ExactSizeIterator for EscapeDebug {
 impl FusedIterator for EscapeDebug {}
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for EscapeDebug {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

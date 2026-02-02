@@ -3,7 +3,6 @@
 
 from docutils import nodes
 
-
 ROLE = "syntax"
 NAME = "syntaxes"
 PRETTY_NAME = "syntactic category"

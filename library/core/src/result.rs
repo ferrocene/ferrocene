@@ -544,20 +544,14 @@
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{convert, fmt, hint};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{convert, hint};
 
 /// `Result` is a type that represents either success ([`Ok`]) or failure ([`Err`]).
 ///
 /// See the [module documentation](self) for details.
 #[doc(search_unbox)]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, Debug, Hash))]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(PartialEq, PartialOrd, Eq, Ord))]
+#[derive(Copy, Debug, Hash)]
+#[derive_const(PartialEq, PartialOrd, Eq, Ord)]
 #[must_use = "this `Result` may be an `Err` variant, which should be handled"]
 #[rustc_diagnostic_item = "Result"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -1187,22 +1181,13 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
-    // Ferrocene: blocked on Debug
-    #[cfg(not(feature = "ferrocene_subset"))]
-    pub fn expect(
-        self,
-        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
-    ) -> T
+    pub fn expect(self, msg: &str) -> T
     where
         E: fmt::Debug,
     {
         match self {
             Ok(t) => t,
-            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             Err(e) => unwrap_failed(msg, &e),
-            #[cfg(feature = "ferrocene_certified_runtime")]
-            Err(_) => crate::panicking::panic(msg),
         }
     }
 
@@ -1314,19 +1299,12 @@ impl<T, E> Result<T, E> {
     #[stable(feature = "result_expect_err", since = "1.17.0")]
     // Ferrocene: blocked on Debug
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub fn expect_err(
-        self,
-        #[cfg(not(feature = "ferrocene_certified_runtime"))] msg: &str,
-        #[cfg(feature = "ferrocene_certified_runtime")] msg: &'static str,
-    ) -> E
+    pub fn expect_err(self, msg: &str) -> E
     where
         T: fmt::Debug,
     {
         match self {
-            #[cfg(not(feature = "ferrocene_certified_runtime"))]
             Ok(t) => unwrap_failed(msg, &t),
-            #[cfg(feature = "ferrocene_certified_runtime")]
-            Ok(_) => crate::panicking::panic(msg),
             Err(e) => e,
         }
     }
@@ -1387,7 +1365,7 @@ impl<T, E> Result<T, E> {
     /// let s: String = only_good_news().into_ok();
     /// println!("{s}");
     /// ```
-    #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
+    #[unstable(feature = "unwrap_infallible", issue = "61695")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
@@ -1426,7 +1404,7 @@ impl<T, E> Result<T, E> {
     /// let error: String = only_bad_news().into_err();
     /// println!("{error}");
     /// ```
-    #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
+    #[unstable(feature = "unwrap_infallible", issue = "61695")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
@@ -1908,8 +1886,6 @@ impl<T, E> Result<Result<T, E>, E> {
 #[inline(never)]
 #[cold]
 #[track_caller]
-// Ferrocene: blocked on Debug
-#[cfg(not(feature = "ferrocene_subset"))]
 fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
     panic!("{msg}: {error:?}");
 }
@@ -1922,8 +1898,6 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 #[inline]
 #[cold]
 #[track_caller]
-// Ferrocene: blocked on Debug
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
     panic!()
 }
@@ -1933,7 +1907,6 @@ const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, E> Clone for Result<T, E>
 where
     T: Clone,

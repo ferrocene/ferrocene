@@ -2,7 +2,6 @@
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
@@ -63,7 +62,7 @@ use crate::hash::Hash;
 /// [`to_raw_parts`]: *const::to_raw_parts
 #[lang = "pointee_trait"]
 #[rustc_deny_explicit_impl]
-#[rustc_do_not_implement_via_object]
+#[rustc_dyn_incompatible_trait]
 pub trait Pointee: PointeeSized {
     /// The type for metadata in pointers and references to `Self`.
     #[lang = "metadata_type"]
@@ -72,13 +71,7 @@ pub trait Pointee: PointeeSized {
     // in sync with those here:
     // NOTE: The metadata of `dyn Trait + 'a` is `DynMetadata<dyn Trait + 'a>`
     // so a `'static` bound must not be added.
-    #[cfg(not(feature = "ferrocene_subset"))]
     type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
-    /// The type for metadata in pointers and references to `Self`.
-    #[lang = "metadata_type"]
-    #[cfg(feature = "ferrocene_subset")]
-    #[rustfmt::skip]
-    type Metadata: /* fmt::Debug */ Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.
@@ -183,7 +176,6 @@ unsafe extern "C" {
     type VTable;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     /// When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout
     /// computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead
@@ -200,6 +192,7 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 
     /// Returns the size of the type associated with this vtable.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     pub fn size_of(self) -> usize {
         // Note that "size stored in vtable" is *not* the same as "result of size_of_val_raw".
@@ -210,6 +203,7 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 
     /// Returns the alignment of the type associated with this vtable.
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     pub fn align_of(self) -> usize {
         // SAFETY: DynMetadata always contains a valid vtable pointer
@@ -217,6 +211,7 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 
     /// Returns the size and alignment together as a `Layout`
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     pub fn layout(self) -> crate::alloc::Layout {
         // SAFETY: the compiler emitted this vtable for a concrete Rust type which
@@ -225,12 +220,9 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<Dyn: PointeeSized> Send for DynMetadata<Dyn> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<Dyn: PointeeSized> Sync for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata").field(&self.vtable_ptr()).finish()
@@ -242,10 +234,8 @@ impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
 #[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Unpin for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Copy for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
     #[inline]
     fn clone(&self) -> Self {

@@ -401,14 +401,6 @@ fn binop_common<F1: Float, F2: Float>(
         return SKIP;
     }
 
-    // FIXME(#939): this should not be skipped, there is a bug in our implementationi.
-    if ctx.base_name == BaseName::FmaximumNum
-        && ctx.basis == CheckBasis::Mpfr
-        && ((input.0.is_nan() && actual.is_nan() && expected.is_nan()) || input.1.is_nan())
-    {
-        return XFAIL_NOCHECK;
-    }
-
     /* FIXME(#439): our fmin and fmax do not compare signed zeros */
 
     if ctx.base_name == BaseName::Fmin

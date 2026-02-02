@@ -8,13 +8,12 @@ use std::path::PathBuf;
 use build_helper::exit;
 
 use crate::builder::Builder;
-use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
-use crate::{BootstrapCommand, Compiler, DocTests, Mode, t};
+use crate::{BootstrapCommand, Compiler, DocTests, Mode};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
     if !builder.config.profiler {
@@ -104,21 +103,14 @@ pub(super) fn instrumented_binaries(
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
 
-            let res_doctest_bins = std::fs::read_dir(&paths.doctests_bins_dir);
-
             let doctests_bins = (builder.doc_tests != DocTests::No)
-                .then(|| t!(res_doctest_bins, "cannot read doctests bins directory"))
+                .then(|| builder.read_dir(&paths.doctests_bins_dir))
                 .into_iter()
-                .flat_map(|read_dir| read_dir)
-                .flat_map(|res| {
-                    let path = t!(res, "cannot inspect doctest bin directory").path();
-                    t!(std::fs::read_dir(path), "cannot read doctest bin directory").into_iter()
-                });
+                .flatten()
+                .flat_map(|entry| builder.read_dir(&entry.path()));
 
-            for res in
-                t!(std::fs::read_dir(out_dir), "cannot read deps directory").chain(doctests_bins)
-            {
-                let path = t!(res, "cannot inspect deps file").path();
+            for entry in builder.read_dir(&out_dir).chain(doctests_bins) {
+                let path = entry.path();
 
                 #[cfg(target_os = "windows")]
                 let is_executable = path.extension().is_some_and(|e| e == "exe" || e == "dll");
@@ -131,7 +123,12 @@ pub(super) fn instrumented_binaries(
                 }
             }
 
-            assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
+            if !builder.config.dry_run() {
+                assert!(
+                    !instrumented_binaries.is_empty(),
+                    "could not find the instrumented binaries"
+                );
+            }
             instrumented_binaries
         }
     }
@@ -180,7 +177,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     if builder.doc_tests != DocTests::No {
         // Remove the doctest binaries so they're not distributed afterwards.
-        t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
+        builder.remove_dir(&paths.doctests_bins_dir);
     }
 }
 

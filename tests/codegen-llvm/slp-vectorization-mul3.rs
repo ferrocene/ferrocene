@@ -3,7 +3,6 @@
 //@ compile-flags: -O
 //@ min-llvm-version: 18.0
 
-
 #![crate_type = "lib"]
 
 // CHECK-LABEL: @mul3

@@ -133,6 +133,7 @@ impl AttributeKind {
             RustcParenSugar(..) => No,
             RustcPassByValue(..) => Yes,
             RustcPassIndirectlyInNonRusticAbis(..) => No,
+            RustcPreserveUbChecks => No,
             RustcPubTransparent(..) => Yes,
             RustcReallocator => No,
             RustcScalableVector { .. } => Yes,

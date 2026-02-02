@@ -31,7 +31,8 @@ use crate::attributes::crate_level::{
     CrateNameParser, CrateTypeParser, MoveSizeLimitParser, NeedsPanicRuntimeParser,
     NoBuiltinsParser, NoCoreParser, NoMainParser, NoStdParser, PanicRuntimeParser,
     PatternComplexityLimitParser, ProfilerRuntimeParser, RecursionLimitParser,
-    RustcCoherenceIsCoreParser, TypeLengthLimitParser, WindowsSubsystemParser,
+    RustcCoherenceIsCoreParser, RustcPreserveUbChecksParser, TypeLengthLimitParser,
+    WindowsSubsystemParser,
 };
 use crate::attributes::debugger::DebuggerViualizerParser;
 use crate::attributes::deprecation::DeprecationParser;
@@ -309,6 +310,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcNounwindParser>>,
         Single<WithoutArgs<RustcOffloadKernelParser>>,
         Single<WithoutArgs<RustcPassIndirectlyInNonRusticAbisParser>>,
+        Single<WithoutArgs<RustcPreserveUbChecksParser>>,
         Single<WithoutArgs<RustcReallocatorParser>>,
         Single<WithoutArgs<RustcShouldNotBeCalledOnConstItems>>,
         Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,

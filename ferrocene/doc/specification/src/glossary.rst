@@ -3164,10 +3164,7 @@ implied bound
 ^^^^^^^^^^^^^
 
 :dp:`fls_t77d8xwG1l9Q`
-An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
-is the byproduct of relations between :t:`[lifetime parameter]s` and
-:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a
-:t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
+An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is the byproduct of relations between :t:`[lifetime parameter]s` and :t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a :t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
 
 .. _fls_3lo8ygoyxxyf:
 

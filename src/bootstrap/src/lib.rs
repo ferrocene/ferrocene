@@ -833,9 +833,6 @@ impl Build {
                 self.config.set_dry_run(DryRun::Disabled);
                 let builder = builder::Builder::new(self);
                 builder.execute_cli();
-
-                // Ferrocene addition
-                generate_coverage_report(&builder);
             }
         } else {
             #[cfg(feature = "tracing")]

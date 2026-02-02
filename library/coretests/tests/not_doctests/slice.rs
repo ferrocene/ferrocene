@@ -139,3 +139,13 @@ fn slice_ascii_simple() {
     let sparkle_heart = [240, 159, 146, 150];
     assert!(!core::slice::is_ascii_simple(&sparkle_heart));
 }
+
+// covers: `core::slice::ascii::is_ascii_simple`
+#[test]
+fn slice_align_to_mut() {
+    let slice: &mut [i32] = &mut [1, 2, 3, 4, 5];
+    let (head, body, tail) = unsafe { slice.align_to_mut::<u64>() };
+    assert_eq!(head, [1]);
+    assert_eq!(body, [12884901890, 21474836484]);
+    assert_eq!(tail, []);
+}

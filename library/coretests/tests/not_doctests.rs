@@ -718,7 +718,7 @@ fn non_power_of_two_align_offset() {
 #[test]
 fn zst_sub_is_noop() {
     let ptr = core::ptr::NonNull::from_ref(&());
-    // SAFETY: `ptr` is a pointer to a ZST so substracting anything from it is a noop.
+    // SAFETY: `ptr` is a pointer to a ZST so subtracting anything from it is a noop.
     assert_eq!(ptr, unsafe { ptr.sub(isize::MAX as usize) });
     assert_eq!(ptr.as_ptr(), unsafe { ptr.as_ptr().sub(isize::MAX as usize) });
 }

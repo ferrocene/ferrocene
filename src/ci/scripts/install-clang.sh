@@ -13,26 +13,7 @@ source "$(cd "$(dirname "$0")" && pwd)/../shared.sh"
 # Try to keep this in sync with src/ci/docker/scripts/build-clang.sh
 LLVM_VERSION="20.1.3"
 
-if isMacOS; then
-    # Clang comes preinstalled on macOS via Xcode, so let's use that.
-    #
-    # Besides, it's kind of a hazzle to install it manually, since LLVM no
-    # longer provide prebuilt macOS x86_64 binaries.
-    bindir="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/bin"
-
-    ciCommandSetEnv CC "${bindir}/clang"
-    ciCommandSetEnv CXX "${bindir}/clang++"
-
-    # macOS 10.15 onwards doesn't have libraries in /usr/include anymore:
-    # those are now located deep into the filesystem, under Xcode's own files.
-    #
-    # The binary in `/usr/bin/clang` is a magical "trampoline" binary that
-    # sets this environment variable and invokes the real Clang binary, which
-    # makes invoking `clang` still work in the common case, but since we point
-    # to the real Clang binary directly above, we need to also set this
-    # variable ourselves.
-    ciCommandSetEnv SDKROOT "$(xcrun --sdk macosx --show-sdk-path)"
-elif isWindows && ! isKnownToBeMingwBuild; then
+if isWindows && ! isKnownToBeMingwBuild; then
     # If we're compiling for MSVC then we, like most other distribution builders,
     # switch to clang as the compiler. This'll allow us eventually to enable LTO
     # amongst LLVM and rustc. Note that we only do this on MSVC as I don't think

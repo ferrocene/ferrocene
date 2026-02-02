@@ -266,6 +266,15 @@ impl MaybeOverride<(f64,)> for SpecialCase {
             return XFAIL_NOCHECK;
         }
 
+        if ctx.base_name == BaseName::Acosh
+            && input.0 < 1.0
+            && actual.is_nan()
+            && ctx.basis == CheckBasis::Musl
+        {
+            // Musl sometimes evaluates acosh(negative) to a numeric value
+            return XFAIL_NOCHECK;
+        }
+
         // maybe_check_nan_bits(actual, expected, ctx)
         unop_common(input, actual, expected, ctx)
     }
@@ -295,19 +304,6 @@ fn unop_common<F1: Float, F2: Float>(
     expected: F2,
     ctx: &CheckCtx,
 ) -> CheckAction {
-    if ctx.base_name == BaseName::Acosh
-        && input.0 < F1::NEG_ONE
-        && !(expected.is_nan() && actual.is_nan())
-    {
-        // acoshf is undefined for x <= 1.0, but we return a random result at lower values.
-
-        if ctx.basis == CheckBasis::Musl {
-            return XFAIL_NOCHECK;
-        }
-
-        return XFAIL("acoshf undefined");
-    }
-
     if (ctx.base_name == BaseName::Lgamma || ctx.base_name == BaseName::LgammaR)
         && input.0 < F1::ZERO
         && !input.0.is_infinite()

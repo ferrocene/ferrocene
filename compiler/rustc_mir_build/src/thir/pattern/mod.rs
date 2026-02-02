@@ -8,13 +8,14 @@ use std::cmp::Ordering;
 use std::sync::Arc;
 
 use rustc_abi::{FieldIdx, Integer};
+use rustc_ast::LitKind;
 use rustc_data_structures::assert_matches;
 use rustc_errors::codes::*;
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{self as hir, RangeEnd};
 use rustc_index::Idx;
-use rustc_middle::mir::interpret::LitToConstInput;
+use rustc_middle::mir::interpret::{LitToConstInput, const_lit_matches_ty};
 use rustc_middle::thir::{
     Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, Pat, PatKind, PatRange, PatRangeBoundary,
 };
@@ -197,8 +198,6 @@ impl<'tcx> PatCtxt<'tcx> {
         expr: Option<&'tcx hir::PatExpr<'tcx>>,
         ty: Ty<'tcx>,
     ) -> Result<(), ErrorGuaranteed> {
-        use rustc_ast::ast::LitKind;
-
         let Some(expr) = expr else {
             return Ok(());
         };
@@ -696,7 +695,17 @@ impl<'tcx> PatCtxt<'tcx> {
 
                 let pat_ty = self.typeck_results.node_type(pat.hir_id);
                 let lit_input = LitToConstInput { lit: lit.node, ty: pat_ty, neg: *negated };
-                let constant = self.tcx.at(expr.span).lit_to_const(lit_input);
+                let constant = const_lit_matches_ty(self.tcx, &lit.node, pat_ty, *negated)
+                    .then(|| self.tcx.at(expr.span).lit_to_const(lit_input))
+                    .flatten()
+                    .map(|v| ty::Const::new_value(self.tcx, v.valtree, pat_ty))
+                    .unwrap_or_else(|| {
+                        ty::Const::new_error_with_message(
+                            self.tcx,
+                            expr.span,
+                            "literal does not match expected type",
+                        )
+                    });
                 self.const_to_pat(constant, pat_ty, expr.hir_id, lit.span)
             }
         }

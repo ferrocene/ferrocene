@@ -1412,7 +1412,7 @@ rustc_queries! {
     // FIXME get rid of this with valtrees
     query lit_to_const(
         key: LitToConstInput<'tcx>
-    ) -> ty::Const<'tcx> {
+    ) -> Option<ty::Value<'tcx>> {
         desc { "converting literal to const" }
     }
 

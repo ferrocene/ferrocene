@@ -59,7 +59,10 @@ fn recurse_build<'tcx>(
         }
         &ExprKind::Literal { lit, neg } => {
             let sp = node.span;
-            tcx.at(sp).lit_to_const(LitToConstInput { lit: lit.node, ty: node.ty, neg })
+            match tcx.at(sp).lit_to_const(LitToConstInput { lit: lit.node, ty: node.ty, neg }) {
+                Some(value) => ty::Const::new_value(tcx, value.valtree, value.ty),
+                None => ty::Const::new_misc_error(tcx),
+            }
         }
         &ExprKind::NonHirLiteral { lit, user_ty: _ } => {
             let val = ty::ValTree::from_scalar_int(tcx, lit);

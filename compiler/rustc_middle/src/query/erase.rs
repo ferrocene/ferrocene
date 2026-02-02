@@ -256,6 +256,10 @@ impl Erasable for Option<ty::EarlyBinder<'_, Ty<'_>>> {
     type Storage = [u8; size_of::<Option<ty::EarlyBinder<'static, Ty<'static>>>>()];
 }
 
+impl Erasable for Option<ty::Value<'_>> {
+    type Storage = [u8; size_of::<Option<ty::Value<'static>>>()];
+}
+
 impl Erasable for rustc_hir::MaybeOwner<'_> {
     type Storage = [u8; size_of::<rustc_hir::MaybeOwner<'static>>()];
 }

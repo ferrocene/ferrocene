@@ -17,12 +17,6 @@ LL |     let b = [0; ()];
    |                 ^^ expected `usize`, found `()`
 
 error[E0308]: mismatched types
-  --> $DIR/repeat_count.rs:33:17
-   |
-LL |     let g = [0; G { g: () }];
-   |                 ^^^^^^^^^^^ expected `usize`, found `G`
-
-error[E0308]: mismatched types
   --> $DIR/repeat_count.rs:12:17
    |
 LL |     let c = [0; true];
@@ -67,6 +61,12 @@ help: change the type of the numeric literal from `u8` to `usize`
 LL -     let f = [0; 4u8];
 LL +     let f = [0; 4usize];
    |
+
+error[E0308]: mismatched types
+  --> $DIR/repeat_count.rs:33:17
+   |
+LL |     let g = [0; G { g: () }];
+   |                 ^^^^^^^^^^^ expected `usize`, found `G`
 
 error: aborting due to 9 previous errors
 

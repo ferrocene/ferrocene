@@ -35,7 +35,7 @@ use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_infer::traits::DynCompatibilityViolation;
 use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::middle::stability::AllowUnstable;
-use rustc_middle::mir::interpret::LitToConstInput;
+use rustc_middle::mir::interpret::{LitToConstInput, const_lit_matches_ty};
 use rustc_middle::ty::print::PrintPolyTraitRefExt as _;
 use rustc_middle::ty::{
     self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, Ty, TyCtxt,
@@ -2803,8 +2803,17 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         span: Span,
     ) -> Const<'tcx> {
         let tcx = self.tcx();
+        if let LitKind::Err(guar) = *kind {
+            return ty::Const::new_error(tcx, guar);
+        }
         let input = LitToConstInput { lit: *kind, ty, neg };
-        tcx.at(span).lit_to_const(input)
+        match tcx.at(span).lit_to_const(input) {
+            Some(value) => ty::Const::new_value(tcx, value.valtree, value.ty),
+            None => {
+                let e = tcx.dcx().span_err(span, "type annotations needed for the literal");
+                ty::Const::new_error(tcx, e)
+            }
+        }
     }
 
     #[instrument(skip(self), level = "debug")]
@@ -2833,11 +2842,15 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             _ => None,
         };
 
-        lit_input
-            // Allow the `ty` to be an alias type, though we cannot handle it here, we just go through
-            // the more expensive anon const code path.
-            .filter(|l| !l.ty.has_aliases())
-            .map(|l| tcx.at(expr.span).lit_to_const(l))
+        lit_input.and_then(|l| {
+            if const_lit_matches_ty(tcx, &l.lit, l.ty, l.neg) {
+                tcx.at(expr.span)
+                    .lit_to_const(l)
+                    .map(|value| ty::Const::new_value(tcx, value.valtree, value.ty))
+            } else {
+                None
+            }
+        })
     }
 
     fn require_type_const_attribute(

@@ -44,3 +44,12 @@ fn test_formatting_options_align_none() {
     let alignment = None;
     assert_eq!(fo.align(alignment).get_align(), alignment);
 }
+
+// Covers `core::fmt::Arguments::<'a>::estimated_capacity`
+#[test]
+fn test_arguments_estimated_capacity_n_128() {
+    let a = format_args!(
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut e"
+    ); // string with length 128
+    assert_eq!(a.estimated_capacity(), 128);
+}

@@ -72,8 +72,8 @@ use crate::attributes::rustc_allocator::{
     RustcDeallocatorParser, RustcReallocatorParser,
 };
 use crate::attributes::rustc_dump::{
-    RustcDumpDefParents, RustcDumpItemBounds, RustcDumpPredicates, RustcDumpUserArgs,
-    RustcDumpVtable,
+    RustcDumpDefParentsParser, RustcDumpItemBoundsParser, RustcDumpPredicatesParser,
+    RustcDumpUserArgsParser, RustcDumpVtableParser,
 };
 use crate::attributes::rustc_internal::{
     RustcHasIncoherentInherentImplsParser, RustcLayoutParser, RustcLayoutScalarValidRangeEndParser,
@@ -294,11 +294,11 @@ attribute_parsers!(
         Single<WithoutArgs<RustcAllocatorZeroedParser>>,
         Single<WithoutArgs<RustcCoherenceIsCoreParser>>,
         Single<WithoutArgs<RustcDeallocatorParser>>,
-        Single<WithoutArgs<RustcDumpDefParents>>,
-        Single<WithoutArgs<RustcDumpItemBounds>>,
-        Single<WithoutArgs<RustcDumpPredicates>>,
-        Single<WithoutArgs<RustcDumpUserArgs>>,
-        Single<WithoutArgs<RustcDumpVtable>>,
+        Single<WithoutArgs<RustcDumpDefParentsParser>>,
+        Single<WithoutArgs<RustcDumpItemBoundsParser>>,
+        Single<WithoutArgs<RustcDumpPredicatesParser>>,
+        Single<WithoutArgs<RustcDumpUserArgsParser>>,
+        Single<WithoutArgs<RustcDumpVtableParser>>,
         Single<WithoutArgs<RustcHasIncoherentInherentImplsParser>>,
         Single<WithoutArgs<RustcLintOptTyParser>>,
         Single<WithoutArgs<RustcLintQueryInstabilityParser>>,

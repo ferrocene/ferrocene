@@ -22,7 +22,9 @@ use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
 use rustc_middle::ty::adjustment::{CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::{
-    self, AdtDef, Binder, ExistentialPredicate, GenericArgs, GenericArgsRef, Instance, PolyTraitRef, TraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor, TypingEnv
+    self, AdtDef, Binder, ExistentialPredicate, GenericArgs, GenericArgsRef, Instance,
+    PolyTraitRef, TraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor,
+    TypingEnv,
 };
 use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
@@ -115,7 +117,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 return None;
             }
             thir::ExprKind::PointerCoercion {
-                cast: PointerCoercion::ReifyFnPointer(_),
+                cast: PointerCoercion::ReifyFnPointer(_), // | PointerCoercion::ClosureFnPointer(_),
                 source,
                 ..
             } => {
@@ -143,9 +145,9 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     Some(UseKind::FnPtrCast(instance))
                 }
             }
-            None => None,
+            // None => None,
             // TODO: buggy!!
-            // None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
+            None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
         }
     }
 
@@ -205,14 +207,20 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 continue;
             };
             match self.find_trait_impl(trait_ref, dest.span) {
-                ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, args: _, nested: _ }) => {
+                ImplSource::UserDefined(ImplSourceUserDefinedData {
+                    impl_def_id,
+                    args: _,
+                    nested: _,
+                }) => {
                     if let Some(unvalidated) = self.find_unvalidated_impl_fn(impl_def_id) {
                         return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
                     }
                 }
                 // builtin impls are always ok
                 ImplSource::Builtin(..) => continue,
-                param @ ImplSource::Param(_) => span_bug!(dest.span, "don't know how to handle nested obligations in {param:?}"),
+                param @ ImplSource::Param(_) => {
+                    span_bug!(dest.span, "don't know how to handle nested obligations in {param:?}")
+                }
             }
         }
         None
@@ -260,7 +268,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
                 // We've finished handling CoerceUnsized; now handle Unsize.
                 (ty::Ref(_, a, _), ty::Ref(_, b, _)) | (ty::RawPtr(a, _), ty::RawPtr(b, _)) => {
-                    (src_inner, dst_inner) = tcx.struct_lockstep_tails_for_codegen(*a, *b, typing_env);
+                    (src_inner, dst_inner) =
+                        tcx.struct_lockstep_tails_for_codegen(*a, *b, typing_env);
                 }
 
                 // Handle CoerceUnsized
@@ -282,7 +291,9 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                         None => {
                             // Iterate this struct looking for a `!Sized` field.
                             let mut unsized_field = None;
-                            for (idx, def) in dst_def.variant(VariantIdx::ZERO).fields.iter_enumerated() {
+                            for (idx, def) in
+                                dst_def.variant(VariantIdx::ZERO).fields.iter_enumerated()
+                            {
                                 if !def.ty(tcx, dst_args).is_sized(tcx, typing_env) {
                                     unsized_field = Some(idx);
                                     break;
@@ -296,7 +307,10 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     src_inner = get_adt_field(*src_def, src_args, field);
                     dst_inner = get_adt_field(*dst_def, dst_args, field);
                 }
-                _ => span_bug!(span, "mismatched types trying to coerce from {src_inner:?} to {dst_inner:?}"),
+                _ => span_bug!(
+                    span,
+                    "mismatched types trying to coerce from {src_inner:?} to {dst_inner:?}"
+                ),
             }
         }
     }
@@ -328,10 +342,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
     /// FIXME: list all uncertified functions, not just the first.
-    fn find_unvalidated_impl_fn(
-        &self,
-        impl_block: DefId,
-    ) -> Option<DefId> {
+    fn find_unvalidated_impl_fn(&self, impl_block: DefId) -> Option<DefId> {
         let tcx = self.linter.tcx;
 
         let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
@@ -346,10 +357,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             // impl block.
             let impl_fn = *trait_to_impl_map.get(trait_item).unwrap_or(trait_item);
 
-            if matches!(
-                item_is_validated(tcx, impl_fn),
-                ValidatedStatus::Validated { .. }
-            ) {
+            if matches!(item_is_validated(tcx, impl_fn), ValidatedStatus::Validated { .. }) {
                 continue;
             }
 
@@ -362,11 +370,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
     /// This function never fails. `None` indicates this is a builtin impl, not that the trait is
     /// unimplemented.
-    fn find_trait_impl(
-        &self,
-        trait_ref: PolyTraitRef<'tcx>,
-        span: Span,
-    ) -> ImplSource<'tcx, ()> {
+    fn find_trait_impl(&self, trait_ref: PolyTraitRef<'tcx>, span: Span) -> ImplSource<'tcx, ()> {
         match self.try_find_trait_impl(trait_ref, span) {
             Some(found) => found,
             None => span_bug!(span, "failed to resolve impl: {trait_ref:?}"),
@@ -560,7 +564,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 /// Given a Rust type, find (at any level of nesting) `dyn Trait` objects contained within it that
 /// have at least one method.
 /// For example, `dyn Send + Sync + Display + Clone` would return `[Display, Clone]`.
-fn dyn_trait_refs<'tcx>(tcx: TyCtxt<'tcx>, source_ty: Ty<'tcx>, dst_ty: Ty<'tcx>) -> Vec<Binder<'tcx, TraitRef<'tcx>>> {
+fn dyn_trait_refs<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    source_ty: Ty<'tcx>,
+    dst_ty: Ty<'tcx>,
+) -> Vec<Binder<'tcx, TraitRef<'tcx>>> {
     struct FindDynTraitVisitor<'tcx>(TyCtxt<'tcx>, Ty<'tcx>);
 
     impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for FindDynTraitVisitor<'tcx> {

@@ -2358,6 +2358,7 @@ symbols! {
         type_changing_struct_update,
         type_id,
         type_id_eq,
+        type_id_vtable,
         type_info,
         type_ir,
         type_ir_infer_ctxt_like,

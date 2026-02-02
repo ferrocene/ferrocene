@@ -213,6 +213,7 @@ fn intrinsic_operation_unsafety(tcx: TyCtxt<'_>, intrinsic_id: LocalDefId) -> hi
         | sym::truncf128
         | sym::type_id
         | sym::type_id_eq
+        | sym::type_id_vtable
         | sym::type_name
         | sym::type_of
         | sym::ub_checks
@@ -322,6 +323,25 @@ pub(crate) fn check_intrinsic_type(
         sym::type_id_eq => {
             let type_id = tcx.type_of(tcx.lang_items().type_id().unwrap()).no_bound_vars().unwrap();
             (0, 0, vec![type_id, type_id], tcx.types.bool)
+        }
+        sym::type_id_vtable => {
+            let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, span);
+            let dyn_metadata_adt_ref = tcx.adt_def(dyn_metadata);
+            let dyn_metadata_args =
+                tcx.mk_args(&[Ty::new_ptr(tcx, tcx.types.unit, ty::Mutability::Not).into()]);
+            let dyn_ty = Ty::new_adt(tcx, dyn_metadata_adt_ref, dyn_metadata_args);
+
+            let option_did = tcx.require_lang_item(LangItem::Option, span);
+            let option_adt_ref = tcx.adt_def(option_did);
+            let option_args = tcx.mk_args(&[dyn_ty.into()]);
+            let ret_ty = Ty::new_adt(tcx, option_adt_ref, option_args);
+
+            (
+                0,
+                0,
+                vec![tcx.type_of(tcx.lang_items().type_id().unwrap()).no_bound_vars().unwrap(); 2],
+                ret_ty,
+            )
         }
         sym::type_of => (
             0,

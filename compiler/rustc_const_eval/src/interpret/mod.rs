@@ -15,7 +15,7 @@ mod projection;
 mod stack;
 mod step;
 mod traits;
-mod util;
+pub(crate) mod util;
 mod validity;
 mod visitor;
 

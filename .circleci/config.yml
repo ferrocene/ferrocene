@@ -82,5 +82,4 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
-        - equal: [<< pipeline.git.branch >>, "mh/sbom-gen"]
     jobs: [setup]

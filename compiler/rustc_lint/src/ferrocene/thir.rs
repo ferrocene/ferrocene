@@ -115,7 +115,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 return None;
             }
             thir::ExprKind::PointerCoercion {
-                cast: PointerCoercion::ReifyFnPointer(_) | PointerCoercion::ClosureFnPointer(_),
+                cast: PointerCoercion::ReifyFnPointer(_),
                 source,
                 ..
             } => {
@@ -177,7 +177,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             dest.ty
         );
 
-        if matches!(coerce_src.kind(), ty::Dynamic(..)) {
+        if matches!(coerce_src.kind(), ty::Dynamic(..) | ty::FnPtr(..)) {
             // upcasting from a `dyn Trait` to a `dyn SuperTrait`.
             // We already checked this when we originally cast to `dyn Trait`.
             return None;

@@ -204,11 +204,15 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // not possible to call any functions on this trait object, casting is always ok.
                 continue;
             };
-            let (impl_block, generics) = self.find_trait_impl(trait_ref, dest.span);
-            if let Some(unvalidated) =
-                self.find_unvalidated_impl_fn(impl_block, generics, dest.span)
-            {
-                return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
+            match self.find_trait_impl(trait_ref, dest.span) {
+                ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, args: _, nested: _ }) => {
+                    if let Some(unvalidated) = self.find_unvalidated_impl_fn(impl_def_id) {
+                        return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
+                    }
+                }
+                // builtin impls are always ok
+                ImplSource::Builtin(..) => continue,
+                param @ ImplSource::Param(_) => span_bug!(dest.span, "don't know how to handle nested obligations in {param:?}"),
             }
         }
         None
@@ -224,6 +228,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     ///
     /// See [`CoerceUnsized`](https://doc.rust-lang.org/std/ops/trait.CoerceUnsized.html) for a full
     /// list of types we need to handle here.
+    ///
+    /// This is adapted from `rustc_monomorphize::collector::find_tails_for_unsizing`.
     fn peel_unsized_tys(
         &self,
         src_ty: Ty<'tcx>,
@@ -252,9 +258,14 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 // Return now so we don't crash trying to prove that the array implements `Trait`.
                 (ty::Array(..), ty::Slice(..)) => return None,
 
+                // We've finished handling CoerceUnsized; now handle Unsize.
                 (ty::Ref(_, a, _), ty::Ref(_, b, _)) | (ty::RawPtr(a, _), ty::RawPtr(b, _)) => {
-                    src_inner = *a;
-                    dst_inner = *b;
+                    (src_inner, dst_inner) = tcx.struct_lockstep_tails_for_codegen(*a, *b, typing_env);
+                }
+
+                // Handle CoerceUnsized
+                (ty::Pat(a, _), ty::Pat(b, _)) => {
+                    (src_inner, dst_inner) = (*a, *b);
                 }
 
                 (ty::Adt(src_def, src_args), ty::Adt(dst_def, dst_args)) => {
@@ -320,8 +331,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     fn find_unvalidated_impl_fn(
         &self,
         impl_block: DefId,
-        generics: GenericArgsRef<'tcx>,
-        span: Span,
     ) -> Option<DefId> {
         let tcx = self.linter.tcx;
 
@@ -351,11 +360,13 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         return None;
     }
 
+    /// This function never fails. `None` indicates this is a builtin impl, not that the trait is
+    /// unimplemented.
     fn find_trait_impl(
         &self,
         trait_ref: PolyTraitRef<'tcx>,
         span: Span,
-    ) -> (DefId, GenericArgsRef<'tcx>) {
+    ) -> ImplSource<'tcx, ()> {
         match self.try_find_trait_impl(trait_ref, span) {
             Some(found) => found,
             None => span_bug!(span, "failed to resolve impl: {trait_ref:?}"),
@@ -376,7 +387,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         &self,
         trait_ref: PolyTraitRef<'tcx>,
         span: Span,
-    ) -> Option<(DefId, GenericArgsRef<'tcx>)> {
+    ) -> Option<ImplSource<'tcx, ()>> {
         use rustc_infer::infer::TyCtxtInferExt;
 
         let tcx = self.linter.tcx;
@@ -388,6 +399,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let mut selcx = SelectionContext::new(&infcx);
         let cause =
             ObligationCause::new(span, self.linter.item, ObligationCauseCode::ExprAssignable);
+        // Normalize the trait ref.
+        let trait_ref = tcx.normalize_erasing_regions(self.typing_env(), trait_ref);
         // method selection doesn't care about regions.
         let trait_ref = tcx.instantiate_bound_regions_with_erased(trait_ref);
         let obligation = Obligation::new(tcx, cause, param_env, trait_ref);
@@ -415,12 +428,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let normalized_impl =
             tcx.erase_and_anonymize_regions(infcx.resolve_vars_if_possible(impl_source));
         debug!("found impl {normalized_impl:?}");
-        match normalized_impl {
-            ImplSource::UserDefined(data) => Some((data.impl_def_id, data.args)),
-            ImplSource::Param(_) => None,
-            // FIXME: what to do here? this shouldn't actually prevent the cast ...
-            ImplSource::Builtin(..) => None,
-        }
+        Some(normalized_impl)
     }
 
     /// Given a call to a function-like type, return the instantiated function definition,
@@ -448,6 +456,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             // }
             // Manual impl of FnOnce.
             ty::Adt(..) => {
+                // span_bug!(span, "don't know how to handle {ty:?}");
+                // self.find_trait_impl(trait_ref, span);
                 None // TODO: currently not supported
             }
             // Reference to a function or function pointer.

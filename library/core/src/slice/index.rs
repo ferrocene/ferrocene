@@ -949,7 +949,7 @@ where
     R: ops::RangeBounds<usize>,
 {
     let len = bounds.end;
-    into_range(len, (range.start_bound().copied(), range.end_bound().copied()))
+    try_into_slice_range(len, (range.start_bound().copied(), range.end_bound().copied()))
 }
 
 /// Converts a pair of `ops::Bound`s into `ops::Range` without performing any
@@ -976,7 +976,7 @@ pub(crate) const fn into_range_unchecked(
 /// Returns `None` on overflowing indices.
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 #[inline]
-pub(crate) const fn into_range(
+pub(crate) const fn try_into_slice_range(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
 ) -> Option<ops::Range<usize>> {
@@ -1043,12 +1043,12 @@ unsafe impl<T> SliceIndex<[T]> for (ops::Bound<usize>, ops::Bound<usize>) {
 
     #[inline]
     fn get(self, slice: &[T]) -> Option<&Self::Output> {
-        into_range(slice.len(), self)?.get(slice)
+        try_into_slice_range(slice.len(), self)?.get(slice)
     }
 
     #[inline]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut Self::Output> {
-        into_range(slice.len(), self)?.get_mut(slice)
+        try_into_slice_range(slice.len(), self)?.get_mut(slice)
     }
 
     #[inline]

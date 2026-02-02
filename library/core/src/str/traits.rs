@@ -382,12 +382,12 @@ unsafe impl SliceIndex<str> for (ops::Bound<usize>, ops::Bound<usize>) {
 
     #[inline]
     fn get(self, slice: &str) -> Option<&str> {
-        crate::slice::index::into_range(slice.len(), self)?.get(slice)
+        crate::slice::index::try_into_slice_range(slice.len(), self)?.get(slice)
     }
 
     #[inline]
     fn get_mut(self, slice: &mut str) -> Option<&mut str> {
-        crate::slice::index::into_range(slice.len(), self)?.get_mut(slice)
+        crate::slice::index::try_into_slice_range(slice.len(), self)?.get_mut(slice)
     }
 
     #[inline]

@@ -575,6 +575,10 @@ impl<'a, 'sess> MetaItemListParserContext<'a, 'sess> {
         should_emit: ShouldEmit,
     ) -> PResult<'sess, MetaItemListParser> {
         let mut parser = Parser::new(psess, tokens, None);
+        if let ShouldEmit::ErrorsAndLints { recovery } = should_emit {
+            parser = parser.recovery(recovery);
+        }
+
         let mut this = MetaItemListParserContext { parser: &mut parser, should_emit };
 
         // Presumably, the majority of the time there will only be one attr.

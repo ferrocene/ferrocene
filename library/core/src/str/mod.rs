@@ -99,7 +99,7 @@ fn slice_error_fail_rt(s: &str, begin: usize, end: usize) -> ! {
 
     // 3. range is backwards.
     if begin > end {
-        panic!("begin <= end ({begin} <= {end}) when slicing `{s_trunc}`{ellipsis}")
+        panic!("begin > end ({begin} > {end}) when slicing `{s_trunc}`{ellipsis}")
     }
 
     // 4. begin is inside a character.

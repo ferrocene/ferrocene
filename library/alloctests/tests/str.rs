@@ -612,14 +612,14 @@ mod slice_index {
             data: "abcdef";
             good: data[4..4] == "";
             bad: data[4..3];
-            message: "begin <= end (4 <= 3)";
+            message: "begin > end (4 > 3)";
         }
 
         in mod rangeinclusive_neg_width {
             data: "abcdef";
             good: data[4..=3] == "";
             bad: data[4..=2];
-            message: "begin <= end (4 <= 3)";
+            message: "begin > end (4 > 3)";
         }
     }
 

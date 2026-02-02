@@ -60,7 +60,7 @@ impl Step for Sbom {
         {
             panic!("Building the Ferrocene SBOM using syft failed.");
         }
-
+    builder.info(&format!("Saving SBOM to {}", main_spdx_sbom_filepath.display()));
         let tarball = Tarball::new(builder, SBOM_CMD_NAME, &self.target.triple);
         tarball.add_file(main_spdx_sbom_filepath, ".", FileType::Regular);
         tarball.generate()

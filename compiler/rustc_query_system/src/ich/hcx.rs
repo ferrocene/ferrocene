@@ -51,21 +51,7 @@ impl<'a> StableHashingContext<'a> {
     }
 
     #[inline]
-    pub fn def_path_hash(&self, def_id: DefId) -> DefPathHash {
-        if let Some(def_id) = def_id.as_local() {
-            self.local_def_path_hash(def_id)
-        } else {
-            self.untracked.cstore.read().def_path_hash(def_id)
-        }
-    }
-
-    #[inline]
-    pub fn local_def_path_hash(&self, def_id: LocalDefId) -> DefPathHash {
-        self.untracked.definitions.read().def_path_hash(def_id)
-    }
-
-    #[inline]
-    pub fn source_map(&mut self) -> &mut CachingSourceMapView<'a> {
+    fn source_map(&mut self) -> &mut CachingSourceMapView<'a> {
         match self.caching_source_map {
             CachingSourceMap::InUse(ref mut sm) => sm,
             CachingSourceMap::Unused(sm) => {
@@ -96,7 +82,11 @@ impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
 
     #[inline]
     fn def_path_hash(&self, def_id: DefId) -> DefPathHash {
-        self.def_path_hash(def_id)
+        if let Some(def_id) = def_id.as_local() {
+            self.untracked.definitions.read().def_path_hash(def_id)
+        } else {
+            self.untracked.cstore.read().def_path_hash(def_id)
+        }
     }
 
     #[inline]

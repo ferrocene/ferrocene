@@ -359,6 +359,10 @@ where
             }
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.len.load(Ordering::Acquire)
+    }
 }
 
 #[cfg(test)]

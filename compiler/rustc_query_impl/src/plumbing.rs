@@ -24,7 +24,7 @@ use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_query_system::dep_graph::{DepNodeParams, HasDepContext};
+use rustc_query_system::dep_graph::{DepNodeParams, FingerprintStyle, HasDepContext};
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
@@ -519,7 +519,11 @@ pub(crate) fn make_dep_kind_vtable_for_query<'tcx, Q>(
 where
     Q: QueryDispatcherUnerased<'tcx>,
 {
-    let fingerprint_style = <Q::Dispatcher as QueryDispatcher>::Key::fingerprint_style();
+    let fingerprint_style = if is_anon {
+        FingerprintStyle::Opaque
+    } else {
+        <Q::Dispatcher as QueryDispatcher>::Key::fingerprint_style()
+    };
 
     if is_anon || !fingerprint_style.reconstructible() {
         return DepKindVTable {

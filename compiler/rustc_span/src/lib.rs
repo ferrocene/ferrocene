@@ -2799,7 +2799,6 @@ impl InnerSpan {
 /// instead of implementing everything in rustc_middle.
 pub trait HashStableContext {
     fn def_path_hash(&self, def_id: DefId) -> DefPathHash;
-    fn hash_spans(&self) -> bool;
     /// Accesses `sess.opts.unstable_opts.incremental_ignore_spans` since
     /// we don't have easy access to a `Session`
     fn unstable_opts_incremental_ignore_spans(&self) -> bool;
@@ -2832,7 +2831,7 @@ where
         const TAG_INVALID_SPAN: u8 = 1;
         const TAG_RELATIVE_SPAN: u8 = 2;
 
-        if !ctx.hash_spans() {
+        if !ctx.hashing_controls().hash_spans {
             return;
         }
 

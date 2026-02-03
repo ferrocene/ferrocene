@@ -86,11 +86,6 @@ impl<'a> HashStable<StableHashingContext<'a>> for ast::NodeId {
 
 impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
     #[inline]
-    fn hash_spans(&self) -> bool {
-        self.hashing_controls.hash_spans
-    }
-
-    #[inline]
     fn unstable_opts_incremental_ignore_spans(&self) -> bool {
         self.incremental_ignore_spans
     }

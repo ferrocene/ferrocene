@@ -230,7 +230,8 @@ jobs:
         # poorly with build scripts)
         cargo build -p compiler_builtins -p libm \
           --target etc/thumbv7em-none-eabi-renamed.json \
-          -Zbuild-std=core
+          -Zbuild-std=core \
+          -Zjson-target-spec
 
   # FIXME: move this target to test job once https://github.com/rust-lang/rust/pull/150138 merged.
   build-thumbv6k:
@@ -248,7 +249,8 @@ jobs:
     - run: |
         cargo build -p compiler_builtins -p libm \
           --target etc/thumbv6-none-eabi.json \
-          -Zbuild-std=core
+          -Zbuild-std=core \
+          -Zjson-target-spec
 
   benchmarks:
     name: Benchmarks

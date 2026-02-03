@@ -19,8 +19,8 @@ use rustc_middle::queries::{
 use rustc_middle::query::AsLocalKey;
 use rustc_middle::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use rustc_middle::query::plumbing::{QuerySystem, QuerySystemFns, QueryVTable};
+use rustc_middle::query::values::Value;
 use rustc_middle::ty::TyCtxt;
-use rustc_middle::values::Value;
 use rustc_query_system::dep_graph::SerializedDepNodeIndex;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{

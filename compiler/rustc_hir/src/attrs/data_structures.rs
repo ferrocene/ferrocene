@@ -1126,6 +1126,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_pass_indirectly_in_non_rustic_abis]`
     RustcPassIndirectlyInNonRusticAbis(Span),
 
+    /// Represents `#[rustc_preserve_ub_checks]`
+    RustcPreserveUbChecks,
+
     /// Represents `#[rustc_pub_transparent]` (used by the `repr_transparent_external_private_fields` lint).
     RustcPubTransparent(Span),
 

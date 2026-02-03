@@ -1,3 +1,4 @@
+use rustc_errors::inline_fluent;
 use rustc_feature::Features;
 use rustc_hir::attrs::AttributeKind::{LinkName, LinkOrdinal, LinkSection};
 use rustc_hir::attrs::*;
@@ -304,7 +305,7 @@ impl LinkParser {
                         sess,
                         sym::raw_dylib_elf,
                         nv.value_span,
-                        "link kind `raw-dylib` is unstable on ELF platforms",
+                        inline_fluent!("link kind `raw-dylib` is unstable on ELF platforms"),
                     )
                     .emit();
                 } else {
@@ -319,7 +320,7 @@ impl LinkParser {
                         sess,
                         sym::link_arg_attribute,
                         nv.value_span,
-                        "link kind `link-arg` is unstable",
+                        inline_fluent!("link kind `link-arg` is unstable"),
                     )
                     .emit();
                 }
@@ -384,7 +385,8 @@ impl LinkParser {
             return true;
         };
         if !features.link_cfg() {
-            feature_err(sess, sym::link_cfg, item.span(), "link cfg is unstable").emit();
+            feature_err(sess, sym::link_cfg, item.span(), inline_fluent!("link cfg is unstable"))
+                .emit();
         }
         *cfg = parse_cfg_entry(cx, link_cfg).ok();
         true

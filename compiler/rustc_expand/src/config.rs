@@ -86,8 +86,7 @@ pub fn features(sess: &Session, krate_attrs: &[Attribute], crate_name: Symbol) -
             if let Some(f) = REMOVED_LANG_FEATURES.iter().find(|f| name == f.feature.name) {
                 let pull_note = if let Some(pull) = f.pull {
                     format!(
-                        "; see <https://github.com/rust-lang/rust/pull/{}> for more information",
-                        pull
+                        "; see <https://github.com/rust-lang/rust/pull/{pull}> for more information",
                     )
                 } else {
                     "".to_owned()

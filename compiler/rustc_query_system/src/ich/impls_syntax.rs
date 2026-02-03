@@ -49,11 +49,7 @@ fn is_ignored_attr(name: Symbol) -> bool {
     IGNORED_ATTRIBUTES.contains(&name)
 }
 
-impl<'ctx> rustc_hir::HashStableContext for StableHashingContext<'ctx> {
-    fn hash_attr_id(&mut self, _id: &HashIgnoredAttrId, _hasher: &mut StableHasher) {
-        /* we don't hash HashIgnoredAttrId, we ignore them */
-    }
-}
+impl<'ctx> rustc_hir::HashStableContext for StableHashingContext<'ctx> {}
 
 impl<'a> HashStable<StableHashingContext<'a>> for SourceFile {
     fn hash_stable(&self, hcx: &mut StableHashingContext<'a>, hasher: &mut StableHasher) {

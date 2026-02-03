@@ -990,7 +990,7 @@ pub enum LifetimeRes {
     /// `'static` lifetime.
     Static,
     /// Resolution failure.
-    Error,
+    Error(rustc_span::ErrorGuaranteed),
     /// HACK: This is used to recover the NodeId of an elided lifetime.
     ElidedAnchor { start: NodeId, end: NodeId },
 }

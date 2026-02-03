@@ -878,7 +878,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
 
                 (hir::ParamName::Fresh, hir::LifetimeParamKind::Elided(kind))
             }
-            LifetimeRes::Static { .. } | LifetimeRes::Error => return None,
+            LifetimeRes::Static { .. } | LifetimeRes::Error(..) => return None,
             res => panic!(
                 "Unexpected lifetime resolution {:?} for {:?} at {:?}",
                 res, ident, ident.span
@@ -1931,26 +1931,29 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         source: LifetimeSource,
         syntax: LifetimeSyntax,
     ) -> &'hir hir::Lifetime {
-        let res = self.resolver.get_lifetime_res(id).unwrap_or(LifetimeRes::Error);
-        let res = match res {
-            LifetimeRes::Param { param, .. } => hir::LifetimeKind::Param(param),
-            LifetimeRes::Fresh { param, .. } => {
-                assert_eq!(ident.name, kw::UnderscoreLifetime);
-                let param = self.local_def_id(param);
-                hir::LifetimeKind::Param(param)
+        let res = if let Some(res) = self.resolver.get_lifetime_res(id) {
+            match res {
+                LifetimeRes::Param { param, .. } => hir::LifetimeKind::Param(param),
+                LifetimeRes::Fresh { param, .. } => {
+                    assert_eq!(ident.name, kw::UnderscoreLifetime);
+                    let param = self.local_def_id(param);
+                    hir::LifetimeKind::Param(param)
+                }
+                LifetimeRes::Infer => {
+                    assert_eq!(ident.name, kw::UnderscoreLifetime);
+                    hir::LifetimeKind::Infer
+                }
+                LifetimeRes::Static { .. } => {
+                    assert!(matches!(ident.name, kw::StaticLifetime | kw::UnderscoreLifetime));
+                    hir::LifetimeKind::Static
+                }
+                LifetimeRes::Error(guar) => hir::LifetimeKind::Error(guar),
+                LifetimeRes::ElidedAnchor { .. } => {
+                    panic!("Unexpected `ElidedAnchar` {:?} at {:?}", ident, ident.span);
+                }
             }
-            LifetimeRes::Infer => {
-                assert_eq!(ident.name, kw::UnderscoreLifetime);
-                hir::LifetimeKind::Infer
-            }
-            LifetimeRes::Static { .. } => {
-                assert!(matches!(ident.name, kw::StaticLifetime | kw::UnderscoreLifetime));
-                hir::LifetimeKind::Static
-            }
-            LifetimeRes::Error => hir::LifetimeKind::Error,
-            LifetimeRes::ElidedAnchor { .. } => {
-                panic!("Unexpected `ElidedAnchar` {:?} at {:?}", ident, ident.span);
-            }
+        } else {
+            hir::LifetimeKind::Error(self.dcx().span_delayed_bug(ident.span, "unresolved lifetime"))
         };
 
         debug!(?res);
@@ -2014,12 +2017,13 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                 // AST resolution emitted an error on those parameters, so we lower them using
                 // `ParamName::Error`.
                 let ident = self.lower_ident(param.ident);
-                let param_name =
-                    if let Some(LifetimeRes::Error) = self.resolver.get_lifetime_res(param.id) {
-                        ParamName::Error(ident)
-                    } else {
-                        ParamName::Plain(ident)
-                    };
+                let param_name = if let Some(LifetimeRes::Error(..)) =
+                    self.resolver.get_lifetime_res(param.id)
+                {
+                    ParamName::Error(ident)
+                } else {
+                    ParamName::Plain(ident)
+                };
                 let kind =
                     hir::GenericParamKind::Lifetime { kind: hir::LifetimeParamKind::Explicit };
 

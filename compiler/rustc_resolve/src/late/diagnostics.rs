@@ -131,7 +131,7 @@ pub(super) struct ElisionFnParameter {
 
 /// Description of lifetimes that appear as candidates for elision.
 /// This is used to suggest introducing an explicit lifetime.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub(super) enum LifetimeElisionCandidate {
     /// This is not a real lifetime.
     Ignore,
@@ -3274,7 +3274,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         &self,
         lifetime_ref: &ast::Lifetime,
         outer_lifetime_ref: Option<Ident>,
-    ) {
+    ) -> ErrorGuaranteed {
         debug_assert_ne!(lifetime_ref.ident.name, kw::UnderscoreLifetime);
         let mut err = if let Some(outer) = outer_lifetime_ref {
             struct_span_code_err!(
@@ -3319,7 +3319,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             );
         }
 
-        err.emit();
+        err.emit()
     }
 
     fn suggest_introducing_lifetime(
@@ -3473,14 +3473,17 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         }
     }
 
-    pub(crate) fn emit_non_static_lt_in_const_param_ty_error(&self, lifetime_ref: &ast::Lifetime) {
+    pub(crate) fn emit_non_static_lt_in_const_param_ty_error(
+        &self,
+        lifetime_ref: &ast::Lifetime,
+    ) -> ErrorGuaranteed {
         self.r
             .dcx()
             .create_err(errors::ParamInTyOfConstParam {
                 span: lifetime_ref.ident.span,
                 name: lifetime_ref.ident.name,
             })
-            .emit();
+            .emit()
     }
 
     /// Non-static lifetimes are prohibited in anonymous constants under `min_const_generics`.
@@ -3490,18 +3493,17 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         &self,
         cause: NoConstantGenericsReason,
         lifetime_ref: &ast::Lifetime,
-    ) {
+    ) -> ErrorGuaranteed {
         match cause {
-            NoConstantGenericsReason::IsEnumDiscriminant => {
-                self.r
-                    .dcx()
-                    .create_err(errors::ParamInEnumDiscriminant {
-                        span: lifetime_ref.ident.span,
-                        name: lifetime_ref.ident.name,
-                        param_kind: errors::ParamKindInEnumDiscriminant::Lifetime,
-                    })
-                    .emit();
-            }
+            NoConstantGenericsReason::IsEnumDiscriminant => self
+                .r
+                .dcx()
+                .create_err(errors::ParamInEnumDiscriminant {
+                    span: lifetime_ref.ident.span,
+                    name: lifetime_ref.ident.name,
+                    param_kind: errors::ParamKindInEnumDiscriminant::Lifetime,
+                })
+                .emit(),
             NoConstantGenericsReason::NonTrivialConstArg => {
                 assert!(!self.r.tcx.features().generic_const_exprs());
                 self.r
@@ -3512,18 +3514,18 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                         param_kind: errors::ParamKindInNonTrivialAnonConst::Lifetime,
                         help: self.r.tcx.sess.is_nightly_build(),
                     })
-                    .emit();
+                    .emit()
             }
         }
     }
 
-    pub(crate) fn report_missing_lifetime_specifiers(
+    pub(crate) fn report_missing_lifetime_specifiers<'a>(
         &mut self,
-        lifetime_refs: Vec<MissingLifetime>,
+        lifetime_refs: impl Clone + IntoIterator<Item = &'a MissingLifetime>,
         function_param_lifetimes: Option<(Vec<MissingLifetime>, Vec<ElisionFnParameter>)>,
     ) -> ErrorGuaranteed {
-        let num_lifetimes: usize = lifetime_refs.iter().map(|lt| lt.count).sum();
-        let spans: Vec<_> = lifetime_refs.iter().map(|lt| lt.span).collect();
+        let num_lifetimes: usize = lifetime_refs.clone().into_iter().map(|lt| lt.count).sum();
+        let spans: Vec<_> = lifetime_refs.clone().into_iter().map(|lt| lt.span).collect();
 
         let mut err = struct_span_code_err!(
             self.r.dcx(),
@@ -3540,13 +3542,13 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         err.emit()
     }
 
-    fn add_missing_lifetime_specifiers_label(
+    fn add_missing_lifetime_specifiers_label<'a>(
         &mut self,
         err: &mut Diag<'_>,
-        lifetime_refs: Vec<MissingLifetime>,
+        lifetime_refs: impl Clone + IntoIterator<Item = &'a MissingLifetime>,
         function_param_lifetimes: Option<(Vec<MissingLifetime>, Vec<ElisionFnParameter>)>,
     ) {
-        for &lt in &lifetime_refs {
+        for &lt in lifetime_refs.clone() {
             err.span_label(
                 lt.span,
                 format!(
@@ -3675,7 +3677,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 (lt.span.shrink_to_hi(), sugg)
             }
         };
-        for &lt in &lifetime_refs {
+        for &lt in lifetime_refs.clone() {
             spans_suggs.push(build_sugg(lt));
         }
         debug!(?spans_suggs);
@@ -3703,7 +3705,9 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             }
             1 => {
                 let post = if maybe_static {
-                    let owned = if let [lt] = &lifetime_refs[..]
+                    let mut lifetime_refs = lifetime_refs.clone().into_iter();
+                    let owned = if let Some(lt) = lifetime_refs.next()
+                        && lifetime_refs.next().is_none()
                         && lt.kind != MissingLifetimeKind::Ampersand
                     {
                         ", or if you will only have owned values"
@@ -3728,7 +3732,9 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     // we identified that the return expression references only one argument, we
                     // would suggest borrowing only that argument, and we'd skip the prior
                     // "use `'static`" suggestion entirely.
-                    if let [lt] = &lifetime_refs[..]
+                    let mut lifetime_refs = lifetime_refs.clone().into_iter();
+                    if let Some(lt) = lifetime_refs.next()
+                        && lifetime_refs.next().is_none()
                         && (lt.kind == MissingLifetimeKind::Ampersand
                             || lt.kind == MissingLifetimeKind::Underscore)
                     {
@@ -4024,7 +4030,11 @@ fn mk_where_bound_predicate(
 }
 
 /// Report lifetime/lifetime shadowing as an error.
-pub(super) fn signal_lifetime_shadowing(sess: &Session, orig: Ident, shadower: Ident) {
+pub(super) fn signal_lifetime_shadowing(
+    sess: &Session,
+    orig: Ident,
+    shadower: Ident,
+) -> ErrorGuaranteed {
     struct_span_code_err!(
         sess.dcx(),
         shadower.span,
@@ -4034,7 +4044,7 @@ pub(super) fn signal_lifetime_shadowing(sess: &Session, orig: Ident, shadower: I
     )
     .with_span_label(orig.span, "first declared here")
     .with_span_label(shadower.span, format!("lifetime `{}` already in scope", orig.name))
-    .emit();
+    .emit()
 }
 
 struct LifetimeFinder<'ast> {

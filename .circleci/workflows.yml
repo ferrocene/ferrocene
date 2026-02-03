@@ -115,13 +115,16 @@ jobs:
             uvx reuse@5.1.1 --include-submodules lint
       - ferrocene-ci
 
+  # Generate a SBOM for the Ferrocene repository
   sbom-gen:
     executor: docker-x86_64-ubuntu-20
     resource_class: medium
+    environment:
+      SCRIPT: |
+        ./x.py dist ferrocene-sbom
     steps:
-      - ferrocene-checkout:
+      - ferrocene-job-dist:
           llvm-subset: false
-      - ferrocene-sbom
 
   # x86_64-unknown-linux-gnu jobs
 
@@ -1240,6 +1243,10 @@ workflows:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets
 
+      - sbom-gen:
+          requires:
+            - build-docker--ubuntu-20--x86_64
+
       - finish-build:
           requires:
             - x86_64-linux-certified
@@ -1255,6 +1262,7 @@ workflows:
             - aarch64-darwin-test-library
             - aarch64-darwin-test-library-std
             - aarch64-darwin-compiletest
+            - sbom-gen
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
@@ -1659,13 +1667,6 @@ commands:
       - run:
           name: Authenticate with AWS
           command: aws sts get-caller-identity
-
-  ferrocene-sbom:
-    description: Generate the Ferrocene SBOM of the repository
-    steps:
-      - run:
-          name: Generate SBOM
-          command: FERROCENE_UNPRIVILEGED_CI=1 FERROCENE_HOST=x86_64-unknown-linux-gnu SCRIPT="./x.py dist ferrocene-sbom" ferrocene/ci/run.sh
 
 executors:
   docker-x86_64-ubuntu-20:

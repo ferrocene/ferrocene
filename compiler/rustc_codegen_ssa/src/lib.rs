@@ -175,6 +175,11 @@ bitflags::bitflags! {
     }
 }
 
+// This is the same as `rustc_session::cstore::NativeLib`, except:
+// - (important) the `foreign_module` field is missing, because it contains a `DefId`, which can't
+//   be encoded with `FileEncoder`.
+// - (less important) the `verbatim` field is a `bool` rather than an `Option<bool>`, because here
+//   we can treat `false` and `absent` the same.
 #[derive(Clone, Debug, Encodable, Decodable)]
 pub struct NativeLib {
     pub kind: NativeLibKind,

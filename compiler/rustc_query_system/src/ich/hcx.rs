@@ -5,9 +5,7 @@ use rustc_hir::definitions::DefPathHash;
 use rustc_session::Session;
 use rustc_session::cstore::Untracked;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{BytePos, CachingSourceMapView, DUMMY_SP, SourceFile, Span, SpanData, Symbol};
-
-use crate::ich;
+use rustc_span::{BytePos, CachingSourceMapView, DUMMY_SP, SourceFile, Span, SpanData};
 
 /// This is the context state available during incr. comp. hashing. It contains
 /// enough information to transform `DefId`s and `HirId`s into stable `DefPath`s (i.e.,
@@ -71,11 +69,6 @@ impl<'a> StableHashingContext<'a> {
                 none.as_mut().unwrap()
             }
         }
-    }
-
-    #[inline]
-    pub fn is_ignored_attr(&self, name: Symbol) -> bool {
-        ich::IGNORED_ATTRIBUTES.contains(&name)
     }
 
     #[inline]

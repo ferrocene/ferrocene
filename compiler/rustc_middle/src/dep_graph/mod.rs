@@ -7,6 +7,7 @@ use crate::ty::{self, TyCtxt};
 
 #[macro_use]
 mod dep_node;
+mod dep_node_key;
 
 pub use rustc_query_system::dep_graph::debug::{DepNodeFilter, EdgeFilter};
 pub use rustc_query_system::dep_graph::{

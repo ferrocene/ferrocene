@@ -1451,6 +1451,7 @@ impl<T> *const T {
     ///     danger.as_ref().expect("references must not be null");
     /// }
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "ptr_cast_slice", issue = "149103")]
     pub const fn cast_slice(self, len: usize) -> *const [T] {

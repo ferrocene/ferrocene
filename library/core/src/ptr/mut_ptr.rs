@@ -1688,6 +1688,7 @@ impl<T: PointeeSized> *mut T {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> *mut T {
     /// Casts from a type to its maybe-uninitialized version.
     ///
@@ -1696,7 +1697,6 @@ impl<T> *mut T {
     #[must_use]
     #[inline(always)]
     #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn cast_uninit(self) -> *mut MaybeUninit<T> {
         self as _
     }

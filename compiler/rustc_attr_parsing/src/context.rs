@@ -32,7 +32,8 @@ use crate::attributes::crate_level::{
     CrateNameParser, CrateTypeParser, MoveSizeLimitParser, NeedsPanicRuntimeParser,
     NoBuiltinsParser, NoCoreParser, NoMainParser, NoStdParser, PanicRuntimeParser,
     PatternComplexityLimitParser, ProfilerRuntimeParser, RecursionLimitParser,
-    RustcCoherenceIsCoreParser, TypeLengthLimitParser, WindowsSubsystemParser,
+    RustcCoherenceIsCoreParser, RustcPreserveUbChecksParser, TypeLengthLimitParser,
+    WindowsSubsystemParser,
 };
 use crate::attributes::debugger::DebuggerViualizerParser;
 use crate::attributes::deprecation::DeprecationParser;
@@ -72,8 +73,8 @@ use crate::attributes::rustc_allocator::{
     RustcDeallocatorParser, RustcReallocatorParser,
 };
 use crate::attributes::rustc_dump::{
-    RustcDumpDefParents, RustcDumpItemBounds, RustcDumpPredicates, RustcDumpUserArgs,
-    RustcDumpVtable,
+    RustcDumpDefParentsParser, RustcDumpItemBoundsParser, RustcDumpPredicatesParser,
+    RustcDumpUserArgsParser, RustcDumpVtableParser,
 };
 use crate::attributes::rustc_internal::{
     RustcHasIncoherentInherentImplsParser, RustcLayoutParser, RustcLayoutScalarValidRangeEndParser,
@@ -294,11 +295,11 @@ attribute_parsers!(
         Single<WithoutArgs<RustcAllocatorZeroedParser>>,
         Single<WithoutArgs<RustcCoherenceIsCoreParser>>,
         Single<WithoutArgs<RustcDeallocatorParser>>,
-        Single<WithoutArgs<RustcDumpDefParents>>,
-        Single<WithoutArgs<RustcDumpItemBounds>>,
-        Single<WithoutArgs<RustcDumpPredicates>>,
-        Single<WithoutArgs<RustcDumpUserArgs>>,
-        Single<WithoutArgs<RustcDumpVtable>>,
+        Single<WithoutArgs<RustcDumpDefParentsParser>>,
+        Single<WithoutArgs<RustcDumpItemBoundsParser>>,
+        Single<WithoutArgs<RustcDumpPredicatesParser>>,
+        Single<WithoutArgs<RustcDumpUserArgsParser>>,
+        Single<WithoutArgs<RustcDumpVtableParser>>,
         Single<WithoutArgs<RustcHasIncoherentInherentImplsParser>>,
         Single<WithoutArgs<RustcLintOptTyParser>>,
         Single<WithoutArgs<RustcLintQueryInstabilityParser>>,
@@ -310,6 +311,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcNounwindParser>>,
         Single<WithoutArgs<RustcOffloadKernelParser>>,
         Single<WithoutArgs<RustcPassIndirectlyInNonRusticAbisParser>>,
+        Single<WithoutArgs<RustcPreserveUbChecksParser>>,
         Single<WithoutArgs<RustcReallocatorParser>>,
         Single<WithoutArgs<RustcShouldNotBeCalledOnConstItems>>,
         Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,

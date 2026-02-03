@@ -318,6 +318,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcParenSugar(..)
                     | AttributeKind::RustcPassByValue (..)
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
+                    | AttributeKind::RustcPreserveUbChecks
                     | AttributeKind::RustcReallocator
                     | AttributeKind::RustcScalableVector { .. }
                     | AttributeKind::RustcShouldNotBeCalledOnConstItems(..)
@@ -406,8 +407,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::register_tool
                             | sym::rustc_no_implicit_bounds
                             | sym::test_runner
-                            | sym::reexport_test_harness_main
-                            | sym::rustc_preserve_ub_checks,
+                            | sym::reexport_test_harness_main,
                             ..
                         ] => {}
                         [name, rest@..] => {

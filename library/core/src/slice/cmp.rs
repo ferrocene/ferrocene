@@ -6,14 +6,17 @@ use super::{from_raw_parts, memchr};
 use crate::ascii;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::{self, BytewiseEq, Ordering};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::compare_bytes;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::SizedTypeProperties;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::ControlFlow;
+
+// Ferrocene addition: Imports for the certified subset
+#[rustfmt::skip]
+#[cfg(feature = "ferrocene_subset")]
+use crate::cmp::BytewiseEq;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
@@ -150,7 +153,6 @@ where
 // When each element can be compared byte-wise, we can compare all the bytes
 // from the whole size in one call to the intrinsics.
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> const SlicePartialEq<B> for A
 where
     A: [const] BytewiseEq<B>,

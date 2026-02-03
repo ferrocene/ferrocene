@@ -2105,7 +2105,6 @@ pub const unsafe fn unchecked_sub<T: Copy>(x: T, y: T) -> T;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 
 /// Performs rotate left.
@@ -2429,7 +2428,6 @@ pub const unsafe fn raw_eq<T>(a: &T, b: &T) -> bool;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn compare_bytes(left: *const u8, right: *const u8, bytes: usize) -> i32;
 
 /// See documentation of [`std::hint::black_box`] for details.

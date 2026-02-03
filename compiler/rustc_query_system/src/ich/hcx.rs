@@ -73,7 +73,7 @@ impl<'a> StableHashingContext<'a> {
 
     #[inline]
     pub fn hashing_controls(&self) -> HashingControls {
-        self.hashing_controls.clone()
+        self.hashing_controls
     }
 }
 
@@ -115,7 +115,7 @@ impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
 
     #[inline]
     fn hashing_controls(&self) -> HashingControls {
-        self.hashing_controls.clone()
+        self.hashing_controls
     }
 }
 

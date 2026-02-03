@@ -915,6 +915,8 @@
 <*mut T as core::fmt::Pointer>::fmt
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
+<A as core::slice::cmp::SlicePartialEq<B>>::equal_same_length
+<A as core::slice::cmp::SlicePartialEq<B>>::equal_same_length
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::traits::collect::IntoIterator>::into_iter
@@ -932,7 +934,6 @@
 <T as core::convert::TryInto<U>>::try_into
 <T as core::iter::adapters::step_by::SpecRangeSetup<T>>::setup
 <T as core::unit::IsUnit>::is_unit
-<[A] as core::slice::cmp::SlicePartialEq<B>>::equal
 <[T] as core::convert::AsMut<[T]>>::as_mut
 <[T] as core::convert::AsRef<[T]>>::as_ref
 <[T] as core::fmt::Debug>::fmt
@@ -1478,6 +1479,8 @@
 <core::num::niche_types::UsizeNoHighBit as core::fmt::Debug>::fmt
 <core::num::niche_types::UsizeNoHighBit as core::hash::Hash>::hash
 <core::num::nonzero::NonZero<T> as core::clone::Clone>::clone
+<core::num::nonzero::NonZero<T> as core::cmp::PartialEq>::eq
+<core::num::nonzero::NonZero<T> as core::cmp::PartialEq>::ne
 <core::num::nonzero::NonZero<T> as core::fmt::Binary>::fmt
 <core::num::nonzero::NonZero<T> as core::fmt::Debug>::fmt
 <core::num::nonzero::NonZero<T> as core::fmt::Display>::fmt

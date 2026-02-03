@@ -596,6 +596,10 @@ Tests for the `--extern` CLI flag.
 
 Tests on feature-gating, and the `#![feature(..)]` mechanism itself.
 
+## `tests/ui/ferrocene/`
+
+UI tests specifically for Ferrocene.
+
 ## `tests/ui/ffi/`: Foreign Function Interface
 
 Tests for the `std::ffi` module.

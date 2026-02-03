@@ -7,6 +7,14 @@ use rustc_session::cstore::Untracked;
 use rustc_span::source_map::SourceMap;
 use rustc_span::{BytePos, CachingSourceMapView, DUMMY_SP, SourceFile, Span, SpanData};
 
+// Very often, we are hashing something that does not need the `CachingSourceMapView`, so we
+// initialize it lazily.
+#[derive(Clone)]
+enum CachingSourceMap<'a> {
+    Unused(&'a SourceMap),
+    InUse(CachingSourceMapView<'a>),
+}
+
 /// This is the context state available during incr. comp. hashing. It contains
 /// enough information to transform `DefId`s and `HirId`s into stable `DefPath`s (i.e.,
 /// a reference to the `TyCtxt`) and it holds a few caches for speeding up various
@@ -17,10 +25,7 @@ pub struct StableHashingContext<'a> {
     // The value of `-Z incremental-ignore-spans`.
     // This field should only be used by `unstable_opts_incremental_ignore_span`
     incremental_ignore_spans: bool,
-    // Very often, we are hashing something that does not need the
-    // `CachingSourceMapView`, so we initialize it lazily.
-    raw_source_map: &'a SourceMap,
-    caching_source_map: Option<CachingSourceMapView<'a>>,
+    caching_source_map: CachingSourceMap<'a>,
     hashing_controls: HashingControls,
 }
 
@@ -32,8 +37,7 @@ impl<'a> StableHashingContext<'a> {
         StableHashingContext {
             untracked,
             incremental_ignore_spans: sess.opts.unstable_opts.incremental_ignore_spans,
-            caching_source_map: None,
-            raw_source_map: sess.source_map(),
+            caching_source_map: CachingSourceMap::Unused(sess.source_map()),
             hashing_controls: HashingControls { hash_spans: hash_spans_initial },
         }
     }
@@ -63,10 +67,10 @@ impl<'a> StableHashingContext<'a> {
     #[inline]
     pub fn source_map(&mut self) -> &mut CachingSourceMapView<'a> {
         match self.caching_source_map {
-            Some(ref mut sm) => sm,
-            ref mut none => {
-                *none = Some(CachingSourceMapView::new(self.raw_source_map));
-                none.as_mut().unwrap()
+            CachingSourceMap::InUse(ref mut sm) => sm,
+            CachingSourceMap::Unused(sm) => {
+                self.caching_source_map = CachingSourceMap::InUse(CachingSourceMapView::new(sm));
+                self.source_map() // this recursive call will hit the `InUse` case
             }
         }
     }

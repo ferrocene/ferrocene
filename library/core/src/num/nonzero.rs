@@ -226,7 +226,6 @@ impl<T> Copy for NonZero<T> where T: ZeroablePrimitive {}
 unsafe impl<T> TrivialClone for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T> const PartialEq for NonZero<T>
 where

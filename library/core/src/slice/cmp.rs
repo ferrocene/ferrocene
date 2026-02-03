@@ -8,12 +8,9 @@ use crate::ascii;
 use crate::cmp::{self, BytewiseEq, Ordering};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::compare_bytes;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 94a0cd15f59
-=======
 use crate::mem::SizedTypeProperties;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::ControlFlow;
@@ -153,14 +150,8 @@ where
 // When each element can be compared byte-wise, we can compare all the bytes
 // from the whole size in one call to the intrinsics.
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-impl<A, B> const SlicePartialEq<B> for [A]
-||||||| 94a0cd15f59
-impl<A, B> const SlicePartialEq<B> for [A]
-=======
 impl<A, B> const SlicePartialEq<B> for A
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 where
     A: [const] BytewiseEq<B>,
 {

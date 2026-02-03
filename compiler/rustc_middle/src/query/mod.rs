@@ -1,4 +1,5 @@
 use rustc_hir::def_id::LocalDefId;
+pub use rustc_query_system::query::{QueryMode, QueryState};
 
 pub use self::keys::{AsLocalKey, Key, LocalCrate};
 pub use self::plumbing::{IntoQueryParam, TyCtxtAt, TyCtxtEnsureDone, TyCtxtEnsureOk};

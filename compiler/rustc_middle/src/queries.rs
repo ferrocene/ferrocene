@@ -49,7 +49,7 @@
 //! ## Query Expansion and Code Generation
 //!
 //! The [`rustc_macros::rustc_queries`] macro expands each query definition into:
-//! - A method on [`TyCtxt`] (and [`TyCtxtAt`]) for invoking the query.
+//! - A method on [`TyCtxt`] (and [`crate::query::TyCtxtAt`]) for invoking the query.
 //! - Provider traits and structs for supplying the query's value.
 //! - Caching and dependency graph integration.
 //! - Support for incremental compilation, disk caching, and arena allocation as controlled by the modifiers.
@@ -87,7 +87,6 @@ use rustc_hir::{Crate, ItemLocalId, ItemLocalMap, PreciseCapturingArgKind, Trait
 use rustc_index::IndexVec;
 use rustc_lint_defs::LintId;
 use rustc_macros::rustc_queries;
-use rustc_query_system::query::{QueryMode, QueryState};
 use rustc_session::Limits;
 use rustc_session::config::{EntryFnType, OptLevel, OutputFilenames, SymbolManglingVersion};
 use rustc_session::cstore::{
@@ -118,10 +117,8 @@ use crate::mir::interpret::{
 use crate::mir::mono::{
     CodegenUnit, CollectionMode, MonoItem, MonoItemPartitions, NormalizationErrorInMono,
 };
-use crate::query::plumbing::{
-    CyclePlaceholder, IntoQueryParam, TyCtxtAt, TyCtxtEnsureDone, TyCtxtEnsureOk,
-};
-use crate::query::{AsLocalKey, describe_as_module};
+use crate::query::describe_as_module;
+use crate::query::plumbing::CyclePlaceholder;
 use crate::traits::query::{
     CanonicalAliasGoal, CanonicalDropckOutlivesGoal, CanonicalImpliedOutlivesBoundsGoal,
     CanonicalMethodAutoderefStepsGoal, CanonicalPredicateGoal, CanonicalTypeOpAscribeUserTypeGoal,

@@ -189,8 +189,8 @@ macro_rules! query_ensure_select {
 }
 
 macro_rules! query_helper_param_ty {
-    (DefId) => { impl IntoQueryParam<DefId> };
-    (LocalDefId) => { impl IntoQueryParam<LocalDefId> };
+    (DefId) => { impl $crate::query::IntoQueryParam<DefId> };
+    (LocalDefId) => { impl $crate::query::IntoQueryParam<LocalDefId> };
     ($K:ty) => { $K };
 }
 
@@ -213,7 +213,7 @@ macro_rules! local_key_if_separate_extern {
         $($K)*
     };
     ([(separate_provide_extern) $($rest:tt)*] $($K:tt)*) => {
-        <$($K)* as AsLocalKey>::LocalKey
+        <$($K)* as $crate::query::AsLocalKey>::LocalKey
     };
     ([$other:tt $($modifiers:tt)*] $($K:tt)*) => {
         local_key_if_separate_extern!([$($modifiers)*] $($K)*)
@@ -370,7 +370,7 @@ macro_rules! define_callbacks {
             $($(#[$attr])* pub $name: $name::Storage<'tcx>,)*
         }
 
-        impl<'tcx> TyCtxtEnsureOk<'tcx> {
+        impl<'tcx> $crate::query::TyCtxtEnsureOk<'tcx> {
             $($(#[$attr])*
             #[inline(always)]
             pub fn $name(
@@ -382,13 +382,13 @@ macro_rules! define_callbacks {
                     self.tcx,
                     self.tcx.query_system.fns.engine.$name,
                     &self.tcx.query_system.caches.$name,
-                    key.into_query_param(),
+                    $crate::query::IntoQueryParam::into_query_param(key),
                     false,
                 )
             })*
         }
 
-        impl<'tcx> TyCtxtEnsureDone<'tcx> {
+        impl<'tcx> $crate::query::TyCtxtEnsureDone<'tcx> {
             $($(#[$attr])*
             #[inline(always)]
             pub fn $name(self, key: query_helper_param_ty!($($K)*)) {
@@ -396,7 +396,7 @@ macro_rules! define_callbacks {
                     self.tcx,
                     self.tcx.query_system.fns.engine.$name,
                     &self.tcx.query_system.caches.$name,
-                    key.into_query_param(),
+                    $crate::query::IntoQueryParam::into_query_param(key),
                     true,
                 );
             })*
@@ -412,7 +412,7 @@ macro_rules! define_callbacks {
             })*
         }
 
-        impl<'tcx> TyCtxtAt<'tcx> {
+        impl<'tcx> $crate::query::TyCtxtAt<'tcx> {
             $($(#[$attr])*
             #[inline(always)]
             pub fn $name(self, key: query_helper_param_ty!($($K)*)) -> $V
@@ -424,7 +424,7 @@ macro_rules! define_callbacks {
                     self.tcx.query_system.fns.engine.$name,
                     &self.tcx.query_system.caches.$name,
                     self.span,
-                    key.into_query_param(),
+                    $crate::query::IntoQueryParam::into_query_param(key),
                 ))
             })*
         }
@@ -441,7 +441,7 @@ macro_rules! define_callbacks {
         #[derive(Default)]
         pub struct QueryStates<'tcx> {
             $(
-                pub $name: QueryState<'tcx, $($K)*>,
+                pub $name: $crate::query::QueryState<'tcx, $($K)*>,
             )*
         }
 
@@ -487,7 +487,7 @@ macro_rules! define_callbacks {
                 TyCtxt<'tcx>,
                 Span,
                 $name::Key<'tcx>,
-                QueryMode,
+                $crate::query::QueryMode,
             ) -> Option<$crate::query::erase::Erased<$V>>,)*
         }
     };
@@ -495,7 +495,7 @@ macro_rules! define_callbacks {
 
 macro_rules! define_feedable {
     ($($(#[$attr:meta])* [$($modifiers:tt)*] fn $name:ident($($K:tt)*) -> $V:ty,)*) => {
-        $(impl<'tcx, K: IntoQueryParam<$($K)*> + Copy> TyCtxtFeed<'tcx, K> {
+        $(impl<'tcx, K: $crate::query::IntoQueryParam<$($K)*> + Copy> TyCtxtFeed<'tcx, K> {
             $(#[$attr])*
             #[inline(always)]
             pub fn $name(self, value: $name::ProvidedValue<'tcx>) {

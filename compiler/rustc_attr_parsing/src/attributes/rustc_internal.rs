@@ -6,6 +6,7 @@ use rustc_hir::attrs::{
     RustcMirKind,
 };
 use rustc_session::errors;
+use rustc_span::Symbol;
 
 use super::prelude::*;
 use super::util::parse_single_integer;
@@ -237,7 +238,7 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcLintUntrackedQueryInformationPa
 pub(crate) struct RustcObjectLifetimeDefaultParser;
 
 impl<S: Stage> SingleAttributeParser<S> for RustcObjectLifetimeDefaultParser {
-    const PATH: &[rustc_span::Symbol] = &[sym::rustc_object_lifetime_default];
+    const PATH: &[Symbol] = &[sym::rustc_object_lifetime_default];
     const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepInnermost;
     const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Struct)]);
@@ -274,7 +275,7 @@ impl<S: Stage> SingleAttributeParser<S> for RustcSimdMonomorphizeLaneLimitParser
 pub(crate) struct RustcScalableVectorParser;
 
 impl<S: Stage> SingleAttributeParser<S> for RustcScalableVectorParser {
-    const PATH: &[rustc_span::Symbol] = &[sym::rustc_scalable_vector];
+    const PATH: &[Symbol] = &[sym::rustc_scalable_vector];
     const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepInnermost;
     const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Struct)]);
@@ -347,7 +348,7 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcOffloadKernelParser {
 pub(crate) struct RustcLayoutParser;
 
 impl<S: Stage> CombineAttributeParser<S> for RustcLayoutParser {
-    const PATH: &[rustc_span::Symbol] = &[sym::rustc_layout];
+    const PATH: &[Symbol] = &[sym::rustc_layout];
 
     type Item = RustcLayoutType;
 
@@ -404,7 +405,7 @@ impl<S: Stage> CombineAttributeParser<S> for RustcLayoutParser {
 pub(crate) struct RustcMirParser;
 
 impl<S: Stage> CombineAttributeParser<S> for RustcMirParser {
-    const PATH: &[rustc_span::Symbol] = &[sym::rustc_mir];
+    const PATH: &[Symbol] = &[sym::rustc_mir];
 
     type Item = RustcMirKind;
 
@@ -599,13 +600,115 @@ impl<S: Stage> CombineAttributeParser<S> for RustcCleanParser {
             return None;
         };
 
-        Some(RustcCleanAttribute {
-            // Used for checking that all attributes have been checked
-            id: cx.cx.sess.psess.attr_id_generator.mk_attr_id(),
-            span: cx.attr_span,
-            cfg,
-            except,
-            loaded_from_disk,
-        })
+        Some(RustcCleanAttribute { span: cx.attr_span, cfg, except, loaded_from_disk })
+    }
+}
+
+pub(crate) struct RustcIfThisChangedParser;
+
+impl<S: Stage> SingleAttributeParser<S> for RustcIfThisChangedParser {
+    const PATH: &[Symbol] = &[sym::rustc_if_this_changed];
+
+    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepOutermost;
+
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        // tidy-alphabetical-start
+        Allow(Target::AssocConst),
+        Allow(Target::AssocTy),
+        Allow(Target::Const),
+        Allow(Target::Enum),
+        Allow(Target::Expression),
+        Allow(Target::Field),
+        Allow(Target::Fn),
+        Allow(Target::ForeignMod),
+        Allow(Target::Impl { of_trait: false }),
+        Allow(Target::Impl { of_trait: true }),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+        Allow(Target::Mod),
+        Allow(Target::Static),
+        Allow(Target::Struct),
+        Allow(Target::Trait),
+        Allow(Target::TyAlias),
+        Allow(Target::Union),
+        // tidy-alphabetical-end
+    ]);
+
+    const TEMPLATE: AttributeTemplate = template!(Word, List: &["DepNode"]);
+
+    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        match args {
+            ArgParser::NoArgs => Some(AttributeKind::RustcIfThisChanged(cx.attr_span, None)),
+            ArgParser::List(list) => {
+                let Some(item) = list.single() else {
+                    cx.expected_single_argument(list.span);
+                    return None;
+                };
+                let Some(ident) = item.meta_item().and_then(|item| item.ident()) else {
+                    cx.expected_identifier(item.span());
+                    return None;
+                };
+                Some(AttributeKind::RustcIfThisChanged(cx.attr_span, Some(ident.name)))
+            }
+            ArgParser::NameValue(_) => {
+                cx.expected_list_or_no_args(cx.inner_span);
+                None
+            }
+        }
+    }
+}
+
+pub(crate) struct RustcThenThisWouldNeedParser;
+
+impl<S: Stage> CombineAttributeParser<S> for RustcThenThisWouldNeedParser {
+    const PATH: &[Symbol] = &[sym::rustc_then_this_would_need];
+    type Item = Ident;
+
+    const CONVERT: ConvertFn<Self::Item> =
+        |items, span| AttributeKind::RustcThenThisWouldNeed(span, items);
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        // tidy-alphabetical-start
+        Allow(Target::AssocConst),
+        Allow(Target::AssocTy),
+        Allow(Target::Const),
+        Allow(Target::Enum),
+        Allow(Target::Expression),
+        Allow(Target::Field),
+        Allow(Target::Fn),
+        Allow(Target::ForeignMod),
+        Allow(Target::Impl { of_trait: false }),
+        Allow(Target::Impl { of_trait: true }),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+        Allow(Target::Mod),
+        Allow(Target::Static),
+        Allow(Target::Struct),
+        Allow(Target::Trait),
+        Allow(Target::TyAlias),
+        Allow(Target::Union),
+        // tidy-alphabetical-end
+    ]);
+
+    const TEMPLATE: AttributeTemplate = template!(List: &["DepNode"]);
+
+    fn extend(
+        cx: &mut AcceptContext<'_, '_, S>,
+        args: &ArgParser,
+    ) -> impl IntoIterator<Item = Self::Item> {
+        let Some(item) = args.list().and_then(|l| l.single()) else {
+            cx.expected_single_argument(cx.inner_span);
+            return None;
+        };
+        let Some(ident) = item.meta_item().and_then(|item| item.ident()) else {
+            cx.expected_identifier(item.span());
+            return None;
+        };
+        Some(ident)
     }
 }

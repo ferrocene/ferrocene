@@ -5,7 +5,7 @@ pub use ReprAttr::*;
 use rustc_abi::Align;
 pub use rustc_ast::attr::data_structures::*;
 use rustc_ast::token::DocFragmentKind;
-use rustc_ast::{AttrId, AttrStyle, ast};
+use rustc_ast::{AttrStyle, ast};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
 use rustc_macros::{Decodable, Encodable, HashStable_Generic, PrintAttribute};
@@ -719,7 +719,6 @@ pub enum BorrowckGraphvizFormatKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
 pub struct RustcCleanAttribute {
-    pub id: AttrId,
     pub span: Span,
     pub cfg: Symbol,
     pub except: Option<RustcCleanQueries>,
@@ -1098,6 +1097,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_hidden_type_of_opaques]`
     RustcHiddenTypeOfOpaques,
 
+    /// Represents `#[rustc_if_this_changed]`
+    RustcIfThisChanged(Span, Option<Symbol>),
+
     /// Represents `#[rustc_layout]`
     RustcLayout(ThinVec<RustcLayoutType>),
 
@@ -1198,6 +1200,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_std_internal_symbol]`.
     RustcStdInternalSymbol(Span),
+
+    /// Represents `#[rustc_then_this_would_need]`
+    RustcThenThisWouldNeed(Span, ThinVec<Ident>),
 
     /// Represents `#[rustc_unsafe_specialization_marker]`.
     RustcUnsafeSpecializationMarker(Span),

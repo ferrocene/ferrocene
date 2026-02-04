@@ -19,7 +19,6 @@
 //! Errors are reported if we are in the suitable configuration but
 //! the required condition is not met.
 
-use rustc_ast::ast;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::unord::UnordSet;
 use rustc_hir::attrs::{AttributeKind, RustcCleanAttribute};
@@ -174,7 +173,7 @@ pub(crate) fn check_clean_annotations(tcx: TyCtxt<'_>) {
 
 struct CleanVisitor<'tcx> {
     tcx: TyCtxt<'tcx>,
-    checked_attrs: FxHashSet<ast::AttrId>,
+    checked_attrs: FxHashSet<Span>,
 }
 
 impl<'tcx> CleanVisitor<'tcx> {
@@ -363,7 +362,7 @@ impl<'tcx> CleanVisitor<'tcx> {
             let Some(assertion) = self.assertion_maybe(item_id, attr) else {
                 continue;
             };
-            self.checked_attrs.insert(attr.id);
+            self.checked_attrs.insert(attr.span);
             for label in assertion.clean.items().into_sorted_stable_ord() {
                 let dep_node = DepNode::from_label_string(self.tcx, label, def_path_hash).unwrap();
                 self.assert_clean(item_span, dep_node);
@@ -412,11 +411,11 @@ impl<'tcx> FindAllAttrs<'tcx> {
         self.tcx.sess.psess.config.contains(&(attr.cfg, None))
     }
 
-    fn report_unchecked_attrs(&self, mut checked_attrs: FxHashSet<ast::AttrId>) {
+    fn report_unchecked_attrs(&self, mut checked_attrs: FxHashSet<Span>) {
         for attr in &self.found_attrs {
-            if !checked_attrs.contains(&attr.id) {
+            if !checked_attrs.contains(&attr.span) {
                 self.tcx.dcx().emit_err(errors::UncheckedClean { span: attr.span });
-                checked_attrs.insert(attr.id);
+                checked_attrs.insert(attr.span);
             }
         }
     }

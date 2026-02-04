@@ -235,6 +235,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     for attr in attrs {
                         self.check_rustc_clean(attr.span);
                     }
+                },
+                Attribute::Parsed(AttributeKind::RustcIfThisChanged(span, _) | AttributeKind::RustcThenThisWouldNeed(span, _)) => {
+                    self.check_rustc_clean(*span);
                 }
                 Attribute::Parsed(
                     // tidy-alphabetical-start
@@ -361,8 +364,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::diagnostic, sym::on_const, ..] => {
                             self.check_diagnostic_on_const(attr.span(), hir_id, target, item)
                         }
-                        [sym::rustc_if_this_changed, ..]
-                        | [sym::rustc_then_this_would_need, ..] => self.check_rustc_clean(attr.span()),
                         [sym::autodiff_forward, ..] | [sym::autodiff_reverse, ..] => {
                             self.check_autodiff(hir_id, attr, span, target)
                         }

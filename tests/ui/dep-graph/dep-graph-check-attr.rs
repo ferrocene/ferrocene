@@ -8,7 +8,7 @@
 #[rustc_clean(cfg = "foo")] //~ ERROR attribute requires -Z query-dep-graph
 fn main() {}
 
-#[rustc_if_this_changed(hir_owner)] //~ ERROR attribute requires -Z query-dep-graph
+#[rustc_if_this_changed] //~ ERROR attribute requires -Z query-dep-graph
 struct Foo<T> {
     f: T,
 }

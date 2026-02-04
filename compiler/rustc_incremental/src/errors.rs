@@ -12,13 +12,6 @@ pub(crate) struct UnrecognizedDepNode {
 }
 
 #[derive(Diagnostic)]
-#[diag("missing `DepNode` variant")]
-pub(crate) struct MissingDepNode {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("no `#[rustc_if_this_changed]` annotation detected")]
 pub(crate) struct MissingIfThisChanged {
     #[primary_span]

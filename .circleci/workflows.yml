@@ -882,7 +882,6 @@ jobs:
       - run:
           name: Generate build metadata
           command: ./x.py dist ferrocene-build-metadata
-      - ferrocene-sbom
       # From this point onwards, the commit can be released by the release process.
       - run:
           name: Upload metadata files to S3

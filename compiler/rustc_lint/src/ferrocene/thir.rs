@@ -10,24 +10,16 @@
 
 use std::ops::ControlFlow;
 
-use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, LangItem, OwnerId};
-use rustc_infer::traits::{
-    ImplSource, ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
-};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
-use rustc_middle::span_bug;
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
-use rustc_middle::ty::adjustment::{CustomCoerceUnsized, PointerCoercion};
+use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
-    self, AdtDef, Binder, ExistentialPredicate, ExistentialTraitRef, GenericArgs, GenericArgsRef,
-    Instance, PolyTraitRef, TraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _,
-    TypeVisitor, TypingEnv,
+    self, Binder, ExistentialTraitRef, GenericArgs, Instance, Ty, TyCtxt, TypeSuperVisitable as _,
+    TypeVisitable as _, TypeVisitor, TypingEnv,
 };
 use rustc_span::Span;
-use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
 use tracing::{debug, info};
 
 use crate::ferrocene::{InstantiateResult, LintState, Use, UseKind};
@@ -84,6 +76,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let tcx = self.linter.tcx;
         let mut span = expr.span;
 
+        let mut try_instantiate = |def_id, args| self.try_instantiate(def_id, args, span);
+
         let use_kind = match expr.kind {
             thir::ExprKind::NamedConst { def_id, .. }
             | thir::ExprKind::StaticRef { def_id, .. } => {
@@ -129,14 +123,22 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     fn_ptr_trait,
                     GenericArgs::empty(),
                 ));
-                self.check_fn_ptr_coercion(
+                self.linter.check_fn_ptr_coercion(
                     source_ty,
                     trait_ref.with_self_ty(tcx, source_ty),
+                    &mut try_instantiate,
                     expr.span,
                 )?
             }
             thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, source, .. } => {
-                self.check_dyn_trait_coercion(expr, source)?
+                let source_ty = self.thir[source].ty;
+                self.linter.check_dyn_trait_coercion(
+                    expr.ty,
+                    source_ty,
+                    self.typing_env(),
+                    &mut try_instantiate,
+                    span,
+                )?
             }
             // Nothing to check.
             _ => return None,
@@ -145,338 +147,14 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         Some(Use { kind: use_kind, span, from_instantiation: None })
     }
 
-    fn check_fn_ptr_coercion(
-        &self,
-        source: Ty<'tcx>,
-        dst_trait: PolyTraitRef<'tcx>,
-        span: Span,
-    ) -> Option<UseKind<'tcx>> {
-        debug!("check cast of {source:?} to function pointer");
-
-        let tcx = self.linter.tcx;
-        match self.instance_of_ty(source, Some(dst_trait), span) {
-            Some(instance) => {
-                if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
-                    // This is a `<dyn Trait>::method as fn()` cast.
-                    // That shim is synthesized and therefore covered under the compiler
-                    // qualification. It can't be called unless someone gets a `dyn Trait`, in which
-                    // case we'll lint the unsizing cast.
-                    None
-                } else if item_is_validated(tcx, instance.def_id()).validated() {
-                    None
-                } else {
-                    Some(UseKind::FnPtrCast(instance))
-                }
-            }
-            // Uncaught fn pointer casts are ok because the post-mono pass will check them later.
-            // FIXME: this is messy, split this out into `check_dyn_trait_coercion`
-            None if Some(dst_trait.def_id()) == tcx.lang_items().fn_ptr_trait() => None,
-            // FIXME: feature(unboxed_closures)
-            None if source.is_adt() => None,
-            // Don't remove this panic. If you do so before adding `check_dyn_trait_coercion` to
-            // the post-mono pass, it will fail to catch real uses of uncertified items in
-            // non-degenerate programs.
-            None => span_bug!(
-                span,
-                "unimplemented: pre-mono cast from {source} to dyn {dst_trait}() that fails to instantiate"
-            ),
-        }
-    }
-
-    /// Given a `source` expression that has an unsizing cast to `dest`, determine
-    /// whether the cast if valid. If not, return a [`TraitObjectCast`](UseKind::TraitObjectCast) showing why not.
-    ///
-    /// This works in four main parts:
-    /// 1. "Peel" as many types as possible. For example, if we are casting `Vec<Box<String>>` to
-    ///    `Vec<Box<dyn Display + Clone + Sync>`, peel that to `String` and
-    ///    `dyn Display + Clone + Sync`. We call these `coerce_src` and `coerce_dst`.
-    /// 2. Determine all traits in `dest`'s type that have at least one method. For example,
-    ///    `dyn Display + Clone + Sync` contains the traits `Display` and `Clone`.
-    /// 3. For each trait, find `coerce_src`'s implementation of it. For example,
-    ///    `impl Display for String`.
-    /// 4. For each method in the impl, check whether it's validated. For example, we would check
-    ///    `<String as Diplay>::fmt`, see that it's unvalidated, and return its `DefId` in the
-    ///    `UseKind`.
-    fn check_dyn_trait_coercion(
-        &self,
-        dest: &thir::Expr<'tcx>,
-        source: thir::ExprId,
-    ) -> Option<UseKind<'tcx>> {
-        let tcx = self.linter.tcx;
-
-        let source_ty = self.thir[source].ty;
-        let (coerce_src, coerce_dst) = self.peel_unsized_tys(source_ty, dest.ty, dest.span)?;
-        debug!(
-            "saw unsized coercion from {source_ty:?} -> {:?} (peeled: {coerce_src:?} -> {coerce_dst:?})",
-            dest.ty
-        );
-
-        if matches!(coerce_src.kind(), ty::Dynamic(..) | ty::FnPtr(..)) {
-            // upcasting from a `dyn Trait` to a `dyn SuperTrait`.
-            // We already checked this when we originally cast to `dyn Trait`.
-            return None;
-        }
-
-        let bound_traits = dyn_trait_refs(tcx, coerce_src, coerce_dst);
-        for trait_ref in bound_traits {
-            // First, check if we are casting to a `dyn Fn*` trait.
-            // If so, this is disallowed no matter what, for the same reason as casting
-            // to a function pointer.
-            if tcx.fn_trait_kind_from_def_id(trait_ref.def_id()).is_some() {
-                if let Some(use_) = self.check_fn_ptr_coercion(coerce_src, trait_ref, dest.span) {
-                    return Some(use_);
-                } else {
-                    continue;
-                }
-            }
-
-            if tcx
-                .associated_item_def_ids(trait_ref.def_id())
-                .iter()
-                .find(|&id| tcx.def_kind(id).is_fn_like())
-                .is_none()
-            {
-                // not possible to call any functions on this trait object, casting is always ok.
-                continue;
-            };
-            let impl_ = self.find_trait_impl(trait_ref, dest.span);
-            if let Some(unvalidated) = self.find_unvalidated_impl_fn(impl_, dest.span) {
-                return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
-            }
-        }
-        None
-    }
-
-    /// Given an `Unsize` coersion from `src_ty` to `dst_ty`, return the innermost "difference"
-    /// between the two. Returns `None` if this isn't a cast to a trait object.
-    ///
-    /// This is quite similar to `struct_lockstep_tails_for_codegen`, except it considers all ZSTs,
-    /// not just those at the tail.
-    ///
-    /// c.f. [Zulip](https://rust-lang.zulipchat.com/#narrow/channel/182449-t-compiler.2Fhelp/topic/Get.20a.20type's.20impl.20for.20a.20trait/with/570837962)
-    ///
-    /// See [`CoerceUnsized`](https://doc.rust-lang.org/std/ops/trait.CoerceUnsized.html) for a full
-    /// list of types we need to handle here.
-    ///
-    /// This is adapted from `rustc_monomorphize::collector::find_tails_for_unsizing`.
-    fn peel_unsized_tys(
-        &self,
-        src_ty: Ty<'tcx>,
-        dst_ty: Ty<'tcx>,
-        span: Span,
-    ) -> Option<(Ty<'tcx>, Ty<'tcx>)> {
-        let tcx = self.linter.tcx;
-        let typing_env = self.typing_env();
-
-        debug!("unsize_ptr: {:?} => {:?}", src_ty, dst_ty);
-
-        let (mut src_inner, mut dst_inner) = (src_ty, dst_ty);
-
-        let get_adt_field = |adt_def: AdtDef<'_>, args, idx: FieldIdx| {
-            let variant = adt_def.variant(VariantIdx::ZERO);
-            let field_ty = variant.fields[idx].ty(tcx, args);
-            tcx.normalize_erasing_regions(typing_env, field_ty)
-        };
-
-        loop {
-            debug!("peel_tys step: src={src_inner:?}, dst={dst_inner:?}");
-            match (src_inner.kind(), dst_inner.kind()) {
-                (_, ty::Dynamic(..)) => return Some((src_inner, dst_inner)),
-                // There's only ever one unsizing coercion at once.
-                // Even if this is a `[dyn Trait; N]`, we would have checked it earlier.
-                // Return now so we don't crash trying to prove that the array implements `Trait`.
-                (ty::Array(..), ty::Slice(..)) => return None,
-
-                // We've finished handling CoerceUnsized; now handle Unsize.
-                (ty::Ref(_, a, _), ty::Ref(_, b, _)) | (ty::RawPtr(a, _), ty::RawPtr(b, _)) => {
-                    (src_inner, dst_inner) =
-                        tcx.struct_lockstep_tails_for_codegen(*a, *b, typing_env);
-                }
-
-                // Handle CoerceUnsized
-                (ty::Pat(a, _), ty::Pat(b, _)) => {
-                    (src_inner, dst_inner) = (*a, *b);
-                }
-
-                (ty::Adt(src_def, src_args), ty::Adt(dst_def, dst_args)) => {
-                    assert_eq!(src_def.did(), dst_def.did());
-
-                    if let Some(boxed) = src_inner.boxed_ty() {
-                        src_inner = boxed;
-                        dst_inner = dst_inner.boxed_ty().unwrap();
-                        continue;
-                    }
-
-                    let field = match self.custom_coerce_unsize_info(src_inner, dst_inner, span) {
-                        Some(CustomCoerceUnsized::Struct(idx)) => idx,
-                        None => {
-                            // Iterate this struct looking for a `!Sized` field.
-                            let mut unsized_field = None;
-                            for (idx, def) in
-                                dst_def.variant(VariantIdx::ZERO).fields.iter_enumerated()
-                            {
-                                if !def.ty(tcx, dst_args).is_sized(tcx, typing_env) {
-                                    unsized_field = Some(idx);
-                                    break;
-                                }
-                            }
-                            unsized_field.unwrap_or_else(|| {
-                                span_bug!(span, "Adt with no CoerceUnsized impl and no !Sized field? {dst_inner:?}");
-                            })
-                        }
-                    };
-                    src_inner = get_adt_field(*src_def, src_args, field);
-                    dst_inner = get_adt_field(*dst_def, dst_args, field);
-                }
-                _ => span_bug!(
-                    span,
-                    "mismatched types trying to coerce from {src_inner:?} to {dst_inner:?}"
-                ),
-            }
-        }
-    }
-
-    // copied from rustc_monomorphize
-    fn custom_coerce_unsize_info(
-        &self,
-        source_ty: Ty<'tcx>,
-        target_ty: Ty<'tcx>,
-        span: Span,
-    ) -> Option<CustomCoerceUnsized> {
-        let tcx = self.linter.tcx;
-        let trait_ref = ty::TraitRef::new(
-            tcx,
-            tcx.require_lang_item(LangItem::CoerceUnsized, span),
-            [source_ty, target_ty],
-        );
-
-        match tcx.codegen_select_candidate(
-            ty::TypingEnv::fully_monomorphized().as_query_input(trait_ref),
-        ) {
-            Ok(ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, .. })) => {
-                Some(tcx.coerce_unsized_info(impl_def_id).unwrap().custom_kind.unwrap())
-            }
-            _ => None,
-        }
-    }
-
-    /// Given an `impl`, find the first associated function that isn't validated.
-    ///
-    /// FIXME: list all uncertified functions, not just the first.
-    fn find_unvalidated_impl_fn(
-        &self,
-        impl_source: ImplSource<'tcx, ()>,
-        span: Span,
-    ) -> Option<DefId> {
-        let tcx = self.linter.tcx;
-
-        let impl_block = match impl_source {
-            ImplSource::UserDefined(ImplSourceUserDefinedData {
-                impl_def_id,
-                args: _,
-                nested: _,
-            }) => impl_def_id,
-            // builtin impls are always ok
-            ImplSource::Builtin(..) => return None,
-            param @ ImplSource::Param(_) => {
-                span_bug!(span, "don't know how to handle nested obligations in {param:?}")
-            }
-        };
-
-        let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
-        for trait_item in tcx.associated_item_def_ids(tcx.impl_trait_id(impl_block)) {
-            debug!("considering {trait_item:?}");
-            if !tcx.def_kind(trait_item).is_fn_like() {
-                debug!("ignoring non-fn {trait_item:?}");
-                continue;
-            }
-
-            // Need this map so we consider default trait fns even if they're not mentioned in the
-            // impl block.
-            let impl_fn = *trait_to_impl_map.get(trait_item).unwrap_or(trait_item);
-
-            if matches!(item_is_validated(tcx, impl_fn), ValidatedStatus::Validated { .. }) {
-                continue;
-            }
-
-            debug!("found unvalidated method {impl_fn:?}");
-            // This function in the impl needs to be marked with `prevalidated`.
-            return Some(impl_fn);
-        }
-        return None;
-    }
-
-    fn find_trait_impl(&self, trait_ref: PolyTraitRef<'tcx>, span: Span) -> ImplSource<'tcx, ()> {
-        match self.try_find_trait_impl(trait_ref, span) {
-            Some(found) => found,
-            None => span_bug!(span, "failed to resolve impl: {trait_ref:?}"),
-        }
-    }
-
-    /// Given a `Trait<Ty>` reference, find `impl Trait for Ty`.
-    ///
-    /// This calls into the [trait solver] to select a suitable impl block.
-    ///
-    /// c.f. [`hax::exporter::traits::resolution::shallow_resolve_trait_ref`](https://github.com/AeneasVerif/hax/blob/3c2b6f01af4a4362dd855b811aa910ad173d546f/frontend/exporter/src/traits/resolution.rs#L666)
-    ///
-    /// Ideally, this would never return None, but sometimes our code is buggy ... failures here
-    /// only degrade the diagnostic, they don't cause soundness issues.
-    ///
-    /// [trait solver]: https://rustc-dev-guide.rust-lang.org/traits/resolution.html
-    fn try_find_trait_impl(
-        &self,
-        trait_ref: PolyTraitRef<'tcx>,
-        span: Span,
-    ) -> Option<ImplSource<'tcx, ()>> {
-        use rustc_infer::infer::TyCtxtInferExt;
-
-        let tcx = self.linter.tcx;
-        let (infcx, param_env) =
-            tcx.infer_ctxt().ignoring_regions().build_with_typing_env(self.typing_env());
-        debug!("resolving impl for {trait_ref:?}");
-
-        // Find the impl block.
-        let mut selcx = SelectionContext::new(&infcx);
-        let cause =
-            ObligationCause::new(span, self.linter.item, ObligationCauseCode::ExprAssignable);
-        // Normalize the trait ref.
-        let trait_ref = tcx.normalize_erasing_regions(self.typing_env(), trait_ref);
-        // method selection doesn't care about regions.
-        let trait_ref = tcx.instantiate_bound_regions_with_erased(trait_ref);
-        let obligation = Obligation::new(tcx, cause, param_env, trait_ref);
-        let selection = match selcx.select(&obligation) {
-            Ok(selection) => selection?,
-            Err(e) => {
-                debug!("type checking failed for trait upcast? {e:?}");
-                return None;
-            }
-        };
-        debug!("selected {selection:?}");
-
-        // Sanity check: make sure all `where` clauses on our `impl` are upheld.
-        let ocx = ObligationCtxt::new(&infcx);
-        let impl_source = selection.map(|o| {
-            debug!("registering obligation {o:?}");
-            ocx.register_obligation(o)
-        });
-        let errors = ocx.evaluate_obligations_error_on_ambiguity();
-        if !errors.is_empty() {
-            debug!("impl obligations not met for trait upcast: {errors:?}");
-            return None;
-        }
-
-        let normalized_impl =
-            tcx.erase_and_anonymize_regions(infcx.resolve_vars_if_possible(impl_source));
-        debug!("found impl {normalized_impl:?}");
-        Some(normalized_impl)
-    }
-
     fn instance_of_ty_ignoring_validated(
         &self,
         ty: Ty<'tcx>,
         span: Span,
     ) -> Option<Instance<'tcx>> {
-        self.instance_of_ty(ty, None, span).filter(|instance| {
+        let mut try_instantiate = |def_id, args| self.try_instantiate(def_id, args, span);
+
+        self.linter.instance_of_ty(ty, None, &mut try_instantiate, span).filter(|instance| {
             // Skip trait functions. These happen when we're calling the vtable of a `dyn` unsized
             // object. This case is caught below in `PointerCoercion::Unsize`.
             if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
@@ -488,72 +166,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         })
     }
 
-    /// Given a call to a function-like type, return the instantiated function definition,
-    /// or `None` if we can't find it until it's been monomorphized.
-    ///
-    /// Panics if given a type that isn't callable.
-    fn instance_of_ty(
-        &self,
-        ty: Ty<'tcx>,
-        fn_trait_ref: Option<PolyTraitRef<'tcx>>,
-        span: Span,
-    ) -> Option<Instance<'tcx>> {
-        let tcx = self.linter.tcx;
-
-        match ty.kind() {
-            ty::FnDef(maybe_trait_fn, generic_args) => {
-                let callee = self.get_concrete_fn_def(*maybe_trait_fn, generic_args, span)?;
-                Some(callee)
-            }
-            ty::Closure(def_id, args) => {
-                Some(Instance::resolve_closure(tcx, *def_id, args, ty::ClosureKind::FnOnce))
-            }
-            // FIXME: `feature(unboxed_closures)`.
-            // Right now we just ignore `fn_trait_ref`, but it's passed in here so that we can call
-            // `find_trait_impl(fn_trait_ref.with_self_ty(ty)`.
-            ty::Adt(..) => None,
-            // Reference to a function or function pointer.
-            ty::Ref(_, ty, _) => self.instance_of_ty(*ty, fn_trait_ref, span),
-            // We assume that all functions pointers are valid. Proof:
-            // 1. If the function was certified, no problem.
-            // 2. If the function was uncertified, and is a literal or assigned to a local
-            //    variable, then either:
-            //    - We can resolve it to a concrete instance, in which case we would have caught it in ZstLiteral above.
-            //    - We can't resolve it yet, but it stays a unique function type, so we will
-            //    catch the call later in the post-mono pass.
-            //    - We can't resolve it yet and it's cast to a function pointer so we don't
-            //    have enough info to catch it post-mono when it's called. In this case we
-            //    catch it in `ReifyFnPtr` above.
-            // 3. If the function was passed as an argument, then either:
-            //   - We were called by an uncertified function. No problem.
-            //   - We were called by a certified function. This lint will run on that
-            //   function too, and we will catch it there at the time it is checked /
-            //   monomorphized.
-            // 4. If this is a closure then either:
-            //   - It was defined in this function, in which case we treat it as also
-            //   certified.
-            //   - It was passed as an argument, which is ok by 3).
-            //   - It is a global const/static, so we catch it in NamedConst/StaticRef above.
-            ty::FnPtr(..) => None,
-            other => span_bug!(span, "unsupported call kind {other:?}"),
-        }
-    }
-
-    /// Given the `DefId` of a function and its generic arguments, instantiate it.
-    /// Return `None` if it can't be resolved until it's been monomorphized.
-    fn get_concrete_fn_def(
-        &self,
-        maybe_trait_fn: DefId,
-        generic_args: GenericArgsRef<'tcx>,
-        span: Span,
-    ) -> Option<Instance<'tcx>> {
-        // Indeterminate results are handled later by a post-mono pass that checks the
-        // instantiation is verified. For now just ignore errors.
-        let callee = self.try_instantiate(maybe_trait_fn, generic_args, span).instance()?;
-        Some(callee)
-    }
-
-    /// Like `get_concrete_fn_def`, but works for things besides functions.
     fn try_instantiate(
         &self,
         def_id: DefId,
@@ -561,7 +173,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         span: Span,
     ) -> InstantiateResult<'tcx> {
         let tcx = self.linter.tcx;
-
         match Instance::try_resolve(tcx, self.typing_env(), def_id, args) {
             Err(_) => {
                 // this happens when we hit the type length limit
@@ -584,57 +195,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let param_env = tcx.param_env(self.linter.item);
         TypingEnv { typing_mode, param_env }
     }
-}
-
-/// Given a Rust type, find (at any level of nesting) `dyn Trait` objects contained within it that
-/// have at least one method.
-/// For example, `dyn Send + Sync + Display + Clone` would return `[Display, Clone]`.
-fn dyn_trait_refs<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    source_ty: Ty<'tcx>,
-    dst_ty: Ty<'tcx>,
-) -> Vec<Binder<'tcx, TraitRef<'tcx>>> {
-    struct FindDynTraitVisitor<'tcx>(TyCtxt<'tcx>, Ty<'tcx>);
-
-    impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for FindDynTraitVisitor<'tcx> {
-        type Result = ControlFlow<Vec<Binder<'tcx, TraitRef<'tcx>>>>;
-
-        fn visit_ty(&mut self, t: Ty<'tcx>) -> Self::Result {
-            match t.kind() {
-                ty::Dynamic(bound_predicates, _lifetime) => {
-                    let mut traits = vec![];
-                    for predicate in *bound_predicates {
-                        debug!("considering {predicate:?}");
-                        let trait_ = predicate
-                            .map_bound(|p| match p {
-                                // auto traits do not allow calling methods
-                                ExistentialPredicate::AutoTrait(_) => None,
-                                // We don't care about associated type bounds.
-                                // They restrict which impl is selected, but that's all they do.
-                                // We already require the implementation of the trait to be certified
-                                // (that's the `Trait` predicate below), so which impl gets picked
-                                // doesn't matter as long we know which one it is.
-                                ExistentialPredicate::Projection(_) => None,
-                                ExistentialPredicate::Trait(t) => Some(t),
-                            })
-                            .transpose();
-                        if let Some(t) = trait_ {
-                            let t = t.with_self_ty(self.0, self.1);
-                            traits.push(t);
-                            traits.extend(supertraits(self.0, t));
-                        }
-                    }
-                    // FIXME: is it possible to have multiple Dynamic types in a single top-level
-                    // type? how? maybe with an enum?
-                    ControlFlow::Break(traits)
-                }
-                _ => t.super_visit_with(self),
-            }
-        }
-    }
-
-    let cf = dst_ty.visit_with(&mut FindDynTraitVisitor(tcx, source_ty));
-    cf.break_value().unwrap_or_default()
 }
 
 /// Used to check whether a `const` or `static` has a function pointer callable at runtime.

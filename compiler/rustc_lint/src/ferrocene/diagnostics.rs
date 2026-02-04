@@ -84,17 +84,7 @@ impl<'tcx> LintState<'tcx> {
             diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
             diag.note("as a precaution, it must assume you will eventually call the function");
         } else if let UseKind::TraitObjectCast(assoc_fn, ty) = use_.kind {
-            if let Some(trait_) = tcx.trait_of_assoc(assoc_fn) {
-                diag.note(format!(
-                    "Ferrocene cannot tell whether `{ty}`'s implementation of `{}` is validated",
-                    tcx.def_path_str(trait_)
-                ));
-                diag.note(format!(
-                    "as a precaution, it must assume `{}` is unvalidated",
-                    tcx.def_path_str(assoc_fn)
-                ));
-            }
-            diag.note("once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated");
+            diag.note(format!("once `{ty}` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated"));
             diag.note(format!(
                 "as a precaution, it must assume you will eventually call `{}`",
                 tcx.def_path_str(assoc_fn)

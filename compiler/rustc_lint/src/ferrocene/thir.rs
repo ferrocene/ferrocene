@@ -22,9 +22,9 @@ use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
 use rustc_middle::ty::adjustment::{CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::{
-    self, AdtDef, Binder, ExistentialPredicate, GenericArgs, GenericArgsRef, Instance,
-    PolyTraitRef, TraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _, TypeVisitor,
-    TypingEnv,
+    self, AdtDef, Binder, ExistentialPredicate, ExistentialTraitRef, GenericArgs, GenericArgsRef,
+    Instance, PolyTraitRef, TraitRef, Ty, TyCtxt, TypeSuperVisitable as _, TypeVisitable as _,
+    TypeVisitor, TypingEnv,
 };
 use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
@@ -99,7 +99,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 UseKind::ContainsFnPtr(def_id, unknown_fn)
             }
             thir::ExprKind::Call { ty, .. } => {
-                let instance = self.instance_of_ty(ty, expr.span)?;
+                let instance = self.instance_of_ty_ignoring_validated(ty, expr.span)?;
                 // we use a custom narrowed span here. it's the receiver that's unvalidated, not the
                 // arguments.
                 span = tcx.sess.source_map().span_until_char(expr.span, '(');
@@ -117,12 +117,23 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 return None;
             }
             thir::ExprKind::PointerCoercion {
-                cast: PointerCoercion::ReifyFnPointer(_), // | PointerCoercion::ClosureFnPointer(_),
+                // NOTE: we intentionally don't check closure casts.
+                cast: PointerCoercion::ReifyFnPointer(_),
                 source,
                 ..
             } => {
                 let source_ty = self.thir[source].ty;
-                self.check_fn_ptr_coercion(source_ty, expr.span)?
+                let fn_ptr_trait = tcx.require_lang_item(LangItem::FnPtrTrait, expr.span);
+                let trait_ref = Binder::dummy(ExistentialTraitRef::new_from_args(
+                    tcx,
+                    fn_ptr_trait,
+                    GenericArgs::empty(),
+                ));
+                self.check_fn_ptr_coercion(
+                    source_ty,
+                    trait_ref.with_self_ty(tcx, source_ty),
+                    expr.span,
+                )?
             }
             thir::ExprKind::PointerCoercion { cast: PointerCoercion::Unsize, source, .. } => {
                 self.check_dyn_trait_coercion(expr, source)?
@@ -134,22 +145,50 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         Some(Use { kind: use_kind, span, from_instantiation: None })
     }
 
-    fn check_fn_ptr_coercion(&self, source: Ty<'tcx>, span: Span) -> Option<UseKind<'tcx>> {
-        let tcx = self.linter.tcx;
+    fn check_fn_ptr_coercion(
+        &self,
+        source: Ty<'tcx>,
+        dst_trait: PolyTraitRef<'tcx>,
+        span: Span,
+    ) -> Option<UseKind<'tcx>> {
+        debug!("check cast of {source:?} to function pointer");
 
-        match self.instance_of_ty(source, span) {
+        // if source.is_closure() { // closures are assumed certified
+        //     return None;
+        // } else if let ty::FnDef(fn_id, args) = source.kind() {
+        //     // skip past `get_concrete_fn_def` because we want to handle Virtual calls specially
+        //     if let Some(instance) = self.try_instantiate(*fn_id, args, span).instance() {
+        //         if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
+        //             return None;
+        //         }
+        //     }
+        // }
+
+        let tcx = self.linter.tcx;
+        match self.instance_of_ty(source, Some(dst_trait), span) {
             Some(instance) => {
-                if item_is_validated(tcx, instance.def_id()).validated() {
+                if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
+                    // This is a `<dyn Trait>::method as fn()` cast.
+                    // That shim is synthesized and therefore covered under the compiler
+                    // qualification. It can't be called unless someone gets a `dyn Trait`, in which
+                    // case we'll lint the unsizing cast.
+                    None
+                } else if item_is_validated(tcx, instance.def_id()).validated() {
                     None
                 } else {
                     Some(UseKind::FnPtrCast(instance))
                 }
             }
-            // None => None,
-            // TODO: buggy!!
+            // FIXME: this is messy, split this out into `check_dyn_trait_coercion`
+            None if Some(dst_trait.def_id()) == tcx.lang_items().fn_ptr_trait() => None,
+            // FIXME: feature(unboxed_closures)
+            None if source.is_adt() => None,
             None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
         }
     }
+
+    // fn find_unvalidated_impl_method() {
+    // }
 
     /// Given a `source` expression that has an unsizing cast to `dest`, determine
     /// whether the cast if valid. If not, return a [`TraitObjectCast`](UseKind::TraitObjectCast) showing why not.
@@ -191,36 +230,25 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             // If so, this is disallowed no matter what, for the same reason as casting
             // to a function pointer.
             if tcx.fn_trait_kind_from_def_id(trait_ref.def_id()).is_some() {
-                if let Some(use_) = self.check_fn_ptr_coercion(coerce_src, dest.span) {
+                if let Some(use_) = self.check_fn_ptr_coercion(coerce_src, trait_ref, dest.span) {
                     return Some(use_);
                 } else {
                     continue;
                 }
             }
 
-            let Some(first_method) = tcx
+            if tcx
                 .associated_item_def_ids(trait_ref.def_id())
                 .iter()
                 .find(|&id| tcx.def_kind(id).is_fn_like())
-            else {
+                .is_none()
+            {
                 // not possible to call any functions on this trait object, casting is always ok.
                 continue;
             };
-            match self.find_trait_impl(trait_ref, dest.span) {
-                ImplSource::UserDefined(ImplSourceUserDefinedData {
-                    impl_def_id,
-                    args: _,
-                    nested: _,
-                }) => {
-                    if let Some(unvalidated) = self.find_unvalidated_impl_fn(impl_def_id) {
-                        return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
-                    }
-                }
-                // builtin impls are always ok
-                ImplSource::Builtin(..) => continue,
-                param @ ImplSource::Param(_) => {
-                    span_bug!(dest.span, "don't know how to handle nested obligations in {param:?}")
-                }
+            let impl_ = self.find_trait_impl(trait_ref, dest.span);
+            if let Some(unvalidated) = self.find_unvalidated_impl_fn(impl_, dest.span) {
+                return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
             }
         }
         None
@@ -342,8 +370,23 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
     /// FIXME: list all uncertified functions, not just the first.
-    fn find_unvalidated_impl_fn(&self, impl_block: DefId) -> Option<DefId> {
+    fn find_unvalidated_impl_fn(
+        &self,
+        impl_source: ImplSource<'tcx, ()>,
+        span: Span,
+    ) -> Option<DefId> {
         let tcx = self.linter.tcx;
+
+        let impl_block = match impl_source {
+            ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, args, nested: _ }) => {
+                impl_def_id
+            }
+            // builtin impls are always ok
+            ImplSource::Builtin(..) => return None,
+            param @ ImplSource::Param(_) => {
+                span_bug!(span, "don't know how to handle nested obligations in {param:?}")
+            }
+        };
 
         let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
         for trait_item in tcx.associated_item_def_ids(tcx.impl_trait_id(impl_block)) {
@@ -368,8 +411,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         return None;
     }
 
-    /// This function never fails. `None` indicates this is a builtin impl, not that the trait is
-    /// unimplemented.
     fn find_trait_impl(&self, trait_ref: PolyTraitRef<'tcx>, span: Span) -> ImplSource<'tcx, ()> {
         match self.try_find_trait_impl(trait_ref, span) {
             Some(found) => found,
@@ -435,12 +476,34 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         Some(normalized_impl)
     }
 
+    fn instance_of_ty_ignoring_validated(
+        &self,
+        ty: Ty<'tcx>,
+        span: Span,
+    ) -> Option<Instance<'tcx>> {
+        self.instance_of_ty(ty, None, span).filter(|instance| {
+            // Skip trait functions. These happen when we're calling the vtable of a `dyn` unsized
+            // object. This case is caught below in `PointerCoercion::Unsize`.
+            if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
+                info!("skipping dyn assoc item {instance:?}");
+                false
+            } else {
+                true
+            }
+        })
+    }
+
     /// Given a call to a function-like type, return the instantiated function definition,
     /// or `None` if we can't find it until it's been monomorphized.
     ///
     /// Panics if given a type that isn't callable.
-    fn instance_of_ty(&self, ty: Ty<'tcx>, span: Span) -> Option<Instance<'tcx>> {
-        // let tcx = self.linter.tcx;
+    fn instance_of_ty(
+        &self,
+        ty: Ty<'tcx>,
+        fn_trait_ref: Option<PolyTraitRef<'tcx>>,
+        span: Span,
+    ) -> Option<Instance<'tcx>> {
+        let tcx = self.linter.tcx;
 
         match ty.kind() {
             ty::FnDef(maybe_trait_fn, generic_args) => {
@@ -449,23 +512,21 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             }
             // TODO: check this logic. I think it's right since we'll check the closure body in a
             // second anyway?
-            ty::Closure(..) => None,
-            // ty::Closure(def_id, args) => {
-            //     Some(Instance::resolve_closure(
-            //         tcx,
-            //         *def_id,
-            //         args,
-            //         ty::ClosureKind::FnOnce,
-            //     ))
-            // }
+            // ty::Closure(..) => None,
+            ty::Closure(def_id, args) => {
+                Some(Instance::resolve_closure(tcx, *def_id, args, ty::ClosureKind::FnOnce))
+            }
             // Manual impl of FnOnce.
             ty::Adt(..) => {
+                // let trait_ref =
                 // span_bug!(span, "don't know how to handle {ty:?}");
-                // self.find_trait_impl(trait_ref, span);
-                None // TODO: currently not supported
+                // let trait_ref = fn_trait_ref.unwrap().map_bound(|trait_ref| trait_ref.with_replaced_self_ty(tcx, ty));
+                // let impl_source = self.find_trait_impl(trait_ref, span);
+                // self.find_unvalidated_impl_fn(impl_source, span)
+                None
             }
             // Reference to a function or function pointer.
-            ty::Ref(_, ty, _) => self.instance_of_ty(*ty, span),
+            ty::Ref(_, ty, _) => self.instance_of_ty(*ty, fn_trait_ref, span),
             // We assume that all functions pointers are valid. Proof:
             // 1. If the function was certified, no problem.
             // 2. If the function was uncertified, and is a literal or assigned to a local
@@ -502,24 +563,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         // Indeterminate results are handled later by a post-mono pass that checks the
         // instantiation is verified. For now just ignore errors.
         let callee = self.try_instantiate(maybe_trait_fn, generic_args, span).instance()?;
-
-        // If this is a call to Fn/FnMut/FnOnce::call, then it's a type that implements
-        // `fn_traits`, either a closure or a user-defined type. Allow closures but check
-        // everything else.
-        // TODO: i think this is wrong for unsizing casts? maybe we need to check if the owner is
-        // validated instead?
-        if self.linter.tcx.is_closure_like(callee.def_id()) {
-            debug!("skipping closure {callee:?}");
-            return None;
-        }
-
-        // Skip trait functions. These happen when we're calling the vtable of a `dyn` unsized
-        // object. This case is caught below in `PointerCoercion::Unsize`.
-        if matches!(callee.def, ty::InstanceKind::Virtual(..)) {
-            info!("skipping dyn assoc item {callee:?}");
-            return None;
-        }
-
         Some(callee)
     }
 

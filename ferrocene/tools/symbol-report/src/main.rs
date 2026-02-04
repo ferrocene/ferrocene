@@ -1,14 +1,11 @@
 #![feature(rustc_private)]
 
 extern crate rustc_driver;
-extern crate rustc_errors;
 extern crate rustc_hir;
 extern crate rustc_interface;
 extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
-
-extern crate tracing;
 
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -18,13 +15,9 @@ use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
-use rustc_errors::Applicability;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{
-    AttrId, Attribute, ForeignItem, ForeignItemKind, HirId, Item, ItemKind, Node, TraitFn,
-    TraitItem, TraitItemKind,
-};
+use rustc_hir::{AttrId, Attribute, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
@@ -33,7 +26,6 @@ use rustc_middle::ty::print::{
 use rustc_session::EarlyDiagCtxt;
 use rustc_session::config::ErrorOutputType;
 use rustc_span::{Span, Symbol};
-use tracing::info;
 
 static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =
     LazyLock::new(|| ["ferrocene", "annotation"].map(Symbol::intern));
@@ -141,10 +133,18 @@ fn main() {
     std::process::exit(exit_code);
 }
 
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
+
 fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {
     for def in tcx.hir_crate_items(()).definitions() {
-        if should_skip_item(tcx, def) {
-            continue;
+        match tcx.def_kind(def) {
+            DefKind::Mod | DefKind::Struct | DefKind::Enum | DefKind::Union => continue,
+            _ => {}
+        }
+
+        match item_is_validated(tcx, def.into()) {
+            ValidatedStatus::Validated { annotation: Some(_) } => {}
+            _ => continue,
         }
 
         let qualified_name = get_qualified_name(tcx, def);
@@ -155,16 +155,6 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         }
 
         let (filename, mut start_line, end_line) = get_span(tcx, &mut vis, def);
-
-        let header = tcx.def_span(def);
-        let mut diag = tcx.dcx().struct_span_warn(header, "mark this item as prevalidated");
-        diag.span_suggestion_verbose(
-            header.shrink_to_lo(),
-            "here",
-            format!("#[ferrocene::prevalidated]\n"),
-            Applicability::MachineApplicable,
-        );
-        diag.emit();
 
         // We don't check for annotations those inside the `Visitor` implementation so we do it
         // here.
@@ -183,31 +173,12 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
     vis
 }
 
-/// These functions exist only to allow code using `.subset` targets to compile,
-/// and will be removed once `#[ferrocene::certified] is implemented.
-fn should_skip_item(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
-    let kind = tcx.def_kind(def);
-    if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure, DefKind::Struct, DefKind::Enum]
-        .contains(&kind)
-    {
-        return true;
-    }
-    // Skip intrinsics, extern functions, and associated functions with no default.
-    match tcx.hir_node_by_def_id(def) {
-        Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
-        | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
-        | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
-            info!("skipping item {def:?}");
-            true
-        }
-        _ => false,
-    }
-}
-
 fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
     with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))))
 }
 
+/// These functions exist only to allow code using `.subset` targets to compile,
+/// and will be removed once `#[ferrocene::certified] is implemented.
 fn should_filter_out(qualified_name: &str) -> bool {
     const FILTER_LIST: &[&str] = &["<core::core_arch::", "core::core_arch::"];
 

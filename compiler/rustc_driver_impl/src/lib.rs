@@ -34,7 +34,6 @@ use rustc_data_structures::profiling::{
 };
 pub use rustc_errors::catch_fatal_errors;
 use rustc_errors::emitter::stderr_destination;
-use rustc_errors::registry::Registry;
 use rustc_errors::translation::Translator;
 use rustc_errors::{ColorConfig, DiagCtxt, ErrCode, PResult, markdown};
 use rustc_feature::find_gated_cfg;
@@ -451,13 +450,11 @@ pub enum Compilation {
 }
 
 fn handle_explain(early_dcx: &EarlyDiagCtxt, code: &str, color: ColorConfig) {
-    let registry = Registry::new();
-
     // Allow "E0123" or "0123" form.
     let upper_cased_code = code.to_ascii_uppercase();
     if let Ok(code) = upper_cased_code.trim_prefix('E').parse::<u32>()
         && code <= ErrCode::MAX_AS_U32
-        && let Ok(description) = registry.try_find_description(ErrCode::from_u32(code))
+        && let Ok(description) = rustc_errors::codes::try_find_description(ErrCode::from_u32(code))
     {
         let mut is_in_code_block = false;
         let mut text = String::new();

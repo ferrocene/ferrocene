@@ -301,6 +301,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcConstStabilityIndirect
                     | AttributeKind::RustcDeallocator
                     | AttributeKind::RustcDefPath(..)
+                    | AttributeKind::RustcDelayedBugFromInsideQuery
                     | AttributeKind::RustcDenyExplicitImpl(..)
                     | AttributeKind::RustcDummy
                     | AttributeKind::RustcDumpDefParents
@@ -406,7 +407,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::rustc_mir
                             | sym::rustc_outlives
                             | sym::rustc_evaluate_where_clauses
-                            | sym::rustc_delayed_bug_from_inside_query
                             | sym::rustc_partition_reused
                             | sym::rustc_partition_codegened
                             | sym::rustc_expected_cgu_reuse

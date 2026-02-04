@@ -106,6 +106,7 @@ impl AttributeKind {
             RustcConstStabilityIndirect => No,
             RustcDeallocator => No,
             RustcDefPath(..) => No,
+            RustcDelayedBugFromInsideQuery => No,
             RustcDenyExplicitImpl(..) => No,
             RustcDummy => No,
             RustcDumpDefParents => No,

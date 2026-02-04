@@ -1084,6 +1084,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_def_path]`
     RustcDefPath(Span),
 
+    /// Represents `#[rustc_delayed_bug_from_inside_query]`
+    RustcDelayedBugFromInsideQuery,
+
     /// Represents `#[rustc_deny_explicit_impl]`.
     RustcDenyExplicitImpl(Span),
 

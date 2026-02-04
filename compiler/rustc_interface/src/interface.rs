@@ -55,7 +55,7 @@ pub(crate) fn parse_cfg(dcx: DiagCtxtHandle<'_>, cfgs: Vec<String>) -> Cfg {
     cfgs.into_iter()
         .map(|s| {
             let psess = ParseSess::emitter_with_note(
-                vec![rustc_parse::DEFAULT_LOCALE_RESOURCE, rustc_session::DEFAULT_LOCALE_RESOURCE],
+                vec![rustc_parse::DEFAULT_LOCALE_RESOURCE],
                 format!("this occurred on the command line: `--cfg={s}`"),
             );
             let filename = FileName::cfg_spec_source_code(&s);
@@ -127,7 +127,7 @@ pub(crate) fn parse_check_cfg(dcx: DiagCtxtHandle<'_>, specs: Vec<String>) -> Ch
 
     for s in specs {
         let psess = ParseSess::emitter_with_note(
-            vec![rustc_parse::DEFAULT_LOCALE_RESOURCE, rustc_session::DEFAULT_LOCALE_RESOURCE],
+            vec![rustc_parse::DEFAULT_LOCALE_RESOURCE],
             format!("this occurred on the command line: `--check-cfg={s}`"),
         );
         let filename = FileName::cfg_spec_source_code(&s);
@@ -455,9 +455,6 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
                 Err(e) => early_dcx.early_fatal(format!("failed to load fluent bundle: {e}")),
             };
 
-            let mut locale_resources = config.locale_resources;
-            locale_resources.push(codegen_backend.locale_resource());
-
             let mut sess = rustc_session::build_session(
                 config.opts,
                 CompilerIO {
@@ -468,7 +465,7 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
                 },
                 bundle,
                 config.registry,
-                locale_resources,
+                config.locale_resources,
                 config.lint_caps,
                 target,
                 util::rustc_version_str().unwrap_or("unknown"),

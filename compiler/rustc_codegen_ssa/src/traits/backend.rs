@@ -37,10 +37,6 @@ pub trait BackendTypes {
 }
 
 pub trait CodegenBackend {
-    /// Locale resources for diagnostic messages - a string the content of the Fluent resource.
-    /// Called before `init` so that all other functions are able to emit translatable diagnostics.
-    fn locale_resource(&self) -> &'static str;
-
     fn name(&self) -> &'static str;
 
     fn init(&self, _sess: &Session) {}

@@ -7340,6 +7340,7 @@ intrinsics:
     return_type: "{neon_type[0]}"
     big_endian_inverse: true # TODO: Remove this attribute, and replace transmute with vreinterpret when https://github.com/llvm/llvm-project/pull/169337 is merged, LLVM inlining issue causing assertion failure.
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v8
       - *neon-i8mm
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vusdot, 'LANE = 3']]}]]
@@ -7363,6 +7364,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}", "c: {neon_type[2]}"]
     return_type: "{neon_type[0]}"
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v8
       - *neon-i8mm
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vsudot, 'LANE = 1']]}]]
@@ -7397,6 +7399,7 @@ intrinsics:
     static_defs: ["const LANE: i32"]
     big_endian_inverse: true # TODO: Remove this attribute, and replace transmute with vreinterpret when https://github.com/llvm/llvm-project/pull/169337 is merged, LLVM inlining issue causing assertion failure.
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v8
       - FnCall: [target_feature, ['enable = "neon,dotprod"']]
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vsdot, 'LANE = 0']]}]]
@@ -7432,6 +7435,7 @@ intrinsics:
     static_defs: ["const LANE: i32"]
     big_endian_inverse: true # TODO: Remove this attribute, and replace transmute with vreinterpret when https://github.com/llvm/llvm-project/pull/169337 is merged, LLVM inlining issue causing assertion failure.
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v8
       - FnCall: [target_feature, ['enable = "neon,dotprod"']]
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vudot, 'LANE = 0']]}]]

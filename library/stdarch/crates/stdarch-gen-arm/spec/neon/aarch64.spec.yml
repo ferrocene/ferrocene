@@ -4593,6 +4593,7 @@ intrinsics:
     safety:
       unsafe: [neon]
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "neon,rcpc3"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [ldap1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
@@ -4623,6 +4624,7 @@ intrinsics:
     safety:
       unsafe: [neon]
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - FnCall: [target_feature, ['enable = "neon,rcpc3"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [ldap1, 'LANE = 0']]}]]
@@ -4649,6 +4651,7 @@ intrinsics:
     static_defs: ["const LANE: i32"]
     safety: safe
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "neon,rcpc3"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [stl1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
@@ -4677,6 +4680,7 @@ intrinsics:
     static_defs: ["const LANE: i32"]
     safety: safe
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "neon,rcpc3"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [stl1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
@@ -14643,6 +14647,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = {type[4]}']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [nop, 'INDEX = 1']]}]]
       - *neon-unstable-feat-lut
@@ -14706,6 +14711,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - FnCall: [target_feature, ['enable = "neon,lut"']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [nop, 'INDEX = 1']]}]]
       - *neon-unstable-feat-lut
@@ -14955,6 +14961,7 @@ intrinsics:
     arguments: ["vn: {type[0]}", "vm: {type[1]}"]
     return_type: "{type[0]}"
     attr:
+      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-unstable-fp8
       - FnCall: [target_feature, ['enable = "neon,fp8"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [fscale]]}]]

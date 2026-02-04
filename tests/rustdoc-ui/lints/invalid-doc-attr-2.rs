@@ -1,7 +1,7 @@
 #![deny(invalid_doc_attributes)]
 
-#![doc(test(""))]
+#![doc("other attribute")]
 //~^ ERROR
 //~| WARN
-
-fn main() {}
+#![doc]
+//~^ ERROR

@@ -1,13 +1,13 @@
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{
     ForeignItem, ForeignItemKind, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
 };
 use rustc_macros::{HashStable, TyDecodable, TyEncodable};
+use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::{Span, Symbol, sym};
 use tracing::info;
-
-use crate::ty::TyCtxt;
 
 #[derive(Clone, TyEncodable, TyDecodable, HashStable, Debug)]
 pub struct Validated {
@@ -59,6 +59,42 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
                     return ValidatedStatus::Validated { annotation: None };
                 }
             _ => {},
+        }
+
+        // Check if this is an associated function from a `derive`.
+        let parent = tcx.parent(owner);
+        tracing::debug!("parent={parent:?}, kind={:?}", tcx.def_kind(parent));
+        if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
+            tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
+        }
+        let mut derived = false;
+        if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
+            derived |= rustc_hir::find_attr!(
+                tcx.get_all_attrs(parent),
+                AttributeKind::AutomaticallyDerived { .. }
+            );
+        }
+        if derived {
+            let self_ty = tcx.type_of(parent);
+            info!("checking {self_ty:?}");
+            match self_ty.skip_binder().peel_refs().kind() {
+                ty::Adt(adt_def, _) => {
+                    let self_id = adt_def.did();
+                    info!(
+                        "{} is marked #[automatically_derived], checking {}",
+                        tcx.def_path_str(def_id),
+                        tcx.def_path_str(self_id)
+                    );
+                    return item_is_validated(tcx, self_id);
+                }
+                _ => {
+                    let span = tcx.def_span(parent);
+                    span_bug!(
+                        span,
+                        "don't know how to handle #[automatically_derived] for non-adt {self_ty:?}"
+                    );
+                }
+            }
         }
     }
 

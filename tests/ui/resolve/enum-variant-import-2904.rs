@@ -1,60 +1,80 @@
+//! Regression test for https://github.com/rust-lang/rust/issues/2904
+
 //@ build-pass
 #![allow(unused_must_use)]
 #![allow(dead_code)]
 #![allow(unused_mut)]
-#![allow(non_camel_case_types)]
 
 // Map representation
 
+use Square::{Bot, ClosedLift, Earth, Empty, Lambda, OpenLift, Rock, Wall};
 use std::fmt;
 use std::io::prelude::*;
-use square::{bot, wall, rock, lambda, closed_lift, open_lift, earth, empty};
 
-enum square {
-    bot,
-    wall,
-    rock,
-    lambda,
-    closed_lift,
-    open_lift,
-    earth,
-    empty
+enum Square {
+    Bot,
+    Wall,
+    Rock,
+    Lambda,
+    ClosedLift,
+    OpenLift,
+    Earth,
+    Empty,
 }
 
-impl fmt::Debug for square {
+impl fmt::Debug for Square {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-          bot => { "R".to_string() }
-          wall => { "#".to_string() }
-          rock => { "*".to_string() }
-          lambda => { "\\".to_string() }
-          closed_lift => { "L".to_string() }
-          open_lift => { "O".to_string() }
-          earth => { ".".to_string() }
-          empty => { " ".to_string() }
-        })
+        write!(
+            f,
+            "{}",
+            match *self {
+                Bot => {
+                    "R".to_string()
+                }
+                Wall => {
+                    "#".to_string()
+                }
+                Rock => {
+                    "*".to_string()
+                }
+                Lambda => {
+                    "\\".to_string()
+                }
+                ClosedLift => {
+                    "L".to_string()
+                }
+                OpenLift => {
+                    "O".to_string()
+                }
+                Earth => {
+                    ".".to_string()
+                }
+                Empty => {
+                    " ".to_string()
+                }
+            }
+        )
     }
 }
 
-fn square_from_char(c: char) -> square {
-    match c  {
-      'R'  => { bot }
-      '#'  => { wall }
-      '*'  => { rock }
-      '\\' => { lambda }
-      'L'  => { closed_lift }
-      'O'  => { open_lift }
-      '.'  => { earth }
-      ' '  => { empty }
-      _ => {
-        println!("invalid square: {}", c);
-        panic!()
-      }
+fn square_from_char(c: char) -> Square {
+    match c {
+        'R' => Bot,
+        '#' => Wall,
+        '*' => Rock,
+        '\\' => Lambda,
+        'L' => ClosedLift,
+        'O' => OpenLift,
+        '.' => Earth,
+        ' ' => Empty,
+        _ => {
+            println!("invalid Square: {}", c);
+            panic!()
+        }
     }
 }
 
-fn read_board_grid<rdr:'static + Read>(mut input: rdr)
-                   -> Vec<Vec<square>> {
+fn read_board_grid<Rdr: 'static + Read>(mut input: Rdr) -> Vec<Vec<Square>> {
     let mut input: &mut dyn Read = &mut input;
     let mut grid = Vec::new();
     let mut line = [0; 10];
@@ -65,14 +85,16 @@ fn read_board_grid<rdr:'static + Read>(mut input: rdr)
     }
     grid.push(row);
     let width = grid[0].len();
-    for row in &grid { assert_eq!(row.len(), width) }
+    for row in &grid {
+        assert_eq!(row.len(), width)
+    }
     grid
 }
 
 mod test {
     #[test]
     pub fn trivial_to_string() {
-        assert_eq!(lambda.to_string(), "\\")
+        assert_eq!(Lambda.to_string(), "\\")
     }
 }
 

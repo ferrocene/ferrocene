@@ -173,12 +173,7 @@ pub trait DepNodeKey<Tcx: DepContext>: fmt::Debug + Sized {
 
     /// This method turns a query key into an opaque `Fingerprint` to be used
     /// in `DepNode`.
-    ///
-    /// Not all `DepNodeKey` impls support being turned into a `Fingerprint`
-    /// (they don't need to if the corresponding `DepNode` is anonymous).
-    fn to_fingerprint(&self, _: Tcx) -> Fingerprint {
-        panic!("Not implemented. Accidentally called on anonymous node?")
-    }
+    fn to_fingerprint(&self, _: Tcx) -> Fingerprint;
 
     fn to_debug_str(&self, tcx: Tcx) -> String;
 

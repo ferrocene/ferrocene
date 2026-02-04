@@ -42,8 +42,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
     //
     // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins without the `dependency=` prefix.
-    let target_dir =
-        builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
+    let target_dir = builder.cargo_out(compiler, Mode::Std, cargo.target()).join("deps");
 
     cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 }

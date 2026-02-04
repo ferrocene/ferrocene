@@ -3186,8 +3186,4 @@ impl<T: ?Sized> Debug for SyncUnsafeCell<T> {
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub mod ferrocene_test {
-    pub fn test_rt_argument_as_u16_none() {
-        assert_eq!(super::rt::Argument::new_debug(&10).as_u16(), None);
-    }
-}
+pub mod ferrocene_test;

@@ -41,7 +41,8 @@ impl<'tcx> PreDefineCodegenMethods<'tcx> for CodegenCx<'_, 'tcx> {
         });
 
         llvm::set_linkage(g, base::linkage_to_llvm(linkage));
-        llvm::set_visibility(g, base::visibility_to_llvm(visibility));
+        self.set_visibility(g, linkage, visibility);
+
         self.assume_dso_local(g, false);
 
         let attrs = self.tcx.codegen_instance_attrs(instance.def);
@@ -69,16 +70,7 @@ impl<'tcx> PreDefineCodegenMethods<'tcx> for CodegenCx<'_, 'tcx> {
         {
             llvm::SetUniqueComdat(self.llmod, lldecl);
         }
-
-        // If we're compiling the compiler-builtins crate, e.g., the equivalent of
-        // compiler-rt, then we want to implicitly compile everything with hidden
-        // visibility as we're going to link this object all over the place but
-        // don't want the symbols to get exported.
-        if linkage != Linkage::Internal && self.tcx.is_compiler_builtins(LOCAL_CRATE) {
-            llvm::set_visibility(lldecl, llvm::Visibility::Hidden);
-        } else {
-            llvm::set_visibility(lldecl, base::visibility_to_llvm(visibility));
-        }
+        self.set_visibility(lldecl, linkage, visibility);
 
         debug!("predefine_fn: instance = {:?}", instance);
 
@@ -120,6 +112,18 @@ impl CodegenCx<'_, '_> {
             llvm::set_dso_local(llval);
         }
         assume
+    }
+
+    fn set_visibility(&self, lldecl: &llvm::Value, linkage: Linkage, visibility: Visibility) {
+        // If we're compiling the compiler-builtins crate, i.e., the equivalent of
+        // compiler-rt, then we want to implicitly compile everything with hidden
+        // visibility as we're going to link this object all over the place but
+        // don't want the symbols to get exported.
+        if linkage != Linkage::Internal && self.tcx.is_compiler_builtins(LOCAL_CRATE) {
+            llvm::set_visibility(lldecl, llvm::Visibility::Hidden);
+        } else {
+            llvm::set_visibility(lldecl, base::visibility_to_llvm(visibility));
+        }
     }
 
     fn should_assume_dso_local(&self, llval: &llvm::Value, is_declaration: bool) -> bool {

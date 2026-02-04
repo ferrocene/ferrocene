@@ -92,8 +92,6 @@ pub mod translation;
 
 pub type PResult<'a, T> = Result<T, Diag<'a>>;
 
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
-
 // `PResult` is used a lot. Make sure it doesn't unintentionally get bigger.
 #[cfg(target_pointer_width = "64")]
 rustc_data_structures::static_assert_size!(PResult<'_, ()>, 24);
@@ -1531,7 +1529,9 @@ impl DiagCtxtInner {
                 // the usual `Diag`/`DiagCtxt` level, so we must augment `bug`
                 // in a lower-level fashion.
                 bug.arg("level", bug.level);
-                let msg = crate::fluent_generated::errors_invalid_flushed_delayed_diagnostic_level;
+                let msg = inline_fluent!(
+                    "`flushed_delayed` got diagnostic with level {$level}, instead of the expected `DelayedBug`"
+                );
                 let msg = self.eagerly_translate_for_subdiag(&bug, msg); // after the `arg` call
                 bug.sub(Note, msg, bug.span.primary_span().unwrap().into());
             }
@@ -1573,10 +1573,13 @@ impl DelayedDiagInner {
         // lower-level fashion.
         let mut diag = self.inner;
         let msg = match self.note.status() {
-            BacktraceStatus::Captured => crate::fluent_generated::errors_delayed_at_with_newline,
+            BacktraceStatus::Captured => inline_fluent!(
+                "delayed at {$emitted_at}
+{$note}"
+            ),
             // Avoid the needless newline when no backtrace has been captured,
             // the display impl should just be a single line.
-            _ => crate::fluent_generated::errors_delayed_at_without_newline,
+            _ => inline_fluent!("delayed at {$emitted_at} - {$note}"),
         };
         diag.arg("emitted_at", diag.emitted_at.clone());
         diag.arg("note", self.note);

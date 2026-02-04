@@ -7,6 +7,7 @@
 
 trait UncertifiedDefault {
     fn foo(&self) {} //~ NOTE unvalidated
+    //~^ NOTE unvalidated
 }
 
 trait CertifiedDefault {

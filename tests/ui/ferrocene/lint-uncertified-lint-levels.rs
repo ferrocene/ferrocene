@@ -49,5 +49,3 @@ fn unreachable() { //~ NOTE is validated
     unvalidated();
     //~^ WARN calls
 }
-
-// TODO: make sure this recurses even if lint is allowed

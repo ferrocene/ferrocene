@@ -176,7 +176,10 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             // Don't remove this panic. If you do so before adding `check_dyn_trait_coercion` to
             // the post-mono pass, it will fail to catch real uses of uncertified items in
             // non-degenerate programs.
-            None => span_bug!(span, "unimplemented: pre-mono cast from {source} to dyn {dst_trait}() that fails to instantiate"),
+            None => span_bug!(
+                span,
+                "unimplemented: pre-mono cast from {source} to dyn {dst_trait}() that fails to instantiate"
+            ),
         }
     }
 

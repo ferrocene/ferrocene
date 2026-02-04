@@ -4315,7 +4315,6 @@ core::ffi::c_str::CStr::to_bytes_with_nul
 core::ffi::c_str::strlen
 core::ffi::c_str::strlen::compiletime
 core::ffi::c_str::strlen::runtime
-core::ffi::c_str::strlen::runtime::strlen
 core::fmt::Arguments::<'a>::as_statically_known_str
 core::fmt::Arguments::<'a>::as_str
 core::fmt::Arguments::<'a>::estimated_capacity
@@ -5738,14 +5737,12 @@ core::panicking::panic_const::panic_const_shr_overflow
 core::panicking::panic_const::panic_const_sub_overflow
 core::panicking::panic_display
 core::panicking::panic_fmt
-core::panicking::panic_fmt::panic_impl
 core::panicking::panic_in_cleanup
 core::panicking::panic_misaligned_pointer_dereference
 core::panicking::panic_nounwind
 core::panicking::panic_nounwind_fmt
 core::panicking::panic_nounwind_fmt::compiletime
 core::panicking::panic_nounwind_fmt::runtime
-core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
 core::panicking::panic_str_2015

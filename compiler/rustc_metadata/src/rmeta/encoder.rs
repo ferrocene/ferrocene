@@ -1102,12 +1102,8 @@ fn should_encode_mir(
     def_id: LocalDefId,
 ) -> (bool, bool) {
     match tcx.def_kind(def_id) {
-        // Constructors
-        DefKind::Ctor(_, _) => {
-            let mir_opt_base = tcx.sess.opts.output_types.should_codegen()
-                || tcx.sess.opts.unstable_opts.always_encode_mir;
-            (true, mir_opt_base)
-        }
+        // instance_mir uses mir_for_ctfe rather than optimized_mir for constructors
+        DefKind::Ctor(_, _) => (true, false),
         // Constants
         DefKind::AnonConst | DefKind::InlineConst | DefKind::AssocConst | DefKind::Const => {
             (true, false)

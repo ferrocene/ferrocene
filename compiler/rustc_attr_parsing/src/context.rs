@@ -16,90 +16,42 @@ use rustc_session::lint::{Lint, LintId};
 use rustc_span::{ErrorGuaranteed, Span, Symbol};
 
 use crate::AttributeParser;
-use crate::attributes::allow_unstable::{
-    AllowConstFnUnstableParser, AllowInternalUnstableParser, UnstableFeatureBoundParser,
-};
-use crate::attributes::body::CoroutineParser;
-use crate::attributes::cfi_encoding::CfiEncodingParser;
-use crate::attributes::codegen_attrs::{
-    ColdParser, CoverageParser, EiiForeignItemParser, ExportNameParser, ForceTargetFeatureParser,
-    NakedParser, NoMangleParser, ObjcClassParser, ObjcSelectorParser, OptimizeParser,
-    PatchableFunctionEntryParser, RustcPassIndirectlyInNonRusticAbisParser, SanitizeParser,
-    TargetFeatureParser, ThreadLocalParser, TrackCallerParser, UsedParser,
-};
-use crate::attributes::confusables::ConfusablesParser;
-use crate::attributes::crate_level::{
-    CrateNameParser, CrateTypeParser, MoveSizeLimitParser, NeedsPanicRuntimeParser,
-    NoBuiltinsParser, NoCoreParser, NoMainParser, NoStdParser, PanicRuntimeParser,
-    PatternComplexityLimitParser, ProfilerRuntimeParser, RecursionLimitParser,
-    RustcCoherenceIsCoreParser, RustcPreserveUbChecksParser, TypeLengthLimitParser,
-    WindowsSubsystemParser,
-};
-use crate::attributes::debugger::DebuggerViualizerParser;
-use crate::attributes::deprecation::DeprecationParser;
-use crate::attributes::do_not_recommend::DoNotRecommendParser;
-use crate::attributes::doc::DocParser;
-use crate::attributes::dummy::DummyParser;
-use crate::attributes::inline::{InlineParser, RustcForceInlineParser};
-use crate::attributes::instruction_set::InstructionSetParser;
-use crate::attributes::link_attrs::{
-    CompilerBuiltinsParser, ExportStableParser, FfiConstParser, FfiPureParser, LinkNameParser,
-    LinkOrdinalParser, LinkParser, LinkSectionParser, LinkageParser, NeedsAllocatorParser,
-    StdInternalSymbolParser,
-};
-use crate::attributes::lint_helpers::{
-    AsPtrParser, AutomaticallyDerivedParser, PassByValueParser, PubTransparentParser,
-    RustcShouldNotBeCalledOnConstItems,
-};
-use crate::attributes::loop_match::{ConstContinueParser, LoopMatchParser};
-use crate::attributes::macro_attrs::{
-    AllowInternalUnsafeParser, CollapseDebugInfoParser, MacroEscapeParser, MacroExportParser,
-    MacroUseParser,
-};
-use crate::attributes::must_not_suspend::MustNotSuspendParser;
-use crate::attributes::must_use::MustUseParser;
-use crate::attributes::no_implicit_prelude::NoImplicitPreludeParser;
-use crate::attributes::no_link::NoLinkParser;
-use crate::attributes::non_exhaustive::NonExhaustiveParser;
+// Glob imports to avoid big, bitrotty import lists
+use crate::attributes::allow_unstable::*;
+use crate::attributes::body::*;
+use crate::attributes::cfi_encoding::*;
+use crate::attributes::codegen_attrs::*;
+use crate::attributes::confusables::*;
+use crate::attributes::crate_level::*;
+use crate::attributes::debugger::*;
+use crate::attributes::deprecation::*;
+use crate::attributes::do_not_recommend::*;
+use crate::attributes::doc::*;
+use crate::attributes::dummy::*;
+use crate::attributes::inline::*;
+use crate::attributes::instruction_set::*;
+use crate::attributes::link_attrs::*;
+use crate::attributes::lint_helpers::*;
+use crate::attributes::loop_match::*;
+use crate::attributes::macro_attrs::*;
+use crate::attributes::must_not_suspend::*;
+use crate::attributes::must_use::*;
+use crate::attributes::no_implicit_prelude::*;
+use crate::attributes::no_link::*;
+use crate::attributes::non_exhaustive::*;
 use crate::attributes::path::PathParser as PathAttributeParser;
-use crate::attributes::pin_v2::PinV2Parser;
-use crate::attributes::proc_macro_attrs::{
-    ProcMacroAttributeParser, ProcMacroDeriveParser, ProcMacroParser, RustcBuiltinMacroParser,
-};
-use crate::attributes::prototype::CustomMirParser;
-use crate::attributes::repr::{AlignParser, AlignStaticParser, ReprParser};
-use crate::attributes::rustc_allocator::{
-    RustcAllocatorParser, RustcAllocatorZeroedParser, RustcAllocatorZeroedVariantParser,
-    RustcDeallocatorParser, RustcReallocatorParser,
-};
-use crate::attributes::rustc_dump::{
-    RustcDumpDefParentsParser, RustcDumpItemBoundsParser, RustcDumpPredicatesParser,
-    RustcDumpUserArgsParser, RustcDumpVtableParser,
-};
-use crate::attributes::rustc_internal::{
-    RustcHasIncoherentInherentImplsParser, RustcHiddenTypeOfOpaquesParser, RustcLayoutParser,
-    RustcLayoutScalarValidRangeEndParser, RustcLayoutScalarValidRangeStartParser,
-    RustcLegacyConstGenericsParser, RustcLintOptDenyFieldAccessParser, RustcLintOptTyParser,
-    RustcLintQueryInstabilityParser, RustcLintUntrackedQueryInformationParser, RustcMainParser,
-    RustcMirParser, RustcMustImplementOneOfParser, RustcNeverReturnsNullPointerParser,
-    RustcNoImplicitAutorefsParser, RustcNonConstTraitMethodParser, RustcNounwindParser,
-    RustcObjectLifetimeDefaultParser, RustcOffloadKernelParser, RustcScalableVectorParser,
-    RustcSimdMonomorphizeLaneLimitParser,
-};
-use crate::attributes::semantics::MayDangleParser;
-use crate::attributes::stability::{
-    BodyStabilityParser, ConstStabilityIndirectParser, ConstStabilityParser, StabilityParser,
-};
-use crate::attributes::test_attrs::{
-    IgnoreParser, RustcVarianceOfOpaquesParser, RustcVarianceParser, ShouldPanicParser,
-};
-use crate::attributes::traits::{
-    AllowIncoherentImplParser, CoinductiveParser, DenyExplicitImplParser,
-    DynIncompatibleTraitParser, FundamentalParser, MarkerParser, ParenSugarParser, PointeeParser,
-    SkipDuringMethodDispatchParser, SpecializationTraitParser, TypeConstParser,
-    UnsafeSpecializationMarkerParser,
-};
-use crate::attributes::transparency::TransparencyParser;
+use crate::attributes::pin_v2::*;
+use crate::attributes::proc_macro_attrs::*;
+use crate::attributes::prototype::*;
+use crate::attributes::repr::*;
+use crate::attributes::rustc_allocator::*;
+use crate::attributes::rustc_dump::*;
+use crate::attributes::rustc_internal::*;
+use crate::attributes::semantics::*;
+use crate::attributes::stability::*;
+use crate::attributes::test_attrs::*;
+use crate::attributes::traits::*;
+use crate::attributes::transparency::*;
 use crate::attributes::{AttributeParser as _, Combine, Single, WithoutArgs};
 use crate::parser::{ArgParser, RefPathParser};
 use crate::session_diagnostics::{

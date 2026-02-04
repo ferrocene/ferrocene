@@ -74,6 +74,12 @@ pub trait CodegenBackend {
 
     fn print_version(&self) {}
 
+    /// Returns a list of all intrinsics that this backend definitely
+    /// replaces, which means their fallback bodies do not need to be monomorphized.
+    fn replaced_intrinsics(&self) -> Vec<Symbol> {
+        vec![]
+    }
+
     /// Value printed by `--print=backend-has-zstd`.
     ///
     /// Used by compiletest to determine whether tests involving zstd compression

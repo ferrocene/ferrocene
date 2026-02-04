@@ -10,7 +10,7 @@ use rustc_span::Symbol;
 
 use super::prelude::*;
 use super::util::parse_single_integer;
-use crate::session_diagnostics::RustcScalableVectorCountOutOfRange;
+use crate::session_diagnostics::{AttributeRequiresOpt, RustcScalableVectorCountOutOfRange};
 
 pub(crate) struct RustcMainParser;
 
@@ -543,6 +543,9 @@ impl<S: Stage> CombineAttributeParser<S> for RustcCleanParser {
         cx: &mut AcceptContext<'_, '_, S>,
         args: &ArgParser,
     ) -> impl IntoIterator<Item = Self::Item> {
+        if !cx.cx.sess.opts.unstable_opts.query_dep_graph {
+            cx.emit_err(AttributeRequiresOpt { span: cx.attr_span, opt: "-Z query-dep-graph" });
+        }
         let Some(list) = args.list() else {
             cx.expected_list(cx.attr_span, args);
             return None;
@@ -641,6 +644,9 @@ impl<S: Stage> SingleAttributeParser<S> for RustcIfThisChangedParser {
     const TEMPLATE: AttributeTemplate = template!(Word, List: &["DepNode"]);
 
     fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        if !cx.cx.sess.opts.unstable_opts.query_dep_graph {
+            cx.emit_err(AttributeRequiresOpt { span: cx.attr_span, opt: "-Z query-dep-graph" });
+        }
         match args {
             ArgParser::NoArgs => Some(AttributeKind::RustcIfThisChanged(cx.attr_span, None)),
             ArgParser::List(list) => {
@@ -701,6 +707,9 @@ impl<S: Stage> CombineAttributeParser<S> for RustcThenThisWouldNeedParser {
         cx: &mut AcceptContext<'_, '_, S>,
         args: &ArgParser,
     ) -> impl IntoIterator<Item = Self::Item> {
+        if !cx.cx.sess.opts.unstable_opts.query_dep_graph {
+            cx.emit_err(AttributeRequiresOpt { span: cx.attr_span, opt: "-Z query-dep-graph" });
+        }
         let Some(item) = args.list().and_then(|l| l.single()) else {
             cx.expected_single_argument(cx.inner_span);
             return None;

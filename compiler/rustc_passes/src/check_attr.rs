@@ -231,14 +231,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     self.check_rustc_must_implement_one_of(*attr_span, fn_names, hir_id,target)
                 },
                 Attribute::Parsed(AttributeKind::DoNotRecommend{attr_span}) => {self.check_do_not_recommend(*attr_span, hir_id, target, item)},
-                Attribute::Parsed(AttributeKind::RustcClean(attrs)) => {
-                    for attr in attrs {
-                        self.check_rustc_clean(attr.span);
-                    }
-                },
-                Attribute::Parsed(AttributeKind::RustcIfThisChanged(span, _) | AttributeKind::RustcThenThisWouldNeed(span, _)) => {
-                    self.check_rustc_clean(*span);
-                }
                 Attribute::Parsed(
                     // tidy-alphabetical-start
                     AttributeKind::RustcAllowIncoherentImpl(..)
@@ -300,6 +292,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcAsPtr(..)
                     | AttributeKind::RustcBodyStability { .. }
                     | AttributeKind::RustcBuiltinMacro { .. }
+                    | AttributeKind::RustcClean(..)
                     | AttributeKind::RustcCoherenceIsCore(..)
                     | AttributeKind::RustcCoinductive(..)
                     | AttributeKind::RustcConfusables { .. }
@@ -315,6 +308,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcDynIncompatibleTrait(..)
                     | AttributeKind::RustcHasIncoherentInherentImpls
                     | AttributeKind::RustcHiddenTypeOfOpaques
+                    | AttributeKind::RustcIfThisChanged(..)
                     | AttributeKind::RustcLayout(..)
                     | AttributeKind::RustcLayoutScalarValidRangeEnd(..)
                     | AttributeKind::RustcLayoutScalarValidRangeStart(..)
@@ -343,6 +337,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcSkipDuringMethodDispatch { .. }
                     | AttributeKind::RustcSpecializationTrait(..)
                     | AttributeKind::RustcStdInternalSymbol (..)
+                    | AttributeKind::RustcThenThisWouldNeed(..)
                     | AttributeKind::RustcUnsafeSpecializationMarker(..)
                     | AttributeKind::RustcVariance
                     | AttributeKind::RustcVarianceOfOpaques
@@ -1261,14 +1256,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     arg_count,
                 });
             }
-        }
-    }
-
-    /// Checks that the dep-graph debugging attributes are only present when the query-dep-graph
-    /// option is passed to the compiler.
-    fn check_rustc_clean(&self, span: Span) {
-        if !self.tcx.sess.opts.unstable_opts.query_dep_graph {
-            self.dcx().emit_err(errors::RustcClean { span });
         }
     }
 

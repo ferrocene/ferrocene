@@ -439,9 +439,6 @@ passes_rustc_allow_const_fn_unstable =
     attribute should be applied to `const fn`
     .label = not a `const fn`
 
-passes_rustc_clean =
-    attribute requires -Z query-dep-graph to be enabled
-
 passes_rustc_const_stable_indirect_pairing =
     `const_stable_indirect` attribute does not make sense on `rustc_const_stable` function, its behavior is already implied
 

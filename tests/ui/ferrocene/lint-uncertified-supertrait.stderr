@@ -7,7 +7,7 @@ LL |     fn foo(&self) {}
 LL |     let x: &dyn BaseTrait = &Unvalidated;
    |                             ^^^^^^^^^^^^
    |
-   = note: once an object is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: once `Unvalidated` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as SuperTrait>::foo`
 note: `validated` is validated
   --> $DIR/lint-uncertified-supertrait.rs:15:4

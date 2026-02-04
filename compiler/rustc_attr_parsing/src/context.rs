@@ -269,6 +269,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcDumpUserArgsParser>>,
         Single<WithoutArgs<RustcDumpVtableParser>>,
         Single<WithoutArgs<RustcEffectiveVisibilityParser>>,
+        Single<WithoutArgs<RustcEvaluateWhereClausesParser>>,
         Single<WithoutArgs<RustcHasIncoherentInherentImplsParser>>,
         Single<WithoutArgs<RustcHiddenTypeOfOpaquesParser>>,
         Single<WithoutArgs<RustcIntrinsicConstStableIndirectParser>>,

@@ -3635,7 +3635,6 @@ dependencies = [
  "rustc_codegen_ssa",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_fs_util",
  "rustc_hashes",
  "rustc_hir",

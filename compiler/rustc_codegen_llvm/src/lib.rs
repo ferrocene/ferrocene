@@ -74,8 +74,6 @@ mod typetree;
 mod va_arg;
 mod value;
 
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
-
 pub(crate) use macros::TryFromU32;
 
 #[derive(Clone)]
@@ -241,10 +239,6 @@ impl LlvmCodegenBackend {
 }
 
 impl CodegenBackend for LlvmCodegenBackend {
-    fn locale_resource(&self) -> &'static str {
-        crate::DEFAULT_LOCALE_RESOURCE
-    }
-
     fn name(&self) -> &'static str {
         "llvm"
     }

@@ -1192,6 +1192,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_offload_kernel]`
     RustcOffloadKernel,
 
+    /// Represents `#[rustc_outlives]`
+    RustcOutlives,
+
     /// Represents `#[rustc_paren_sugar]`.
     RustcParenSugar(Span),
 

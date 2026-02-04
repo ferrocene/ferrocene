@@ -39,7 +39,9 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // Skip items synthesized by the compiler.
     let synthetic = match tcx.def_kind(owner) {
         DefKind::Ctor(..) | DefKind::SyntheticCoroutineBody => true,
-        _ => tcx.intrinsic(owner).is_some(),
+        // NOTE: intrinsics might have a "fallback body" that is used as a default if the codegen
+        // backend doesn't override it.
+        _ => tcx.intrinsic(owner).is_some_and(|def| def.must_be_overridden),
     };
     if synthetic {
         info!("skipping synthetic item {owner:?}");

@@ -1,5 +1,4 @@
-use rustc_ast as ast;
-use rustc_data_structures::stable_hasher::{HashStable, HashingControls, StableHasher};
+use rustc_data_structures::stable_hasher::HashingControls;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::definitions::DefPathHash;
 use rustc_session::Session;
@@ -67,13 +66,6 @@ impl<'a> StableHashingContext<'a> {
     }
 }
 
-impl<'a> HashStable<StableHashingContext<'a>> for ast::NodeId {
-    #[inline]
-    fn hash_stable(&self, _: &mut StableHashingContext<'a>, _: &mut StableHasher) {
-        panic!("Node IDs should not appear in incremental state");
-    }
-}
-
 impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
     #[inline]
     fn unstable_opts_incremental_ignore_spans(&self) -> bool {
@@ -108,4 +100,7 @@ impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
     }
 }
 
+impl<'a> rustc_abi::HashStableContext for StableHashingContext<'a> {}
+impl<'a> rustc_ast::HashStableContext for StableHashingContext<'a> {}
+impl<'a> rustc_hir::HashStableContext for StableHashingContext<'a> {}
 impl<'a> rustc_session::HashStableContext for StableHashingContext<'a> {}

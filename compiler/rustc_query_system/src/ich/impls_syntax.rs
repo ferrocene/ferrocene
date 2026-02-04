@@ -2,14 +2,18 @@
 //! from various crates in no particular order.
 
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
-use rustc_hir::{self as hir, HashIgnoredAttrId};
 use rustc_span::{SourceFile, Symbol, sym};
 use smallvec::SmallVec;
+use {rustc_ast as ast, rustc_hir as hir};
 
 use crate::ich::StableHashingContext;
 
-impl<'ctx> rustc_abi::HashStableContext for StableHashingContext<'ctx> {}
-impl<'ctx> rustc_ast::HashStableContext for StableHashingContext<'ctx> {}
+impl<'a> HashStable<StableHashingContext<'a>> for ast::NodeId {
+    #[inline]
+    fn hash_stable(&self, _: &mut StableHashingContext<'a>, _: &mut StableHasher) {
+        panic!("Node IDs should not appear in incremental state");
+    }
+}
 
 impl<'a> HashStable<StableHashingContext<'a>> for [hir::Attribute] {
     fn hash_stable(&self, hcx: &mut StableHashingContext<'a>, hasher: &mut StableHasher) {
@@ -48,8 +52,6 @@ fn is_ignored_attr(name: Symbol) -> bool {
     ];
     IGNORED_ATTRIBUTES.contains(&name)
 }
-
-impl<'ctx> rustc_hir::HashStableContext for StableHashingContext<'ctx> {}
 
 impl<'a> HashStable<StableHashingContext<'a>> for SourceFile {
     fn hash_stable(&self, hcx: &mut StableHashingContext<'a>, hasher: &mut StableHasher) {

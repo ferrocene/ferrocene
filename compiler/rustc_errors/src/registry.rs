@@ -11,8 +11,8 @@ pub struct Registry {
 }
 
 impl Registry {
-    pub fn new(long_descriptions: &[(ErrCode, &'static str)]) -> Registry {
-        Registry { long_descriptions: long_descriptions.iter().copied().collect() }
+    pub fn new() -> Registry {
+        Registry { long_descriptions: crate::codes::DIAGNOSTICS.iter().copied().collect() }
     }
 
     /// Returns `InvalidErrorCode` if the code requested does not exist in the

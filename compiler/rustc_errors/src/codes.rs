@@ -27,7 +27,7 @@ macro_rules! define_error_code_constants_and_diagnostics_table {
         $(
             pub const ${concat(E, $num)}: $crate::ErrCode = $crate::ErrCode::from_u32($num);
         )*
-        pub static DIAGNOSTICS: &[($crate::ErrCode, &str)] = &[
+        pub(crate) static DIAGNOSTICS: &[($crate::ErrCode, &str)] = &[
             $( (
                 ${concat(E, $num)},
                 include_str!(

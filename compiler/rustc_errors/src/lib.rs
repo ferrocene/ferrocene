@@ -482,11 +482,6 @@ impl DiagCtxt {
         self
     }
 
-    pub fn with_registry(mut self, registry: Registry) -> Self {
-        self.inner.get_mut().registry = registry;
-        self
-    }
-
     pub fn new(emitter: Box<DynEmitter>) -> Self {
         Self { inner: Lock::new(DiagCtxtInner::new(emitter)) }
     }
@@ -1186,7 +1181,7 @@ impl DiagCtxtInner {
     fn new(emitter: Box<DynEmitter>) -> Self {
         Self {
             flags: DiagCtxtFlags { can_emit_warnings: true, ..Default::default() },
-            registry: Registry::new(&[]),
+            registry: Registry::new(),
             err_guars: Vec::new(),
             lint_err_guars: Vec::new(),
             delayed_bugs: Vec::new(),

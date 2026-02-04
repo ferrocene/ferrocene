@@ -197,10 +197,6 @@ impl Callbacks for TimePassesCallbacks {
     }
 }
 
-pub fn diagnostics_registry() -> Registry {
-    Registry::new(rustc_errors::codes::DIAGNOSTICS)
-}
-
 /// This is the primary entry point for rustc.
 pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) {
     let mut default_early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
@@ -228,7 +224,7 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
     let ice_file = ice_path_with_config(Some(&sopts.unstable_opts)).clone();
 
     if let Some(ref code) = matches.opt_str("explain") {
-        handle_explain(&default_early_dcx, diagnostics_registry(), code, sopts.color);
+        handle_explain(&default_early_dcx, code, sopts.color);
         return;
     }
 
@@ -255,7 +251,6 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
         override_queries: None,
         extra_symbols: Vec::new(),
         make_codegen_backend: None,
-        registry: diagnostics_registry(),
         using_internal_features: &USING_INTERNAL_FEATURES,
     };
 
@@ -455,7 +450,9 @@ pub enum Compilation {
     Continue,
 }
 
-fn handle_explain(early_dcx: &EarlyDiagCtxt, registry: Registry, code: &str, color: ColorConfig) {
+fn handle_explain(early_dcx: &EarlyDiagCtxt, code: &str, color: ColorConfig) {
+    let registry = Registry::new();
+
     // Allow "E0123" or "0123" form.
     let upper_cased_code = code.to_ascii_uppercase();
     if let Ok(code) = upper_cased_code.trim_prefix('E').parse::<u32>()

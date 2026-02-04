@@ -164,6 +164,9 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             // We assume that all roots come from the current crate.
             // This is checked earlier in `lint_validated_roots`.
             ClearCrossCrate::Clear => match self.from_instantiation.as_ref() {
+                // This is a bit odd - we use the HIR id of the caller function,
+                // not the callee that actually caused the error.
+                // The callee is in another crate so we don't have any choice here.
                 Some(local) => local.lint_node,
                 // A local root can resolve to a cross-crate instantiation when a MIR inline pass runs.
                 // We don't have anywhere to point to, so just point to the crate root.
@@ -171,7 +174,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             },
         };
 
-        self.lint_at(lint_node, use_);
+        self.linter.check_use(lint_node, use_);
 
         let site =
             if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_in_place_fn() {
@@ -186,24 +189,8 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                     pre_mono_item: pre_mono_call,
                 }
             };
-        trace!("recurse into {callee_instance:?}");
+        trace!("recurse into {callee_instance:?}, lint_node={lint_node:?}");
         LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
-    }
-
-    fn lint_at(&mut self, lint_node: HirId, use_: Use<'tcx>) {
-        if self.from_instantiation.is_none() {
-            // TODO: i think this is wrong? it's assuming THIR will catch all issues in the
-            // current crate, but i'm not sure that's true ...
-            info!("ignoring root instantiation of {use_:?}");
-            // info!("linting root instantiation of {use_:?}");
-            return;
-        }
-
-        // This is a bit odd - we use the HIR id of the caller function,
-        // not the callee that actually caused the error.
-        // This is so people can `allow` individual instantiations rather than having to
-        // blanket-allow all of them.
-        self.linter.check_use(lint_node, use_);
     }
 
     fn visit_instance(

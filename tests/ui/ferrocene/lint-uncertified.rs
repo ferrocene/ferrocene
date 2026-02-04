@@ -111,8 +111,12 @@ fn certified() {
     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated; //~ ERROR unvalidated
     dyn_trait.partial_cmp(&Unvalidated); // ok
 
-    // TODO: catch ptr-to-int casts?
-    // "vector table"
+    // "vector table", common in embedded systems
+    unsafe {
+        let ptr_to_int = core::mem::transmute::<_, usize>(normal_def as *const ());
+        //[no-dedup]~^ ERROR possibly calls
+        (core::mem::transmute::<usize, fn()>(ptr_to_int))();
+    }
 
     let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unvalidated;
     //~^ ERROR unvalidated
@@ -146,9 +150,8 @@ fn certified() {
     rename();
     //[no-dedup]~^ ERROR unvalidated
 
-    unsafe { extern_fn(); } // TODO this should lint
-    // TODO: test trait defaults when casting to `dyn Trait`
-    // TODO: panic hooks are likely broken
+    // FIXME: lint all unsafe blocks
+    // FIXME: lint calls to `extern "C"` functions
 }
 
 #[ferrocene::prevalidated]

@@ -153,17 +153,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     ) -> Option<UseKind<'tcx>> {
         debug!("check cast of {source:?} to function pointer");
 
-        // if source.is_closure() { // closures are assumed certified
-        //     return None;
-        // } else if let ty::FnDef(fn_id, args) = source.kind() {
-        //     // skip past `get_concrete_fn_def` because we want to handle Virtual calls specially
-        //     if let Some(instance) = self.try_instantiate(*fn_id, args, span).instance() {
-        //         if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
-        //             return None;
-        //         }
-        //     }
-        // }
-
         let tcx = self.linter.tcx;
         match self.instance_of_ty(source, Some(dst_trait), span) {
             Some(instance) => {
@@ -179,16 +168,17 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                     Some(UseKind::FnPtrCast(instance))
                 }
             }
+            // Uncaught fn pointer casts are ok because the post-mono pass will check them later.
             // FIXME: this is messy, split this out into `check_dyn_trait_coercion`
             None if Some(dst_trait.def_id()) == tcx.lang_items().fn_ptr_trait() => None,
             // FIXME: feature(unboxed_closures)
             None if source.is_adt() => None,
-            None => span_bug!(span, "TODO: pre-mono fn ptr cast that fails to instantiate"),
+            // Don't remove this panic. If you do so before adding `check_dyn_trait_coercion` to
+            // the post-mono pass, it will fail to catch real uses of uncertified items in
+            // non-degenerate programs.
+            None => span_bug!(span, "unimplemented: pre-mono cast from {source} to dyn {dst_trait}() that fails to instantiate"),
         }
     }
-
-    // fn find_unvalidated_impl_method() {
-    // }
 
     /// Given a `source` expression that has an unsizing cast to `dest`, determine
     /// whether the cast if valid. If not, return a [`TraitObjectCast`](UseKind::TraitObjectCast) showing why not.
@@ -378,9 +368,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let tcx = self.linter.tcx;
 
         let impl_block = match impl_source {
-            ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, args, nested: _ }) => {
-                impl_def_id
-            }
+            ImplSource::UserDefined(ImplSourceUserDefinedData {
+                impl_def_id,
+                args: _,
+                nested: _,
+            }) => impl_def_id,
             // builtin impls are always ok
             ImplSource::Builtin(..) => return None,
             param @ ImplSource::Param(_) => {
@@ -510,21 +502,13 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 let callee = self.get_concrete_fn_def(*maybe_trait_fn, generic_args, span)?;
                 Some(callee)
             }
-            // TODO: check this logic. I think it's right since we'll check the closure body in a
-            // second anyway?
-            // ty::Closure(..) => None,
             ty::Closure(def_id, args) => {
                 Some(Instance::resolve_closure(tcx, *def_id, args, ty::ClosureKind::FnOnce))
             }
-            // Manual impl of FnOnce.
-            ty::Adt(..) => {
-                // let trait_ref =
-                // span_bug!(span, "don't know how to handle {ty:?}");
-                // let trait_ref = fn_trait_ref.unwrap().map_bound(|trait_ref| trait_ref.with_replaced_self_ty(tcx, ty));
-                // let impl_source = self.find_trait_impl(trait_ref, span);
-                // self.find_unvalidated_impl_fn(impl_source, span)
-                None
-            }
+            // FIXME: `feature(unboxed_closures)`.
+            // Right now we just ignore `fn_trait_ref`, but it's passed in here so that we can call
+            // `find_trait_impl(fn_trait_ref.with_self_ty(ty)`.
+            ty::Adt(..) => None,
             // Reference to a function or function pointer.
             ty::Ref(_, ty, _) => self.instance_of_ty(*ty, fn_trait_ref, span),
             // We assume that all functions pointers are valid. Proof:
@@ -593,11 +577,6 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         use rustc_middle::ty::TypingMode;
         let tcx = self.linter.tcx;
 
-        // apparently the rest of THIR uses this? it has a comment saying it's wrong though...
-        //let typing_mode = TypingMode::non_body_analysis();
-        // this definitely works but there's scary comments about revealing opaque types
-        // let env = TypingEnv::post_analysis(tcx, self.linter.owner);
-
         let typing_mode = TypingMode::typeck_for_body(tcx, self.linter.item);
         let param_env = tcx.param_env(self.linter.item);
         TypingEnv { typing_mode, param_env }
@@ -642,7 +621,7 @@ fn dyn_trait_refs<'tcx>(
                             traits.extend(supertraits(self.0, t));
                         }
                     }
-                    // TODO: is it possible to have multiple Dynamic types in a single top-level
+                    // FIXME: is it possible to have multiple Dynamic types in a single top-level
                     // type? how? maybe with an enum?
                     ControlFlow::Break(traits)
                 }

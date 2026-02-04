@@ -313,15 +313,6 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             _ => return None,
         };
 
-        // if call_instance.def_id() == pre_mono_call
-        //     && generic_args.is_empty()
-        //     && pre_mono_call.is_local()
-        //     && tcx.dcx().err_count() == 0
-        // {
-        // TODO: this is broken if the warning isn't set to Deny, lol
-        // tcx.dcx().span_delayed_bug(span, format!("THIR pass didn't catch simple call? {pre_mono_call:?}"));
-        // }
-
         Some((call_instance, pre_mono_call))
     }
 

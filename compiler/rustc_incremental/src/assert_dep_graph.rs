@@ -5,7 +5,7 @@
 //! annotations. These annotations can be used to test whether paths
 //! exist in the graph. These checks run after codegen, so they view the
 //! the final state of the dependency graph. Note that there are
-//! similar assertions found in `persist::dirty_clean` which check the
+//! similar assertions found in `persist::clean` which check the
 //! **initial** state of the dependency graph, just after it has been
 //! loaded from disk.
 //!

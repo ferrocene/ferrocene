@@ -218,8 +218,8 @@ pub(crate) struct RustcLegacyConstGenericsIndexExceed {
 }
 
 #[derive(Diagnostic)]
-#[diag(passes_rustc_dirty_clean)]
-pub(crate) struct RustcDirtyClean {
+#[diag(passes_rustc_clean)]
+pub(crate) struct RustcClean {
     #[primary_span]
     pub span: Span,
 }

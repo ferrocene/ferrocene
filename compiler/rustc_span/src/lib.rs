@@ -1331,6 +1331,7 @@ impl Default for Span {
 rustc_index::newtype_index! {
     #[orderable]
     #[debug_format = "AttrId({})"]
+    #[derive(HashStable_Generic)]
     pub struct AttrId {}
 }
 

@@ -231,6 +231,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     self.check_rustc_must_implement_one_of(*attr_span, fn_names, hir_id,target)
                 },
                 Attribute::Parsed(AttributeKind::DoNotRecommend{attr_span}) => {self.check_do_not_recommend(*attr_span, hir_id, target, item)},
+                Attribute::Parsed(AttributeKind::RustcClean(attrs)) => {
+                    for attr in attrs {
+                        self.check_rustc_clean(attr.span);
+                    }
+                }
                 Attribute::Parsed(
                     // tidy-alphabetical-start
                     AttributeKind::RustcAllowIncoherentImpl(..)
@@ -356,10 +361,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::diagnostic, sym::on_const, ..] => {
                             self.check_diagnostic_on_const(attr.span(), hir_id, target, item)
                         }
-                        [sym::rustc_clean, ..]
-                        | [sym::rustc_dirty, ..]
-                        | [sym::rustc_if_this_changed, ..]
-                        | [sym::rustc_then_this_would_need, ..] => self.check_rustc_dirty_clean(attr),
+                        [sym::rustc_if_this_changed, ..]
+                        | [sym::rustc_then_this_would_need, ..] => self.check_rustc_clean(attr.span()),
                         [sym::autodiff_forward, ..] | [sym::autodiff_reverse, ..] => {
                             self.check_autodiff(hir_id, attr, span, target)
                         }
@@ -1262,9 +1265,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
     /// Checks that the dep-graph debugging attributes are only present when the query-dep-graph
     /// option is passed to the compiler.
-    fn check_rustc_dirty_clean(&self, attr: &Attribute) {
+    fn check_rustc_clean(&self, span: Span) {
         if !self.tcx.sess.opts.unstable_opts.query_dep_graph {
-            self.dcx().emit_err(errors::RustcDirtyClean { span: attr.span() });
+            self.dcx().emit_err(errors::RustcClean { span });
         }
     }
 

@@ -96,6 +96,7 @@ impl AttributeKind {
             RustcAsPtr(..) => Yes,
             RustcBodyStability { .. } => No,
             RustcBuiltinMacro { .. } => Yes,
+            RustcClean { .. } => No,
             RustcCoherenceIsCore(..) => No,
             RustcCoinductive(..) => No,
             RustcConfusables { .. } => Yes,

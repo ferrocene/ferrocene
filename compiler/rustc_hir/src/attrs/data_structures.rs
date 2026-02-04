@@ -5,7 +5,7 @@ pub use ReprAttr::*;
 use rustc_abi::Align;
 pub use rustc_ast::attr::data_structures::*;
 use rustc_ast::token::DocFragmentKind;
-use rustc_ast::{AttrStyle, ast};
+use rustc_ast::{AttrId, AttrStyle, ast};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
 use rustc_macros::{Decodable, Encodable, HashStable_Generic, PrintAttribute};
@@ -716,6 +716,24 @@ pub enum BorrowckGraphvizFormatKind {
     TwoPhase,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcCleanAttribute {
+    pub id: AttrId,
+    pub span: Span,
+    pub cfg: Symbol,
+    pub except: Option<RustcCleanQueries>,
+    pub loaded_from_disk: Option<RustcCleanQueries>,
+}
+
+/// Represents the `except=` or `loaded_from_disk=` argument of `#[rustc_clean]`
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcCleanQueries {
+    pub entries: ThinVec<Symbol>,
+    pub span: Span,
+}
+
 /// Represents parsed *built-in* inert attributes.
 ///
 /// ## Overview
@@ -1021,6 +1039,9 @@ pub enum AttributeKind {
     },
     /// Represents `#[rustc_builtin_macro]`.
     RustcBuiltinMacro { builtin_name: Option<Symbol>, helper_attrs: ThinVec<Symbol>, span: Span },
+
+    /// Represents `#[rustc_clean]`
+    RustcClean(ThinVec<RustcCleanAttribute>),
 
     /// Represents `#[rustc_coherence_is_core]`
     RustcCoherenceIsCore(Span),

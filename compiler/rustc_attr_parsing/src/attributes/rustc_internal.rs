@@ -1,7 +1,10 @@
 use std::path::PathBuf;
 
 use rustc_ast::{LitIntType, LitKind, MetaItemLit};
-use rustc_hir::attrs::{BorrowckGraphvizFormatKind, RustcLayoutType, RustcMirKind};
+use rustc_hir::attrs::{
+    BorrowckGraphvizFormatKind, RustcCleanAttribute, RustcCleanQueries, RustcLayoutType,
+    RustcMirKind,
+};
 use rustc_session::errors;
 
 use super::prelude::*;
@@ -496,4 +499,113 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcNonConstTraitMethodParser {
         Allow(Target::Method(MethodKind::Trait { body: false })),
     ]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcNonConstTraitMethod;
+}
+
+pub(crate) struct RustcCleanParser;
+
+impl<S: Stage> CombineAttributeParser<S> for RustcCleanParser {
+    const PATH: &[Symbol] = &[sym::rustc_clean];
+
+    type Item = RustcCleanAttribute;
+
+    const CONVERT: ConvertFn<Self::Item> = |items, _| AttributeKind::RustcClean(items);
+
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        // tidy-alphabetical-start
+        Allow(Target::AssocConst),
+        Allow(Target::AssocTy),
+        Allow(Target::Const),
+        Allow(Target::Enum),
+        Allow(Target::Expression),
+        Allow(Target::Field),
+        Allow(Target::Fn),
+        Allow(Target::ForeignMod),
+        Allow(Target::Impl { of_trait: false }),
+        Allow(Target::Impl { of_trait: true }),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+        Allow(Target::Mod),
+        Allow(Target::Static),
+        Allow(Target::Struct),
+        Allow(Target::Trait),
+        Allow(Target::TyAlias),
+        Allow(Target::Union),
+        // tidy-alphabetical-end
+    ]);
+
+    const TEMPLATE: AttributeTemplate =
+        template!(List: &[r#"cfg = "...", /*opt*/ label = "...", /*opt*/ except = "...""#]);
+
+    fn extend(
+        cx: &mut AcceptContext<'_, '_, S>,
+        args: &ArgParser,
+    ) -> impl IntoIterator<Item = Self::Item> {
+        let Some(list) = args.list() else {
+            cx.expected_list(cx.attr_span, args);
+            return None;
+        };
+        let mut except = None;
+        let mut loaded_from_disk = None;
+        let mut cfg = None;
+
+        for item in list.mixed() {
+            let Some((value, name)) =
+                item.meta_item().and_then(|m| Option::zip(m.args().name_value(), m.ident()))
+            else {
+                cx.expected_name_value(item.span(), None);
+                continue;
+            };
+            let value_span = value.value_span;
+            let Some(value) = value.value_as_str() else {
+                cx.expected_string_literal(value_span, None);
+                continue;
+            };
+            match name.name {
+                sym::cfg if cfg.is_some() => {
+                    cx.duplicate_key(item.span(), sym::cfg);
+                }
+
+                sym::cfg => {
+                    cfg = Some(value);
+                }
+                sym::except if except.is_some() => {
+                    cx.duplicate_key(item.span(), sym::except);
+                }
+                sym::except => {
+                    let entries =
+                        value.as_str().split(',').map(|s| Symbol::intern(s.trim())).collect();
+                    except = Some(RustcCleanQueries { entries, span: value_span });
+                }
+                sym::loaded_from_disk if loaded_from_disk.is_some() => {
+                    cx.duplicate_key(item.span(), sym::loaded_from_disk);
+                }
+                sym::loaded_from_disk => {
+                    let entries =
+                        value.as_str().split(',').map(|s| Symbol::intern(s.trim())).collect();
+                    loaded_from_disk = Some(RustcCleanQueries { entries, span: value_span });
+                }
+                _ => {
+                    cx.expected_specific_argument(
+                        name.span,
+                        &[sym::cfg, sym::except, sym::loaded_from_disk],
+                    );
+                }
+            }
+        }
+        let Some(cfg) = cfg else {
+            cx.expected_specific_argument(list.span, &[sym::cfg]);
+            return None;
+        };
+
+        Some(RustcCleanAttribute {
+            // Used for checking that all attributes have been checked
+            id: cx.cx.sess.psess.attr_id_generator.mk_attr_id(),
+            span: cx.attr_span,
+            cfg,
+            except,
+            loaded_from_disk,
+        })
+    }
 }

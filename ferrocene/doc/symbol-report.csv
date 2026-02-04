@@ -3872,7 +3872,6 @@ core::ffi::c_str::CStr::to_bytes_with_nul
 core::ffi::c_str::strlen
 core::ffi::c_str::strlen::compiletime
 core::ffi::c_str::strlen::runtime
-core::ffi::c_str::strlen::runtime::strlen
 core::fmt::Arguments::<'a>::as_statically_known_str
 core::fmt::Arguments::<'a>::as_str
 core::fmt::Arguments::<'a>::estimated_capacity
@@ -4061,23 +4060,7 @@ core::hint::assert_unchecked::precondition_check
 core::hint::select_unpredictable
 core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
-core::intrinsics::assume
-core::intrinsics::cold_path
-core::intrinsics::const_make_global
-core::intrinsics::disjoint_bitor
-core::intrinsics::is_val_statically_known
 core::intrinsics::likely
-core::intrinsics::overflow_checks
-core::intrinsics::ptr_guaranteed_cmp
-core::intrinsics::rotate_left
-core::intrinsics::rotate_right
-core::intrinsics::select_unpredictable
-core::intrinsics::type_id_eq
-core::intrinsics::type_of
-core::intrinsics::typed_swap_nonoverlapping
-core::intrinsics::ub_checks
-core::intrinsics::unchecked_funnel_shl
-core::intrinsics::unchecked_funnel_shr
 core::intrinsics::unlikely
 core::iter::adapters::chain::Chain::<A, B>::new
 core::iter::adapters::chain::and_then_or_clear
@@ -5006,14 +4989,12 @@ core::panicking::panic_const::panic_const_shr_overflow
 core::panicking::panic_const::panic_const_sub_overflow
 core::panicking::panic_display
 core::panicking::panic_fmt
-core::panicking::panic_fmt::panic_impl
 core::panicking::panic_in_cleanup
 core::panicking::panic_misaligned_pointer_dereference
 core::panicking::panic_nounwind
 core::panicking::panic_nounwind_fmt
 core::panicking::panic_nounwind_fmt::compiletime
 core::panicking::panic_nounwind_fmt::runtime
-core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
 core::profiling::compiler_copy

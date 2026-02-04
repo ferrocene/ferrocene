@@ -165,6 +165,7 @@ const fn escape_unicode<const N: usize>(c: char) -> ([ascii::Char; N], Range<u8>
 }
 
 #[derive(Clone, Copy)]
+#[ferrocene::prevalidated]
 union MaybeEscapedCharacter<const N: usize> {
     pub escape_seq: [ascii::Char; N],
     pub literal: char,

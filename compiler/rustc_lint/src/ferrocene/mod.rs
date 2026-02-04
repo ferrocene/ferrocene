@@ -161,6 +161,7 @@ declare_lint_pass!(LintUncertified => [UNCERTIFIED]);
 pub use post_mono::lint_validated_roots;
 
 mod diagnostics;
+mod dynamic_casts;
 mod post_mono;
 mod thir;
 

@@ -151,6 +151,7 @@ impl AttributeKind {
             RustcPubTransparent(..) => Yes,
             RustcReallocator => No,
             RustcRegions => No,
+            RustcReservationImpl(..) => Yes,
             RustcScalableVector { .. } => Yes,
             RustcShouldNotBeCalledOnConstItems(..) => Yes,
             RustcSimdMonomorphizeLaneLimit(..) => Yes, // Affects layout computation, which needs to work cross-crate

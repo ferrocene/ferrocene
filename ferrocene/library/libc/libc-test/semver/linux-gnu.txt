@@ -454,6 +454,7 @@ STA_PPSWANDER
 STA_RONLY
 STA_UNSYNC
 ST_RELATIME
+SUN_LEN
 SYSFS_MAGIC
 TCA_CHAIN
 TCA_DUMP_INVISIBLE
@@ -659,6 +660,8 @@ pthread_attr_setaffinity_np
 pthread_rwlockattr_getkind_np
 pthread_rwlockattr_getpshared
 pthread_rwlockattr_setkind_np
+pthread_timedjoin_np
+pthread_tryjoin_np
 ptrace_peeksiginfo_args
 ptrace_sud_config
 ptrace_syscall_info

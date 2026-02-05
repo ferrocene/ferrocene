@@ -42,6 +42,11 @@ struct Unsized {
     s: str,
 }
 
+union Union {
+    first: i16,
+    second: u16,
+}
+
 macro_rules! dump_types {
     ($($ty:ty),+ $(,)?) => {
         $(println!("{:#?}", const { Type::of::<$ty>() });)+
@@ -54,7 +59,7 @@ fn main() {
         [u8; 2],
         i8, i32, i64, i128, isize,
         u8, u32, u64, u128, usize,
-        Foo, Bar, NonExhaustiveStruct, TupleStruct, Generics<i32, u32, 1>,
+        Foo, Bar, NonExhaustiveStruct, TupleStruct, Generics<i32, u32, 1>, Union,
         &Unsized, &str, &[u8],
         str, [u8],
         &u8, &mut u8,

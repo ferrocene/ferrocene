@@ -297,6 +297,28 @@ Type {
     ),
 }
 Type {
+    kind: Union(
+        Union {
+            generics: [],
+            fields: [
+                Field {
+                    name: "first",
+                    ty: TypeId(0xdeb66dd04fa9db03298cc77926096aae),
+                    offset: 0,
+                },
+                Field {
+                    name: "second",
+                    ty: TypeId(0xc50c4a8d8e150aa67101203f1fab1cd7),
+                    offset: 0,
+                },
+            ],
+        },
+    ),
+    size: Some(
+        2,
+    ),
+}
+Type {
     kind: Reference(
         Reference {
             pointee: TypeId(0xda1b6da9bd297bb2900de9303aadea79),

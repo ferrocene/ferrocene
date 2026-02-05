@@ -136,6 +136,47 @@ fn test_structs() {
 }
 
 #[test]
+fn test_unions() {
+    use TypeKind::*;
+
+    const {
+        union TestUnion {
+            first: i16,
+            second: u16,
+        }
+
+        let Type { kind: Union(ty), size, .. } = Type::of::<TestUnion>() else { panic!() };
+        assert!(size == Some(size_of::<TestUnion>()));
+        assert!(ty.fields.len() == 2);
+        assert!(ty.fields[0].name == "first");
+        assert!(ty.fields[0].offset == offset_of!(TestUnion, first));
+        assert!(ty.fields[1].name == "second");
+        assert!(ty.fields[1].offset == offset_of!(TestUnion, second));
+    }
+
+    const {
+        union Generics<'a, T: Copy, const C: u64> {
+            a: T,
+            z: &'a (),
+        }
+
+        let Type { kind: Union(ty), .. } = Type::of::<Generics<'static, i32, 1_u64>>() else {
+            panic!()
+        };
+        assert!(ty.fields.len() == 2);
+        assert!(ty.fields[0].offset == offset_of!(Generics<'static, i32, 1_u64>, a));
+        assert!(ty.fields[1].offset == offset_of!(Generics<'static, i32, 1_u64>, z));
+
+        assert!(ty.generics.len() == 3);
+        let Generic::Lifetime(_) = ty.generics[0] else { panic!() };
+        let Generic::Type(GenericType { ty: generic_ty, .. }) = ty.generics[1] else { panic!() };
+        assert!(generic_ty == TypeId::of::<i32>());
+        let Generic::Const(Const { ty: const_ty, .. }) = ty.generics[2] else { panic!() };
+        assert!(const_ty == TypeId::of::<u64>());
+    }
+}
+
+#[test]
 fn test_enums() {
     use TypeKind::*;
 

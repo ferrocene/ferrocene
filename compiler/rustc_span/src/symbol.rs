@@ -400,6 +400,7 @@ symbols! {
         TyCtxt,
         TyKind,
         Type,
+        Union,
         Unknown,
         Unsize,
         UnsizedConstParamTy,

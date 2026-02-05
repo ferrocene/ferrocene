@@ -120,12 +120,7 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                             variant
                         }
                         ty::Adt(adt_def, generics) => {
-                            // TODO(type_info): Handle union
-                            if !adt_def.is_struct() && !adt_def.is_enum() {
-                                self.downcast(&field_dest, sym::Other)?.0
-                            } else {
-                                self.write_adt_type_info(&field_dest, (ty, *adt_def), generics)?
-                            }
+                            self.write_adt_type_info(&field_dest, (ty, *adt_def), generics)?
                         }
                         ty::Bool => {
                             let (variant, _variant_place) =
@@ -394,13 +389,22 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                 )?;
                 variant
             }
+            AdtKind::Union => {
+                let (variant, variant_place) = self.downcast(place, sym::Union)?;
+                let place = self.project_field(&variant_place, FieldIdx::ZERO)?;
+                self.write_union_type_info(
+                    place,
+                    (adt_ty, adt_def.variant(VariantIdx::ZERO)),
+                    generics,
+                )?;
+                variant
+            }
             AdtKind::Enum => {
                 let (variant, variant_place) = self.downcast(place, sym::Enum)?;
                 let place = self.project_field(&variant_place, FieldIdx::ZERO)?;
                 self.write_enum_type_info(place, adt, generics)?;
                 variant
             }
-            AdtKind::Union => todo!(),
         };
         interp_ok(variant_idx)
     }
@@ -426,6 +430,36 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                 }
                 sym::non_exhaustive => {
                     let is_non_exhaustive = struct_def.is_field_list_non_exhaustive();
+                    self.write_scalar(Scalar::from_bool(is_non_exhaustive), &field_place)?
+                }
+                other => span_bug!(self.tcx.def_span(field.did), "unimplemented field {other}"),
+            }
+        }
+
+        interp_ok(())
+    }
+
+    pub(crate) fn write_union_type_info(
+        &mut self,
+        place: impl Writeable<'tcx, CtfeProvenance>,
+        union_: (Ty<'tcx>, &'tcx VariantDef),
+        generics: &'tcx GenericArgs<'tcx>,
+    ) -> InterpResult<'tcx> {
+        let (union_ty, union_def) = union_;
+        let union_layout = self.layout_of(union_ty)?;
+
+        for (field_idx, field) in
+            place.layout().ty.ty_adt_def().unwrap().non_enum_variant().fields.iter_enumerated()
+        {
+            let field_place = self.project_field(&place, field_idx)?;
+
+            match field.name {
+                sym::generics => self.write_generics(field_place, generics)?,
+                sym::fields => {
+                    self.write_variant_fields(field_place, union_def, union_layout, generics)?
+                }
+                sym::non_exhaustive => {
+                    let is_non_exhaustive = union_def.is_field_list_non_exhaustive();
                     self.write_scalar(Scalar::from_bool(is_non_exhaustive), &field_place)?
                 }
                 other => span_bug!(self.tcx.def_span(field.did), "unimplemented field {other}"),

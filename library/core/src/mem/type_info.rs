@@ -53,6 +53,8 @@ pub enum TypeKind {
     Struct(Struct),
     /// Enums.
     Enum(Enum),
+    /// Unions.
+    Union(Union),
     /// Primitive boolean type.
     Bool(Bool),
     /// Primitive character type.
@@ -154,6 +156,17 @@ pub struct Struct {
     pub fields: &'static [Field],
     /// Whether the struct field list is non-exhaustive.
     pub non_exhaustive: bool,
+}
+
+/// Compile-time type information about unions.
+#[derive(Debug)]
+#[non_exhaustive]
+#[unstable(feature = "type_info", issue = "146922")]
+pub struct Union {
+    /// Instantiated generics of the union.
+    pub generics: &'static [Generic],
+    /// All fields of the union.
+    pub fields: &'static [Field],
 }
 
 /// Compile-time type information about enums.

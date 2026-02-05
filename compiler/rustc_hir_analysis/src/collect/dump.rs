@@ -1,13 +1,13 @@
 use rustc_hir as hir;
 use rustc_hir::attrs::AttributeKind;
-use rustc_hir::def_id::{CRATE_DEF_ID, LocalDefId};
+use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{find_attr, intravisit};
 use rustc_middle::hir::nested_filter;
 use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt};
 use rustc_span::sym;
 
 pub(crate) fn opaque_hidden_types(tcx: TyCtxt<'_>) {
-    if !find_attr!(tcx, CRATE_DEF_ID, AttributeKind::RustcHiddenTypeOfOpaques) {
+    if !find_attr!(tcx, crate, AttributeKind::RustcHiddenTypeOfOpaques) {
         return;
     }
     for id in tcx.hir_crate_items(()).opaques() {

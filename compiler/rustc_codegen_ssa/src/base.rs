@@ -14,7 +14,7 @@ use rustc_data_structures::profiling::{get_resident_set_size, print_time_passes_
 use rustc_data_structures::sync::{IntoDynSyncSend, par_map};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir::attrs::{AttributeKind, DebuggerVisualizerType, OptimizeAttr};
-use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LOCAL_CRATE};
+use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ItemId, Target, find_attr};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
@@ -895,7 +895,7 @@ impl CrateInfo {
             crate_types.iter().map(|&c| (c, crate::back::linker::linked_symbols(tcx, c))).collect();
         let local_crate_name = tcx.crate_name(LOCAL_CRATE);
         let windows_subsystem =
-            find_attr!(tcx, CRATE_DEF_ID, AttributeKind::WindowsSubsystem(kind, _) => *kind);
+            find_attr!(tcx, crate, AttributeKind::WindowsSubsystem(kind, _) => *kind);
 
         // This list is used when generating the command line to pass through to
         // system linker. The linker expects undefined symbols on the left of the

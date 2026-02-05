@@ -6,7 +6,7 @@ use rustc_errors::struct_span_code_err;
 use rustc_hir as hir;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
+use rustc_hir::def_id::DefId;
 use rustc_hir::{PolyTraitRef, find_attr};
 use rustc_middle::bug;
 use rustc_middle::ty::{
@@ -171,7 +171,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let tcx = self.tcx();
 
         // Skip adding any default bounds if `#![rustc_no_implicit_bounds]`
-        if find_attr!(tcx.get_all_attrs(CRATE_DEF_ID), AttributeKind::RustcNoImplicitBounds) {
+        if find_attr!(tcx, crate, AttributeKind::RustcNoImplicitBounds) {
             return;
         }
 
@@ -285,8 +285,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         context: ImpliedBoundsContext<'tcx>,
     ) -> bool {
         let collected = collect_bounds(hir_bounds, context, trait_def_id);
-        !find_attr!(self.tcx().get_all_attrs(CRATE_DEF_ID), AttributeKind::RustcNoImplicitBounds)
-            && !collected.any()
+        !find_attr!(self.tcx(), crate, AttributeKind::RustcNoImplicitBounds) && !collected.any()
     }
 
     fn reject_duplicate_relaxed_bounds(&self, relaxed_bounds: SmallVec<[&PolyTraitRef<'_>; 1]>) {

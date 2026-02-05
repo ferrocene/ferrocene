@@ -454,8 +454,7 @@ pub(crate) fn start_async_codegen<B: ExtraBackendMethods>(
 ) -> OngoingCodegen<B> {
     let (coordinator_send, coordinator_receive) = channel();
 
-    let crate_attrs = tcx.hir_attrs(rustc_hir::CRATE_HIR_ID);
-    let no_builtins = find_attr!(crate_attrs, AttributeKind::NoBuiltins);
+    let no_builtins = find_attr!(tcx, crate, AttributeKind::NoBuiltins);
 
     let crate_info = CrateInfo::new(tcx, target_cpu);
 

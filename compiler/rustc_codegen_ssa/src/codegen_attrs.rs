@@ -350,8 +350,7 @@ fn apply_overrides(tcx: TyCtxt<'_>, did: LocalDefId, codegen_fn_attrs: &mut Code
 
     // When `no_builtins` is applied at the crate level, we should add the
     // `no-builtins` attribute to each function to ensure it takes effect in LTO.
-    let crate_attrs = tcx.hir_attrs(rustc_hir::CRATE_HIR_ID);
-    let no_builtins = find_attr!(crate_attrs, AttributeKind::NoBuiltins);
+    let no_builtins = find_attr!(tcx, crate, AttributeKind::NoBuiltins);
     if no_builtins {
         codegen_fn_attrs.flags |= CodegenFnAttrFlags::NO_BUILTINS;
     }

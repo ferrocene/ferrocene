@@ -2,7 +2,7 @@ use rustc_ast::entry::EntryPointType;
 use rustc_errors::codes::*;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LOCAL_CRATE, LocalDefId};
-use rustc_hir::{CRATE_HIR_ID, ItemId, Node, find_attr};
+use rustc_hir::{ItemId, Node, find_attr};
 use rustc_middle::query::Providers;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::config::{CrateType, EntryFnType, sigpipe};
@@ -29,7 +29,7 @@ fn entry_fn(tcx: TyCtxt<'_>, (): ()) -> Option<(DefId, EntryFnType)> {
     }
 
     // If the user wants no main function at all, then stop here.
-    if find_attr!(tcx.hir_attrs(CRATE_HIR_ID), AttributeKind::NoMain) {
+    if find_attr!(tcx, crate, AttributeKind::NoMain) {
         return None;
     }
 

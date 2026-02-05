@@ -126,7 +126,7 @@ pub struct BridgeConfig<'a> {
     input: Buffer,
 
     /// Server-side function that the client uses to make requests.
-    dispatch: closure::Closure<'a, Buffer, Buffer>,
+    dispatch: closure::Closure<'a>,
 
     /// If 'true', always invoke the default panic hook
     force_show_panics: bool,

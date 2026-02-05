@@ -129,7 +129,7 @@ struct Bridge<'a> {
     cached_buffer: Buffer,
 
     /// Server-side function that the client uses to make requests.
-    dispatch: closure::Closure<'a, Buffer, Buffer>,
+    dispatch: closure::Closure<'a>,
 
     /// Provided globals for this macro expansion.
     globals: ExpnGlobals<Span>,

@@ -1049,6 +1049,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::dist::CoverageOutcomes,
                 crate::ferrocene::dist::GenerateBuildMetadata,
                 crate::ferrocene::partners::oxidos::DistOxidOs,
+                crate::ferrocene::dist::sbom::Sbom,
             ),
             Kind::Install => describe!(
                 // Ferrocene annotation

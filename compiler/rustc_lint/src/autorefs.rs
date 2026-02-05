@@ -108,7 +108,7 @@ impl<'tcx> LateLintPass<'tcx> for ImplicitAutorefs {
                 ExprKind::MethodCall(..) => cx.typeck_results().type_dependent_def_id(expr.hir_id),
                 _ => None,
             }
-            && method_did.map(|did| find_attr!(cx.tcx.get_all_attrs(did), AttributeKind::RustcNoImplicitAutorefs)).unwrap_or(true)
+            && method_did.map(|did| find_attr!(cx.tcx, did, AttributeKind::RustcNoImplicitAutorefs)).unwrap_or(true)
         {
             cx.emit_span_lint(
                 DANGEROUS_IMPLICIT_AUTOREFS,

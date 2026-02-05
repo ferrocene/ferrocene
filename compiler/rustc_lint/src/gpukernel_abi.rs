@@ -184,10 +184,7 @@ impl<'tcx> LateLintPass<'tcx> for ImproperGpuKernelLint {
         }
 
         // Check for no_mangle/export_name, so the kernel can be found when querying the compiled object for the kernel function by name
-        if !find_attr!(
-            cx.tcx.get_all_attrs(id),
-            AttributeKind::NoMangle(..) | AttributeKind::ExportName { .. }
-        ) {
+        if !find_attr!(cx.tcx, id, AttributeKind::NoMangle(..) | AttributeKind::ExportName { .. }) {
             cx.emit_span_lint(MISSING_GPU_KERNEL_EXPORT_NAME, span, MissingGpuKernelExportName);
         }
     }

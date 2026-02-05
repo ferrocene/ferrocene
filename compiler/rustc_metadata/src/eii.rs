@@ -25,13 +25,12 @@ pub(crate) fn collect<'tcx>(tcx: TyCtxt<'tcx>, LocalCrate: LocalCrate) -> EiiMap
 
     // iterate over all items in the current crate
     for id in tcx.hir_crate_items(()).eiis() {
-        for i in
-            find_attr!(tcx.get_all_attrs(id), AttributeKind::EiiImpls(e) => e).into_iter().flatten()
-        {
+        for i in find_attr!(tcx, id, AttributeKind::EiiImpls(e) => e).into_iter().flatten() {
             let decl = match i.resolution {
                 EiiImplResolution::Macro(macro_defid) => {
                     // find the decl for this one if it wasn't in yet (maybe it's from the local crate? not very useful but not illegal)
-                    let Some(decl) = find_attr!(tcx.get_all_attrs(macro_defid), AttributeKind::EiiDeclaration(d) => *d)
+                    let Some(decl) =
+                        find_attr!(tcx, macro_defid, AttributeKind::EiiDeclaration(d) => *d)
                     else {
                         // skip if it doesn't have eii_declaration (if we resolved to another macro that's not an EII)
                         tcx.dcx()
@@ -52,9 +51,7 @@ pub(crate) fn collect<'tcx>(tcx: TyCtxt<'tcx>, LocalCrate: LocalCrate) -> EiiMap
         }
 
         // if we find a new declaration, add it to the list without a known implementation
-        if let Some(decl) =
-            find_attr!(tcx.get_all_attrs(id), AttributeKind::EiiDeclaration(d) => *d)
-        {
+        if let Some(decl) = find_attr!(tcx, id, AttributeKind::EiiDeclaration(d) => *d) {
             eiis.entry(decl.foreign_item).or_insert((decl, Default::default()));
         }
     }

@@ -2170,7 +2170,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         // Otherwise, point out if the struct has any private fields.
         if let Some(def_id) = res.opt_def_id()
             && !def_id.is_local()
-            && let Some(attr_span) = find_attr!(self.tcx.get_all_attrs(def_id), AttributeKind::NonExhaustive(span) => *span)
+            && let Some(attr_span) =
+                find_attr!(self.tcx, def_id, AttributeKind::NonExhaustive(span) => *span)
         {
             non_exhaustive = Some(attr_span);
         } else if let Some(span) = ctor_fields_span {

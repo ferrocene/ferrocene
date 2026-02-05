@@ -230,9 +230,7 @@ fn process_builtin_attrs(
                 for i in impls {
                     let foreign_item = match i.resolution {
                         EiiImplResolution::Macro(def_id) => {
-                            let Some(extern_item) = find_attr!(
-                                tcx.get_all_attrs(def_id),
-                                AttributeKind::EiiDeclaration(target) => target.foreign_item
+                            let Some(extern_item) = find_attr!(tcx, def_id, AttributeKind::EiiDeclaration(target) => target.foreign_item
                             ) else {
                                 tcx.dcx().span_delayed_bug(
                                     i.span,
@@ -483,9 +481,8 @@ fn check_result(
             .map(|features| (features.name.as_str(), true))
             .collect(),
     ) {
-        let span =
-            find_attr!(tcx.get_all_attrs(did), AttributeKind::TargetFeature{attr_span: span, ..} => *span)
-                .unwrap_or_else(|| tcx.def_span(did));
+        let span = find_attr!(tcx, did, AttributeKind::TargetFeature{attr_span: span, ..} => *span)
+            .unwrap_or_else(|| tcx.def_span(did));
 
         tcx.dcx()
             .create_err(errors::TargetFeatureDisableOrEnable {
@@ -583,7 +580,7 @@ fn sanitizer_settings_for(tcx: TyCtxt<'_>, did: LocalDefId) -> SanitizerFnAttrs 
     };
 
     // Check for a sanitize annotation directly on this def.
-    if let Some((on_set, off_set, rtsan)) = find_attr!(tcx.get_all_attrs(did), AttributeKind::Sanitize {on_set, off_set, rtsan, ..} => (on_set, off_set, rtsan))
+    if let Some((on_set, off_set, rtsan)) = find_attr!(tcx, did, AttributeKind::Sanitize {on_set, off_set, rtsan, ..} => (on_set, off_set, rtsan))
     {
         // the on set is the set of sanitizers explicitly enabled.
         // we mask those out since we want the set of disabled sanitizers here

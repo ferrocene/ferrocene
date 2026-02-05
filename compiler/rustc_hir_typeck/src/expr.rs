@@ -3676,7 +3676,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn check_expr_asm(&self, asm: &'tcx hir::InlineAsm<'tcx>, span: Span) -> Ty<'tcx> {
         if let rustc_ast::AsmMacro::NakedAsm = asm.asm_macro {
-            if !find_attr!(self.tcx.get_all_attrs(self.body_id), AttributeKind::Naked(..)) {
+            if !find_attr!(self.tcx, self.body_id, AttributeKind::Naked(..)) {
                 self.tcx.dcx().emit_err(NakedAsmOutsideNakedFn { span });
             }
         }

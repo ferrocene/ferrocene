@@ -97,8 +97,9 @@ impl RustcMirAttrs {
     fn parse(tcx: TyCtxt<'_>, def_id: DefId) -> Self {
         let mut ret = RustcMirAttrs::default();
 
-        let attrs = tcx.get_all_attrs(def_id);
-        if let Some(rustc_mir_attrs) = find_attr!(attrs, AttributeKind::RustcMir(kind) => kind) {
+        if let Some(rustc_mir_attrs) =
+            find_attr!(tcx, def_id, AttributeKind::RustcMir(kind) => kind)
+        {
             for attr in rustc_mir_attrs {
                 match attr {
                     RustcMirKind::BorrowckGraphvizPostflow { path } => {

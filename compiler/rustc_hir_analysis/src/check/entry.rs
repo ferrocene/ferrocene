@@ -99,8 +99,7 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) {
         error = true;
     }
 
-    if let Some(attr_span) =
-        find_attr!(tcx.get_all_attrs(main_def_id), AttributeKind::TrackCaller(span) => *span)
+    if let Some(attr_span) = find_attr!(tcx, main_def_id, AttributeKind::TrackCaller(span) => *span)
     {
         tcx.dcx().emit_err(errors::TrackCallerOnMain { span: attr_span, annotated: main_span });
         error = true;

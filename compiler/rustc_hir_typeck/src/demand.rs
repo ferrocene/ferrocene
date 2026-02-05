@@ -1092,7 +1092,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 //
                 // FIXME? Other potential candidate methods: `as_ref` and
                 // `as_mut`?
-                && find_attr!(self.tcx.get_all_attrs(m.def_id), AttributeKind::RustcConversionSuggestion)
+                && find_attr!(self.tcx, m.def_id, AttributeKind::RustcConversionSuggestion)
             },
         );
 

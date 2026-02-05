@@ -1744,10 +1744,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn should_log_capture_analysis(&self, closure_def_id: LocalDefId) -> bool {
         self.has_rustc_attrs
-            && find_attr!(
-                self.tcx.get_all_attrs(closure_def_id),
-                AttributeKind::RustcCaptureAnalysis
-            )
+            && find_attr!(self.tcx, closure_def_id, AttributeKind::RustcCaptureAnalysis)
     }
 
     fn log_capture_analysis_first_pass(

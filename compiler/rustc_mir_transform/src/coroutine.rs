@@ -1989,7 +1989,7 @@ fn check_must_not_suspend_def(
     data: SuspendCheckData<'_>,
 ) -> bool {
     if let Some(reason_str) =
-        find_attr!(tcx.get_all_attrs(def_id), AttributeKind::MustNotSupend {reason} => reason)
+        find_attr!(tcx, def_id, AttributeKind::MustNotSupend {reason} => reason)
     {
         let reason =
             reason_str.map(|s| errors::MustNotSuspendReason { span: data.source_span, reason: s });

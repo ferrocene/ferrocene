@@ -296,7 +296,7 @@ pub(super) fn dump_annotation<'tcx, 'infcx>(
 ) {
     let tcx = infcx.tcx;
     let base_def_id = tcx.typeck_root_def_id(body.source.def_id());
-    if !find_attr!(tcx.get_all_attrs(base_def_id), AttributeKind::RustcRegions) {
+    if !find_attr!(tcx, base_def_id, AttributeKind::RustcRegions) {
         return;
     }
 

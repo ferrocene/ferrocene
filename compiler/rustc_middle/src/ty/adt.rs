@@ -282,13 +282,11 @@ impl AdtDefData {
         debug!("AdtDef::new({:?}, {:?}, {:?}, {:?})", did, kind, variants, repr);
         let mut flags = AdtFlags::NO_ADT_FLAGS;
 
-        if kind == AdtKind::Enum
-            && find_attr!(tcx.get_all_attrs(did), AttributeKind::NonExhaustive(..))
-        {
+        if kind == AdtKind::Enum && find_attr!(tcx, did, AttributeKind::NonExhaustive(..)) {
             debug!("found non-exhaustive variant list for {:?}", did);
             flags = flags | AdtFlags::IS_VARIANT_LIST_NON_EXHAUSTIVE;
         }
-        if find_attr!(tcx.get_all_attrs(did), AttributeKind::PinV2(..)) {
+        if find_attr!(tcx, did, AttributeKind::PinV2(..)) {
             debug!("found pin-project type {:?}", did);
             flags |= AdtFlags::IS_PIN_PROJECT;
         }
@@ -303,7 +301,7 @@ impl AdtDefData {
             flags |= AdtFlags::HAS_CTOR;
         }
 
-        if find_attr!(tcx.get_all_attrs(did), AttributeKind::Fundamental) {
+        if find_attr!(tcx, did, AttributeKind::Fundamental) {
             flags |= AdtFlags::IS_FUNDAMENTAL;
         }
         if tcx.is_lang_item(did, LangItem::PhantomData) {

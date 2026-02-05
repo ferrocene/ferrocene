@@ -36,7 +36,7 @@ pub fn check_live_drops<'tcx>(tcx: TyCtxt<'tcx>, body: &mir::Body<'tcx>) {
         return;
     }
 
-    if find_attr!(tcx.get_all_attrs(body.source.def_id()), AttributeKind::RustcDoNotConstCheck) {
+    if find_attr!(tcx, body.source.def_id(), AttributeKind::RustcDoNotConstCheck) {
         return;
     }
 

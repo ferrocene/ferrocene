@@ -527,10 +527,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // `#[rustc_evaluate_where_clauses]` trigger special output
                 // to let us test the trait evaluation system.
                 if self.has_rustc_attrs
-                    && find_attr!(
-                        self.tcx.get_all_attrs(def_id),
-                        AttributeKind::RustcEvaluateWhereClauses
-                    )
+                    && find_attr!(self.tcx, def_id, AttributeKind::RustcEvaluateWhereClauses)
                 {
                     let predicates = self.tcx.predicates_of(def_id);
                     let predicates = predicates.instantiate(self.tcx, args);
@@ -907,7 +904,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) {
         // If we have `rustc_do_not_const_check`, do not check `[const]` bounds.
         if self.has_rustc_attrs
-            && find_attr!(self.tcx.get_all_attrs(self.body_id), AttributeKind::RustcDoNotConstCheck)
+            && find_attr!(self.tcx, self.body_id, AttributeKind::RustcDoNotConstCheck)
         {
             return;
         }

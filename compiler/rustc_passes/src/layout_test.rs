@@ -20,8 +20,7 @@ pub fn test_layout(tcx: TyCtxt<'_>) {
         return;
     }
     for id in tcx.hir_crate_items(()).definitions() {
-        let attrs = tcx.get_all_attrs(id);
-        if let Some(attrs) = find_attr!(attrs, AttributeKind::RustcLayout(attrs) => attrs) {
+        if let Some(attrs) = find_attr!(tcx, id, AttributeKind::RustcLayout(attrs) => attrs) {
             // Attribute parsing handles error reporting
             if matches!(
                 tcx.def_kind(id),

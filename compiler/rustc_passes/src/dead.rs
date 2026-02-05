@@ -381,10 +381,7 @@ impl<'tcx> MarkSymbolVisitor<'tcx> {
             && let impl_of = self.tcx.parent(impl_item.owner_id.to_def_id())
             && self.tcx.is_automatically_derived(impl_of)
             && let trait_ref = self.tcx.impl_trait_ref(impl_of).instantiate_identity()
-            && find_attr!(
-                self.tcx.get_all_attrs(trait_ref.def_id),
-                AttributeKind::RustcTrivialFieldReads
-            )
+            && find_attr!(self.tcx, trait_ref.def_id, AttributeKind::RustcTrivialFieldReads)
         {
             if let ty::Adt(adt_def, _) = trait_ref.self_ty().kind()
                 && let Some(adt_def_id) = adt_def.did().as_local()

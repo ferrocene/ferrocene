@@ -216,7 +216,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
             return;
         }
 
-        if !find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcDoNotConstCheck) {
+        if !find_attr!(tcx, def_id, AttributeKind::RustcDoNotConstCheck) {
             self.visit_body(body);
         }
 

@@ -47,7 +47,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // This attribute causes us to dump some writeback information
         // in the form of errors, which is used for unit tests.
         let rustc_dump_user_args = self.has_rustc_attrs
-            && find_attr!(self.tcx.get_all_attrs(item_def_id), AttributeKind::RustcDumpUserArgs);
+            && find_attr!(self.tcx, item_def_id, AttributeKind::RustcDumpUserArgs);
 
         let mut wbcx = WritebackCx::new(self, body, rustc_dump_user_args);
         for param in body.params {

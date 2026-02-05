@@ -7,7 +7,7 @@ use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt};
 use rustc_span::sym;
 
 pub(crate) fn opaque_hidden_types(tcx: TyCtxt<'_>) {
-    if !find_attr!(tcx.get_all_attrs(CRATE_DEF_ID), AttributeKind::RustcHiddenTypeOfOpaques) {
+    if !find_attr!(tcx, CRATE_DEF_ID, AttributeKind::RustcHiddenTypeOfOpaques) {
         return;
     }
     for id in tcx.hir_crate_items(()).opaques() {
@@ -28,7 +28,7 @@ pub(crate) fn opaque_hidden_types(tcx: TyCtxt<'_>) {
 
 pub(crate) fn predicates_and_item_bounds(tcx: TyCtxt<'_>) {
     for id in tcx.hir_crate_items(()).owners() {
-        if find_attr!(tcx.get_all_attrs(id), AttributeKind::RustcDumpPredicates) {
+        if find_attr!(tcx, id, AttributeKind::RustcDumpPredicates) {
             let preds = tcx.predicates_of(id).instantiate_identity(tcx).predicates;
             let span = tcx.def_span(id);
 
@@ -38,7 +38,7 @@ pub(crate) fn predicates_and_item_bounds(tcx: TyCtxt<'_>) {
             }
             diag.emit();
         }
-        if find_attr!(tcx.get_all_attrs(id), AttributeKind::RustcDumpItemBounds) {
+        if find_attr!(tcx, id, AttributeKind::RustcDumpItemBounds) {
             let bounds = tcx.item_bounds(id).instantiate_identity();
             let span = tcx.def_span(id);
 
@@ -54,7 +54,7 @@ pub(crate) fn predicates_and_item_bounds(tcx: TyCtxt<'_>) {
 pub(crate) fn def_parents(tcx: TyCtxt<'_>) {
     for iid in tcx.hir_free_items() {
         let did = iid.owner_id.def_id;
-        if find_attr!(tcx.get_all_attrs(did), AttributeKind::RustcDumpDefParents) {
+        if find_attr!(tcx, did, AttributeKind::RustcDumpDefParents) {
             struct AnonConstFinder<'tcx> {
                 tcx: TyCtxt<'tcx>,
                 anon_consts: Vec<LocalDefId>,
@@ -103,7 +103,7 @@ pub(crate) fn vtables<'tcx>(tcx: TyCtxt<'tcx>) {
         let def_id = id.owner_id.def_id;
 
         let Some(&attr_span) =
-            find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcDumpVtable(span) => span)
+            find_attr!(tcx, def_id, AttributeKind::RustcDumpVtable(span) => span)
         else {
             continue;
         };

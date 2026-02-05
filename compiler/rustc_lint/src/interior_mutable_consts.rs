@@ -87,7 +87,7 @@ impl<'tcx> LateLintPass<'tcx> for InteriorMutableConsts {
                 .any(|adj| matches!(adj.kind, Adjust::Deref(_)))
             // Let's do the attribute check after the other checks for perf reasons
             && find_attr!(
-                cx.tcx.get_all_attrs(method_did),
+                cx.tcx, method_did,
                 AttributeKind::RustcShouldNotBeCalledOnConstItems(_)
             )
             && let Some(method_name) = cx.tcx.opt_item_ident(method_did)

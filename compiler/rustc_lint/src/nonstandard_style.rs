@@ -3,7 +3,7 @@ use rustc_attr_parsing::AttributeParser;
 use rustc_errors::Applicability;
 use rustc_hir::attrs::{AttributeKind, ReprAttr};
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_hir::intravisit::{FnKind, Visitor};
 use rustc_hir::{Attribute, GenericParamKind, PatExprKind, PatKind, find_attr};
 use rustc_middle::hir::nested_filter::All;
@@ -322,7 +322,7 @@ impl<'tcx> LateLintPass<'tcx> for NonSnakeCase {
         let crate_ident = if let Some(name) = &cx.tcx.sess.opts.crate_name {
             Some(Ident::from_str(name))
         } else {
-            find_attr!(cx.tcx.hir_attrs(hir::CRATE_HIR_ID), AttributeKind::CrateName{name, name_span,..} => (name, name_span)).map(
+            find_attr!(cx.tcx, CRATE_DEF_ID, AttributeKind::CrateName{name, name_span,..} => (name, name_span)).map(
                 |(&name, &span)| {
                     // Discard the double quotes surrounding the literal.
                     let sp = cx
@@ -371,7 +371,7 @@ impl<'tcx> LateLintPass<'tcx> for NonSnakeCase {
             FnKind::Method(ident, sig, ..) => match cx.tcx.associated_item(id).container {
                 AssocContainer::InherentImpl => {
                     if sig.header.abi != ExternAbi::Rust
-                        && find_attr!(cx.tcx.get_all_attrs(id), AttributeKind::NoMangle(..))
+                        && find_attr!(cx.tcx, id, AttributeKind::NoMangle(..))
                     {
                         return;
                     }
@@ -385,7 +385,7 @@ impl<'tcx> LateLintPass<'tcx> for NonSnakeCase {
             FnKind::ItemFn(ident, _, header) => {
                 // Skip foreign-ABI #[no_mangle] functions (Issue #31924)
                 if header.abi != ExternAbi::Rust
-                    && find_attr!(cx.tcx.get_all_attrs(id), AttributeKind::NoMangle(..))
+                    && find_attr!(cx.tcx, id, AttributeKind::NoMangle(..))
                 {
                     return;
                 }

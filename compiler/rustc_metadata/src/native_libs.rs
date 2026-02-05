@@ -213,11 +213,10 @@ impl<'tcx> Collector<'tcx> {
             return;
         }
 
-        for attr in
-            find_attr!(self.tcx.get_all_attrs(def_id), AttributeKind::Link(links, _) => links)
-                .iter()
-                .map(|v| v.iter())
-                .flatten()
+        for attr in find_attr!(self.tcx, def_id, AttributeKind::Link(links, _) => links)
+            .iter()
+            .map(|v| v.iter())
+            .flatten()
         {
             let dll_imports = match attr.kind {
                 NativeLibKind::RawDylib { .. } => foreign_items
@@ -232,7 +231,7 @@ impl<'tcx> Collector<'tcx> {
                     .collect(),
                 _ => {
                     for &child_item in foreign_items {
-                        if let Some(span) = find_attr!(self.tcx.get_all_attrs(child_item), AttributeKind::LinkOrdinal {span, ..} => *span)
+                        if let Some(span) = find_attr!(self.tcx, child_item, AttributeKind::LinkOrdinal {span, ..} => *span)
                         {
                             sess.dcx().emit_err(errors::LinkOrdinalRawDylib { span });
                         }

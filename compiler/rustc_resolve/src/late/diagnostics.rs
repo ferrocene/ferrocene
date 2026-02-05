@@ -1115,8 +1115,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     // confused by them.
                     continue;
                 }
-                if let Some(d) =
-                    hir::find_attr!(r.tcx.get_all_attrs(did), AttributeKind::Doc(d) => d)
+                if let Some(d) = hir::find_attr!(r.tcx, did, AttributeKind::Doc(d) => d)
                     && d.aliases.contains_key(&item_name)
                 {
                     return Some(did);

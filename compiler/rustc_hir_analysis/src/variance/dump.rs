@@ -26,7 +26,7 @@ fn format_variances(tcx: TyCtxt<'_>, def_id: LocalDefId) -> String {
 pub(crate) fn variances(tcx: TyCtxt<'_>) {
     let crate_items = tcx.hir_crate_items(());
 
-    if find_attr!(tcx.get_all_attrs(CRATE_DEF_ID), AttributeKind::RustcVarianceOfOpaques) {
+    if find_attr!(tcx, CRATE_DEF_ID, AttributeKind::RustcVarianceOfOpaques) {
         for id in crate_items.opaques() {
             tcx.dcx().emit_err(crate::errors::VariancesOf {
                 span: tcx.def_span(id),
@@ -36,7 +36,7 @@ pub(crate) fn variances(tcx: TyCtxt<'_>) {
     }
 
     for id in crate_items.free_items() {
-        if !find_attr!(tcx.get_all_attrs(id.owner_id), AttributeKind::RustcVariance) {
+        if !find_attr!(tcx, id.owner_id, AttributeKind::RustcVariance) {
             continue;
         }
 

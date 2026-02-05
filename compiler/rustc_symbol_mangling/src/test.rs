@@ -53,10 +53,9 @@ impl SymbolNamesTest<'_> {
         // to test the entirety of the string, if they choose, or else just
         // some subset.
 
-        if let Some(attr_span) = find_attr!(
-            tcx.get_all_attrs(def_id),
-            AttributeKind::RustcSymbolName(span) => span
-        ) {
+        if let Some(attr_span) =
+            find_attr!(tcx, def_id,AttributeKind::RustcSymbolName(span) => span)
+        {
             let def_id = def_id.to_def_id();
             let instance = Instance::new_raw(
                 def_id,
@@ -83,7 +82,7 @@ impl SymbolNamesTest<'_> {
         }
 
         if let Some(attr_span) = find_attr!(
-            tcx.get_all_attrs(def_id),
+            tcx, def_id,
             AttributeKind::RustcDefPath(span) => span
         ) {
             tcx.dcx().emit_err(TestOutput {

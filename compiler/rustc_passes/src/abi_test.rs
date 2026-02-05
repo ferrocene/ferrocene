@@ -18,7 +18,8 @@ pub fn test_abi(tcx: TyCtxt<'_>) {
         return;
     }
     for id in tcx.hir_crate_items(()).definitions() {
-        let Some((attr_span, attr_kind)) = find_attr!(tcx.get_all_attrs(id), AttributeKind::RustcAbi{ attr_span, kind } => (*attr_span, *kind))
+        let Some((attr_span, attr_kind)) =
+            find_attr!(tcx, id, AttributeKind::RustcAbi{ attr_span, kind } => (*attr_span, *kind))
         else {
             continue;
         };

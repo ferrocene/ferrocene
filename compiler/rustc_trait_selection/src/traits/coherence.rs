@@ -760,8 +760,8 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
             } = cand.kind()
                 && let ty::ImplPolarity::Reservation = infcx.tcx.impl_polarity(def_id)
             {
-                let message = find_attr!(infcx.tcx.get_all_attrs(def_id), AttributeKind::RustcReservationImpl(_, message) => *message);
-                if let Some(message) = message {
+                if let Some(message) = find_attr!(infcx.tcx, def_id, AttributeKind::RustcReservationImpl(_, message) => *message)
+                {
                     self.causes.insert(IntercrateAmbiguityCause::ReservationImpl { message });
                 }
             }

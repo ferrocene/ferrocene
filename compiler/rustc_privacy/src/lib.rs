@@ -876,7 +876,7 @@ pub struct TestReachabilityVisitor<'a, 'tcx> {
 
 impl<'a, 'tcx> TestReachabilityVisitor<'a, 'tcx> {
     fn effective_visibility_diagnostic(&self, def_id: LocalDefId) {
-        if find_attr!(self.tcx.get_all_attrs(def_id), AttributeKind::RustcEffectiveVisibility) {
+        if find_attr!(self.tcx, def_id, AttributeKind::RustcEffectiveVisibility) {
             let mut error_msg = String::new();
             let span = self.tcx.def_span(def_id.to_def_id());
             if let Some(effective_vis) = self.effective_visibilities.effective_vis(def_id) {

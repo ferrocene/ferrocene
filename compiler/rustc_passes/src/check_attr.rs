@@ -567,7 +567,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             }
 
             if let EiiImplResolution::Macro(eii_macro) = resolution
-                && find_attr!(self.tcx.get_all_attrs(*eii_macro), AttributeKind::EiiDeclaration(EiiDecl { impl_unsafe, .. }) if *impl_unsafe)
+                && find_attr!(self.tcx, *eii_macro, AttributeKind::EiiDeclaration(EiiDecl { impl_unsafe, .. }) if *impl_unsafe)
                 && !impl_marked_unsafe
             {
                 self.dcx().emit_err(errors::EiiImplRequiresUnsafe {
@@ -1774,7 +1774,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             let parent_span = self.tcx.def_span(parent_did);
 
             if let Some(attr_span) = find_attr!(
-                self.tcx.get_all_attrs(parent_did),
+                self.tcx, parent_did,
                 AttributeKind::Inline(InlineAttr::Force { attr_span, .. }, _) => *attr_span
             ) && is_coro
             {
@@ -1906,7 +1906,7 @@ impl<'tcx> Visitor<'tcx> for CheckAttrVisitor<'tcx> {
         if let ItemKind::Macro(_, macro_def, _) = item.kind {
             let def_id = item.owner_id.to_def_id();
             if macro_def.macro_rules
-                && !find_attr!(self.tcx.get_all_attrs(def_id), AttributeKind::MacroExport { .. })
+                && !find_attr!(self.tcx, def_id, AttributeKind::MacroExport { .. })
             {
                 check_non_exported_macro_for_invalid_attrs(self.tcx, item);
             }

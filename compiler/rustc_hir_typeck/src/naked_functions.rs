@@ -21,7 +21,7 @@ pub(crate) fn typeck_naked_fn<'tcx>(
     def_id: LocalDefId,
     body: &'tcx hir::Body<'tcx>,
 ) {
-    debug_assert!(find_attr!(tcx.get_all_attrs(def_id), AttributeKind::Naked(..)));
+    debug_assert!(find_attr!(tcx, def_id, AttributeKind::Naked(..)));
     check_no_patterns(tcx, body.params);
     check_no_parameters_use(tcx, body);
     check_asm(tcx, def_id, body);

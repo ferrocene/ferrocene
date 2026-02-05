@@ -442,7 +442,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
             // all. That said, we have to allow calling functions inside a `const trait`. These
             // *are* const-checked!
             if !ecx.tcx.is_const_fn(def)
-                || find_attr!(ecx.tcx.get_all_attrs(def), AttributeKind::RustcDoNotConstCheck)
+                || find_attr!(ecx.tcx, def, AttributeKind::RustcDoNotConstCheck)
             {
                 // We certainly do *not* want to actually call the fn
                 // though, so be sure we return here.

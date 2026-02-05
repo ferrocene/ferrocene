@@ -687,7 +687,7 @@ pub(crate) fn nonnull_optimization_guaranteed<'tcx>(
     tcx: TyCtxt<'tcx>,
     def: ty::AdtDef<'tcx>,
 ) -> bool {
-    find_attr!(tcx.get_all_attrs(def.did()), AttributeKind::RustcNonnullOptimizationGuaranteed)
+    find_attr!(tcx, def.did(), AttributeKind::RustcNonnullOptimizationGuaranteed)
 }
 
 /// `repr(transparent)` structs can have a single non-1-ZST field, this function returns that

@@ -257,7 +257,7 @@ impl ResolverAstLowering {
 
         find_attr!(
             // we can use parsed attrs here since for other crates they're already available
-            tcx.get_all_attrs(def_id),
+            tcx, def_id,
             AttributeKind::RustcLegacyConstGenerics{fn_indexes,..} => fn_indexes
         )
         .map(|fn_indexes| fn_indexes.iter().map(|(num, _)| *num).collect())

@@ -1442,10 +1442,7 @@ impl<'tcx> TyCtxt<'tcx> {
             field_shuffle_seed ^= user_seed;
         }
 
-        let attributes = self.get_all_attrs(did);
-        let elt = find_attr!(
-            attributes,
-            AttributeKind::RustcScalableVector { element_count, .. } => element_count
+        let elt = find_attr!(self, did, AttributeKind::RustcScalableVector { element_count, .. } => element_count
         )
         .map(|elt| match elt {
             Some(n) => ScalableElt::ElementCount(*n),
@@ -1454,7 +1451,7 @@ impl<'tcx> TyCtxt<'tcx> {
         if elt.is_some() {
             flags.insert(ReprFlags::IS_SCALABLE);
         }
-        if let Some(reprs) = find_attr!(attributes, AttributeKind::Repr { reprs, .. } => reprs) {
+        if let Some(reprs) = find_attr!(self, did, AttributeKind::Repr { reprs, .. } => reprs) {
             for (r, _) in reprs {
                 flags.insert(match *r {
                     attr::ReprRust => ReprFlags::empty(),
@@ -1514,7 +1511,7 @@ impl<'tcx> TyCtxt<'tcx> {
         }
 
         // See `TyAndLayout::pass_indirectly_in_non_rustic_abis` for details.
-        if find_attr!(attributes, AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)) {
+        if find_attr!(self, did, AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)) {
             flags.insert(ReprFlags::PASS_INDIRECTLY_IN_NON_RUSTIC_ABIS);
         }
 
@@ -1988,7 +1985,8 @@ impl<'tcx> TyCtxt<'tcx> {
             && let outer = self.def_span(def_id).ctxt().outer_expn_data()
             && matches!(outer.kind, ExpnKind::Macro(MacroKind::Derive, _))
             && find_attr!(
-                self.get_all_attrs(outer.macro_def_id.unwrap()),
+                self,
+                outer.macro_def_id.unwrap(),
                 AttributeKind::RustcBuiltinMacro { .. }
             )
         {
@@ -2000,7 +1998,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Check if the given `DefId` is `#\[automatically_derived\]`.
     pub fn is_automatically_derived(self, def_id: DefId) -> bool {
-        find_attr!(self.get_all_attrs(def_id), AttributeKind::AutomaticallyDerived(..))
+        find_attr!(self, def_id, AttributeKind::AutomaticallyDerived(..))
     }
 
     /// Looks up the span of `impl_did` if the impl is local; otherwise returns `Err`

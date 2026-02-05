@@ -6,7 +6,7 @@ use rustc_span::sym;
 
 pub(crate) fn inferred_outlives(tcx: TyCtxt<'_>) {
     for id in tcx.hir_free_items() {
-        if !find_attr!(tcx.get_all_attrs(id.owner_id), AttributeKind::RustcOutlives) {
+        if !find_attr!(tcx, id.owner_id, AttributeKind::RustcOutlives) {
             continue;
         }
 

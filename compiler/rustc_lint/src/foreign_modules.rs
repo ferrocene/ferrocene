@@ -185,8 +185,7 @@ fn name_of_extern_decl(tcx: TyCtxt<'_>, fi: hir::OwnerId) -> SymbolName {
             // bottleneck, this does just fine.
             (
                 overridden_link_name,
-                find_attr!(tcx.get_all_attrs(fi), AttributeKind::LinkName {span, ..} => *span)
-                    .unwrap(),
+                find_attr!(tcx, fi, AttributeKind::LinkName {span, ..} => *span).unwrap(),
             )
         })
     {

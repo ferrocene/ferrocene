@@ -401,7 +401,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
 
         fn is_def_must_use(cx: &LateContext<'_>, def_id: DefId, span: Span) -> Option<MustUsePath> {
             if let Some(reason) = find_attr!(
-                cx.tcx.get_all_attrs(def_id),
+                cx.tcx, def_id,
                 AttributeKind::MustUse { reason, .. } => reason
             ) {
                 // check for #[must_use = "..."]

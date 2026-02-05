@@ -96,8 +96,7 @@ fn annotation_kind(tcx: TyCtxt<'_>, def_id: LocalDefId) -> AnnotationKind {
 }
 
 fn lookup_deprecation_entry(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<DeprecationEntry> {
-    let attrs = tcx.hir_attrs(tcx.local_def_id_to_hir_id(def_id));
-    let depr = find_attr!(attrs,
+    let depr = find_attr!(tcx, def_id,
         AttributeKind::Deprecation { deprecation, span: _ } => *deprecation
     );
 
@@ -161,8 +160,8 @@ fn lookup_stability(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<Stability> {
     }
 
     // # Regular stability
-    let attrs = tcx.hir_attrs(tcx.local_def_id_to_hir_id(def_id));
-    let stab = find_attr!(attrs, AttributeKind::Stability { stability, span: _ } => *stability);
+    let stab =
+        find_attr!(tcx, def_id, AttributeKind::Stability { stability, span: _ } => *stability);
 
     if let Some(stab) = stab {
         return Some(stab);
@@ -195,9 +194,8 @@ fn lookup_default_body_stability(
         return None;
     }
 
-    let attrs = tcx.hir_attrs(tcx.local_def_id_to_hir_id(def_id));
     // FIXME: check that this item can have body stability
-    find_attr!(attrs, AttributeKind::RustcBodyStability { stability, .. } => *stability)
+    find_attr!(tcx, def_id, AttributeKind::RustcBodyStability { stability, .. } => *stability)
 }
 
 #[instrument(level = "debug", skip(tcx))]
@@ -212,9 +210,8 @@ fn lookup_const_stability(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<ConstSt
                 && let Some(fn_sig) = tcx.hir_node_by_def_id(def_id).fn_sig()
                 && fn_sig.header.is_const()
             {
-                let attrs = tcx.hir_attrs(tcx.local_def_id_to_hir_id(def_id));
                 let const_stability_indirect =
-                    find_attr!(attrs, AttributeKind::RustcConstStabilityIndirect);
+                    find_attr!(tcx, def_id, AttributeKind::RustcConstStabilityIndirect);
                 return Some(ConstStability::unmarked(const_stability_indirect, parent_stab));
             }
         }
@@ -222,10 +219,9 @@ fn lookup_const_stability(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<ConstSt
         return None;
     }
 
-    let attrs = tcx.hir_attrs(tcx.local_def_id_to_hir_id(def_id));
-    let const_stability_indirect = find_attr!(attrs, AttributeKind::RustcConstStabilityIndirect);
-    let const_stab =
-        find_attr!(attrs, AttributeKind::RustcConstStability { stability, span: _ } => *stability);
+    let const_stability_indirect =
+        find_attr!(tcx, def_id, AttributeKind::RustcConstStabilityIndirect);
+    let const_stab = find_attr!(tcx, def_id, AttributeKind::RustcConstStability { stability, span: _ } => *stability);
 
     // After checking the immediate attributes, get rid of the span and compute implied
     // const stability: inherit feature gate from regular stability.

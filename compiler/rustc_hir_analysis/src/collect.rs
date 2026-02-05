@@ -817,9 +817,9 @@ fn lower_variant<'tcx>(
         parent_did.to_def_id(),
         recovered,
         adt_kind == AdtKind::Struct
-            && find_attr!(tcx.get_all_attrs(parent_did), AttributeKind::NonExhaustive(..))
+            && find_attr!(tcx, parent_did, AttributeKind::NonExhaustive(..))
             || variant_did.is_some_and(|variant_did| {
-                find_attr!(tcx.get_all_attrs(variant_did), AttributeKind::NonExhaustive(..))
+                find_attr!(tcx, variant_did, AttributeKind::NonExhaustive(..))
             }),
     )
 }
@@ -1355,8 +1355,7 @@ fn impl_trait_header(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::ImplTraitHeader
         .of_trait
         .unwrap_or_else(|| panic!("expected impl trait, found inherent impl on {def_id:?}"));
     let selfty = tcx.type_of(def_id).instantiate_identity();
-    let is_rustc_reservation =
-        find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcReservationImpl(..));
+    let is_rustc_reservation = find_attr!(tcx, def_id, AttributeKind::RustcReservationImpl(..));
 
     check_impl_constness(tcx, impl_.constness, &of_trait.trait_ref);
 

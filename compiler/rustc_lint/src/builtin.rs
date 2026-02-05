@@ -1178,7 +1178,7 @@ impl<'tcx> LateLintPass<'tcx> for UngatedAsyncFnTrackCaller {
         if fn_kind.asyncness().is_async()
             && !cx.tcx.features().async_fn_track_caller()
             // Now, check if the function has the `#[track_caller]` attribute
-            && let Some(attr_span) = find_attr!(cx.tcx.get_all_attrs(def_id), AttributeKind::TrackCaller(span) => *span)
+            && let Some(attr_span) = find_attr!(cx.tcx, def_id, AttributeKind::TrackCaller(span) => *span)
         {
             cx.emit_span_lint(
                 UNGATED_ASYNC_FN_TRACK_CALLER,

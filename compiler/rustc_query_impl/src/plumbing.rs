@@ -24,17 +24,17 @@ use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_query_system::dep_graph::{DepNodeParams, FingerprintStyle, HasDepContext};
+use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle, HasDepContext};
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
     QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra, force_query,
 };
-use rustc_query_system::{QueryOverflow, QueryOverflowNote};
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
 use crate::QueryDispatcherUnerased;
+use crate::error::{QueryOverflow, QueryOverflowNote};
 
 /// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
 /// crate does not have direct access to [`TyCtxt`].

@@ -55,7 +55,7 @@ pub(super) const fn reify_to_extern_c_fn_hrt_bridge<
         let f = unsafe {
             // SAFETY: `F` satisfies all criteria for "out of thin air"
             // reconstructability (see module-level doc comment).
-            mem::MaybeUninit::<F>::uninit().assume_init()
+            mem::conjure_zst::<F>()
         };
         f(bridge)
     }

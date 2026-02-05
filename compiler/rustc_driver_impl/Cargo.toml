@@ -33,7 +33,6 @@ rustc_mir_build = { path = "../rustc_mir_build" }
 rustc_mir_transform = { path = "../rustc_mir_transform" }
 rustc_parse = { path = "../rustc_parse" }
 rustc_passes = { path = "../rustc_passes" }
-rustc_pattern_analysis = { path = "../rustc_pattern_analysis" }
 rustc_public = { path = "../rustc_public", features = ["rustc_internal"] }
 rustc_resolve = { path = "../rustc_resolve" }
 rustc_session = { path = "../rustc_session" }

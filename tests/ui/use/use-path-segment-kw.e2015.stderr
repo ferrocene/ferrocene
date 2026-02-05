@@ -140,77 +140,77 @@ help: try renaming it with a name
 LL |         use super as name;
    |                   +++++++
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:139:15
    |
 LL |         use ::super;
    |               ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:140:15
    |
 LL |         use ::super as _super2;
    |               ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:141:16
    |
 LL |         use ::{super};
    |                ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:142:16
    |
-LL |         use ::{super as _nested_super2};
-   |                ^^^^^
+LL | ...   use ::{super as _nested_super2};
+   |              ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:145:21
    |
 LL |         use foobar::super;
    |                     ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:146:21
    |
-LL |         use foobar::super as _super3;
-   |                     ^^^^^
+LL | ...   use foobar::super as _super3;
+   |                   ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:147:22
    |
 LL |         use foobar::{super};
    |                      ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:148:22
    |
-LL |         use foobar::{super as _nested_super3};
-   |                      ^^^^^
+LL | ...   use foobar::{super as _nested_super3};
+   |                    ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:151:20
    |
 LL |         use crate::super;
    |                    ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:152:20
    |
-LL |         use crate::super as _super4;
-   |                    ^^^^^
+LL | ...   use crate::super as _super4;
+   |                  ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:153:21
    |
 LL |         use crate::{super};
    |                     ^^^^^
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:154:21
    |
-LL |         use crate::{super as _nested_super4};
-   |                     ^^^^^
+LL | ...   use crate::{super as _nested_super4};
+   |                   ^^^^^
 
 error: imports need to be explicitly named
   --> $DIR/use-path-segment-kw.rs:157:20
@@ -234,29 +234,27 @@ help: try renaming it with a name
 LL |         use super::{super as name};
    |                           +++++++
 
-error: `super` in paths can only be used in start position or after another `super`
+error: imports need to be explicitly named
   --> $DIR/use-path-segment-kw.rs:163:19
    |
 LL |         use self::super;
    |                   ^^^^^
-
-error: `super` in paths can only be used in start position or after another `super`
-  --> $DIR/use-path-segment-kw.rs:164:19
    |
-LL |         use self::super as _super6;
-   |                   ^^^^^
+help: try renaming it with a name
+   |
+LL |         use self::super as name;
+   |                         +++++++
 
-error: `super` in paths can only be used in start position or after another `super`
+error: imports need to be explicitly named
   --> $DIR/use-path-segment-kw.rs:165:20
    |
 LL |         use self::{super};
    |                    ^^^^^
-
-error: `super` in paths can only be used in start position or after another `super`
-  --> $DIR/use-path-segment-kw.rs:166:20
    |
-LL |         use self::{super as _nested_super6};
-   |                    ^^^^^
+help: try renaming it with a name
+   |
+LL |         use self::{super as name};
+   |                          +++++++
 
 error: imports need to be explicitly named
   --> $DIR/use-path-segment-kw.rs:173:13
@@ -827,7 +825,7 @@ LL |         macro_dollar_crate!();
    |
    = note: this error originates in the macro `macro_dollar_crate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:57:21
    |
 LL |         use $crate::super;
@@ -838,18 +836,18 @@ LL |         macro_dollar_crate!();
    |
    = note: this error originates in the macro `macro_dollar_crate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:58:21
    |
-LL |         use $crate::super as _m_super8;
-   |                     ^^^^^
+LL | ...   use $crate::super as _m_super8;
+   |                   ^^^^^
 ...
-LL |         macro_dollar_crate!();
-   |         --------------------- in this macro invocation
+LL | ...   macro_dollar_crate!();
+   |       --------------------- in this macro invocation
    |
    = note: this error originates in the macro `macro_dollar_crate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:59:22
    |
 LL |         use $crate::{super};
@@ -860,14 +858,14 @@ LL |         macro_dollar_crate!();
    |
    = note: this error originates in the macro `macro_dollar_crate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: `super` in paths can only be used in start position or after another `super`
+error: `super` in paths can only be used in start position, after `self`, or after another `super`
   --> $DIR/use-path-segment-kw.rs:60:22
    |
-LL |         use $crate::{super as _m_nested_super8};
-   |                      ^^^^^
+LL | ...   use $crate::{super as _m_nested_super8};
+   |                    ^^^^^
 ...
-LL |         macro_dollar_crate!();
-   |         --------------------- in this macro invocation
+LL | ...   macro_dollar_crate!();
+   |       --------------------- in this macro invocation
    |
    = note: this error originates in the macro `macro_dollar_crate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
@@ -1195,7 +1193,7 @@ error[E0433]: `self` in paths can only be used in start position
 LL |         type D6 = self::self;
    |                         ^^^^ can only be used in path start position
 
-error: aborting due to 131 previous errors
+error: aborting due to 129 previous errors
 
 Some errors have detailed explanations: E0429, E0432, E0433, E0573.
 For more information about an error, try `rustc --explain E0429`.

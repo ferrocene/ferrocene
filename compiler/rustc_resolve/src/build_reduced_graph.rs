@@ -649,10 +649,17 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
                         }
                     }
                     kw::Super => {
-                        if module_path.iter().any(|seg| seg.ident.name != kw::Super) {
+                        // Allow `self::super` as a valid prefix - `self` at position 0
+                        // followed by any number of `super` segments.
+                        let valid_prefix = module_path.iter().enumerate().all(|(i, seg)| {
+                            let name = seg.ident.name;
+                            name == kw::Super || (name == kw::SelfLower && i == 0)
+                        });
+
+                        if !valid_prefix {
                             self.r.dcx().span_err(
                                 source.ident.span,
-                                "`super` in paths can only be used in start position or after another `super`",
+                                "`super` in paths can only be used in start position, after `self`, or after another `super`",
                             );
                             return;
                         }

@@ -54,10 +54,10 @@ macro_rules! macro_dollar_crate {
         use $crate::{crate as _m_nested_crate8}; //~ ERROR `crate` in paths can only be used in start position
 
         type A9 = $crate::super; //~ ERROR `super` in paths can only be used in start position
-        use $crate::super; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use $crate::super as _m_super8; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use $crate::{super}; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use $crate::{super as _m_nested_super8}; //~ ERROR `super` in paths can only be used in start position or after another `super`
+        use $crate::super; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use $crate::super as _m_super8; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use $crate::{super}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use $crate::{super as _m_nested_super8}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
 
         type A10 = $crate::self; //~ ERROR `self` in paths can only be used in start position
         use $crate::self; //~ ERROR imports need to be explicitly named
@@ -136,22 +136,22 @@ mod foo {
         pub use super as _super;
 
         type C2 = ::super; //~ ERROR global paths cannot start with `super`
-        use ::super; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use ::super as _super2; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use ::{super}; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use ::{super as _nested_super2}; //~ ERROR `super` in paths can only be used in start position or after another `super`
+        use ::super; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use ::super as _super2; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use ::{super}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use ::{super as _nested_super2}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
 
         type C3 = foobar::super; //~ ERROR `super` in paths can only be used in start position
-        use foobar::super; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use foobar::super as _super3; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use foobar::{super}; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use foobar::{super as _nested_super3}; //~ ERROR `super` in paths can only be used in start position or after another `super`
+        use foobar::super; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use foobar::super as _super3; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use foobar::{super}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use foobar::{super as _nested_super3}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
 
         type C4 = crate::super; //~ ERROR `super` in paths can only be used in start position
-        use crate::super; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use crate::super as _super4; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use crate::{super}; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use crate::{super as _nested_super4}; //~ ERROR `super` in paths can only be used in start position or after another `super`
+        use crate::super; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use crate::super as _super4; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use crate::{super}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
+        use crate::{super as _nested_super4}; //~ ERROR `super` in paths can only be used in start position, after `self`, or after another `super`
 
         type C5 = super::super; //~ ERROR expected type, found module `super::super`
         use super::super; //~ ERROR imports need to be explicitly named
@@ -160,10 +160,10 @@ mod foo {
         pub use super::{super as _nested_super5};
 
         type C6 = self::super; //~ ERROR expected type, found module `self::super`
-        use self::super; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use self::super as _super6; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use self::{super}; //~ ERROR `super` in paths can only be used in start position or after another `super`
-        use self::{super as _nested_super6}; //~ ERROR `super` in paths can only be used in start position or after another `super`
+        use self::super; //~ ERROR imports need to be explicitly named
+        pub use self::super as _super6;
+        use self::{super}; //~ ERROR imports need to be explicitly named
+        pub use self::{super as _nested_super6};
 
         // --- self ---
         // use self::*; // Suppress other errors
@@ -232,6 +232,8 @@ fn main() {
     foo::bar::_super::bar::foobar::inner();
     foo::bar::_super5::outer();
     foo::bar::_nested_super5::outer();
+    foo::bar::_super6::bar::foobar::inner();
+    foo::bar::_nested_super6::bar::foobar::inner();
 
     foo::bar::_self::foobar::inner();
     foo::bar::qux::inner(); // Works after recovery

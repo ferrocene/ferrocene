@@ -29,7 +29,22 @@ mod pretty_printing;
 /// ```
 ///
 /// Often this requires you to first end up with a list of attributes.
-/// A common way to get those is through `tcx.get_all_attrs(did)`
+/// Often these are available through the `tcx`.
+///
+/// As a convenience, this macro can do that for you!
+///
+/// Instead of providing an attribute list, provide the `tcx` and a `DefId`.
+///
+/// ```rust,ignore (illustrative)
+/// find_attr!(tcx, def_id, <pattern>)
+/// ```
+///
+/// Another common case is finding attributes applied to the root of the current crate.
+/// For that, use the shortcut:
+///
+/// ```rust, ignore (illustrative)
+/// find_attr!(tcx, crate, <pattern>)
+/// ```
 #[macro_export]
 macro_rules! find_attr {
     ($tcx: expr, crate, $pattern: pat $(if $guard: expr)?) => {

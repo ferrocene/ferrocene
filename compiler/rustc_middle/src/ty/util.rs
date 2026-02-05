@@ -609,9 +609,8 @@ impl<'tcx> TyCtxt<'tcx> {
     /// have the same `DefKind`.
     ///
     /// Note that closures have a `DefId`, but the closure *expression* also has a
-    /// `HirId` that is located within the context where the closure appears (and, sadly,
-    /// a corresponding `NodeId`, since those are not yet phased out). The parent of
-    /// the closure's `DefId` will also be the context where it appears.
+    /// `HirId` that is located within the context where the closure appears. The
+    /// parent of the closure's `DefId` will also be the context where it appears.
     pub fn is_closure_like(self, def_id: DefId) -> bool {
         matches!(self.def_kind(def_id), DefKind::Closure)
     }
@@ -643,12 +642,8 @@ impl<'tcx> TyCtxt<'tcx> {
     /// has its own type-checking context or "inference environment".
     ///
     /// For example, a closure has its own `DefId`, but it is type-checked
-    /// with the containing item. Similarly, an inline const block has its
-    /// own `DefId` but it is type-checked together with the containing item.
-    ///
-    /// Therefore, when we fetch the
-    /// `typeck` the closure, for example, we really wind up
-    /// fetching the `typeck` the enclosing fn item.
+    /// with the containing item. Therefore, when we fetch the `typeck` of the closure,
+    /// for example, we really wind up fetching the `typeck` of the enclosing fn item.
     pub fn typeck_root_def_id(self, def_id: DefId) -> DefId {
         let mut def_id = def_id;
         while self.is_typeck_child(def_id) {

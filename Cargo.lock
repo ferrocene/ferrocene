@@ -184,9 +184,9 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "askama"
-version = "0.15.1"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb7125972258312e79827b60c9eb93938334100245081cf701a2dee981b17427"
+checksum = "08e1676b346cadfec169374f949d7490fd80a24193d37d2afce0c047cf695e57"
 dependencies = [
  "askama_macros",
  "itoa",
@@ -197,9 +197,9 @@ dependencies = [
 
 [[package]]
 name = "askama_derive"
-version = "0.15.1"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ba5e7259a1580c61571e3116ebaaa01e3c001b2132b17c4cc5c70780ca3e994"
+checksum = "7661ff56517787343f376f75db037426facd7c8d3049cef8911f1e75016f3a37"
 dependencies = [
  "askama_parser",
  "basic-toml",
@@ -214,18 +214,18 @@ dependencies = [
 
 [[package]]
 name = "askama_macros"
-version = "0.15.1"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "236ce20b77cb13506eaf5024899f4af6e12e8825f390bd943c4c37fd8f322e46"
+checksum = "713ee4dbfd1eb719c2dab859465b01fa1d21cb566684614a713a6b7a99a4e47b"
 dependencies = [
  "askama_derive",
 ]
 
 [[package]]
 name = "askama_parser"
-version = "0.15.1"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3c63392767bb2df6aa65a6e1e3b80fd89bb7af6d58359b924c0695620f1512e"
+checksum = "1d62d674238a526418b30c0def480d5beadb9d8964e7f38d635b03bf639c704c"
 dependencies = [
  "rustc-hash 2.1.1",
  "serde",
@@ -580,9 +580,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.51"
+version = "4.5.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c26d721170e0295f191a69bd9a1f93efcdb0aff38684b61ab5750468972e5f5"
+checksum = "c6e6ff9dcd79cff5cd969a17a545d79e84ab086e444102a591e288a8aa3ce394"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -600,9 +600,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.51"
+version = "4.5.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75835f0c7bf681bfd05abe44e965760fea999a5286c6eb2d59883634fd02011a"
+checksum = "fa42cf4d2b7a41bc8f663a7cab4031ebafa1bf3875705bfaf8466dc60ab52c00"
 dependencies = [
  "anstream",
  "anstyle",
@@ -857,7 +857,7 @@ dependencies = [
  "tracing-subscriber",
  "unified-diff",
  "walkdir",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -2038,7 +2038,7 @@ dependencies = [
  "serde",
  "tempfile",
  "uuid",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -3543,7 +3543,6 @@ dependencies = [
  "rustc_ast_pretty",
  "rustc_errors",
  "rustc_feature",
- "rustc_fluent_macro",
  "rustc_hir",
  "rustc_lexer",
  "rustc_macros",
@@ -3636,7 +3635,6 @@ dependencies = [
  "rustc_codegen_ssa",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_fs_util",
  "rustc_hashes",
  "rustc_hir",
@@ -3684,7 +3682,6 @@ dependencies = [
  "rustc_macros",
  "rustc_metadata",
  "rustc_middle",
- "rustc_query_system",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
@@ -3698,7 +3695,7 @@ dependencies = [
  "thorin-dwp",
  "tracing",
  "wasm-encoder 0.219.2",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -3756,7 +3753,7 @@ dependencies = [
  "tempfile",
  "thin-vec",
  "tracing",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -3780,7 +3777,6 @@ dependencies = [
  "rustc_ast_lowering",
  "rustc_ast_passes",
  "rustc_ast_pretty",
- "rustc_attr_parsing",
  "rustc_borrowck",
  "rustc_builtin_macros",
  "rustc_codegen_ssa",
@@ -3789,13 +3785,10 @@ dependencies = [
  "rustc_errors",
  "rustc_expand",
  "rustc_feature",
- "rustc_fluent_macro",
  "rustc_hir_analysis",
  "rustc_hir_pretty",
  "rustc_hir_typeck",
- "rustc_incremental",
  "rustc_index",
- "rustc_infer",
  "rustc_interface",
  "rustc_lexer",
  "rustc_lint",
@@ -3804,25 +3797,20 @@ dependencies = [
  "rustc_metadata",
  "rustc_middle",
  "rustc_mir_build",
- "rustc_mir_dataflow",
  "rustc_mir_transform",
- "rustc_monomorphize",
  "rustc_parse",
  "rustc_passes",
  "rustc_pattern_analysis",
- "rustc_privacy",
  "rustc_public",
- "rustc_query_system",
  "rustc_resolve",
  "rustc_session",
  "rustc_span",
  "rustc_target",
  "rustc_trait_selection",
- "rustc_ty_utils",
  "serde_json",
  "shlex",
  "tracing",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -3873,7 +3861,7 @@ dependencies = [
  "serde_json",
  "termize",
  "tracing",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -4054,7 +4042,6 @@ dependencies = [
  "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_fs_util",
  "rustc_graphviz",
  "rustc_hashes",
@@ -4093,7 +4080,6 @@ version = "0.0.0"
 dependencies = [
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_hir",
  "rustc_index",
  "rustc_macros",
@@ -4124,7 +4110,6 @@ dependencies = [
  "rustc_errors",
  "rustc_expand",
  "rustc_feature",
- "rustc_fluent_macro",
  "rustc_fs_util",
  "rustc_hir",
  "rustc_hir_analysis",
@@ -4170,6 +4155,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "rustc_abi",
+ "rustc_apfloat",
  "rustc_ast",
  "rustc_ast_pretty",
  "rustc_attr_parsing",
@@ -4228,6 +4214,8 @@ dependencies = [
 name = "rustc_macros"
 version = "0.0.0"
 dependencies = [
+ "fluent-bundle",
+ "fluent-syntax",
  "proc-macro2",
  "quote",
  "syn 2.0.110",
@@ -4335,11 +4323,10 @@ dependencies = [
  "polonius-engine",
  "regex",
  "rustc_abi",
- "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_graphviz",
+ "rustc_hir",
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
@@ -4353,7 +4340,6 @@ name = "rustc_mir_transform"
 version = "0.0.0"
 dependencies = [
  "either",
- "hashbrown 0.16.1",
  "itertools",
  "rustc_abi",
  "rustc_arena",
@@ -4383,7 +4369,6 @@ dependencies = [
  "rustc_abi",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_hir",
  "rustc_index",
  "rustc_macros",
@@ -4496,7 +4481,6 @@ dependencies = [
  "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_hir",
  "rustc_macros",
  "rustc_middle",
@@ -4564,14 +4548,12 @@ dependencies = [
 name = "rustc_query_system"
 version = "0.0.0"
 dependencies = [
- "hashbrown 0.16.1",
  "parking_lot",
  "rustc_abi",
  "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
- "rustc_fluent_macro",
  "rustc_hashes",
  "rustc_hir",
  "rustc_index",
@@ -4653,7 +4635,6 @@ dependencies = [
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
- "rustc_fluent_macro",
  "rustc_fs_util",
  "rustc_hashes",
  "rustc_hir",
@@ -4664,7 +4645,7 @@ dependencies = [
  "rustc_target",
  "termize",
  "tracing",
- "windows",
+ "windows 0.61.3",
 ]
 
 [[package]]
@@ -4809,7 +4790,6 @@ dependencies = [
  "rustc_abi",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_fluent_macro",
  "rustc_hashes",
  "rustc_hir",
  "rustc_index",
@@ -5438,14 +5418,14 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.37.2"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16607d5caffd1c07ce073528f9ed972d88db15dd44023fa57142963be3feb11f"
+checksum = "fe840c5b1afe259a5657392a4dbb74473a14c8db999c3ec2f4ae812e028a94da"
 dependencies = [
  "libc",
  "objc2-core-foundation",
  "objc2-io-kit",
- "windows",
+ "windows 0.62.2",
 ]
 
 [[package]]
@@ -5622,6 +5602,7 @@ version = "0.1.0"
 dependencies = [
  "build_helper",
  "cargo_metadata 0.21.0",
+ "clap",
  "fluent-syntax",
  "globset",
  "ignore",
@@ -6398,22 +6379,34 @@ version = "0.61.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9babd3a767a4c1aef6900409f85f5d53ce2544ccdfaa86dad48c91782c6d6893"
 dependencies = [
- "windows-collections",
+ "windows-collections 0.2.0",
  "windows-core 0.61.2",
- "windows-future",
+ "windows-future 0.2.1",
  "windows-link 0.1.3",
- "windows-numerics",
+ "windows-numerics 0.2.0",
+]
+
+[[package]]
+name = "windows"
+version = "0.62.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "527fadee13e0c05939a6a05d5bd6eec6cd2e3dbd648b9f8e447c6518133d8580"
+dependencies = [
+ "windows-collections 0.3.2",
+ "windows-core 0.62.2",
+ "windows-future 0.3.2",
+ "windows-numerics 0.3.1",
 ]
 
 [[package]]
 name = "windows-bindgen"
-version = "0.61.1"
+version = "0.66.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b4e97b01190d32f268a2dfbd3f006f77840633746707fbe40bcee588108a231"
+checksum = "81b7ec123a4eadd44d1f44f76804316b477b2537abed9a2ab950b3c54afa1fcf"
 dependencies = [
  "serde",
  "serde_json",
- "windows-threading",
+ "windows-threading 0.2.1",
 ]
 
 [[package]]
@@ -6423,6 +6416,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3beeceb5e5cfd9eb1d76b381630e82c4241ccd0d27f1a39ed41b2760b255c5e8"
 dependencies = [
  "windows-core 0.61.2",
+]
+
+[[package]]
+name = "windows-collections"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b2d95af1a8a14a3c7367e1ed4fc9c20e0a26e79551b1454d72583c97cc6610"
+dependencies = [
+ "windows-core 0.62.2",
 ]
 
 [[package]]
@@ -6459,7 +6461,18 @@ checksum = "fc6a41e98427b19fe4b73c550f060b59fa592d7d686537eebf9385621bfbad8e"
 dependencies = [
  "windows-core 0.61.2",
  "windows-link 0.1.3",
- "windows-threading",
+ "windows-threading 0.1.0",
+]
+
+[[package]]
+name = "windows-future"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1d6f90251fe18a279739e78025bd6ddc52a7e22f921070ccdc67dde84c605cb"
+dependencies = [
+ "windows-core 0.62.2",
+ "windows-link 0.2.1",
+ "windows-threading 0.2.1",
 ]
 
 [[package]]
@@ -6504,6 +6517,16 @@ checksum = "9150af68066c4c5c07ddc0ce30421554771e528bde427614c61038bc2c92c2b1"
 dependencies = [
  "windows-core 0.61.2",
  "windows-link 0.1.3",
+]
+
+[[package]]
+name = "windows-numerics"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e2e40844ac143cdb44aead537bbf727de9b044e107a0f1220392177d15b0f26"
+dependencies = [
+ "windows-core 0.62.2",
+ "windows-link 0.2.1",
 ]
 
 [[package]]
@@ -6609,6 +6632,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b66463ad2e0ea3bbf808b7f1d371311c80e115c0b71d60efc142cafbcfb057a6"
 dependencies = [
  "windows-link 0.1.3",
+]
+
+[[package]]
+name = "windows-threading"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3949bd5b99cafdf1c7ca86b43ca564028dfe27d66958f2470940f73d86d75b37"
+dependencies = [
+ "windows-link 0.2.1",
 ]
 
 [[package]]

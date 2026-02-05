@@ -401,15 +401,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::deny
                             | sym::forbid
                             // internal
-                            | sym::rustc_inherit_overflow_checks
                             | sym::rustc_on_unimplemented
                             | sym::rustc_layout
                             | sym::rustc_autodiff
-                            | sym::rustc_capture_analysis
-                            | sym::rustc_mir
+                            | sym::rustc_inherit_overflow_checks
                             // crate-level attrs, are checked below
                             | sym::feature
-                            | sym::register_tool,                            ..
+                            | sym::register_tool,
+                            ..
                         ] => {}
                         [name, rest@..] => {
                             match BUILTIN_ATTRIBUTE_MAP.get(name) {

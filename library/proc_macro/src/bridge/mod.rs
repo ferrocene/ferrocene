@@ -173,7 +173,7 @@ impl<T, M> Mark for Marked<T, M> {
         self.value
     }
 }
-impl<'a, T, M> Mark for &'a Marked<T, M> {
+impl<'a, T> Mark for &'a Marked<T, client::TokenStream> {
     type Unmarked = &'a T;
     fn mark(_: Self::Unmarked) -> Self {
         unreachable!()
@@ -220,6 +220,8 @@ mark_noop! {
     Delimiter,
     LitKind,
     Level,
+    Bound<usize>,
+    Range<usize>,
 }
 
 rpc_encode_decode!(
@@ -318,7 +320,7 @@ macro_rules! compound_traits {
     };
 }
 
-compound_traits!(
+rpc_encode_decode!(
     enum Bound<T> {
         Included(x),
         Excluded(x),
@@ -390,7 +392,7 @@ pub struct Literal<Span, Symbol> {
     pub span: Span,
 }
 
-compound_traits!(struct Literal<Sp, Sy> { kind, symbol, suffix, span });
+compound_traits!(struct Literal<Span, Symbol> { kind, symbol, suffix, span });
 
 #[derive(Clone)]
 pub enum TokenTree<TokenStream, Span, Symbol> {
@@ -434,6 +436,6 @@ compound_traits!(
     struct ExpnGlobals<Span> { def_site, call_site, mixed_site }
 );
 
-compound_traits!(
+rpc_encode_decode!(
     struct Range<T> { start, end }
 );

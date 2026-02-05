@@ -63,7 +63,7 @@ macro_rules! define_server_dispatcher_impl {
         $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)*;)*
     ) => {
         pub trait Server {
-            type TokenStream: 'static + Clone;
+            type TokenStream: 'static + Clone + Default;
             type Span: 'static + Copy + Eq + Hash;
             type Symbol: 'static;
 
@@ -312,7 +312,6 @@ impl client::Client<crate::TokenStream, crate::TokenStream> {
     ) -> Result<S::TokenStream, PanicMessage>
     where
         S: Server,
-        S::TokenStream: Default,
     {
         let client::Client { handle_counters, run, _marker } = *self;
         run_server(
@@ -338,7 +337,6 @@ impl client::Client<(crate::TokenStream, crate::TokenStream), crate::TokenStream
     ) -> Result<S::TokenStream, PanicMessage>
     where
         S: Server,
-        S::TokenStream: Default,
     {
         let client::Client { handle_counters, run, _marker } = *self;
         run_server(

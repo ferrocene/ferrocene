@@ -97,13 +97,13 @@ pub use self::predicate::{
     RegionOutlivesPredicate, SubtypePredicate, TraitPredicate, TraitRef, TypeOutlivesPredicate,
 };
 pub use self::region::{
-    BoundRegion, BoundRegionKind, EarlyParamRegion, LateParamRegion, LateParamRegionKind, Region,
-    RegionKind, RegionVid,
+    EarlyParamRegion, LateParamRegion, LateParamRegionKind, Region, RegionKind, RegionVid,
 };
 pub use self::sty::{
-    AliasTy, Article, Binder, BoundTy, BoundTyKind, BoundVariableKind, CanonicalPolyFnSig,
-    CoroutineArgsExt, EarlyBinder, FnSig, InlineConstArgs, InlineConstArgsParts, ParamConst,
-    ParamTy, PolyFnSig, TyKind, TypeAndMut, TypingMode, UpvarArgs,
+    AliasTy, Article, Binder, BoundConst, BoundRegion, BoundRegionKind, BoundTy, BoundTyKind,
+    BoundVariableKind, CanonicalPolyFnSig, CoroutineArgsExt, EarlyBinder, FnSig, InlineConstArgs,
+    InlineConstArgsParts, ParamConst, ParamTy, PlaceholderConst, PlaceholderRegion,
+    PlaceholderType, PolyFnSig, TyKind, TypeAndMut, TypingMode, UpvarArgs,
 };
 pub use self::trait_def::TraitDef;
 pub use self::typeck_results::{
@@ -405,6 +405,12 @@ impl<Id: Into<DefId>> Visibility<Id> {
             Visibility::Public => self.is_public(),
             Visibility::Restricted(id) => self.is_accessible_from(id, tcx),
         }
+    }
+}
+
+impl<Id: Into<DefId> + Copy> Visibility<Id> {
+    pub fn min(self, vis: Visibility<Id>, tcx: TyCtxt<'_>) -> Visibility<Id> {
+        if self.is_at_least(vis, tcx) { vis } else { self }
     }
 }
 
@@ -911,100 +917,6 @@ impl<'tcx> DefinitionSiteHiddenType<'tcx> {
             other_span: other.span,
             sub: sub_diag,
         }))
-    }
-}
-
-pub type PlaceholderRegion<'tcx> = ty::Placeholder<TyCtxt<'tcx>, BoundRegion>;
-
-impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderRegion<'tcx> {
-    type Bound = BoundRegion;
-
-    fn universe(self) -> UniverseIndex {
-        self.universe
-    }
-
-    fn var(self) -> BoundVar {
-        self.bound.var
-    }
-
-    fn with_updated_universe(self, ui: UniverseIndex) -> Self {
-        ty::Placeholder::new(ui, self.bound)
-    }
-
-    fn new(ui: UniverseIndex, bound: BoundRegion) -> Self {
-        ty::Placeholder::new(ui, bound)
-    }
-
-    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
-        ty::Placeholder::new(ui, BoundRegion { var, kind: BoundRegionKind::Anon })
-    }
-}
-
-pub type PlaceholderType<'tcx> = ty::Placeholder<TyCtxt<'tcx>, BoundTy>;
-
-impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderType<'tcx> {
-    type Bound = BoundTy;
-
-    fn universe(self) -> UniverseIndex {
-        self.universe
-    }
-
-    fn var(self) -> BoundVar {
-        self.bound.var
-    }
-
-    fn with_updated_universe(self, ui: UniverseIndex) -> Self {
-        ty::Placeholder::new(ui, self.bound)
-    }
-
-    fn new(ui: UniverseIndex, bound: BoundTy) -> Self {
-        ty::Placeholder::new(ui, bound)
-    }
-
-    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
-        ty::Placeholder::new(ui, BoundTy { var, kind: BoundTyKind::Anon })
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, HashStable)]
-#[derive(TyEncodable, TyDecodable)]
-pub struct BoundConst {
-    pub var: BoundVar,
-}
-
-impl<'tcx> rustc_type_ir::inherent::BoundVarLike<TyCtxt<'tcx>> for BoundConst {
-    fn var(self) -> BoundVar {
-        self.var
-    }
-
-    fn assert_eq(self, var: ty::BoundVariableKind) {
-        var.expect_const()
-    }
-}
-
-pub type PlaceholderConst<'tcx> = ty::Placeholder<TyCtxt<'tcx>, BoundConst>;
-
-impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderConst<'tcx> {
-    type Bound = BoundConst;
-
-    fn universe(self) -> UniverseIndex {
-        self.universe
-    }
-
-    fn var(self) -> BoundVar {
-        self.bound.var
-    }
-
-    fn with_updated_universe(self, ui: UniverseIndex) -> Self {
-        ty::Placeholder::new(ui, self.bound)
-    }
-
-    fn new(ui: UniverseIndex, bound: BoundConst) -> Self {
-        ty::Placeholder::new(ui, bound)
-    }
-
-    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
-        ty::Placeholder::new(ui, BoundConst { var })
     }
 }
 
@@ -2180,8 +2092,16 @@ impl<'tcx> TyCtxt<'tcx> {
                     DefKind::Impl { of_trait: false } => {
                         self.constness(def_id) == hir::Constness::Const
                     }
-                    DefKind::Impl { of_trait: true } | DefKind::Trait => {
-                        self.is_conditionally_const(parent_def_id)
+                    DefKind::Impl { of_trait: true } => {
+                        let Some(trait_method_did) = self.trait_item_of(def_id) else {
+                            return false;
+                        };
+                        self.constness(trait_method_did) == hir::Constness::Const
+                            && self.is_conditionally_const(parent_def_id)
+                    }
+                    DefKind::Trait => {
+                        self.constness(def_id) == hir::Constness::Const
+                            && self.is_conditionally_const(parent_def_id)
                     }
                     _ => bug!("unexpected parent item of associated fn: {parent_def_id:?}"),
                 }

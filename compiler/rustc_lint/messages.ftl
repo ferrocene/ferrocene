@@ -326,6 +326,14 @@ lint_expectation = this lint expectation is unfulfilled
     .note = the `unfulfilled_lint_expectations` lint can't be expected and will always produce this message
     .rationale = {$rationale}
 
+lint_expected_name_value =
+    expected this to be of the form `... = "..."`
+    .warn = {-lint_previously_accepted}
+
+lint_expected_no_args =
+    didn't expect any arguments here
+    .warn = {-lint_previously_accepted}
+
 lint_for_loops_over_fallibles =
     for loop over {$article} `{$ref_prefix}{$ty}`. This is more readably written as an `if let` statement
     .suggestion = consider using `if let` to clear intent
@@ -557,6 +565,10 @@ lint_macro_expr_fragment_specifier_2024_migration =
     .suggestion = to keep the existing behavior, use the `expr_2021` fragment specifier
 
 lint_malformed_attribute = malformed lint attribute input
+
+lint_malformed_doc =
+    malformed `doc` attribute input
+    .warn = {-lint_previously_accepted}
 
 lint_map_unit_fn = `Iterator::map` call that discard the iterator's values
     .note = `Iterator::map`, like many of the methods on `Iterator`, gets executed lazily, meaning that its effects won't be visible until it is iterated

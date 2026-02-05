@@ -1,4 +1,7 @@
+use std::path::PathBuf;
+
 use rustc_ast::{LitIntType, LitKind, MetaItemLit};
+use rustc_hir::attrs::{BorrowckGraphvizFormatKind, RustcLayoutType, RustcMirKind};
 use rustc_session::errors;
 
 use super::prelude::*;
@@ -306,6 +309,14 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcHasIncoherentInherentImplsParse
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcHasIncoherentInherentImpls;
 }
 
+pub(crate) struct RustcHiddenTypeOfOpaquesParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcHiddenTypeOfOpaquesParser {
+    const PATH: &[Symbol] = &[sym::rustc_hidden_type_of_opaques];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcHiddenTypeOfOpaques;
+}
 pub(crate) struct RustcNounwindParser;
 
 impl<S: Stage> NoArgsAttributeParser<S> for RustcNounwindParser {
@@ -328,4 +339,161 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcOffloadKernelParser {
     const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Fn)]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcOffloadKernel;
+}
+
+pub(crate) struct RustcLayoutParser;
+
+impl<S: Stage> CombineAttributeParser<S> for RustcLayoutParser {
+    const PATH: &[rustc_span::Symbol] = &[sym::rustc_layout];
+
+    type Item = RustcLayoutType;
+
+    const CONVERT: ConvertFn<Self::Item> = |items, _| AttributeKind::RustcLayout(items);
+
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Struct),
+        Allow(Target::Enum),
+        Allow(Target::Union),
+        Allow(Target::TyAlias),
+    ]);
+
+    const TEMPLATE: AttributeTemplate =
+        template!(List: &["abi", "align", "size", "homogenous_aggregate", "debug"]);
+    fn extend(
+        cx: &mut AcceptContext<'_, '_, S>,
+        args: &ArgParser,
+    ) -> impl IntoIterator<Item = Self::Item> {
+        let ArgParser::List(items) = args else {
+            cx.expected_list(cx.attr_span, args);
+            return vec![];
+        };
+
+        let mut result = Vec::new();
+        for item in items.mixed() {
+            let Some(arg) = item.meta_item() else {
+                cx.unexpected_literal(item.span());
+                continue;
+            };
+            let Some(ident) = arg.ident() else {
+                cx.expected_identifier(arg.span());
+                return vec![];
+            };
+            let ty = match ident.name {
+                sym::abi => RustcLayoutType::Abi,
+                sym::align => RustcLayoutType::Align,
+                sym::size => RustcLayoutType::Size,
+                sym::homogeneous_aggregate => RustcLayoutType::HomogenousAggregate,
+                sym::debug => RustcLayoutType::Debug,
+                _ => {
+                    cx.expected_specific_argument(
+                        ident.span,
+                        &[sym::abi, sym::align, sym::size, sym::homogeneous_aggregate, sym::debug],
+                    );
+                    continue;
+                }
+            };
+            result.push(ty);
+        }
+        result
+    }
+}
+
+pub(crate) struct RustcMirParser;
+
+impl<S: Stage> CombineAttributeParser<S> for RustcMirParser {
+    const PATH: &[rustc_span::Symbol] = &[sym::rustc_mir];
+
+    type Item = RustcMirKind;
+
+    const CONVERT: ConvertFn<Self::Item> = |items, _| AttributeKind::RustcMir(items);
+
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Fn),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+    ]);
+
+    const TEMPLATE: AttributeTemplate = template!(List: &["arg1, arg2, ..."]);
+
+    fn extend(
+        cx: &mut AcceptContext<'_, '_, S>,
+        args: &ArgParser,
+    ) -> impl IntoIterator<Item = Self::Item> {
+        let Some(list) = args.list() else {
+            cx.expected_list(cx.attr_span, args);
+            return ThinVec::new();
+        };
+
+        list.mixed()
+            .filter_map(|arg| arg.meta_item())
+            .filter_map(|mi| {
+                if let Some(ident) = mi.ident() {
+                    match ident.name {
+                        sym::rustc_peek_maybe_init => Some(RustcMirKind::PeekMaybeInit),
+                        sym::rustc_peek_maybe_uninit => Some(RustcMirKind::PeekMaybeUninit),
+                        sym::rustc_peek_liveness => Some(RustcMirKind::PeekLiveness),
+                        sym::stop_after_dataflow => Some(RustcMirKind::StopAfterDataflow),
+                        sym::borrowck_graphviz_postflow => {
+                            let Some(nv) = mi.args().name_value() else {
+                                cx.expected_name_value(
+                                    mi.span(),
+                                    Some(sym::borrowck_graphviz_postflow),
+                                );
+                                return None;
+                            };
+                            let Some(path) = nv.value_as_str() else {
+                                cx.expected_string_literal(nv.value_span, None);
+                                return None;
+                            };
+                            let path = PathBuf::from(path.to_string());
+                            if path.file_name().is_some() {
+                                Some(RustcMirKind::BorrowckGraphvizPostflow { path })
+                            } else {
+                                cx.expected_filename_literal(nv.value_span);
+                                None
+                            }
+                        }
+                        sym::borrowck_graphviz_format => {
+                            let Some(nv) = mi.args().name_value() else {
+                                cx.expected_name_value(
+                                    mi.span(),
+                                    Some(sym::borrowck_graphviz_format),
+                                );
+                                return None;
+                            };
+                            let Some(format) = nv.value_as_ident() else {
+                                cx.expected_identifier(nv.value_span);
+                                return None;
+                            };
+                            match format.name {
+                                sym::two_phase => Some(RustcMirKind::BorrowckGraphvizFormat {
+                                    format: BorrowckGraphvizFormatKind::TwoPhase,
+                                }),
+                                _ => {
+                                    cx.expected_specific_argument(format.span, &[sym::two_phase]);
+                                    None
+                                }
+                            }
+                        }
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+}
+pub(crate) struct RustcNonConstTraitMethodParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcNonConstTraitMethodParser {
+    const PATH: &'static [Symbol] = &[sym::rustc_non_const_trait_method];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcNonConstTraitMethod;
 }

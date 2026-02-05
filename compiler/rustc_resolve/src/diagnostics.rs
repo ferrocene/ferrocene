@@ -24,17 +24,15 @@ use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
 use rustc_session::lint::BuiltinLintDiag;
 use rustc_session::lint::builtin::{
-    ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_PANIC_IMPORTS,
-    MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
+    ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_IMPORT_VISIBILITIES,
+    AMBIGUOUS_PANIC_IMPORTS, MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
 };
 use rustc_session::utils::was_invoked_from_cargo;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::source_map::{SourceMap, Spanned};
-use rustc_span::{
-    BytePos, DUMMY_SP, Ident, Macros20NormalizedIdent, Span, Symbol, SyntaxContext, kw, sym,
-};
+use rustc_span::{BytePos, Ident, Span, Symbol, SyntaxContext, kw, sym};
 use thin_vec::{ThinVec, thin_vec};
 use tracing::{debug, instrument};
 
@@ -43,14 +41,15 @@ use crate::errors::{
     ExplicitUnsafeTraits, MacroDefinedLater, MacroRulesNot, MacroSuggMovePosition,
     MaybeMissingMacroRulesName,
 };
+use crate::hygiene::Macros20NormalizedSyntaxContext;
 use crate::imports::{Import, ImportKind};
 use crate::late::{DiagMetadata, PatternSource, Rib};
 use crate::{
     AmbiguityError, AmbiguityKind, AmbiguityWarning, BindingError, BindingKey, Decl, DeclKind,
-    Finalize, ForwardGenericParamBanReason, HasGenericParams, LateDecl, MacroRulesScope, Module,
-    ModuleKind, ModuleOrUniformRoot, ParentScope, PathResult, PrivacyError, ResolutionError,
-    Resolver, Scope, ScopeSet, Segment, UseError, Used, VisResolutionError, errors as errs,
-    path_names_to_string,
+    Finalize, ForwardGenericParamBanReason, HasGenericParams, IdentKey, LateDecl, MacroRulesScope,
+    Module, ModuleKind, ModuleOrUniformRoot, ParentScope, PathResult, PrivacyError,
+    ResolutionError, Resolver, Scope, ScopeSet, Segment, UseError, Used, VisResolutionError,
+    errors as errs, path_names_to_string,
 };
 
 type Res = def::Res<ast::NodeId>;
@@ -81,24 +80,14 @@ pub(crate) struct TypoSuggestion {
 }
 
 impl TypoSuggestion {
-    pub(crate) fn typo_from_ident(ident: Ident, res: Res) -> TypoSuggestion {
-        Self {
-            candidate: ident.name,
-            span: Some(ident.span),
-            res,
-            target: SuggestionTarget::SimilarlyNamed,
-        }
+    pub(crate) fn new(candidate: Symbol, span: Span, res: Res) -> TypoSuggestion {
+        Self { candidate, span: Some(span), res, target: SuggestionTarget::SimilarlyNamed }
     }
     pub(crate) fn typo_from_name(candidate: Symbol, res: Res) -> TypoSuggestion {
         Self { candidate, span: None, res, target: SuggestionTarget::SimilarlyNamed }
     }
-    pub(crate) fn single_item_from_ident(ident: Ident, res: Res) -> TypoSuggestion {
-        Self {
-            candidate: ident.name,
-            span: Some(ident.span),
-            res,
-            target: SuggestionTarget::SingleItem,
-        }
+    pub(crate) fn single_item(candidate: Symbol, span: Span, res: Res) -> TypoSuggestion {
+        Self { candidate, span: Some(span), res, target: SuggestionTarget::SingleItem }
     }
 }
 
@@ -156,6 +145,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 };
 
                 let lint = match ambiguity_warning {
+                    _ if ambiguity_error.ambig_vis.is_some() => AMBIGUOUS_IMPORT_VISIBILITIES,
                     AmbiguityWarning::GlobImport => AMBIGUOUS_GLOB_IMPORTS,
                     AmbiguityWarning::PanicImport => AMBIGUOUS_PANIC_IMPORTS,
                 };
@@ -212,7 +202,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
     pub(crate) fn report_conflict(
         &mut self,
-        ident: Ident,
+        ident: IdentKey,
         ns: Namespace,
         old_binding: Decl<'ra>,
         new_binding: Decl<'ra>,
@@ -324,10 +314,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         // Check if the target of the use for both bindings is the same.
         let duplicate = new_binding.res().opt_def_id() == old_binding.res().opt_def_id();
         let has_dummy_span = new_binding.span.is_dummy() || old_binding.span.is_dummy();
-        let from_item = self
-            .extern_prelude
-            .get(&Macros20NormalizedIdent::new(ident))
-            .is_none_or(|entry| entry.introduced_by_item());
+        let from_item =
+            self.extern_prelude.get(&ident).is_none_or(|entry| entry.introduced_by_item());
         // Only suggest removing an import if both bindings are to the same def, if both spans
         // aren't dummy spans. Further, if both bindings are imports, then the ident must have
         // been introduced by an item.
@@ -531,10 +519,10 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         filter_fn: &impl Fn(Res) -> bool,
         ctxt: Option<SyntaxContext>,
     ) {
-        module.for_each_child(self, |_this, ident, _ns, binding| {
+        module.for_each_child(self, |_this, ident, orig_ident_span, _ns, binding| {
             let res = binding.res();
-            if filter_fn(res) && ctxt.is_none_or(|ctxt| ctxt == ident.span.ctxt()) {
-                names.push(TypoSuggestion::typo_from_ident(ident.0, res));
+            if filter_fn(res) && ctxt.is_none_or(|ctxt| ctxt == *ident.ctxt) {
+                names.push(TypoSuggestion::new(ident.name, orig_ident_span, res));
             }
         });
     }
@@ -1177,21 +1165,21 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         suggestions: &mut Vec<TypoSuggestion>,
         scope_set: ScopeSet<'ra>,
         ps: &ParentScope<'ra>,
-        ctxt: SyntaxContext,
+        sp: Span,
         filter_fn: &impl Fn(Res) -> bool,
     ) {
-        let ctxt = DUMMY_SP.with_ctxt(ctxt);
-        self.cm().visit_scopes(scope_set, ps, ctxt, None, |this, scope, use_prelude, _| {
+        let ctxt = Macros20NormalizedSyntaxContext::new(sp.ctxt());
+        self.cm().visit_scopes(scope_set, ps, ctxt, sp, None, |this, scope, use_prelude, _| {
             match scope {
                 Scope::DeriveHelpers(expn_id) => {
                     let res = Res::NonMacroAttr(NonMacroAttrKind::DeriveHelper);
                     if filter_fn(res) {
                         suggestions.extend(
-                            this.helper_attrs
-                                .get(&expn_id)
-                                .into_iter()
-                                .flatten()
-                                .map(|(ident, _)| TypoSuggestion::typo_from_ident(ident.0, res)),
+                            this.helper_attrs.get(&expn_id).into_iter().flatten().map(
+                                |&(ident, orig_ident_span, _)| {
+                                    TypoSuggestion::new(ident.name, orig_ident_span, res)
+                                },
+                            ),
                         );
                     }
                 }
@@ -1202,8 +1190,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     if let MacroRulesScope::Def(macro_rules_def) = macro_rules_scope.get() {
                         let res = macro_rules_def.decl.res();
                         if filter_fn(res) {
-                            suggestions
-                                .push(TypoSuggestion::typo_from_ident(macro_rules_def.ident.0, res))
+                            suggestions.push(TypoSuggestion::new(
+                                macro_rules_def.ident.name,
+                                macro_rules_def.orig_ident_span,
+                                res,
+                            ))
                         }
                     }
                 }
@@ -1233,9 +1224,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 }
                 Scope::ExternPreludeItems => {
                     // Add idents from both item and flag scopes.
-                    suggestions.extend(this.extern_prelude.keys().filter_map(|ident| {
+                    suggestions.extend(this.extern_prelude.iter().filter_map(|(ident, entry)| {
                         let res = Res::Def(DefKind::Mod, CRATE_DEF_ID.to_def_id());
-                        filter_fn(res).then_some(TypoSuggestion::typo_from_ident(ident.0, res))
+                        filter_fn(res).then_some(TypoSuggestion::new(ident.name, entry.span(), res))
                     }));
                 }
                 Scope::ExternPreludeFlags => {}
@@ -1244,7 +1235,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     suggestions.extend(
                         this.registered_tools
                             .iter()
-                            .map(|ident| TypoSuggestion::typo_from_ident(*ident, res)),
+                            .map(|ident| TypoSuggestion::new(ident.name, ident.span, res)),
                     );
                 }
                 Scope::StdLibPrelude => {
@@ -1280,8 +1271,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         filter_fn: &impl Fn(Res) -> bool,
     ) -> Option<TypoSuggestion> {
         let mut suggestions = Vec::new();
-        let ctxt = ident.span.ctxt();
-        self.add_scope_set_candidates(&mut suggestions, scope_set, parent_scope, ctxt, filter_fn);
+        self.add_scope_set_candidates(
+            &mut suggestions,
+            scope_set,
+            parent_scope,
+            ident.span,
+            filter_fn,
+        );
 
         // Make sure error reporting is deterministic.
         suggestions.sort_by(|a, b| a.candidate.as_str().cmp(b.candidate.as_str()));
@@ -1329,7 +1325,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             }
         {
             let in_module_is_extern = !in_module.def_id().is_local();
-            in_module.for_each_child(self, |this, ident, ns, name_binding| {
+            in_module.for_each_child(self, |this, ident, orig_ident_span, ns, name_binding| {
                 // Avoid non-importable candidates.
                 if name_binding.is_assoc_item()
                     && !this.tcx.features().import_trait_associated_functions()
@@ -1382,7 +1378,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 if ident.name == lookup_ident.name
                     && ns == namespace
                     && in_module != parent_scope.module
-                    && !ident.span.normalize_to_macros_2_0().from_expansion()
+                    && ident.ctxt.is_root()
                     && filter_fn(res)
                 {
                     // create the path
@@ -1395,7 +1391,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     };
                     segms.append(&mut path_segments.clone());
 
-                    segms.push(ast::PathSegment::from_ident(ident.0));
+                    segms.push(ast::PathSegment::from_ident(ident.orig(orig_ident_span)));
                     let path = Path { span: name_binding.span, segments: segms, tokens: None };
 
                     if child_accessible
@@ -1468,7 +1464,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 if let Some(def_id) = name_binding.res().module_like_def_id() {
                     // form the path
                     let mut path_segments = path_segments.clone();
-                    path_segments.push(ast::PathSegment::from_ident(ident.0));
+                    path_segments.push(ast::PathSegment::from_ident(ident.orig(orig_ident_span)));
 
                     let alias_import = if let DeclKind::Import { import, .. } = name_binding.kind
                         && let ImportKind::ExternCrate { source: Some(_), .. } = import.kind
@@ -1557,8 +1553,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         );
 
         if lookup_ident.span.at_least_rust_2018() {
-            for &ident in self.extern_prelude.keys() {
-                if ident.span.from_expansion() {
+            for (ident, entry) in &self.extern_prelude {
+                if entry.span().from_expansion() {
                     // Idents are adjusted to the root context before being
                     // resolved in the extern prelude, so reporting this to the
                     // user is no help. This skips the injected
@@ -1582,7 +1578,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     self.resolutions(parent_scope.module).borrow().iter().any(
                         |(key, name_resolution)| {
                             if key.ns == TypeNS
-                                && key.ident == ident
+                                && key.ident == *ident
                                 && let Some(decl) = name_resolution.borrow().best_decl()
                             {
                                 match decl.res() {
@@ -1601,7 +1597,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 if needs_disambiguation {
                     crate_path.push(ast::PathSegment::path_root(rustc_span::DUMMY_SP));
                 }
-                crate_path.push(ast::PathSegment::from_ident(ident.0));
+                crate_path.push(ast::PathSegment::from_ident(ident.orig(entry.span())));
 
                 suggestions.extend(self.lookup_import_candidates_from_module(
                     lookup_ident,
@@ -1720,7 +1716,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 ScopeSet::All(ns),
                 parent_scope,
                 None,
-                false,
                 None,
                 None,
             ) else {
@@ -1777,7 +1772,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             return;
         }
 
-        if self.macro_names.contains(&ident.normalize_to_macros_2_0()) {
+        if self.macro_names.contains(&IdentKey::new(ident)) {
             err.subdiagnostic(AddedMacroUse);
             return;
         }
@@ -2001,14 +1996,15 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn ambiguity_diagnostic(&self, ambiguity_error: &AmbiguityError<'ra>) -> errors::Ambiguity {
-        let AmbiguityError { kind, ident, b1, b2, scope1, scope2, .. } = *ambiguity_error;
+        let AmbiguityError { kind, ambig_vis, ident, b1, b2, scope1, scope2, .. } =
+            *ambiguity_error;
         let extern_prelude_ambiguity = || {
             // Note: b1 may come from a module scope, as an extern crate item in module.
             matches!(scope2, Scope::ExternPreludeFlags)
                 && self
                     .extern_prelude
-                    .get(&Macros20NormalizedIdent::new(ident))
-                    .is_some_and(|entry| entry.item_decl.map(|(b, _)| b) == Some(b1))
+                    .get(&IdentKey::new(ident))
+                    .is_some_and(|entry| entry.item_decl.map(|(b, ..)| b) == Some(b1))
         };
         let (b1, b2, scope1, scope2, swapped) = if b2.span.is_dummy() && !b1.span.is_dummy() {
             // We have to print the span-less alternative first, otherwise formatting looks bad.
@@ -2080,9 +2076,18 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             None
         };
 
+        let ambig_vis = ambig_vis.map(|(vis1, vis2)| {
+            format!(
+                "{} or {}",
+                vis1.to_string(CRATE_DEF_ID, self.tcx),
+                vis2.to_string(CRATE_DEF_ID, self.tcx)
+            )
+        });
+
         errors::Ambiguity {
             ident,
             help,
+            ambig_vis,
             kind: kind.descr(),
             b1_note,
             b1_help_msgs,
@@ -2557,7 +2562,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                             ScopeSet::All(ns_to_try),
                             parent_scope,
                             None,
-                            false,
                             ignore_decl,
                             ignore_import,
                         )
@@ -2661,7 +2665,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 ScopeSet::All(ValueNS),
                 parent_scope,
                 None,
-                false,
                 ignore_decl,
                 ignore_import,
             ) {
@@ -2914,7 +2917,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             return None;
         }
 
-        let binding_key = BindingKey::new(Macros20NormalizedIdent::new(ident), MacroNS);
+        let binding_key = BindingKey::new(IdentKey::new(ident), MacroNS);
         let binding = self.resolution(crate_module, binding_key)?.binding()?;
         let Res::Def(DefKind::Macro(kinds), _) = binding.res() else {
             return None;

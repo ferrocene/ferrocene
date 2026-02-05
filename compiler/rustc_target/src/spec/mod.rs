@@ -1709,6 +1709,8 @@ supported_targets! {
     ("aarch64-unknown-none-softfloat", aarch64_unknown_none_softfloat),
     ("aarch64_be-unknown-none-softfloat", aarch64_be_unknown_none_softfloat),
     ("aarch64-unknown-nuttx", aarch64_unknown_nuttx),
+    ("aarch64v8r-unknown-none", aarch64v8r_unknown_none),
+    ("aarch64v8r-unknown-none-softfloat", aarch64v8r_unknown_none_softfloat),
 
     ("x86_64-fortanix-unknown-sgx", x86_64_fortanix_unknown_sgx),
 
@@ -3360,6 +3362,9 @@ impl Target {
                 }
 
                 Err(format!("could not find specification for target {target_tuple:?}"))
+            }
+            TargetTuple::TargetJson { ref contents, .. } if !unstable_options => {
+                Err("custom targets are unstable and require `-Zunstable-options`".to_string())
             }
             TargetTuple::TargetJson { ref contents, .. } => Target::from_json(contents),
         }

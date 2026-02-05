@@ -895,6 +895,8 @@ fn trait_def(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::TraitDef {
         _ => span_bug!(item.span, "trait_def_of_item invoked on non-trait"),
     };
 
+    // we do a bunch of find_attr calls here, probably faster to get them from the tcx just once.
+    #[allow(deprecated)]
     let attrs = tcx.get_all_attrs(def_id);
 
     let paren_sugar = find_attr!(attrs, AttributeKind::RustcParenSugar(_));

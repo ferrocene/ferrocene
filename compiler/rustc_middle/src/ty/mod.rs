@@ -1708,11 +1708,13 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Gets all attributes with the given name.
+    #[deprecated = "Though there are valid usecases for this method, especially when your attribute is not a parsed attribute, usually you want to call rustc_hir::find_attr! instead."]
     pub fn get_attrs(
         self,
         did: impl Into<DefId>,
         attr: Symbol,
     ) -> impl Iterator<Item = &'tcx hir::Attribute> {
+        #[allow(deprecated)]
         self.get_all_attrs(did).iter().filter(move |a: &&hir::Attribute| a.has_name(attr))
     }
 
@@ -1720,6 +1722,7 @@ impl<'tcx> TyCtxt<'tcx> {
     ///
     /// To see if an item has a specific attribute, you should use
     /// [`rustc_hir::find_attr!`] so you can use matching.
+    #[deprecated = "Though there are valid usecases for this method, especially when your attribute is not a parsed attribute, usually you want to call rustc_hir::find_attr! instead."]
     pub fn get_all_attrs(self, did: impl Into<DefId>) -> &'tcx [hir::Attribute] {
         let did: DefId = did.into();
         if let Some(did) = did.as_local() {
@@ -1742,17 +1745,21 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
+    #[deprecated = "Though there are valid usecases for this method, especially when your attribute is not a parsed attribute, usually you want to call rustc_hir::find_attr! instead."]
     pub fn get_attr(self, did: impl Into<DefId>, attr: Symbol) -> Option<&'tcx hir::Attribute> {
         if cfg!(debug_assertions) && !rustc_feature::is_valid_for_get_attr(attr) {
             let did: DefId = did.into();
             bug!("get_attr: unexpected called with DefId `{:?}`, attr `{:?}`", did, attr);
         } else {
+            #[allow(deprecated)]
             self.get_attrs(did, attr).next()
         }
     }
 
     /// Determines whether an item is annotated with an attribute.
+    #[deprecated = "Though there are valid usecases for this method, especially when your attribute is not a parsed attribute, usually you want to call rustc_hir::find_attr! instead."]
     pub fn has_attr(self, did: impl Into<DefId>, attr: Symbol) -> bool {
+        #[allow(deprecated)]
         self.get_attrs(did, attr).next().is_some()
     }
 

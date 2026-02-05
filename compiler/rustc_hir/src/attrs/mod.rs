@@ -57,9 +57,11 @@ macro_rules! find_attr {
     ($tcx: expr, $def_id: expr, $pattern: pat $(if $guard: expr)?) => {
         $crate::find_attr!($tcx, $def_id, $pattern $(if $guard)? => ()).is_some()
     };
-    ($tcx: expr, $def_id: expr, $pattern: pat $(if $guard: expr)? => $e: expr) => {
-        $crate::find_attr!($tcx.get_all_attrs($def_id), $pattern $(if $guard)? => $e)
-    };
+    ($tcx: expr, $def_id: expr, $pattern: pat $(if $guard: expr)? => $e: expr) => {{
+        #[allow(deprecated)] {
+            $crate::find_attr!($tcx.get_all_attrs($def_id), $pattern $(if $guard)? => $e)
+        }
+    }};
 
 
     ($attributes_list: expr, $pattern: pat $(if $guard: expr)?) => {{

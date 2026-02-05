@@ -3219,8 +3219,7 @@ index expression
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_1f7e9q8n431n`
-An :dt:`index expression` is an :t:`expression` that indexes into a :t:`value`
-of an :t:`indexable type`.
+An :dt:`index expression` is an :t:`expression` that indexes into a :t:`value` of an :t:`indexable type`.
 
 :dp:`fls_xm2er7vuo07g`
 See :s:`IndexExpression`.

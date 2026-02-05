@@ -2665,10 +2665,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             .iter()
             .filter_map(|candidate| candidate.did)
             .find(|did| {
-                find_attr!(
-                    self.r.tcx.get_all_attrs(*did),
-                    AttributeKind::RustcDiagnosticItem(sym::Default)
-                )
+                find_attr!(self.r.tcx, *did, AttributeKind::RustcDiagnosticItem(sym::Default))
             });
         let Some(default_trait) = default_trait else {
             return;

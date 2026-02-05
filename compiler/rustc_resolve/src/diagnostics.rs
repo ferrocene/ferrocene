@@ -1430,7 +1430,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         let note = if let Some(did) = did {
                             let requires_note = !did.is_local()
                                 && find_attr!(
-                                    this.tcx.get_all_attrs(did),
+                                    this.tcx,
+                                    did,
                                     AttributeKind::RustcDiagnosticItem(
                                         sym::TryInto | sym::TryFrom | sym::FromIterator
                                     )

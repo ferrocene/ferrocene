@@ -979,6 +979,7 @@ impl<T: PointeeSized> *const T {
         #[cfg(debug_assertions)]
         #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
+        #[ferrocene::prevalidated]
         const fn runtime_sub_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
                 @capture { this: *const (), count: usize, size: usize } -> bool:

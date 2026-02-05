@@ -324,7 +324,6 @@ provide! { tcx, def_id, other, cdata,
     inherent_impls => { cdata.get_inherent_implementations_for_type(tcx, def_id.index) }
     attrs_for_def => { tcx.arena.alloc_from_iter(cdata.get_item_attrs(tcx, def_id.index)) }
     is_mir_available => { cdata.is_item_mir_available(tcx, def_id.index) }
-    is_ctfe_mir_available => { cdata.is_ctfe_mir_available(tcx, def_id.index) }
     cross_crate_inlinable => { table_direct }
 
     dylib_dependency_formats => { cdata.get_dylib_dependency_formats(tcx) }

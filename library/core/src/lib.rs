@@ -94,6 +94,8 @@
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
 //
+// Ferrocene addition: require transitive closure of prevalidated functions.
+#![warn(ferrocene::unvalidated)]
 // Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
 // of conflicts we have when merging main.
 //

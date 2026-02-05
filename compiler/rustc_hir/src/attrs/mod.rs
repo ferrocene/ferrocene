@@ -32,6 +32,13 @@ mod pretty_printing;
 /// A common way to get those is through `tcx.get_all_attrs(did)`
 #[macro_export]
 macro_rules! find_attr {
+    ($tcx: expr, crate, $pattern: pat $(if $guard: expr)?) => {
+        $crate::find_attr!($tcx, crate, $pattern $(if $guard)? => ()).is_some()
+    };
+    ($tcx: expr, crate, $pattern: pat $(if $guard: expr)? => $e: expr) => {
+        $crate::find_attr!($tcx.hir_krate_attrs(), $pattern $(if $guard)? => $e)
+    };
+
     ($tcx: expr, $def_id: expr, $pattern: pat $(if $guard: expr)?) => {
         $crate::find_attr!($tcx, $def_id, $pattern $(if $guard)? => ()).is_some()
     };

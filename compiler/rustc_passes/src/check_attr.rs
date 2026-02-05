@@ -15,7 +15,7 @@ use rustc_attr_parsing::{AttributeParser, Late};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_data_structures::unord::UnordMap;
-use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey};
+use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey, inline_fluent};
 use rustc_feature::{
     ACCEPTED_LANG_FEATURES, AttributeDuplicates, AttributeType, BUILTIN_ATTRIBUTE_MAP,
     BuiltinAttribute,
@@ -54,23 +54,23 @@ use rustc_trait_selection::infer::{TyCtxtInferExt, ValuePairs};
 use rustc_trait_selection::traits::ObligationCtxt;
 use tracing::debug;
 
-use crate::{errors, fluent_generated as fluent};
+use crate::errors;
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_unimplemented_only_for_traits)]
+#[diag("`#[diagnostic::on_unimplemented]` can only be applied to trait definitions")]
 struct DiagnosticOnUnimplementedOnlyForTraits;
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_const_only_for_trait_impls)]
+#[diag("`#[diagnostic::on_const]` can only be applied to trait impls")]
 struct DiagnosticOnConstOnlyForTraitImpls {
-    #[label]
+    #[label("not a trait impl")]
     item_span: Span,
 }
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_const_only_for_non_const_trait_impls)]
+#[diag("`#[diagnostic::on_const]` can only be applied to non-const trait impls")]
 struct DiagnosticOnConstOnlyForNonConstTraitImpls {
-    #[label]
+    #[label("this is a const trait impl")]
     item_span: Span,
 }
 
@@ -1010,8 +1010,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 for (inline2, span2) in rest {
                     if inline2 != inline {
                         let mut spans = MultiSpan::from_spans(vec![*span, *span2]);
-                        spans.push_span_label(*span, fluent::passes_doc_inline_conflict_first);
-                        spans.push_span_label(*span2, fluent::passes_doc_inline_conflict_second);
+                        spans.push_span_label(*span, inline_fluent!("this attribute..."));
+                        spans.push_span_label(
+                            *span2,
+                            inline_fluent!("{\".\"}..conflicts with this attribute"),
+                        );
                         self.dcx().emit_err(errors::DocInlineConflict { spans });
                         return;
                     }
@@ -1155,7 +1158,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 &self.tcx.sess,
                 sym::rustdoc_internals,
                 *span,
-                fluent::passes_doc_rust_logo,
+                inline_fluent!("the `#[doc(rust_logo)]` attribute is used for Rust branding"),
             )
             .emit();
         }

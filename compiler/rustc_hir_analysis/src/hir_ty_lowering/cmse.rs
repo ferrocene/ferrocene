@@ -160,7 +160,7 @@ fn is_valid_cmse_output<'tcx>(
 }
 
 /// Returns whether the output will fit into the available registers
-fn is_valid_cmse_output_layout<'tcx>(cx: LayoutCx<'tcx>, mut layout: TyAndLayout<'tcx>) -> bool {
+fn is_valid_cmse_output_layout<'tcx>(cx: LayoutCx<'tcx>, layout: TyAndLayout<'tcx>) -> bool {
     let size = layout.layout.size().bytes();
 
     if size <= 4 {
@@ -169,21 +169,9 @@ fn is_valid_cmse_output_layout<'tcx>(cx: LayoutCx<'tcx>, mut layout: TyAndLayout
         return false;
     }
 
-    // Find the wrapped inner type of a transparent wrapper.
-    loop {
-        match layout.ty.kind() {
-            ty::Adt(adt_def, _) if adt_def.repr().transparent() => {
-                // Find the non-1-ZST field, and recurse.
-                (_, layout) = layout.non_1zst_field(&cx).unwrap();
-            }
-            // Not a transparent type, no further unfolding.
-            _ => break,
-        }
-    }
-
     // Accept (transparently wrapped) scalar 64-bit primitives.
     matches!(
-        layout.ty.kind(),
+        layout.peel_transparent_wrappers(&cx).ty.kind(),
         ty::Int(ty::IntTy::I64) | ty::Uint(ty::UintTy::U64) | ty::Float(ty::FloatTy::F64)
     )
 }

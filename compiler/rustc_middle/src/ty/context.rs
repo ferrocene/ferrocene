@@ -2915,12 +2915,15 @@ impl<'tcx> TyCtxt<'tcx> {
     ) -> bool {
         let generics = self.generics_of(def_id);
 
-        // IATs themselves have a weird arg setup (self + own args), but nested items *in* IATs
-        // (namely: opaques, i.e. ATPITs) do not.
-        let own_args = if !nested
-            && let DefKind::AssocTy = self.def_kind(def_id)
-            && let DefKind::Impl { of_trait: false } = self.def_kind(self.parent(def_id))
-        {
+        // IATs and IACs (inherent associated types/consts with #[type_const]) themselves have a
+        // weird arg setup (self + own args), but nested items *in* IATs (namely: opaques, i.e.
+        // ATPITs) do not.
+        let is_inherent_assoc_ty = matches!(self.def_kind(def_id), DefKind::AssocTy)
+            && matches!(self.def_kind(self.parent(def_id)), DefKind::Impl { of_trait: false });
+        let is_inherent_assoc_type_const = matches!(self.def_kind(def_id), DefKind::AssocConst)
+            && matches!(self.def_kind(self.parent(def_id)), DefKind::Impl { of_trait: false })
+            && self.is_type_const(def_id);
+        let own_args = if !nested && (is_inherent_assoc_ty || is_inherent_assoc_type_const) {
             if generics.own_params.len() + 1 != args.len() {
                 return false;
             }
@@ -2962,9 +2965,12 @@ impl<'tcx> TyCtxt<'tcx> {
     /// and print out the args if not.
     pub fn debug_assert_args_compatible(self, def_id: DefId, args: &'tcx [ty::GenericArg<'tcx>]) {
         if cfg!(debug_assertions) && !self.check_args_compatible(def_id, args) {
-            if let DefKind::AssocTy = self.def_kind(def_id)
-                && let DefKind::Impl { of_trait: false } = self.def_kind(self.parent(def_id))
-            {
+            let is_inherent_assoc_ty = matches!(self.def_kind(def_id), DefKind::AssocTy)
+                && matches!(self.def_kind(self.parent(def_id)), DefKind::Impl { of_trait: false });
+            let is_inherent_assoc_type_const = matches!(self.def_kind(def_id), DefKind::AssocConst)
+                && matches!(self.def_kind(self.parent(def_id)), DefKind::Impl { of_trait: false })
+                && self.is_type_const(def_id);
+            if is_inherent_assoc_ty || is_inherent_assoc_type_const {
                 bug!(
                     "args not compatible with generics for {}: args={:#?}, generics={:#?}",
                     self.def_path_str(def_id),

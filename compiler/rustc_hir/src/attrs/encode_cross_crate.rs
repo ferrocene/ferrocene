@@ -153,6 +153,7 @@ impl AttributeKind {
             RustcSkipDuringMethodDispatch { .. } => No,
             RustcSpecializationTrait(..) => No,
             RustcStdInternalSymbol(..) => No,
+            RustcStrictCoherence(..) => Yes,
             RustcSymbolName(..) => Yes,
             RustcThenThisWouldNeed(..) => No,
             RustcUnsafeSpecializationMarker(..) => No,

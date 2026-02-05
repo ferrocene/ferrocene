@@ -344,6 +344,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcSkipDuringMethodDispatch { .. }
                     | AttributeKind::RustcSpecializationTrait(..)
                     | AttributeKind::RustcStdInternalSymbol (..)
+                    | AttributeKind::RustcStrictCoherence(..)
                     | AttributeKind::RustcSymbolName(..)
                     | AttributeKind::RustcThenThisWouldNeed(..)
                     | AttributeKind::RustcUnsafeSpecializationMarker(..)
@@ -402,7 +403,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::rustc_never_type_options
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis
-                            | sym::rustc_strict_coherence
                             | sym::rustc_mir
                             | sym::rustc_outlives
                             | sym::rustc_evaluate_where_clauses

@@ -7000,6 +7000,7 @@ core::ptr::const_ptr::<impl *const T>::offset_from_unsigned::runtime_ptr_ge::run
 core::ptr::const_ptr::<impl *const T>::read
 core::ptr::const_ptr::<impl *const T>::read_unaligned
 core::ptr::const_ptr::<impl *const T>::sub::precondition_check
+core::ptr::const_ptr::<impl *const T>::sub::runtime_sub_nowrap
 core::ptr::const_ptr::<impl *const T>::sub::runtime_sub_nowrap::compiletime
 core::ptr::const_ptr::<impl *const T>::sub::runtime_sub_nowrap::runtime
 core::ptr::const_ptr::<impl *const T>::to_raw_parts
@@ -7289,6 +7290,7 @@ core::str::<impl str>::from_utf8_mut
 core::str::<impl str>::from_utf8_unchecked
 core::str::<impl str>::from_utf8_unchecked_mut
 core::str::<impl str>::get_unchecked
+core::str::<impl str>::is_ascii
 core::str::<impl str>::is_char_boundary
 core::str::<impl str>::is_empty
 core::str::<impl str>::len

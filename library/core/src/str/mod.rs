@@ -2829,6 +2829,7 @@ impl str {
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii(&self) -> bool {
         // We can treat each byte as character here: all multibyte characters
         // start with a byte that is not in the ASCII range, so we will stop

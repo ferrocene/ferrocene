@@ -7271,6 +7271,7 @@ core::str::<impl str>::from_utf8_mut
 core::str::<impl str>::from_utf8_unchecked
 core::str::<impl str>::from_utf8_unchecked_mut
 core::str::<impl str>::get_unchecked
+core::str::<impl str>::is_ascii
 core::str::<impl str>::is_char_boundary
 core::str::<impl str>::is_empty
 core::str::<impl str>::len

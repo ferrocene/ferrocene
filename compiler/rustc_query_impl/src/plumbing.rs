@@ -300,15 +300,31 @@ macro_rules! call_provider {
     };
 }
 
-macro_rules! should_ever_cache_on_disk {
-    ([]$yes:tt $no:tt) => {{
+/// Expands to one of two token trees, depending on whether the current query
+/// has the `cache_on_disk_if` modifier.
+macro_rules! if_cache_on_disk {
+    ([] $yes:tt $no:tt) => {
         $no
-    }};
-    ([(cache) $($rest:tt)*]$yes:tt $no:tt) => {{
+    };
+    // The `cache_on_disk_if` modifier generates a synthetic `(cache_on_disk)`,
+    // modifier, for use by this macro and similar macros.
+    ([(cache_on_disk) $($rest:tt)*] $yes:tt $no:tt) => {
         $yes
-    }};
-    ([$other:tt $($modifiers:tt)*]$yes:tt $no:tt) => {
-        should_ever_cache_on_disk!([$($modifiers)*]$yes $no)
+    };
+    ([$other:tt $($modifiers:tt)*] $yes:tt $no:tt) => {
+        if_cache_on_disk!([$($modifiers)*] $yes $no)
+    };
+}
+
+/// Conditionally expands to some token trees, if the current query has the
+/// `cache_on_disk_if` modifier.
+macro_rules! item_if_cache_on_disk {
+    ([] $($item:tt)*) => {};
+    ([(cache_on_disk) $($rest:tt)*] $($item:tt)*) => {
+        $($item)*
+    };
+    ([$other:tt $($modifiers:tt)*] $($item:tt)*) => {
+        item_if_cache_on_disk! { [$($modifiers)*] $($item)* }
     };
 }
 
@@ -544,40 +560,6 @@ where
     }
 }
 
-macro_rules! item_if_cached {
-    ([] $tokens:tt) => {};
-    ([(cache) $($rest:tt)*] { $($tokens:tt)* }) => {
-        $($tokens)*
-    };
-    ([$other:tt $($modifiers:tt)*] $tokens:tt) => {
-        item_if_cached! { [$($modifiers)*] $tokens }
-    };
-}
-
-macro_rules! expand_if_cached {
-    ([], $tokens:expr) => {{
-        None
-    }};
-    ([(cache) $($rest:tt)*], $tokens:expr) => {{
-        Some($tokens)
-    }};
-    ([$other:tt $($modifiers:tt)*], $tokens:expr) => {
-        expand_if_cached!([$($modifiers)*], $tokens)
-    };
-}
-
-/// Don't show the backtrace for query system by default
-/// use `RUST_BACKTRACE=full` to show all the backtraces
-#[inline(never)]
-pub(crate) fn __rust_begin_short_backtrace<F, T>(f: F) -> T
-where
-    F: FnOnce() -> T,
-{
-    let result = f();
-    std::hint::black_box(());
-    result
-}
-
 // NOTE: `$V` isn't used here, but we still need to match on it so it can be passed to other macros
 // invoked by `rustc_with_all_queries`.
 macro_rules! define_queries {
@@ -636,6 +618,32 @@ macro_rules! define_queries {
                 }
             }
 
+            /// Defines a `compute` function for this query, to be used as a
+            /// function pointer in the query's vtable.
+            mod compute_fn {
+                use super::*;
+                use ::rustc_middle::queries::$name::{Key, Value, provided_to_erased};
+
+                /// This function would be named `compute`, but we also want it
+                /// to mark the boundaries of an omitted region in backtraces.
+                #[inline(never)]
+                pub(crate) fn __rust_begin_short_backtrace<'tcx>(
+                    tcx: TyCtxt<'tcx>,
+                    key: Key<'tcx>,
+                ) -> Erased<Value<'tcx>> {
+                    #[cfg(debug_assertions)]
+                    let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
+
+                    // Call the actual provider function for this query.
+                    let provided_value = call_provider!([$($modifiers)*][tcx, $name, key]);
+                    rustc_middle::ty::print::with_reduced_queries!({
+                        tracing::trace!(?provided_value);
+                    });
+
+                    provided_to_erased(tcx, provided_value)
+                }
+            }
+
             pub(crate) fn make_query_vtable<'tcx>()
                 -> QueryVTable<'tcx, queries::$name::Storage<'tcx>>
             {
@@ -646,32 +654,17 @@ macro_rules! define_queries {
                     cycle_error_handling: cycle_error_handling!([$($modifiers)*]),
                     query_state: std::mem::offset_of!(QueryStates<'tcx>, $name),
                     query_cache: std::mem::offset_of!(QueryCaches<'tcx>, $name),
-                    will_cache_on_disk_for_key_fn: should_ever_cache_on_disk!([$($modifiers)*] {
-                        Some(::rustc_middle::query::cached::$name)
+                    will_cache_on_disk_for_key_fn: if_cache_on_disk!([$($modifiers)*] {
+                        Some(::rustc_middle::queries::_cache_on_disk_if_fns::$name)
                     } {
                         None
                     }),
                     execute_query: |tcx, key| erase::erase_val(tcx.$name(key)),
-                    compute: |tcx, key| {
-                        #[cfg(debug_assertions)]
-                        let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
-                        __rust_begin_short_backtrace(||
-                            queries::$name::provided_to_erased(
-                                tcx,
-                                {
-                                    let ret = call_provider!([$($modifiers)*][tcx, $name, key]);
-                                    rustc_middle::ty::print::with_reduced_queries!({
-                                        tracing::trace!(?ret);
-                                    });
-                                    ret
-                                }
-                            )
-                        )
-                    },
-                    try_load_from_disk_fn: should_ever_cache_on_disk!([$($modifiers)*] {
+                    compute_fn: self::compute_fn::__rust_begin_short_backtrace,
+                    try_load_from_disk_fn: if_cache_on_disk!([$($modifiers)*] {
                         Some(|tcx, key, prev_index, index| {
                             // Check the `cache_on_disk_if` condition for this key.
-                            if !::rustc_middle::query::cached::$name(tcx, key) {
+                            if !::rustc_middle::queries::_cache_on_disk_if_fns::$name(tcx, key) {
                                 return None;
                             }
 
@@ -684,9 +677,9 @@ macro_rules! define_queries {
                     } {
                         None
                     }),
-                    is_loadable_from_disk_fn: should_ever_cache_on_disk!([$($modifiers)*] {
+                    is_loadable_from_disk_fn: if_cache_on_disk!([$($modifiers)*] {
                         Some(|tcx, key, index| -> bool {
-                            ::rustc_middle::query::cached::$name(tcx, key) &&
+                            ::rustc_middle::queries::_cache_on_disk_if_fns::$name(tcx, key) &&
                                 $crate::plumbing::loadable_from_disk(tcx, index)
                         })
                     } {
@@ -746,7 +739,7 @@ macro_rules! define_queries {
                 let make_frame = |tcx, key| {
                     let kind = rustc_middle::dep_graph::dep_kinds::$name;
                     let name = stringify!($name);
-                    $crate::plumbing::create_query_frame(tcx, rustc_middle::query::descs::$name, key, kind, name)
+                    $crate::plumbing::create_query_frame(tcx, queries::descs::$name, key, kind, name)
                 };
 
                 // Call `gather_active_jobs_inner` to do the actual work.
@@ -781,7 +774,7 @@ macro_rules! define_queries {
                 )
             }
 
-            item_if_cached! { [$($modifiers)*] {
+            item_if_cache_on_disk! { [$($modifiers)*]
                 pub(crate) fn encode_query_results<'tcx>(
                     tcx: TyCtxt<'tcx>,
                     encoder: &mut CacheEncoder<'_, 'tcx>,
@@ -794,7 +787,7 @@ macro_rules! define_queries {
                         query_result_index,
                     )
                 }
-            }}
+            }
 
             pub(crate) fn query_key_hash_verify<'tcx>(tcx: TyCtxt<'tcx>) {
                 $crate::plumbing::query_key_hash_verify(
@@ -816,8 +809,8 @@ macro_rules! define_queries {
             }
         }
 
-        pub fn make_query_vtables<'tcx>() -> ::rustc_middle::query::PerQueryVTables<'tcx> {
-            ::rustc_middle::query::PerQueryVTables {
+        pub fn make_query_vtables<'tcx>() -> queries::PerQueryVTables<'tcx> {
+            queries::PerQueryVTables {
                 $(
                     $name: query_impl::$name::make_query_vtable(),
                 )*
@@ -848,7 +841,15 @@ macro_rules! define_queries {
                 &mut CacheEncoder<'_, 'tcx>,
                 &mut EncodedDepNodeIndex)
             >
-        ] = &[$(expand_if_cached!([$($modifiers)*], query_impl::$name::encode_query_results)),*];
+        ] = &[
+            $(
+                if_cache_on_disk!([$($modifiers)*] {
+                    Some(query_impl::$name::encode_query_results)
+                } {
+                    None
+                })
+            ),*
+        ];
 
         const QUERY_KEY_HASH_VERIFY: &[
             for<'tcx> fn(TyCtxt<'tcx>)

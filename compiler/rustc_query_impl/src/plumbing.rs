@@ -9,32 +9,33 @@ use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hashes::Hash64;
+use rustc_hir::def_id::DefId;
 use rustc_hir::limit::Limit;
 use rustc_index::Idx;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::{
-    self, DepContext, DepKind, DepKindVTable, DepNode, DepNodeIndex, SerializedDepNodeIndex,
-    dep_kinds,
+    self, DepContext, DepKindVTable, DepNode, DepNodeIndex, SerializedDepNodeIndex, dep_kinds,
 };
 use rustc_middle::query::Key;
 use rustc_middle::query::on_disk_cache::{
     AbsoluteBytePos, CacheDecoder, CacheEncoder, EncodedDepNodeIndex,
 };
+use rustc_middle::query::plumbing::QueryVTable;
 use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_query_system::dep_graph::{DepNodeParams, FingerprintStyle, HasDepContext};
+use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle, HasDepContext};
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
     QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra, force_query,
 };
-use rustc_query_system::{QueryOverflow, QueryOverflowNote};
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
 use crate::QueryDispatcherUnerased;
+use crate::error::{QueryOverflow, QueryOverflowNote};
 
 /// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
 /// crate does not have direct access to [`TyCtxt`].
@@ -328,15 +329,14 @@ macro_rules! item_if_cache_on_disk {
     };
 }
 
-fn mk_query_stack_frame_extra<'tcx, K: Key + Copy + 'tcx>(
-    (tcx, key, kind, name, do_describe): (
-        TyCtxt<'tcx>,
-        K,
-        DepKind,
-        &'static str,
-        fn(TyCtxt<'tcx>, K) -> String,
-    ),
-) -> QueryStackFrameExtra {
+/// The deferred part of a deferred query stack frame.
+fn mk_query_stack_frame_extra<'tcx, Cache>(
+    (tcx, vtable, key): (TyCtxt<'tcx>, &'tcx QueryVTable<'tcx, Cache>, Cache::Key),
+) -> QueryStackFrameExtra
+where
+    Cache: QueryCache,
+    Cache::Key: Key,
+{
     let def_id = key.key_as_def_id();
 
     // If reduced queries are requested, we may be printing a query stack due
@@ -344,13 +344,13 @@ fn mk_query_stack_frame_extra<'tcx, K: Key + Copy + 'tcx>(
     let reduce_queries = with_reduced_queries();
 
     // Avoid calling queries while formatting the description
-    let description = ty::print::with_no_queries!(do_describe(tcx, key));
+    let description = ty::print::with_no_queries!((vtable.description_fn)(tcx, key));
     let description = if tcx.sess.verbose_internals() {
-        format!("{description} [{name:?}]")
+        format!("{description} [{name:?}]", name = vtable.name)
     } else {
         description
     };
-    let span = if kind == dep_graph::dep_kinds::def_span || reduce_queries {
+    let span = if vtable.dep_kind == dep_graph::dep_kinds::def_span || reduce_queries {
         // The `def_span` query is used to calculate `default_span`,
         // so exit to avoid infinite recursion.
         None
@@ -358,7 +358,7 @@ fn mk_query_stack_frame_extra<'tcx, K: Key + Copy + 'tcx>(
         Some(key.default_span(tcx))
     };
 
-    let def_kind = if kind == dep_graph::dep_kinds::def_kind || reduce_queries {
+    let def_kind = if vtable.dep_kind == dep_graph::dep_kinds::def_kind || reduce_queries {
         // Try to avoid infinite recursion.
         None
     } else {
@@ -367,17 +367,16 @@ fn mk_query_stack_frame_extra<'tcx, K: Key + Copy + 'tcx>(
     QueryStackFrameExtra::new(description, span, def_kind)
 }
 
-pub(crate) fn create_query_frame<
-    'tcx,
-    K: Copy + DynSend + DynSync + Key + for<'a> HashStable<StableHashingContext<'a>> + 'tcx,
->(
+pub(crate) fn create_deferred_query_stack_frame<'tcx, Cache>(
     tcx: TyCtxt<'tcx>,
-    do_describe: fn(TyCtxt<'tcx>, K) -> String,
-    key: K,
-    kind: DepKind,
-    name: &'static str,
-) -> QueryStackFrame<QueryStackDeferred<'tcx>> {
-    let def_id = key.key_as_def_id();
+    vtable: &'tcx QueryVTable<'tcx, Cache>,
+    key: Cache::Key,
+) -> QueryStackFrame<QueryStackDeferred<'tcx>>
+where
+    Cache: QueryCache,
+    Cache::Key: Key + DynSend + DynSync + for<'a> HashStable<StableHashingContext<'a>> + 'tcx,
+{
+    let kind = vtable.dep_kind;
 
     let hash = tcx.with_stable_hashing_context(|mut hcx| {
         let mut hasher = StableHasher::new();
@@ -385,11 +384,11 @@ pub(crate) fn create_query_frame<
         key.hash_stable(&mut hcx, &mut hasher);
         hasher.finish::<Hash64>()
     });
-    let def_id_for_ty_in_cycle = key.def_id_for_ty_in_cycle();
 
-    let info =
-        QueryStackDeferred::new((tcx, key, kind, name, do_describe), mk_query_stack_frame_extra);
+    let def_id: Option<DefId> = key.key_as_def_id();
+    let def_id_for_ty_in_cycle: Option<DefId> = key.def_id_for_ty_in_cycle();
 
+    let info = QueryStackDeferred::new((tcx, vtable, key), mk_query_stack_frame_extra);
     QueryStackFrame::new(info, kind, hash, def_id, def_id_for_ty_in_cycle)
 }
 
@@ -691,6 +690,7 @@ macro_rules! define_queries {
                     },
                     hash_result: hash_result!([$($modifiers)*][queries::$name::Value<'tcx>]),
                     format_value: |value| format!("{:?}", erase::restore_val::<queries::$name::Value<'tcx>>(*value)),
+                    description_fn: $crate::queries::_description_fns::$name,
                 }
             }
 
@@ -736,10 +736,9 @@ macro_rules! define_queries {
                 qmap: &mut QueryMap<'tcx>,
                 require_complete: bool,
             ) -> Option<()> {
-                let make_frame = |tcx, key| {
-                    let kind = rustc_middle::dep_graph::dep_kinds::$name;
-                    let name = stringify!($name);
-                    $crate::plumbing::create_query_frame(tcx, queries::descs::$name, key, kind, name)
+                let make_frame = |tcx: TyCtxt<'tcx>, key| {
+                    let vtable = &tcx.query_system.query_vtables.$name;
+                    $crate::plumbing::create_deferred_query_stack_frame(tcx, vtable, key)
                 };
 
                 // Call `gather_active_jobs_inner` to do the actual work.

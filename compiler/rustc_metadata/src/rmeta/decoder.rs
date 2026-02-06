@@ -1298,10 +1298,6 @@ impl<'a> CrateMetadataRef<'a> {
         }
     }
 
-    fn is_ctfe_mir_available(self, tcx: TyCtxt<'_>, id: DefIndex) -> bool {
-        self.root.tables.mir_for_ctfe.get((self, tcx), id).is_some()
-    }
-
     fn is_item_mir_available(self, tcx: TyCtxt<'_>, id: DefIndex) -> bool {
         self.root.tables.optimized_mir.get((self, tcx), id).is_some()
     }

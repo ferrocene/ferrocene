@@ -1588,11 +1588,6 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    query is_ctfe_mir_available(key: DefId) -> bool {
-        desc { |tcx| "checking if item has CTFE MIR available: `{}`", tcx.def_path_str(key) }
-        cache_on_disk_if { key.is_local() }
-        separate_provide_extern
-    }
     query is_mir_available(key: DefId) -> bool {
         desc { |tcx| "checking if item has MIR available: `{}`", tcx.def_path_str(key) }
         cache_on_disk_if { key.is_local() }

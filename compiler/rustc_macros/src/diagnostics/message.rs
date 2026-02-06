@@ -153,6 +153,7 @@ const ALLOWED_CAPITALIZED_WORDS: &[&str] = &[
     "Ferris",
     "GCC",
     "MIR",
+    "NaNs",
     "OK",
     "VS",
     // tidy-alphabetical-end

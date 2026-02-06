@@ -2,14 +2,18 @@
 //! from various crates in no particular order.
 
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
-use rustc_hir::{self as hir, HashIgnoredAttrId};
-use rustc_span::SourceFile;
+use rustc_span::{SourceFile, Symbol, sym};
 use smallvec::SmallVec;
+use {rustc_ast as ast, rustc_hir as hir};
 
 use crate::ich::StableHashingContext;
 
-impl<'ctx> rustc_abi::HashStableContext for StableHashingContext<'ctx> {}
-impl<'ctx> rustc_ast::HashStableContext for StableHashingContext<'ctx> {}
+impl<'a> HashStable<StableHashingContext<'a>> for ast::NodeId {
+    #[inline]
+    fn hash_stable(&self, _: &mut StableHashingContext<'a>, _: &mut StableHasher) {
+        panic!("Node IDs should not appear in incremental state");
+    }
+}
 
 impl<'a> HashStable<StableHashingContext<'a>> for [hir::Attribute] {
     fn hash_stable(&self, hcx: &mut StableHashingContext<'a>, hasher: &mut StableHasher) {
@@ -24,7 +28,7 @@ impl<'a> HashStable<StableHashingContext<'a>> for [hir::Attribute] {
             .filter(|attr| {
                 attr.is_doc_comment().is_none()
                     // FIXME(jdonszelmann) have a better way to handle ignored attrs
-                    && !attr.name().is_some_and(|ident| hcx.is_ignored_attr(ident))
+                    && !attr.name().is_some_and(|ident| is_ignored_attr(ident))
             })
             .collect();
 
@@ -35,10 +39,18 @@ impl<'a> HashStable<StableHashingContext<'a>> for [hir::Attribute] {
     }
 }
 
-impl<'ctx> rustc_hir::HashStableContext for StableHashingContext<'ctx> {
-    fn hash_attr_id(&mut self, _id: &HashIgnoredAttrId, _hasher: &mut StableHasher) {
-        /* we don't hash HashIgnoredAttrId, we ignore them */
-    }
+#[inline]
+fn is_ignored_attr(name: Symbol) -> bool {
+    const IGNORED_ATTRIBUTES: &[Symbol] = &[
+        sym::cfg_trace, // FIXME(#138844) should this really be ignored?
+        sym::rustc_if_this_changed,
+        sym::rustc_then_this_would_need,
+        sym::rustc_clean,
+        sym::rustc_partition_reused,
+        sym::rustc_partition_codegened,
+        sym::rustc_expected_cgu_reuse,
+    ];
+    IGNORED_ATTRIBUTES.contains(&name)
 }
 
 impl<'a> HashStable<StableHashingContext<'a>> for SourceFile {

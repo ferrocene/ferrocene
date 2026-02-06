@@ -1,13 +1,18 @@
-use rustc_ast as ast;
-use rustc_data_structures::stable_hasher::{HashStable, HashingControls, StableHasher};
+use rustc_data_structures::stable_hasher::HashingControls;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::definitions::DefPathHash;
 use rustc_session::Session;
 use rustc_session::cstore::Untracked;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{BytePos, CachingSourceMapView, DUMMY_SP, SourceFile, Span, SpanData, Symbol};
+use rustc_span::{BytePos, CachingSourceMapView, DUMMY_SP, SourceFile, Span, SpanData};
 
-use crate::ich;
+// Very often, we are hashing something that does not need the `CachingSourceMapView`, so we
+// initialize it lazily.
+#[derive(Clone)]
+enum CachingSourceMap<'a> {
+    Unused(&'a SourceMap),
+    InUse(CachingSourceMapView<'a>),
+}
 
 /// This is the context state available during incr. comp. hashing. It contains
 /// enough information to transform `DefId`s and `HirId`s into stable `DefPath`s (i.e.,
@@ -19,10 +24,7 @@ pub struct StableHashingContext<'a> {
     // The value of `-Z incremental-ignore-spans`.
     // This field should only be used by `unstable_opts_incremental_ignore_span`
     incremental_ignore_spans: bool,
-    // Very often, we are hashing something that does not need the
-    // `CachingSourceMapView`, so we initialize it lazily.
-    raw_source_map: &'a SourceMap,
-    caching_source_map: Option<CachingSourceMapView<'a>>,
+    caching_source_map: CachingSourceMap<'a>,
     hashing_controls: HashingControls,
 }
 
@@ -34,8 +36,7 @@ impl<'a> StableHashingContext<'a> {
         StableHashingContext {
             untracked,
             incremental_ignore_spans: sess.opts.unstable_opts.incremental_ignore_spans,
-            caching_source_map: None,
-            raw_source_map: sess.source_map(),
+            caching_source_map: CachingSourceMap::Unused(sess.source_map()),
             hashing_controls: HashingControls { hash_spans: hash_spans_initial },
         }
     }
@@ -49,54 +50,23 @@ impl<'a> StableHashingContext<'a> {
     }
 
     #[inline]
-    pub fn def_path_hash(&self, def_id: DefId) -> DefPathHash {
-        if let Some(def_id) = def_id.as_local() {
-            self.local_def_path_hash(def_id)
-        } else {
-            self.untracked.cstore.read().def_path_hash(def_id)
-        }
-    }
-
-    #[inline]
-    pub fn local_def_path_hash(&self, def_id: LocalDefId) -> DefPathHash {
-        self.untracked.definitions.read().def_path_hash(def_id)
-    }
-
-    #[inline]
-    pub fn source_map(&mut self) -> &mut CachingSourceMapView<'a> {
+    fn source_map(&mut self) -> &mut CachingSourceMapView<'a> {
         match self.caching_source_map {
-            Some(ref mut sm) => sm,
-            ref mut none => {
-                *none = Some(CachingSourceMapView::new(self.raw_source_map));
-                none.as_mut().unwrap()
+            CachingSourceMap::InUse(ref mut sm) => sm,
+            CachingSourceMap::Unused(sm) => {
+                self.caching_source_map = CachingSourceMap::InUse(CachingSourceMapView::new(sm));
+                self.source_map() // this recursive call will hit the `InUse` case
             }
         }
     }
 
     #[inline]
-    pub fn is_ignored_attr(&self, name: Symbol) -> bool {
-        ich::IGNORED_ATTRIBUTES.contains(&name)
-    }
-
-    #[inline]
     pub fn hashing_controls(&self) -> HashingControls {
-        self.hashing_controls.clone()
-    }
-}
-
-impl<'a> HashStable<StableHashingContext<'a>> for ast::NodeId {
-    #[inline]
-    fn hash_stable(&self, _: &mut StableHashingContext<'a>, _: &mut StableHasher) {
-        panic!("Node IDs should not appear in incremental state");
+        self.hashing_controls
     }
 }
 
 impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
-    #[inline]
-    fn hash_spans(&self) -> bool {
-        self.hashing_controls.hash_spans
-    }
-
     #[inline]
     fn unstable_opts_incremental_ignore_spans(&self) -> bool {
         self.incremental_ignore_spans
@@ -104,7 +74,11 @@ impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
 
     #[inline]
     fn def_path_hash(&self, def_id: DefId) -> DefPathHash {
-        self.def_path_hash(def_id)
+        if let Some(def_id) = def_id.as_local() {
+            self.untracked.definitions.read().def_path_hash(def_id)
+        } else {
+            self.untracked.cstore.read().def_path_hash(def_id)
+        }
     }
 
     #[inline]
@@ -122,8 +96,11 @@ impl<'a> rustc_span::HashStableContext for StableHashingContext<'a> {
 
     #[inline]
     fn hashing_controls(&self) -> HashingControls {
-        self.hashing_controls.clone()
+        self.hashing_controls
     }
 }
 
+impl<'a> rustc_abi::HashStableContext for StableHashingContext<'a> {}
+impl<'a> rustc_ast::HashStableContext for StableHashingContext<'a> {}
+impl<'a> rustc_hir::HashStableContext for StableHashingContext<'a> {}
 impl<'a> rustc_session::HashStableContext for StableHashingContext<'a> {}

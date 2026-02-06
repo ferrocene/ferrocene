@@ -31,7 +31,6 @@ use crate::emitter::{
     ColorConfig, Destination, Emitter, HumanReadableErrorType, OutputTheme, TimingEvent,
     should_show_source_code,
 };
-use crate::registry::Registry;
 use crate::timings::{TimingRecord, TimingSection};
 use crate::translation::{Translator, to_fluent_args};
 use crate::{CodeSuggestion, MultiSpan, SpanLabel, Subdiag, Suggestions, TerminalUrl};
@@ -107,8 +106,8 @@ enum EmitTyped<'a> {
 }
 
 impl Emitter for JsonEmitter {
-    fn emit_diagnostic(&mut self, diag: crate::DiagInner, registry: &Registry) {
-        let data = Diagnostic::from_errors_diagnostic(diag, self, registry);
+    fn emit_diagnostic(&mut self, diag: crate::DiagInner) {
+        let data = Diagnostic::from_errors_diagnostic(diag, self);
         let result = self.emit(EmitTyped::Diagnostic(data));
         if let Err(e) = result {
             panic!("failed to print diagnostics: {e:?}");
@@ -139,7 +138,7 @@ impl Emitter for JsonEmitter {
         }
     }
 
-    fn emit_future_breakage_report(&mut self, diags: Vec<crate::DiagInner>, registry: &Registry) {
+    fn emit_future_breakage_report(&mut self, diags: Vec<crate::DiagInner>) {
         let data: Vec<FutureBreakageItem<'_>> = diags
             .into_iter()
             .map(|mut diag| {
@@ -153,7 +152,7 @@ impl Emitter for JsonEmitter {
                 }
                 FutureBreakageItem {
                     diagnostic: EmitTyped::Diagnostic(Diagnostic::from_errors_diagnostic(
-                        diag, self, registry,
+                        diag, self,
                     )),
                 }
             })
@@ -307,11 +306,7 @@ struct UnusedExterns<'a> {
 
 impl Diagnostic {
     /// Converts from `rustc_errors::DiagInner` to `Diagnostic`.
-    fn from_errors_diagnostic(
-        diag: crate::DiagInner,
-        je: &JsonEmitter,
-        registry: &Registry,
-    ) -> Diagnostic {
+    fn from_errors_diagnostic(diag: crate::DiagInner, je: &JsonEmitter) -> Diagnostic {
         let args = to_fluent_args(diag.args.iter());
         let sugg_to_diag = |sugg: &CodeSuggestion| {
             let translated_message =
@@ -351,7 +346,7 @@ impl Diagnostic {
         let code = if let Some(code) = diag.code {
             Some(DiagnosticCode {
                 code: code.to_string(),
-                explanation: registry.try_find_description(code).ok(),
+                explanation: crate::codes::try_find_description(code).ok(),
             })
         } else if let Some(IsLint { name, .. }) = &diag.is_lint {
             Some(DiagnosticCode { code: name.to_string(), explanation: None })
@@ -388,7 +383,7 @@ impl Diagnostic {
             .ui_testing(je.ui_testing)
             .ignored_directories_in_source_blocks(je.ignored_directories_in_source_blocks.clone())
             .theme(if je.json_rendered.unicode { OutputTheme::Unicode } else { OutputTheme::Ascii })
-            .emit_diagnostic(diag, registry);
+            .emit_diagnostic(diag);
 
         let buf = Arc::try_unwrap(buf.0).unwrap().into_inner().unwrap();
         let buf = String::from_utf8(buf).unwrap();

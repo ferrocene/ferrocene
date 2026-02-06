@@ -27,7 +27,6 @@ use crate::emitter::{
     ConfusionType, Destination, MAX_SUGGESTIONS, OutputTheme, detect_confusion_type, is_different,
     normalize_whitespace, should_show_source_code,
 };
-use crate::registry::Registry;
 use crate::translation::{Translator, to_fluent_args};
 use crate::{
     CodeSuggestion, DiagInner, DiagMessage, Emitter, ErrCode, Level, MultiSpan, Style, Subdiag,
@@ -73,7 +72,7 @@ impl Debug for AnnotateSnippetEmitter {
 
 impl Emitter for AnnotateSnippetEmitter {
     /// The entry point for the diagnostics generation
-    fn emit_diagnostic(&mut self, mut diag: DiagInner, _registry: &Registry) {
+    fn emit_diagnostic(&mut self, mut diag: DiagInner) {
         let fluent_args = to_fluent_args(diag.args.iter());
 
         if self.track_diagnostics && diag.span.has_primary_spans() && !diag.span.is_dummy() {

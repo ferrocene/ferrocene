@@ -71,7 +71,6 @@ use rustc_span::{DUMMY_SP, Span};
 use tracing::debug;
 
 use crate::emitter::TimingEvent;
-use crate::registry::Registry;
 use crate::timings::TimingRecord;
 
 pub mod annotate_snippet_emitter_writer;
@@ -84,7 +83,6 @@ pub mod error;
 pub mod json;
 mod lock;
 pub mod markdown;
-pub mod registry;
 #[cfg(test)]
 mod tests;
 pub mod timings;
@@ -297,8 +295,6 @@ impl<'a> std::ops::Deref for DiagCtxtHandle<'a> {
 struct DiagCtxtInner {
     flags: DiagCtxtFlags,
 
-    registry: Registry,
-
     /// The error guarantees from all emitted errors. The length gives the error count.
     err_guars: Vec<ErrorGuaranteed>,
     /// The error guarantee from all emitted lint errors. The length gives the
@@ -480,11 +476,6 @@ impl DiagCtxt {
         self
     }
 
-    pub fn with_registry(mut self, registry: Registry) -> Self {
-        self.inner.get_mut().registry = registry;
-        self
-    }
-
     pub fn new(emitter: Box<DynEmitter>) -> Self {
         Self { inner: Lock::new(DiagCtxtInner::new(emitter)) }
     }
@@ -537,7 +528,6 @@ impl DiagCtxt {
         let mut inner = self.inner.borrow_mut();
         let DiagCtxtInner {
             flags: _,
-            registry: _,
             err_guars,
             lint_err_guars,
             delayed_bugs,
@@ -811,7 +801,7 @@ impl<'a> DiagCtxtHandle<'a> {
                 .emitted_diagnostic_codes
                 .iter()
                 .filter_map(|&code| {
-                    if inner.registry.try_find_description(code).is_ok() {
+                    if crate::codes::try_find_description(code).is_ok() {
                         Some(code.to_string())
                     } else {
                         None
@@ -883,7 +873,7 @@ impl<'a> DiagCtxtHandle<'a> {
         let inner = &mut *self.inner.borrow_mut();
         let diags = std::mem::take(&mut inner.future_breakage_diagnostics);
         if !diags.is_empty() {
-            inner.emitter.emit_future_breakage_report(diags, &inner.registry);
+            inner.emitter.emit_future_breakage_report(diags);
         }
     }
 
@@ -1184,7 +1174,6 @@ impl DiagCtxtInner {
     fn new(emitter: Box<DynEmitter>) -> Self {
         Self {
             flags: DiagCtxtFlags { can_emit_warnings: true, ..Default::default() },
-            registry: Registry::new(&[]),
             err_guars: Vec::new(),
             lint_err_guars: Vec::new(),
             delayed_bugs: Vec::new(),
@@ -1360,7 +1349,7 @@ impl DiagCtxtInner {
                 }
                 self.has_printed = true;
 
-                self.emitter.emit_diagnostic(diagnostic, &self.registry);
+                self.emitter.emit_diagnostic(diagnostic);
             }
 
             if is_error {

@@ -203,8 +203,11 @@ impl DiagnosticDeriveVariantBuilder {
                         )
                         .emit();
                     }
-                    self.message =
-                        Some(Message { message_span: message.span(), value: message.value() });
+                    self.message = Some(Message {
+                        attr_span: attr.span(),
+                        message_span: message.span(),
+                        value: message.value(),
+                    });
                 }
 
                 // Parse arguments

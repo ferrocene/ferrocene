@@ -708,7 +708,7 @@ impl SubdiagnosticVariant {
                     }
                     if !input.is_empty() { input.parse::<Token![,]>()?; }
                     if is_first {
-                        message = Some(Message { message_span: inline_message.span(), value: inline_message.value() });
+                        message = Some(Message { attr_span: attr.span(), message_span: inline_message.span(), value: inline_message.value() });
                         is_first = false;
                     } else {
                         span_err(inline_message.span().unwrap(), "a diagnostic message must be the first argument to the attribute").emit();

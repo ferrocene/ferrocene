@@ -1,7 +1,10 @@
 //! Tool used by CI to inspect compiler-builtins archives and help ensure we won't run into any
 //! linking errors.
+//!
+//! Note that symcheck is a "hostprog", i.e. is built and run on the host target even when the
+//! actual target is cross compiled.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
@@ -42,8 +45,7 @@ fn main() {
             run_build_and_check(target, args);
         }
         ["build-and-check", "--", args @ ..] if !args.is_empty() => {
-            let target = &host_target();
-            run_build_and_check(target, args);
+            run_build_and_check(env!("HOST"), args);
         }
         ["check", paths @ ..] if !paths.is_empty() => {
             check_paths(paths);
@@ -78,20 +80,6 @@ fn check_paths<P: AsRef<Path>>(paths: &[P]) {
         verify_no_duplicates(&archive);
         verify_core_symbols(&archive);
     }
-}
-
-fn host_target() -> String {
-    let out = Command::new("rustc")
-        .arg("--version")
-        .arg("--verbose")
-        .output()
-        .unwrap();
-    assert!(out.status.success());
-    let out = String::from_utf8(out.stdout).unwrap();
-    out.lines()
-        .find_map(|s| s.strip_prefix("host: "))
-        .unwrap()
-        .to_owned()
 }
 
 /// Run `cargo build` with the provided additional arguments, collecting the list of created
@@ -257,8 +245,9 @@ fn verify_no_duplicates(archive: &BinFile) {
     assert!(found_any, "no symbols found");
 
     if !dups.is_empty() {
+        let count = dups.iter().map(|x| &x.name).collect::<HashSet<_>>().len();
         dups.sort_unstable_by(|a, b| a.name.cmp(&b.name));
-        panic!("found duplicate symbols: {dups:#?}");
+        panic!("found {count} duplicate symbols: {dups:#?}");
     }
 
     println!("    success: no duplicate symbols found");
@@ -293,7 +282,10 @@ fn verify_core_symbols(archive: &BinFile) {
 
     if !undefined.is_empty() {
         undefined.sort_unstable_by(|a, b| a.name.cmp(&b.name));
-        panic!("found undefined symbols from core: {undefined:#?}");
+        panic!(
+            "found {} undefined symbols from core: {undefined:#?}",
+            undefined.len()
+        );
     }
 
     println!("    success: no undefined references to core found");

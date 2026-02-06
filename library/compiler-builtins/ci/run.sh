@@ -46,6 +46,7 @@ fi
 # Ensure there are no duplicate symbols or references to `core` when
 # `compiler-builtins` is built with various features. Symcheck invokes Cargo to
 # build with the arguments we provide it, then validates the built artifacts.
+SYMCHECK_TEST_TARGET="$target" cargo test -p symbol-check --release
 symcheck=(cargo run -p symbol-check --release)
 symcheck+=(-- build-and-check)
 
@@ -151,7 +152,8 @@ if [ "${BUILD_ONLY:-}" = "1" ]; then
 
     echo "can't run tests on $target; skipping"
 else
-    mflags+=(--workspace --target "$target")
+    # symcheck tests need specific env setup, and is already tested above
+    mflags+=(--workspace --exclude symbol-check --target "$target")
     cmd=(cargo test "${mflags[@]}")
     profile_flag="--profile"
 

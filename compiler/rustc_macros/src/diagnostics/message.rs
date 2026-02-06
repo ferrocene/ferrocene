@@ -3,6 +3,7 @@ use fluent_syntax::ast::{Expression, InlineExpression, Pattern, PatternElement};
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::Path;
+use syn::ext::IdentExt;
 use synstructure::{Structure, VariantInfo};
 
 use crate::diagnostics::error::span_err;
@@ -100,7 +101,7 @@ fn verify_fluent_message(msg_span: Span, message_str: &str, variant: Option<&Var
             .bindings()
             .iter()
             .flat_map(|b| b.ast().ident.as_ref())
-            .map(|id| id.to_string())
+            .map(|id| id.unraw().to_string())
             .collect();
         for variable in variable_references(&message) {
             if !fields.iter().any(|f| f == variable) {

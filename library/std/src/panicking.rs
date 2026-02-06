@@ -139,6 +139,7 @@ static HOOK: RwLock<Hook> = RwLock::new(Hook::Default);
 /// panic!("Normal panic");
 /// ```
 #[stable(feature = "panic_hooks", since = "1.10.0")]
+#[ferrocene::prevalidated]
 pub fn set_hook(hook: Box<dyn Fn(&PanicHookInfo<'_>) + 'static + Sync + Send>) {
     if thread::panicking() {
         panic!("cannot modify the panic hook from a panicking thread");
@@ -709,6 +710,7 @@ pub fn panic_handler(info: &core::panic::PanicInfo<'_>) -> ! {
 /// panic!() and assert!(). In particular, this is the only entry point that supports
 /// arbitrary payloads, not just format strings.
 #[unstable(feature = "libstd_sys_internals", reason = "used by the panic! macro", issue = "none")]
+#[ferrocene::prevalidated]
 #[cfg_attr(not(any(test, doctest)), lang = "begin_panic")]
 // lang item for CTFE panic support
 // never inline unless panic=immediate-abort to avoid code
@@ -784,6 +786,7 @@ fn payload_as_str(payload: &dyn Any) -> &str {
 /// panics, panic hooks, and finally dispatching to the panic runtime to either
 /// abort or unwind.
 #[optimize(size)]
+#[ferrocene::prevalidated]
 fn panic_with_hook(
     payload: &mut dyn PanicPayload,
     location: &Location<'_>,

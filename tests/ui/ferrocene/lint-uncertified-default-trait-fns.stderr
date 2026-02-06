@@ -1,0 +1,57 @@
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:35:5
+   |
+LL |     fn bar(&self) {}
+   |        --- `<OverridesDefault as CertifiedDefault>::bar` is unvalidated
+...
+LL |     OverridesDefault.bar();
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+note: `test` is validated
+  --> $DIR/lint-uncertified-default-trait-fns.rs:33:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn test() {
+   |    ^^^^
+note: the lint level is defined here
+  --> $DIR/lint-uncertified-default-trait-fns.rs:6:9
+   |
+LL | #![deny(ferrocene::uncertified)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:36:5
+   |
+LL |     fn foo(&self) {}
+   |        --- `<UsesDefault as UncertifiedDefault>::foo` is unvalidated
+...
+LL |     UsesDefault.foo();
+   |     ^^^^^^^^^^^^^^^
+
+error: validated function possibly calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:40:38
+   |
+LL |     fn foo(&self) {}
+   |        --- `UncertifiedDefault::foo` is unvalidated
+...
+LL |     let _: &dyn UncertifiedDefault = &UsesDefault;
+   |                                      ^^^^^^^^^^^^
+   |
+   = note: once `UsesDefault` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call `UncertifiedDefault::foo`
+
+error: validated function possibly calls an unvalidated method
+  --> $DIR/lint-uncertified-default-trait-fns.rs:43:36
+   |
+LL |     fn bar(&self) {}
+   |        --- `<OverridesDefault as CertifiedDefault>::bar` is unvalidated
+...
+LL |     let _: &dyn CertifiedDefault = &OverridesDefault;
+   |                                    ^^^^^^^^^^^^^^^^^
+   |
+   = note: once `OverridesDefault` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
+   = note: as a precaution, it must assume you will eventually call `<OverridesDefault as CertifiedDefault>::bar`
+
+error: aborting due to 4 previous errors
+

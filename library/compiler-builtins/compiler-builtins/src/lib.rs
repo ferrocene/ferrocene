@@ -11,11 +11,11 @@
 #![feature(repr_simd)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(rustc_attrs)]
-#![feature(float_bits_const)]
 #![cfg_attr(f16_enabled, feature(f16))]
 #![cfg_attr(f128_enabled, feature(f128))]
 #![no_builtins]
 #![no_std]
+#![allow(unstable_name_collisions)] // FIXME(float_bits_const): remove when stable
 #![allow(unused_features)]
 #![allow(internal_features)]
 // `mem::swap` cannot be used because it may generate references to memcpy in unoptimized code.

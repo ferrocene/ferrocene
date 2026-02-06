@@ -1432,8 +1432,7 @@ impl EarlyDiagCtxt {
 fn mk_emitter(output: ErrorOutputType) -> Box<DynEmitter> {
     // FIXME(#100717): early errors aren't translated at the moment, so this is fine, but it will
     // need to reference every crate that might emit an early error for translation to work.
-    let translator =
-        Translator::with_fallback_bundle(vec![rustc_errors::DEFAULT_LOCALE_RESOURCE], false);
+    let translator = Translator::with_fallback_bundle(vec![], false);
     let emitter: Box<DynEmitter> = match output {
         config::ErrorOutputType::HumanReadable { kind, color_config } => match kind {
             HumanReadableErrorType { short, unicode } => Box::new(

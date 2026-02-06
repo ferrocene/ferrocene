@@ -32,7 +32,8 @@ pub type IsLoadableFromDiskFn<'tcx, Key> =
 
 /// Stores function pointers and other metadata for a particular query.
 ///
-/// Used indirectly by query plumbing in `rustc_query_system`, via a trait.
+/// Used indirectly by query plumbing in `rustc_query_system` via a trait,
+/// and also used directly by query plumbing in `rustc_query_impl`.
 pub struct QueryVTable<'tcx, C: QueryCache> {
     pub name: &'static str,
     pub eval_always: bool,
@@ -52,6 +53,12 @@ pub struct QueryVTable<'tcx, C: QueryCache> {
     pub value_from_cycle_error:
         fn(tcx: TyCtxt<'tcx>, cycle_error: &CycleError, guar: ErrorGuaranteed) -> C::Value,
     pub format_value: fn(&C::Value) -> String,
+
+    /// Formats a human-readable description of this query and its key, as
+    /// specified by the `desc` query modifier.
+    ///
+    /// Used when reporting query cycle errors and similar problems.
+    pub description_fn: fn(TyCtxt<'tcx>, C::Key) -> String,
 }
 
 pub struct QuerySystemFns {

@@ -48,6 +48,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv6-none-eabi",
     "aarch64v8r-unknown-none",
     "aarch64v8r-unknown-none-softfloat",
+    "s390x-unknown-none-softfloat",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

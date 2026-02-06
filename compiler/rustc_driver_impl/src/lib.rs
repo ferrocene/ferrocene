@@ -20,7 +20,7 @@ use std::fs::{self, File};
 use std::io::{self, IsTerminal, Read, Write};
 use std::panic::{self, PanicHookInfo};
 use std::path::{Path, PathBuf};
-use std::process::{self, Command, Stdio};
+use std::process::{Command, ExitCode, Stdio, Termination};
 use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
@@ -114,25 +114,13 @@ pub fn default_translator() -> Translator {
 
 pub static DEFAULT_LOCALE_RESOURCES: &[&str] = &[
     // tidy-alphabetical-start
-    rustc_ast_lowering::DEFAULT_LOCALE_RESOURCE,
-    rustc_ast_passes::DEFAULT_LOCALE_RESOURCE,
     rustc_borrowck::DEFAULT_LOCALE_RESOURCE,
-    rustc_builtin_macros::DEFAULT_LOCALE_RESOURCE,
-    rustc_codegen_ssa::DEFAULT_LOCALE_RESOURCE,
     rustc_const_eval::DEFAULT_LOCALE_RESOURCE,
-    rustc_errors::DEFAULT_LOCALE_RESOURCE,
-    rustc_expand::DEFAULT_LOCALE_RESOURCE,
     rustc_hir_analysis::DEFAULT_LOCALE_RESOURCE,
-    rustc_hir_typeck::DEFAULT_LOCALE_RESOURCE,
     rustc_lint::DEFAULT_LOCALE_RESOURCE,
-    rustc_metadata::DEFAULT_LOCALE_RESOURCE,
-    rustc_middle::DEFAULT_LOCALE_RESOURCE,
     rustc_mir_build::DEFAULT_LOCALE_RESOURCE,
-    rustc_mir_transform::DEFAULT_LOCALE_RESOURCE,
     rustc_parse::DEFAULT_LOCALE_RESOURCE,
     rustc_passes::DEFAULT_LOCALE_RESOURCE,
-    rustc_pattern_analysis::DEFAULT_LOCALE_RESOURCE,
-    rustc_resolve::DEFAULT_LOCALE_RESOURCE,
     rustc_trait_selection::DEFAULT_LOCALE_RESOURCE,
     // tidy-alphabetical-end
 ];
@@ -1404,10 +1392,10 @@ fn parse_crate_attrs<'a>(sess: &'a Session) -> PResult<'a, ast::AttrVec> {
 
 /// Variant of `catch_fatal_errors` for the `interface::Result` return type
 /// that also computes the exit code.
-pub fn catch_with_exit_code(f: impl FnOnce()) -> i32 {
+pub fn catch_with_exit_code<T: Termination>(f: impl FnOnce() -> T) -> ExitCode {
     match catch_fatal_errors(f) {
-        Ok(()) => EXIT_SUCCESS,
-        _ => EXIT_FAILURE,
+        Ok(status) => status.report(),
+        _ => ExitCode::FAILURE,
     }
 }
 
@@ -1692,7 +1680,7 @@ pub fn install_ctrlc_handler() {
     .expect("Unable to install ctrlc handler");
 }
 
-pub fn main() -> ! {
+pub fn main() -> ExitCode {
     let start_time = Instant::now();
     let start_rss = get_resident_set_size();
 
@@ -1712,5 +1700,5 @@ pub fn main() -> ! {
         print_time_passes_entry("total", start_time.elapsed(), start_rss, end_rss, format);
     }
 
-    process::exit(exit_code)
+    exit_code
 }

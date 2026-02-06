@@ -209,13 +209,25 @@ impl<'a> Parser<'a> {
             AllowConstBlockItems::Yes,
         ) {
             Ok(Some(item)) => {
-                // FIXME(#100717)
                 err.arg("item", item.kind.descr());
-                err.span_label(item.span, inline_fluent!("BROKEN"));
+                err.span_label(
+                    item.span,
+                    match attr_type {
+                        OuterAttributeType::Attribute => {
+                            inline_fluent!("the inner attribute doesn't annotate this {$item}")
+                        }
+                        OuterAttributeType::DocComment | OuterAttributeType::DocBlockComment => {
+                            inline_fluent!("the inner doc comment doesn't annotate this {$item}")
+                        }
+                    },
+                );
                 if suggest_to_outer {
                     err.span_suggestion_verbose(
                         replacement_span,
-                        inline_fluent!("BROKEN"),
+                        match attr_type {
+                            OuterAttributeType::Attribute =>  inline_fluent!("to annotate the {$item}, change the attribute from inner to outer style"),
+                            OuterAttributeType::DocComment | OuterAttributeType::DocBlockComment =>  inline_fluent!("to annotate the {$item}, change the doc comment from inner to outer style"),
+                        },
                         match attr_type {
                             OuterAttributeType::Attribute => "",
                             OuterAttributeType::DocBlockComment => "*",

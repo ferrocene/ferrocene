@@ -4,10 +4,8 @@
 
 use std::num::NonZero;
 
-use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_data_structures::unord::UnordMap;
-use rustc_hashes::Hash64;
 use rustc_hir::def_id::DefId;
 use rustc_hir::limit::Limit;
 use rustc_index::Idx;
@@ -319,18 +317,11 @@ where
 {
     let kind = vtable.dep_kind;
 
-    let hash = tcx.with_stable_hashing_context(|mut hcx| {
-        let mut hasher = StableHasher::new();
-        kind.as_usize().hash_stable(&mut hcx, &mut hasher);
-        key.hash_stable(&mut hcx, &mut hasher);
-        hasher.finish::<Hash64>()
-    });
-
     let def_id: Option<DefId> = key.key_as_def_id();
     let def_id_for_ty_in_cycle: Option<DefId> = key.def_id_for_ty_in_cycle();
 
     let info = QueryStackDeferred::new((tcx, vtable, key), mk_query_stack_frame_extra);
-    QueryStackFrame::new(info, kind, hash, def_id, def_id_for_ty_in_cycle)
+    QueryStackFrame::new(info, kind, def_id, def_id_for_ty_in_cycle)
 }
 
 pub(crate) fn encode_query_results<'a, 'tcx, Q, C: QueryCache, const FLAGS: QueryFlags>(

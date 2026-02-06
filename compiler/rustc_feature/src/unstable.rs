@@ -769,8 +769,9 @@ impl Features {
     }
 }
 
-/// Some features are not allowed to be used together at the same time, if
-/// the two are present, produce an error.
+/// Some features are not allowed to be used together at the same time.
+///
+/// If the two are present, produce an error.
 pub const INCOMPATIBLE_FEATURES: &[(Symbol, Symbol)] = &[
     // Experimental match ergonomics rulesets are incompatible with each other, to simplify the
     // boolean logic required to tell which typing rules to use.

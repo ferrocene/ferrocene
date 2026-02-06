@@ -20,15 +20,26 @@ FROM --platform=$TARGETPLATFORM ubuntu:24.04 AS noble
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
+# There is a mirror of the depended on QEMU version in `ferrocene-ci-mirrors` if it ever disappears.
+# See https://launchpad.net/ubuntu/noble/amd64/qemu-user-static and https://launchpad.net/ubuntu/noble/arm64/qemu-user-static
 COPY ferrocene/ci/docker-images/ubuntu-20/qemu-version /tmp/qemu-version
 RUN <<-EOF
     set -xe
+    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-    apt-get update
-    QEMU_VERSION=$(cat /tmp/qemu-version)
+    apt update
+    apt install curl -y
+
+    QEMU_VERSION=$(cat /tmp/qemu-version | cut -d ":" -f 2)
     echo "QEMU $QEMU_VERSION"
     rm /tmp/qemu-version
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static=$QEMU_VERSION
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        curl -Lo /tmp/qemu.deb http://launchpadlibrarian.net/834172758/qemu-user-static_${QEMU_VERSION}_amd64.deb
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        curl -Lo /tmp/qemu.deb http://launchpadlibrarian.net/834165403/qemu-user-static_${QEMU_VERSION}_arm64.deb
+    fi
+    apt install /tmp/qemu.deb -y
+    rm /tmp/qemu.deb
 
     mkdir -p /ferrocene/packages
     dpkg -l qemu-user-static >> /ferrocene/packages/ubuntu-24.04
@@ -99,7 +110,7 @@ RUN <<-EOF
       --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
       --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
       --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
-    
+
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
     # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
     apt-install gcc-arm-none-eabi
@@ -342,4 +353,3 @@ WORKDIR /home/ci
 # We prefer uv over other solutions, it's in Rust and fast
 ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"
 RUN curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
-

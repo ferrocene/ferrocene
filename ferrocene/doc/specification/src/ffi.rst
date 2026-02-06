@@ -74,7 +74,7 @@ The following :t:`[ABI]s` are supported:
   :dt:`Rust ABI`.
 
 * :dp:`fls_8m7pc3riokst`
-  ``extern "system"`` - The operating system-dependent :t:`ABI`.
+  ``extern "system"`` - The operating system-dependent :t:`ABI`. This :t:`ABI kind` is equivalent to ``extern "C"`` except on Windows x86_32 where it is equivalent to ``extern "stdcall"`` for non-:t:`[variadic function]s`, and equivalent to ``extern "C"`` for :t:`[variadic function]s`.
 
 * :dp:`fls_NQAzj5ai1La5`
   ``extern "system-unwind"`` - The same as ``extern "system"`` with the
@@ -108,6 +108,9 @@ include, but may not be limited to, the following:
   ``extern "cdecl-unwind"`` - The same as ``extern "cdecl"``
   with the addition that unwinding across FFI is permitted.
 
+* :dp:`fls_JHlqXjn4Sf07`
+  ``extern "efiapi"`` - The :t:`ABI` for `UEFI <https://uefi.org/specifications>`_.
+
 * :dp:`fls_6rtj6rwqxojh`
   ``extern "fastcall"`` - The ``fastcall`` :t:`ABI` that corresponds to MSVC's
   ``__fastcall`` and GCC and clang's ``__attribute__((fastcall))``.
@@ -132,9 +135,6 @@ include, but may not be limited to, the following:
 * :dp:`fls_xrCRprWS13R1`
   ``extern "win64-unwind"`` - The same as ``extern "win64"``
   with the addition that unwinding across FFI is permitted.
-
-* :dp:`fls_JHlqXjn4Sf07`
-  ``extern "efiapi"`` - The :t:`ABI` for `UEFI <https://uefi.org/specifications>`_.
 
 .. rubric:: Undefined Behavior
 

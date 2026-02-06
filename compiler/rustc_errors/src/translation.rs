@@ -34,24 +34,11 @@ pub struct Translator {
     /// Localized diagnostics for the locale requested by the user. If no language was requested by
     /// the user then this will be `None` and `fallback_fluent_bundle` should be used.
     pub fluent_bundle: Option<Arc<FluentBundle>>,
-    /// Return `FluentBundle` with localized diagnostics for the default locale of the compiler.
-    /// Used when the user has not requested a specific language or when a localized diagnostic is
-    /// unavailable for the requested locale.
-    pub fallback_fluent_bundle: LazyFallbackBundle,
 }
 
 impl Translator {
-    pub fn with_fallback_bundle(
-        resources: Vec<&'static str>,
-        with_directionality_markers: bool,
-    ) -> Translator {
-        Translator {
-            fluent_bundle: None,
-            fallback_fluent_bundle: crate::fallback_fluent_bundle(
-                resources,
-                with_directionality_markers,
-            ),
-        }
+    pub fn new() -> Translator {
+        Translator { fluent_bundle: None }
     }
 
     /// Convert `DiagMessage`s to a string, performing translation if necessary.

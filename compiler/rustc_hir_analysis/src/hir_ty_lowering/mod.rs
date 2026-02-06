@@ -2397,8 +2397,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             hir::ConstArgKind::Anon(anon) => self.lower_const_arg_anon(anon),
             hir::ConstArgKind::Infer(()) => self.ct_infer(None, const_arg.span),
             hir::ConstArgKind::Error(e) => ty::Const::new_error(tcx, e),
-            hir::ConstArgKind::Literal(kind) => {
-                self.lower_const_arg_literal(&kind, ty, const_arg.span)
+            hir::ConstArgKind::Literal { lit, negated } => {
+                self.lower_const_arg_literal(&lit, negated, ty, const_arg.span)
             }
         }
     }
@@ -2805,9 +2805,15 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     }
 
     #[instrument(skip(self), level = "debug")]
-    fn lower_const_arg_literal(&self, kind: &LitKind, ty: Ty<'tcx>, span: Span) -> Const<'tcx> {
+    fn lower_const_arg_literal(
+        &self,
+        kind: &LitKind,
+        neg: bool,
+        ty: Ty<'tcx>,
+        span: Span,
+    ) -> Const<'tcx> {
         let tcx = self.tcx();
-        let input = LitToConstInput { lit: *kind, ty, neg: false };
+        let input = LitToConstInput { lit: *kind, ty, neg };
         tcx.at(span).lit_to_const(input)
     }
 

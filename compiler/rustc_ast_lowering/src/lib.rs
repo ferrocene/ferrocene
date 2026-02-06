@@ -2570,7 +2570,19 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
 
                 ConstArg {
                     hir_id: self.lower_node_id(expr.id),
-                    kind: hir::ConstArgKind::Literal(literal.node),
+                    kind: hir::ConstArgKind::Literal { lit: literal.node, negated: false },
+                    span,
+                }
+            }
+            ExprKind::Unary(UnOp::Neg, inner_expr)
+                if let ExprKind::Lit(literal) = &inner_expr.kind =>
+            {
+                let span = expr.span;
+                let literal = self.lower_lit(literal, span);
+
+                ConstArg {
+                    hir_id: self.lower_node_id(expr.id),
+                    kind: hir::ConstArgKind::Literal { lit: literal.node, negated: true },
                     span,
                 }
             }

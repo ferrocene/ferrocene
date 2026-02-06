@@ -1158,9 +1158,12 @@ impl<'a> State<'a> {
             ConstArgKind::Anon(anon) => self.print_anon_const(anon),
             ConstArgKind::Error(_) => self.word("/*ERROR*/"),
             ConstArgKind::Infer(..) => self.word("_"),
-            ConstArgKind::Literal(node) => {
+            ConstArgKind::Literal { lit, negated } => {
+                if *negated {
+                    self.word("-");
+                }
                 let span = const_arg.span;
-                self.print_literal(&Spanned { span, node: *node })
+                self.print_literal(&Spanned { span, node: *lit })
             }
         }
     }

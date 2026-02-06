@@ -521,7 +521,10 @@ pub enum ConstArgKind<'hir, Unambig = ()> {
     /// This variant is not always used to represent inference consts, sometimes
     /// [`GenericArg::Infer`] is used instead.
     Infer(Unambig),
-    Literal(LitKind),
+    Literal {
+        lit: LitKind,
+        negated: bool,
+    },
 }
 
 #[derive(Clone, Copy, Debug, HashStable_Generic)]
@@ -1958,8 +1961,6 @@ pub struct PatExpr<'hir> {
 pub enum PatExprKind<'hir> {
     Lit {
         lit: Lit,
-        // FIXME: move this into `Lit` and handle negated literal expressions
-        // once instead of matching on unop neg expressions everywhere.
         negated: bool,
     },
     /// A path pattern for a unit struct/variant or a (maybe-associated) constant.

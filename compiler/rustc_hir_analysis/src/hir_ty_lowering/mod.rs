@@ -1422,14 +1422,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             LowerTypeRelativePathMode::Const,
         )? {
             TypeRelativePath::AssocItem(def_id, args) => {
-                if !self.tcx().is_type_const(def_id) {
-                    let mut err = self.dcx().struct_span_err(
-                        span,
-                        "use of trait associated const without `#[type_const]`",
-                    );
-                    err.note("the declaration in the trait must be marked with `#[type_const]`");
-                    return Err(err.emit());
-                }
+                self.require_type_const_attribute(def_id, span)?;
                 let ct = Const::new_unevaluated(tcx, ty::UnevaluatedConst::new(def_id, args));
                 let ct = self.check_param_uses_if_mcg(ct, span, false);
                 Ok(ct)
@@ -1885,30 +1878,18 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         item_def_id: DefId,
         trait_segment: Option<&hir::PathSegment<'tcx>>,
         item_segment: &hir::PathSegment<'tcx>,
-    ) -> Const<'tcx> {
-        match self.lower_resolved_assoc_item_path(
+    ) -> Result<Const<'tcx>, ErrorGuaranteed> {
+        let (item_def_id, item_args) = self.lower_resolved_assoc_item_path(
             span,
             opt_self_ty,
             item_def_id,
             trait_segment,
             item_segment,
             ty::AssocTag::Const,
-        ) {
-            Ok((item_def_id, item_args)) => {
-                if !self.tcx().is_type_const(item_def_id) {
-                    let mut err = self.dcx().struct_span_err(
-                        span,
-                        "use of `const` in the type system without `#[type_const]`",
-                    );
-                    err.note("the declaration must be marked with `#[type_const]`");
-                    return Const::new_error(self.tcx(), err.emit());
-                }
-
-                let uv = ty::UnevaluatedConst::new(item_def_id, item_args);
-                Const::new_unevaluated(self.tcx(), uv)
-            }
-            Err(guar) => Const::new_error(self.tcx(), guar),
-        }
+        )?;
+        self.require_type_const_attribute(item_def_id, span)?;
+        let uv = ty::UnevaluatedConst::new(item_def_id, item_args);
+        Ok(Const::new_unevaluated(self.tcx(), uv))
     }
 
     /// Lower a [resolved][hir::QPath::Resolved] (type-level) associated item path.
@@ -2396,8 +2377,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             hir::ConstArgKind::Anon(anon) => self.lower_const_arg_anon(anon),
             hir::ConstArgKind::Infer(()) => self.ct_infer(None, const_arg.span),
             hir::ConstArgKind::Error(e) => ty::Const::new_error(tcx, e),
-            hir::ConstArgKind::Literal(kind) => {
-                self.lower_const_arg_literal(&kind, ty, const_arg.span)
+            hir::ConstArgKind::Literal { lit, negated } => {
+                self.lower_const_arg_literal(&lit, negated, ty, const_arg.span)
             }
         }
     }
@@ -2668,6 +2649,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 self.lower_const_param(def_id, hir_id)
             }
             Res::Def(DefKind::Const, did) => {
+                if let Err(guar) = self.require_type_const_attribute(did, span) {
+                    return Const::new_error(self.tcx(), guar);
+                }
+
                 assert_eq!(opt_self_ty, None);
                 let [leading_segments @ .., segment] = path.segments else { bug!() };
                 let _ = self
@@ -2718,6 +2703,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     trait_segment,
                     path.segments.last().unwrap(),
                 )
+                .unwrap_or_else(|guar| Const::new_error(tcx, guar))
             }
             Res::Def(DefKind::Static { .. }, _) => {
                 span_bug!(span, "use of bare `static` ConstArgKind::Path's not yet supported")
@@ -2804,9 +2790,15 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     }
 
     #[instrument(skip(self), level = "debug")]
-    fn lower_const_arg_literal(&self, kind: &LitKind, ty: Ty<'tcx>, span: Span) -> Const<'tcx> {
+    fn lower_const_arg_literal(
+        &self,
+        kind: &LitKind,
+        neg: bool,
+        ty: Ty<'tcx>,
+        span: Span,
+    ) -> Const<'tcx> {
         let tcx = self.tcx();
-        let input = LitToConstInput { lit: *kind, ty, neg: false };
+        let input = LitToConstInput { lit: *kind, ty, neg };
         tcx.at(span).lit_to_const(input)
     }
 
@@ -2841,6 +2833,33 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             // the more expensive anon const code path.
             .filter(|l| !l.ty.has_aliases())
             .map(|l| tcx.at(expr.span).lit_to_const(l))
+    }
+
+    fn require_type_const_attribute(
+        &self,
+        def_id: DefId,
+        span: Span,
+    ) -> Result<(), ErrorGuaranteed> {
+        let tcx = self.tcx();
+        if tcx.is_type_const(def_id) {
+            Ok(())
+        } else {
+            let mut err = self
+                .dcx()
+                .struct_span_err(span, "use of `const` in the type system without `#[type_const]`");
+            if def_id.is_local() {
+                let name = tcx.def_path_str(def_id);
+                err.span_suggestion(
+                    tcx.def_span(def_id).shrink_to_lo(),
+                    format!("add `#[type_const]` attribute to `{name}`"),
+                    format!("#[type_const]\n"),
+                    Applicability::MaybeIncorrect,
+                );
+            } else {
+                err.note("only consts marked with `#[type_const]` may be used in types");
+            }
+            Err(err.emit())
+        }
     }
 
     fn lower_delegation_ty(&self, idx: hir::InferDelegationKind) -> Ty<'tcx> {

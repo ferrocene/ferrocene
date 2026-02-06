@@ -1,0 +1,14 @@
+error: use of `const` in the type system without `#[type_const]`
+  --> $DIR/unmarked-free-const.rs:9:18
+   |
+LL |     let x = [(); N];
+   |                  ^
+   |
+help: add `#[type_const]` attribute to `N`
+   |
+LL + #[type_const]
+LL | const N: usize = 4;
+   |
+
+error: aborting due to 1 previous error
+

@@ -861,7 +861,16 @@ pub(crate) struct ComparisonInterpretedAsGeneric {
     #[label("interpreted as generic arguments")]
     pub args: Span,
     #[subdiagnostic]
-    pub suggestion: ComparisonOrShiftInterpretedAsGenericSugg,
+    pub suggestion: ComparisonInterpretedAsGenericSugg,
+}
+
+#[derive(Subdiagnostic)]
+#[multipart_suggestion("try comparing the cast value", applicability = "machine-applicable")]
+pub(crate) struct ComparisonInterpretedAsGenericSugg {
+    #[suggestion_part(code = "(")]
+    pub left: Span,
+    #[suggestion_part(code = ")")]
+    pub right: Span,
 }
 
 #[derive(Diagnostic)]
@@ -874,12 +883,12 @@ pub(crate) struct ShiftInterpretedAsGeneric {
     #[label("interpreted as generic arguments")]
     pub args: Span,
     #[subdiagnostic]
-    pub suggestion: ComparisonOrShiftInterpretedAsGenericSugg,
+    pub suggestion: ShiftInterpretedAsGenericSugg,
 }
 
 #[derive(Subdiagnostic)]
-#[multipart_suggestion("BROKEN", applicability = "machine-applicable")]
-pub(crate) struct ComparisonOrShiftInterpretedAsGenericSugg {
+#[multipart_suggestion("try shifting the cast value", applicability = "machine-applicable")]
+pub(crate) struct ShiftInterpretedAsGenericSugg {
     #[suggestion_part(code = "(")]
     pub left: Span,
     #[suggestion_part(code = ")")]

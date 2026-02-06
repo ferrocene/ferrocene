@@ -322,7 +322,6 @@ pub(crate) fn create_config(
         }),
         extra_symbols: Vec::new(),
         make_codegen_backend: None,
-        registry: rustc_driver::diagnostics_registry(),
         ice_file: None,
         using_internal_features: &USING_INTERNAL_FEATURES,
     }

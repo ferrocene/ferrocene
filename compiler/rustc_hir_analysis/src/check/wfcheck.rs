@@ -5,7 +5,9 @@ use hir::intravisit::{self, Visitor};
 use rustc_abi::{ExternAbi, ScalableElt};
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, ErrorGuaranteed, pluralize, struct_span_code_err};
+use rustc_errors::{
+    Applicability, ErrorGuaranteed, inline_fluent, pluralize, struct_span_code_err,
+};
 use rustc_hir::attrs::{AttributeKind, EiiDecl, EiiImpl, EiiImplResolution};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -42,8 +44,8 @@ use {rustc_ast as ast, rustc_hir as hir};
 use super::compare_eii::compare_eii_function_types;
 use crate::autoderef::Autoderef;
 use crate::constrained_generic_params::{Parameter, identify_constrained_generic_params};
+use crate::errors;
 use crate::errors::InvalidReceiverTyHint;
-use crate::{errors, fluent_generated as fluent};
 
 pub(super) struct WfCheckingCtxt<'a, 'tcx> {
     pub(super) ocx: ObligationCtxt<'a, 'tcx, FulfillmentError<'tcx>>,
@@ -953,7 +955,7 @@ pub(crate) fn check_associated_item(
                 wfcx.register_wf_obligation(span, loc, ty.into());
 
                 let has_value = item.defaultness(tcx).has_value();
-                if find_attr!(tcx.get_all_attrs(def_id), AttributeKind::TypeConst(_)) {
+                if tcx.is_type_const(def_id.into()) {
                     check_type_const(wfcx, def_id, ty, has_value)?;
                 }
 
@@ -1740,7 +1742,7 @@ fn check_method_receiver<'tcx>(
                             the `arbitrary_self_types` feature",
                     ),
                 )
-                .with_help(fluent::hir_analysis_invalid_receiver_ty_help)
+                .with_help(inline_fluent!("consider changing to `self`, `&self`, `&mut self`, or a type implementing `Receiver` such as `self: Box<Self>`, `self: Rc<Self>`, or `self: Arc<Self>`"))
                 .emit()
             }
             None | Some(ArbitrarySelfTypesLevel::Basic)
@@ -1764,7 +1766,7 @@ fn check_method_receiver<'tcx>(
                             the `arbitrary_self_types_pointers` feature",
                     ),
                 )
-                .with_help(fluent::hir_analysis_invalid_receiver_ty_help)
+                .with_help(inline_fluent!("consider changing to `self`, `&self`, `&mut self`, or a type implementing `Receiver` such as `self: Box<Self>`, `self: Rc<Self>`, or `self: Arc<Self>`"))
                 .emit()
             }
             _ =>
@@ -2442,8 +2444,8 @@ fn lint_redundant_lifetimes<'tcx>(
 }
 
 #[derive(LintDiagnostic)]
-#[diag(hir_analysis_redundant_lifetime_args)]
-#[note]
+#[diag("unnecessary lifetime parameter `{$victim}`")]
+#[note("you can use the `{$candidate}` lifetime directly, in place of `{$victim}`")]
 struct RedundantLifetimeArgsLint<'tcx> {
     /// The lifetime we have found to be redundant.
     victim: ty::Region<'tcx>,

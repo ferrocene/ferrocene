@@ -418,6 +418,7 @@ provide! { tcx, def_id, other, cdata,
     }
     anon_const_kind => { table }
     const_of_item => { table }
+    is_rhs_type_const => { table }
 }
 
 pub(in crate::rmeta) fn provide(providers: &mut Providers) {

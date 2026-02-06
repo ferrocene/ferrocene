@@ -24,7 +24,7 @@ LL | #![feature(inherent_associated_types)]
    = note: see issue #8995 <https://github.com/rust-lang/rust/issues/8995> for more information
 
 error: the constant `2` is not of type `usize`
-  --> $DIR/type-const-in-array-len-wrong-type.rs:14:26
+  --> $DIR/type-const-in-array-len-wrong-type.rs:13:26
    |
 LL |     fn lfn_contents() -> [char; Self::LFN_FRAGMENT_LEN] {
    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `usize`, found `i64`

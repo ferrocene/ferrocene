@@ -1209,14 +1209,14 @@ fn clean_trait_item<'tcx>(trait_item: &hir::TraitItem<'tcx>, cx: &mut DocContext
     let local_did = trait_item.owner_id.to_def_id();
     cx.with_param_env(local_did, |cx| {
         let inner = match trait_item.kind {
-            hir::TraitItemKind::Const(ty, Some(default)) => {
+            hir::TraitItemKind::Const(ty, Some(default), _) => {
                 ProvidedAssocConstItem(Box::new(Constant {
                     generics: enter_impl_trait(cx, |cx| clean_generics(trait_item.generics, cx)),
                     kind: clean_const_item_rhs(default, local_did),
                     type_: clean_ty(ty, cx),
                 }))
             }
-            hir::TraitItemKind::Const(ty, None) => {
+            hir::TraitItemKind::Const(ty, None, _) => {
                 let generics = enter_impl_trait(cx, |cx| clean_generics(trait_item.generics, cx));
                 RequiredAssocConstItem(generics, Box::new(clean_ty(ty, cx)))
             }

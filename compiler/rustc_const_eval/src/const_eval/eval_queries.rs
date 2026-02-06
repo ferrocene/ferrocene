@@ -394,7 +394,7 @@ fn eval_in_interpreter<'tcx, R: InterpretationResult<'tcx>>(
     typing_env: ty::TypingEnv<'tcx>,
 ) -> Result<R, ErrorHandled> {
     let def = cid.instance.def.def_id();
-    // #[type_const] don't have bodys
+    // `type const` don't have bodys
     debug_assert!(!tcx.is_type_const(def), "CTFE tried to evaluate type-const: {:?}", def);
 
     let is_static = tcx.is_static(def);

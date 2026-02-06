@@ -955,7 +955,7 @@ pub(crate) fn check_associated_item(
                 wfcx.register_wf_obligation(span, loc, ty.into());
 
                 let has_value = item.defaultness(tcx).has_value();
-                if tcx.is_type_const(def_id.into()) {
+                if tcx.is_type_const(def_id) {
                     check_type_const(wfcx, def_id, ty, has_value)?;
                 }
 

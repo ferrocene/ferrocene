@@ -12,8 +12,8 @@ enum MyEnum<T> {
     Unit,
 }
 
-#[type_const]
-const CONST_ITEM: u32 = 42;
+
+type const CONST_ITEM: u32 = 42;
 
 fn accepts_point<const P: Point>() {}
 fn accepts_enum<const E: MyEnum<u32>>() {}

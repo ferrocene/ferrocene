@@ -453,7 +453,7 @@ impl<'a, 'b, 'tcx> TypeFolder<TyCtxt<'tcx>> for AssocTypeNormalizer<'a, 'b, 'tcx
         // been emitted earlier in compilation.
         //
         // That's because we can only end up with an Unevaluated ty::Const for a const item
-        // if it was marked with `#[type_const]`. Using this attribute without the mgca
+        // if it was marked with `type const`. Using this attribute without the mgca
         // feature gate causes a parse error.
         let ct = match tcx.def_kind(uv.def) {
             DefKind::AssocConst => match tcx.def_kind(tcx.parent(uv.def)) {

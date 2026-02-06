@@ -169,7 +169,6 @@ impl AttributeKind {
             TargetFeature { .. } => No,
             ThreadLocal => No,
             TrackCaller(..) => Yes,
-            TypeConst(..) => Yes,
             TypeLengthLimit { .. } => No,
             UnstableFeatureBound(..) => No,
             Used { .. } => No,

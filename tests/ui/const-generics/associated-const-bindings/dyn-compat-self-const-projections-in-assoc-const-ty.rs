@@ -14,14 +14,12 @@
 
 trait A {
     type Ty: std::marker::ConstParamTy_;
-    #[type_const]
-    const CT: Self::Ty;
+    type const CT: Self::Ty;
 }
 
 impl A for () {
     type Ty = i32;
-    #[type_const]
-    const CT: i32 = 0;
+    type const CT: i32 = 0;
 }
 
 fn main() {

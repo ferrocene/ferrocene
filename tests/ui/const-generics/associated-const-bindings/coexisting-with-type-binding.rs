@@ -12,13 +12,11 @@ trait Trait: SuperTrait {
     type N;
     type Q;
 
-    #[type_const]
-    const N: usize;
+    type const N: usize;
 }
 
 trait SuperTrait {
-    #[type_const]
-    const Q: &'static str;
+    type const Q: &'static str;
 }
 
 fn take0(_: impl Trait<N = 0, N = ()>) {}

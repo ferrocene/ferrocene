@@ -1,8 +1,8 @@
 struct S<const N: usize>;
 impl<const N: usize> S<N> {
-    #[type_const]
-    //~^ ERROR: the `#[type_const]` attribute is an experimental feature
-    const LEN: usize = 1;
+    type const LEN: usize = 1;
+    //~^ ERROR: associated `type const` are unstable [E0658]
+    //~| ERROR: `type const` syntax is experimental [E0658]
     fn arr() {
         [8; Self::LEN]
         //~^ WARN: cannot use constants which depend on generic parameters in types

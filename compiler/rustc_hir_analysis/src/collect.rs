@@ -95,6 +95,7 @@ pub(crate) fn provide(providers: &mut Providers) {
         const_param_default,
         anon_const_kind,
         const_of_item,
+        is_rhs_type_const,
         ..*providers
     };
 }
@@ -1549,7 +1550,8 @@ fn is_anon_const_rhs_of_const_item<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) 
     let (Node::Item(hir::Item { kind: hir::ItemKind::Const(_, _, _, ct_rhs), .. })
     | Node::ImplItem(hir::ImplItem { kind: hir::ImplItemKind::Const(_, ct_rhs), .. })
     | Node::TraitItem(hir::TraitItem {
-        kind: hir::TraitItemKind::Const(_, Some(ct_rhs)), ..
+        kind: hir::TraitItemKind::Const(_, Some(ct_rhs), _),
+        ..
     })) = grandparent_node
     else {
         return false;
@@ -1594,7 +1596,7 @@ fn const_of_item<'tcx>(
     let ct_rhs = match tcx.hir_node_by_def_id(def_id) {
         hir::Node::Item(hir::Item { kind: hir::ItemKind::Const(.., ct), .. }) => *ct,
         hir::Node::TraitItem(hir::TraitItem {
-            kind: hir::TraitItemKind::Const(.., ct), ..
+            kind: hir::TraitItemKind::Const(_, ct, _), ..
         }) => ct.expect("no default value for trait assoc const"),
         hir::Node::ImplItem(hir::ImplItem { kind: hir::ImplItemKind::Const(.., ct), .. }) => *ct,
         _ => {
@@ -1622,5 +1624,24 @@ fn const_of_item<'tcx>(
         ty::EarlyBinder::bind(Const::new_error(tcx, e))
     } else {
         ty::EarlyBinder::bind(ct)
+    }
+}
+
+/// Check if a Const or AssocConst is a type const (mgca)
+fn is_rhs_type_const<'tcx>(tcx: TyCtxt<'tcx>, def: LocalDefId) -> bool {
+    match tcx.hir_node_by_def_id(def) {
+        hir::Node::Item(hir::Item {
+            kind: hir::ItemKind::Const(_, _, _, hir::ConstItemRhs::TypeConst(_)),
+            ..
+        })
+        | hir::Node::ImplItem(hir::ImplItem {
+            kind: hir::ImplItemKind::Const(_, hir::ConstItemRhs::TypeConst(_)),
+            ..
+        })
+        | hir::Node::TraitItem(hir::TraitItem {
+            kind: hir::TraitItemKind::Const(_, _, hir::IsTypeConst::Yes),
+            ..
+        }) => return true,
+        _ => return false,
     }
 }

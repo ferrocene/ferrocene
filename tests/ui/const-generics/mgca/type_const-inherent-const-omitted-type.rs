@@ -4,8 +4,7 @@
 struct A;
 
 impl A {
-    #[type_const]
-    const B = 4;
+    type const B = 4;
     //~^ ERROR: missing type for `const` item
 }
 

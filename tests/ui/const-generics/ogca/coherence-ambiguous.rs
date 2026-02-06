@@ -4,11 +4,9 @@
 #![feature(generic_const_items, min_generic_const_args, opaque_generic_const_args)]
 #![expect(incomplete_features)]
 
-#[type_const]
-const FOO<const N: usize>: usize = const { N + 1 };
+type const FOO<const N: usize>: usize = const { N + 1 };
 
-#[type_const]
-const BAR<const N: usize>: usize = const { N + 1 };
+type const BAR<const N: usize>: usize = const { N + 1 };
 
 trait Trait {}
 

@@ -888,13 +888,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         EncodeCrossCrate::Yes, experimental!(patchable_function_entry)
     ),
 
-    // Probably temporary component of min_generic_const_args.
-    // `#[type_const] const ASSOC: usize;`
-    gated!(
-        type_const, Normal, template!(Word), ErrorFollowing,
-        EncodeCrossCrate::Yes, min_generic_const_args, experimental!(type_const),
-    ),
-
     // The `#[loop_match]` and `#[const_continue]` attributes are part of the
     // lang experiment for RFC 3720 tracked in:
     //

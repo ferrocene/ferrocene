@@ -8,8 +8,7 @@ pub struct NoPin;
 impl<TA> Pins<TA> for NoPin {}
 
 pub trait PinA<PER> {
-    #[type_const]
-    const A: &'static () = const { &() };
+    type const A: &'static () = const { &() };
 }
 
 pub trait Pins<USART> {}

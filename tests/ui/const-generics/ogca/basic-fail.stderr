@@ -1,5 +1,5 @@
 error[E0308]: mismatched types
-  --> $DIR/basic-fail.rs:19:30
+  --> $DIR/basic-fail.rs:15:30
    |
 LL | const ARR: [(); ADD1::<0>] = [(); INC::<0>];
    |                              ^^^^^^^^^^^^^^ expected an array with a size of const { N + 1 }, found one with a size of const { N + 1 }

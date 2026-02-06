@@ -7,5 +7,5 @@ const N: usize = 4;
 
 fn main() {
     let x = [(); N];
-    //~^ ERROR use of `const` in the type system without `#[type_const]`
+    //~^ ERROR use of `const` in the type system not defined as `type const`
 }

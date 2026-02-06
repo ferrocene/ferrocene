@@ -1630,6 +1630,9 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 let table = tcx.associated_types_for_impl_traits_in_trait_or_impl(def_id);
                 record!(self.tables.associated_types_for_impl_traits_in_trait_or_impl[def_id] <- table);
             }
+            if let DefKind::AssocConst | DefKind::Const = def_kind {
+                record!(self.tables.is_rhs_type_const[def_id] <- self.tcx.is_rhs_type_const(def_id));
+            }
         }
 
         for (def_id, impls) in &tcx.crate_inherent_impls(()).0.inherent_impls {

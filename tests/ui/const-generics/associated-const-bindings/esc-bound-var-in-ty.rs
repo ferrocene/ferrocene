@@ -9,8 +9,7 @@
 #![allow(incomplete_features)]
 
 trait Trait<'a> {
-    #[type_const]
-    const K: &'a ();
+    type const K: &'a ();
 }
 
 fn take(_: impl for<'r> Trait<'r, K = const { &() }>) {}

@@ -5,8 +5,5 @@ edition = "2024"
 publish = false
 
 [dependencies]
-object = "0.37.3"
+object = { version = "0.37.3", features = ["wasm"] }
 serde_json = "1.0.149"
-
-[features]
-wasm = ["object/wasm"]

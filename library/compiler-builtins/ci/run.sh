@@ -47,7 +47,6 @@ fi
 # `compiler-builtins` is built with various features. Symcheck invokes Cargo to
 # build with the arguments we provide it, then validates the built artifacts.
 symcheck=(cargo run -p symbol-check --release)
-[[ "$target" = "wasm"* ]] && symcheck+=(--features wasm)
 symcheck+=(-- build-and-check)
 
 "${symcheck[@]}" "$target" -- -p compiler_builtins

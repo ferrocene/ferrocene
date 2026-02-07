@@ -147,9 +147,9 @@ attribute_parsers!(
         DocParser,
         MacroUseParser,
         NakedParser,
+        RustcCguTestAttributeParser,
         StabilityParser,
         UsedParser,
-        RustcCguTestAttributeParser,
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
@@ -210,6 +210,7 @@ attribute_parsers!(
         Single<RustcLegacyConstGenericsParser>,
         Single<RustcLintOptDenyFieldAccessParser>,
         Single<RustcMustImplementOneOfParser>,
+        Single<RustcNeverTypeOptionsParser>,
         Single<RustcObjectLifetimeDefaultParser>,
         Single<RustcReservationImplParser>,
         Single<RustcScalableVectorParser>,

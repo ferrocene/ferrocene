@@ -99,6 +99,7 @@ impl AttributeKind {
             RustcBodyStability { .. } => No,
             RustcBuiltinMacro { .. } => Yes,
             RustcCaptureAnalysis => No,
+            RustcCguTestAttr { .. } => No,
             RustcClean { .. } => No,
             RustcCoherenceIsCore(..) => No,
             RustcCoinductive(..) => No,
@@ -139,6 +140,7 @@ impl AttributeKind {
             RustcMir(..) => Yes,
             RustcMustImplementOneOf { .. } => No,
             RustcNeverReturnsNullPointer => Yes,
+            RustcNeverTypeOptions { .. } => No,
             RustcNoImplicitAutorefs => Yes,
             RustcNoImplicitBounds => No,
             RustcNonConstTraitMethod => No, // should be reported via other queries like `constness`
@@ -149,7 +151,6 @@ impl AttributeKind {
             RustcOffloadKernel => Yes,
             RustcOutlives => No,
             RustcParenSugar(..) => No,
-            RustcCguTestAttr { .. } => No,
             RustcPassByValue(..) => Yes,
             RustcPassIndirectlyInNonRusticAbis(..) => No,
             RustcPreserveUbChecks => No,

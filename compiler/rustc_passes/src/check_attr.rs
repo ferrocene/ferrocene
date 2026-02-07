@@ -295,6 +295,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcBodyStability { .. }
                     | AttributeKind::RustcBuiltinMacro { .. }
                     | AttributeKind::RustcCaptureAnalysis
+                    | AttributeKind::RustcCguTestAttr(..)
                     | AttributeKind::RustcClean(..)
                     | AttributeKind::RustcCoherenceIsCore(..)
                     | AttributeKind::RustcCoinductive(..)
@@ -332,6 +333,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcMain
                     | AttributeKind::RustcMir(_)
                     | AttributeKind::RustcNeverReturnsNullPointer
+                    | AttributeKind::RustcNeverTypeOptions {..}
                     | AttributeKind::RustcNoImplicitAutorefs
                     | AttributeKind::RustcNoImplicitBounds
                     | AttributeKind::RustcNonConstTraitMethod
@@ -341,7 +343,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcOffloadKernel
                     | AttributeKind::RustcOutlives
                     | AttributeKind::RustcParenSugar(..)
-                    | AttributeKind::RustcCguTestAttr(..)
                     | AttributeKind::RustcPassByValue (..)
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
                     | AttributeKind::RustcPreserveUbChecks
@@ -405,7 +406,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::rustc_test_marker
                             | sym::rustc_layout
                             | sym::rustc_proc_macro_decls
-                            | sym::rustc_never_type_options
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis
                             | sym::rustc_mir

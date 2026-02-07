@@ -98,7 +98,7 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                                     .fields
                                     .len()
                             );
-                            self.write_tuple_fields(tuple_place, fields, ty)?;
+                            self.write_tuple_type_info(tuple_place, fields, ty)?;
                             variant
                         }
                         ty::Array(ty, len) => {
@@ -232,42 +232,6 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
         interp_ok(())
     }
 
-    // TODO(type_info): Remove this method, use `allocate_fill_and_write_slice_ptr` as it's more general.
-    pub(crate) fn write_tuple_fields(
-        &mut self,
-        tuple_place: impl Writeable<'tcx, CtfeProvenance>,
-        fields: &[Ty<'tcx>],
-        tuple_ty: Ty<'tcx>,
-    ) -> InterpResult<'tcx> {
-        // project into the `type_info::Tuple::fields` field
-        let fields_slice_place = self.project_field(&tuple_place, FieldIdx::ZERO)?;
-        // get the `type_info::Field` type from `fields: &[Field]`
-        let field_type = fields_slice_place
-            .layout()
-            .ty
-            .builtin_deref(false)
-            .unwrap()
-            .sequence_element_type(self.tcx.tcx);
-        // Create an array with as many elements as the number of fields in the inspected tuple
-        let fields_layout =
-            self.layout_of(Ty::new_array(self.tcx.tcx, field_type, fields.len() as u64))?;
-        let fields_place = self.allocate(fields_layout, MemoryKind::Stack)?;
-        let mut fields_places = self.project_array_fields(&fields_place)?;
-
-        let tuple_layout = self.layout_of(tuple_ty)?;
-
-        while let Some((i, place)) = fields_places.next(self)? {
-            let field_ty = fields[i as usize];
-            self.write_field(field_ty, place, tuple_layout, None, i)?;
-        }
-
-        let fields_place = fields_place.map_provenance(CtfeProvenance::as_immutable);
-
-        let ptr = Immediate::new_slice(fields_place.ptr(), fields.len() as u64, self);
-
-        self.write_immediate(ptr, &fields_slice_place)
-    }
-
     // Write fields for struct, enum variants
     fn write_variant_fields(
         &mut self,
@@ -323,6 +287,24 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
             }
         }
         interp_ok(())
+    }
+
+    pub(crate) fn write_tuple_type_info(
+        &mut self,
+        tuple_place: impl Writeable<'tcx, CtfeProvenance>,
+        fields: &[Ty<'tcx>],
+        tuple_ty: Ty<'tcx>,
+    ) -> InterpResult<'tcx> {
+        let tuple_layout = self.layout_of(tuple_ty)?;
+        let fields_slice_place = self.project_field(&tuple_place, FieldIdx::ZERO)?;
+        self.allocate_fill_and_write_slice_ptr(
+            fields_slice_place,
+            fields.len() as u64,
+            |this, i, place| {
+                let field_ty = fields[i as usize];
+                this.write_field(field_ty, place, tuple_layout, None, i)
+            },
+        )
     }
 
     pub(crate) fn write_array_type_info(

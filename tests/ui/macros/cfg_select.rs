@@ -151,8 +151,10 @@ cfg_select! {
 }
 
 cfg_select! {
-    unix => {}
-    unix => {}
+    test => {}
+    test => {}
+    //~^ WARN unreachable configuration predicate
+    _ => {}
     //~^ WARN unreachable configuration predicate
 }
 

@@ -66,8 +66,10 @@ fn test_core_symbols() {
     let lib_out = dir.path().join("libfoo.rlib");
     rustc_build(&input_dir().join("core_symbols.rs"), &lib_out, |cmd| cmd);
     let assert = cargo_bin_cmd!().arg("check").arg(&lib_out).assert();
-    // FIXME(symcheck): this should fail but we don't detect the new mangling.
-    assert.success();
+    assert
+        .failure()
+        .stderr_contains("found 1 undefined symbols from core")
+        .stderr_contains("from_utf8");
 }
 
 #[test]

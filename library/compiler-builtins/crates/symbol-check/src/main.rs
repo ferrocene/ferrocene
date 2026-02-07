@@ -9,12 +9,14 @@ use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::LazyLock;
 
 use object::read::archive::ArchiveFile;
 use object::{
     File as ObjFile, Object, ObjectSection, ObjectSymbol, Result as ObjResult, Symbol, SymbolKind,
     SymbolScope,
 };
+use regex::Regex;
 use serde_json::Value;
 
 const CHECK_LIBRARIES: &[&str] = &["compiler_builtins", "builtins_test_intrinsics"];
@@ -255,6 +257,14 @@ fn verify_no_duplicates(archive: &BinFile) {
 
 /// Ensure that there are no references to symbols from `core` that aren't also (somehow) defined.
 fn verify_core_symbols(archive: &BinFile) {
+    // Match both mangling styles:
+    //
+    // * `_ZN4core3str8converts9from_utf817hd4454ac14cbbb790E` (old)
+    // * `_RNvNtNtCscK9O3IwVk7N_4core3str8converts9from_utf8` (v0)
+    //
+    // Also account for the Apple leading `_`.
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^_?_[RZ].*4core").unwrap());
+
     let mut defined = BTreeSet::new();
     let mut undefined = Vec::new();
     let mut has_symbols = false;
@@ -263,7 +273,7 @@ fn verify_core_symbols(archive: &BinFile) {
         has_symbols = true;
 
         // Find only symbols from `core`
-        if !symbol.name().unwrap().contains("_ZN4core") {
+        if !RE.is_match(symbol.name().unwrap()) {
             return;
         }
 

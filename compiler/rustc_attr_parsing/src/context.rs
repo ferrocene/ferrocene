@@ -270,6 +270,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcEffectiveVisibilityParser>>,
         Single<WithoutArgs<RustcHasIncoherentInherentImplsParser>>,
         Single<WithoutArgs<RustcHiddenTypeOfOpaquesParser>>,
+        Single<WithoutArgs<RustcInsignificantDtorParser>>,
         Single<WithoutArgs<RustcIntrinsicConstStableIndirectParser>>,
         Single<WithoutArgs<RustcIntrinsicParser>>,
         Single<WithoutArgs<RustcLintOptTyParser>>,

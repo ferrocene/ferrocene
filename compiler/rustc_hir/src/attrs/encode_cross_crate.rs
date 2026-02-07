@@ -167,6 +167,7 @@ impl AttributeKind {
             RustcStrictCoherence(..) => Yes,
             RustcSymbolName(..) => Yes,
             RustcThenThisWouldNeed(..) => No,
+            RustcTrivialFieldReads => Yes,
             RustcUnsafeSpecializationMarker(..) => No,
             RustcVariance => No,
             RustcVarianceOfOpaques => No,

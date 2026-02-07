@@ -1326,6 +1326,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_then_this_would_need]`
     RustcThenThisWouldNeed(Span, ThinVec<Ident>),
 
+    /// Represents `#[rustc_trivial_field_reads]`
+    RustcTrivialFieldReads,
+
     /// Represents `#[rustc_unsafe_specialization_marker]`.
     RustcUnsafeSpecializationMarker(Span),
 

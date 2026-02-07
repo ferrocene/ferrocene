@@ -149,6 +149,7 @@ impl AttributeKind {
             RustcNoImplicitBounds => No,
             RustcNoMirInline => Yes,
             RustcNonConstTraitMethod => No, // should be reported via other queries like `constness`
+            RustcNonnullOptimizationGuaranteed => Yes,
             RustcNounwind => No,
             RustcObjcClass { .. } => No,
             RustcObjcSelector { .. } => No,

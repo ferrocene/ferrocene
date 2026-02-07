@@ -1268,6 +1268,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_non_const_trait_method]`.
     RustcNonConstTraitMethod,
 
+    /// Represents `#[rustc_nonnull_optimization_guaranteed]`.
+    RustcNonnullOptimizationGuaranteed,
+
     /// Represents `#[rustc_nounwind]`
     RustcNounwind,
 

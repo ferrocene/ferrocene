@@ -409,7 +409,6 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         // cause the borrow checker to enforce that `val` lives sufficiently
                         // long to be stored in `b`. The above lowering does this; anything that
                         // involves a `*const T` or a `NonNull<T>` does not as those are covariant.
-                        let tcx = this.tcx;
 
                         // Extract the operands, compile `b`.
                         let [b, val] = **args else {
@@ -419,28 +418,19 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         else {
                             span_bug!(expr_span, "invalid init_box_via_move call")
                         };
-
-                        // Helper to project to a field of an ADT.
-                        let place_project_field = |place: Place<'tcx>, idx: FieldIdx| {
-                            let ty = place.ty(&this.local_decls, tcx).ty;
-                            let ty::Adt(adt, args) = ty.kind() else {
-                                panic!("projecting to field of non-ADT {ty}")
-                            };
-                            let field = &adt.non_enum_variant().fields[idx];
-                            let field_ty = field.ty(tcx, args);
-                            place.project_deeper(&[ProjectionElem::Field(idx, field_ty)], tcx)
-                        };
+                        let tcx = this.tcx;
+                        let decls = &this.local_decls;
 
                         // `b` is a `Box<MaybeUninit<T>>`.
                         let place = b.project_deeper(&[ProjectionElem::Deref], tcx);
                         // Current type: `MaybeUninit<T>`. Field #1 is `ManuallyDrop<T>`.
-                        let place = place_project_field(place, FieldIdx::from_u32(1));
+                        let place = place.project_to_field(FieldIdx::from_u32(1), decls, tcx);
                         // Current type: `ManuallyDrop<T>`. Field #0 is `MaybeDangling<T>`.
-                        let place = place_project_field(place, FieldIdx::ZERO);
+                        let place = place.project_to_field(FieldIdx::ZERO, decls, tcx);
                         // Current type: `MaybeDangling<T>`. Field #0 is `T`.
-                        let place = place_project_field(place, FieldIdx::ZERO);
+                        let place = place.project_to_field(FieldIdx::ZERO, decls, tcx);
                         // Sanity check.
-                        assert_eq!(place.ty(&this.local_decls, tcx).ty, generic_args.type_at(0));
+                        assert_eq!(place.ty(decls, tcx).ty, generic_args.type_at(0));
 
                         // Store `val` into place.
                         unpack!(block = this.expr_into_dest(place, block, val));

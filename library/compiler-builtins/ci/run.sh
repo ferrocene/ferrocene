@@ -13,11 +13,6 @@ if [ -z "$target" ]; then
     target="$host_target"
 fi
 
-if [[ "$target" = *"wasm"* ]]; then
-    # Enable the random backend
-    export RUSTFLAGS="${RUSTFLAGS:-} --cfg getrandom_backend=\"wasm_js\""
-fi
-
 if [ "${USING_CONTAINER_RUSTC:-}" = 1 ]; then
     # Install nonstandard components if we have control of the environment
     rustup target list --installed |

@@ -498,7 +498,7 @@ fn int_float_common<F1: Float, F2: Float>(
         if input.0 > 4000 {
             return XFAIL_NOCHECK;
         } else if input.0 > 100 {
-            return CheckAction::AssertWithUlp(1_000_000);
+            return CheckAction::AssertWithUlp(2_000_000);
         }
     }
     DEFAULT

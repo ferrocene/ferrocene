@@ -15,6 +15,10 @@ license = "MIT"
 edition = "2021"
 rust-version = "1.63"
 
+[dev-dependencies]
+# FIXME(msrv): switch to `no-panic.workspace` when possible
+no-panic = "0.1.35"
+
 [features]
 default = ["arch"]
 
@@ -41,10 +45,6 @@ unstable-float = []
 # Rust dependencies. Setting this overrides all features that may enable
 # hard float operations.
 force-soft-floats = []
-
-[dev-dependencies]
-# FIXME(msrv): switch to `no-panic.workspace` when possible
-no-panic = "0.1.35"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [

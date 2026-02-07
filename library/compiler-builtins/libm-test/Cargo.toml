@@ -5,28 +5,6 @@ edition = "2024"
 publish = false
 license = "MIT OR Apache-2.0"
 
-[features]
-default = ["build-mpfr", "unstable-float"]
-
-# Propagated from libm because this affects which functions we test.
-unstable-float = ["libm/unstable-float", "rug?/nightly-float"]
-
-# Generate tests which are random inputs and the outputs are calculated with
-# musl libc.
-build-mpfr = ["dep:rug", "dep:gmp-mpfr-sys"]
-
-# Build our own musl for testing and benchmarks
-build-musl = ["dep:musl-math-sys"]
-
-# Enable report generation without bringing in more dependencies by default
-benchmarking-reports = ["criterion/plotters", "criterion/html_reports"]
-
-# Enable icount benchmarks (requires gungraun-runner and valgrind locally)
-icount = ["dep:gungraun"]
-
-# Run with a reduced set of benchmarks, such as for CI
-short-benchmarks = []
-
 [dependencies]
 anyhow.workspace = true
 # This is not directly used but is required so we can enable `gmp-mpfr-sys/force-cross`.
@@ -51,6 +29,28 @@ rand = { workspace = true, optional = true }
 [dev-dependencies]
 criterion.workspace = true
 libtest-mimic.workspace = true
+
+[features]
+default = ["build-mpfr", "unstable-float"]
+
+# Propagated from libm because this affects which functions we test.
+unstable-float = ["libm/unstable-float", "rug?/nightly-float"]
+
+# Generate tests which are random inputs and the outputs are calculated with
+# musl libc.
+build-mpfr = ["dep:rug", "dep:gmp-mpfr-sys"]
+
+# Build our own musl for testing and benchmarks
+build-musl = ["dep:musl-math-sys"]
+
+# Enable report generation without bringing in more dependencies by default
+benchmarking-reports = ["criterion/plotters", "criterion/html_reports"]
+
+# Enable icount benchmarks (requires gungraun-runner and valgrind locally)
+icount = ["dep:gungraun"]
+
+# Run with a reduced set of benchmarks, such as for CI
+short-benchmarks = []
 
 [[bench]]
 name = "icount"

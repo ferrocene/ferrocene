@@ -276,6 +276,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcPassIndirectlyInNonRusticAbisParser>>,
         Single<WithoutArgs<RustcPreserveUbChecksParser>>,
         Single<WithoutArgs<RustcReallocatorParser>>,
+        Single<WithoutArgs<RustcRegionsParser>>,
         Single<WithoutArgs<RustcShouldNotBeCalledOnConstItems>>,
         Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,
         Single<WithoutArgs<RustcVarianceParser>>,

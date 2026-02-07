@@ -169,32 +169,6 @@ attribute_parsers!(
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
-%%%%%%% Changes from base to side #1
-%%%%%%%%%%% Changes from base to side #1
-         Single<WithoutArgs<RustcStrictCoherenceParser>>,
-         Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,
-         Single<WithoutArgs<RustcVarianceParser>>,
-         Single<WithoutArgs<SpecializationTraitParser>>,
-         Single<WithoutArgs<StdInternalSymbolParser>>,
-         Single<WithoutArgs<ThreadLocalParser>>,
-         Single<WithoutArgs<TrackCallerParser>>,
-+        Single<WithoutArgs<RustcStrictCoherenceParser>>,
-+++++++ Contents of side #2
-        Single<WithoutArgs<RustcTrivialFieldReadsParser>>,
-+++++++++++ Contents of side #2
--        Single<WithoutArgs<TypeConstParser>>,
-         Single<WithoutArgs<UnsafeSpecializationMarkerParser>>,
-<<<<<<< Conflict 1 of 1
-<<<<<<<<<<< Conflict 2 of 2
->>>>>>> Conflict 1 of 1 ends
-        Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,
-        Single<WithoutArgs<RustcVarianceParser>>,
-        Single<WithoutArgs<SpecializationTraitParser>>,
-        Single<WithoutArgs<StdInternalSymbolParser>>,
-        Single<WithoutArgs<ThreadLocalParser>>,
-        Single<WithoutArgs<TrackCallerParser>>,
-        Single<WithoutArgs<TypeConstParser>>,
-        Single<WithoutArgs<UnsafeSpecializationMarkerParser>>,
         Single<CfiEncodingParser>,
         Single<CollapseDebugInfoParser>,
         Single<CoverageParser>,
@@ -237,9 +211,9 @@ attribute_parsers!(
         Single<RustcLintOptDenyFieldAccessParser>,
         Single<RustcMustImplementOneOfParser>,
         Single<RustcNeverTypeOptionsParser>,
+        Single<RustcNeverTypeOptionsParser>,
         Single<RustcObjectLifetimeDefaultParser>,
         Single<RustcReservationImplParser>,
-        Single<RustcNeverTypeOptionsParser>,
         Single<RustcScalableVectorParser>,
         Single<RustcSimdMonomorphizeLaneLimitParser>,
         Single<RustcSymbolName>,
@@ -315,6 +289,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcNeverReturnsNullPointerParser>>,
         Single<WithoutArgs<RustcNoImplicitAutorefsParser>>,
         Single<WithoutArgs<RustcNoImplicitBoundsParser>>,
+        Single<WithoutArgs<RustcNoMirInlineParser>>,
         Single<WithoutArgs<RustcNonConstTraitMethodParser>>,
         Single<WithoutArgs<RustcNounwindParser>>,
         Single<WithoutArgs<RustcOffloadKernelParser>>,
@@ -324,7 +299,23 @@ attribute_parsers!(
         Single<WithoutArgs<RustcReallocatorParser>>,
         Single<WithoutArgs<RustcRegionsParser>>,
         Single<WithoutArgs<RustcShouldNotBeCalledOnConstItems>>,
->>>>>>>>>>> Conflict 2 of 2 ends
+        Single<WithoutArgs<RustcStrictCoherenceParser>>,
+        Single<WithoutArgs<RustcStrictCoherenceParser>>,
+        Single<WithoutArgs<RustcTrivialFieldReadsParser>>,
+        Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,
+        Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,
+        Single<WithoutArgs<RustcVarianceParser>>,
+        Single<WithoutArgs<RustcVarianceParser>>,
+        Single<WithoutArgs<SpecializationTraitParser>>,
+        Single<WithoutArgs<SpecializationTraitParser>>,
+        Single<WithoutArgs<StdInternalSymbolParser>>,
+        Single<WithoutArgs<StdInternalSymbolParser>>,
+        Single<WithoutArgs<ThreadLocalParser>>,
+        Single<WithoutArgs<ThreadLocalParser>>,
+        Single<WithoutArgs<TrackCallerParser>>,
+        Single<WithoutArgs<TrackCallerParser>>,
+        Single<WithoutArgs<UnsafeSpecializationMarkerParser>>,
+        Single<WithoutArgs<UnsafeSpecializationMarkerParser>>,
         // tidy-alphabetical-end
     ];
 );

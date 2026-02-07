@@ -274,6 +274,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcConversionSuggestionParser>>,
         Single<WithoutArgs<RustcDeallocatorParser>>,
         Single<WithoutArgs<RustcDelayedBugFromInsideQueryParser>>,
+        Single<WithoutArgs<RustcDoNotConstCheckParser>>,
         Single<WithoutArgs<RustcDumpDefParentsParser>>,
         Single<WithoutArgs<RustcDumpItemBoundsParser>>,
         Single<WithoutArgs<RustcDumpPredicatesParser>>,

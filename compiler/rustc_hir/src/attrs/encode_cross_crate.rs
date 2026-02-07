@@ -115,6 +115,7 @@ impl AttributeKind {
             RustcDenyExplicitImpl(..) => No,
             RustcDeprecatedSafe2024 { .. } => Yes,
             RustcDiagnosticItem(..) => Yes,
+            RustcDoNotConstCheck => Yes,
             RustcDummy => No,
             RustcDumpDefParents => No,
             RustcDumpItemBounds => No,

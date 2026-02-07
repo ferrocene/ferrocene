@@ -1163,6 +1163,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_diagnostic_item]`
     RustcDiagnosticItem(Symbol),
 
+    /// Represents `#[rustc_do_not_const_check]`
+    RustcDoNotConstCheck,
+
     /// Represents `#[rustc_dummy]`.
     RustcDummy,
 

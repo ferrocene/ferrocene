@@ -43,6 +43,7 @@ unstable-float = []
 force-soft-floats = []
 
 [dev-dependencies]
+# FIXME(msrv): switch to `no-panic.workspace` when possible
 no-panic = "0.1.35"
 
 [lints.rust]

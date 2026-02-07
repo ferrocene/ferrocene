@@ -7,6 +7,9 @@
 # manifest that is identical except for the `core` dependency and forwards
 # to the same sources, which acts as the `compiler-builtins` Cargo entrypoint
 # for out of tree testing
+#
+# Ideally we can eventually replace this with a patch in the workspace
+# manifest <https://github.com/rust-lang/cargo/issues/4648>.
 
 [package]
 name = "compiler_builtins"
@@ -33,7 +36,7 @@ doctest = false
 test = false
 
 [build-dependencies]
-cc = { optional = true, version = "1.2" }
+cc = { version = "1.2", optional = true }
 
 [features]
 default = ["compiler-builtins"]

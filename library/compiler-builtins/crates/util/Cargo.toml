@@ -12,8 +12,8 @@ build-mpfr = ["libm-test/build-mpfr", "dep:rug"]
 unstable-float = ["libm/unstable-float", "libm-test/unstable-float", "rug?/nightly-float"]
 
 [dependencies]
-libm = { path = "../../libm", default-features = false }
-libm-macros = { path = "../libm-macros" }
-libm-test = { path = "../../libm-test", default-features = false }
-musl-math-sys = { path = "../musl-math-sys", optional = true }
-rug = { version = "1.28.1", optional = true, default-features = false, features = ["float", "std"] }
+libm.workspace = true
+libm-macros.workspace = true
+libm-test.workspace = true
+musl-math-sys = { workspace = true, optional = true }
+rug = { workspace = true, optional = true }

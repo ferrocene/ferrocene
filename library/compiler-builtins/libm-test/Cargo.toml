@@ -28,29 +28,29 @@ icount = ["dep:gungraun"]
 short-benchmarks = []
 
 [dependencies]
-anyhow = "1.0.101"
+anyhow.workspace = true
 # This is not directly used but is required so we can enable `gmp-mpfr-sys/force-cross`.
-gmp-mpfr-sys = { version = "1.6.8", optional = true, default-features = false }
-gungraun = { version = "0.17.0", optional = true }
-indicatif = { version = "0.18.3", default-features = false }
-libm = { path = "../libm", features = ["unstable-public-internals"] }
-libm-macros = { path = "../crates/libm-macros" }
-musl-math-sys = { path = "../crates/musl-math-sys", optional = true }
-paste = "1.0.15"
-rand = "0.9.2"
-rand_chacha = "0.9.0"
-rayon = "1.11.0"
-rug = { version = "1.28.1", optional = true, default-features = false, features = ["float", "integer", "std"] }
+gmp-mpfr-sys = { workspace = true, optional = true }
+gungraun = { workspace = true, optional = true }
+indicatif.workspace = true
+libm = { workspace = true, default-features = true, features = ["unstable-public-internals"] }
+libm-macros.workspace = true
+musl-math-sys = { workspace = true, optional = true }
+paste.workspace = true
+rand.workspace = true
+rand_chacha.workspace = true
+rayon.workspace = true
+rug = { workspace = true, optional = true }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-getrandom = { version = "0.3.4", features = ["wasm_js"] }
+getrandom = { workspace = true, features = ["wasm_js"] }
 
 [build-dependencies]
-rand = { version = "0.9.2", optional = true }
+rand = { workspace = true, optional = true }
 
 [dev-dependencies]
-criterion = { version = "0.6.0", default-features = false, features = ["cargo_bench_support"] }
-libtest-mimic = "0.8.1"
+criterion.workspace = true
+libtest-mimic.workspace = true
 
 [[bench]]
 name = "icount"

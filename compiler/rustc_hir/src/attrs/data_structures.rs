@@ -1120,6 +1120,12 @@ pub enum AttributeKind {
     /// Represents `#[rustc_if_this_changed]`
     RustcIfThisChanged(Span, Option<Symbol>),
 
+    /// Represents `#[rustc_intrinsic]`
+    RustcIntrinsic,
+
+    /// Represents `#[rustc_intrinsic_const_stable_indirect]`
+    RustcIntrinsicConstStableIndirect,
+
     /// Represents `#[rustc_layout]`
     RustcLayout(ThinVec<RustcLayoutType>),
 

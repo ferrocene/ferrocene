@@ -1417,8 +1417,8 @@ pub(crate) struct DuplicateEiiImpls {
     pub second_crate: Symbol,
 
     #[note("in addition to these two, { $num_additional_crates ->
-         [one] another implementation was found in crate {$additional_crate_names}
-         *[other] more implementations were also found in the following crates: {$additional_crate_names}
+        [one] another implementation was found in crate {$additional_crate_names}
+        *[other] more implementations were also found in the following crates: {$additional_crate_names}
     }")]
     pub additional_crates: Option<()>,
 

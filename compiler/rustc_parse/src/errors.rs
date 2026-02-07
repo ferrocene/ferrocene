@@ -1151,7 +1151,7 @@ pub(crate) enum MatchArmBodyWithoutBracesSugg {
     #[multipart_suggestion(
         "surround the {$num_statements ->
             [one] statement
-           *[other] statements
+            *[other] statements
         } with a body",
         applicability = "machine-applicable"
     )]

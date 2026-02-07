@@ -198,12 +198,12 @@ pub(crate) struct UnsafeOpInUnsafeFnCallToFunctionWithRequiresUnsafe {
     pub(crate) missing_target_features: DiagArgValue,
     pub(crate) missing_target_features_count: usize,
     #[note("the {$build_target_features} target {$build_target_features_count ->
-    [1] feature
-    *[count] features
+        [1] feature
+        *[count] features
     } being enabled in the build configuration does not remove the requirement to list {$build_target_features_count ->
-    [1] it
-*[count] them
-} in `#[target_feature]`")]
+        [1] it
+        *[count] them
+    } in `#[target_feature]`")]
     pub(crate) note: bool,
     pub(crate) build_target_features: DiagArgValue,
     pub(crate) build_target_features_count: usize,
@@ -532,12 +532,12 @@ pub(crate) struct CallToFunctionWithRequiresUnsafe {
     pub(crate) missing_target_features: DiagArgValue,
     pub(crate) missing_target_features_count: usize,
     #[note("the {$build_target_features} target {$build_target_features_count ->
-    [1] feature
-    *[count] features
-} being enabled in the build configuration does not remove the requirement to list {$build_target_features_count ->
-    [1] it
-    *[count] them
-} in `#[target_feature]`")]
+        [1] feature
+        *[count] features
+    } being enabled in the build configuration does not remove the requirement to list {$build_target_features_count ->
+        [1] it
+        *[count] them
+    } in `#[target_feature]`")]
     pub(crate) note: bool,
     pub(crate) build_target_features: DiagArgValue,
     pub(crate) build_target_features_count: usize,
@@ -1264,9 +1264,9 @@ pub(crate) struct InterpretedAsConstSugg {
 pub(crate) enum SuggestLet {
     #[multipart_suggestion(
         "you might want to use `if let` to ignore the {$count ->
-[one] variant that isn't
-*[other] variants that aren't
-} matched",
+            [one] variant that isn't
+            *[other] variants that aren't
+        } matched",
         applicability = "has-placeholders"
     )]
     If {
@@ -1278,9 +1278,9 @@ pub(crate) enum SuggestLet {
     },
     #[suggestion(
         "you might want to use `let...else` to handle the {$count ->
-[one] variant that isn't
-*[other] variants that aren't
-} matched",
+            [one] variant that isn't
+            *[other] variants that aren't
+        } matched",
         code = " else {{ todo!() }}",
         applicability = "has-placeholders"
     )]

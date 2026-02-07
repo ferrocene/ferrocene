@@ -9,13 +9,16 @@ use rustc_type_ir::solve::AliasBoundKind;
 
 use self::EvaluationResult::*;
 use super::{SelectionError, SelectionResult};
+use crate::traits::cache::WithDepNodeCache;
 use crate::ty;
-use crate::traits::cache::Cache;
 
-pub type SelectionCache<'tcx, ENV> =
-    Cache<(ENV, ty::TraitPredicate<'tcx>), SelectionResult<'tcx, SelectionCandidate<'tcx>>>;
+pub type SelectionCache<'tcx, ENV> = WithDepNodeCache<
+    (ENV, ty::TraitPredicate<'tcx>),
+    SelectionResult<'tcx, SelectionCandidate<'tcx>>,
+>;
 
-pub type EvaluationCache<'tcx, ENV> = Cache<(ENV, ty::PolyTraitPredicate<'tcx>), EvaluationResult>;
+pub type EvaluationCache<'tcx, ENV> =
+    WithDepNodeCache<(ENV, ty::PolyTraitPredicate<'tcx>), EvaluationResult>;
 
 /// The selection process begins by considering all impls, where
 /// clauses, and so forth that might resolve an obligation. Sometimes

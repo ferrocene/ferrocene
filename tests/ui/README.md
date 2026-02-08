@@ -172,10 +172,6 @@ See:
 - [`std::box::Boxed`](https://doc.rust-lang.org/std/boxed/struct.Box.html)
 - [Tracking issue for `box_patterns` feature #29641](https://github.com/rust-lang/rust/issues/29641)
 
-## `tests/ui/btreemap/`: B-Tree Maps
-
-Tests focused on `BTreeMap` collections and their compiler interactions. E.g. collection patterns, iterator behavior, and trait implementations specific to `BTreeMap`. See [`std::collections::BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html).
-
 ## `tests/ui/builtin-superkinds/`: Built-in Trait Hierarchy Tests
 
 Tests for built-in trait hierarchy (Send, Sync, Sized, etc.) and their supertrait relationships. E.g. auto traits and marker trait constraints.
@@ -262,11 +258,9 @@ This directory only contains one highly specific test. Other coinduction tests c
 
 ## `tests/ui/collections`
 
-These tests exercise the `collections` library.
+These tests exercise the `collections` library. For example, `BTreeMap` and `HashMap`.
 
 See [`std::collections`](https://doc.rust-lang.org/std/collections/index.html)
-
-**FIXME**: consider merge with `tests/ui/btreemap` and `tests/ui/hashmap`
 
 ## `tests/ui/command/`: `std::process::Command`
 
@@ -683,10 +677,6 @@ A broad category of tests on generics, usually used when no more specific subdir
 Tests on range patterns where one of the bounds is not a direct value.
 
 **FIXME**: Overlaps with `ui/range`. `impossible_range.rs` is particularly suspected to be a duplicate test.
-
-## `tests/ui/hashmap/`
-
-Tests for the standard library collection [`std::collections::HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html).
 
 ## `tests/ui/higher-ranked/`
 

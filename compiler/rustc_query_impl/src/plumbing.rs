@@ -29,13 +29,14 @@ use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle, HasDepContext}
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
-    QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra, force_query,
+    QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
 };
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
 use crate::QueryDispatcherUnerased;
 use crate::error::{QueryOverflow, QueryOverflowNote};
+use crate::execution::{all_inactive, force_query};
 
 /// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
 /// crate does not have direct access to [`TyCtxt`].
@@ -387,7 +388,7 @@ pub(crate) fn encode_query_results<'a, 'tcx, Q>(
 {
     let _timer = qcx.tcx.prof.generic_activity_with_arg("encode_query_results_for", query.name());
 
-    assert!(query.query_state(qcx).all_inactive());
+    assert!(all_inactive(query.query_state(qcx)));
     let cache = query.query_cache(qcx);
     cache.iter(&mut |key, value, dep_node| {
         if query.will_cache_on_disk_for_key(qcx.tcx, key) {
@@ -594,7 +595,7 @@ macro_rules! define_queries {
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
                     #[cfg(debug_assertions)]
                     let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
-                    get_query_incr(
+                    execution::get_query_incr(
                         QueryType::query_dispatcher(tcx),
                         QueryCtxt::new(tcx),
                         span,
@@ -614,7 +615,7 @@ macro_rules! define_queries {
                     key: queries::$name::Key<'tcx>,
                     __mode: QueryMode,
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
-                    Some(get_query_non_incr(
+                    Some(execution::get_query_non_incr(
                         QueryType::query_dispatcher(tcx),
                         QueryCtxt::new(tcx),
                         span,
@@ -748,7 +749,7 @@ macro_rules! define_queries {
                 };
 
                 // Call `gather_active_jobs_inner` to do the actual work.
-                let res = tcx.query_system.states.$name.gather_active_jobs_inner(
+                let res = crate::execution::gather_active_jobs_inner(&tcx.query_system.states.$name,
                     tcx,
                     make_frame,
                     qmap,

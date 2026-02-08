@@ -3,6 +3,7 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![feature(adt_const_params)]
+#![feature(core_intrinsics)]
 #![feature(min_specialization)]
 #![feature(rustc_attrs)]
 // tidy-alphabetical-end
@@ -25,21 +26,20 @@ use rustc_query_system::dep_graph::SerializedDepNodeIndex;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     CycleError, CycleErrorHandling, HashResult, QueryCache, QueryDispatcher, QueryMap, QueryMode,
-    QueryState, get_query_incr, get_query_non_incr,
+    QueryState,
 };
 use rustc_span::{ErrorGuaranteed, Span};
 
+pub use crate::plumbing::{QueryCtxt, query_key_hash_verify_all};
 use crate::plumbing::{encode_all_query_results, try_mark_green};
 use crate::profiling_support::QueryKeyStringCache;
-
-#[macro_use]
-mod plumbing;
-pub use crate::plumbing::{QueryCtxt, query_key_hash_verify_all};
-
-mod profiling_support;
-pub use self::profiling_support::alloc_self_profile_query_strings;
+pub use crate::profiling_support::alloc_self_profile_query_strings;
 
 mod error;
+mod execution;
+#[macro_use]
+mod plumbing;
+mod profiling_support;
 
 #[derive(ConstParamTy)] // Allow this struct to be used for const-generic values.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

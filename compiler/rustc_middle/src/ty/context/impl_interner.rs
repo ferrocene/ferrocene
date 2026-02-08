@@ -722,9 +722,11 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     }
 }
 
+/// Defines trivial conversion functions between the main [`LangItem`] enum,
+/// and some other lang-item enum that is a subset of it.
 macro_rules! bidirectional_lang_item_map {
     (
-        $solver_ty:ident, $to_solver:ident, $from_solver:ident;
+        $solver_ty:ident, fn $to_solver:ident, fn $from_solver:ident;
         $($name:ident),+ $(,)?
     ) => {
         fn $from_solver(lang_item: $solver_ty) -> LangItem {
@@ -743,7 +745,7 @@ macro_rules! bidirectional_lang_item_map {
 }
 
 bidirectional_lang_item_map! {
-    SolverLangItem, lang_item_to_solver_lang_item, solver_lang_item_to_lang_item;
+    SolverLangItem, fn lang_item_to_solver_lang_item, fn solver_lang_item_to_lang_item;
 
 // tidy-alphabetical-start
     AsyncFnKindUpvars,
@@ -759,7 +761,7 @@ bidirectional_lang_item_map! {
 }
 
 bidirectional_lang_item_map! {
-    SolverAdtLangItem, lang_item_to_solver_adt_lang_item, solver_adt_lang_item_to_lang_item;
+    SolverAdtLangItem, fn lang_item_to_solver_adt_lang_item, fn solver_adt_lang_item_to_lang_item;
 
 // tidy-alphabetical-start
     Option,
@@ -768,7 +770,7 @@ bidirectional_lang_item_map! {
 }
 
 bidirectional_lang_item_map! {
-    SolverTraitLangItem, lang_item_to_solver_trait_lang_item, solver_trait_lang_item_to_lang_item;
+    SolverTraitLangItem, fn lang_item_to_solver_trait_lang_item, fn solver_trait_lang_item_to_lang_item;
 
 // tidy-alphabetical-start
     AsyncFn,

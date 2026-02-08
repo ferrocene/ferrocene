@@ -518,10 +518,6 @@ The `dyn` keyword is used to highlight that calls to methods on the associated T
 
 See [`dyn` keyword](https://doc.rust-lang.org/std/keyword.dyn.html).
 
-## `tests/ui/dynamically-sized-types`: Dynamically Sized Types
-
-**FIXME**: should be coalesced with `tests/ui/dst`.
-
 ## `tests/ui/editions/`: Rust edition-specific peculiarities
 
 These tests run in specific Rust editions, such as Rust 2015 or Rust 2018, and check errors and functionality related to specific now-deprecated idioms and features.

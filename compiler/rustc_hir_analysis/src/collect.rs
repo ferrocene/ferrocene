@@ -1138,13 +1138,65 @@ fn recover_infer_ret_ty<'tcx>(
         );
     }
     let guar = diag.emit();
-    ty::Binder::dummy(tcx.mk_fn_sig(
+
+    // If we return a dummy binder here, we can ICE later in borrowck when it encounters
+    // `ReLateParam` regions (e.g. in a local type annotation) which weren't registered via the
+    // signature binder. See #135845.
+    let bound_vars = tcx.late_bound_vars(hir_id);
+    let scope = def_id.to_def_id();
+
+    let fn_sig = tcx.mk_fn_sig(
         fn_sig.inputs().iter().copied(),
         recovered_ret_ty.unwrap_or_else(|| Ty::new_error(tcx, guar)),
         fn_sig.c_variadic,
         fn_sig.safety,
         fn_sig.abi,
-    ))
+    );
+
+    let fn_sig = fold_regions(tcx, fn_sig, |r, _| match r.kind() {
+        ty::ReLateParam(lp) if lp.scope == scope => {
+            let br = match lp.kind {
+                ty::LateParamRegionKind::Anon(idx) | ty::LateParamRegionKind::NamedAnon(idx, _) => {
+                    let idx = idx as usize;
+                    match bound_vars.get(idx).copied() {
+                        Some(ty::BoundVariableKind::Region(br_kind)) => Some(ty::BoundRegion {
+                            var: ty::BoundVar::from_usize(idx),
+                            kind: br_kind,
+                        }),
+                        _ => None,
+                    }
+                }
+                ty::LateParamRegionKind::Named(def_id) => {
+                    bound_vars.iter().enumerate().find_map(|(idx, bv)| match bv {
+                        ty::BoundVariableKind::Region(
+                            br_kind @ ty::BoundRegionKind::Named(did),
+                        ) if did == def_id => Some(ty::BoundRegion {
+                            var: ty::BoundVar::from_usize(idx),
+                            kind: br_kind,
+                        }),
+                        _ => None,
+                    })
+                }
+                ty::LateParamRegionKind::ClosureEnv => {
+                    bound_vars.iter().enumerate().find_map(|(idx, bv)| match bv {
+                        ty::BoundVariableKind::Region(
+                            br_kind @ ty::BoundRegionKind::ClosureEnv,
+                        ) => Some(ty::BoundRegion {
+                            var: ty::BoundVar::from_usize(idx),
+                            kind: br_kind,
+                        }),
+                        _ => None,
+                    })
+                }
+            };
+
+            br.map(|br| ty::Region::new_bound(tcx, ty::INNERMOST, br))
+                .unwrap_or_else(|| ty::Region::new_error(tcx, guar))
+        }
+        _ => r,
+    });
+
+    ty::Binder::bind_with_vars(fn_sig, bound_vars)
 }
 
 pub fn suggest_impl_trait<'tcx>(

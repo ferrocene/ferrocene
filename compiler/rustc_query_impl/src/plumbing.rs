@@ -14,7 +14,8 @@ use rustc_hir::limit::Limit;
 use rustc_index::Idx;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::{
-    self, DepContext, DepKindVTable, DepNode, DepNodeIndex, SerializedDepNodeIndex, dep_kinds,
+    self, DepContext, DepKindVTable, DepNode, DepNodeIndex, DepsType, SerializedDepNodeIndex,
+    dep_kinds,
 };
 use rustc_middle::query::Key;
 use rustc_middle::query::on_disk_cache::{
@@ -29,13 +30,14 @@ use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle, HasDepContext}
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
-    QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra, force_query,
+    QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
 };
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
 use crate::QueryDispatcherUnerased;
 use crate::error::{QueryOverflow, QueryOverflowNote};
+use crate::execution::{all_inactive, force_query};
 
 /// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
 /// crate does not have direct access to [`TyCtxt`].
@@ -68,10 +70,57 @@ impl<'tcx> QueryCtxt<'tcx> {
             crate_name: self.tcx.crate_name(LOCAL_CRATE),
         });
     }
+
+    #[inline]
+    pub(crate) fn next_job_id(self) -> QueryJobId {
+        QueryJobId(
+            NonZero::new(
+                self.tcx.query_system.jobs.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+            )
+            .unwrap(),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn current_query_job(self) -> Option<QueryJobId> {
+        tls::with_related_context(self.tcx, |icx| icx.query)
+    }
+
+    /// Executes a job by changing the `ImplicitCtxt` to point to the
+    /// new query job while it executes.
+    #[inline(always)]
+    pub(crate) fn start_query<R>(
+        self,
+        token: QueryJobId,
+        depth_limit: bool,
+        compute: impl FnOnce() -> R,
+    ) -> R {
+        // The `TyCtxt` stored in TLS has the same global interner lifetime
+        // as `self`, so we use `with_related_context` to relate the 'tcx lifetimes
+        // when accessing the `ImplicitCtxt`.
+        tls::with_related_context(self.tcx, move |current_icx| {
+            if depth_limit
+                && !self.tcx.recursion_limit().value_within_limit(current_icx.query_depth)
+            {
+                self.depth_limit_error(token);
+            }
+
+            // Update the `ImplicitCtxt` to point to our new query job.
+            let new_icx = ImplicitCtxt {
+                tcx: self.tcx,
+                query: Some(token),
+                query_depth: current_icx.query_depth + depth_limit as usize,
+                task_deps: current_icx.task_deps,
+            };
+
+            // Use the `ImplicitCtxt` while we execute the query.
+            tls::enter_context(&new_icx, compute)
+        })
+    }
 }
 
 impl<'tcx> HasDepContext for QueryCtxt<'tcx> {
-    type Deps = rustc_middle::dep_graph::DepsType;
+    type Deps = DepsType;
     type DepContext = TyCtxt<'tcx>;
 
     #[inline]
@@ -84,21 +133,6 @@ impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
     #[inline]
     fn jobserver_proxy(&self) -> &Proxy {
         &self.tcx.jobserver_proxy
-    }
-
-    #[inline]
-    fn next_job_id(self) -> QueryJobId {
-        QueryJobId(
-            NonZero::new(
-                self.tcx.query_system.jobs.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-            )
-            .unwrap(),
-        )
-    }
-
-    #[inline]
-    fn current_query_job(self) -> Option<QueryJobId> {
-        tls::with_related_context(self.tcx, |icx| icx.query)
     }
 
     /// Returns a map of currently active query jobs, collected from all queries.
@@ -145,38 +179,6 @@ impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
         if let Some(c) = self.tcx.query_system.on_disk_cache.as_ref() {
             c.store_side_effect(dep_node_index, side_effect)
         }
-    }
-
-    /// Executes a job by changing the `ImplicitCtxt` to point to the
-    /// new query job while it executes.
-    #[inline(always)]
-    fn start_query<R>(
-        self,
-        token: QueryJobId,
-        depth_limit: bool,
-        compute: impl FnOnce() -> R,
-    ) -> R {
-        // The `TyCtxt` stored in TLS has the same global interner lifetime
-        // as `self`, so we use `with_related_context` to relate the 'tcx lifetimes
-        // when accessing the `ImplicitCtxt`.
-        tls::with_related_context(self.tcx, move |current_icx| {
-            if depth_limit
-                && !self.tcx.recursion_limit().value_within_limit(current_icx.query_depth)
-            {
-                self.depth_limit_error(token);
-            }
-
-            // Update the `ImplicitCtxt` to point to our new query job.
-            let new_icx = ImplicitCtxt {
-                tcx: self.tcx,
-                query: Some(token),
-                query_depth: current_icx.query_depth + depth_limit as usize,
-                task_deps: current_icx.task_deps,
-            };
-
-            // Use the `ImplicitCtxt` while we execute the query.
-            tls::enter_context(&new_icx, compute)
-        })
     }
 }
 
@@ -387,7 +389,7 @@ pub(crate) fn encode_query_results<'a, 'tcx, Q>(
 {
     let _timer = qcx.tcx.prof.generic_activity_with_arg("encode_query_results_for", query.name());
 
-    assert!(query.query_state(qcx).all_inactive());
+    assert!(all_inactive(query.query_state(qcx)));
     let cache = query.query_cache(qcx);
     cache.iter(&mut |key, value, dep_node| {
         if query.will_cache_on_disk_for_key(qcx.tcx, key) {
@@ -594,7 +596,7 @@ macro_rules! define_queries {
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
                     #[cfg(debug_assertions)]
                     let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
-                    get_query_incr(
+                    execution::get_query_incr(
                         QueryType::query_dispatcher(tcx),
                         QueryCtxt::new(tcx),
                         span,
@@ -614,7 +616,7 @@ macro_rules! define_queries {
                     key: queries::$name::Key<'tcx>,
                     __mode: QueryMode,
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
-                    Some(get_query_non_incr(
+                    Some(execution::get_query_non_incr(
                         QueryType::query_dispatcher(tcx),
                         QueryCtxt::new(tcx),
                         span,
@@ -748,7 +750,7 @@ macro_rules! define_queries {
                 };
 
                 // Call `gather_active_jobs_inner` to do the actual work.
-                let res = tcx.query_system.states.$name.gather_active_jobs_inner(
+                let res = crate::execution::gather_active_jobs_inner(&tcx.query_system.states.$name,
                     tcx,
                     make_frame,
                     qmap,

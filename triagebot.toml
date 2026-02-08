@@ -1555,10 +1555,6 @@ style-team = [
     "@joshtriplett",
     "@traviscross",
 ]
-project-exploit-mitigations = [
-    "@cuviper",
-    "@rcvalle",
-]
 compiletest = [
     "@jieyouxu",
 ]

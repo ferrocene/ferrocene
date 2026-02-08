@@ -1536,13 +1536,6 @@ mir-opt = [
     "@wesleywiser",
     "@saethlin",
 ]
-types = [
-    "@jackh726",
-    "@lcnr",
-    "@oli-obk",
-    "@spastorino",
-    "@BoxyUwU",
-]
 borrowck = [
     "@davidtwco",
     "@matthewjasper"
@@ -1561,21 +1554,6 @@ style-team = [
     "@calebcartwright",
     "@joshtriplett",
     "@traviscross",
-]
-project-const-traits = [
-    "@fee1-dead",
-    "@fmease",
-    "@oli-obk",
-]
-project-stable-mir = [
-    "@celinval",
-    "@oli-obk",
-    "@scottmcm",
-    "@makai410",
-]
-project-exploit-mitigations = [
-    "@cuviper",
-    "@rcvalle",
 ]
 compiletest = [
     "@jieyouxu",

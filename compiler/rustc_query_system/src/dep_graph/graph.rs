@@ -336,13 +336,17 @@ impl<D: Deps> DepGraphData<D> {
         //    in `DepGraph::try_mark_green()`.
         // 2. Two distinct query keys get mapped to the same `DepNode`
         //    (see for example #48923).
-        self.assert_dep_node_not_yet_allocated_in_current_session(&key, || {
-            format!(
-                "forcing query with already existing `DepNode`\n\
+        self.assert_dep_node_not_yet_allocated_in_current_session(
+            cx.dep_context().sess(),
+            &key,
+            || {
+                format!(
+                    "forcing query with already existing `DepNode`\n\
                  - query-key: {arg:?}\n\
                  - dep-node: {key:?}"
-            )
-        });
+                )
+            },
+        );
 
         let with_deps = |task_deps| D::with_deps(task_deps, || task(cx, arg));
         let (result, edges) = if cx.dep_context().is_eval_always(key.kind) {
@@ -627,12 +631,20 @@ impl<D: Deps> DepGraph<D> {
 impl<D: Deps> DepGraphData<D> {
     fn assert_dep_node_not_yet_allocated_in_current_session<S: std::fmt::Display>(
         &self,
+        sess: &Session,
         dep_node: &DepNode,
         msg: impl FnOnce() -> S,
     ) {
         if let Some(prev_index) = self.previous.node_to_index_opt(dep_node) {
-            let current = self.colors.get(prev_index);
-            assert_matches!(current, DepNodeColor::Unknown, "{}", msg())
+            let color = self.colors.get(prev_index);
+            let ok = match color {
+                DepNodeColor::Unknown => true,
+                DepNodeColor::Red => false,
+                DepNodeColor::Green(..) => sess.threads() > 1, // Other threads may mark this green
+            };
+            if !ok {
+                panic!("{}", msg())
+            }
         } else if let Some(nodes_in_current_session) = &self.current.nodes_in_current_session {
             outline(|| {
                 let seen = nodes_in_current_session.lock().contains_key(dep_node);
@@ -1035,11 +1047,12 @@ impl<D: Deps> DepGraph<D> {
 
     pub fn assert_dep_node_not_yet_allocated_in_current_session<S: std::fmt::Display>(
         &self,
+        sess: &Session,
         dep_node: &DepNode,
         msg: impl FnOnce() -> S,
     ) {
         if let Some(data) = &self.data {
-            data.assert_dep_node_not_yet_allocated_in_current_session(dep_node, msg)
+            data.assert_dep_node_not_yet_allocated_in_current_session(sess, dep_node, msg)
         }
     }
 

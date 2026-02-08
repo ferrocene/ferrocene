@@ -1526,12 +1526,6 @@ See [RFC 0132 Unified Function Call Syntax](https://github.com/rust-lang/rfcs/bl
 
 See [Tracking issue for Fn traits (`unboxed_closures` & `fn_traits` feature)](https://github.com/rust-lang/rust/issues/29625).
 
-## `tests/ui/underscore-imports/`
-
-See [Underscore imports | Reference](https://doc.rust-lang.org/reference/items/use-declarations.html#underscore-imports).
-
-**FIXME**: should become a subdirectory of `tests/ui/imports/`.
-
 ## `tests/ui/underscore-lifetime/`: `'_` elided lifetime
 
 Exercises [anonymous elided lifetimes](https://doc.rust-lang.org/reference/lifetime-elision.html).

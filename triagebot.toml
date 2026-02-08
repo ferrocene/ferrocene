@@ -1536,13 +1536,6 @@ mir-opt = [
     "@wesleywiser",
     "@saethlin",
 ]
-types = [
-    "@jackh726",
-    "@lcnr",
-    "@oli-obk",
-    "@spastorino",
-    "@BoxyUwU",
-]
 borrowck = [
     "@davidtwco",
     "@matthewjasper"

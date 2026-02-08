@@ -909,12 +909,6 @@ See [Tracking issue for allowing overlapping implementations for marker trait #2
 
 Broad category of tests on `match` constructs.
 
-## `tests/ui/meta/`: Tests for compiletest itself
-
-These tests check the function of the UI test suite at large and Compiletest in itself.
-
-**FIXME**: This should absolutely be merged with `tests/ui/compiletest-self-test/`.
-
 ## `tests/ui/methods/`
 
 A broad category for anything related to methods and method resolution.

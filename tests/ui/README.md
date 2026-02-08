@@ -687,10 +687,6 @@ See:
 - [Higher-ranked trait bounds | rustc-dev-guide](https://rustc-dev-guide.rust-lang.org/traits/hrtb.html)
 - [Higher-ranked trait bounds | Nomicon](https://doc.rust-lang.org/nomicon/hrtb.html)
 
-## `tests/ui/higher-ranked-trait-bounds`
-
-**FIXME**: move to `tests/ui/higher-ranked/trait-bounds`
-
 ## `tests/ui/hygiene/`
 
 This seems to have been originally intended for "hygienic macros" - macros which work in all contexts, independent of what surrounds them. However, this category has grown into a mish-mash of many tests that may belong in the other directories.

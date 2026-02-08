@@ -34,9 +34,9 @@ use rustc_query_system::query::{
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
-use crate::QueryDispatcherUnerased;
 use crate::error::{QueryOverflow, QueryOverflowNote};
 use crate::execution::{all_inactive, force_query};
+use crate::{QueryDispatcherUnerased, QueryFlags, SemiDynamicQueryDispatcher};
 
 /// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
 /// crate does not have direct access to [`TyCtxt`].
@@ -377,13 +377,13 @@ where
     QueryStackFrame::new(info, kind, hash, def_id, def_id_for_ty_in_cycle)
 }
 
-pub(crate) fn encode_query_results<'a, 'tcx, Q>(
-    query: Q::Dispatcher,
+pub(crate) fn encode_query_results<'a, 'tcx, Q, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
     qcx: QueryCtxt<'tcx>,
     encoder: &mut CacheEncoder<'a, 'tcx>,
     query_result_index: &mut EncodedDepNodeIndex,
 ) where
-    Q: QueryDispatcherUnerased<'tcx>,
+    Q: QueryDispatcherUnerased<'tcx, C, FLAGS>,
     Q::UnerasedValue: Encodable<CacheEncoder<'a, 'tcx>>,
 {
     let _timer = qcx.tcx.prof.generic_activity_with_arg("encode_query_results_for", query.name());
@@ -506,17 +506,22 @@ where
     }
 }
 
-pub(crate) fn make_dep_kind_vtable_for_query<'tcx, Q>(
+pub(crate) fn make_dep_kind_vtable_for_query<
+    'tcx,
+    Q,
+    C: QueryCache + 'tcx,
+    const FLAGS: QueryFlags,
+>(
     is_anon: bool,
     is_eval_always: bool,
 ) -> DepKindVTable<'tcx>
 where
-    Q: QueryDispatcherUnerased<'tcx>,
+    Q: QueryDispatcherUnerased<'tcx, C, FLAGS>,
 {
     let fingerprint_style = if is_anon {
         FingerprintStyle::Opaque
     } else {
-        <Q::Dispatcher as QueryDispatcher>::Key::fingerprint_style()
+        <C::Key as DepNodeKey<TyCtxt<'tcx>>>::fingerprint_style()
     };
 
     if is_anon || !fingerprint_style.reconstructible() {
@@ -712,25 +717,26 @@ macro_rules! define_queries {
                 is_feedable: feedable!([$($modifiers)*]),
             };
 
-            impl<'tcx> QueryDispatcherUnerased<'tcx> for QueryType<'tcx> {
+            impl<'tcx> QueryDispatcherUnerased<'tcx, queries::$name::Storage<'tcx>, FLAGS>
+                for QueryType<'tcx>
+            {
                 type UnerasedValue = queries::$name::Value<'tcx>;
-                type Dispatcher = SemiDynamicQueryDispatcher<
-                    'tcx,
-                    queries::$name::Storage<'tcx>,
-                    FLAGS,
-                >;
 
                 const NAME: &'static &'static str = &stringify!($name);
 
                 #[inline(always)]
-                fn query_dispatcher(tcx: TyCtxt<'tcx>) -> Self::Dispatcher {
+                fn query_dispatcher(tcx: TyCtxt<'tcx>)
+                    -> SemiDynamicQueryDispatcher<'tcx, queries::$name::Storage<'tcx>, FLAGS>
+                {
                     SemiDynamicQueryDispatcher {
                         vtable: &tcx.query_system.query_vtables.$name,
                     }
                 }
 
                 #[inline(always)]
-                fn restore_val(value: <Self::Dispatcher as QueryDispatcher<'tcx>>::Value) -> Self::UnerasedValue {
+                fn restore_val(value: <queries::$name::Storage<'tcx> as QueryCache>::Value)
+                    -> Self::UnerasedValue
+                {
                     erase::restore_val::<queries::$name::Value<'tcx>>(value)
                 }
             }
@@ -786,7 +792,11 @@ macro_rules! define_queries {
                     encoder: &mut CacheEncoder<'_, 'tcx>,
                     query_result_index: &mut EncodedDepNodeIndex
                 ) {
-                    $crate::plumbing::encode_query_results::<query_impl::$name::QueryType<'tcx>>(
+                    $crate::plumbing::encode_query_results::<
+                        query_impl::$name::QueryType<'tcx>,
+                        _,
+                        _
+                    > (
                         query_impl::$name::QueryType::query_dispatcher(tcx),
                         QueryCtxt::new(tcx),
                         encoder,
@@ -958,7 +968,7 @@ macro_rules! define_queries {
 
             $(pub(crate) fn $name<'tcx>() -> DepKindVTable<'tcx> {
                 use $crate::query_impl::$name::QueryType;
-                $crate::plumbing::make_dep_kind_vtable_for_query::<QueryType<'tcx>>(
+                $crate::plumbing::make_dep_kind_vtable_for_query::<QueryType<'tcx>, _, _>(
                     is_anon!([$($modifiers)*]),
                     is_eval_always!([$($modifiers)*]),
                 )

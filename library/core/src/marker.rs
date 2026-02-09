@@ -818,11 +818,13 @@ impl<T: PointeeSized> !Sync for *mut T {}
 /// [drop check]: Drop#drop-check
 #[lang = "phantom_data"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct PhantomData<T: PointeeSized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Hash for PhantomData<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 
@@ -859,6 +861,7 @@ impl<T: PointeeSized> Copy for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Clone for PhantomData<T> {
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         Self
     }

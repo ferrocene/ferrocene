@@ -35,14 +35,16 @@ macro_rules! impl_full_ops {
     ($($ty:ty: add($addfn:path), mul/div($bigty:ident);)*) => (
         $(
             impl FullOps for $ty {
-                fn full_mul_add(self, other: $ty, other2: $ty, carry: $ty) -> ($ty, $ty) {
+                #[ferrocene::prevalidated]
+fn full_mul_add(self, other: $ty, other2: $ty, carry: $ty) -> ($ty, $ty) {
                     // This cannot overflow;
                     // the output is between `0` and `2^nbits * (2^nbits - 1)`.
                     let (lo, hi) = self.carrying_mul_add(other, other2, carry);
                     (hi, lo)
                 }
 
-                fn full_div_rem(self, other: $ty, borrow: $ty) -> ($ty, $ty) {
+                #[ferrocene::prevalidated]
+fn full_div_rem(self, other: $ty, borrow: $ty) -> ($ty, $ty) {
                     debug_assert!(borrow < other);
                     // This cannot overflow; the output is between `0` and `other * (2^nbits - 1)`.
                     let lhs = ((borrow as $bigty) << <$ty>::BITS) | (self as $bigty);
@@ -77,6 +79,7 @@ macro_rules! define_bignum {
         ///
         /// All operations available to bignums panic in the case of overflows.
         /// The caller is responsible to use large enough bignum types.
+        #[ferrocene::prevalidated]
         pub struct $name {
             /// One plus the offset to the maximum "digit" in use.
             /// This does not decrease, so be aware of the computation order.
@@ -89,6 +92,7 @@ macro_rules! define_bignum {
 
         impl $name {
             /// Makes a bignum from one digit.
+            #[ferrocene::prevalidated]
             pub fn from_small(v: $ty) -> $name {
                 let mut base = [0; $n];
                 base[0] = v;
@@ -96,6 +100,7 @@ macro_rules! define_bignum {
             }
 
             /// Makes a bignum from `u64` value.
+            #[ferrocene::prevalidated]
             pub fn from_u64(mut v: u64) -> $name {
                 let mut base = [0; $n];
                 let mut sz = 0;
@@ -110,6 +115,7 @@ macro_rules! define_bignum {
             /// Returns the internal digits as a slice `[a, b, c, ...]` such that the numeric
             /// value is `a + b * 2^W + c * 2^(2W) + ...` where `W` is the number of bits in
             /// the digit type.
+            #[ferrocene::prevalidated]
             pub fn digits(&self) -> &[$ty] {
                 &self.base[..self.size]
             }
@@ -125,6 +131,7 @@ macro_rules! define_bignum {
             }
 
             /// Returns `true` if the bignum is zero.
+            #[ferrocene::prevalidated]
             pub fn is_zero(&self) -> bool {
                 self.digits().iter().all(|&v| v == 0)
             }
@@ -145,6 +152,7 @@ macro_rules! define_bignum {
             }
 
             /// Adds `other` to itself and returns its own mutable reference.
+            #[ferrocene::prevalidated]
             pub fn add<'a>(&'a mut self, other: &$name) -> &'a mut $name {
                 use crate::{cmp, iter};
 
@@ -181,6 +189,7 @@ macro_rules! define_bignum {
             }
 
             /// Subtracts `other` from itself and returns its own mutable reference.
+            #[ferrocene::prevalidated]
             pub fn sub<'a>(&'a mut self, other: &$name) -> &'a mut $name {
                 use crate::{cmp, iter};
 
@@ -198,6 +207,7 @@ macro_rules! define_bignum {
 
             /// Multiplies itself by a digit-sized `other` and returns its own
             /// mutable reference.
+            #[ferrocene::prevalidated]
             pub fn mul_small(&mut self, other: $ty) -> &mut $name {
                 let mut sz = self.size;
                 let mut carry = 0;
@@ -215,6 +225,7 @@ macro_rules! define_bignum {
             }
 
             /// Multiplies itself by `2^bits` and returns its own mutable reference.
+            #[ferrocene::prevalidated]
             pub fn mul_pow2(&mut self, bits: usize) -> &mut $name {
                 let digitbits = <$ty>::BITS as usize;
                 let digits = bits / digitbits;
@@ -283,8 +294,10 @@ macro_rules! define_bignum {
             /// Multiplies itself by a number described by `other[0] + other[1] * 2^W +
             /// other[2] * 2^(2W) + ...` (where `W` is the number of bits in the digit type)
             /// and returns its own mutable reference.
+            #[ferrocene::prevalidated]
             pub fn mul_digits<'a>(&'a mut self, other: &[$ty]) -> &'a mut $name {
                 // the internal routine. works best when aa.len() <= bb.len().
+                #[ferrocene::prevalidated]
                 fn mul_inner(ret: &mut [$ty; $n], aa: &[$ty], bb: &[$ty]) -> usize {
                     use crate::num::bignum::FullOps;
 
@@ -324,6 +337,7 @@ macro_rules! define_bignum {
 
             /// Divides itself by a digit-sized `other` and returns its own
             /// mutable reference *and* the remainder.
+            #[ferrocene::prevalidated]
             pub fn div_rem_small(&mut self, other: $ty) -> (&mut $name, $ty) {
                 use crate::num::bignum::FullOps;
 
@@ -341,6 +355,7 @@ macro_rules! define_bignum {
         }
 
         impl crate::cmp::PartialEq for $name {
+            #[ferrocene::prevalidated]
             fn eq(&self, other: &$name) -> bool {
                 self.base[..] == other.base[..]
             }
@@ -349,12 +364,14 @@ macro_rules! define_bignum {
         impl crate::cmp::Eq for $name {}
 
         impl crate::cmp::PartialOrd for $name {
+            #[ferrocene::prevalidated]
             fn partial_cmp(&self, other: &$name) -> crate::option::Option<crate::cmp::Ordering> {
                 crate::option::Option::Some(self.cmp(other))
             }
         }
 
         impl crate::cmp::Ord for $name {
+            #[ferrocene::prevalidated]
             fn cmp(&self, other: &$name) -> crate::cmp::Ordering {
                 use crate::cmp::max;
                 let sz = max(self.size, other.size);
@@ -365,6 +382,7 @@ macro_rules! define_bignum {
         }
 
         impl crate::clone::Clone for $name {
+            #[ferrocene::prevalidated]
             fn clone(&self) -> Self {
                 Self { size: self.size, base: self.base }
             }
@@ -374,6 +392,7 @@ macro_rules! define_bignum {
         impl crate::clone::UseCloned for $name {}
 
         impl crate::fmt::Debug for $name {
+            #[ferrocene::prevalidated]
             fn fmt(&self, f: &mut crate::fmt::Formatter<'_>) -> crate::fmt::Result {
                 let sz = if self.size < 1 { 1 } else { self.size };
                 let digitlen = <$ty>::BITS as usize / 4;

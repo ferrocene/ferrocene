@@ -12,7 +12,8 @@ trait GeneralFormat: PartialOrd {
 macro_rules! impl_general_format {
     ($($t:ident)*) => {
         $(impl GeneralFormat for $t {
-            fn already_rounded_value_should_use_exponential(&self) -> bool {
+            #[ferrocene::prevalidated]
+fn already_rounded_value_should_use_exponential(&self) -> bool {
                 // `max_abs` rounds to infinity for `f16`. This is fine to save us from a more
                 // complex macro, it just means a positive-exponent `f16` will never print as
                 // scientific notation by default (reasonably, the max is 65504.0).
@@ -33,6 +34,7 @@ impl_general_format! { f32 f64 }
 // Don't inline this so callers don't use the stack space this function
 // requires unless they have to.
 #[inline(never)]
+#[ferrocene::prevalidated]
 fn float_to_decimal_common_exact<T>(
     fmt: &mut Formatter<'_>,
     num: &T,
@@ -59,6 +61,7 @@ where
 // Don't inline this so callers that call both this and the above won't wind
 // up using the combined stack space of both functions in some cases.
 #[inline(never)]
+#[ferrocene::prevalidated]
 fn float_to_decimal_common_shortest<T>(
     fmt: &mut Formatter<'_>,
     num: &T,
@@ -84,6 +87,7 @@ where
     unsafe { fmt.pad_formatted_parts(&formatted) }
 }
 
+#[ferrocene::prevalidated]
 fn float_to_decimal_display<T>(fmt: &mut Formatter<'_>, num: &T) -> Result
 where
     T: flt2dec::DecodableFloat,
@@ -105,6 +109,7 @@ where
 // Don't inline this so callers don't use the stack space this function
 // requires unless they have to.
 #[inline(never)]
+#[ferrocene::prevalidated]
 fn float_to_exponential_common_exact<T>(
     fmt: &mut Formatter<'_>,
     num: &T,
@@ -133,6 +138,7 @@ where
 // Don't inline this so callers that call both this and the above won't wind
 // up using the combined stack space of both functions in some cases.
 #[inline(never)]
+#[ferrocene::prevalidated]
 fn float_to_exponential_common_shortest<T>(
     fmt: &mut Formatter<'_>,
     num: &T,
@@ -160,6 +166,7 @@ where
 }
 
 // Common code of floating point LowerExp and UpperExp.
+#[ferrocene::prevalidated]
 fn float_to_exponential_common<T>(fmt: &mut Formatter<'_>, num: &T, upper: bool) -> Result
 where
     T: flt2dec::DecodableFloat,
@@ -178,6 +185,7 @@ where
     }
 }
 
+#[ferrocene::prevalidated]
 fn float_to_general_debug<T>(fmt: &mut Formatter<'_>, num: &T) -> Result
 where
     T: flt2dec::DecodableFloat + GeneralFormat,
@@ -208,28 +216,32 @@ macro_rules! floating {
         $(
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Debug for $ty {
-                fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
+                #[ferrocene::prevalidated]
+fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
                     float_to_general_debug(fmt, self)
                 }
             }
 
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Display for $ty {
-                fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
+                #[ferrocene::prevalidated]
+fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
                     float_to_decimal_display(fmt, self)
                 }
             }
 
             #[stable(feature = "rust1", since = "1.0.0")]
             impl LowerExp for $ty {
-                fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
+                #[ferrocene::prevalidated]
+fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
                     float_to_exponential_common(fmt, self, false)
                 }
             }
 
             #[stable(feature = "rust1", since = "1.0.0")]
             impl UpperExp for $ty {
-                fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
+                #[ferrocene::prevalidated]
+fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
                     float_to_exponential_common(fmt, self, true)
                 }
             }

@@ -43,6 +43,7 @@ use crate::ops::{Deref, DerefMut, DerefPure};
 #[unstable(feature = "bstr", issue = "134915")]
 #[repr(transparent)]
 #[doc(alias = "BStr")]
+#[ferrocene::prevalidated]
 pub struct ByteStr(pub [u8]);
 
 impl ByteStr {
@@ -102,6 +103,7 @@ impl ByteStr {
     #[unstable(feature = "bstr_internals", issue = "none")]
     #[inline]
     #[rustc_const_unstable(feature = "bstr_internals", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn from_bytes(slice: &[u8]) -> &Self {
         // SAFETY: `ByteStr` is a transparent wrapper around `[u8]`, so we can turn a reference to
         // the wrapped type into a reference to the wrapper type.
@@ -144,6 +146,7 @@ impl const Deref for ByteStr {
     type Target = [u8];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &[u8] {
         &self.0
     }
@@ -153,6 +156,7 @@ impl const Deref for ByteStr {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const DerefMut for ByteStr {
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -163,6 +167,7 @@ unsafe impl DerefPure for ByteStr {}
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl fmt::Debug for ByteStr {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "\"")?;
         for chunk in self.utf8_chunks() {

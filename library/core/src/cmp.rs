@@ -263,6 +263,7 @@ pub const trait PartialEq<Rhs: PointeeSized = Self>: PointeeSized {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialeq_ne"]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &Rhs) -> bool {
         !self.eq(other)
     }
@@ -347,6 +348,7 @@ pub const trait Eq: [const] PartialEq<Self> + PointeeSized {
     #[coverage(off)]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     fn assert_receiver_is_total_eq(&self) {}
 }
 
@@ -370,6 +372,7 @@ pub macro Eq($item:item) {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
+#[ferrocene::prevalidated]
 pub struct AssertParamIsEq<T: Eq + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -395,6 +398,7 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 // `Less`/`Equal`/`Greater` remain `-1_i8`/`0_i8`/`+1_i8` respectively.
 #[lang = "Ordering"]
 #[repr(i8)]
+#[ferrocene::prevalidated]
 pub enum Ordering {
     /// An ordering where a compared value is less than another.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -409,6 +413,7 @@ pub enum Ordering {
 
 impl Ordering {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn as_raw(self) -> i8 {
         // FIXME(const-hack): just use `PartialOrd` against `Equal` once that's const
         crate::intrinsics::discriminant_value(&self)
@@ -429,6 +434,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_eq(self) -> bool {
         // All the `is_*` methods are implemented as comparisons against zero
         // to follow how clang's libcxx implements their equivalents in
@@ -452,6 +458,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_ne(self) -> bool {
         self.as_raw() != 0
     }
@@ -471,6 +478,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_lt(self) -> bool {
         self.as_raw() < 0
     }
@@ -490,6 +498,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_gt(self) -> bool {
         self.as_raw() > 0
     }
@@ -509,6 +518,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_le(self) -> bool {
         self.as_raw() <= 0
     }
@@ -528,6 +538,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_ge(self) -> bool {
         self.as_raw() >= 0
     }
@@ -565,6 +576,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "const_ordering", since = "1.48.0")]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub const fn reverse(self) -> Ordering {
         match self {
             Less => Greater,
@@ -604,6 +616,7 @@ impl Ordering {
     #[must_use]
     #[rustc_const_stable(feature = "const_ordering", since = "1.48.0")]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
+    #[ferrocene::prevalidated]
     pub const fn then(self, other: Ordering) -> Ordering {
         match self {
             Equal => other,
@@ -1029,6 +1042,7 @@ pub const trait Ord: [const] Eq + [const] PartialOrd<Self> + PointeeSized {
     #[inline]
     #[must_use]
     #[rustc_diagnostic_item = "cmp_ord_max"]
+    #[ferrocene::prevalidated]
     fn max(self, other: Self) -> Self
     where
         Self: Sized + [const] Destruct,
@@ -1068,6 +1082,7 @@ pub const trait Ord: [const] Eq + [const] PartialOrd<Self> + PointeeSized {
     #[inline]
     #[must_use]
     #[rustc_diagnostic_item = "cmp_ord_min"]
+    #[ferrocene::prevalidated]
     fn min(self, other: Self) -> Self
     where
         Self: Sized + [const] Destruct,
@@ -1094,6 +1109,7 @@ pub const trait Ord: [const] Eq + [const] PartialOrd<Self> + PointeeSized {
     #[must_use]
     #[inline]
     #[stable(feature = "clamp", since = "1.50.0")]
+    #[ferrocene::prevalidated]
     fn clamp(self, min: Self, max: Self) -> Self
     where
         Self: Sized + [const] Destruct,
@@ -1406,6 +1422,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_lt"]
+    #[ferrocene::prevalidated]
     fn lt(&self, other: &Rhs) -> bool {
         self.partial_cmp(other).is_some_and(Ordering::is_lt)
     }
@@ -1424,6 +1441,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_le"]
+    #[ferrocene::prevalidated]
     fn le(&self, other: &Rhs) -> bool {
         self.partial_cmp(other).is_some_and(Ordering::is_le)
     }
@@ -1442,6 +1460,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_gt"]
+    #[ferrocene::prevalidated]
     fn gt(&self, other: &Rhs) -> bool {
         self.partial_cmp(other).is_some_and(Ordering::is_gt)
     }
@@ -1460,6 +1479,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_ge"]
+    #[ferrocene::prevalidated]
     fn ge(&self, other: &Rhs) -> bool {
         self.partial_cmp(other).is_some_and(Ordering::is_ge)
     }
@@ -1475,6 +1495,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     // Added to improve the behaviour of tuples; not necessarily stabilization-track.
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     fn __chaining_lt(&self, other: &Rhs) -> ControlFlow<bool> {
         default_chaining_impl(self, other, Ordering::is_lt)
     }
@@ -1483,6 +1504,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[inline]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     fn __chaining_le(&self, other: &Rhs) -> ControlFlow<bool> {
         default_chaining_impl(self, other, Ordering::is_le)
     }
@@ -1491,6 +1513,7 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[inline]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     fn __chaining_gt(&self, other: &Rhs) -> ControlFlow<bool> {
         default_chaining_impl(self, other, Ordering::is_gt)
     }
@@ -1499,12 +1522,14 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
     #[inline]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     fn __chaining_ge(&self, other: &Rhs) -> ControlFlow<bool> {
         default_chaining_impl(self, other, Ordering::is_ge)
     }
 }
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[ferrocene::prevalidated]
 const fn default_chaining_impl<T, U>(
     lhs: &T,
     rhs: &U,
@@ -1570,6 +1595,7 @@ pub macro PartialOrd($item:item) {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_min"]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[ferrocene::prevalidated]
 pub const fn min<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
     v1.min(v2)
 }
@@ -1679,6 +1705,7 @@ where
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_max"]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[ferrocene::prevalidated]
 pub const fn max<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
     v1.max(v2)
 }
@@ -1710,6 +1737,7 @@ pub const fn max<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[ferrocene::prevalidated]
 pub const fn max_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
     v1: T,
     v2: T,
@@ -1881,9 +1909,11 @@ mod impls {
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
             impl const PartialEq for $t {
                 #[inline]
-                fn eq(&self, other: &Self) -> bool { *self == *other }
+                #[ferrocene::prevalidated]
+fn eq(&self, other: &Self) -> bool { *self == *other }
                 #[inline]
-                fn ne(&self, other: &Self) -> bool { *self != *other }
+                #[ferrocene::prevalidated]
+fn ne(&self, other: &Self) -> bool { *self != *other }
             }
         )*)
     }
@@ -1892,10 +1922,12 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const PartialEq for () {
         #[inline]
+        #[ferrocene::prevalidated]
         fn eq(&self, _other: &()) -> bool {
             true
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn ne(&self, _other: &()) -> bool {
             false
         }
@@ -1919,35 +1951,43 @@ mod impls {
     macro_rules! partial_ord_methods_primitive_impl {
         () => {
             #[inline(always)]
-            fn lt(&self, other: &Self) -> bool { *self <  *other }
+            #[ferrocene::prevalidated]
+fn lt(&self, other: &Self) -> bool { *self <  *other }
             #[inline(always)]
-            fn le(&self, other: &Self) -> bool { *self <= *other }
+            #[ferrocene::prevalidated]
+fn le(&self, other: &Self) -> bool { *self <= *other }
             #[inline(always)]
-            fn gt(&self, other: &Self) -> bool { *self >  *other }
+            #[ferrocene::prevalidated]
+fn gt(&self, other: &Self) -> bool { *self >  *other }
             #[inline(always)]
-            fn ge(&self, other: &Self) -> bool { *self >= *other }
+            #[ferrocene::prevalidated]
+fn ge(&self, other: &Self) -> bool { *self >= *other }
 
             // These implementations are the same for `Ord` or `PartialOrd` types
             // because if either is NAN the `==` test will fail so we end up in
             // the `Break` case and the comparison will correctly return `false`.
 
             #[inline]
-            fn __chaining_lt(&self, other: &Self) -> ControlFlow<bool> {
+            #[ferrocene::prevalidated]
+fn __chaining_lt(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs < rhs) }
             }
             #[inline]
-            fn __chaining_le(&self, other: &Self) -> ControlFlow<bool> {
+            #[ferrocene::prevalidated]
+fn __chaining_le(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs <= rhs) }
             }
             #[inline]
-            fn __chaining_gt(&self, other: &Self) -> ControlFlow<bool> {
+            #[ferrocene::prevalidated]
+fn __chaining_gt(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs > rhs) }
             }
             #[inline]
-            fn __chaining_ge(&self, other: &Self) -> ControlFlow<bool> {
+            #[ferrocene::prevalidated]
+fn __chaining_ge(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs >= rhs) }
             }
@@ -1960,7 +2000,8 @@ mod impls {
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
             impl const PartialOrd for $t {
                 #[inline]
-                fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                #[ferrocene::prevalidated]
+fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                     match (*self <= *other, *self >= *other) {
                         (false, false) => None,
                         (false, true) => Some(Greater),
@@ -1978,6 +2019,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const PartialOrd for () {
         #[inline]
+        #[ferrocene::prevalidated]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
             Some(Equal)
         }
@@ -1987,6 +2029,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const PartialOrd for bool {
         #[inline]
+        #[ferrocene::prevalidated]
         fn partial_cmp(&self, other: &bool) -> Option<Ordering> {
             Some(self.cmp(other))
         }
@@ -2002,7 +2045,8 @@ mod impls {
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
             impl const PartialOrd for $t {
                 #[inline]
-                fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                #[ferrocene::prevalidated]
+fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                     Some(crate::intrinsics::three_way_compare(*self, *other))
                 }
 
@@ -2013,7 +2057,8 @@ mod impls {
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
             impl const Ord for $t {
                 #[inline]
-                fn cmp(&self, other: &Self) -> Ordering {
+                #[ferrocene::prevalidated]
+fn cmp(&self, other: &Self) -> Ordering {
                     crate::intrinsics::three_way_compare(*self, *other)
                 }
 
@@ -2045,6 +2090,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const Ord for () {
         #[inline]
+        #[ferrocene::prevalidated]
         fn cmp(&self, _other: &()) -> Ordering {
             Equal
         }
@@ -2054,6 +2100,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const Ord for bool {
         #[inline]
+        #[ferrocene::prevalidated]
         fn cmp(&self, other: &bool) -> Ordering {
             // Casting to i8's and converting the difference to an Ordering generates
             // more optimal assembly.
@@ -2071,16 +2118,19 @@ mod impls {
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         fn min(self, other: bool) -> bool {
             self & other
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         fn max(self, other: bool) -> bool {
             self | other
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         fn clamp(self, min: bool, max: bool) -> bool {
             assert!(min <= max);
             self.max(min).min(max)
@@ -2093,6 +2143,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const PartialEq for ! {
         #[inline]
+        #[ferrocene::prevalidated]
         fn eq(&self, _: &!) -> bool {
             *self
         }
@@ -2106,6 +2157,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const PartialOrd for ! {
         #[inline]
+        #[ferrocene::prevalidated]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
             *self
         }
@@ -2115,6 +2167,7 @@ mod impls {
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
     impl const Ord for ! {
         #[inline]
+        #[ferrocene::prevalidated]
         fn cmp(&self, _: &!) -> Ordering {
             *self
         }
@@ -2129,10 +2182,12 @@ mod impls {
         A: [const] PartialEq<B>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn eq(&self, other: &&B) -> bool {
             PartialEq::eq(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn ne(&self, other: &&B) -> bool {
             PartialEq::ne(*self, *other)
         }
@@ -2144,38 +2199,47 @@ mod impls {
         A: [const] PartialOrd<B>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn partial_cmp(&self, other: &&B) -> Option<Ordering> {
             PartialOrd::partial_cmp(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn lt(&self, other: &&B) -> bool {
             PartialOrd::lt(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn le(&self, other: &&B) -> bool {
             PartialOrd::le(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn gt(&self, other: &&B) -> bool {
             PartialOrd::gt(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn ge(&self, other: &&B) -> bool {
             PartialOrd::ge(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn __chaining_lt(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_lt(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn __chaining_le(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_le(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn __chaining_gt(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_gt(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn __chaining_ge(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_ge(*self, *other)
         }
@@ -2205,10 +2269,12 @@ mod impls {
         A: [const] PartialEq<B>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn eq(&self, other: &&mut B) -> bool {
             PartialEq::eq(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn ne(&self, other: &&mut B) -> bool {
             PartialEq::ne(*self, *other)
         }
@@ -2280,10 +2346,12 @@ mod impls {
         A: [const] PartialEq<B>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn eq(&self, other: &&mut B) -> bool {
             PartialEq::eq(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn ne(&self, other: &&mut B) -> bool {
             PartialEq::ne(*self, *other)
         }
@@ -2296,10 +2364,12 @@ mod impls {
         A: [const] PartialEq<B>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn eq(&self, other: &&B) -> bool {
             PartialEq::eq(*self, *other)
         }
         #[inline]
+        #[ferrocene::prevalidated]
         fn ne(&self, other: &&B) -> bool {
             PartialEq::ne(*self, *other)
         }

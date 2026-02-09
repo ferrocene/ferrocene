@@ -13,6 +13,7 @@
 #[ferrocene::annotation(
     "This function cannot be covered as it is never called at runtime, see documentation"
 )]
+#[ferrocene::prevalidated]
 pub fn compiler_move<T, const SIZE: usize>(_src: *const T, _dst: *mut T) {
     unreachable!(
         "compiler_move marks where the compiler-generated a memcpy for moves. It is never actually called."
@@ -32,6 +33,7 @@ pub fn compiler_move<T, const SIZE: usize>(_src: *const T, _dst: *mut T) {
 #[ferrocene::annotation(
     "This function cannot be covered as it is never called at runtime, see documentation"
 )]
+#[ferrocene::prevalidated]
 pub fn compiler_copy<T, const SIZE: usize>(_src: *const T, _dst: *mut T) {
     unreachable!(
         "compiler_copy marks where the compiler-generated a memcpy for Copies. It is never actually called."

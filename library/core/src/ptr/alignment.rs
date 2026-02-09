@@ -20,6 +20,7 @@ use crate::{fmt, hash, mem};
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(transparent)]
+#[ferrocene::prevalidated]
 pub struct Alignment(AlignmentEnum);
 
 // Alignment is `repr(usize)`, but via extra steps.
@@ -142,6 +143,7 @@ impl Alignment {
     /// Note that `0` is not a power of two, nor a valid alignment.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(align: usize) -> Option<Self> {
         if align.is_power_of_two() {
             // SAFETY: Just checked it only has one bit set
@@ -162,6 +164,7 @@ impl Alignment {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn new_unchecked(align: usize) -> Self {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -177,6 +180,7 @@ impl Alignment {
     /// Returns the alignment as a [`usize`].
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_usize(self) -> usize {
         self.0 as usize
     }
@@ -184,6 +188,7 @@ impl Alignment {
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_nonzero(self) -> NonZero<usize> {
         // This transmutes directly to avoid the UbCheck in `NonZero::new_unchecked`
         // since there's no way for the user to trip that check anyway -- the
@@ -209,6 +214,7 @@ impl Alignment {
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn log2(self) -> u32 {
         self.as_nonzero().trailing_zeros()
     }
@@ -253,6 +259,7 @@ impl Alignment {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 impl fmt::Debug for Alignment {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?} (1 << {:?})", self.as_nonzero(), self.log2())
     }
@@ -323,6 +330,7 @@ impl cmp::PartialOrd for Alignment {
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 impl hash::Hash for Alignment {
     #[inline]
+    #[ferrocene::prevalidated]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.as_nonzero().hash(state)
     }
@@ -401,6 +409,7 @@ enum AlignmentEnum {
 #[cfg(target_pointer_width = "64")]
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
+#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,

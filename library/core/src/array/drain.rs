@@ -16,6 +16,7 @@ impl<'l, 'f, T, U, const N: usize, F: FnMut(T) -> U> Drain<'l, 'f, T, N, F> {
     /// SAFETY: must only be called `N` times. Thou shalt not drop the array either.
     // FIXME(const-hack): this is a hack for `let guard = Guard(array); |i| f(guard[i])`.
     #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
+    #[ferrocene::prevalidated]
     pub(super) const unsafe fn new(array: &'l mut ManuallyDrop<[T; N]>, f: &'f mut F) -> Self {
         // dont drop the array, transfers "ownership" to Self
         let ptr: NonNull<T> = NonNull::from_mut(array).cast();
@@ -33,6 +34,7 @@ impl<'l, 'f, T, U, const N: usize, F: FnMut(T) -> U> Drain<'l, 'f, T, N, F> {
 /// See [`Drain::new`]; this is our fake iterator.
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
+#[ferrocene::prevalidated]
 pub(super) struct Drain<'l, 'f, T, const N: usize, F> {
     // FIXME(const-hack): This is essentially a slice::IterMut<'static>, replace when possible.
     /// The pointer to the next element to return, or the past-the-end location
@@ -58,6 +60,7 @@ where
     type Output = U;
 
     /// This implementation is useless.
+    #[ferrocene::prevalidated]
     extern "rust-call" fn call_once(mut self, args: (usize,)) -> Self::Output {
         self.call_mut(args)
     }
@@ -69,6 +72,7 @@ where
     F: [const] FnMut(T) -> U,
 {
     // FIXME(const-hack): ideally this would be an unsafe fn `next()`, and to use it you would instead `|_| unsafe { drain.next() }`.
+    #[ferrocene::prevalidated]
     extern "rust-call" fn call_mut(
         &mut self,
         (_ /* ignore argument */,): (usize,),
@@ -90,6 +94,7 @@ where
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
 impl<T: [const] Destruct, const N: usize, F> const Drop for Drain<'_, '_, T, N, F> {
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         if !T::IS_ZST {
             // SAFETY: we cant read more than N elements

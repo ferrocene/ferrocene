@@ -703,7 +703,7 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
   :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.
 
 * :dp:`fls_g07zq3n55094`
-  All other :t:`bindings` are :t:`dropped` in reverse declaration order.
+  All other :t:`[binding]s` are :t:`dropped` in reverse declaration order.
 
 :dp:`fls_zQGkVGWIzMQ7`
 When a :t:`drop scope` of a :t:`function` is left, then each
@@ -773,4 +773,3 @@ Dropping proceeds as follows:
    drop_order(Ok([PrintOnDrop("1"), PrintOnDrop("2")]));
 
    drop_order(Err([PrintOnDrop("2"), PrintOnDrop("1")]));
-

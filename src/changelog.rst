@@ -127,6 +127,7 @@ Language changes in Rust 1.91.0
     - :p:`fls_gNWXh61ZXXt8`
     - :p:`fls_VQMmveZUfNTn`
     - :p:`fls_72JHo343O7jp`
+    - :p:`fls_6bwTtGKb7ba7`
     - :p:`fls_YDVgFaTQwcL8`
     - :p:`fls_zv73CR8rplIa`
     - :p:`fls_tZJgZDWVChJV`

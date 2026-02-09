@@ -209,6 +209,7 @@ attribute_parsers!(
         Single<RustcLintOptDenyFieldAccessParser>,
         Single<RustcMustImplementOneOfParser>,
         Single<RustcObjectLifetimeDefaultParser>,
+        Single<RustcReservationImplParser>,
         Single<RustcScalableVectorParser>,
         Single<RustcSimdMonomorphizeLaneLimitParser>,
         Single<RustcSymbolName>,

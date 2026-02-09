@@ -9,6 +9,7 @@ use crate::diagnostics::error::span_err;
 
 #[derive(Clone)]
 pub(crate) struct Message {
+    pub attr_span: Span,
     pub message_span: Span,
     pub value: String,
 }
@@ -19,12 +20,18 @@ impl Message {
     /// For subdiagnostics, we cannot check this.
     pub(crate) fn diag_message(&self, variant: Option<&VariantInfo<'_>>) -> TokenStream {
         let message = &self.value;
-        verify_fluent_message(self.message_span, &message, variant);
+        self.verify(variant);
         quote! { rustc_errors::DiagMessage::Inline(std::borrow::Cow::Borrowed(#message)) }
+    }
+
+    fn verify(&self, variant: Option<&VariantInfo<'_>>) {
+        verify_variables_used(self.message_span, &self.value, variant);
+        verify_message_style(self.message_span, &self.value);
+        verify_message_formatting(self.attr_span, self.message_span, &self.value);
     }
 }
 
-fn verify_fluent_message(msg_span: Span, message_str: &str, variant: Option<&VariantInfo<'_>>) {
+fn verify_variables_used(msg_span: Span, message_str: &str, variant: Option<&VariantInfo<'_>>) {
     // Parse the fluent message
     const GENERATED_MSG_ID: &str = "generated_msg";
     let resource =
@@ -53,8 +60,6 @@ fn verify_fluent_message(msg_span: Span, message_str: &str, variant: Option<&Var
             }
         }
     }
-
-    verify_message_style(msg_span, message_str);
 }
 
 fn variable_references<'a>(msg: &fluent_syntax::ast::Message<&'a str>) -> Vec<&'a str> {
@@ -118,5 +123,31 @@ fn verify_message_style(msg_span: Span, message: &str) {
     if message.ends_with(".") && !message.ends_with("...") {
         span_err(msg_span.unwrap(), "message `{value}` ends with a period").emit();
         return;
+    }
+}
+
+/// Verifies that the message is properly indented into the code
+fn verify_message_formatting(attr_span: Span, msg_span: Span, message: &str) {
+    // Find the indent at the start of the message (`column()` is one-indexed)
+    let start = attr_span.unwrap().column() - 1;
+
+    for line in message.lines().skip(1) {
+        if line.is_empty() {
+            continue;
+        }
+        let indent = line.chars().take_while(|c| *c == ' ').count();
+        if indent < start {
+            span_err(
+                msg_span.unwrap(),
+                format!("message is not properly indented. {indent} < {start}"),
+            )
+            .emit();
+            return;
+        }
+        if indent % 4 != 0 {
+            span_err(msg_span.unwrap(), "message is not indented with a multiple of 4 spaces")
+                .emit();
+            return;
+        }
     }
 }

@@ -27,17 +27,16 @@ use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle, HasDepContext};
-use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
-    QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
-    QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
+    QueryCache, QueryContext, QueryJobId, QueryMap, QuerySideEffect, QueryStackDeferred,
+    QueryStackFrame, QueryStackFrameExtra,
 };
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
-use crate::QueryDispatcherUnerased;
 use crate::error::{QueryOverflow, QueryOverflowNote};
 use crate::execution::{all_inactive, force_query};
+use crate::{QueryDispatcherUnerased, QueryFlags, SemiDynamicQueryDispatcher};
 
 /// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
 /// crate does not have direct access to [`TyCtxt`].
@@ -360,7 +359,7 @@ pub(crate) fn create_deferred_query_stack_frame<'tcx, Cache>(
 ) -> QueryStackFrame<QueryStackDeferred<'tcx>>
 where
     Cache: QueryCache,
-    Cache::Key: Key + DynSend + DynSync + for<'a> HashStable<StableHashingContext<'a>> + 'tcx,
+    Cache::Key: Key + DynSend + DynSync,
 {
     let kind = vtable.dep_kind;
 
@@ -378,13 +377,13 @@ where
     QueryStackFrame::new(info, kind, hash, def_id, def_id_for_ty_in_cycle)
 }
 
-pub(crate) fn encode_query_results<'a, 'tcx, Q>(
-    query: Q::Dispatcher,
+pub(crate) fn encode_query_results<'a, 'tcx, Q, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
     qcx: QueryCtxt<'tcx>,
     encoder: &mut CacheEncoder<'a, 'tcx>,
     query_result_index: &mut EncodedDepNodeIndex,
 ) where
-    Q: QueryDispatcherUnerased<'tcx>,
+    Q: QueryDispatcherUnerased<'tcx, C, FLAGS>,
     Q::UnerasedValue: Encodable<CacheEncoder<'a, 'tcx>>,
 {
     let _timer = qcx.tcx.prof.generic_activity_with_arg("encode_query_results_for", query.name());
@@ -405,8 +404,8 @@ pub(crate) fn encode_query_results<'a, 'tcx, Q>(
     });
 }
 
-pub(crate) fn query_key_hash_verify<'tcx>(
-    query: impl QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>,
+pub(crate) fn query_key_hash_verify<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
     qcx: QueryCtxt<'tcx>,
 ) {
     let _timer = qcx.tcx.prof.generic_activity_with_arg("query_key_hash_verify_for", query.name());
@@ -431,13 +430,14 @@ pub(crate) fn query_key_hash_verify<'tcx>(
     });
 }
 
-fn try_load_from_on_disk_cache<'tcx, Q>(query: Q, tcx: TyCtxt<'tcx>, dep_node: DepNode)
-where
-    Q: QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>,
-{
+fn try_load_from_on_disk_cache<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
+    tcx: TyCtxt<'tcx>,
+    dep_node: DepNode,
+) {
     debug_assert!(tcx.dep_graph.is_green(&dep_node));
 
-    let key = Q::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
+    let key = C::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
         panic!("Failed to recover key for {:?} with hash {}", dep_node, dep_node.hash)
     });
     if query.will_cache_on_disk_for_key(tcx, &key) {
@@ -477,10 +477,11 @@ where
     value
 }
 
-fn force_from_dep_node<'tcx, Q>(query: Q, tcx: TyCtxt<'tcx>, dep_node: DepNode) -> bool
-where
-    Q: QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>,
-{
+fn force_from_dep_node<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
+    tcx: TyCtxt<'tcx>,
+    dep_node: DepNode,
+) -> bool {
     // We must avoid ever having to call `force_from_dep_node()` for a
     // `DepNode::codegen_unit`:
     // Since we cannot reconstruct the query key of a `DepNode::codegen_unit`, we
@@ -499,7 +500,7 @@ where
         "calling force_from_dep_node() on dep_kinds::codegen_unit"
     );
 
-    if let Some(key) = Q::Key::recover(tcx, &dep_node) {
+    if let Some(key) = C::Key::recover(tcx, &dep_node) {
         force_query(query, QueryCtxt::new(tcx), key, dep_node);
         true
     } else {
@@ -507,17 +508,22 @@ where
     }
 }
 
-pub(crate) fn make_dep_kind_vtable_for_query<'tcx, Q>(
-    is_anon: bool,
+pub(crate) fn make_dep_kind_vtable_for_query<
+    'tcx,
+    Q,
+    C: QueryCache + 'tcx,
+    const FLAGS: QueryFlags,
+>(
     is_eval_always: bool,
 ) -> DepKindVTable<'tcx>
 where
-    Q: QueryDispatcherUnerased<'tcx>,
+    Q: QueryDispatcherUnerased<'tcx, C, FLAGS>,
 {
+    let is_anon = FLAGS.is_anon;
     let fingerprint_style = if is_anon {
         FingerprintStyle::Opaque
     } else {
-        <Q::Dispatcher as QueryDispatcher>::Key::fingerprint_style()
+        <C::Key as DepNodeKey<TyCtxt<'tcx>>>::fingerprint_style()
     };
 
     if is_anon || !fingerprint_style.reconstructible() {
@@ -713,25 +719,26 @@ macro_rules! define_queries {
                 is_feedable: feedable!([$($modifiers)*]),
             };
 
-            impl<'tcx> QueryDispatcherUnerased<'tcx> for QueryType<'tcx> {
+            impl<'tcx> QueryDispatcherUnerased<'tcx, queries::$name::Storage<'tcx>, FLAGS>
+                for QueryType<'tcx>
+            {
                 type UnerasedValue = queries::$name::Value<'tcx>;
-                type Dispatcher = SemiDynamicQueryDispatcher<
-                    'tcx,
-                    queries::$name::Storage<'tcx>,
-                    FLAGS,
-                >;
 
                 const NAME: &'static &'static str = &stringify!($name);
 
                 #[inline(always)]
-                fn query_dispatcher(tcx: TyCtxt<'tcx>) -> Self::Dispatcher {
+                fn query_dispatcher(tcx: TyCtxt<'tcx>)
+                    -> SemiDynamicQueryDispatcher<'tcx, queries::$name::Storage<'tcx>, FLAGS>
+                {
                     SemiDynamicQueryDispatcher {
                         vtable: &tcx.query_system.query_vtables.$name,
                     }
                 }
 
                 #[inline(always)]
-                fn restore_val(value: <Self::Dispatcher as QueryDispatcher<'tcx>>::Value) -> Self::UnerasedValue {
+                fn restore_val(value: <queries::$name::Storage<'tcx> as QueryCache>::Value)
+                    -> Self::UnerasedValue
+                {
                     erase::restore_val::<queries::$name::Value<'tcx>>(value)
                 }
             }
@@ -787,7 +794,11 @@ macro_rules! define_queries {
                     encoder: &mut CacheEncoder<'_, 'tcx>,
                     query_result_index: &mut EncodedDepNodeIndex
                 ) {
-                    $crate::plumbing::encode_query_results::<query_impl::$name::QueryType<'tcx>>(
+                    $crate::plumbing::encode_query_results::<
+                        query_impl::$name::QueryType<'tcx>,
+                        _,
+                        _
+                    > (
                         query_impl::$name::QueryType::query_dispatcher(tcx),
                         QueryCtxt::new(tcx),
                         encoder,
@@ -959,8 +970,7 @@ macro_rules! define_queries {
 
             $(pub(crate) fn $name<'tcx>() -> DepKindVTable<'tcx> {
                 use $crate::query_impl::$name::QueryType;
-                $crate::plumbing::make_dep_kind_vtable_for_query::<QueryType<'tcx>>(
-                    is_anon!([$($modifiers)*]),
+                $crate::plumbing::make_dep_kind_vtable_for_query::<QueryType<'tcx>, _, _>(
                     is_eval_always!([$($modifiers)*]),
                 )
             })*

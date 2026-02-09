@@ -181,15 +181,9 @@ struct QueryLatchInfo<'tcx> {
     waiters: Vec<Arc<QueryWaiter<'tcx>>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct QueryLatch<'tcx> {
     info: Arc<Mutex<QueryLatchInfo<'tcx>>>,
-}
-
-impl<'tcx> Clone for QueryLatch<'tcx> {
-    fn clone(&self) -> Self {
-        Self { info: Arc::clone(&self.info) }
-    }
 }
 
 impl<'tcx> QueryLatch<'tcx> {

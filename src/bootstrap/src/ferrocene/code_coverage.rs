@@ -23,6 +23,11 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
         exit!(1);
     }
 
+    // This guarantees that the coverage information is not stripped away from the binary
+    if cargo.target().starts_with("thumbv7em") {
+        cargo.rustflag("-Copt-level=2");
+    }
+
     cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
     cargo.rustflag("--cfg=ferrocene_coverage");

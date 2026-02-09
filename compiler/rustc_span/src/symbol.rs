@@ -1628,6 +1628,7 @@ symbols! {
         on_const,
         on_unimplemented,
         opaque,
+        opaque_generic_const_args,
         opaque_module_name_placeholder: "<opaque>",
         open_options_new,
         ops,

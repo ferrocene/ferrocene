@@ -162,9 +162,9 @@ pub(crate) struct AbiRequiredTargetFeature<'a> {
     #[primary_span]
     #[label(
         "function {$is_call ->
-[true] called
-*[false] defined
-} here"
+            [true] called
+            *[false] defined
+        } here"
     )]
     pub span: Span,
     pub required_feature: &'a str,

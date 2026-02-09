@@ -327,18 +327,18 @@ pub struct InferenceBadError<'a> {
 pub enum SourceKindSubdiag<'a> {
     #[suggestion(
         "{$kind ->
-[with_pattern] consider giving `{$name}` an explicit type
-[closure] consider giving this closure parameter an explicit type
-*[other] consider giving this pattern a type
-}{$x_kind ->
-[has_name] , where the {$prefix_kind ->
-*[type] type for {$prefix}
-[const_with_param] value of const parameter
-[const] value of the constant
-} `{$arg_name}` is specified
-[underscore] , where the placeholders `_` are specified
-*[empty] {\"\"}
-}",
+            [with_pattern] consider giving `{$name}` an explicit type
+            [closure] consider giving this closure parameter an explicit type
+            *[other] consider giving this pattern a type
+        }{$x_kind ->
+            [has_name] , where the {$prefix_kind ->
+                *[type] type for {$prefix}
+                [const_with_param] value of const parameter
+                [const] value of the constant
+            } `{$arg_name}` is specified
+            [underscore] , where the placeholders `_` are specified
+            *[empty] {\"\"}
+        }",
         style = "verbose",
         code = ": {type_name}",
         applicability = "has-placeholders"
@@ -356,15 +356,15 @@ pub enum SourceKindSubdiag<'a> {
     },
     #[label(
         "cannot infer {$is_type ->
-[true] type
-*[false] the value
-} of the {$is_type ->
-[true] type
-*[false] const
-} {$parent_exists ->
-[true] parameter `{$param_name}` declared on the {$parent_prefix} `{$parent_name}`
-*[false] parameter {$param_name}
-}"
+            [true] type
+            *[false] the value
+        } of the {$is_type ->
+            [true] type
+            *[false] const
+        } {$parent_exists ->
+            [true] parameter `{$param_name}` declared on the {$parent_prefix} `{$parent_name}`
+            *[false] parameter {$param_name}
+        }"
     )]
     GenericLabel {
         #[primary_span]
@@ -377,9 +377,9 @@ pub enum SourceKindSubdiag<'a> {
     },
     #[suggestion(
         "consider specifying the generic {$arg_count ->
-[one] argument
-*[other] arguments
-}",
+            [one] argument
+            *[other] arguments
+        }",
         style = "verbose",
         code = "::<{args}>",
         applicability = "has-placeholders"
@@ -945,9 +945,9 @@ impl IntoDiagArg for TyOrSig<'_> {
 #[derive(Subdiagnostic)]
 pub enum ActualImplExplNotes<'tcx> {
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}closure with signature `{$ty_or_sig}` must implement `{$trait_path}`, for any two lifetimes `'{$lifetime_1}` and `'{$lifetime_2}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }closure with signature `{$ty_or_sig}` must implement `{$trait_path}`, for any two lifetimes `'{$lifetime_1}` and `'{$lifetime_2}`...")]
     ExpectedSignatureTwo {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -956,9 +956,9 @@ pub enum ActualImplExplNotes<'tcx> {
         lifetime_2: usize,
     },
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}closure with signature `{$ty_or_sig}` must implement `{$trait_path}`, for any lifetime `'{$lifetime_1}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }closure with signature `{$ty_or_sig}` must implement `{$trait_path}`, for any lifetime `'{$lifetime_1}`...")]
     ExpectedSignatureAny {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -966,9 +966,9 @@ pub enum ActualImplExplNotes<'tcx> {
         lifetime_1: usize,
     },
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}closure with signature `{$ty_or_sig}` must implement `{$trait_path}`, for some specific lifetime `'{$lifetime_1}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }closure with signature `{$ty_or_sig}` must implement `{$trait_path}`, for some specific lifetime `'{$lifetime_1}`...")]
     ExpectedSignatureSome {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -977,9 +977,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}closure with signature `{$ty_or_sig}` must implement `{$trait_path}`"
+            [true] ...
+            *[false] {\"\"}
+        }closure with signature `{$ty_or_sig}` must implement `{$trait_path}`"
     )]
     ExpectedSignatureNothing {
         leading_ellipsis: bool,
@@ -987,9 +987,9 @@ pub enum ActualImplExplNotes<'tcx> {
         trait_path: Highlighted<'tcx, TraitRefPrintOnlyTraitPath<'tcx>>,
     },
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`, for any two lifetimes `'{$lifetime_1}` and `'{$lifetime_2}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`, for any two lifetimes `'{$lifetime_1}` and `'{$lifetime_2}`...")]
     ExpectedPassiveTwo {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -998,9 +998,9 @@ pub enum ActualImplExplNotes<'tcx> {
         lifetime_2: usize,
     },
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`, for any lifetime `'{$lifetime_1}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`, for any lifetime `'{$lifetime_1}`...")]
     ExpectedPassiveAny {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -1008,9 +1008,9 @@ pub enum ActualImplExplNotes<'tcx> {
         lifetime_1: usize,
     },
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`, for some specific lifetime `'{$lifetime_1}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`, for some specific lifetime `'{$lifetime_1}`...")]
     ExpectedPassiveSome {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -1019,9 +1019,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`"
+            [true] ...
+            *[false] {\"\"}
+        }`{$trait_path}` would have to be implemented for the type `{$ty_or_sig}`"
     )]
     ExpectedPassiveNothing {
         leading_ellipsis: bool,
@@ -1029,9 +1029,9 @@ pub enum ActualImplExplNotes<'tcx> {
         trait_path: Highlighted<'tcx, TraitRefPrintOnlyTraitPath<'tcx>>,
     },
     #[note("{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$ty_or_sig}` must implement `{$trait_path}`, for any two lifetimes `'{$lifetime_1}` and `'{$lifetime_2}`...")]
+        [true] ...
+        *[false] {\"\"}
+    }`{$ty_or_sig}` must implement `{$trait_path}`, for any two lifetimes `'{$lifetime_1}` and `'{$lifetime_2}`...")]
     ExpectedOtherTwo {
         leading_ellipsis: bool,
         ty_or_sig: TyOrSig<'tcx>,
@@ -1041,9 +1041,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$ty_or_sig}` must implement `{$trait_path}`, for any lifetime `'{$lifetime_1}`..."
+            [true] ...
+            *[false] {\"\"}
+        }`{$ty_or_sig}` must implement `{$trait_path}`, for any lifetime `'{$lifetime_1}`..."
     )]
     ExpectedOtherAny {
         leading_ellipsis: bool,
@@ -1053,9 +1053,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$ty_or_sig}` must implement `{$trait_path}`, for some specific lifetime `'{$lifetime_1}`..."
+            [true] ...
+            *[false] {\"\"}
+        }`{$ty_or_sig}` must implement `{$trait_path}`, for some specific lifetime `'{$lifetime_1}`..."
     )]
     ExpectedOtherSome {
         leading_ellipsis: bool,
@@ -1065,9 +1065,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "{$leading_ellipsis ->
-[true] ...
-*[false] {\"\"}
-}`{$ty_or_sig}` must implement `{$trait_path}`"
+            [true] ...
+            *[false] {\"\"}
+        }`{$ty_or_sig}` must implement `{$trait_path}`"
     )]
     ExpectedOtherNothing {
         leading_ellipsis: bool,
@@ -1076,9 +1076,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "...but it actually implements `{$trait_path}`{$has_lifetime ->
-[true] , for some specific lifetime `'{$lifetime}`
-*[false] {\"\"}
-}"
+            [true] , for some specific lifetime `'{$lifetime}`
+            *[false] {\"\"}
+        }"
     )]
     ButActuallyImplementsTrait {
         trait_path: Highlighted<'tcx, TraitRefPrintOnlyTraitPath<'tcx>>,
@@ -1087,9 +1087,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "...but `{$trait_path}` is actually implemented for the type `{$ty}`{$has_lifetime ->
-[true] , for some specific lifetime `'{$lifetime}`
-*[false] {\"\"}
-}"
+            [true] , for some specific lifetime `'{$lifetime}`
+            *[false] {\"\"}
+        }"
     )]
     ButActuallyImplementedForTy {
         trait_path: Highlighted<'tcx, TraitRefPrintOnlyTraitPath<'tcx>>,
@@ -1099,9 +1099,9 @@ pub enum ActualImplExplNotes<'tcx> {
     },
     #[note(
         "...but `{$ty}` actually implements `{$trait_path}`{$has_lifetime ->
-[true] , for some specific lifetime `'{$lifetime}`
-*[false] {\"\"}
-}"
+            [true] , for some specific lifetime `'{$lifetime}`
+            *[false] {\"\"}
+        }"
     )]
     ButActuallyTyImplements {
         trait_path: Highlighted<'tcx, TraitRefPrintOnlyTraitPath<'tcx>>,
@@ -1246,7 +1246,7 @@ pub struct TraitImplDiff {
     pub trait_sp: Span,
     #[note(
         "expected signature `{$expected}`
-               {\"   \"}found signature `{$found}`"
+        {\"   \"}found signature `{$found}`"
     )]
     pub note: (),
     #[subdiagnostic]
@@ -1940,10 +1940,12 @@ pub enum ObligationCauseFailureCode {
         #[primary_span]
         span: Span,
     },
-    #[diag("{$lang_item_name ->
-[panic_impl] `#[panic_handler]`
-*[lang_item_name] lang item `{$lang_item_name}`
-} function has wrong type", code = E0308)]
+    #[diag(
+        "{$lang_item_name ->
+            [panic_impl] `#[panic_handler]`
+            *[lang_item_name] lang item `{$lang_item_name}`
+        } function has wrong type"
+    , code = E0308)]
     FnLangCorrectType {
         #[primary_span]
         span: Span,

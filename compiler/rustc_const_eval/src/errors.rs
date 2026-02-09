@@ -106,9 +106,9 @@ pub(crate) struct UnstableInStableExposed {
     pub is_function_call2: bool,
     #[suggestion(
         "if the {$is_function_call2 ->
-    [true] caller
-    *[false] function
-} is not (yet) meant to be exposed to stable const contexts, add `#[rustc_const_unstable]`",
+            [true] caller
+            *[false] function
+        } is not (yet) meant to be exposed to stable const contexts, add `#[rustc_const_unstable]`",
         code = "#[rustc_const_unstable(feature = \"...\", issue = \"...\")]\n",
         applicability = "has-placeholders"
     )]
@@ -300,11 +300,11 @@ pub(crate) struct UnallowedHeapAllocations {
     #[primary_span]
     #[label(
         r#"allocation not allowed in {$kind ->
-    [const] constant
-    [static] static
-    [const_fn] constant function
-    *[other] {""}
-}s"#
+            [const] constant
+            [static] static
+            [const_fn] constant function
+            *[other] {""}
+        }s"#
     )]
     pub span: Span,
     pub kind: ConstContext,
@@ -539,20 +539,20 @@ pub enum NonConstClosureNote {
     },
     #[note(
         r#"function pointers need an RFC before allowed to be called in {$kind ->
-    [const] constant
-    [static] static
-    [const_fn] constant function
-    *[other] {""}
-}s"#
+            [const] constant
+            [static] static
+            [const_fn] constant function
+            *[other] {""}
+        }s"#
     )]
     FnPtr,
     #[note(
         r#"closures need an RFC before allowed to be called in {$kind ->
-    [const] constant
-    [static] static
-    [const_fn] constant function
-    *[other] {""}
-}s"#
+            [const] constant
+            [static] static
+            [const_fn] constant function
+            *[other] {""}
+        }s"#
     )]
     Closure,
 }
@@ -608,11 +608,11 @@ pub struct LiveDrop<'tcx> {
     #[primary_span]
     #[label(
         r#"the destructor for this type cannot be evaluated in {$kind ->
-    [const] constant
-    [static] static
-    [const_fn] constant function
-    *[other] {""}
-}s"#
+            [const] constant
+            [static] static
+            [const_fn] constant function
+            *[other] {""}
+        }s"#
     )]
     pub span: Span,
     pub kind: ConstContext,

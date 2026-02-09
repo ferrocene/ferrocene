@@ -4,17 +4,24 @@
 //              to the rest of the compiler and by extension the user via diagnostics.
 //@ known-bug: unknown
 
-#![feature(min_generic_const_args, unsized_const_params, generic_const_parameter_types)]
+#![feature(
+    adt_const_params,
+    min_generic_const_args,
+    unsized_const_params,
+    generic_const_parameter_types
+)]
 #![expect(incomplete_features)]
 
 trait A {
     type Ty: std::marker::ConstParamTy_;
-    #[type_const] const CT: Self::Ty;
+    #[type_const]
+    const CT: Self::Ty;
 }
 
 impl A for () {
     type Ty = i32;
-    #[type_const] const CT: i32 = 0;
+    #[type_const]
+    const CT: i32 = 0;
 }
 
 fn main() {

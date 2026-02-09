@@ -1,12 +1,12 @@
 error[E0038]: the trait `Trait` is not dyn compatible
-  --> $DIR/dyn-compat-assoc-const-ty-mentions-self.rs:37:16
+  --> $DIR/dyn-compat-assoc-const-ty-mentions-self.rs:38:16
    |
 LL |     let _: dyn Trait;
    |                ^^^^^ `Trait` is not dyn compatible
    |
 note: for a trait to be dyn compatible it needs to allow building a vtable
       for more information, visit <https://doc.rust-lang.org/reference/items/traits.html#dyn-compatibility>
-  --> $DIR/dyn-compat-assoc-const-ty-mentions-self.rs:17:11
+  --> $DIR/dyn-compat-assoc-const-ty-mentions-self.rs:18:11
    |
 LL | trait Trait {
    |       ----- this trait is not dyn compatible...

@@ -951,6 +951,16 @@ pub(crate) struct IncompatibleFeatures {
 }
 
 #[derive(Diagnostic)]
+#[diag("`{$parent}` requires {$missing} to be enabled")]
+#[help("enable all of these features")]
+pub(crate) struct MissingDependentFeatures {
+    #[primary_span]
+    pub parent_span: Span,
+    pub parent: Symbol,
+    pub missing: String,
+}
+
+#[derive(Diagnostic)]
 #[diag("negative bounds are not supported")]
 pub(crate) struct NegativeBoundUnsupported {
     #[primary_span]

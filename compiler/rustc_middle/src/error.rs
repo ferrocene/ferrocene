@@ -93,7 +93,7 @@ pub(crate) struct StrictCoherenceNeedsNegativeCoherence {
     #[primary_span]
     pub span: Span,
     #[label("due to this attribute")]
-    pub attr_span: Option<Span>,
+    pub attr_span: Span,
 }
 
 #[derive(Diagnostic)]

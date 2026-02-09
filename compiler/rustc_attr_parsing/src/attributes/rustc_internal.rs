@@ -739,6 +739,19 @@ impl<S: Stage> CombineAttributeParser<S> for RustcThenThisWouldNeedParser {
     }
 }
 
+pub(crate) struct RustcInsignificantDtorParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcInsignificantDtorParser {
+    const PATH: &[Symbol] = &[sym::rustc_insignificant_dtor];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Enum),
+        Allow(Target::Struct),
+        Allow(Target::ForeignTy),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcInsignificantDtor;
+}
+
 pub(crate) struct RustcEffectiveVisibilityParser;
 
 impl<S: Stage> NoArgsAttributeParser<S> for RustcEffectiveVisibilityParser {
@@ -844,4 +857,19 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcIntrinsicConstStableIndirectPar
     const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Fn)]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcIntrinsicConstStableIndirect;
+}
+
+pub(crate) struct RustcStrictCoherenceParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcStrictCoherenceParser {
+    const PATH: &[Symbol] = &[sym::rustc_strict_coherence];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Trait),
+        Allow(Target::Struct),
+        Allow(Target::Enum),
+        Allow(Target::Union),
+        Allow(Target::ForeignTy),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = AttributeKind::RustcStrictCoherence;
 }

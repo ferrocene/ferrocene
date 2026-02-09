@@ -1551,7 +1551,9 @@ impl<'a> Parser<'a> {
 
         let rhs = if self.eat(exp!(Eq)) {
             if attr::contains_name(attrs, sym::type_const) {
-                Some(ConstItemRhs::TypeConst(self.parse_const_arg()?))
+                let ct =
+                    self.parse_expr_anon_const(|this, expr| this.mgca_direct_lit_hack(expr))?;
+                Some(ConstItemRhs::TypeConst(ct))
             } else {
                 Some(ConstItemRhs::Body(self.parse_expr()?))
             }

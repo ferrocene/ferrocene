@@ -1219,6 +1219,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_regions]`
     RustcRegions,
 
+    /// Represents `#[rustc_reservation_impl]`
+    RustcReservationImpl(Span, Symbol),
+
     /// Represents `#[rustc_scalable_vector(N)]`
     RustcScalableVector {
         /// The base multiple of lanes that are in a scalable vector, if provided. `element_count`

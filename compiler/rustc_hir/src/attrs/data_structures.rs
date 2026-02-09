@@ -1239,6 +1239,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_std_internal_symbol]`.
     RustcStdInternalSymbol(Span),
 
+    /// Represents `#[rustc_strict_coherence]`.
+    RustcStrictCoherence(Span),
+
     /// Represents `#[rustc_symbol_name]`
     RustcSymbolName(Span),
 
@@ -1275,6 +1278,7 @@ pub enum AttributeKind {
         /// Span of the attribute.
         span: Span,
     },
+
     /// Represents `#[target_feature(enable = "...")]` and
     /// `#[unsafe(force_target_feature(enable = "...")]`.
     TargetFeature { features: ThinVec<(Symbol, Span)>, attr_span: Span, was_forced: bool },

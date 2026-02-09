@@ -289,6 +289,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcReallocatorParser>>,
         Single<WithoutArgs<RustcRegionsParser>>,
         Single<WithoutArgs<RustcShouldNotBeCalledOnConstItems>>,
+        Single<WithoutArgs<RustcStrictCoherenceParser>>,
         Single<WithoutArgs<RustcVarianceOfOpaquesParser>>,
         Single<WithoutArgs<RustcVarianceParser>>,
         Single<WithoutArgs<SpecializationTraitParser>>,

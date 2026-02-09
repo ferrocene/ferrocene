@@ -845,3 +845,18 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcIntrinsicConstStableIndirectPar
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Fn)]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcIntrinsicConstStableIndirect;
 }
+
+pub(crate) struct RustcStrictCoherenceParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcStrictCoherenceParser {
+    const PATH: &[Symbol] = &[sym::rustc_strict_coherence];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Trait),
+        Allow(Target::Struct),
+        Allow(Target::Enum),
+        Allow(Target::Union),
+        Allow(Target::ForeignTy),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = AttributeKind::RustcStrictCoherence;
+}

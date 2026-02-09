@@ -512,12 +512,12 @@ pub(crate) fn make_dep_kind_vtable_for_query<
     C: QueryCache + 'tcx,
     const FLAGS: QueryFlags,
 >(
-    is_anon: bool,
     is_eval_always: bool,
 ) -> DepKindVTable<'tcx>
 where
     Q: QueryDispatcherUnerased<'tcx, C, FLAGS>,
 {
+    let is_anon = FLAGS.is_anon;
     let fingerprint_style = if is_anon {
         FingerprintStyle::Opaque
     } else {
@@ -969,7 +969,6 @@ macro_rules! define_queries {
             $(pub(crate) fn $name<'tcx>() -> DepKindVTable<'tcx> {
                 use $crate::query_impl::$name::QueryType;
                 $crate::plumbing::make_dep_kind_vtable_for_query::<QueryType<'tcx>, _, _>(
-                    is_anon!([$($modifiers)*]),
                     is_eval_always!([$($modifiers)*]),
                 )
             })*

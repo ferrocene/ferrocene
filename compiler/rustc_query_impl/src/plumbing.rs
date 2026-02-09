@@ -28,8 +28,8 @@ use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle, HasDepContext};
 use rustc_query_system::query::{
-    QueryCache, QueryContext, QueryDispatcher, QueryJobId, QueryMap, QuerySideEffect,
-    QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
+    QueryCache, QueryContext, QueryJobId, QueryMap, QuerySideEffect, QueryStackDeferred,
+    QueryStackFrame, QueryStackFrameExtra,
 };
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
@@ -404,8 +404,8 @@ pub(crate) fn encode_query_results<'a, 'tcx, Q, C: QueryCache, const FLAGS: Quer
     });
 }
 
-pub(crate) fn query_key_hash_verify<'tcx>(
-    query: impl QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>,
+pub(crate) fn query_key_hash_verify<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
     qcx: QueryCtxt<'tcx>,
 ) {
     let _timer = qcx.tcx.prof.generic_activity_with_arg("query_key_hash_verify_for", query.name());
@@ -430,13 +430,14 @@ pub(crate) fn query_key_hash_verify<'tcx>(
     });
 }
 
-fn try_load_from_on_disk_cache<'tcx, Q>(query: Q, tcx: TyCtxt<'tcx>, dep_node: DepNode)
-where
-    Q: QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>,
-{
+fn try_load_from_on_disk_cache<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
+    tcx: TyCtxt<'tcx>,
+    dep_node: DepNode,
+) {
     debug_assert!(tcx.dep_graph.is_green(&dep_node));
 
-    let key = Q::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
+    let key = C::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
         panic!("Failed to recover key for {:?} with hash {}", dep_node, dep_node.hash)
     });
     if query.will_cache_on_disk_for_key(tcx, &key) {
@@ -476,10 +477,11 @@ where
     value
 }
 
-fn force_from_dep_node<'tcx, Q>(query: Q, tcx: TyCtxt<'tcx>, dep_node: DepNode) -> bool
-where
-    Q: QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>,
-{
+fn force_from_dep_node<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
+    query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
+    tcx: TyCtxt<'tcx>,
+    dep_node: DepNode,
+) -> bool {
     // We must avoid ever having to call `force_from_dep_node()` for a
     // `DepNode::codegen_unit`:
     // Since we cannot reconstruct the query key of a `DepNode::codegen_unit`, we
@@ -498,7 +500,7 @@ where
         "calling force_from_dep_node() on dep_kinds::codegen_unit"
     );
 
-    if let Some(key) = Q::Key::recover(tcx, &dep_node) {
+    if let Some(key) = C::Key::recover(tcx, &dep_node) {
         force_query(query, QueryCtxt::new(tcx), key, dep_node);
         true
     } else {

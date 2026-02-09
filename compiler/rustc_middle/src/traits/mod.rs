@@ -845,7 +845,7 @@ impl DynCompatibilityViolation {
                 format!("it contains generic associated const `{name}`").into()
             }
             Self::AssocConst(name, AssocConstViolation::NonType, _) => {
-                format!("it contains associated const `{name}` that's not marked `#[type_const]`")
+                format!("it contains associated const `{name}` that's not defined as `type const`")
                     .into()
             }
             Self::AssocConst(name, AssocConstViolation::TypeReferencesSelf, _) => format!(
@@ -999,7 +999,7 @@ pub enum AssocConstViolation {
     /// Has own generic parameters (GAC).
     Generic,
 
-    /// Isn't marked `#[type_const]`.
+    /// Isn't defined as `type const`.
     NonType,
 
     /// Its type mentions the `Self` type parameter.

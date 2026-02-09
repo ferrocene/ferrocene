@@ -2060,14 +2060,14 @@ fn compare_type_const<'tcx>(
             .dcx()
             .struct_span_err(
                 tcx.def_span(impl_const_item.def_id),
-                "implementation of `#[type_const]` const must be marked with `#[type_const]`",
+                "implementation of a `type const` must also be marked as `type const`",
             )
             .with_span_note(
                 MultiSpan::from_spans(vec![
                     tcx.def_span(trait_const_item.def_id),
                     trait_type_const_span,
                 ]),
-                "trait declaration of const is marked with `#[type_const]`",
+                "trait declaration of const is marked as `type const`",
             )
             .emit());
     }

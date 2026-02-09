@@ -1890,14 +1890,22 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn type_const_span(self, def_id: DefId) -> Option<Span> {
-        matches!(self.def_kind(def_id), DefKind::Const | DefKind::AssocConst)
-            .then(|| find_attr!(self.get_all_attrs(def_id), AttributeKind::TypeConst(sp) => *sp))
-            .flatten()
+        if !self.is_type_const(def_id) {
+            return None;
+        }
+        Some(self.def_span(def_id))
     }
 
-    /// Check if the given `def_id` is a const with the `#[type_const]` attribute.
-    pub fn is_type_const(self, def_id: DefId) -> bool {
-        self.type_const_span(def_id).is_some()
+    /// Check if the given `def_id` is a `type const` (mgca)
+    pub fn is_type_const<I: Copy + IntoQueryParam<DefId>>(self, def_id: I) -> bool {
+        // No need to call the query directly in this case always false.
+        if !(matches!(
+            self.def_kind(def_id.into_query_param()),
+            DefKind::Const | DefKind::AssocConst
+        )) {
+            return false;
+        }
+        self.is_rhs_type_const(def_id)
     }
 
     /// Returns the movability of the coroutine of `def_id`, or panics
@@ -2923,7 +2931,7 @@ impl<'tcx> TyCtxt<'tcx> {
     ) -> bool {
         let generics = self.generics_of(def_id);
 
-        // IATs and IACs (inherent associated types/consts with #[type_const]) themselves have a
+        // IATs and IACs (inherent associated types/consts with `type const`) themselves have a
         // weird arg setup (self + own args), but nested items *in* IATs (namely: opaques, i.e.
         // ATPITs) do not.
         let is_inherent_assoc_ty = matches!(self.def_kind(def_id), DefKind::AssocTy)

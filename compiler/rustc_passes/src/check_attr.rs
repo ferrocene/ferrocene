@@ -358,7 +358,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcVarianceOfOpaques
                     | AttributeKind::ShouldPanic { .. }
                     | AttributeKind::ThreadLocal
-                    | AttributeKind::TypeConst{..}
                     | AttributeKind::TypeLengthLimit { .. }
                     | AttributeKind::UnstableFeatureBound(..)
                     | AttributeKind::Used { .. }

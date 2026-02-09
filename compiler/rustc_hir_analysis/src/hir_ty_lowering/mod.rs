@@ -2849,19 +2849,20 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         if tcx.is_type_const(def_id) {
             Ok(())
         } else {
-            let mut err = self
-                .dcx()
-                .struct_span_err(span, "use of `const` in the type system without `#[type_const]`");
+            let mut err = self.dcx().struct_span_err(
+                span,
+                "use of `const` in the type system not defined as `type const`",
+            );
             if def_id.is_local() {
                 let name = tcx.def_path_str(def_id);
                 err.span_suggestion(
                     tcx.def_span(def_id).shrink_to_lo(),
-                    format!("add `#[type_const]` attribute to `{name}`"),
-                    format!("#[type_const]\n"),
+                    format!("add `type` before `const` for `{name}`"),
+                    format!("type "),
                     Applicability::MaybeIncorrect,
                 );
             } else {
-                err.note("only consts marked with `#[type_const]` may be used in types");
+                err.note("only consts marked defined as `type const` may be used in types");
             }
             Err(err.emit())
         }

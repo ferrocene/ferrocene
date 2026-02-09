@@ -2847,11 +2847,10 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 ident,
                 generics,
                 ty,
-                rhs,
+                rhs_kind,
                 define_opaque,
                 defaultness: _,
             }) => {
-                let is_type_const = attr::contains_name(&item.attrs, sym::type_const);
                 self.with_generic_param_rib(
                     &generics.params,
                     RibKind::Item(
@@ -2871,7 +2870,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         this.with_lifetime_rib(
                             LifetimeRibKind::Elided(LifetimeRes::Static),
                             |this| {
-                                if is_type_const
+                                if rhs_kind.is_type_const()
                                     && !this.r.tcx.features().generic_const_parameter_types()
                                 {
                                     this.with_rib(TypeNS, RibKind::ConstParamTy, |this| {
@@ -2888,12 +2887,10 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                             },
                         );
 
-                        if let Some(rhs) = rhs {
-                            this.resolve_const_item_rhs(
-                                rhs,
-                                Some((*ident, ConstantItemKind::Const)),
-                            );
-                        }
+                        this.resolve_const_item_rhs(
+                            rhs_kind,
+                            Some((*ident, ConstantItemKind::Const)),
+                        );
                     },
                 );
                 self.resolve_define_opaques(define_opaque);
@@ -3242,11 +3239,10 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 AssocItemKind::Const(box ast::ConstItem {
                     generics,
                     ty,
-                    rhs,
+                    rhs_kind,
                     define_opaque,
                     ..
                 }) => {
-                    let is_type_const = attr::contains_name(&item.attrs, sym::type_const);
                     self.with_generic_param_rib(
                         &generics.params,
                         RibKind::AssocItem,
@@ -3261,7 +3257,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                 },
                                 |this| {
                                     this.visit_generics(generics);
-                                    if is_type_const
+                                    if rhs_kind.is_type_const()
                                         && !this.r.tcx.features().generic_const_parameter_types()
                                     {
                                         this.with_rib(TypeNS, RibKind::ConstParamTy, |this| {
@@ -3278,14 +3274,13 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
 
                                     // Only impose the restrictions of `ConstRibKind` for an
                                     // actual constant expression in a provided default.
-                                    if let Some(rhs) = rhs {
-                                        // We allow arbitrary const expressions inside of associated consts,
-                                        // even if they are potentially not const evaluatable.
-                                        //
-                                        // Type parameters can already be used and as associated consts are
-                                        // not used as part of the type system, this is far less surprising.
-                                        this.resolve_const_item_rhs(rhs, None);
-                                    }
+                                    //
+                                    // We allow arbitrary const expressions inside of associated consts,
+                                    // even if they are potentially not const evaluatable.
+                                    //
+                                    // Type parameters can already be used and as associated consts are
+                                    // not used as part of the type system, this is far less surprising.
+                                    this.resolve_const_item_rhs(rhs_kind, None);
                                 },
                             )
                         },
@@ -3463,12 +3458,11 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 ident,
                 generics,
                 ty,
-                rhs,
+                rhs_kind,
                 define_opaque,
                 ..
             }) => {
                 debug!("resolve_implementation AssocItemKind::Const");
-                let is_type_const = attr::contains_name(&item.attrs, sym::type_const);
                 self.with_generic_param_rib(
                     &generics.params,
                     RibKind::AssocItem,
@@ -3505,7 +3499,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                         );
 
                                         this.visit_generics(generics);
-                                        if is_type_const
+                                        if rhs_kind.is_type_const()
                                             && !this
                                                 .r
                                                 .tcx
@@ -3527,14 +3521,12 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                         } else {
                                             this.visit_ty(ty);
                                         }
-                                        if let Some(rhs) = rhs {
-                                            // We allow arbitrary const expressions inside of associated consts,
-                                            // even if they are potentially not const evaluatable.
-                                            //
-                                            // Type parameters can already be used and as associated consts are
-                                            // not used as part of the type system, this is far less surprising.
-                                            this.resolve_const_item_rhs(rhs, None);
-                                        }
+                                        // We allow arbitrary const expressions inside of associated consts,
+                                        // even if they are potentially not const evaluatable.
+                                        //
+                                        // Type parameters can already be used and as associated consts are
+                                        // not used as part of the type system, this is far less surprising.
+                                        this.resolve_const_item_rhs(rhs_kind, None);
                                     },
                                 )
                             },
@@ -3756,18 +3748,19 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
 
     fn resolve_const_item_rhs(
         &mut self,
-        rhs: &'ast ConstItemRhs,
+        rhs_kind: &'ast ConstItemRhsKind,
         item: Option<(Ident, ConstantItemKind)>,
     ) {
-        self.with_lifetime_rib(LifetimeRibKind::Elided(LifetimeRes::Infer), |this| match rhs {
-            ConstItemRhs::TypeConst(anon_const) => {
+        self.with_lifetime_rib(LifetimeRibKind::Elided(LifetimeRes::Infer), |this| match rhs_kind {
+            ConstItemRhsKind::TypeConst { rhs: Some(anon_const) } => {
                 this.resolve_anon_const(anon_const, AnonConstKind::ConstArg(IsRepeatExpr::No));
             }
-            ConstItemRhs::Body(expr) => {
+            ConstItemRhsKind::Body { rhs: Some(expr) } => {
                 this.with_constant_rib(IsRepeatExpr::No, ConstantHasGenerics::Yes, item, |this| {
                     this.visit_expr(expr)
                 });
             }
+            _ => (),
         })
     }
 

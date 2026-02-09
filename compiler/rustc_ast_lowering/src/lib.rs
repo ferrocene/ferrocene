@@ -2374,15 +2374,20 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
 
     fn lower_const_item_rhs(
         &mut self,
-        attrs: &[hir::Attribute],
-        rhs: Option<&ConstItemRhs>,
+        rhs_kind: &ConstItemRhsKind,
         span: Span,
     ) -> hir::ConstItemRhs<'hir> {
-        match rhs {
-            Some(ConstItemRhs::TypeConst(anon)) => {
+        match rhs_kind {
+            ConstItemRhsKind::Body { rhs: Some(body) } => {
+                hir::ConstItemRhs::Body(self.lower_const_body(span, Some(body)))
+            }
+            ConstItemRhsKind::Body { rhs: None } => {
+                hir::ConstItemRhs::Body(self.lower_const_body(span, None))
+            }
+            ConstItemRhsKind::TypeConst { rhs: Some(anon) } => {
                 hir::ConstItemRhs::TypeConst(self.lower_anon_const_to_const_arg_and_alloc(anon))
             }
-            None if find_attr!(attrs, AttributeKind::TypeConst(_)) => {
+            ConstItemRhsKind::TypeConst { rhs: None } => {
                 let const_arg = ConstArg {
                     hir_id: self.next_id(),
                     kind: hir::ConstArgKind::Error(
@@ -2392,10 +2397,6 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                 };
                 hir::ConstItemRhs::TypeConst(self.arena.alloc(const_arg))
             }
-            Some(ConstItemRhs::Body(body)) => {
-                hir::ConstItemRhs::Body(self.lower_const_body(span, Some(body)))
-            }
-            None => hir::ConstItemRhs::Body(self.lower_const_body(span, None)),
         }
     }
 

@@ -299,7 +299,6 @@ attribute_parsers!(
         Single<WithoutArgs<StdInternalSymbolParser>>,
         Single<WithoutArgs<ThreadLocalParser>>,
         Single<WithoutArgs<TrackCallerParser>>,
-        Single<WithoutArgs<TypeConstParser>>,
         Single<WithoutArgs<UnsafeSpecializationMarkerParser>>,
         // tidy-alphabetical-end
     ];

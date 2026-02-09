@@ -9,8 +9,7 @@
 #![expect(incomplete_features)]
 
 trait Trait {
-    #[type_const]
-    const Y: i32;
+    type const Y: i32;
 }
 
 struct Hold<T: ?Sized>(T);

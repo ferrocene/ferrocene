@@ -6,9 +6,7 @@ use rustc_ast::ast::*;
 use rustc_ast::token::{self, Delimiter, InvisibleOrigin, MetaVarKind, TokenKind};
 use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use rustc_ast::util::case::Case;
-use rustc_ast::{
-    attr, {self as ast},
-};
+use rustc_ast::{self as ast};
 use rustc_ast_pretty::pprust;
 use rustc_errors::codes::*;
 use rustc_errors::{Applicability, PResult, StashKey, inline_fluent, struct_span_code_err};
@@ -286,13 +284,13 @@ impl<'a> Parser<'a> {
             // CONST ITEM
             self.recover_const_mut(const_span);
             self.recover_missing_kw_before_item()?;
-            let (ident, generics, ty, rhs) = self.parse_const_item(attrs)?;
+            let (ident, generics, ty, rhs_kind) = self.parse_const_item(false)?;
             ItemKind::Const(Box::new(ConstItem {
                 defaultness: def_(),
                 ident,
                 generics,
                 ty,
-                rhs,
+                rhs_kind,
                 define_opaque: None,
             }))
         } else if let Some(kind) = self.is_reuse_item() {
@@ -303,8 +301,26 @@ impl<'a> Parser<'a> {
             // MODULE ITEM
             self.parse_item_mod(attrs)?
         } else if self.eat_keyword_case(exp!(Type), case) {
-            // TYPE ITEM
-            self.parse_type_alias(def_())?
+            if let Const::Yes(const_span) = self.parse_constness(case) {
+                // TYPE CONST (mgca)
+                self.recover_const_mut(const_span);
+                self.recover_missing_kw_before_item()?;
+                let (ident, generics, ty, rhs_kind) = self.parse_const_item(true)?;
+                // Make sure this is only allowed if the feature gate is enabled.
+                // #![feature(mgca_type_const_syntax)]
+                self.psess.gated_spans.gate(sym::mgca_type_const_syntax, lo.to(const_span));
+                ItemKind::Const(Box::new(ConstItem {
+                    defaultness: def_(),
+                    ident,
+                    generics,
+                    ty,
+                    rhs_kind,
+                    define_opaque: None,
+                }))
+            } else {
+                // TYPE ITEM
+                self.parse_type_alias(def_())?
+            }
         } else if self.eat_keyword_case(exp!(Enum), case) {
             // ENUM ITEM
             self.parse_item_enum()?
@@ -1113,13 +1129,12 @@ impl<'a> Parser<'a> {
                             define_opaque,
                         }) => {
                             self.dcx().emit_err(errors::AssociatedStaticItemNotAllowed { span });
-                            let rhs = expr.map(ConstItemRhs::Body);
                             AssocItemKind::Const(Box::new(ConstItem {
                                 defaultness: Defaultness::Final,
                                 ident,
                                 generics: Generics::default(),
                                 ty,
-                                rhs,
+                                rhs_kind: ConstItemRhsKind::Body { rhs: expr },
                                 define_opaque,
                             }))
                         }
@@ -1360,7 +1375,7 @@ impl<'a> Parser<'a> {
                 let kind = match ForeignItemKind::try_from(kind) {
                     Ok(kind) => kind,
                     Err(kind) => match kind {
-                        ItemKind::Const(box ConstItem { ident, ty, rhs, .. }) => {
+                        ItemKind::Const(box ConstItem { ident, ty, rhs_kind, .. }) => {
                             let const_span = Some(span.with_hi(ident.span.lo()))
                                 .filter(|span| span.can_be_used_for_suggestions());
                             self.dcx().emit_err(errors::ExternItemCannotBeConst {
@@ -1371,10 +1386,13 @@ impl<'a> Parser<'a> {
                                 ident,
                                 ty,
                                 mutability: Mutability::Not,
-                                expr: rhs.map(|b| match b {
-                                    ConstItemRhs::TypeConst(anon_const) => anon_const.value,
-                                    ConstItemRhs::Body(expr) => expr,
-                                }),
+                                expr: match rhs_kind {
+                                    ConstItemRhsKind::Body { rhs } => rhs,
+                                    ConstItemRhsKind::TypeConst { rhs: Some(anon) } => {
+                                        Some(anon.value)
+                                    }
+                                    ConstItemRhsKind::TypeConst { rhs: None } => None,
+                                },
                                 safety: Safety::Default,
                                 define_opaque: None,
                             }))
@@ -1516,13 +1534,16 @@ impl<'a> Parser<'a> {
 
     /// Parse a constant item with the prefix `"const"` already parsed.
     ///
+    /// If `const_arg` is true, any expression assigned to the const will be parsed
+    /// as a const_arg instead of a body expression.
+    ///
     /// ```ebnf
     /// Const = "const" ($ident | "_") Generics ":" $ty (= $expr)? WhereClause ";" ;
     /// ```
     fn parse_const_item(
         &mut self,
-        attrs: &[Attribute],
-    ) -> PResult<'a, (Ident, Generics, Box<Ty>, Option<ast::ConstItemRhs>)> {
+        const_arg: bool,
+    ) -> PResult<'a, (Ident, Generics, Box<Ty>, ConstItemRhsKind)> {
         let ident = self.parse_ident_or_underscore()?;
 
         let mut generics = self.parse_generics()?;
@@ -1549,16 +1570,15 @@ impl<'a> Parser<'a> {
         let before_where_clause =
             if self.may_recover() { self.parse_where_clause()? } else { WhereClause::default() };
 
-        let rhs = if self.eat(exp!(Eq)) {
-            if attr::contains_name(attrs, sym::type_const) {
-                let ct =
-                    self.parse_expr_anon_const(|this, expr| this.mgca_direct_lit_hack(expr))?;
-                Some(ConstItemRhs::TypeConst(ct))
-            } else {
-                Some(ConstItemRhs::Body(self.parse_expr()?))
-            }
-        } else {
-            None
+        let rhs = match (self.eat(exp!(Eq)), const_arg) {
+            (true, true) => ConstItemRhsKind::TypeConst {
+                rhs: Some(
+                    self.parse_expr_anon_const(|this, expr| this.mgca_direct_lit_hack(expr))?,
+                ),
+            },
+            (true, false) => ConstItemRhsKind::Body { rhs: Some(self.parse_expr()?) },
+            (false, true) => ConstItemRhsKind::TypeConst { rhs: None },
+            (false, false) => ConstItemRhsKind::Body { rhs: None },
         };
 
         let after_where_clause = self.parse_where_clause()?;
@@ -1567,18 +1587,18 @@ impl<'a> Parser<'a> {
         // Users may be tempted to write such code if they are still used to the deprecated
         // where-clause location on type aliases and associated types. See also #89122.
         if before_where_clause.has_where_token
-            && let Some(rhs) = &rhs
+            && let Some(rhs_span) = rhs.span()
         {
             self.dcx().emit_err(errors::WhereClauseBeforeConstBody {
                 span: before_where_clause.span,
                 name: ident.span,
-                body: rhs.span(),
+                body: rhs_span,
                 sugg: if !after_where_clause.has_where_token {
-                    self.psess.source_map().span_to_snippet(rhs.span()).ok().map(|body_s| {
+                    self.psess.source_map().span_to_snippet(rhs_span).ok().map(|body_s| {
                         errors::WhereClauseBeforeConstBodySugg {
                             left: before_where_clause.span.shrink_to_lo(),
                             snippet: body_s,
-                            right: before_where_clause.span.shrink_to_hi().to(rhs.span()),
+                            right: before_where_clause.span.shrink_to_hi().to(rhs_span),
                         }
                     })
                 } else {

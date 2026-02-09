@@ -1271,7 +1271,7 @@ pub fn walk_trait_item<'v, V: Visitor<'v>>(
     try_visit!(visitor.visit_defaultness(&defaultness));
     try_visit!(visitor.visit_id(hir_id));
     match *kind {
-        TraitItemKind::Const(ref ty, default) => {
+        TraitItemKind::Const(ref ty, default, _) => {
             try_visit!(visitor.visit_ty_unambig(ty));
             visit_opt!(visitor, visit_const_item_rhs, default);
         }

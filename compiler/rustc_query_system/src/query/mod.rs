@@ -15,7 +15,6 @@ use rustc_span::def_id::DefId;
 pub use self::caches::{
     DefIdCache, DefaultCache, QueryCache, QueryCacheKey, SingleCache, VecCache,
 };
-pub use self::dispatcher::HashResult;
 pub use self::job::{
     QueryInfo, QueryJob, QueryJobId, QueryJobInfo, QueryLatch, QueryMap, break_query_cycles,
     print_query_stack, report_cycle,
@@ -24,7 +23,6 @@ pub use self::plumbing::*;
 use crate::dep_graph::{DepKind, DepNodeIndex, HasDepContext, SerializedDepNodeIndex};
 
 mod caches;
-mod dispatcher;
 mod job;
 mod plumbing;
 

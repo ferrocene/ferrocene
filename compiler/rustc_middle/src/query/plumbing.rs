@@ -1,12 +1,14 @@
 use std::ops::Deref;
 
+use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sync::{AtomicU64, WorkerLocal};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
 use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
+use rustc_query_system::ich::StableHashingContext;
 pub(crate) use rustc_query_system::query::QueryJobId;
-use rustc_query_system::query::{CycleError, CycleErrorHandling, HashResult, QueryCache};
+use rustc_query_system::query::{CycleError, CycleErrorHandling, QueryCache};
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
@@ -29,6 +31,8 @@ pub type TryLoadFromDiskFn<'tcx, Key, Value> = fn(
 
 pub type IsLoadableFromDiskFn<'tcx, Key> =
     fn(tcx: TyCtxt<'tcx>, key: &Key, index: SerializedDepNodeIndex) -> bool;
+
+pub type HashResult<V> = Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>;
 
 /// Stores function pointers and other metadata for a particular query.
 ///

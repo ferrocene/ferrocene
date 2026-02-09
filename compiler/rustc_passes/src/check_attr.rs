@@ -315,6 +315,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcHasIncoherentInherentImpls
                     | AttributeKind::RustcHiddenTypeOfOpaques
                     | AttributeKind::RustcIfThisChanged(..)
+                    | AttributeKind::RustcInsignificantDtor
                     | AttributeKind::RustcIntrinsic
                     | AttributeKind::RustcIntrinsicConstStableIndirect
                     | AttributeKind::RustcLayout(..)
@@ -390,7 +391,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::default_lib_allocator
                             | sym::rustc_diagnostic_item
                             | sym::rustc_no_mir_inline
-                            | sym::rustc_insignificant_dtor
                             | sym::rustc_nonnull_optimization_guaranteed
                             | sym::rustc_inherit_overflow_checks
                             | sym::rustc_trivial_field_reads

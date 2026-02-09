@@ -120,6 +120,7 @@ impl AttributeKind {
             RustcHasIncoherentInherentImpls => Yes,
             RustcHiddenTypeOfOpaques => No,
             RustcIfThisChanged(..) => No,
+            RustcInsignificantDtor => Yes,
             RustcIntrinsic => Yes,
             RustcIntrinsicConstStableIndirect => No,
             RustcLayout(..) => No,

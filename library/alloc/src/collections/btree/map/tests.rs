@@ -2128,6 +2128,16 @@ create_append_test!(test_append_239, 239);
 #[cfg(not(miri))] // Miri is too slow
 create_append_test!(test_append_1700, 1700);
 
+// a inserts (0, 0)..(8, 8) to its own tree
+// b inserts (5, 5 * 2)..($len, 2 * $len) to its own tree
+// note that between a and b, there are duplicate keys
+// between 5..min($len, 8), so on merge we add the values
+// of these keys together
+// we check that:
+//     - the merged tree 'a' has a length of max(8, $len)
+//     - all keys in 'a' have the correct value associated
+//     - removing and inserting an element into the merged
+//       tree 'a' still keeps it in valid tree form
 macro_rules! create_merge_test {
     ($name:ident, $len:expr) => {
         #[test]
@@ -2237,6 +2247,84 @@ fn test_append_ord_chaos() {
     assert_eq!(map2.len(), 0);
     map1.check();
     map2.check();
+}
+
+#[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
+fn test_merge_drop_leak() {
+    let a = CrashTestDummy::new(0);
+    let b = CrashTestDummy::new(1);
+    let c = CrashTestDummy::new(2);
+    let mut left = BTreeMap::new();
+    let mut right = BTreeMap::new();
+    left.insert(a.spawn(Panic::Never), ());
+    left.insert(b.spawn(Panic::Never), ());
+    left.insert(c.spawn(Panic::Never), ());
+    right.insert(b.spawn(Panic::InDrop), ()); // first duplicate key, dropped during merge
+    right.insert(c.spawn(Panic::Never), ());
+
+    catch_unwind(move || left.merge(right, |_, _, _| ())).unwrap_err();
+    assert_eq!(a.dropped(), 1); // this should not be dropped
+    assert_eq!(b.dropped(), 2); // key is dropped on panic
+    assert_eq!(c.dropped(), 2); // key is dropped on panic
+}
+
+#[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
+fn test_merge_conflict_drop_leak() {
+    let a = CrashTestDummy::new(0);
+    let a_val_left = CrashTestDummy::new(0);
+
+    let b = CrashTestDummy::new(1);
+    let b_val_left = CrashTestDummy::new(1);
+    let b_val_right = CrashTestDummy::new(1);
+
+    let c = CrashTestDummy::new(2);
+    let c_val_left = CrashTestDummy::new(2);
+    let c_val_right = CrashTestDummy::new(2);
+
+    let mut left = BTreeMap::new();
+    let mut right = BTreeMap::new();
+
+    left.insert(a.spawn(Panic::Never), a_val_left.spawn(Panic::Never));
+    left.insert(b.spawn(Panic::Never), b_val_left.spawn(Panic::Never));
+    left.insert(c.spawn(Panic::Never), c_val_left.spawn(Panic::Never));
+    right.insert(b.spawn(Panic::Never), b_val_right.spawn(Panic::Never));
+    right.insert(c.spawn(Panic::Never), c_val_right.spawn(Panic::Never));
+
+    // First key that conflicts should
+    catch_unwind(move || {
+        left.merge(right, |_, _, _| panic!("Panic in conflict function"));
+        assert_eq!(left.len(), 1); // only 1 entry should be left
+    })
+    .unwrap_err();
+    assert_eq!(a.dropped(), 1); // should not panic
+    assert_eq!(a_val_left.dropped(), 1); // should not panic
+    assert_eq!(b.dropped(), 2); // should drop from panic (conflict)
+    assert_eq!(b_val_left.dropped(), 1); // should be 2 were it not for Rust issue #47949
+    assert_eq!(b_val_right.dropped(), 1); // should be 2 were it not for Rust issue #47949
+    assert_eq!(c.dropped(), 2); // should drop from panic (conflict)
+    assert_eq!(c_val_left.dropped(), 1); // should be 2 were it not for Rust issue #47949
+    assert_eq!(c_val_right.dropped(), 1); // should be 2 were it not for Rust issue #47949
+}
+
+#[test]
+fn test_merge_ord_chaos() {
+    let mut map1 = BTreeMap::new();
+    map1.insert(Cyclic3::A, ());
+    map1.insert(Cyclic3::B, ());
+    let mut map2 = BTreeMap::new();
+    map2.insert(Cyclic3::A, ());
+    map2.insert(Cyclic3::B, ());
+    map2.insert(Cyclic3::C, ()); // lands first, before A
+    map2.insert(Cyclic3::B, ()); // lands first, before C
+    map1.check();
+    map2.check(); // keys are not unique but still strictly ascending
+    assert_eq!(map1.len(), 2);
+    assert_eq!(map2.len(), 4);
+    map1.merge(map2, |_, _, _| ());
+    assert_eq!(map1.len(), 5);
+    map1.check();
 }
 
 fn rand_data(len: usize) -> Vec<(u32, u32)> {
@@ -2695,9 +2783,15 @@ fn test_id_based_merge() {
     rhs.insert(IdBased { id: 0, name: "rhs_k".to_string() }, "2".to_string());
 
     lhs.merge(rhs, |_, mut lhs_val, rhs_val| {
+        // confirming that lhs_val comes from lhs tree,
+        // rhs_val comes from rhs tree
+        assert_eq!(lhs_val, String::from("1"));
+        assert_eq!(rhs_val, String::from("2"));
         lhs_val.push_str(&rhs_val);
         lhs_val
     });
 
-    assert_eq!(lhs.pop_first().unwrap().0.name, "lhs_k".to_string());
+    let merged_kv_pair = lhs.pop_first().unwrap();
+    assert_eq!(merged_kv_pair.0.id, 0);
+    assert_eq!(merged_kv_pair.0.name, "lhs_k".to_string());
 }

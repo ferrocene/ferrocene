@@ -52,7 +52,6 @@ pub const unsafe fn simd_insert_dyn<T, U>(x: T, idx: u32, val: U) -> T;
 /// `idx` must be in-bounds of the vector.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_extract_dyn<T, U>(x: T, idx: u32) -> U;
 
 /// Creates a vector where every lane has the provided value.

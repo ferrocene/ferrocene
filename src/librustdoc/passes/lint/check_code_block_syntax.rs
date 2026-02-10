@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use rustc_data_structures::sync::Lock;
 use rustc_errors::emitter::Emitter;
-use rustc_errors::translation::{Translator, to_fluent_args};
+use rustc_errors::translation::{to_fluent_args, translate_message};
 use rustc_errors::{Applicability, DiagCtxt, DiagInner};
 use rustc_parse::{source_str_to_stream, unwrap_or_emit_fatal};
 use rustc_resolve::rustdoc::source_span_for_markdown_range;
@@ -35,8 +35,7 @@ fn check_rust_syntax(
     code_block: RustCodeBlock,
 ) {
     let buffer = Arc::new(Lock::new(Buffer::default()));
-    let translator = rustc_driver::default_translator();
-    let emitter = BufferEmitter { buffer: Arc::clone(&buffer), translator };
+    let emitter = BufferEmitter { buffer: Arc::clone(&buffer) };
 
     let sm = Arc::new(SourceMap::new(FilePathMapping::empty()));
     let dcx = DiagCtxt::new(Box::new(emitter)).disable_warnings();
@@ -145,7 +144,6 @@ struct Buffer {
 
 struct BufferEmitter {
     buffer: Arc<Lock<Buffer>>,
-    translator: Translator,
 }
 
 impl Emitter for BufferEmitter {
@@ -153,10 +151,8 @@ impl Emitter for BufferEmitter {
         let mut buffer = self.buffer.borrow_mut();
 
         let fluent_args = to_fluent_args(diag.args.iter());
-        let translated_main_message = self
-            .translator
-            .translate_message(&diag.messages[0].0, &fluent_args)
-            .unwrap_or_else(|e| panic!("{e}"));
+        let translated_main_message =
+            translate_message(&diag.messages[0].0, &fluent_args).unwrap_or_else(|e| panic!("{e}"));
 
         buffer.messages.push(format!("error from rustc: {translated_main_message}"));
         if diag.is_error() {
@@ -166,9 +162,5 @@ impl Emitter for BufferEmitter {
 
     fn source_map(&self) -> Option<&SourceMap> {
         None
-    }
-
-    fn translator(&self) -> &Translator {
-        &self.translator
     }
 }

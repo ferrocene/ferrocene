@@ -12,7 +12,6 @@ use rustc_data_structures::jobserver::{self, Acquired};
 use rustc_data_structures::memmap::Mmap;
 use rustc_data_structures::profiling::{SelfProfilerRef, VerboseTimingGuard};
 use rustc_errors::emitter::Emitter;
-use rustc_errors::translation::Translator;
 use rustc_errors::{
     Diag, DiagArgMap, DiagCtxt, DiagCtxtHandle, DiagMessage, ErrCode, FatalError, FatalErrorMarker,
     Level, MultiSpan, Style, Suggestions, catch_fatal_errors,
@@ -2009,10 +2008,6 @@ impl Emitter for SharedEmitter {
 
     fn source_map(&self) -> Option<&SourceMap> {
         None
-    }
-
-    fn translator(&self) -> &Translator {
-        panic!("shared emitter attempted to translate a diagnostic");
     }
 }
 

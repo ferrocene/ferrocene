@@ -4,98 +4,15 @@
 // tidy-alphabetical-end
 
 use std::borrow::Cow;
-use std::error::Error;
-use std::sync::{Arc, LazyLock};
-use std::{fmt, io};
 
-use fluent_bundle::FluentResource;
 pub use fluent_bundle::types::FluentType;
 pub use fluent_bundle::{self, FluentArgs, FluentError, FluentValue};
-use fluent_syntax::parser::ParserError;
-use intl_memoizer::concurrent::IntlLangMemoizer;
-use rustc_data_structures::sync::{DynSend, IntoDynSyncSend};
 use rustc_macros::{Decodable, Encodable};
 use rustc_span::Span;
-use tracing::instrument;
 pub use unic_langid::{LanguageIdentifier, langid};
 
 mod diagnostic_impls;
 pub use diagnostic_impls::DiagArgFromDisplay;
-
-pub type FluentBundle =
-    IntoDynSyncSend<fluent_bundle::bundle::FluentBundle<FluentResource, IntlLangMemoizer>>;
-
-fn new_bundle(locales: Vec<LanguageIdentifier>) -> FluentBundle {
-    IntoDynSyncSend(fluent_bundle::bundle::FluentBundle::new_concurrent(locales))
-}
-
-#[derive(Debug)]
-pub enum TranslationBundleError {
-    /// Failed to read from `.ftl` file.
-    ReadFtl(io::Error),
-    /// Failed to parse contents of `.ftl` file.
-    ParseFtl(ParserError),
-    /// Failed to add `FluentResource` to `FluentBundle`.
-    AddResource(FluentError),
-    /// `$sysroot/share/locale/$locale` does not exist.
-    MissingLocale,
-    /// Cannot read directory entries of `$sysroot/share/locale/$locale`.
-    ReadLocalesDir(io::Error),
-    /// Cannot read directory entry of `$sysroot/share/locale/$locale`.
-    ReadLocalesDirEntry(io::Error),
-    /// `$sysroot/share/locale/$locale` is not a directory.
-    LocaleIsNotDir,
-}
-
-impl fmt::Display for TranslationBundleError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            TranslationBundleError::ReadFtl(e) => write!(f, "could not read ftl file: {e}"),
-            TranslationBundleError::ParseFtl(e) => {
-                write!(f, "could not parse ftl file: {e}")
-            }
-            TranslationBundleError::AddResource(e) => write!(f, "failed to add resource: {e}"),
-            TranslationBundleError::MissingLocale => write!(f, "missing locale directory"),
-            TranslationBundleError::ReadLocalesDir(e) => {
-                write!(f, "could not read locales dir: {e}")
-            }
-            TranslationBundleError::ReadLocalesDirEntry(e) => {
-                write!(f, "could not read locales dir entry: {e}")
-            }
-            TranslationBundleError::LocaleIsNotDir => {
-                write!(f, "`$sysroot/share/locales/$locale` is not a directory")
-            }
-        }
-    }
-}
-
-impl Error for TranslationBundleError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            TranslationBundleError::ReadFtl(e) => Some(e),
-            TranslationBundleError::ParseFtl(e) => Some(e),
-            TranslationBundleError::AddResource(e) => Some(e),
-            TranslationBundleError::MissingLocale => None,
-            TranslationBundleError::ReadLocalesDir(e) => Some(e),
-            TranslationBundleError::ReadLocalesDirEntry(e) => Some(e),
-            TranslationBundleError::LocaleIsNotDir => None,
-        }
-    }
-}
-
-impl From<(FluentResource, Vec<ParserError>)> for TranslationBundleError {
-    fn from((_, mut errs): (FluentResource, Vec<ParserError>)) -> Self {
-        TranslationBundleError::ParseFtl(errs.pop().expect("failed ftl parse with no errors"))
-    }
-}
-
-impl From<Vec<FluentError>> for TranslationBundleError {
-    fn from(mut errs: Vec<FluentError>) -> Self {
-        TranslationBundleError::AddResource(
-            errs.pop().expect("failed adding resource to bundle with no errors"),
-        )
-    }
-}
 
 pub fn register_functions<R, M>(bundle: &mut fluent_bundle::bundle::FluentBundle<R, M>) {
     bundle
@@ -104,35 +21,6 @@ pub fn register_functions<R, M>(bundle: &mut fluent_bundle::bundle::FluentBundle
             _ => FluentValue::Error,
         })
         .expect("Failed to add a function to the bundle.");
-}
-
-/// Type alias for the result of `fallback_fluent_bundle` - a reference-counted pointer to a lazily
-/// evaluated fluent bundle.
-pub type LazyFallbackBundle =
-    Arc<LazyLock<FluentBundle, Box<dyn FnOnce() -> FluentBundle + DynSend>>>;
-
-/// Return the default `FluentBundle` with standard "en-US" diagnostic messages.
-#[instrument(level = "trace", skip(resources))]
-pub fn fallback_fluent_bundle(
-    resources: Vec<&'static str>,
-    with_directionality_markers: bool,
-) -> LazyFallbackBundle {
-    Arc::new(LazyLock::new(Box::new(move || {
-        let mut fallback_bundle = new_bundle(vec![langid!("en-US")]);
-
-        register_functions(&mut fallback_bundle);
-
-        // See comment in `fluent_bundle`.
-        fallback_bundle.set_use_isolating(with_directionality_markers);
-
-        for resource in resources {
-            let resource = FluentResource::try_new(resource.to_string())
-                .expect("failed to parse fallback fluent resource");
-            fallback_bundle.add_resource_overriding(resource);
-        }
-
-        fallback_bundle
-    })))
 }
 
 /// Abstraction over a message in a diagnostic to support both translatable and non-translatable

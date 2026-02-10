@@ -71,7 +71,6 @@ where
         let sess = build_session(
             sessopts,
             io,
-            None,
             Default::default(),
             target,
             "",

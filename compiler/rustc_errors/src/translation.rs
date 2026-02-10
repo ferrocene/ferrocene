@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::error::Report;
 
-pub use rustc_error_messages::{FluentArgs, LazyFallbackBundle};
+pub use rustc_error_messages::FluentArgs;
 use rustc_error_messages::{langid, register_functions};
 use tracing::{debug, trace};
 
@@ -28,59 +28,48 @@ pub fn to_fluent_args<'iter>(iter: impl Iterator<Item = DiagArg<'iter>>) -> Flue
     args
 }
 
-#[derive(Clone)]
-pub struct Translator;
+/// Convert `DiagMessage`s to a string, performing translation if necessary.
+pub fn translate_messages(
+    messages: &[(DiagMessage, Style)],
+    args: &FluentArgs<'_>,
+) -> Cow<'static, str> {
+    Cow::Owned(
+        messages
+            .iter()
+            .map(|(m, _)| translate_message(m, args).map_err(Report::new).unwrap())
+            .collect::<String>(),
+    )
+}
 
-impl Translator {
-    pub fn new() -> Translator {
-        Self
-    }
+/// Convert a `DiagMessage` to a string, performing translation if necessary.
+pub fn translate_message<'a>(
+    message: &'a DiagMessage,
+    args: &'a FluentArgs<'_>,
+) -> Result<Cow<'a, str>, TranslateError<'a>> {
+    trace!(?message, ?args);
+    match message {
+        DiagMessage::Str(msg) => Ok(Cow::Borrowed(msg)),
+        // This translates an inline fluent diagnostic message
+        // It does this by creating a new `FluentBundle` with only one message,
+        // and then translating using this bundle.
+        DiagMessage::Inline(msg) => {
+            const GENERATED_MSG_ID: &str = "generated_msg";
+            let resource =
+                FluentResource::try_new(format!("{GENERATED_MSG_ID} = {msg}\n")).unwrap();
+            let mut bundle = fluent_bundle::FluentBundle::new(vec![langid!("en-US")]);
+            bundle.set_use_isolating(false);
+            bundle.add_resource(resource).unwrap();
+            register_functions(&mut bundle);
+            let message = bundle.get_message(GENERATED_MSG_ID).unwrap();
+            let value = message.value().unwrap();
 
-    /// Convert `DiagMessage`s to a string, performing translation if necessary.
-    pub fn translate_messages(
-        &self,
-        messages: &[(DiagMessage, Style)],
-        args: &FluentArgs<'_>,
-    ) -> Cow<'_, str> {
-        Cow::Owned(
-            messages
-                .iter()
-                .map(|(m, _)| self.translate_message(m, args).map_err(Report::new).unwrap())
-                .collect::<String>(),
-        )
-    }
-
-    /// Convert a `DiagMessage` to a string, performing translation if necessary.
-    pub fn translate_message<'a>(
-        &'a self,
-        message: &'a DiagMessage,
-        args: &'a FluentArgs<'_>,
-    ) -> Result<Cow<'a, str>, TranslateError<'a>> {
-        trace!(?message, ?args);
-        match message {
-            DiagMessage::Str(msg) => Ok(Cow::Borrowed(msg)),
-            // This translates an inline fluent diagnostic message
-            // It does this by creating a new `FluentBundle` with only one message,
-            // and then translating using this bundle.
-            DiagMessage::Inline(msg) => {
-                const GENERATED_MSG_ID: &str = "generated_msg";
-                let resource =
-                    FluentResource::try_new(format!("{GENERATED_MSG_ID} = {msg}\n")).unwrap();
-                let mut bundle = fluent_bundle::FluentBundle::new(vec![langid!("en-US")]);
-                bundle.set_use_isolating(false);
-                bundle.add_resource(resource).unwrap();
-                register_functions(&mut bundle);
-                let message = bundle.get_message(GENERATED_MSG_ID).unwrap();
-                let value = message.value().unwrap();
-
-                let mut errs = vec![];
-                let translated = bundle.format_pattern(value, Some(args), &mut errs).to_string();
-                debug!(?translated, ?errs);
-                if errs.is_empty() {
-                    Ok(Cow::Owned(translated))
-                } else {
-                    Err(TranslateError::fluent(&Cow::Borrowed(GENERATED_MSG_ID), args, errs))
-                }
+            let mut errs = vec![];
+            let translated = bundle.format_pattern(value, Some(args), &mut errs).to_string();
+            debug!(?translated, ?errs);
+            if errs.is_empty() {
+                Ok(Cow::Owned(translated))
+            } else {
+                Err(TranslateError::fluent(&Cow::Borrowed(GENERATED_MSG_ID), args, errs))
             }
         }
     }

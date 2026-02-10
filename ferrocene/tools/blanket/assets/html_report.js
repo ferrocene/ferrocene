@@ -36,9 +36,9 @@ function main() {
             for (details of section.querySelectorAll("details")) {
                 var summary = details.querySelector("summary");
                 if (summary.innerText.search(currentQuery) === -1) {
-                    summary.style.display = "none";
+                    details.style.display = "none";
                 } else {
-                    summary.style = "";
+                    details.style = "";
 
                     var testedLines = parseInt(summary.getAttribute("tested-lines"));
                     var untestedLines = parseInt(summary.getAttribute("untested-lines"));
@@ -59,7 +59,11 @@ function main() {
         }
 
         var totalLines = numLinesTested + numLinesUntested;
-        var percentileLinesTested = (numLinesTested / totalLines) * 100.0;
+        var percentileLinesTested = 100.0;
+
+        if (totalLines > 0) {
+            percentileLinesTested = (numLinesTested / totalLines) * 100.0;
+        }
 
         document.querySelector(".coverage-summary").children[0].textContent = `${percentileLinesTested.toFixed(2)}% (${numLinesTested}/${totalLines} lines)`;
     }

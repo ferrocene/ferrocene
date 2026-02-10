@@ -48,6 +48,12 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-ferrocene.facade", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "aarch64v8r-unknown-none", std: false, linker: Linker::BundledLld },
+    TargetSpec {
+        tuple: "aarch64v8r-unknown-none-softfloat",
+        std: false,
+        linker: Linker::BundledLld,
+    },
     TargetSpec { tuple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },

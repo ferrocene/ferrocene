@@ -63,7 +63,7 @@ description = "by Ferrous Systems"
 [llvm]
 # Statically link libstdc++ in the resulting LLVM.
 #
-# If this confiugration is missing the resulting LLVM will be different, and might require libstdc++
+# If this configuration is missing the resulting LLVM will be different, and might require libstdc++
 # to be installed on the user's system.
 static-libstdcpp = true
 

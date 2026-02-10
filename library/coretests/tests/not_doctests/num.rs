@@ -75,3 +75,65 @@ int_overflowing_neg! {
     i128 => i128_overflowing_neg,
     isize => isize_overflowing_neg,
 }
+
+// Covers core::num::int_log10::usize
+#[test]
+fn int_log10_usize() {
+    let a = core::num::NonZeroUsize::new(100).unwrap();
+    assert_eq!(a.ilog10(), 2);
+}
+
+// Covers
+// - core::num::<impl u8>::checked_pow
+// - core::num::<impl u16>::checked_pow
+// - core::num::<impl u32>::checked_pow
+// - core::num::<impl u64>::checked_pow
+// - core::num::<impl u128>::checked_pow
+// - core::num::<impl usize>::checked_pow
+macro_rules! test_uint_checked_pow {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(<$T>::checked_pow(2, 5), Some(32));
+                assert_eq!(<$T>::checked_pow(0, 0), Some(1));
+                assert_eq!(<$T>::checked_pow(<$T>::MAX, 2), None);
+            }
+        )*
+    };
+}
+test_uint_checked_pow! {
+    u8 => u8_checked_pow,
+    u16 => u16_checked_pow,
+    u32 => u32_checked_pow,
+    u64 => u64_checked_pow,
+    u128 => u128_checked_pow,
+    usize => usize_checked_pow,
+}
+
+// Covers
+// - core::num::<impl i8>::ilog
+// - core::num::<impl i16>::ilog
+// - core::num::<impl i32>::ilog
+// - core::num::<impl i64>::ilog
+// - core::num::<impl i128>::ilog
+// - core::num::<impl isize>::ilog
+macro_rules! test_int_ilog_panic_nonpositive_argument {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic = "argument of integer logarithm must be positive"]
+            fn $fn() {
+                assert_eq!(<$T>::ilog(-1, 2), 0);
+            }
+        )*
+    };
+}
+test_int_ilog_panic_nonpositive_argument! {
+    i8 => i8_ilog_panic_nonpositive_argument,
+    i16 => i16_ilog_panic_nonpositive_argument,
+    i32 => i32_ilog_panic_nonpositive_argument,
+    i64 => i64_ilog_panic_nonpositive_argument,
+    i128 => i128_ilog_panic_nonpositive_argument,
+    isize => isize_ilog_panic_nonpositive_argument,
+}

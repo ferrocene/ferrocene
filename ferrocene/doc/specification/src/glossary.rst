@@ -1804,7 +1804,7 @@ See :s:`DiscriminantInitializer`.
 discriminant type
 ^^^^^^^^^^^^^^^^^
 
-:dp:`fls_t4yeovFm83Wo`
+:dp:`fls_kqdvWGi9cglm`
 A :dt:`discriminant type` is the :t:`type` of a :t:`discriminant`.
 
 .. _fls_gDFsAj1Bvx7A:
@@ -3164,10 +3164,7 @@ implied bound
 ^^^^^^^^^^^^^
 
 :dp:`fls_t77d8xwG1l9Q`
-An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
-is the byproduct of relations between :t:`[lifetime parameter]s` and
-:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a
-:t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
+An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is the byproduct of relations between :t:`[lifetime parameter]s` and :t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a :t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
 
 .. _fls_3lo8ygoyxxyf:
 
@@ -3930,7 +3927,7 @@ See :s:`LiteralPattern`.
 local trait
 ^^^^^^^^^^^
 
-:dp:`fls_I9JaKZelMiby`
+:dp:`fls_H5vkbMFvzrFs`
 A :dt:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
 
 .. _fls_cexgUIGUUKS4:

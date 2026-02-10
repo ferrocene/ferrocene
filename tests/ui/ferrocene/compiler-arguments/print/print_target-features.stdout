@@ -12,8 +12,8 @@ Features supported by rustc for this target:
     amx-tile                        - Support AMX-TILE instructions.
     apxf                            - Support extended general purpose register.
     avx                             - Enable AVX instructions.
-    avx10.1                         - Support AVX10.1 up to 512-bit instruction.
-    avx10.2                         - Support AVX10.2 up to 512-bit instruction.
+    avx10.1                         - Support AVX10.1 instruction.
+    avx10.2                         - Support AVX10.2 instruction.
     avx2                            - Enable AVX2 instructions.
     avx512bf16                      - Support bfloat16 floating point.
     avx512bitalg                    - Enable AVX-512 Bit Algorithms.
@@ -82,9 +82,8 @@ Code-generation features supported by LLVM for this target:
     64bit                           - Support 64-bit instructions.
     64bit-mode                      - 64-bit mode (x86_64).
     allow-light-256-bit             - Enable generation of 256-bit load/stores even if we prefer 128-bit.
-    amx-transpose                   - Support AMX amx-transpose instructions.
-    avx10.1-256                     - Support AVX10.1 up to 256-bit instruction.
-    avx10.2-256                     - Support AVX10.2 up to 256-bit instruction.
+    avx10.1-512                     - Support AVX10.1 instruction.
+    avx10.2-512                     - Support AVX10.2 instruction.
     branch-hint                     - Target has branch hint feature.
     branchfusion                    - CMP/TEST can be fused with conditional branches.
     ccmp                            - Support conditional cmp & test instructions.
@@ -157,6 +156,7 @@ Code-generation features supported by LLVM for this target:
     ppx                             - Support Push-Pop Acceleration.
     prefer-128-bit                  - Prefer 128-bit AVX instructions.
     prefer-256-bit                  - Prefer 256-bit AVX instructions.
+    prefer-legacy-setcc             - Prefer to emit legacy SetCC..
     prefer-mask-registers           - Prefer AVX512 mask registers over PTEST/MOVMSK.
     prefer-movmsk-over-vtest        - Prefer movmsk over vtest instruction.
     prefer-no-gather                - Prefer no gather instructions.
@@ -181,6 +181,7 @@ Code-generation features supported by LLVM for this target:
     slow-lea                        - LEA instruction with certain arguments is slow.
     slow-pmaddwd                    - PMADDWD is slower than PMULLD.
     slow-pmulld                     - PMULLD instruction is slow (compared to PMULLW/PMULHW and PMULUDQ).
+    slow-pmullq                     - PMULLQ instruction is slow.
     slow-shld                       - SHLD instruction is slow.
     slow-two-mem-ops                - Two memory operand instructions are slow.
     slow-unaligned-mem-16           - Slow unaligned 16-byte memory access.
@@ -197,6 +198,7 @@ Code-generation features supported by LLVM for this target:
     vzeroupper                      - Should insert vzeroupper instructions.
     waitpkg                         - Wait and pause enhancements.
     wbnoinvd                        - Write Back No Invalidate.
+    x32                             - 64-bit with ILP32 programming model (e.g. x32 ABI).
     zu                              - Support zero-upper SETcc/IMUL.
 
 Use +feature to enable a feature, or -feature to disable it.

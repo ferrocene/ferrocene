@@ -106,7 +106,7 @@
 #![feature(cfg_select)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(const_carrying_mul_add)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(const_cmp))]
+#![feature(const_cmp)]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(const_select_unpredictable)]
@@ -185,6 +185,7 @@
 #![feature(staged_api)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance_lints)]
+#![feature(target_feature_inline_always)]
 #![feature(trait_alias)]
 #![feature(transparent_unions)]
 #![feature(try_blocks)]
@@ -241,7 +242,6 @@ mod macros;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "assert_matches", issue = "82775")]
 pub use crate::macros::{assert_matches, debug_assert_matches};
 

@@ -8,13 +8,12 @@ use std::path::PathBuf;
 use build_helper::exit;
 
 use crate::builder::Builder;
-use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
-use crate::{BootstrapCommand, Compiler, DocTests, Mode, t};
+use crate::{BootstrapCommand, Compiler, DocTests, Mode};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
     if !builder.config.profiler {
@@ -43,8 +42,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
     //
     // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
     // the location of profiler_builtins without the `dependency=` prefix.
-    let target_dir =
-        builder.cargo_out(compiler, Mode::Std, builder.config.host_target).join("deps");
+    let target_dir = builder.cargo_out(compiler, Mode::Std, cargo.target()).join("deps");
 
     cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 }
@@ -56,10 +54,6 @@ pub(crate) fn measure_coverage(
     target: TargetSelection,
     coverage_for: FerroceneCoverageFor,
 ) {
-    // Pre-requisites for the `generate_coverage_report()` function are built here, as that function is
-    // executed after all bootstrap steps are executed.
-    builder.ensure(Llvm { target });
-
     let paths = Paths::find(builder, target, coverage_for);
     let profraw_file_template = paths.profraw_dir.join("%m_%p.profraw");
     cmd.env("LLVM_PROFILE_FILE", profraw_file_template);
@@ -108,21 +102,14 @@ pub(super) fn instrumented_binaries(
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
 
-            let res_doctest_bins = std::fs::read_dir(&paths.doctests_bins_dir);
-
             let doctests_bins = (builder.doc_tests != DocTests::No)
-                .then(|| t!(res_doctest_bins, "cannot read doctests bins directory"))
+                .then(|| builder.read_dir(&paths.doctests_bins_dir))
                 .into_iter()
-                .flat_map(|read_dir| read_dir)
-                .flat_map(|res| {
-                    let path = t!(res, "cannot inspect doctest bin directory").path();
-                    t!(std::fs::read_dir(path), "cannot read doctest bin directory").into_iter()
-                });
+                .flatten()
+                .flat_map(|entry| builder.read_dir(&entry.path()));
 
-            for res in
-                t!(std::fs::read_dir(out_dir), "cannot read deps directory").chain(doctests_bins)
-            {
-                let path = t!(res, "cannot inspect deps file").path();
+            for entry in builder.read_dir(&out_dir).chain(doctests_bins) {
+                let path = entry.path();
 
                 #[cfg(target_os = "windows")]
                 let is_executable = path.extension().is_some_and(|e| e == "exe" || e == "dll");
@@ -135,17 +122,20 @@ pub(super) fn instrumented_binaries(
                 }
             }
 
-            assert!(!instrumented_binaries.is_empty(), "could not find the instrumented binaries");
+            if !builder.config.dry_run() {
+                assert!(
+                    !instrumented_binaries.is_empty(),
+                    "could not find the instrumented binaries"
+                );
+            }
             instrumented_binaries
         }
     }
 }
 
+/// Note: this function is called after all bootstrap steps are executed, to ensure the report
+/// includes data from all tests suites measuring coverage.
 pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
-    // Note: this function is called after all bootstrap steps are executed, to ensure the report
-    // includes data from all tests suites measuring coverage. It cannot call `builder.ensure`, so
-    // make sure to call it in `measure_coverage()`.
-
     if builder.config.cmd.ferrocene_coverage_for().is_none() {
         return;
     }
@@ -155,8 +145,8 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     };
 
     let paths = Paths::find(builder, state.target, state.coverage_for);
-    let llvm_bin_dir = match builder.llvm_config(state.target) {
-        None => builder.llvm_out(state.target).join("bin"),
+    let llvm_bin_dir = match builder.llvm_config(builder.host_target) {
+        None => builder.llvm_out(builder.host_target).join("bin"),
         Some(system_llvm) => system_llvm.parent().unwrap().into(),
     };
 
@@ -165,11 +155,11 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(&paths.profraw_dir);
     cmd.fail_fast().run(builder);
 
-    let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
-
     builder.info("Listing symbols for the certified libcore subset");
     let symbol_report =
         builder.ensure(CertifiedCoreSymbols::new(builder, builder.config.host_target));
+
+    let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 
     let html_report = builder.ensure(CoverageReport {
         certified_target: builder.config.host_target.subset_equivalent(),
@@ -186,7 +176,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     if builder.doc_tests != DocTests::No {
         // Remove the doctest binaries so they're not distributed afterwards.
-        t!(std::fs::remove_dir_all(&paths.doctests_bins_dir));
+        builder.remove_dir(&paths.doctests_bins_dir);
     }
 }
 

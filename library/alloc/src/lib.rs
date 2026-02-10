@@ -175,7 +175,7 @@
 // tidy-alphabetical-end
 //
 // Language features:
-// not-alphbetical-start
+// not-alphabetical-start
 #![feature(allocator_internals)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(allow_internal_unstable))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(cfg_sanitize))]
@@ -204,7 +204,7 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsized_fn_params))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(with_negative_coherence))]
 #![cfg_attr(not(feature = "ferrocene_subset"), rustc_preserve_ub_checks)]
-// not-alphbetical-end
+// not-alphabetical-end
 //
 // Rustdoc features:
 #![feature(doc_cfg)]

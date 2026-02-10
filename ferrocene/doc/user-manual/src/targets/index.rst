@@ -192,6 +192,12 @@ Supported targets can often be qualified or quality managed upon request.
      - Full
      - \-
 
+   * - :target:`aarch64v8r-unknown-none`
+     - ``aarch64v8r-unknown-none``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
    * - :target:`aarch64-unknown-linux-musl`
      - ``aarch64-unknown-linux-musl``
      - Cross-compilation
@@ -275,6 +281,12 @@ It is sometimes possible for Experimental targets to be qualified or quality man
      - Kind
      - Standard library
      - Notes
+
+   * - :target:`aarch64v8r-unknown-none-softfloat`
+     - ``aarch64v8r-unknown-none-softfloat``
+     - Cross-compilation
+     - Bare-metal
+     - \-
 
    * - :target:`armebv7r-none-eabihf`
      - ``armebv7r-none-eabihf``

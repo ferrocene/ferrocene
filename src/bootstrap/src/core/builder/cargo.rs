@@ -156,6 +156,10 @@ impl Cargo {
         self.compiler
     }
 
+    pub fn target(&self) -> TargetSelection {
+        self.target
+    }
+
     pub fn mode(&self) -> Mode {
         self.mode
     }

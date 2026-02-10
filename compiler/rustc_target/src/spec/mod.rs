@@ -1790,6 +1790,7 @@ supported_targets! {
 
     ("i386-lynx-lynxos178", i386_lynx_lynxos178),
     ("aarch64-unknown-ferrocene.facade", aarch64_unknown_ferrocene_facade),
+    ("aarch64v8r-unknown-ferrocene.facade", aarch64v8r_unknown_ferrocene_facade),
     ("thumbv7em-ferrocene.facade-eabi", thumbv7em_ferrocene_facade_eabi),
     ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
     ("x86_64-unknown-ferrocene.subset", x86_64_unknown_ferrocene_subset),

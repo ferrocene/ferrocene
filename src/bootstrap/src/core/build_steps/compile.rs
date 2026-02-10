@@ -221,10 +221,7 @@ impl Step for Std {
         let should_instrument_coverage = builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
             // If we instrument any stage other than the top stage, it will be linked into rustc,
             // which will spam a bunch of `default_XXXXX.profraw` files in the top of the repo.
-            && build_compiler.stage == builder.top_stage
-            // When we cross-compile a std, we don't run tests on it, and profiler-builtins is very
-            // likely to break.
-            && target == build_compiler.host;
+            && build_compiler.stage == builder.top_stage;
 
         // Ferrocene addition: We can't reuse stage1 std if we are instrumenting stage2 but not
         // stage1.
@@ -753,6 +750,7 @@ pub fn std_cargo(
     if target.contains("facade") {
         match &*target.triple {
             "aarch64-unknown-ferrocene.facade"
+            | "aarch64v8r-unknown-ferrocene.facade"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-ferrocene.facade-eabihf" => {
                 cargo.rustflag("--cfg=ferrocene_facade_secretsauce");

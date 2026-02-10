@@ -965,7 +965,7 @@ fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
     // In dry run situations (notably, just bootstrap tests) the out folder is not necessarily
     // relative to the source directory.
     //
-    // In 'real' builds, Sphinx needs relative paths to the conf.py for reproducability,
+    // In 'real' builds, Sphinx needs relative paths to the conf.py for reproducibility,
     // but in dry run situations, don't need to do this, returning the `path` is enough.
     if dry_run {
         return path.into();

@@ -833,9 +833,6 @@ impl Build {
                 self.config.set_dry_run(DryRun::Disabled);
                 let builder = builder::Builder::new(self);
                 builder.execute_cli();
-
-                // Ferrocene addition
-                generate_coverage_report(&builder);
             }
         } else {
             #[cfg(feature = "tracing")]
@@ -2035,7 +2032,7 @@ impl Build {
         self.create_dir(dir);
     }
 
-    fn read_dir(&self, dir: &Path) -> impl Iterator<Item = fs::DirEntry> {
+    fn read_dir(&self, dir: &Path) -> impl Iterator<Item = fs::DirEntry> + use<> {
         let iter = match fs::read_dir(dir) {
             Ok(v) => v,
             Err(_) if self.config.dry_run() => return vec![].into_iter(),

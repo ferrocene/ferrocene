@@ -1206,6 +1206,9 @@ impl<'a> Builder<'a> {
 
     pub fn execute_cli(&self) {
         self.run_step_descriptions(&Builder::get_step_descriptions(self.kind), &self.paths);
+
+        // Ferrocene addition
+        crate::generate_coverage_report(&self);
     }
 
     /// Run all default documentation steps to build documentation.

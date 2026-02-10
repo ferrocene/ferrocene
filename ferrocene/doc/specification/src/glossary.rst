@@ -1804,7 +1804,7 @@ See :s:`DiscriminantInitializer`.
 discriminant type
 ^^^^^^^^^^^^^^^^^
 
-:dp:`fls_t4yeovFm83Wo`
+:dp:`fls_kqdvWGi9cglm`
 A :dt:`discriminant type` is the :t:`type` of a :t:`discriminant`.
 
 .. _fls_gDFsAj1Bvx7A:
@@ -3927,7 +3927,7 @@ See :s:`LiteralPattern`.
 local trait
 ^^^^^^^^^^^
 
-:dp:`fls_I9JaKZelMiby`
+:dp:`fls_H5vkbMFvzrFs`
 A :dt:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
 
 .. _fls_cexgUIGUUKS4:

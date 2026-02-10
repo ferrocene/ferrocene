@@ -273,7 +273,10 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                     let ptr = self.mplace_to_ref(&name_place)?;
                     self.write_immediate(*ptr, &field_place)?
                 }
-                sym::ty => self.write_type_id(field_ty, &field_place)?,
+                sym::ty => {
+                    let field_ty = self.tcx.erase_and_anonymize_regions(field_ty);
+                    self.write_type_id(field_ty, &field_place)?
+                }
                 sym::offset => {
                     let offset = layout.fields.offset(idx as usize);
                     self.write_scalar(

@@ -91,7 +91,7 @@ fn test_structs() {
         assert!(ty.fields[1].ty == TypeId::of::<u16>());
         assert!(ty.fields[1].offset == offset_of!(TestStruct, second));
         assert!(ty.fields[2].name == "reference");
-        assert!(ty.fields[2].ty != TypeId::of::<&'static u16>()); // FIXME(type_info): should be ==
+        assert!(ty.fields[2].ty == TypeId::of::<&'static u16>());
         assert!(ty.fields[2].offset == offset_of!(TestStruct, reference));
     }
 

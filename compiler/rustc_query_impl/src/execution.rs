@@ -11,12 +11,11 @@ use rustc_query_system::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
 use rustc_query_system::query::{
     ActiveKeyStatus, CycleError, CycleErrorHandling, QueryCache, QueryJob, QueryJobId, QueryLatch,
     QueryMode, QueryStackDeferred, QueryStackFrame, QueryState, incremental_verify_ich,
-    report_cycle,
 };
 use rustc_span::{DUMMY_SP, Span};
 
 use crate::dep_graph::{DepContext, DepNode, DepNodeIndex};
-use crate::job::{QueryJobInfo, QueryMap, find_cycle_in_stack};
+use crate::job::{QueryJobInfo, QueryMap, find_cycle_in_stack, report_cycle};
 use crate::{QueryCtxt, QueryFlags, SemiDynamicQueryDispatcher};
 
 #[inline]

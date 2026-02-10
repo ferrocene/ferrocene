@@ -4503,6 +4503,7 @@ dependencies = [
  "rustc_middle",
  "rustc_query_system",
  "rustc_serialize",
+ "rustc_session",
  "rustc_span",
  "rustc_thread_pool",
  "tracing",

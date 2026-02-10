@@ -3,11 +3,13 @@ use std::iter;
 use std::sync::Arc;
 
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
-use rustc_errors::DiagCtxtHandle;
+use rustc_errors::{Diag, DiagCtxtHandle};
+use rustc_hir::def::DefKind;
 use rustc_query_system::query::{
     CycleError, QueryInfo, QueryJob, QueryJobId, QueryLatch, QueryStackDeferred, QueryStackFrame,
     QueryWaiter,
 };
+use rustc_session::Session;
 use rustc_span::{DUMMY_SP, Span};
 
 use crate::QueryCtxt;
@@ -443,4 +445,56 @@ pub fn print_query_stack<'tcx>(
         let _ = writeln!(file, "end of query stack");
     }
     count_total
+}
+
+#[inline(never)]
+#[cold]
+pub(crate) fn report_cycle<'a>(
+    sess: &'a Session,
+    CycleError { usage, cycle: stack }: &CycleError,
+) -> Diag<'a> {
+    assert!(!stack.is_empty());
+
+    let span = stack[0].frame.info.default_span(stack[1 % stack.len()].span);
+
+    let mut cycle_stack = Vec::new();
+
+    use crate::error::StackCount;
+    let stack_count = if stack.len() == 1 { StackCount::Single } else { StackCount::Multiple };
+
+    for i in 1..stack.len() {
+        let frame = &stack[i].frame;
+        let span = frame.info.default_span(stack[(i + 1) % stack.len()].span);
+        cycle_stack
+            .push(crate::error::CycleStack { span, desc: frame.info.description.to_owned() });
+    }
+
+    let mut cycle_usage = None;
+    if let Some((span, ref query)) = *usage {
+        cycle_usage = Some(crate::error::CycleUsage {
+            span: query.info.default_span(span),
+            usage: query.info.description.to_string(),
+        });
+    }
+
+    let alias =
+        if stack.iter().all(|entry| matches!(entry.frame.info.def_kind, Some(DefKind::TyAlias))) {
+            Some(crate::error::Alias::Ty)
+        } else if stack.iter().all(|entry| entry.frame.info.def_kind == Some(DefKind::TraitAlias)) {
+            Some(crate::error::Alias::Trait)
+        } else {
+            None
+        };
+
+    let cycle_diag = crate::error::Cycle {
+        span,
+        cycle_stack,
+        stack_bottom: stack[0].frame.info.description.to_owned(),
+        alias,
+        cycle_usage,
+        stack_count,
+        note_span: (),
+    };
+
+    sess.dcx().create_err(cycle_diag)
 }

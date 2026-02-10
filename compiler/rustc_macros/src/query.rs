@@ -90,7 +90,7 @@ struct QueryModifiers {
     arena_cache: Option<Ident>,
 
     /// Cache the query to disk if the `Block` returns true.
-    cache: Option<(Option<Pat>, Block)>,
+    cache_on_disk_if: Option<(Option<Pat>, Block)>,
 
     /// A cycle error for this query aborting the compilation with a fatal error.
     cycle_fatal: Option<Ident>,
@@ -134,7 +134,7 @@ struct QueryModifiers {
 
 fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
     let mut arena_cache = None;
-    let mut cache = None;
+    let mut cache_on_disk_if = None;
     let mut desc = None;
     let mut cycle_fatal = None;
     let mut cycle_delay_bug = None;
@@ -175,8 +175,11 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
             let list = attr_content.parse_terminated(Expr::parse, Token![,])?;
             try_insert!(desc = (tcx, list));
         } else if modifier == "cache_on_disk_if" {
-            // Parse a cache modifier like:
-            // `cache(tcx) { |tcx| key.is_local() }`
+            // Parse a cache-on-disk modifier like:
+            //
+            // `cache_on_disk_if { true }`
+            // `cache_on_disk_if { key.is_local() }`
+            // `cache_on_disk_if(tcx) { tcx.is_typeck_child(key.to_def_id()) }`
             let args = if input.peek(token::Paren) {
                 let args;
                 parenthesized!(args in input);
@@ -186,7 +189,7 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
                 None
             };
             let block = input.parse()?;
-            try_insert!(cache = (args, block));
+            try_insert!(cache_on_disk_if = (args, block));
         } else if modifier == "arena_cache" {
             try_insert!(arena_cache = modifier);
         } else if modifier == "cycle_fatal" {
@@ -218,7 +221,7 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
     };
     Ok(QueryModifiers {
         arena_cache,
-        cache,
+        cache_on_disk_if,
         desc,
         cycle_fatal,
         cycle_delay_bug,
@@ -260,12 +263,18 @@ fn doc_comment_from_desc(list: &Punctuated<Expr, token::Comma>) -> Result<Attrib
     Ok(parse_quote! { #[doc = #doc_string] })
 }
 
-/// Add the impl of QueryDescription for the query to `impls` if one is requested
-fn add_query_desc_cached_impl(
-    query: &Query,
-    descs: &mut proc_macro2::TokenStream,
-    cached: &mut proc_macro2::TokenStream,
-) {
+/// Contains token streams that are used to accumulate per-query helper
+/// functions, to be used by the final output of `rustc_queries!`.
+///
+/// Helper items typically have the same name as the query they relate to,
+/// and expect to be interpolated into a dedicated module.
+#[derive(Default)]
+struct HelperTokenStreams {
+    description_fns_stream: proc_macro2::TokenStream,
+    cache_on_disk_if_fns_stream: proc_macro2::TokenStream,
+}
+
+fn make_helpers_for_query(query: &Query, streams: &mut HelperTokenStreams) {
     let Query { name, key, modifiers, .. } = &query;
 
     // This dead code exists to instruct rust-analyzer about the link between the `rustc_queries`
@@ -281,12 +290,12 @@ fn add_query_desc_cached_impl(
     };
 
     // Generate a function to check whether we should cache the query to disk, for some key.
-    if let Some((args, expr)) = modifiers.cache.as_ref() {
+    if let Some((args, expr)) = modifiers.cache_on_disk_if.as_ref() {
         let tcx = args.as_ref().map(|t| quote! { #t }).unwrap_or_else(|| quote! { _ });
         // expr is a `Block`, meaning that `{ #expr }` gets expanded
         // to `{ { stmts... } }`, which triggers the `unused_braces` lint.
         // we're taking `key` by reference, but some rustc types usually prefer being passed by value
-        cached.extend(quote! {
+        streams.cache_on_disk_if_fns_stream.extend(quote! {
             #[allow(unused_variables, unused_braces, rustc::pass_by_value)]
             #[inline]
             pub fn #name<'tcx>(#tcx: TyCtxt<'tcx>, #key: &crate::queries::#name::Key<'tcx>) -> bool {
@@ -307,7 +316,7 @@ fn add_query_desc_cached_impl(
         }
     };
 
-    descs.extend(quote! {
+    streams.description_fns_stream.extend(quote! {
         #desc
     });
 }
@@ -316,8 +325,7 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
     let queries = parse_macro_input!(input as List<Query>);
 
     let mut query_stream = quote! {};
-    let mut query_description_stream = quote! {};
-    let mut query_cached_stream = quote! {};
+    let mut helpers = HelperTokenStreams::default();
     let mut feedable_queries = quote! {};
     let mut errors = quote! {};
 
@@ -363,9 +371,11 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
             return_result_from_ensure_ok,
         );
 
-        // Pass on the cache modifier
-        if modifiers.cache.is_some() {
-            attributes.push(quote! { (cache) });
+        // If there was a `cache_on_disk_if` modifier in the real input, pass
+        // on a synthetic `(cache_on_disk)` modifier that can be inspected by
+        // macro-rules macros.
+        if modifiers.cache_on_disk_if.is_some() {
+            attributes.push(quote! { (cache_on_disk) });
         }
 
         // This uses the span of the query definition for the commas,
@@ -399,8 +409,10 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
             });
         }
 
-        add_query_desc_cached_impl(&query, &mut query_description_stream, &mut query_cached_stream);
+        make_helpers_for_query(&query, &mut helpers);
     }
+
+    let HelperTokenStreams { description_fns_stream, cache_on_disk_if_fns_stream } = helpers;
 
     TokenStream::from(quote! {
         /// Higher-order macro that invokes the specified macro with a prepared
@@ -438,12 +450,17 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
         /// module easier to search for.)
         pub mod _description_fns {
             use super::*;
-            #query_description_stream
+            #description_fns_stream
         }
-        pub mod cached {
+
+        // FIXME(Zalathar): Instead of declaring these functions directly, can
+        // we put them in a macro and then expand that macro downstream in
+        // `rustc_query_impl`, where the functions are actually used?
+        pub mod _cache_on_disk_if_fns {
             use super::*;
-            #query_cached_stream
+            #cache_on_disk_if_fns_stream
         }
+
         #errors
     })
 }

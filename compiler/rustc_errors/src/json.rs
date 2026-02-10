@@ -32,7 +32,7 @@ use crate::emitter::{
     should_show_source_code,
 };
 use crate::timings::{TimingRecord, TimingSection};
-use crate::translation::{to_fluent_args, translate_message, translate_messages};
+use crate::translation::{format_diag_message, format_diag_messages, to_fluent_args};
 use crate::{CodeSuggestion, MultiSpan, SpanLabel, Subdiag, Suggestions, TerminalUrl};
 
 #[cfg(test)]
@@ -302,7 +302,7 @@ impl Diagnostic {
         let args = to_fluent_args(diag.args.iter());
         let sugg_to_diag = |sugg: &CodeSuggestion| {
             let translated_message =
-                translate_message(&sugg.msg, &args).map_err(Report::new).unwrap();
+                format_diag_message(&sugg.msg, &args).map_err(Report::new).unwrap();
             Diagnostic {
                 message: translated_message.to_string(),
                 code: None,
@@ -333,7 +333,7 @@ impl Diagnostic {
             }
         }
 
-        let translated_message = translate_messages(&diag.messages, &args);
+        let translated_message = format_diag_messages(&diag.messages, &args);
 
         let code = if let Some(code) = diag.code {
             Some(DiagnosticCode {
@@ -395,7 +395,7 @@ impl Diagnostic {
         args: &FluentArgs<'_>,
         je: &JsonEmitter,
     ) -> Diagnostic {
-        let translated_message = translate_messages(&subdiag.messages, args);
+        let translated_message = format_diag_messages(&subdiag.messages, args);
         Diagnostic {
             message: translated_message.to_string(),
             code: None,
@@ -417,7 +417,10 @@ impl DiagnosticSpan {
         Self::from_span_etc(
             span.span,
             span.is_primary,
-            span.label.as_ref().map(|m| translate_message(m, args).unwrap()).map(|m| m.to_string()),
+            span.label
+                .as_ref()
+                .map(|m| format_diag_message(m, args).unwrap())
+                .map(|m| m.to_string()),
             suggestion,
             je,
         )

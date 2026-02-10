@@ -28,21 +28,21 @@ pub fn to_fluent_args<'iter>(iter: impl Iterator<Item = DiagArg<'iter>>) -> Flue
     args
 }
 
-/// Convert `DiagMessage`s to a string, performing translation if necessary.
-pub fn translate_messages(
+/// Convert `DiagMessage`s to a string
+pub fn format_diag_messages(
     messages: &[(DiagMessage, Style)],
     args: &FluentArgs<'_>,
 ) -> Cow<'static, str> {
     Cow::Owned(
         messages
             .iter()
-            .map(|(m, _)| translate_message(m, args).map_err(Report::new).unwrap())
+            .map(|(m, _)| format_diag_message(m, args).map_err(Report::new).unwrap())
             .collect::<String>(),
     )
 }
 
-/// Convert a `DiagMessage` to a string, performing translation if necessary.
-pub fn translate_message<'a>(
+/// Convert a `DiagMessage` to a string
+pub fn format_diag_message<'a>(
     message: &'a DiagMessage,
     args: &'a FluentArgs<'_>,
 ) -> Result<Cow<'a, str>, TranslateError<'a>> {

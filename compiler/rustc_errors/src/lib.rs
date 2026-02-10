@@ -71,7 +71,7 @@ use tracing::debug;
 
 use crate::emitter::TimingEvent;
 use crate::timings::TimingRecord;
-use crate::translation::translate_message;
+use crate::translation::format_diag_message;
 
 pub mod annotate_snippet_emitter_writer;
 pub mod codes;
@@ -1438,7 +1438,7 @@ impl DiagCtxtInner {
         args: impl Iterator<Item = DiagArg<'a>>,
     ) -> String {
         let args = crate::translation::to_fluent_args(args);
-        translate_message(&message, &args).map_err(Report::new).unwrap().to_string()
+        format_diag_message(&message, &args).map_err(Report::new).unwrap().to_string()
     }
 
     fn eagerly_translate_for_subdiag(

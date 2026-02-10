@@ -294,7 +294,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             if is_shadowed {
                 diag.note(format!(
                     "the associated type `{}` is defined as `{}` in the implementation, \
-                    but the generic bound `{}` hides this definition",
+                    but the where-bound `{}` shadows this definition\n\
+                    see issue #152409 <https://github.com/rust-lang/rust/issues/152409> for more information",
                     self.ty_to_string(tcx.mk_ty_from_kind(ty::Alias(ty::Projection, *alias))),
                     self.ty_to_string(concrete),
                     self.ty_to_string(alias.self_ty())

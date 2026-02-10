@@ -4493,6 +4493,7 @@ name = "rustc_query_impl"
 version = "0.0.0"
 dependencies = [
  "measureme",
+ "rustc_abi",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hashes",

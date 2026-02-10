@@ -257,7 +257,6 @@ impl<S: Stage> AttributeParser<S> for ConstStabilityParser {
         Allow(Target::Trait),
         Allow(Target::Static),
         Allow(Target::Crate),
-        Allow(Target::MacroDef), // FIXME(oli-obk): remove this and eliminate the manual check for it
     ]);
 
     fn finalize(mut self, cx: &FinalizeContext<'_, '_, S>) -> Option<AttributeKind> {

@@ -161,8 +161,8 @@ fn pattern_is_suffix_of() {
 
 #[test]
 fn str_from_raw_parts_mut() {
-    #[expect(const_item_mutation)]
-    let c = unsafe { core::str::from_raw_parts_mut(STR_MUT_BYTES.as_mut_ptr().cast(), 4) };
+    let mut str_mut_bytes = STR_MUT_BYTES;
+    let c = unsafe { core::str::from_raw_parts_mut(str_mut_bytes.as_mut_ptr().cast(), 4) };
 
     assert_eq!(c, "Hell");
 }

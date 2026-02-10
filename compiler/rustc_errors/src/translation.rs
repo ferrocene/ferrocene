@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 use std::error::Report;
-use std::sync::Arc;
 
 pub use rustc_error_messages::{FluentArgs, LazyFallbackBundle};
 use rustc_error_messages::{langid, register_functions};
@@ -8,7 +7,7 @@ use tracing::{debug, trace};
 
 use crate::error::TranslateError;
 use crate::fluent_bundle::FluentResource;
-use crate::{DiagArg, DiagMessage, FluentBundle, Style, fluent_bundle};
+use crate::{DiagArg, DiagMessage, Style, fluent_bundle};
 
 /// Convert diagnostic arguments (a rustc internal type that exists to implement
 /// `Encodable`/`Decodable`) into `FluentArgs` which is necessary to perform translation.
@@ -30,15 +29,11 @@ pub fn to_fluent_args<'iter>(iter: impl Iterator<Item = DiagArg<'iter>>) -> Flue
 }
 
 #[derive(Clone)]
-pub struct Translator {
-    /// Localized diagnostics for the locale requested by the user. If no language was requested by
-    /// the user then this will be `None` and `fallback_fluent_bundle` should be used.
-    pub fluent_bundle: Option<Arc<FluentBundle>>,
-}
+pub struct Translator;
 
 impl Translator {
     pub fn new() -> Translator {
-        Translator { fluent_bundle: None }
+        Self
     }
 
     /// Convert `DiagMessage`s to a string, performing translation if necessary.

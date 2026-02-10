@@ -5,9 +5,8 @@
 
 use std::borrow::Cow;
 use std::error::Error;
-use std::path::Path;
 use std::sync::{Arc, LazyLock};
-use std::{fmt, fs, io};
+use std::{fmt, io};
 
 use fluent_bundle::FluentResource;
 pub use fluent_bundle::types::FluentType;
@@ -17,7 +16,7 @@ use intl_memoizer::concurrent::IntlLangMemoizer;
 use rustc_data_structures::sync::{DynSend, IntoDynSyncSend};
 use rustc_macros::{Decodable, Encodable};
 use rustc_span::Span;
-use tracing::{instrument, trace};
+use tracing::instrument;
 pub use unic_langid::{LanguageIdentifier, langid};
 
 mod diagnostic_impls;
@@ -96,100 +95,6 @@ impl From<Vec<FluentError>> for TranslationBundleError {
             errs.pop().expect("failed adding resource to bundle with no errors"),
         )
     }
-}
-
-/// Returns Fluent bundle with the user's locale resources from
-/// `$sysroot/share/locale/$requested_locale/*.ftl`.
-///
-/// If `-Z additional-ftl-path` was provided, load that resource and add it  to the bundle
-/// (overriding any conflicting messages).
-#[instrument(level = "trace")]
-pub fn fluent_bundle(
-    sysroot_candidates: &[&Path],
-    requested_locale: Option<LanguageIdentifier>,
-    additional_ftl_path: Option<&Path>,
-    with_directionality_markers: bool,
-) -> Result<Option<Arc<FluentBundle>>, TranslationBundleError> {
-    if requested_locale.is_none() && additional_ftl_path.is_none() {
-        return Ok(None);
-    }
-
-    let fallback_locale = langid!("en-US");
-    let requested_fallback_locale = requested_locale.as_ref() == Some(&fallback_locale);
-    trace!(?requested_fallback_locale);
-    if requested_fallback_locale && additional_ftl_path.is_none() {
-        return Ok(None);
-    }
-    // If there is only `-Z additional-ftl-path`, assume locale is "en-US", otherwise use user
-    // provided locale.
-    let locale = requested_locale.clone().unwrap_or(fallback_locale);
-    trace!(?locale);
-    let mut bundle = new_bundle(vec![locale]);
-
-    // Add convenience functions available to ftl authors.
-    register_functions(&mut bundle);
-
-    // Fluent diagnostics can insert directionality isolation markers around interpolated variables
-    // indicating that there may be a shift from right-to-left to left-to-right text (or
-    // vice-versa). These are disabled because they are sometimes visible in the error output, but
-    // may be worth investigating in future (for example: if type names are left-to-right and the
-    // surrounding diagnostic messages are right-to-left, then these might be helpful).
-    bundle.set_use_isolating(with_directionality_markers);
-
-    // If the user requests the default locale then don't try to load anything.
-    if let Some(requested_locale) = requested_locale {
-        let mut found_resources = false;
-        for sysroot in sysroot_candidates {
-            let mut sysroot = sysroot.to_path_buf();
-            sysroot.push("share");
-            sysroot.push("locale");
-            sysroot.push(requested_locale.to_string());
-            trace!(?sysroot);
-
-            if !sysroot.exists() {
-                trace!("skipping");
-                continue;
-            }
-
-            if !sysroot.is_dir() {
-                return Err(TranslationBundleError::LocaleIsNotDir);
-            }
-
-            for entry in sysroot.read_dir().map_err(TranslationBundleError::ReadLocalesDir)? {
-                let entry = entry.map_err(TranslationBundleError::ReadLocalesDirEntry)?;
-                let path = entry.path();
-                trace!(?path);
-                if path.extension().and_then(|s| s.to_str()) != Some("ftl") {
-                    trace!("skipping");
-                    continue;
-                }
-
-                let resource_str =
-                    fs::read_to_string(path).map_err(TranslationBundleError::ReadFtl)?;
-                let resource =
-                    FluentResource::try_new(resource_str).map_err(TranslationBundleError::from)?;
-                trace!(?resource);
-                bundle.add_resource(resource).map_err(TranslationBundleError::from)?;
-                found_resources = true;
-            }
-        }
-
-        if !found_resources {
-            return Err(TranslationBundleError::MissingLocale);
-        }
-    }
-
-    if let Some(additional_ftl_path) = additional_ftl_path {
-        let resource_str =
-            fs::read_to_string(additional_ftl_path).map_err(TranslationBundleError::ReadFtl)?;
-        let resource =
-            FluentResource::try_new(resource_str).map_err(TranslationBundleError::from)?;
-        trace!(?resource);
-        bundle.add_resource_overriding(resource);
-    }
-
-    let bundle = Arc::new(bundle);
-    Ok(Some(bundle))
 }
 
 pub fn register_functions<R, M>(bundle: &mut fluent_bundle::bundle::FluentBundle<R, M>) {

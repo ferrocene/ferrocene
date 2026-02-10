@@ -76,7 +76,7 @@
 //!
 //! These are similar to function pointers, except trait objects bundle many function pointers
 //! together, and determining which functions those actually are is non-trivial. See
-//! [`LintThir::check_dyn_trait_coercion`] for examples of how this works.
+//! [`LintState::check_dyn_trait_coercion`] for examples of how this works.
 //!
 //! ```
 //! struct Uncertified;

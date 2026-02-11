@@ -94,7 +94,7 @@ pub(crate) struct LtoBitcodeFromRlib {
 }
 
 #[derive(Diagnostic)]
-pub enum LlvmError<'a> {
+pub(crate) enum LlvmError<'a> {
     #[diag("could not write output to {$path}")]
     WriteOutput { path: &'a Path },
     #[diag("could not create LLVM TargetMachine for triple: {$triple}")]

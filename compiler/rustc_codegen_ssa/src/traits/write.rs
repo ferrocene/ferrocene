@@ -10,7 +10,6 @@ use crate::{CompiledModule, ModuleCodegen};
 pub trait WriteBackendMethods: Clone + 'static {
     type Module: Send + Sync;
     type TargetMachine;
-    type TargetMachineError;
     type ModuleBuffer: ModuleBufferMethods;
     type ThinData: Send + Sync;
     type ThinBuffer: ThinBufferMethods;

@@ -313,11 +313,10 @@ impl TargetMachineFactoryConfig {
 
 pub type TargetMachineFactoryFn<B> = Arc<
     dyn Fn(
+            DiagCtxtHandle<'_>,
             TargetMachineFactoryConfig,
-        ) -> Result<
-            <B as WriteBackendMethods>::TargetMachine,
-            <B as WriteBackendMethods>::TargetMachineError,
-        > + Send
+        ) -> <B as WriteBackendMethods>::TargetMachine
+        + Send
         + Sync,
 >;
 

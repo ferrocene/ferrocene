@@ -25,7 +25,6 @@ use std::path::PathBuf;
 use back::owned_target_machine::OwnedTargetMachine;
 use back::write::{create_informational_target_machine, create_target_machine};
 use context::SimpleCx;
-use errors::ParseTargetMachineConfig;
 use llvm_util::target_config;
 use rustc_ast::expand::allocator::AllocatorMethod;
 use rustc_codegen_ssa::back::lto::{SerializedModule, ThinModule};
@@ -152,7 +151,6 @@ impl WriteBackendMethods for LlvmCodegenBackend {
     type Module = ModuleLlvm;
     type ModuleBuffer = back::lto::ModuleBuffer;
     type TargetMachine = OwnedTargetMachine;
-    type TargetMachineError = crate::errors::LlvmError<'static>;
     type ThinData = back::lto::ThinData;
     type ThinBuffer = back::lto::ThinBuffer;
     fn print_pass_timings(&self) {
@@ -445,13 +443,7 @@ impl ModuleLlvm {
         name: &str,
         dcx: DiagCtxtHandle<'_>,
     ) -> OwnedTargetMachine {
-        let tm_factory_config = TargetMachineFactoryConfig::new(cgcx, name);
-        match (cgcx.tm_factory)(tm_factory_config) {
-            Ok(m) => m,
-            Err(e) => {
-                dcx.emit_fatal(ParseTargetMachineConfig(e));
-            }
-        }
+        (cgcx.tm_factory)(dcx, TargetMachineFactoryConfig::new(cgcx, name))
     }
 
     fn parse(

@@ -6,7 +6,7 @@ mod m {
     pub struct S {}
 }
 
-use m::*;
-pub use m::*; //~ ERROR unused import: `m::*`
+use m::*; //~ ERROR unused import: `m::*`
+pub use m::*;
 
 fn main() {}

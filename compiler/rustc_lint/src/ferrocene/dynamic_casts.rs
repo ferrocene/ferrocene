@@ -60,7 +60,7 @@ impl<'tcx> LintState<'tcx> {
     }
 
     /// Given a `source` expression that has an unsizing cast to `dest`, determine
-    /// whether the cast if valid. If not, return a [`TraitObjectCast`](UseKind::TraitObjectCast) showing why not.
+    /// whether the cast is valid. If not, return a [`TraitObjectCast`](UseKind::TraitObjectCast) showing why not.
     ///
     /// This works in four main parts:
     /// 1. "Peel" as many types as possible. For example, if we are casting `Vec<Box<String>>` to

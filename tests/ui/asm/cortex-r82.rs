@@ -22,6 +22,7 @@ use minicore::*;
  * A `/*  */` comment indicates that the extension is being tested in the ISA level codegen test
  * (`tests/ui/asm/aarch64v8r.rs`)
  *
+<<<<<<< HEAD
  * ## References:
  *
  * - Arm Cortex-R82 Processor Technical Reference Manual Revision r3p1 (102670_0301_06_en Issue 6)
@@ -82,6 +83,73 @@ pub fn mandatory_extensions() {
     feat_jscvt();
     /* FEAT_LRCPC */
     feat_fcma();
+||||||| 35a31ba7639
+=======
+ * Note that as we use the hard-float `aarch64v8r-unknown-none` target as the base, the neon
+ * extension is present (`NEON_FPm=1`). This affects which R82-specific extensions are enabled
+ * (see "when `NEON_FPm == 1`" note in Cortex-R82 Processor Technical Reference Manual)
+ *
+ * ## References:
+ *
+ * - Arm Cortex-R82 Processor Technical Reference Manual Revision r3p1 (102670_0301_06_en Issue 6)
+ *   section 3.2.1 has the list of mandatory extensions
+ * - Arm Architecture Reference Manual for A-profile architecture (ARM DDI 0487) -- has the
+ *   mapping from features to instructions
+ * - Feature names in A-profile architecture (109697_0100_02_en Version 1.0) -- overview of what
+ *   each extension mean
+ * */
+pub fn mandatory_extensions() {
+    // FEAT_GICv3
+    // FEAT_GICv3p1
+    // FEAT_GICv3_TDIR
+    feat_pmuv3();
+    // FEAT_ETMv4
+    // FEAT_ETMv4p1
+    // FEAT_ETMv4p2
+    // FEAT_ETMv4p3
+    // FEAT_ETMv4p4
+    // FEAT_ETMv4p5
+    /* FEAT_RAS */
+    // FEAT_PCSRv8
+    feat_ssbs();
+    feat_ssbs2();
+    // FEAT_CSV2
+    // FEAT_CSV2_1p1
+    // FEAT_CSV3
+    feat_sb();
+    feat_specres();
+    feat_dgh();
+    // FEAT_nTLBPA
+    /* FEAT_CRC32 */
+    /* FEAT_LSE */
+    feat_rdm(); // mandatory given that NEON_FPm=1
+    /* FEAT_HPDS */
+    /* FEAT_PAN */
+    // FEAT_HAFDBS
+    // FEAT_PMUv3p1
+    // FEAT_TTCNP
+    // FEAT_XNX
+    /* FEAT_UAO */
+    feat_pan2();
+    feat_dpb();
+    /* FEAT_Debugv8p2 */
+    /* FEAT_ASMv8p2 */
+    // FEAT_IESB
+    feat_fp16(); // mandatory given that NEON_FPm=1
+    // FEAT_PCSRv8p2
+    feat_dotprod(); // mandatory given that NEON_FPm=1
+    feat_fhm(); // mandatory given that NEON_FPm=1
+    feat_dpb2();
+    /* FEAT_PAuth */
+    // FEAT_PACQARMA3
+    // FEAT_PAuth2
+    // FEAT_FPAC
+    // FEAT_FPACCOMBINE
+    // FEAT_CONSTPACFIELD
+    feat_jscvt(); // mandatory given that NEON_FPm=1
+    /* FEAT_LRCPC */
+    feat_fcma(); // mandatory given that NEON_FPm=1
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // FEAT_DoPD
     // FEAT_SEL2
     /* FEAT_S2FWB */

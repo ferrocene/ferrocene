@@ -805,7 +805,10 @@ trait UnusedDelimLint {
 
                 ExprKind::Break(_label, None) => return false,
                 ExprKind::Break(_label, Some(break_expr)) => {
-                    return matches!(break_expr.kind, ExprKind::Block(..));
+                    // `if (break 'label i) { ... }` removing parens would make `i { ... }`
+                    // be parsed as a struct literal, so keep parentheses if the break value
+                    // ends with a path (which could be mistaken for a struct name).
+                    return matches!(break_expr.kind, ExprKind::Block(..) | ExprKind::Path(..));
                 }
 
                 ExprKind::Range(_lhs, Some(rhs), _limits) => {
@@ -1782,7 +1785,7 @@ declare_lint! {
 declare_lint_pass!(UnusedAllocation => [UNUSED_ALLOCATION]);
 
 impl<'tcx> LateLintPass<'tcx> for UnusedAllocation {
-    fn check_expr(&mut self, cx: &LateContext<'_>, e: &hir::Expr<'_>) {
+    fn check_expr(&mut self, cx: &LateContext<'tcx>, e: &hir::Expr<'_>) {
         match e.kind {
             hir::ExprKind::Call(path_expr, [_])
                 if let hir::ExprKind::Path(qpath) = &path_expr.kind
@@ -1793,6 +1796,12 @@ impl<'tcx> LateLintPass<'tcx> for UnusedAllocation {
 
         for adj in cx.typeck_results().expr_adjustments(e) {
             if let adjustment::Adjust::Borrow(adjustment::AutoBorrow::Ref(m)) = adj.kind {
+                if let ty::Ref(_, inner_ty, _) = adj.target.kind()
+                    && inner_ty.is_box()
+                {
+                    // If the target type is `&Box<T>` or `&mut Box<T>`, the allocation is necessary
+                    continue;
+                }
                 match m {
                     adjustment::AutoBorrowMutability::Not => {
                         cx.emit_span_lint(UNUSED_ALLOCATION, e.span, UnusedAllocationDiag);

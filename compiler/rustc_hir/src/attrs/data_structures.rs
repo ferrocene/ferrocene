@@ -690,6 +690,30 @@ impl IntoDiagArg for CrateType {
     }
 }
 
+#[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub enum RustcLayoutType {
+    Abi,
+    Align,
+    Size,
+    HomogenousAggregate,
+    Debug,
+}
+
+#[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute, PartialEq, Eq)]
+pub enum RustcMirKind {
+    PeekMaybeInit,
+    PeekMaybeUninit,
+    PeekLiveness,
+    StopAfterDataflow,
+    BorrowckGraphvizPostflow { path: PathBuf },
+    BorrowckGraphvizFormat { format: BorrowckGraphvizFormatKind },
+}
+
+#[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute, PartialEq, Eq)]
+pub enum BorrowckGraphvizFormatKind {
+    TwoPhase,
+}
+
 /// Represents parsed *built-in* inert attributes.
 ///
 /// ## Overview
@@ -1048,6 +1072,12 @@ pub enum AttributeKind {
     /// Represents `#[rustc_has_incoherent_inherent_impls]`
     RustcHasIncoherentInherentImpls,
 
+    /// Represents `#[rustc_hidden_type_of_opaques]`
+    RustcHiddenTypeOfOpaques,
+
+    /// Represents `#[rustc_layout]`
+    RustcLayout(ThinVec<RustcLayoutType>),
+
     /// Represents `#[rustc_layout_scalar_valid_range_end]`.
     RustcLayoutScalarValidRangeEnd(Box<u128>, Span),
 
@@ -1075,6 +1105,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_main]`.
     RustcMain,
 
+    /// Represents `#[rustc_mir]`.
+    RustcMir(ThinVec<RustcMirKind>),
+
     /// Represents `#[rustc_must_implement_one_of]`
     RustcMustImplementOneOf { attr_span: Span, fn_names: ThinVec<Ident> },
 
@@ -1083,6 +1116,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_no_implicit_autorefs]`
     RustcNoImplicitAutorefs,
+
+    /// Represents `#[rustc_non_const_trait_method]`.
+    RustcNonConstTraitMethod,
 
     /// Represents `#[rustc_nounwind]`
     RustcNounwind,
@@ -1107,6 +1143,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_pass_indirectly_in_non_rustic_abis]`
     RustcPassIndirectlyInNonRusticAbis(Span),
+
+    /// Represents `#[rustc_preserve_ub_checks]`
+    RustcPreserveUbChecks,
 
     /// Represents `#[rustc_pub_transparent]` (used by the `repr_transparent_external_private_fields` lint).
     RustcPubTransparent(Span),

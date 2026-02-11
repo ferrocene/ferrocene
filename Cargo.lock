@@ -4093,7 +4093,6 @@ dependencies = [
  "rustc_passes",
  "rustc_privacy",
  "rustc_query_impl",
- "rustc_query_system",
  "rustc_resolve",
  "rustc_session",
  "rustc_span",
@@ -4519,13 +4518,11 @@ dependencies = [
  "rustc_errors",
  "rustc_feature",
  "rustc_hir",
- "rustc_index",
  "rustc_macros",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
  "smallvec",
- "tracing",
 ]
 
 [[package]]

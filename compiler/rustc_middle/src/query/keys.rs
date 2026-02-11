@@ -5,9 +5,9 @@ use std::ffi::OsStr;
 use rustc_ast::tokenstream::TokenStream;
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalModDefId};
 use rustc_hir::hir_id::OwnerId;
-use rustc_query_system::dep_graph::DepNodeIndex;
 use rustc_span::{DUMMY_SP, Ident, LocalExpnId, Span, Symbol};
 
+use crate::dep_graph::DepNodeIndex;
 use crate::infer::canonical::CanonicalQueryInput;
 use crate::mir::mono::CollectionMode;
 use crate::query::{DefIdCache, DefaultCache, SingleCache, VecCache};

@@ -15,6 +15,8 @@ use rustc_data_structures::{assert_matches, outline};
 use rustc_errors::DiagInner;
 use rustc_index::IndexVec;
 use rustc_macros::{Decodable, Encodable};
+use rustc_query_system::ich::StableHashingContext;
+use rustc_query_system::query::QuerySideEffect;
 use rustc_serialize::opaque::{FileEncodeResult, FileEncoder};
 use rustc_session::Session;
 use tracing::{debug, instrument};
@@ -25,8 +27,8 @@ use super::query::DepGraphQuery;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
 use super::{DepContext, DepKind, DepNode, Deps, HasDepContext, WorkProductId};
 use crate::dep_graph::edges::EdgesVec;
-use crate::ich::StableHashingContext;
-use crate::query::{QueryContext, QuerySideEffect};
+use crate::query::QueryContext;
+use crate::verify_ich::incremental_verify_ich;
 
 pub struct DepGraph<D: Deps> {
     data: Option<Arc<DepGraphData<D>>>,
@@ -583,7 +585,7 @@ impl<D: Deps> DepGraph<D> {
             if let Some(prev_index) = data.previous.node_to_index_opt(&node) {
                 let dep_node_index = data.colors.current(prev_index);
                 if let Some(dep_node_index) = dep_node_index {
-                    crate::query::incremental_verify_ich(
+                    incremental_verify_ich(
                         cx,
                         data,
                         result,

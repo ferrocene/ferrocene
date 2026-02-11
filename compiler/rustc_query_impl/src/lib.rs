@@ -12,7 +12,7 @@
 use std::marker::ConstParamTy;
 
 use rustc_data_structures::sync::AtomicU64;
-use rustc_middle::dep_graph::{self, DepKind, DepNode, DepNodeIndex};
+use rustc_middle::dep_graph::{self, DepKind, DepNode, DepNodeIndex, SerializedDepNodeIndex};
 use rustc_middle::queries::{
     self, ExternProviders, Providers, QueryCaches, QueryEngine, QueryStates,
 };
@@ -22,7 +22,6 @@ use rustc_middle::query::plumbing::{
 };
 use rustc_middle::query::{AsLocalKey, CycleError, CycleErrorHandling, QueryCache, QueryMode};
 use rustc_middle::ty::TyCtxt;
-use rustc_query_system::dep_graph::SerializedDepNodeIndex;
 use rustc_span::{ErrorGuaranteed, Span};
 
 pub use crate::dep_kind_vtables::make_dep_kind_vtables;

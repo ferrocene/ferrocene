@@ -1,10 +1,10 @@
 //! Helper functions that serve as the immediate implementation of
 //! `tcx.$query(..)` and its variations.
 
-use rustc_query_system::dep_graph::{DepKind, DepNodeKey};
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
 
 use crate::dep_graph;
+use crate::dep_graph::{DepKind, DepNodeKey};
 use crate::query::erase::{self, Erasable, Erased};
 use crate::query::plumbing::QueryVTable;
 use crate::query::{QueryCache, QueryMode};

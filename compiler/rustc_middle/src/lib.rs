@@ -81,6 +81,7 @@ pub mod thir;
 pub mod traits;
 pub mod ty;
 pub mod util;
+pub mod verify_ich;
 
 #[macro_use]
 pub mod query;

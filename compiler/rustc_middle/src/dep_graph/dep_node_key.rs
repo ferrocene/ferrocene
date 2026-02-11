@@ -2,9 +2,8 @@ use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalModDefId, ModDefId};
 use rustc_hir::definitions::DefPathHash;
 use rustc_hir::{HirId, ItemLocalId, OwnerId};
-use rustc_query_system::dep_graph::{DepContext, DepNode, DepNodeKey, FingerprintStyle};
 
-use crate::dep_graph::DepNodeExt;
+use crate::dep_graph::{DepContext, DepNode, DepNodeExt, DepNodeKey, FingerprintStyle};
 use crate::ty::TyCtxt;
 
 impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for () {

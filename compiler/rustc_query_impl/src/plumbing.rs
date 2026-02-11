@@ -16,21 +16,22 @@ use rustc_middle::bug;
 #[expect(unused_imports, reason = "used by doc comments")]
 use rustc_middle::dep_graph::DepKindVTable;
 use rustc_middle::dep_graph::{
-    self, DepContext, DepNode, DepNodeIndex, DepsType, SerializedDepNodeIndex, dep_kinds,
+    self, DepContext, DepNode, DepNodeIndex, DepNodeKey, DepsType, HasDepContext,
+    SerializedDepNodeIndex, dep_kinds,
 };
 use rustc_middle::query::on_disk_cache::{
     AbsoluteBytePos, CacheDecoder, CacheEncoder, EncodedDepNodeIndex,
 };
 use rustc_middle::query::plumbing::QueryVTable;
 use rustc_middle::query::{
-    Key, QueryCache, QueryJobId, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
+    Key, QueryCache, QueryContext, QueryJobId, QueryStackDeferred, QueryStackFrame,
+    QueryStackFrameExtra,
 };
 use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_query_system::dep_graph::{DepNodeKey, HasDepContext};
-use rustc_query_system::query::{QueryContext, QuerySideEffect};
+use rustc_query_system::query::QuerySideEffect;
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
@@ -275,8 +276,8 @@ macro_rules! feedable {
 macro_rules! hash_result {
     ([][$V:ty]) => {{
         Some(|hcx, result| {
-            let result = ::rustc_middle::query::erase::restore_val::<$V>(*result);
-            ::rustc_query_system::dep_graph::hash_result(hcx, &result)
+            let result = rustc_middle::query::erase::restore_val::<$V>(*result);
+            rustc_middle::dep_graph::hash_result(hcx, &result)
         })
     }};
     ([(no_hash) $($rest:tt)*][$V:ty]) => {{

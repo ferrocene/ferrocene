@@ -1,13 +1,7 @@
 use std::fmt::Debug;
 
-use rustc_data_structures::jobserver::Proxy;
 use rustc_errors::DiagInner;
 use rustc_macros::{Decodable, Encodable};
-
-pub use self::plumbing::*;
-use crate::dep_graph::{DepNodeIndex, HasDepContext, SerializedDepNodeIndex};
-
-mod plumbing;
 
 /// Tracks 'side effects' for a particular query.
 /// This struct is saved to disk along with the query result,
@@ -25,19 +19,4 @@ pub enum QuerySideEffect {
     /// the query as green, as that query will have the side
     /// effect dep node as a dependency.
     Diagnostic(DiagInner),
-}
-
-pub trait QueryContext<'tcx>: HasDepContext {
-    /// Gets a jobserver reference which is used to release then acquire
-    /// a token while waiting on a query.
-    fn jobserver_proxy(&self) -> &Proxy;
-
-    /// Load a side effect associated to the node in the previous session.
-    fn load_side_effect(
-        self,
-        prev_dep_node_index: SerializedDepNodeIndex,
-    ) -> Option<QuerySideEffect>;
-
-    /// Register a side effect for the given node, for use in next session.
-    fn store_side_effect(self, dep_node_index: DepNodeIndex, side_effect: QuerySideEffect);
 }

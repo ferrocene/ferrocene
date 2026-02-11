@@ -5,14 +5,13 @@ use rustc_data_structures::hash_table::{Entry, HashTable};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::{outline, sharded, sync};
 use rustc_errors::{Diag, FatalError, StashKey};
-use rustc_middle::dep_graph::DepsType;
+use rustc_middle::dep_graph::{DepGraphData, DepNodeKey, DepsType, HasDepContext};
 use rustc_middle::query::{
     ActiveKeyStatus, CycleError, CycleErrorHandling, QueryCache, QueryJob, QueryJobId, QueryLatch,
     QueryMode, QueryStackDeferred, QueryStackFrame, QueryState,
 };
 use rustc_middle::ty::TyCtxt;
-use rustc_query_system::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
-use rustc_query_system::query::incremental_verify_ich;
+use rustc_middle::verify_ich::incremental_verify_ich;
 use rustc_span::{DUMMY_SP, Span};
 
 use crate::dep_graph::{DepContext, DepNode, DepNodeIndex};

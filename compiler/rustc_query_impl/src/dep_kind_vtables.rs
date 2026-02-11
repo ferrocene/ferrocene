@@ -1,8 +1,7 @@
 use rustc_middle::bug;
-use rustc_middle::dep_graph::DepKindVTable;
+use rustc_middle::dep_graph::{DepKindVTable, DepNodeKey, FingerprintStyle};
 use rustc_middle::query::QueryCache;
 use rustc_middle::ty::TyCtxt;
-use rustc_query_system::dep_graph::{DepNodeKey, FingerprintStyle};
 
 use crate::plumbing::{force_from_dep_node_inner, try_load_from_on_disk_cache_inner};
 use crate::{QueryCtxt, QueryDispatcherUnerased, QueryFlags};

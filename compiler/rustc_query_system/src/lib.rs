@@ -4,7 +4,5 @@
 #![feature(min_specialization)]
 // tidy-alphabetical-end
 
-pub mod dep_graph;
-mod error;
 pub mod ich;
 pub mod query;

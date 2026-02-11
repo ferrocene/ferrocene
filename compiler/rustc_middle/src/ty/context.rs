@@ -39,7 +39,6 @@ use rustc_hir::lang_items::LangItem;
 use rustc_hir::limit::Limit;
 use rustc_hir::{self as hir, HirId, Node, TraitCandidate, find_attr};
 use rustc_index::IndexVec;
-use rustc_query_system::dep_graph::DepNodeIndex;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_serialize::opaque::{FileEncodeResult, FileEncoder};
 use rustc_session::Session;
@@ -54,7 +53,8 @@ use rustc_type_ir::{CollectAndApply, TypeFlags, WithCachedTypeInfo, elaborate, s
 use tracing::{debug, instrument};
 
 use crate::arena::Arena;
-use crate::dep_graph::{DepGraph, DepKindVTable};
+use crate::dep_graph::dep_node::make_metadata;
+use crate::dep_graph::{DepGraph, DepKindVTable, DepNodeIndex};
 use crate::infer::canonical::{CanonicalParamEnvCache, CanonicalVarKind};
 use crate::lint::lint_level;
 use crate::metadata::ModChild;
@@ -2751,7 +2751,7 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn metadata_dep_node(self) -> crate::dep_graph::DepNode {
-        crate::dep_graph::make_metadata(self)
+        make_metadata(self)
     }
 
     pub fn needs_coroutine_by_move_body_def_id(self, def_id: DefId) -> bool {

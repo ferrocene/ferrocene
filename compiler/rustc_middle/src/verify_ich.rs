@@ -1,11 +1,10 @@
 use std::cell::Cell;
 
 use rustc_data_structures::fingerprint::Fingerprint;
+use rustc_query_system::ich::StableHashingContext;
 use tracing::instrument;
 
-use crate::dep_graph::{DepContext, DepGraphData};
-use crate::ich::StableHashingContext;
-use crate::query::SerializedDepNodeIndex;
+use crate::dep_graph::{DepContext, DepGraphData, SerializedDepNodeIndex};
 
 #[inline]
 #[instrument(skip(tcx, dep_graph_data, result, hash_result, format_value), level = "debug")]

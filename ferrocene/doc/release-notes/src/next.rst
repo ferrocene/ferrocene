@@ -20,7 +20,7 @@ New features
 * Certify the ``core::fmt`` module.
 
   * This module contains the code to format Rust data structures into human-readable output. This enables customers to use this functionality in certified contexts.
-  * Retire "certified panic runtime" compilation targets. They were used to certify panicking without certifying the formatting code, but are not obsolete. Following targets are being retired:
+  * Retire "certified panic runtime" compilation targets. They were used to certify panicking without certifying the formatting code, but are now obsolete. Following targets are being retired:
 
     * ``aarch64-ferrocene-none``
     * ``thumbv7em-ferrocene-none-eabi``

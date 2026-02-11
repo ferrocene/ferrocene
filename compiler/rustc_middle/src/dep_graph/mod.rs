@@ -10,7 +10,7 @@ pub use self::dep_node::{
     DepKind, DepNode, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds, label_strs,
 };
 pub use self::graph::{
-    DepGraphData, DepNodeIndex, TaskDepsRef, WorkProduct, WorkProductMap, hash_result,
+    DepGraph, DepGraphData, DepNodeIndex, TaskDepsRef, WorkProduct, WorkProductMap, hash_result,
 };
 use self::graph::{MarkFrame, print_markframe_trace};
 pub use self::query::DepGraphQuery;
@@ -34,7 +34,7 @@ pub trait DepContext: Copy {
     fn with_stable_hashing_context<R>(self, f: impl FnOnce(StableHashingContext<'_>) -> R) -> R;
 
     /// Access the DepGraph.
-    fn dep_graph(&self) -> &graph::DepGraph<Self::Deps>;
+    fn dep_graph(&self) -> &DepGraph;
 
     /// Access the profiler.
     fn profiler(&self) -> &SelfProfilerRef;
@@ -178,8 +178,6 @@ impl FingerprintStyle {
         }
     }
 }
-
-pub type DepGraph = graph::DepGraph<DepsType>;
 
 pub type DepKindVTable<'tcx> = dep_node::DepKindVTable<TyCtxt<'tcx>>;
 

@@ -10,7 +10,7 @@ use crate::dep_graph::{DepContext, DepGraphData, SerializedDepNodeIndex};
 #[instrument(skip(tcx, dep_graph_data, result, hash_result, format_value), level = "debug")]
 pub fn incremental_verify_ich<Tcx, V>(
     tcx: Tcx,
-    dep_graph_data: &DepGraphData<Tcx::Deps>,
+    dep_graph_data: &DepGraphData,
     result: &V,
     prev_index: SerializedDepNodeIndex,
     hash_result: Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>,

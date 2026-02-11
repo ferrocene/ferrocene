@@ -5,7 +5,7 @@ use rustc_data_structures::hash_table::{Entry, HashTable};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::{outline, sharded, sync};
 use rustc_errors::{Diag, FatalError, StashKey};
-use rustc_middle::dep_graph::{DepGraphData, DepNodeKey, DepsType, HasDepContext};
+use rustc_middle::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
 use rustc_middle::query::{
     ActiveKeyStatus, CycleError, CycleErrorHandling, QueryCache, QueryJob, QueryJobId, QueryLatch,
     QueryMode, QueryStackDeferred, QueryStackFrame, QueryState,
@@ -438,7 +438,7 @@ fn execute_job_non_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 fn execute_job_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
     qcx: QueryCtxt<'tcx>,
-    dep_graph_data: &DepGraphData<DepsType>,
+    dep_graph_data: &DepGraphData,
     key: C::Key,
     mut dep_node_opt: Option<DepNode>,
     job_id: QueryJobId,
@@ -487,7 +487,7 @@ fn execute_job_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 #[inline(always)]
 fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
-    dep_graph_data: &DepGraphData<DepsType>,
+    dep_graph_data: &DepGraphData,
     qcx: QueryCtxt<'tcx>,
     key: &C::Key,
     dep_node: &DepNode,

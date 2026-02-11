@@ -1,8 +1,8 @@
 error: unused import: `m::*`
-  --> $DIR/overwrite-vis-unused.rs:10:9
+  --> $DIR/overwrite-vis-unused.rs:9:5
    |
-LL | pub use m::*;
-   |         ^^^^
+LL | use m::*;
+   |     ^^^^
    |
 note: the lint level is defined here
   --> $DIR/overwrite-vis-unused.rs:3:9

@@ -1,5 +1,6 @@
 // Regression test for issue #152347.
 
+//@ check-pass
 //@ edition: 2018..
 
 use outer::*; // must be before `mod outer`
@@ -13,5 +14,5 @@ mod outer {
 }
 
 fn main() {
-    f(); //~ ERROR cannot find function `f` in this scope
+    f();
 }

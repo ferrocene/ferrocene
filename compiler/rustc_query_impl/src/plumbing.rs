@@ -23,14 +23,14 @@ use rustc_middle::query::on_disk_cache::{
 };
 use rustc_middle::query::plumbing::QueryVTable;
 use rustc_middle::query::{
-    Key, QueryJobId, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
+    Key, QueryCache, QueryJobId, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
 };
 use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_query_system::dep_graph::{DepNodeKey, HasDepContext};
-use rustc_query_system::query::{QueryCache, QueryContext, QuerySideEffect};
+use rustc_query_system::query::{QueryContext, QuerySideEffect};
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 

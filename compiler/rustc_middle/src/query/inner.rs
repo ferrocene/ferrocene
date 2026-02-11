@@ -2,10 +2,11 @@
 //! `tcx.$query(..)` and its variations.
 
 use rustc_query_system::dep_graph::{DepKind, DepNodeKey};
-use rustc_query_system::query::{QueryCache, QueryMode};
+use rustc_query_system::query::QueryMode;
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
 
 use crate::dep_graph;
+use crate::query::QueryCache;
 use crate::query::erase::{self, Erasable, Erased};
 use crate::query::plumbing::QueryVTable;
 use crate::ty::TyCtxt;

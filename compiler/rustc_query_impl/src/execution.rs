@@ -7,14 +7,12 @@ use rustc_data_structures::{outline, sharded, sync};
 use rustc_errors::{Diag, FatalError, StashKey};
 use rustc_middle::dep_graph::DepsType;
 use rustc_middle::query::{
-    ActiveKeyStatus, CycleError, QueryJob, QueryJobId, QueryLatch, QueryStackDeferred,
+    ActiveKeyStatus, CycleError, QueryCache, QueryJob, QueryJobId, QueryLatch, QueryStackDeferred,
     QueryStackFrame, QueryState,
 };
 use rustc_middle::ty::TyCtxt;
 use rustc_query_system::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
-use rustc_query_system::query::{
-    CycleErrorHandling, QueryCache, QueryMode, incremental_verify_ich,
-};
+use rustc_query_system::query::{CycleErrorHandling, QueryMode, incremental_verify_ich};
 use rustc_span::{DUMMY_SP, Span};
 
 use crate::dep_graph::{DepContext, DepNode, DepNodeIndex};

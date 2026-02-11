@@ -9,7 +9,7 @@ use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
 use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
 use rustc_query_system::ich::StableHashingContext;
-use rustc_query_system::query::{CycleErrorHandling, QueryCache};
+use rustc_query_system::query::CycleErrorHandling;
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
@@ -20,7 +20,7 @@ use crate::queries::{
 };
 use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
-use crate::query::{QueryInfo, QueryJob};
+use crate::query::{QueryCache, QueryInfo, QueryJob};
 use crate::ty::TyCtxt;
 
 /// For a particular query, keeps track of "active" keys, i.e. keys whose

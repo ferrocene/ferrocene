@@ -4,13 +4,9 @@ use rustc_data_structures::jobserver::Proxy;
 use rustc_errors::DiagInner;
 use rustc_macros::{Decodable, Encodable};
 
-pub use self::caches::{
-    DefIdCache, DefaultCache, QueryCache, QueryCacheKey, SingleCache, VecCache,
-};
 pub use self::plumbing::*;
 use crate::dep_graph::{DepNodeIndex, HasDepContext, SerializedDepNodeIndex};
 
-mod caches;
 mod plumbing;
 
 /// How a particular query deals with query cycle errors.

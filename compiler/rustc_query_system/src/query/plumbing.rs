@@ -1,5 +1,4 @@
 use std::cell::Cell;
-use std::fmt::Debug;
 
 use rustc_data_structures::fingerprint::Fingerprint;
 use tracing::instrument;
@@ -89,10 +88,4 @@ fn incremental_verify_ich_failed<Tcx>(
     }
 
     INSIDE_VERIFY_PANIC.set(old_in_panic);
-}
-
-#[derive(Debug)]
-pub enum QueryMode {
-    Get,
-    Ensure { check_cache: bool },
 }

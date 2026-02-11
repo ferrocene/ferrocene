@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::ops::Deref;
 
 use rustc_data_structures::fingerprint::Fingerprint;
@@ -93,6 +94,12 @@ impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
             cycle: self.cycle.iter().map(|info| info.lift()).collect(),
         }
     }
+}
+
+#[derive(Debug)]
+pub enum QueryMode {
+    Get,
+    Ensure { check_cache: bool },
 }
 
 /// Stores function pointers and other metadata for a particular query.

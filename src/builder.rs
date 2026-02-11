@@ -314,14 +314,12 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
         self.block.get_function()
     }
 
-    fn function_call(
+    pub fn function_call(
         &mut self,
-        func: RValue<'gcc>,
+        func: Function<'gcc>,
         args: &[RValue<'gcc>],
         _funclet: Option<&Funclet>,
     ) -> RValue<'gcc> {
-        // TODO(antoyo): remove when the API supports a different type for functions.
-        let func: Function<'gcc> = self.cx.rvalue_as_function(func);
         let args = self.check_call("call", func, args);
 
         // gccjit requires to use the result of functions, even when it's not used.
@@ -514,6 +512,7 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
     type CodegenCx = CodegenCx<'gcc, 'tcx>;
 
     fn build(cx: &'a CodegenCx<'gcc, 'tcx>, block: Block<'gcc>) -> Builder<'a, 'gcc, 'tcx> {
+        *cx.current_func.borrow_mut() = Some(block.get_function());
         Builder::with_cx(cx, block)
     }
 
@@ -1496,6 +1495,8 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
 
     #[cfg(not(feature = "master"))]
     fn extract_element(&mut self, vec: RValue<'gcc>, idx: RValue<'gcc>) -> RValue<'gcc> {
+        use crate::context::new_array_type;
+
         let vector_type = vec
             .get_type()
             .unqualified()
@@ -1504,7 +1505,7 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         let element_type = vector_type.get_element_type();
         let vec_num_units = vector_type.get_num_units();
         let array_type =
-            self.context.new_array_type(self.location, element_type, vec_num_units as u64);
+            new_array_type(self.context, self.location, element_type, vec_num_units as u64);
         let array = self.context.new_bitcast(self.location, vec, array_type).to_rvalue();
         self.context.new_array_access(self.location, array, idx).to_rvalue()
     }
@@ -1765,6 +1766,8 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         // FIXME(antoyo): remove when having a proper API.
         let gcc_func = unsafe { std::mem::transmute::<RValue<'gcc>, Function<'gcc>>(func) };
         let call = if self.functions.borrow().values().any(|value| *value == gcc_func) {
+            // TODO(antoyo): remove when the API supports a different type for functions.
+            let func: Function<'gcc> = self.cx.rvalue_as_function(func);
             self.function_call(func, args, funclet)
         } else {
             // If it's a not function that was defined, it's a function pointer.

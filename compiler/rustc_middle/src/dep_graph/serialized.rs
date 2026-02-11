@@ -60,7 +60,7 @@ use tracing::{debug, instrument};
 
 use super::graph::{CurrentDepGraph, DepNodeColorMap};
 use super::query::DepGraphQuery;
-use super::{DepKind, DepNode, DepNodeIndex, Deps};
+use super::{DepKind, DepNode, DepNodeIndex};
 use crate::dep_graph::DepsType;
 use crate::dep_graph::edges::EdgesVec;
 

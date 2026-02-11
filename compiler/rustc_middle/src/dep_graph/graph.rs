@@ -25,7 +25,7 @@ use {super::debug::EdgeFilter, std::env};
 
 use super::query::DepGraphQuery;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
-use super::{DepContext, DepKind, DepNode, Deps, DepsType, HasDepContext, WorkProductId};
+use super::{DepContext, DepKind, DepNode, DepsType, HasDepContext, WorkProductId};
 use crate::dep_graph::edges::EdgesVec;
 use crate::ty::TyCtxt;
 use crate::verify_ich::incremental_verify_ich;
@@ -252,7 +252,7 @@ impl DepGraph {
     }
 
     #[inline(always)]
-    pub fn with_task<Ctxt: HasDepContext<Deps = DepsType>, A: Debug, R>(
+    pub fn with_task<Ctxt: HasDepContext, A: Debug, R>(
         &self,
         key: DepNode,
         cx: Ctxt,
@@ -266,7 +266,7 @@ impl DepGraph {
         }
     }
 
-    pub fn with_anon_task<Tcx: DepContext<Deps = DepsType>, OP, R>(
+    pub fn with_anon_task<Tcx: DepContext, OP, R>(
         &self,
         cx: Tcx,
         dep_kind: DepKind,
@@ -315,7 +315,7 @@ impl DepGraphData {
     ///
     /// [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/queries/incremental-compilation.html
     #[inline(always)]
-    pub fn with_task<Ctxt: HasDepContext<Deps = DepsType>, A: Debug, R>(
+    pub fn with_task<Ctxt: HasDepContext, A: Debug, R>(
         &self,
         key: DepNode,
         cx: Ctxt,
@@ -369,7 +369,7 @@ impl DepGraphData {
     /// FIXME: This could perhaps return a `WithDepNode` to ensure that the
     /// user of this function actually performs the read; we'll have to see
     /// how to make that work with `anon` in `execute_job_incr`, though.
-    pub fn with_anon_task_inner<Tcx: DepContext<Deps = DepsType>, OP, R>(
+    pub fn with_anon_task_inner<Tcx: DepContext, OP, R>(
         &self,
         cx: Tcx,
         dep_kind: DepKind,
@@ -438,7 +438,7 @@ impl DepGraphData {
     }
 
     /// Intern the new `DepNode` with the dependencies up-to-now.
-    fn hash_result_and_alloc_node<Ctxt: DepContext<Deps = DepsType>, R>(
+    fn hash_result_and_alloc_node<Ctxt: DepContext, R>(
         &self,
         cx: &Ctxt,
         node: DepNode,
@@ -553,7 +553,7 @@ impl DepGraph {
     /// FIXME: If the code is changed enough for this node to be marked before requiring the
     /// caller's node, we suppose that those changes will be enough to mark this node red and
     /// force a recomputation using the "normal" way.
-    pub fn with_feed_task<Ctxt: DepContext<Deps = DepsType>, R>(
+    pub fn with_feed_task<Ctxt: DepContext, R>(
         &self,
         node: DepNode,
         cx: Ctxt,

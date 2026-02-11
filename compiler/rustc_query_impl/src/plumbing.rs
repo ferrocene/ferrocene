@@ -15,8 +15,8 @@ use rustc_middle::bug;
 #[expect(unused_imports, reason = "used by doc comments")]
 use rustc_middle::dep_graph::DepKindVTable;
 use rustc_middle::dep_graph::{
-    self, DepContext, DepNode, DepNodeIndex, DepNodeKey, DepsType, HasDepContext,
-    SerializedDepNodeIndex, dep_kinds,
+    self, DepContext, DepNode, DepNodeIndex, DepNodeKey, HasDepContext, SerializedDepNodeIndex,
+    dep_kinds,
 };
 use rustc_middle::query::on_disk_cache::{
     AbsoluteBytePos, CacheDecoder, CacheEncoder, EncodedDepNodeIndex,
@@ -142,7 +142,6 @@ impl<'tcx> QueryCtxt<'tcx> {
 }
 
 impl<'tcx> HasDepContext for QueryCtxt<'tcx> {
-    type Deps = DepsType;
     type DepContext = TyCtxt<'tcx>;
 
     #[inline]

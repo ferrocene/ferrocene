@@ -1,7 +1,6 @@
 use std::panic;
 
 use rustc_data_structures::profiling::SelfProfilerRef;
-use rustc_data_structures::sync::DynSync;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_session::Session;
 use tracing::instrument;
@@ -28,8 +27,6 @@ mod query;
 mod serialized;
 
 pub trait DepContext: Copy {
-    type Deps: Deps;
-
     /// Create a hashing context for hashing new results.
     fn with_stable_hashing_context<R>(self, f: impl FnOnce(StableHashingContext<'_>) -> R) -> R;
 
@@ -96,45 +93,13 @@ pub trait DepContext: Copy {
     fn with_reduced_queries<T>(self, _: impl FnOnce() -> T) -> T;
 }
 
-pub trait Deps: DynSync {
-    /// Execute the operation with provided dependencies.
-    fn with_deps<OP, R>(deps: TaskDepsRef<'_>, op: OP) -> R
-    where
-        OP: FnOnce() -> R;
-
-    /// Access dependencies from current implicit context.
-    fn read_deps<OP>(op: OP)
-    where
-        OP: for<'a> FnOnce(TaskDepsRef<'a>);
-
-    fn name(dep_kind: DepKind) -> &'static str;
-
-    /// We use this for most things when incr. comp. is turned off.
-    const DEP_KIND_NULL: DepKind;
-
-    /// We use this to create a forever-red node.
-    const DEP_KIND_RED: DepKind;
-
-    /// We use this to create a side effect node.
-    const DEP_KIND_SIDE_EFFECT: DepKind;
-
-    /// We use this to create the anon node with zero dependencies.
-    const DEP_KIND_ANON_ZERO_DEPS: DepKind;
-
-    /// This is the highest value a `DepKind` can have. It's used during encoding to
-    /// pack information into the unused bits.
-    const DEP_KIND_MAX: u16;
-}
-
 pub trait HasDepContext: Copy {
-    type Deps: self::Deps;
-    type DepContext: self::DepContext<Deps = Self::Deps>;
+    type DepContext: self::DepContext;
 
     fn dep_context(&self) -> &Self::DepContext;
 }
 
 impl<T: DepContext> HasDepContext for T {
-    type Deps = T::Deps;
     type DepContext = Self;
 
     fn dep_context(&self) -> &Self::DepContext {
@@ -143,7 +108,6 @@ impl<T: DepContext> HasDepContext for T {
 }
 
 impl<T: HasDepContext, Q: Copy> HasDepContext for (T, Q) {
-    type Deps = T::Deps;
     type DepContext = T::DepContext;
 
     fn dep_context(&self) -> &Self::DepContext {
@@ -183,7 +147,8 @@ pub type DepKindVTable<'tcx> = dep_node::DepKindVTable<TyCtxt<'tcx>>;
 
 pub struct DepsType;
 
-impl Deps for DepsType {
+impl DepsType {
+    /// Execute the operation with provided dependencies.
     fn with_deps<OP, R>(task_deps: TaskDepsRef<'_>, op: OP) -> R
     where
         OP: FnOnce() -> R,
@@ -195,6 +160,7 @@ impl Deps for DepsType {
         })
     }
 
+    /// Access dependencies from current implicit context.
     fn read_deps<OP>(op: OP)
     where
         OP: for<'a> FnOnce(TaskDepsRef<'a>),
@@ -209,16 +175,24 @@ impl Deps for DepsType {
         dep_node::DEP_KIND_NAMES[dep_kind.as_usize()]
     }
 
+    /// We use this for most things when incr. comp. is turned off.
     const DEP_KIND_NULL: DepKind = dep_kinds::Null;
+
+    /// We use this to create a forever-red node.
     const DEP_KIND_RED: DepKind = dep_kinds::Red;
+
+    /// We use this to create a side effect node.
     const DEP_KIND_SIDE_EFFECT: DepKind = dep_kinds::SideEffect;
+
+    /// We use this to create the anon node with zero dependencies.
     const DEP_KIND_ANON_ZERO_DEPS: DepKind = dep_kinds::AnonZeroDeps;
+
+    /// This is the highest value a `DepKind` can have. It's used during encoding to
+    /// pack information into the unused bits.
     const DEP_KIND_MAX: u16 = dep_node::DEP_KIND_VARIANTS - 1;
 }
 
 impl<'tcx> DepContext for TyCtxt<'tcx> {
-    type Deps = DepsType;
-
     #[inline]
     fn with_stable_hashing_context<R>(self, f: impl FnOnce(StableHashingContext<'_>) -> R) -> R {
         TyCtxt::with_stable_hashing_context(self, f)

@@ -208,16 +208,16 @@ pub fn query_key_hash_verify_all<'tcx>(tcx: TyCtxt<'tcx>) {
 
 macro_rules! cycle_error_handling {
     ([]) => {{
-        rustc_query_system::query::CycleErrorHandling::Error
+        rustc_middle::query::CycleErrorHandling::Error
     }};
     ([(cycle_fatal) $($rest:tt)*]) => {{
-        rustc_query_system::query::CycleErrorHandling::Fatal
+        rustc_middle::query::CycleErrorHandling::Fatal
     }};
     ([(cycle_stash) $($rest:tt)*]) => {{
-        rustc_query_system::query::CycleErrorHandling::Stash
+        rustc_middle::query::CycleErrorHandling::Stash
     }};
     ([(cycle_delay_bug) $($rest:tt)*]) => {{
-        rustc_query_system::query::CycleErrorHandling::DelayBug
+        rustc_middle::query::CycleErrorHandling::DelayBug
     }};
     ([$other:tt $($modifiers:tt)*]) => {
         cycle_error_handling!([$($modifiers)*])

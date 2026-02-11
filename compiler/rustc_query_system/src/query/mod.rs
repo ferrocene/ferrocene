@@ -9,18 +9,6 @@ use crate::dep_graph::{DepNodeIndex, HasDepContext, SerializedDepNodeIndex};
 
 mod plumbing;
 
-/// How a particular query deals with query cycle errors.
-///
-/// Inspected by the code that actually handles cycle errors, to decide what
-/// approach to use.
-#[derive(Copy, Clone)]
-pub enum CycleErrorHandling {
-    Error,
-    Fatal,
-    DelayBug,
-    Stash,
-}
-
 /// Tracks 'side effects' for a particular query.
 /// This struct is saved to disk along with the query result,
 /// and loaded from disk if we mark the query as green.

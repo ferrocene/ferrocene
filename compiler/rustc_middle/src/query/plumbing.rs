@@ -9,7 +9,6 @@ use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
 use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
 use rustc_query_system::ich::StableHashingContext;
-use rustc_query_system::query::CycleErrorHandling;
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
@@ -52,6 +51,18 @@ pub enum ActiveKeyStatus<'tcx> {
     /// The query panicked. Queries trying to wait on this will raise a fatal error which will
     /// silently panic.
     Poisoned,
+}
+
+/// How a particular query deals with query cycle errors.
+///
+/// Inspected by the code that actually handles cycle errors, to decide what
+/// approach to use.
+#[derive(Copy, Clone)]
+pub enum CycleErrorHandling {
+    Error,
+    Fatal,
+    DelayBug,
+    Stash,
 }
 
 pub type WillCacheOnDiskForKeyFn<'tcx, Key> = fn(tcx: TyCtxt<'tcx>, key: &Key) -> bool;

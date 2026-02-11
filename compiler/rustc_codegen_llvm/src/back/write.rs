@@ -323,7 +323,7 @@ pub(crate) fn target_machine_factory(
 }
 
 pub(crate) fn save_temp_bitcode(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
+    cgcx: &CodegenContext,
     module: &ModuleCodegen<ModuleLlvm>,
     name: &str,
 ) {
@@ -358,14 +358,14 @@ pub(crate) enum CodegenDiagnosticsStage {
 }
 
 pub(crate) struct DiagnosticHandlers<'a> {
-    data: *mut (&'a CodegenContext<LlvmCodegenBackend>, &'a SharedEmitter),
+    data: *mut (&'a CodegenContext, &'a SharedEmitter),
     llcx: &'a llvm::Context,
     old_handler: Option<&'a llvm::DiagnosticHandler>,
 }
 
 impl<'a> DiagnosticHandlers<'a> {
     pub(crate) fn new(
-        cgcx: &'a CodegenContext<LlvmCodegenBackend>,
+        cgcx: &'a CodegenContext,
         shared_emitter: &'a SharedEmitter,
         llcx: &'a llvm::Context,
         module: &ModuleCodegen<ModuleLlvm>,
@@ -431,7 +431,7 @@ impl<'a> Drop for DiagnosticHandlers<'a> {
 }
 
 fn report_inline_asm(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
+    cgcx: &CodegenContext,
     msg: String,
     level: llvm::DiagnosticLevel,
     cookie: u64,
@@ -463,8 +463,7 @@ unsafe extern "C" fn diagnostic_handler(info: &DiagnosticInfo, user: *mut c_void
     if user.is_null() {
         return;
     }
-    let (cgcx, shared_emitter) =
-        unsafe { *(user as *const (&CodegenContext<LlvmCodegenBackend>, &SharedEmitter)) };
+    let (cgcx, shared_emitter) = unsafe { *(user as *const (&CodegenContext, &SharedEmitter)) };
 
     let dcx = DiagCtxt::new(Box::new(shared_emitter.clone()));
     let dcx = dcx.handle();
@@ -560,7 +559,7 @@ pub(crate) enum AutodiffStage {
 }
 
 pub(crate) unsafe fn llvm_optimize(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
+    cgcx: &CodegenContext,
     dcx: DiagCtxtHandle<'_>,
     module: &ModuleCodegen<ModuleLlvm>,
     thin_lto_buffer: Option<&mut *mut llvm::ThinLTOBuffer>,
@@ -892,7 +891,7 @@ pub(crate) unsafe fn llvm_optimize(
 
 // Unsafe due to LLVM calls.
 pub(crate) fn optimize(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
+    cgcx: &CodegenContext,
     shared_emitter: &SharedEmitter,
     module: &mut ModuleCodegen<ModuleLlvm>,
     config: &ModuleConfig,
@@ -983,7 +982,7 @@ pub(crate) fn optimize(
 }
 
 pub(crate) fn codegen(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
+    cgcx: &CodegenContext,
     shared_emitter: &SharedEmitter,
     module: ModuleCodegen<ModuleLlvm>,
     config: &ModuleConfig,
@@ -1238,7 +1237,7 @@ fn create_section_with_flags_asm(section_name: &str, section_flags: &str, data: 
     asm
 }
 
-pub(crate) fn bitcode_section_name(cgcx: &CodegenContext<LlvmCodegenBackend>) -> &'static CStr {
+pub(crate) fn bitcode_section_name(cgcx: &CodegenContext) -> &'static CStr {
     if cgcx.target_is_like_darwin {
         c"__LLVM,__bitcode"
     } else if cgcx.target_is_like_aix {
@@ -1250,7 +1249,7 @@ pub(crate) fn bitcode_section_name(cgcx: &CodegenContext<LlvmCodegenBackend>) ->
 
 /// Embed the bitcode of an LLVM module for LTO in the LLVM module itself.
 fn embed_bitcode(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
+    cgcx: &CodegenContext,
     llcx: &llvm::Context,
     llmod: &llvm::Module,
     bitcode: &[u8],
@@ -1334,11 +1333,7 @@ fn embed_bitcode(
 // when using MSVC linker. We do this only for data, as linker can fix up
 // code references on its own.
 // See #26591, #27438
-fn create_msvc_imps(
-    cgcx: &CodegenContext<LlvmCodegenBackend>,
-    llcx: &llvm::Context,
-    llmod: &llvm::Module,
-) {
+fn create_msvc_imps(cgcx: &CodegenContext, llcx: &llvm::Context, llmod: &llvm::Module) {
     if !cgcx.msvc_imps_needed {
         return;
     }

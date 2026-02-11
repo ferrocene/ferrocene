@@ -426,8 +426,9 @@ impl WriteBackendMethods for GccCodegenBackend {
     type ThinBuffer = ThinBuffer;
 
     fn run_and_optimize_fat_lto(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         shared_emitter: &SharedEmitter,
+        _tm_factory: TargetMachineFactoryFn<Self>,
         // FIXME(bjorn3): Limit LTO exports to these symbols
         _exported_symbols_for_lto: &[String],
         each_linked_rlib_for_lto: &[PathBuf],
@@ -437,7 +438,7 @@ impl WriteBackendMethods for GccCodegenBackend {
     }
 
     fn run_thin_lto(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         dcx: DiagCtxtHandle<'_>,
         // FIXME(bjorn3): Limit LTO exports to these symbols
         _exported_symbols_for_lto: &[String],
@@ -457,7 +458,7 @@ impl WriteBackendMethods for GccCodegenBackend {
     }
 
     fn optimize(
-        _cgcx: &CodegenContext<Self>,
+        _cgcx: &CodegenContext,
         _shared_emitter: &SharedEmitter,
         module: &mut ModuleCodegen<Self::Module>,
         config: &ModuleConfig,
@@ -466,15 +467,16 @@ impl WriteBackendMethods for GccCodegenBackend {
     }
 
     fn optimize_thin(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         _shared_emitter: &SharedEmitter,
+        _tm_factory: TargetMachineFactoryFn<Self>,
         thin: ThinModule<Self>,
     ) -> ModuleCodegen<Self::Module> {
         back::lto::optimize_thin_module(thin, cgcx)
     }
 
     fn codegen(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         shared_emitter: &SharedEmitter,
         module: ModuleCodegen<Self::Module>,
         config: &ModuleConfig,

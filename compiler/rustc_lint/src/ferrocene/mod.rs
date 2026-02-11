@@ -102,13 +102,13 @@
 //! [`collect_and_partition_mono_items`](TyCtxt::collect_and_partition_mono_items)
 //! [query](https://rustc-dev-guide.rust-lang.org/overview.html#queries), which runs on
 //! [MIR](https://rustc-dev-guide.rust-lang.org/mir/index.html) just before the time we actually
-//! generate LLVM IR for a given function. That allows us to assume that assume all function calls
+//! generate LLVM IR for a given function. That allows us to assume that all function calls
 //! can be resolved to an [`Instance`] (and error out otherwise). It also runs after ["elaborate
 //! drops"](https://rustc-dev-guide.rust-lang.org/mir/drop-elaboration.html#drop-elaboration)
 //! expands each drop to an explicit [`TerminatorKind::Drop`].
 //!
 //! *However*, it means we cannot depend on the function to be local to the current crate, or that
-//! we have a lint node for the failing call, or that we have we have source spans or HIR available
+//! we have a lint node for the failing call, or that we have source spans or HIR available
 //! for the failing call.
 //!
 //! This sucks a lot! What we do instead is look at the *caller* of the unvalidated function.

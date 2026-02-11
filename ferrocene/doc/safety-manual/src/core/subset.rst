@@ -20,12 +20,6 @@ To prove compliance with the subset, follow these steps:
    - Contact Ferrous Systems to discuss the option of adding your desired function to the certified subset.
    - Keep using the function, but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
 
-.. warning::
-
-   Subset targets can **only** be used to verify compliance with the subset.
-   Subset targets **cannot** be used at runtime as a certified target.
-   When creating a certified production build, use a :ref:`certified target <certified-core-targets>` instead.
-
 .. list-table::
    :align: left
    :header-rows: 1

@@ -27,8 +27,6 @@ Certified version
 
 The certified version of the core library is |rust_version|.
 
-.. _certified-core-targets:
-
 Certified subset
 ----------------
 

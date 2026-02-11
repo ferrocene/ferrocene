@@ -7,8 +7,7 @@ use rustc_session::Session;
 use tracing::instrument;
 
 pub use self::dep_node::{
-    DepKind, DepNode, DepNodeExt, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds,
-    label_strs,
+    DepKind, DepNode, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds, label_strs,
 };
 pub use self::graph::{
     DepGraphData, DepNodeIndex, TaskDepsRef, WorkProduct, WorkProductMap, hash_result,
@@ -52,6 +51,7 @@ pub trait DepContext: Copy {
 
     #[inline(always)]
     /// Return whether this kind always require evaluation.
+    // FIXME: remove this in favour of the version on `TyCtxt`.
     fn is_eval_always(self, kind: DepKind) -> bool {
         self.dep_kind_vtable(kind).is_eval_always
     }

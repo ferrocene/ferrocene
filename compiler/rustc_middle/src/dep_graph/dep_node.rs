@@ -434,19 +434,7 @@ pub(crate) fn make_metadata(tcx: TyCtxt<'_>) -> DepNode {
     DepNode::construct(tcx, dep_kinds::Metadata, &())
 }
 
-pub trait DepNodeExt: Sized {
-    fn extract_def_id(&self, tcx: TyCtxt<'_>) -> Option<DefId>;
-
-    fn from_label_string(
-        tcx: TyCtxt<'_>,
-        label: &str,
-        def_path_hash: DefPathHash,
-    ) -> Result<Self, ()>;
-
-    fn has_label_string(label: &str) -> bool;
-}
-
-impl DepNodeExt for DepNode {
+impl DepNode {
     /// Extracts the DefId corresponding to this DepNode. This will work
     /// if two conditions are met:
     ///
@@ -457,7 +445,7 @@ impl DepNodeExt for DepNode {
     /// DepNode. Condition (2) might not be fulfilled if a DepNode
     /// refers to something from the previous compilation session that
     /// has been removed.
-    fn extract_def_id(&self, tcx: TyCtxt<'_>) -> Option<DefId> {
+    pub fn extract_def_id(&self, tcx: TyCtxt<'_>) -> Option<DefId> {
         if tcx.fingerprint_style(self.kind) == FingerprintStyle::DefPathHash {
             tcx.def_path_hash_to_def_id(DefPathHash(self.hash.into()))
         } else {
@@ -465,8 +453,7 @@ impl DepNodeExt for DepNode {
         }
     }
 
-    /// Used in testing
-    fn from_label_string(
+    pub fn from_label_string(
         tcx: TyCtxt<'_>,
         label: &str,
         def_path_hash: DefPathHash,
@@ -482,8 +469,7 @@ impl DepNodeExt for DepNode {
         }
     }
 
-    /// Used in testing
-    fn has_label_string(label: &str) -> bool {
+    pub fn has_label_string(label: &str) -> bool {
         dep_kind_from_label_string(label).is_ok()
     }
 }

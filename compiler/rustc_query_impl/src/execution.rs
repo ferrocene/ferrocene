@@ -495,7 +495,7 @@ fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: Quer
     // Note this function can be called concurrently from the same query
     // We must ensure that this is handled correctly.
 
-    let (prev_dep_node_index, dep_node_index) = dep_graph_data.try_mark_green(qcx, dep_node)?;
+    let (prev_dep_node_index, dep_node_index) = dep_graph_data.try_mark_green(qcx.tcx, dep_node)?;
 
     debug_assert!(dep_graph_data.is_index_green(prev_dep_node_index));
 
@@ -602,7 +602,7 @@ fn ensure_must_run<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     let dep_node = query.construct_dep_node(qcx.tcx, key);
 
     let dep_graph = &qcx.tcx.dep_graph;
-    let serialized_dep_node_index = match dep_graph.try_mark_green(qcx, &dep_node) {
+    let serialized_dep_node_index = match dep_graph.try_mark_green(qcx.tcx, &dep_node) {
         None => {
             // A None return from `try_mark_green` means that this is either
             // a new dep node or that the dep node has already been marked red.

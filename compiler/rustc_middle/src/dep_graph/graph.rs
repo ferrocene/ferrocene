@@ -27,7 +27,7 @@ use super::query::DepGraphQuery;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
 use super::{DepContext, DepKind, DepNode, Deps, HasDepContext, WorkProductId};
 use crate::dep_graph::edges::EdgesVec;
-use crate::query::QueryContext;
+use crate::ty::TyCtxt;
 use crate::verify_ich::incremental_verify_ich;
 
 pub struct DepGraph<D: Deps> {
@@ -525,16 +525,12 @@ impl<D: Deps> DepGraph<D> {
     /// This encodes a diagnostic by creating a node with an unique index and associating
     /// `diagnostic` with it, for use in the next session.
     #[inline]
-    pub fn record_diagnostic<'tcx, Qcx: QueryContext<'tcx>>(
-        &self,
-        qcx: Qcx,
-        diagnostic: &DiagInner,
-    ) {
+    pub fn record_diagnostic<'tcx>(&self, tcx: TyCtxt<'tcx>, diagnostic: &DiagInner) {
         if let Some(ref data) = self.data {
             D::read_deps(|task_deps| match task_deps {
                 TaskDepsRef::EvalAlways | TaskDepsRef::Ignore => return,
                 TaskDepsRef::Forbid | TaskDepsRef::Allow(..) => {
-                    self.read_index(data.encode_diagnostic(qcx, diagnostic));
+                    self.read_index(data.encode_diagnostic(tcx, diagnostic));
                 }
             })
         }
@@ -542,13 +538,13 @@ impl<D: Deps> DepGraph<D> {
     /// This forces a diagnostic node green by running its side effect. `prev_index` would
     /// refer to a node created used `encode_diagnostic` in the previous session.
     #[inline]
-    pub fn force_diagnostic_node<'tcx, Qcx: QueryContext<'tcx>>(
+    pub fn force_diagnostic_node<'tcx>(
         &self,
-        qcx: Qcx,
+        tcx: TyCtxt<'tcx>,
         prev_index: SerializedDepNodeIndex,
     ) {
         if let Some(ref data) = self.data {
-            data.force_diagnostic_node(qcx, prev_index);
+            data.force_diagnostic_node(tcx, prev_index);
         }
     }
 
@@ -688,11 +684,7 @@ impl<D: Deps> DepGraphData<D> {
     /// This encodes a diagnostic by creating a node with an unique index and associating
     /// `diagnostic` with it, for use in the next session.
     #[inline]
-    fn encode_diagnostic<'tcx, Qcx: QueryContext<'tcx>>(
-        &self,
-        qcx: Qcx,
-        diagnostic: &DiagInner,
-    ) -> DepNodeIndex {
+    fn encode_diagnostic<'tcx>(&self, tcx: TyCtxt<'tcx>, diagnostic: &DiagInner) -> DepNodeIndex {
         // Use `send_new` so we get an unique index, even though the dep node is not.
         let dep_node_index = self.current.encoder.send_new(
             DepNode {
@@ -705,24 +697,20 @@ impl<D: Deps> DepGraphData<D> {
             std::iter::once(DepNodeIndex::FOREVER_RED_NODE).collect(),
         );
         let side_effect = QuerySideEffect::Diagnostic(diagnostic.clone());
-        qcx.store_side_effect(dep_node_index, side_effect);
+        tcx.store_side_effect(dep_node_index, side_effect);
         dep_node_index
     }
 
     /// This forces a diagnostic node green by running its side effect. `prev_index` would
     /// refer to a node created used `encode_diagnostic` in the previous session.
     #[inline]
-    fn force_diagnostic_node<'tcx, Qcx: QueryContext<'tcx>>(
-        &self,
-        qcx: Qcx,
-        prev_index: SerializedDepNodeIndex,
-    ) {
+    fn force_diagnostic_node<'tcx>(&self, tcx: TyCtxt<'tcx>, prev_index: SerializedDepNodeIndex) {
         D::with_deps(TaskDepsRef::Ignore, || {
-            let side_effect = qcx.load_side_effect(prev_index).unwrap();
+            let side_effect = tcx.load_side_effect(prev_index).unwrap();
 
             match &side_effect {
                 QuerySideEffect::Diagnostic(diagnostic) => {
-                    qcx.dep_context().sess().dcx().emit_diagnostic(diagnostic.clone());
+                    tcx.dcx().emit_diagnostic(diagnostic.clone());
                 }
             }
 
@@ -741,7 +729,7 @@ impl<D: Deps> DepGraphData<D> {
                 true,
             );
             // This will just overwrite the same value for concurrent calls.
-            qcx.store_side_effect(dep_node_index, side_effect);
+            tcx.store_side_effect(dep_node_index, side_effect);
         })
     }
 
@@ -867,12 +855,12 @@ impl<D: Deps> DepGraph<D> {
         DepNodeColor::Unknown
     }
 
-    pub fn try_mark_green<'tcx, Qcx: QueryContext<'tcx, Deps = D>>(
+    pub fn try_mark_green<'tcx>(
         &self,
-        qcx: Qcx,
+        tcx: TyCtxt<'tcx>,
         dep_node: &DepNode,
     ) -> Option<(SerializedDepNodeIndex, DepNodeIndex)> {
-        self.data().and_then(|data| data.try_mark_green(qcx, dep_node))
+        self.data().and_then(|data| data.try_mark_green(tcx, dep_node))
     }
 }
 
@@ -882,12 +870,12 @@ impl<D: Deps> DepGraphData<D> {
     /// A node will have an index, when it's already been marked green, or when we can mark it
     /// green. This function will mark the current task as a reader of the specified node, when
     /// a node index can be found for that node.
-    pub fn try_mark_green<'tcx, Qcx: QueryContext<'tcx, Deps = D>>(
+    pub fn try_mark_green<'tcx>(
         &self,
-        qcx: Qcx,
+        tcx: TyCtxt<'tcx>,
         dep_node: &DepNode,
     ) -> Option<(SerializedDepNodeIndex, DepNodeIndex)> {
-        debug_assert!(!qcx.dep_context().is_eval_always(dep_node.kind));
+        debug_assert!(!tcx.is_eval_always(dep_node.kind));
 
         // Return None if the dep node didn't exist in the previous session
         let prev_index = self.previous.node_to_index_opt(dep_node)?;
@@ -902,16 +890,16 @@ impl<D: Deps> DepGraphData<D> {
                 // in the previous compilation session too, so we can try to
                 // mark it as green by recursively marking all of its
                 // dependencies green.
-                self.try_mark_previous_green(qcx, prev_index, None)
+                self.try_mark_previous_green(tcx, prev_index, None)
                     .map(|dep_node_index| (prev_index, dep_node_index))
             }
         }
     }
 
-    #[instrument(skip(self, qcx, parent_dep_node_index, frame), level = "debug")]
-    fn try_mark_parent_green<'tcx, Qcx: QueryContext<'tcx, Deps = D>>(
+    #[instrument(skip(self, tcx, parent_dep_node_index, frame), level = "debug")]
+    fn try_mark_parent_green<'tcx>(
         &self,
-        qcx: Qcx,
+        tcx: TyCtxt<'tcx>,
         parent_dep_node_index: SerializedDepNodeIndex,
         frame: &MarkFrame<'_>,
     ) -> Option<()> {
@@ -944,13 +932,13 @@ impl<D: Deps> DepGraphData<D> {
 
         // We don't know the state of this dependency. If it isn't
         // an eval_always node, let's try to mark it green recursively.
-        if !qcx.dep_context().is_eval_always(dep_dep_node.kind) {
+        if !tcx.is_eval_always(dep_dep_node.kind) {
             debug!(
                 "state of dependency {:?} ({}) is unknown, trying to mark it green",
                 dep_dep_node, dep_dep_node.hash,
             );
 
-            let node_index = self.try_mark_previous_green(qcx, parent_dep_node_index, Some(frame));
+            let node_index = self.try_mark_previous_green(tcx, parent_dep_node_index, Some(frame));
 
             if node_index.is_some() {
                 debug!("managed to MARK dependency {dep_dep_node:?} as green");
@@ -960,7 +948,7 @@ impl<D: Deps> DepGraphData<D> {
 
         // We failed to mark it green, so we try to force the query.
         debug!("trying to force dependency {dep_dep_node:?}");
-        if !qcx.dep_context().try_force_from_dep_node(*dep_dep_node, parent_dep_node_index, frame) {
+        if !tcx.dep_context().try_force_from_dep_node(*dep_dep_node, parent_dep_node_index, frame) {
             // The DepNode could not be forced.
             debug!("dependency {dep_dep_node:?} could not be forced");
             return None;
@@ -978,7 +966,7 @@ impl<D: Deps> DepGraphData<D> {
             DepNodeColor::Unknown => {}
         }
 
-        if let None = qcx.dep_context().sess().dcx().has_errors_or_delayed_bugs() {
+        if let None = tcx.dcx().has_errors_or_delayed_bugs() {
             panic!("try_mark_previous_green() - Forcing the DepNode should have set its color")
         }
 
@@ -997,10 +985,10 @@ impl<D: Deps> DepGraphData<D> {
     }
 
     /// Try to mark a dep-node which existed in the previous compilation session as green.
-    #[instrument(skip(self, qcx, prev_dep_node_index, frame), level = "debug")]
-    fn try_mark_previous_green<'tcx, Qcx: QueryContext<'tcx, Deps = D>>(
+    #[instrument(skip(self, tcx, prev_dep_node_index, frame), level = "debug")]
+    fn try_mark_previous_green<'tcx>(
         &self,
-        qcx: Qcx,
+        tcx: TyCtxt<'tcx>,
         prev_dep_node_index: SerializedDepNodeIndex,
         frame: Option<&MarkFrame<'_>>,
     ) -> Option<DepNodeIndex> {
@@ -1008,14 +996,14 @@ impl<D: Deps> DepGraphData<D> {
 
         // We never try to mark eval_always nodes as green
         debug_assert!(
-            !qcx.dep_context()
+            !tcx.dep_context()
                 .is_eval_always(self.previous.index_to_node(prev_dep_node_index).kind)
         );
 
         let prev_deps = self.previous.edge_targets_from(prev_dep_node_index);
 
         for dep_dep_node_index in prev_deps {
-            self.try_mark_parent_green(qcx, dep_dep_node_index, &frame)?;
+            self.try_mark_parent_green(tcx, dep_dep_node_index, &frame)?;
         }
 
         // If we got here without hitting a `return` that means that all
@@ -1507,4 +1495,31 @@ fn panic_on_forbidden_read<D: Deps>(data: &DepGraphData<D>, dep_node_index: DepN
          allowed as part of loading something from the incremental on-disk cache. \
          See <https://github.com/rust-lang/rust/pull/91919>."
     )
+}
+
+impl<'tcx> TyCtxt<'tcx> {
+    /// Return whether this kind always require evaluation.
+    #[inline(always)]
+    fn is_eval_always(self, kind: DepKind) -> bool {
+        self.dep_kind_vtable(kind).is_eval_always
+    }
+
+    // Interactions with on_disk_cache
+    fn load_side_effect(
+        self,
+        prev_dep_node_index: SerializedDepNodeIndex,
+    ) -> Option<QuerySideEffect> {
+        self.query_system
+            .on_disk_cache
+            .as_ref()
+            .and_then(|c| c.load_side_effect(self, prev_dep_node_index))
+    }
+
+    #[inline(never)]
+    #[cold]
+    fn store_side_effect(self, dep_node_index: DepNodeIndex, side_effect: QuerySideEffect) {
+        if let Some(c) = self.query_system.on_disk_cache.as_ref() {
+            c.store_side_effect(dep_node_index, side_effect)
+        }
+    }
 }

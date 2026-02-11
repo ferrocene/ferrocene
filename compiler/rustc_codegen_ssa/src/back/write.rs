@@ -23,6 +23,7 @@ use rustc_hir::find_attr;
 use rustc_incremental::{
     copy_cgu_workproduct_to_incr_comp_cache_dir, in_incr_comp_dir, in_incr_comp_dir_sess,
 };
+use rustc_macros::{Decodable, Encodable};
 use rustc_metadata::fs::copy_to_stdout;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::{WorkProduct, WorkProductId};
@@ -50,7 +51,7 @@ use crate::{
 const PRE_LTO_BC_EXT: &str = "pre-lto.bc";
 
 /// What kind of object file to emit.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Encodable, Decodable)]
 pub enum EmitObj {
     // No object file.
     None,
@@ -64,7 +65,7 @@ pub enum EmitObj {
 }
 
 /// What kind of llvm bitcode section to embed in an object file.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Encodable, Decodable)]
 pub enum BitcodeSection {
     // No bitcode section.
     None,
@@ -74,6 +75,7 @@ pub enum BitcodeSection {
 }
 
 /// Module-specific configuration for `optimize_and_codegen`.
+#[derive(Encodable, Decodable)]
 pub struct ModuleConfig {
     /// Names of additional optimization passes to run.
     pub passes: Vec<String>,
@@ -319,7 +321,7 @@ pub type TargetMachineFactoryFn<B> = Arc<
 >;
 
 /// Additional resources used by optimize_and_codegen (not module specific)
-#[derive(Clone)]
+#[derive(Clone, Encodable, Decodable)]
 pub struct CodegenContext {
     // Resources needed when running LTO
     pub lto: Lto,

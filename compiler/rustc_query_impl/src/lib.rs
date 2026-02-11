@@ -18,12 +18,12 @@ use rustc_middle::queries::{
 };
 use rustc_middle::query::AsLocalKey;
 use rustc_middle::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
-use rustc_middle::query::plumbing::{HashResult, QuerySystem, QuerySystemFns, QueryVTable};
+use rustc_middle::query::plumbing::{
+    HashResult, QueryState, QuerySystem, QuerySystemFns, QueryVTable,
+};
 use rustc_middle::ty::TyCtxt;
 use rustc_query_system::dep_graph::SerializedDepNodeIndex;
-use rustc_query_system::query::{
-    CycleError, CycleErrorHandling, QueryCache, QueryMode, QueryState,
-};
+use rustc_query_system::query::{CycleError, CycleErrorHandling, QueryCache, QueryMode};
 use rustc_span::{ErrorGuaranteed, Span};
 
 pub use crate::dep_kind_vtables::make_dep_kind_vtables;

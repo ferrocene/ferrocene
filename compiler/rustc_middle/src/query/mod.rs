@@ -1,8 +1,10 @@
 use rustc_hir::def_id::LocalDefId;
-pub use rustc_query_system::query::{QueryMode, QueryState};
+pub use rustc_query_system::query::QueryMode;
 
 pub use self::keys::{AsLocalKey, Key, LocalCrate};
-pub use self::plumbing::{IntoQueryParam, TyCtxtAt, TyCtxtEnsureDone, TyCtxtEnsureOk};
+pub use self::plumbing::{
+    ActiveKeyStatus, IntoQueryParam, QueryState, TyCtxtAt, TyCtxtEnsureDone, TyCtxtEnsureOk,
+};
 pub use crate::queries::Providers;
 use crate::ty::TyCtxt;
 

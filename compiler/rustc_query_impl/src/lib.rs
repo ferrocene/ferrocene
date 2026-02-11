@@ -16,14 +16,14 @@ use rustc_middle::dep_graph::{self, DepKind, DepNode, DepNodeIndex};
 use rustc_middle::queries::{
     self, ExternProviders, Providers, QueryCaches, QueryEngine, QueryStates,
 };
-use rustc_middle::query::AsLocalKey;
 use rustc_middle::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use rustc_middle::query::plumbing::{
     HashResult, QueryState, QuerySystem, QuerySystemFns, QueryVTable,
 };
+use rustc_middle::query::{AsLocalKey, CycleError};
 use rustc_middle::ty::TyCtxt;
 use rustc_query_system::dep_graph::SerializedDepNodeIndex;
-use rustc_query_system::query::{CycleError, CycleErrorHandling, QueryCache, QueryMode};
+use rustc_query_system::query::{CycleErrorHandling, QueryCache, QueryMode};
 use rustc_span::{ErrorGuaranteed, Span};
 
 pub use crate::dep_kind_vtables::make_dep_kind_vtables;

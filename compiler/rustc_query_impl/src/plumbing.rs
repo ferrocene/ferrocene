@@ -18,20 +18,19 @@ use rustc_middle::dep_graph::DepKindVTable;
 use rustc_middle::dep_graph::{
     self, DepContext, DepNode, DepNodeIndex, DepsType, SerializedDepNodeIndex, dep_kinds,
 };
-use rustc_middle::query::Key;
 use rustc_middle::query::on_disk_cache::{
     AbsoluteBytePos, CacheDecoder, CacheEncoder, EncodedDepNodeIndex,
 };
 use rustc_middle::query::plumbing::QueryVTable;
+use rustc_middle::query::{
+    Key, QueryJobId, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
+};
 use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_query_system::dep_graph::{DepNodeKey, HasDepContext};
-use rustc_query_system::query::{
-    QueryCache, QueryContext, QueryJobId, QuerySideEffect, QueryStackDeferred, QueryStackFrame,
-    QueryStackFrameExtra,
-};
+use rustc_query_system::query::{QueryCache, QueryContext, QuerySideEffect};
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 

@@ -2,30 +2,11 @@ use std::cell::Cell;
 use std::fmt::Debug;
 
 use rustc_data_structures::fingerprint::Fingerprint;
-use rustc_span::Span;
 use tracing::instrument;
 
-use super::{QueryStackDeferred, QueryStackFrameExtra};
 use crate::dep_graph::{DepContext, DepGraphData};
 use crate::ich::StableHashingContext;
-use crate::query::job::QueryInfo;
-use crate::query::{QueryStackFrame, SerializedDepNodeIndex};
-
-#[derive(Clone, Debug)]
-pub struct CycleError<I = QueryStackFrameExtra> {
-    /// The query and related span that uses the cycle.
-    pub usage: Option<(Span, QueryStackFrame<I>)>,
-    pub cycle: Vec<QueryInfo<I>>,
-}
-
-impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
-    pub fn lift(&self) -> CycleError<QueryStackFrameExtra> {
-        CycleError {
-            usage: self.usage.as_ref().map(|(span, frame)| (*span, frame.lift())),
-            cycle: self.cycle.iter().map(|info| info.lift()).collect(),
-        }
-    }
-}
+use crate::query::SerializedDepNodeIndex;
 
 #[inline]
 #[instrument(skip(tcx, dep_graph_data, result, hash_result, format_value), level = "debug")]

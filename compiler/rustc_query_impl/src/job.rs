@@ -5,7 +5,7 @@ use std::sync::Arc;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_errors::{Diag, DiagCtxtHandle};
 use rustc_hir::def::DefKind;
-use rustc_query_system::query::{
+use rustc_middle::query::{
     CycleError, QueryInfo, QueryJob, QueryJobId, QueryLatch, QueryStackDeferred, QueryStackFrame,
     QueryWaiter,
 };

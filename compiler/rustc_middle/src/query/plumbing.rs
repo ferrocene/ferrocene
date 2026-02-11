@@ -9,8 +9,7 @@ use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
 use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
 use rustc_query_system::ich::StableHashingContext;
-pub(crate) use rustc_query_system::query::QueryJobId;
-use rustc_query_system::query::{CycleError, CycleErrorHandling, QueryCache, QueryJob};
+use rustc_query_system::query::{CycleErrorHandling, QueryCache};
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
@@ -20,6 +19,8 @@ use crate::queries::{
     ExternProviders, PerQueryVTables, Providers, QueryArenas, QueryCaches, QueryEngine, QueryStates,
 };
 use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
+use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
+use crate::query::{QueryInfo, QueryJob};
 use crate::ty::TyCtxt;
 
 /// For a particular query, keeps track of "active" keys, i.e. keys whose
@@ -66,6 +67,22 @@ pub type IsLoadableFromDiskFn<'tcx, Key> =
     fn(tcx: TyCtxt<'tcx>, key: &Key, index: SerializedDepNodeIndex) -> bool;
 
 pub type HashResult<V> = Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>;
+
+#[derive(Clone, Debug)]
+pub struct CycleError<I = QueryStackFrameExtra> {
+    /// The query and related span that uses the cycle.
+    pub usage: Option<(Span, QueryStackFrame<I>)>,
+    pub cycle: Vec<QueryInfo<I>>,
+}
+
+impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
+    pub fn lift(&self) -> CycleError<QueryStackFrameExtra> {
+        CycleError {
+            usage: self.usage.as_ref().map(|(span, frame)| (*span, frame.lift())),
+            cycle: self.cycle.iter().map(|info| info.lift()).collect(),
+        }
+    }
+}
 
 /// Stores function pointers and other metadata for a particular query.
 ///

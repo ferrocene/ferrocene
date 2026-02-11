@@ -6,12 +6,14 @@ use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::{outline, sharded, sync};
 use rustc_errors::{Diag, FatalError, StashKey};
 use rustc_middle::dep_graph::DepsType;
-use rustc_middle::query::{ActiveKeyStatus, QueryState};
+use rustc_middle::query::{
+    ActiveKeyStatus, CycleError, QueryJob, QueryJobId, QueryLatch, QueryStackDeferred,
+    QueryStackFrame, QueryState,
+};
 use rustc_middle::ty::TyCtxt;
 use rustc_query_system::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
 use rustc_query_system::query::{
-    CycleError, CycleErrorHandling, QueryCache, QueryJob, QueryJobId, QueryLatch, QueryMode,
-    QueryStackDeferred, QueryStackFrame, incremental_verify_ich,
+    CycleErrorHandling, QueryCache, QueryMode, incremental_verify_ich,
 };
 use rustc_span::{DUMMY_SP, Span};
 
@@ -239,7 +241,7 @@ fn wait_for_query<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 
     // With parallel queries we might just have to wait on some other
     // thread.
-    let result = latch.wait_on(qcx, current, span);
+    let result = latch.wait_on(qcx.tcx, current, span);
 
     match result {
         Ok(()) => {

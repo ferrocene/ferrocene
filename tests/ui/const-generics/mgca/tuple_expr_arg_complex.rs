@@ -8,6 +8,8 @@ trait Trait {
 
 fn takes_tuple<const A: (u32, u32)>() {}
 fn takes_nested_tuple<const A: (u32, (u32, u32))>() {}
+fn takes_array<const A: [u32; 2]>() {}
+fn takes_tuple_with_array<const A: ([u32; 2], u32)>() {}
 
 fn generic_caller<T: Trait, const N: u32, const N2: u32>() {
     takes_tuple::<{ (N, N + 1) }>(); //~ ERROR complex const arguments must be placed inside of a `const` block
@@ -15,6 +17,9 @@ fn generic_caller<T: Trait, const N: u32, const N2: u32>() {
 
     takes_nested_tuple::<{ (N, (N, N + 1)) }>(); //~ ERROR complex const arguments must be placed inside of a `const` block
     takes_nested_tuple::<{ (N, (N, const { N + 1 })) }>(); //~ ERROR generic parameters may not be used in const operations
+
+    takes_array::<{ [N, N + 1] }>(); //~ ERROR complex const arguments must be placed inside of a `const` block
+    takes_tuple_with_array::<{ ([N, N + 1], N) }>(); //~ ERROR complex const arguments must be placed inside of a `const` block
 }
 
 fn main() {}

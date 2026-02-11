@@ -1,5 +1,5 @@
+#![expect(incomplete_features)]
 #![feature(adt_const_params, min_generic_const_args)]
-//~^ WARN feature `min_generic_const_args` is incomplete
 use std::marker::ConstParamTy;
 
 #[derive(Eq, PartialEq, ConstParamTy)]

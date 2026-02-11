@@ -68,14 +68,3 @@ which means it can use ``std`` for testing and enriched interactive development 
 For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
 
 .. _thumbv7em-ferrocene-none-eabi:
-
-Certified equivalent
---------------------
-
-This :ref:`qualified <qualified-targets>` target's certified equivalent is
-``thumbv7em-ferrocene-none-eabi``. To use the certified core library, the
-following additional flags must be provided to ``rustc``:
-
-* ``--target=thumbv7em-ferrocene-none-eabi``
-
-Refer to :ref:`certified-core-targets` for more information about certified targets.

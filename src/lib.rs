@@ -374,7 +374,7 @@ impl ExtraBackendMethods for GccCodegenBackend {
         _features: &[String],
     ) -> TargetMachineFactoryFn<Self> {
         // TODO(antoyo): set opt level.
-        Arc::new(|_| Ok(()))
+        Arc::new(|_, _| ())
     }
 }
 
@@ -421,7 +421,6 @@ unsafe impl Sync for SyncContext {}
 impl WriteBackendMethods for GccCodegenBackend {
     type Module = GccContext;
     type TargetMachine = ();
-    type TargetMachineError = ();
     type ModuleBuffer = ModuleBuffer;
     type ThinData = ThinData;
     type ThinBuffer = ThinBuffer;

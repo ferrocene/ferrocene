@@ -848,7 +848,7 @@ bitflags! {
 }
 
 unsafe extern "C" {
-    pub(crate) type ModuleBuffer;
+    pub(crate) type Buffer;
 }
 
 pub(crate) type SelfProfileBeforePassCallback =
@@ -2457,10 +2457,10 @@ unsafe extern "C" {
     pub(crate) fn LLVMRustSetModulePICLevel(M: &Module);
     pub(crate) fn LLVMRustSetModulePIELevel(M: &Module);
     pub(crate) fn LLVMRustSetModuleCodeModel(M: &Module, Model: CodeModel);
-    pub(crate) fn LLVMRustModuleBufferCreate(M: &Module) -> &'static mut ModuleBuffer;
-    pub(crate) fn LLVMRustModuleBufferPtr(p: &ModuleBuffer) -> *const u8;
-    pub(crate) fn LLVMRustModuleBufferLen(p: &ModuleBuffer) -> usize;
-    pub(crate) fn LLVMRustModuleBufferFree(p: &'static mut ModuleBuffer);
+    pub(crate) fn LLVMRustBufferPtr(p: &Buffer) -> *const u8;
+    pub(crate) fn LLVMRustBufferLen(p: &Buffer) -> usize;
+    pub(crate) fn LLVMRustBufferFree(p: &'static mut Buffer);
+    pub(crate) fn LLVMRustModuleSerialize(M: &Module) -> &'static mut Buffer;
     pub(crate) fn LLVMRustModuleCost(M: &Module) -> u64;
     pub(crate) fn LLVMRustModuleInstructionStats(M: &Module) -> u64;
 

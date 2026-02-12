@@ -658,32 +658,40 @@ pub(crate) fn run_pass_manager(
     debug!("lto done");
 }
 
-pub struct ModuleBuffer(&'static mut llvm::ModuleBuffer);
+pub(crate) struct Buffer(&'static mut llvm::Buffer);
 
-unsafe impl Send for ModuleBuffer {}
-unsafe impl Sync for ModuleBuffer {}
+unsafe impl Send for Buffer {}
+unsafe impl Sync for Buffer {}
 
-impl ModuleBuffer {
-    pub(crate) fn new(m: &llvm::Module) -> ModuleBuffer {
-        ModuleBuffer(unsafe { llvm::LLVMRustModuleBufferCreate(m) })
-    }
-}
-
-impl ModuleBufferMethods for ModuleBuffer {
-    fn data(&self) -> &[u8] {
+impl Buffer {
+    pub(crate) fn data(&self) -> &[u8] {
         unsafe {
-            let ptr = llvm::LLVMRustModuleBufferPtr(self.0);
-            let len = llvm::LLVMRustModuleBufferLen(self.0);
+            let ptr = llvm::LLVMRustBufferPtr(self.0);
+            let len = llvm::LLVMRustBufferLen(self.0);
             slice::from_raw_parts(ptr, len)
         }
     }
 }
 
-impl Drop for ModuleBuffer {
+impl Drop for Buffer {
     fn drop(&mut self) {
         unsafe {
-            llvm::LLVMRustModuleBufferFree(&mut *(self.0 as *mut _));
+            llvm::LLVMRustBufferFree(&mut *(self.0 as *mut _));
         }
+    }
+}
+
+pub struct ModuleBuffer(Buffer);
+
+impl ModuleBuffer {
+    pub(crate) fn new(m: &llvm::Module) -> ModuleBuffer {
+        ModuleBuffer(Buffer(unsafe { llvm::LLVMRustModuleSerialize(m) }))
+    }
+}
+
+impl ModuleBufferMethods for ModuleBuffer {
+    fn data(&self) -> &[u8] {
+        self.0.data()
     }
 }
 

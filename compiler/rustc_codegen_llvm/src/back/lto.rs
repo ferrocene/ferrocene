@@ -202,12 +202,6 @@ pub(crate) fn run_thin(
     thin_lto(cgcx, prof, dcx, modules, upstream_modules, cached_modules, &symbols_below_threshold)
 }
 
-pub(crate) fn prepare_thin(module: ModuleCodegen<ModuleLlvm>) -> (String, ModuleBuffer) {
-    let name = module.name;
-    let buffer = ModuleBuffer::new(module.module_llvm.llmod(), true);
-    (name, buffer)
-}
-
 fn fat_lto(
     cgcx: &CodegenContext,
     prof: &SelfProfilerRef,

@@ -868,22 +868,22 @@ fn execute_optimize_work_item<B: ExtraBackendMethods>(
             WorkItemResult::Finished(module)
         }
         ComputedLtoType::Thin => {
-            let (name, thin_buffer) = B::prepare_thin(module);
+            let thin_buffer = B::prepare_thin(module.module_llvm);
             if let Some(path) = bitcode {
                 fs::write(&path, thin_buffer.data()).unwrap_or_else(|e| {
                     panic!("Error writing pre-lto-bitcode file `{}`: {}", path.display(), e);
                 });
             }
-            WorkItemResult::NeedsThinLto(name, thin_buffer)
+            WorkItemResult::NeedsThinLto(module.name, thin_buffer)
         }
         ComputedLtoType::Fat => match bitcode {
             Some(path) => {
-                let (name, buffer) = B::serialize_module(module);
+                let buffer = B::serialize_module(module.module_llvm);
                 fs::write(&path, buffer.data()).unwrap_or_else(|e| {
                     panic!("Error writing pre-lto-bitcode file `{}`: {}", path.display(), e);
                 });
                 WorkItemResult::NeedsFatLto(FatLtoInput::Serialized {
-                    name,
+                    name: module.name,
                     buffer: SerializedModule::Local(buffer),
                 })
             }
@@ -1804,8 +1804,8 @@ fn start_executing_work<B: ExtraBackendMethods>(
                 ));
             } else {
                 if let Some(allocator_module) = allocator_module.take() {
-                    let (name, thin_buffer) = B::prepare_thin(allocator_module);
-                    needs_thin_lto.push((name, thin_buffer));
+                    let thin_buffer = B::prepare_thin(allocator_module.module_llvm);
+                    needs_thin_lto.push((allocator_module.name, thin_buffer));
                 }
 
                 return Ok(MaybeLtoModules::ThinLto {

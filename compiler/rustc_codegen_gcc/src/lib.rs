@@ -502,11 +502,11 @@ impl WriteBackendMethods for GccCodegenBackend {
         back::write::codegen(cgcx, prof, shared_emitter, module, config)
     }
 
-    fn prepare_thin(_module: ModuleCodegen<Self::Module>) -> (String, Self::ThinBuffer) {
+    fn prepare_thin(_module: Self::Module) -> Self::ThinBuffer {
         unreachable!()
     }
 
-    fn serialize_module(_module: ModuleCodegen<Self::Module>) -> (String, Self::ModuleBuffer) {
+    fn serialize_module(_module: Self::Module) -> Self::ModuleBuffer {
         unimplemented!();
     }
 }

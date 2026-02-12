@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 use std::ffi::{CStr, CString};
 use std::fs::File;
 use std::path::{Path, PathBuf};
-use std::ptr::NonNull;
 use std::sync::Arc;
 use std::{io, iter, slice};
 
@@ -660,17 +659,13 @@ pub(crate) fn run_pass_manager(
     debug!("lto done");
 }
 
+#[repr(transparent)]
 pub(crate) struct Buffer(&'static mut llvm::Buffer);
 
 unsafe impl Send for Buffer {}
 unsafe impl Sync for Buffer {}
 
 impl Buffer {
-    pub(crate) unsafe fn from_raw_ptr(ptr: *mut llvm::Buffer) -> Buffer {
-        let mut ptr = NonNull::new(ptr).unwrap();
-        Buffer(unsafe { ptr.as_mut() })
-    }
-
     pub(crate) fn data(&self) -> &[u8] {
         unsafe {
             let ptr = llvm::LLVMRustBufferPtr(self.0);

@@ -554,9 +554,9 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     LLVMRustPassBuilderOptLevel OptLevelRust, LLVMRustOptStage OptStage,
     bool IsLinkerPluginLTO, bool NoPrepopulatePasses, bool VerifyIR,
     bool LintIR, LLVMRustBuffer **ThinLTOBufferRef,
-    LLVMRustBuffer **ThinLTOSummaryBufferRef, bool EmitThinLTOSummary,
-    bool MergeFunctions, bool UnrollLoops, bool SLPVectorize,
-    bool LoopVectorize, bool DisableSimplifyLibCalls, bool EmitLifetimeMarkers,
+    LLVMRustBuffer **ThinLTOSummaryBufferRef, bool MergeFunctions,
+    bool UnrollLoops, bool SLPVectorize, bool LoopVectorize,
+    bool DisableSimplifyLibCalls, bool EmitLifetimeMarkers,
     registerEnzymeAndPassPipelineFn EnzymePtr, bool PrintBeforeEnzyme,
     bool PrintAfterEnzyme, bool PrintPasses,
     LLVMRustSanitizerOptions *SanitizerOptions, const char *PGOGenPath,
@@ -825,9 +825,12 @@ extern "C" LLVMRustResult LLVMRustOptimize(
           // `ThinLTOPreLinkDefaultPipeline`.
           MPM.addPass(PB.buildThinLTOPreLinkDefaultPipeline(OptLevel));
           MPM.addPass(ThinLTOBitcodeWriterPass(
-              ThinLTODataOS, EmitThinLTOSummary ? &ThinLinkDataOS : nullptr));
+              ThinLTODataOS,
+              ThinLTOSummaryBufferRef ? &ThinLinkDataOS : nullptr));
           *ThinLTOBufferRef = ThinLTOBuffer.release();
-          *ThinLTOSummaryBufferRef = ThinLTOSummaryBuffer.release();
+          if (ThinLTOSummaryBufferRef) {
+            *ThinLTOSummaryBufferRef = ThinLTOSummaryBuffer.release();
+          }
           MPM.addPass(PB.buildModuleOptimizationPipeline(
               OptLevel, ThinOrFullLTOPhase::None));
           MPM.addPass(
@@ -883,12 +886,14 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     // lto is requested. See PR #136840 for background information.
     if (OptStage != LLVMRustOptStage::PreLinkFatLTO) {
       MPM.addPass(ThinLTOBitcodeWriterPass(
-          ThinLTODataOS, EmitThinLTOSummary ? &ThinLinkDataOS : nullptr));
+          ThinLTODataOS, ThinLTOSummaryBufferRef ? &ThinLinkDataOS : nullptr));
     } else {
       MPM.addPass(BitcodeWriterPass(ThinLTODataOS));
     }
     *ThinLTOBufferRef = ThinLTOBuffer.release();
-    *ThinLTOSummaryBufferRef = ThinLTOSummaryBuffer.release();
+    if (ThinLTOSummaryBufferRef) {
+      *ThinLTOSummaryBufferRef = ThinLTOSummaryBuffer.release();
+    }
   }
 
   // now load "-enzyme" pass:

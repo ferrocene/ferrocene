@@ -274,7 +274,8 @@ fn main() {
         for (i, &expected) in expected_ref_row2.iter().enumerate() {
             let actual = dst_ref[2 * WIDTH + 1 + i];
             assert_eq!(
-                actual, expected,
+                actual,
+                expected,
                 "reference mismatch at row 2, col {}: expected {}, got {}",
                 1 + i,
                 expected,

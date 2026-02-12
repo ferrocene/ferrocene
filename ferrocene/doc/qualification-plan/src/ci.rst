@@ -140,7 +140,7 @@ The bare metal testing target allows us to execute the test suite on Linux
 requirement to have an operating system.
 
 Since the only difference between the two targets is the implementation of the
-APIs in the ``std`` crate, and the relevant certified targets do not include
+APIs in the ``std`` crate, and the relevant qualified targets do not include
 `std`, we can conclude that the test results of the two targets are equivalent.
 
 .. _test-variants:

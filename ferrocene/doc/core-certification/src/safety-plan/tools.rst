@@ -293,8 +293,8 @@ Failure modes
    - Mitigation: Package exactly the code that was tested.
 - Incorrect configuration: The core library is built in a configuration that does not match the safety plan.
    - Risk: Some certified code calls uncertified code.
-   - Mitigation: Building for a certified target automatically sets configuration flags that ensure all certified code only calls certified code.
-                 Tests and coverage collection run on that certified target.
+   - Mitigation: Building for a subset target automatically sets configuration flags that ensure all certified code only calls certified code.
+                 Tests and coverage collection run on the qualified target equivalent to the subset target.
 - Missing build flags: The core library is built without flags required by the safety plan, such as ``-Cpanic=abort``.
 
   - Risk: The core library uses unwinding panics at runtime, which are not certified.

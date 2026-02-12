@@ -338,7 +338,7 @@ Detection Measures and Usage Restriction
    * - .. id:: CORE_AVD_ARCH_003
      - User must verify that architecture specific functions are used correctly.
    * - .. id:: CORE_AVD_CERT_004
-     - User must use a certified target whose pre-compiled core library contains no calls to uncertified functions.
+     - User must compile against the subset target equivalent to the qualified target.
 
 .. end of table
 

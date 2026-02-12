@@ -279,8 +279,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 
             let is_shadowed = self.infcx.probe(|_| {
                 let impl_substs = self.infcx.fresh_args_for_item(DUMMY_SP, impl_def_id);
-                let impl_trait_ref =
-                    tcx.impl_trait_ref(impl_def_id).instantiate(tcx, impl_substs);
+                let impl_trait_ref = tcx.impl_trait_ref(impl_def_id).instantiate(tcx, impl_substs);
 
                 let expected_trait_ref = alias.trait_ref(tcx);
 

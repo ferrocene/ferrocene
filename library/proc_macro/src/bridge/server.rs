@@ -60,7 +60,7 @@ struct Dispatcher<S: Server> {
 
 macro_rules! define_server {
     (
-        $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)*;)*
+        $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)?;)*
     ) => {
         pub trait Server {
             type TokenStream: 'static + Clone + Default;
@@ -83,7 +83,7 @@ with_api!(define_server, Self::TokenStream, Self::Span, Self::Symbol);
 
 macro_rules! define_dispatcher {
     (
-        $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)*;)*
+        $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)?;)*
     ) => {
         // FIXME(eddyb) `pub` only for `ExecutionStrategy` below.
         pub trait DispatcherTrait {
@@ -100,9 +100,7 @@ macro_rules! define_dispatcher {
                         let mut call_method = || {
                             $(let $arg = <$arg_ty>::decode(&mut reader, handle_store).unmark();)*
                             let r = server.$method($($arg),*);
-                            $(
-                                let r: $ret_ty = Mark::mark(r);
-                            )*
+                            $(let r: $ret_ty = Mark::mark(r);)?
                             r
                         };
                         // HACK(eddyb) don't use `panic::catch_unwind` in a panic.

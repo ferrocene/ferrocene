@@ -333,10 +333,10 @@ fn parse_prototype(prototype: &str) -> Option<(RustType, Vec<(String, RustType)>
 
         let mut params = Vec::new();
         if !params_str.trim().is_empty() {
+            // Pattern: Type Name or Type* Name
+            let param_re = Regex::new(r"(\w+\*?)\s+(\w+)").unwrap();
             for param in params_str.split(',') {
                 let param = param.trim();
-                // Pattern: Type Name or Type* Name
-                let param_re = Regex::new(r"(\w+\*?)\s+(\w+)").unwrap();
                 if let Some(pcaps) = param_re.captures(param) {
                     let ptype_str = pcaps[1].trim();
                     let pname = pcaps[2].to_lowercase();
@@ -368,6 +368,12 @@ fn parse_header(content: &str) -> Vec<IntrinsicInfo> {
 
     // Also handle builtins without VECTOR_WRAP
     let simple_builtin_re2 = Regex::new(r"__builtin_HEXAGON_(\w+)\([^)]*\)\s*$").unwrap();
+
+    // Regex to extract Q6 name from #define
+    let q6_name_re = Regex::new(r"#define\s+(Q6_\w+)").unwrap();
+
+    // Regex to extract macro expression body
+    let macro_expr_re = Regex::new(r"#define\s+Q6_\w+\([^)]*\)\s+(.+)").unwrap();
 
     let lines: Vec<&str> = content.lines().collect();
     let mut current_arch: u32 = 60;
@@ -421,7 +427,6 @@ fn parse_header(content: &str) -> Vec<IntrinsicInfo> {
                 let define_line = lines[j];
 
                 // Extract Q6 name and check if it's simple or compound
-                let q6_name_re = Regex::new(r"#define\s+(Q6_\w+)").unwrap();
                 if let Some(caps) = q6_name_re.captures(define_line) {
                     let q6_name = caps[1].to_string();
 
@@ -434,14 +439,10 @@ fn parse_header(content: &str) -> Vec<IntrinsicInfo> {
                     }
 
                     // Try to extract simple builtin name
-                    let builtin_name = if let Some(bcaps) = simple_builtin_re.captures(&macro_body)
-                    {
-                        Some(bcaps[1].to_string())
-                    } else if let Some(bcaps) = simple_builtin_re2.captures(&macro_body) {
-                        Some(bcaps[1].to_string())
-                    } else {
-                        None
-                    };
+                    let builtin_name = simple_builtin_re
+                        .captures(&macro_body)
+                        .or_else(|| simple_builtin_re2.captures(&macro_body))
+                        .map(|bcaps| bcaps[1].to_string());
 
                     // Check if it's a compound intrinsic (multiple __builtin calls)
                     let builtin_count = macro_body.matches("__builtin_HEXAGON_").count();
@@ -452,11 +453,8 @@ fn parse_header(content: &str) -> Vec<IntrinsicInfo> {
                         if is_compound {
                             // For compound intrinsics, parse the expression
                             // Extract the macro body after the parameter list
-                            let macro_expr_re =
-                                Regex::new(r"#define\s+Q6_\w+\([^)]*\)\s+(.+)").unwrap();
                             if let Some(expr_caps) = macro_expr_re.captures(&macro_body) {
-                                let expr_str =
-                                    expr_caps[1].trim().replace('\n', " ").replace('\\', " ");
+                                let expr_str = expr_caps[1].trim().replace(['\n', '\\'], " ");
                                 let expr_str = expr_str.trim();
 
                                 if let Some(compound_expr) = parse_compound_expr(expr_str) {
@@ -486,11 +484,10 @@ fn parse_header(content: &str) -> Vec<IntrinsicInfo> {
                             }
                         } else if let Some(builtin) = builtin_name {
                             // Extract short instruction name
-                            let instr_name = if builtin.starts_with("V6_") {
-                                builtin[3..].to_string()
-                            } else {
-                                builtin.clone()
-                            };
+                            let instr_name = builtin
+                                .strip_prefix("V6_")
+                                .map(|s| s.to_string())
+                                .unwrap_or_else(|| builtin.clone());
 
                             intrinsics.push(IntrinsicInfo {
                                 q6_name,
@@ -1365,7 +1362,7 @@ fn get_compound_primary_instr(expr: &CompoundExpr) -> Option<String> {
     match expr {
         CompoundExpr::BuiltinCall(name, args) => {
             // For vandqrt wrapper, look inside
-            if name == "vandqrt" && args.len() >= 1 {
+            if name == "vandqrt" && !args.is_empty() {
                 if let Some(inner) = get_compound_primary_instr(&args[0]) {
                     return Some(inner);
                 }

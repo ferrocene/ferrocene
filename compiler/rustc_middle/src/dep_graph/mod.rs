@@ -68,51 +68,26 @@ impl FingerprintStyle {
     }
 }
 
-pub struct DepsType;
+/// Execute the operation with provided dependencies.
+fn with_deps<OP, R>(task_deps: TaskDepsRef<'_>, op: OP) -> R
+where
+    OP: FnOnce() -> R,
+{
+    ty::tls::with_context(|icx| {
+        let icx = ty::tls::ImplicitCtxt { task_deps, ..icx.clone() };
+        ty::tls::enter_context(&icx, op)
+    })
+}
 
-impl DepsType {
-    /// Execute the operation with provided dependencies.
-    fn with_deps<OP, R>(task_deps: TaskDepsRef<'_>, op: OP) -> R
-    where
-        OP: FnOnce() -> R,
-    {
-        ty::tls::with_context(|icx| {
-            let icx = ty::tls::ImplicitCtxt { task_deps, ..icx.clone() };
-
-            ty::tls::enter_context(&icx, op)
-        })
-    }
-
-    /// Access dependencies from current implicit context.
-    fn read_deps<OP>(op: OP)
-    where
-        OP: for<'a> FnOnce(TaskDepsRef<'a>),
-    {
-        ty::tls::with_context_opt(|icx| {
-            let Some(icx) = icx else { return };
-            op(icx.task_deps)
-        })
-    }
-
-    fn name(dep_kind: DepKind) -> &'static str {
-        dep_node::DEP_KIND_NAMES[dep_kind.as_usize()]
-    }
-
-    /// We use this for most things when incr. comp. is turned off.
-    const DEP_KIND_NULL: DepKind = dep_kinds::Null;
-
-    /// We use this to create a forever-red node.
-    const DEP_KIND_RED: DepKind = dep_kinds::Red;
-
-    /// We use this to create a side effect node.
-    const DEP_KIND_SIDE_EFFECT: DepKind = dep_kinds::SideEffect;
-
-    /// We use this to create the anon node with zero dependencies.
-    const DEP_KIND_ANON_ZERO_DEPS: DepKind = dep_kinds::AnonZeroDeps;
-
-    /// This is the highest value a `DepKind` can have. It's used during encoding to
-    /// pack information into the unused bits.
-    const DEP_KIND_MAX: u16 = dep_node::DEP_KIND_VARIANTS - 1;
+/// Access dependencies from current implicit context.
+fn read_deps<OP>(op: OP)
+where
+    OP: for<'a> FnOnce(TaskDepsRef<'a>),
+{
+    ty::tls::with_context_opt(|icx| {
+        let Some(icx) = icx else { return };
+        op(icx.task_deps)
+    })
 }
 
 impl<'tcx> TyCtxt<'tcx> {

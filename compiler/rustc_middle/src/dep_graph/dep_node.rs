@@ -92,6 +92,26 @@ impl DepKind {
     pub const fn as_usize(&self) -> usize {
         self.variant as usize
     }
+
+    pub(crate) fn name(self) -> &'static str {
+        DEP_KIND_NAMES[self.as_usize()]
+    }
+
+    /// We use this for most things when incr. comp. is turned off.
+    pub(crate) const NULL: DepKind = dep_kinds::Null;
+
+    /// We use this to create a forever-red node.
+    pub(crate) const RED: DepKind = dep_kinds::Red;
+
+    /// We use this to create a side effect node.
+    pub(crate) const SIDE_EFFECT: DepKind = dep_kinds::SideEffect;
+
+    /// We use this to create the anon node with zero dependencies.
+    pub(crate) const ANON_ZERO_DEPS: DepKind = dep_kinds::AnonZeroDeps;
+
+    /// This is the highest value a `DepKind` can have. It's used during encoding to
+    /// pack information into the unused bits.
+    pub(crate) const MAX: u16 = DEP_KIND_VARIANTS - 1;
 }
 
 pub fn default_dep_kind_debug(kind: DepKind, f: &mut fmt::Formatter<'_>) -> fmt::Result {

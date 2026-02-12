@@ -61,7 +61,6 @@ use tracing::{debug, instrument};
 use super::graph::{CurrentDepGraph, DepNodeColorMap};
 use super::query::DepGraphQuery;
 use super::{DepKind, DepNode, DepNodeIndex};
-use crate::dep_graph::DepsType;
 use crate::dep_graph::edges::EdgesVec;
 
 // The maximum value of `SerializedDepNodeIndex` leaves the upper two bits
@@ -213,10 +212,7 @@ impl SerializedDepGraph {
         let graph_bytes = d.len() - (3 * IntEncodedWithFixedSize::ENCODED_SIZE) - d.position();
 
         let mut nodes = IndexVec::from_elem_n(
-            DepNode {
-                kind: DepsType::DEP_KIND_NULL,
-                hash: PackedFingerprint::from(Fingerprint::ZERO),
-            },
+            DepNode { kind: DepKind::NULL, hash: PackedFingerprint::from(Fingerprint::ZERO) },
             node_max,
         );
         let mut fingerprints = IndexVec::from_elem_n(Fingerprint::ZERO, node_max);
@@ -244,10 +240,7 @@ impl SerializedDepGraph {
 
             let node = &mut nodes[index];
             // Make sure there's no duplicate indices in the dep graph.
-            assert!(
-                node_header.node().kind != DepsType::DEP_KIND_NULL
-                    && node.kind == DepsType::DEP_KIND_NULL
-            );
+            assert!(node_header.node().kind != DepKind::NULL && node.kind == DepKind::NULL);
             *node = node_header.node();
 
             fingerprints[index] = node_header.fingerprint();
@@ -275,7 +268,7 @@ impl SerializedDepGraph {
         edge_list_data.extend(&[0u8; DEP_NODE_PAD]);
 
         // Read the number of each dep kind and use it to create an hash map with a suitable size.
-        let mut index: Vec<_> = (0..(DepsType::DEP_KIND_MAX + 1))
+        let mut index: Vec<_> = (0..(DepKind::MAX + 1))
             .map(|_| UnhashMap::with_capacity_and_hasher(d.read_u32() as usize, Default::default()))
             .collect();
 
@@ -284,10 +277,8 @@ impl SerializedDepGraph {
         for (idx, node) in nodes.iter_enumerated() {
             if index[node.kind.as_usize()].insert(node.hash, idx).is_some() {
                 // Empty nodes and side effect nodes can have duplicates
-                if node.kind != DepsType::DEP_KIND_NULL
-                    && node.kind != DepsType::DEP_KIND_SIDE_EFFECT
-                {
-                    let name = DepsType::name(node.kind);
+                if node.kind != DepKind::NULL && node.kind != DepKind::SIDE_EFFECT {
+                    let name = node.kind.name();
                     panic!(
                     "Error: A dep graph node ({name}) does not have an unique index. \
                      Running a clean build on a nightly compiler with `-Z incremental-verify-ich` \
@@ -347,7 +338,7 @@ impl SerializedNodeHeader {
     const TOTAL_BITS: usize = size_of::<DepKind>() * 8;
     const LEN_BITS: usize = Self::TOTAL_BITS - Self::KIND_BITS - Self::WIDTH_BITS;
     const WIDTH_BITS: usize = DEP_NODE_WIDTH_BITS;
-    const KIND_BITS: usize = Self::TOTAL_BITS - DepsType::DEP_KIND_MAX.leading_zeros() as usize;
+    const KIND_BITS: usize = Self::TOTAL_BITS - DepKind::MAX.leading_zeros() as usize;
     const MAX_INLINE_LEN: usize = (u16::MAX as usize >> (Self::TOTAL_BITS - Self::LEN_BITS)) - 1;
 
     #[inline]
@@ -566,7 +557,7 @@ impl EncoderState {
                     edge_count: 0,
                     node_count: 0,
                     encoder: MemEncoder::new(),
-                    kind_stats: iter::repeat_n(0, DepsType::DEP_KIND_MAX as usize + 1).collect(),
+                    kind_stats: iter::repeat_n(0, DepKind::MAX as usize + 1).collect(),
                 })
             }),
         }
@@ -734,8 +725,7 @@ impl EncoderState {
 
         let mut encoder = self.file.lock().take().unwrap();
 
-        let mut kind_stats: Vec<u32> =
-            iter::repeat_n(0, DepsType::DEP_KIND_MAX as usize + 1).collect();
+        let mut kind_stats: Vec<u32> = iter::repeat_n(0, DepKind::MAX as usize + 1).collect();
 
         let mut node_max = 0;
         let mut node_count = 0;

@@ -25,7 +25,7 @@ use {super::debug::EdgeFilter, std::env};
 
 use super::query::DepGraphQuery;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
-use super::{DepKind, DepNode, DepsType, HasDepContext, WorkProductId};
+use super::{DepKind, DepNode, HasDepContext, WorkProductId, read_deps, with_deps};
 use crate::dep_graph::edges::EdgesVec;
 use crate::ty::TyCtxt;
 use crate::verify_ich::incremental_verify_ich;
@@ -126,7 +126,7 @@ impl DepGraph {
 
         // Instantiate a node with zero dependencies only once for anonymous queries.
         let _green_node_index = current.alloc_new_node(
-            DepNode { kind: DepsType::DEP_KIND_ANON_ZERO_DEPS, hash: current.anon_id_seed.into() },
+            DepNode { kind: DepKind::ANON_ZERO_DEPS, hash: current.anon_id_seed.into() },
             EdgesVec::new(),
             Fingerprint::ZERO,
         );
@@ -134,7 +134,7 @@ impl DepGraph {
 
         // Instantiate a dependy-less red node only once for anonymous queries.
         let red_node_index = current.alloc_new_node(
-            DepNode { kind: DepsType::DEP_KIND_RED, hash: Fingerprint::ZERO.into() },
+            DepNode { kind: DepKind::RED, hash: Fingerprint::ZERO.into() },
             EdgesVec::new(),
             Fingerprint::ZERO,
         );
@@ -181,7 +181,7 @@ impl DepGraph {
 
     pub fn assert_ignored(&self) {
         if let Some(..) = self.data {
-            DepsType::read_deps(|task_deps| {
+            read_deps(|task_deps| {
                 assert_matches!(
                     task_deps,
                     TaskDepsRef::Ignore,
@@ -195,7 +195,7 @@ impl DepGraph {
     where
         OP: FnOnce() -> R,
     {
-        DepsType::with_deps(TaskDepsRef::Ignore, op)
+        with_deps(TaskDepsRef::Ignore, op)
     }
 
     /// Used to wrap the deserialization of a query result from disk,
@@ -248,7 +248,7 @@ impl DepGraph {
     where
         OP: FnOnce() -> R,
     {
-        DepsType::with_deps(TaskDepsRef::Forbid, op)
+        with_deps(TaskDepsRef::Forbid, op)
     }
 
     #[inline(always)]
@@ -340,7 +340,7 @@ impl DepGraphData {
             },
         );
 
-        let with_deps = |task_deps| DepsType::with_deps(task_deps, || task(cx, arg));
+        let with_deps = |task_deps| with_deps(task_deps, || task(cx, arg));
         let (result, edges) = if cx.dep_context().is_eval_always(key.kind) {
             (with_deps(TaskDepsRef::EvalAlways), EdgesVec::new())
         } else {
@@ -387,7 +387,7 @@ impl DepGraphData {
             None,
             128,
         ));
-        let result = DepsType::with_deps(TaskDepsRef::Allow(&task_deps), op);
+        let result = with_deps(TaskDepsRef::Allow(&task_deps), op);
         let task_deps = task_deps.into_inner();
         let reads = task_deps.reads;
 
@@ -460,7 +460,7 @@ impl DepGraph {
     #[inline]
     pub fn read_index(&self, dep_node_index: DepNodeIndex) {
         if let Some(ref data) = self.data {
-            DepsType::read_deps(|task_deps| {
+            read_deps(|task_deps| {
                 let mut task_deps = match task_deps {
                     TaskDepsRef::Allow(deps) => deps.lock(),
                     TaskDepsRef::EvalAlways => {
@@ -517,7 +517,7 @@ impl DepGraph {
     #[inline]
     pub fn record_diagnostic<'tcx>(&self, tcx: TyCtxt<'tcx>, diagnostic: &DiagInner) {
         if let Some(ref data) = self.data {
-            DepsType::read_deps(|task_deps| match task_deps {
+            read_deps(|task_deps| match task_deps {
                 TaskDepsRef::EvalAlways | TaskDepsRef::Ignore => return,
                 TaskDepsRef::Forbid | TaskDepsRef::Allow(..) => {
                     self.read_index(data.encode_diagnostic(tcx, diagnostic));
@@ -594,7 +594,7 @@ impl DepGraph {
             }
 
             let mut edges = EdgesVec::new();
-            DepsType::read_deps(|task_deps| match task_deps {
+            read_deps(|task_deps| match task_deps {
                 TaskDepsRef::Allow(deps) => edges.extend(deps.lock().reads.iter().copied()),
                 TaskDepsRef::EvalAlways => {
                     edges.push(DepNodeIndex::FOREVER_RED_NODE);
@@ -678,7 +678,7 @@ impl DepGraphData {
         // Use `send_new` so we get an unique index, even though the dep node is not.
         let dep_node_index = self.current.encoder.send_new(
             DepNode {
-                kind: DepsType::DEP_KIND_SIDE_EFFECT,
+                kind: DepKind::SIDE_EFFECT,
                 hash: PackedFingerprint::from(Fingerprint::ZERO),
             },
             Fingerprint::ZERO,
@@ -695,7 +695,7 @@ impl DepGraphData {
     /// refer to a node created used `encode_diagnostic` in the previous session.
     #[inline]
     fn force_diagnostic_node<'tcx>(&self, tcx: TyCtxt<'tcx>, prev_index: SerializedDepNodeIndex) {
-        DepsType::with_deps(TaskDepsRef::Ignore, || {
+        with_deps(TaskDepsRef::Ignore, || {
             let side_effect = tcx.load_side_effect(prev_index).unwrap();
 
             match &side_effect {
@@ -711,7 +711,7 @@ impl DepGraphData {
                 prev_index,
                 &self.colors,
                 DepNode {
-                    kind: DepsType::DEP_KIND_SIDE_EFFECT,
+                    kind: DepKind::SIDE_EFFECT,
                     hash: PackedFingerprint::from(Fingerprint::ZERO),
                 },
                 Fingerprint::ZERO,

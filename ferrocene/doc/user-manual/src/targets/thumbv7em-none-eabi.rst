@@ -66,5 +66,3 @@ which means it can use ``std`` for testing and enriched interactive development 
 :target:`aarch64-unknown-linux-gnu` or :ref:`x86_64-unknown-linux-gnu` host.
 
 For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
-
-.. _thumbv7em-ferrocene-none-eabi:

@@ -130,6 +130,16 @@ impl LocalizedConstraintGraph {
                 let location = liveness.location_from_point(node.point);
                 visitor.on_node_traversed(loan_idx, node);
 
+                // When we find a _new_ successor, we'd like to
+                // - visit it eventually,
+                // - and let the generic visitor know about it.
+                let mut successor_found = |succ| {
+                    if !visited.contains(&succ) {
+                        stack.push(succ);
+                        visitor.on_successor_discovered(node, succ);
+                    }
+                };
+
                 // Then, we propagate the loan along the localized constraint graph. The outgoing
                 // edges are computed lazily, from:
                 // - the various physical edges present at this node,
@@ -144,10 +154,7 @@ impl LocalizedConstraintGraph {
                 // 1. the typeck edges that flow from region to region *at this point*.
                 for &succ in self.edges.get(&node).into_iter().flatten() {
                     let succ = LocalizedNode { region: succ, point: node.point };
-                    if !visited.contains(&succ) {
-                        stack.push(succ);
-                        visitor.on_successor_discovered(node, succ);
-                    }
+                    successor_found(succ);
                 }
 
                 // 2a. the liveness edges that flow *forward*, from this node's point to its
@@ -163,10 +170,7 @@ impl LocalizedConstraintGraph {
                         live_region_variances,
                         is_universal_region,
                     ) {
-                        if !visited.contains(&succ) {
-                            stack.push(succ);
-                            visitor.on_successor_discovered(node, succ);
-                        }
+                        successor_found(succ);
                     }
                 } else {
                     // Inter-block edges, from the block's terminator to each successor block's
@@ -181,10 +185,7 @@ impl LocalizedConstraintGraph {
                             live_region_variances,
                             is_universal_region,
                         ) {
-                            if !visited.contains(&succ) {
-                                stack.push(succ);
-                                visitor.on_successor_discovered(node, succ);
-                            }
+                            successor_found(succ);
                         }
                     }
                 }
@@ -202,10 +203,7 @@ impl LocalizedConstraintGraph {
                             live_regions,
                             live_region_variances,
                         ) {
-                            if !visited.contains(&succ) {
-                                stack.push(succ);
-                                visitor.on_successor_discovered(node, succ);
-                            }
+                            successor_found(succ);
                         }
                     } else {
                         // Backward edges from the block entry point to the terminator of the
@@ -224,10 +222,7 @@ impl LocalizedConstraintGraph {
                                 live_regions,
                                 live_region_variances,
                             ) {
-                                if !visited.contains(&succ) {
-                                    stack.push(succ);
-                                    visitor.on_successor_discovered(node, succ);
-                                }
+                                successor_found(succ);
                             }
                         }
                     }
@@ -236,10 +231,7 @@ impl LocalizedConstraintGraph {
                 // And finally, we have the logical edges, materialized at this point.
                 for &logical_succ in self.logical_edges.get(&node.region).into_iter().flatten() {
                     let succ = LocalizedNode { region: logical_succ, point: node.point };
-                    if !visited.contains(&succ) {
-                        stack.push(succ);
-                        visitor.on_successor_discovered(node, succ);
-                    }
+                    successor_found(succ);
                 }
             }
         }

@@ -64,13 +64,6 @@ impl VectorMode {
         self.bytes() / 4 // 32-bit lanes
     }
 
-    fn module_name(&self) -> &'static str {
-        match self {
-            VectorMode::V64 => "v64",
-            VectorMode::V128 => "v128",
-        }
-    }
-
     fn target_feature(&self) -> &'static str {
         match self {
             VectorMode::V64 => "hvx-length64b",

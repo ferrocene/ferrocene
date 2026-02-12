@@ -74,44 +74,8 @@ fn get_simple_intrinsic<'gcc, 'tcx>(
         sym::fabsf64 => "fabs",
         sym::minnumf32 => "fminf",
         sym::minnumf64 => "fmin",
-        sym::minimumf32 => "fminimumf",
-        sym::minimumf64 => "fminimum",
-        sym::minimumf128 => {
-            // GCC doesn't have the intrinsic we want so we use the compiler-builtins one
-            // https://docs.rs/compiler_builtins/latest/compiler_builtins/math/full_availability/fn.fminimumf128.html
-            let f128_type = cx.type_f128();
-            return Some(cx.context.new_function(
-                None,
-                FunctionType::Extern,
-                f128_type,
-                &[
-                    cx.context.new_parameter(None, f128_type, "a"),
-                    cx.context.new_parameter(None, f128_type, "b"),
-                ],
-                "fminimumf128",
-                false,
-            ));
-        }
         sym::maxnumf32 => "fmaxf",
         sym::maxnumf64 => "fmax",
-        sym::maximumf32 => "fmaximumf",
-        sym::maximumf64 => "fmaximum",
-        sym::maximumf128 => {
-            // GCC doesn't have the intrinsic we want so we use the compiler-builtins one
-            // https://docs.rs/compiler_builtins/latest/compiler_builtins/math/full_availability/fn.fmaximumf128.html
-            let f128_type = cx.type_f128();
-            return Some(cx.context.new_function(
-                None,
-                FunctionType::Extern,
-                f128_type,
-                &[
-                    cx.context.new_parameter(None, f128_type, "a"),
-                    cx.context.new_parameter(None, f128_type, "b"),
-                ],
-                "fmaximumf128",
-                false,
-            ));
-        }
         sym::copysignf32 => "copysignf",
         sym::copysignf64 => "copysign",
         sym::floorf32 => "floorf",
@@ -208,6 +172,7 @@ fn get_simple_function_f128<'gcc, 'tcx>(
     let f128_type = cx.type_f128();
     let func_name = match name {
         sym::ceilf128 => "ceilf128",
+        sym::fabsf128 => "fabsf128",
         sym::floorf128 => "floorf128",
         sym::truncf128 => "truncf128",
         sym::roundf128 => "roundf128",
@@ -262,6 +227,7 @@ fn f16_builtin<'gcc, 'tcx>(
     let builtin_name = match name {
         sym::ceilf16 => "__builtin_ceilf",
         sym::copysignf16 => "__builtin_copysignf",
+        sym::fabsf16 => "fabsf",
         sym::floorf16 => "__builtin_floorf",
         sym::fmaf16 => "fmaf",
         sym::maxnumf16 => "__builtin_fmaxf",
@@ -328,6 +294,7 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
             }
             sym::ceilf16
             | sym::copysignf16
+            | sym::fabsf16
             | sym::floorf16
             | sym::fmaf16
             | sym::maxnumf16
@@ -648,15 +615,15 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
         let fn_ptr = func.get_address(None);
         let fn_ty = fn_ptr.get_type();
 
-        let mut llargs = vec![];
+        let mut call_args = vec![];
 
         for arg in args {
             match arg.val {
                 OperandValue::ZeroSized => {}
-                OperandValue::Immediate(_) => llargs.push(arg.immediate()),
+                OperandValue::Immediate(_) => call_args.push(arg.immediate()),
                 OperandValue::Pair(a, b) => {
-                    llargs.push(a);
-                    llargs.push(b);
+                    call_args.push(a);
+                    call_args.push(b);
                 }
                 OperandValue::Ref(op_place_val) => {
                     let mut llval = op_place_val.llval;
@@ -673,13 +640,13 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
                         // We store bools as `i8` so we need to truncate to `i1`.
                         llval = self.to_immediate_scalar(llval, scalar);
                     }
-                    llargs.push(llval);
+                    call_args.push(llval);
                 }
             }
         }
 
         // FIXME directly use the llvm intrinsic adjustment functions here
-        let llret = self.call(fn_ty, None, None, fn_ptr, &llargs, None, None);
+        let llret = self.call(fn_ty, None, None, fn_ptr, &call_args, None, None);
         if is_cleanup {
             self.apply_attrs_to_cleanup_callsite(llret);
         }
@@ -720,7 +687,8 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
     }
 
     fn va_end(&mut self, _va_list: RValue<'gcc>) -> RValue<'gcc> {
-        unimplemented!();
+        // TODO(antoyo): implement.
+        self.context.new_rvalue_from_int(self.int_type, 0)
     }
 }
 

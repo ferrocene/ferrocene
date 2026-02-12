@@ -1495,6 +1495,8 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
 
     #[cfg(not(feature = "master"))]
     fn extract_element(&mut self, vec: RValue<'gcc>, idx: RValue<'gcc>) -> RValue<'gcc> {
+        use crate::context::new_array_type;
+
         let vector_type = vec
             .get_type()
             .unqualified()
@@ -1503,7 +1505,7 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         let element_type = vector_type.get_element_type();
         let vec_num_units = vector_type.get_num_units();
         let array_type =
-            self.context.new_array_type(self.location, element_type, vec_num_units as u64);
+            new_array_type(self.context, self.location, element_type, vec_num_units as u64);
         let array = self.context.new_bitcast(self.location, vec, array_type).to_rvalue();
         self.context.new_array_access(self.location, array, idx).to_rvalue()
     }

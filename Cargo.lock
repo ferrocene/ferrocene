@@ -5564,7 +5564,6 @@ dependencies = [
  "build_helper",
  "cargo_metadata 0.21.0",
  "clap",
- "fluent-syntax",
  "globset",
  "ignore",
  "miropt-test-tools",

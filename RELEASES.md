@@ -1,3 +1,12 @@
+Version 1.93.1 (2026-02-12)
+===========================
+
+<a id="1.93.1"></a>
+
+- [Don't try to recover keyword as non-keyword identifier](https://github.com/rust-lang/rust/pull/150590), fixing an ICE that especially [affected rustfmt](https://github.com/rust-lang/rustfmt/issues/6739).
+- [Fix `clippy::panicking_unwrap` false-positive on field access with implicit deref](https://github.com/rust-lang/rust-clippy/pull/16196).
+- [Revert "Update wasm-related dependencies in CI"](https://github.com/rust-lang/rust/pull/152259), fixing file descriptor leaks on the `wasm32-wasip2` target.
+
 Version 1.93.0 (2026-01-22)
 ==========================
 

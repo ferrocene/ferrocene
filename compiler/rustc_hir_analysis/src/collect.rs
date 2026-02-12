@@ -1063,6 +1063,69 @@ fn lower_fn_sig_recovering_infer_ret_ty<'tcx>(
     )
 }
 
+/// Convert `ReLateParam`s in `value` back into `ReBound`s so the returned
+/// `PolyFnSig` properly binds all late-bound vars.
+fn late_param_regions_to_bound<'tcx, T>(
+    tcx: TyCtxt<'tcx>,
+    scope: DefId,
+    bound_vars: &'tcx ty::List<ty::BoundVariableKind<'tcx>>,
+    value: T,
+) -> T
+where
+    T: ty::TypeFoldable<TyCtxt<'tcx>>,
+{
+    fold_regions(tcx, value, |r, debruijn| match r.kind() {
+        ty::ReLateParam(lp) => {
+            // Should be in scope, otherwise inconsistency happens somewhere.
+            assert_eq!(lp.scope, scope);
+
+            let br = match lp.kind {
+                // These variants preserve the bound var index.
+                kind @ (ty::LateParamRegionKind::Anon(idx)
+                | ty::LateParamRegionKind::NamedAnon(idx, _)) => {
+                    let idx = idx as usize;
+                    let var = ty::BoundVar::from_usize(idx);
+
+                    let Some(ty::BoundVariableKind::Region(kind)) = bound_vars.get(idx).copied()
+                    else {
+                        bug!("unexpected late-bound region {kind:?} for bound vars {bound_vars:?}");
+                    };
+
+                    ty::BoundRegion { var, kind }
+                }
+
+                // For named regions, look up the corresponding bound var.
+                ty::LateParamRegionKind::Named(def_id) => bound_vars
+                    .iter()
+                    .enumerate()
+                    .find_map(|(idx, bv)| match bv {
+                        ty::BoundVariableKind::Region(kind @ ty::BoundRegionKind::Named(did))
+                            if did == def_id =>
+                        {
+                            Some(ty::BoundRegion { var: ty::BoundVar::from_usize(idx), kind })
+                        }
+                        _ => None,
+                    })
+                    .unwrap(),
+
+                ty::LateParamRegionKind::ClosureEnv => bound_vars
+                    .iter()
+                    .enumerate()
+                    .find_map(|(idx, bv)| match bv {
+                        ty::BoundVariableKind::Region(kind @ ty::BoundRegionKind::ClosureEnv) => {
+                            Some(ty::BoundRegion { var: ty::BoundVar::from_usize(idx), kind })
+                        }
+                        _ => None,
+                    })
+                    .unwrap(),
+            };
+
+            ty::Region::new_bound(tcx, debruijn, br)
+        }
+        _ => r,
+    })
+}
+
 fn recover_infer_ret_ty<'tcx>(
     icx: &ItemCtxt<'tcx>,
     infer_ret_ty: &'tcx hir::Ty<'tcx>,
@@ -1153,48 +1216,7 @@ fn recover_infer_ret_ty<'tcx>(
         fn_sig.abi,
     );
 
-    let fn_sig = fold_regions(tcx, fn_sig, |r, _| match r.kind() {
-        ty::ReLateParam(lp) if lp.scope == scope => {
-            let br = match lp.kind {
-                ty::LateParamRegionKind::Anon(idx) | ty::LateParamRegionKind::NamedAnon(idx, _) => {
-                    let idx = idx as usize;
-                    match bound_vars.get(idx).copied() {
-                        Some(ty::BoundVariableKind::Region(br_kind)) => Some(ty::BoundRegion {
-                            var: ty::BoundVar::from_usize(idx),
-                            kind: br_kind,
-                        }),
-                        _ => None,
-                    }
-                }
-                ty::LateParamRegionKind::Named(def_id) => {
-                    bound_vars.iter().enumerate().find_map(|(idx, bv)| match bv {
-                        ty::BoundVariableKind::Region(
-                            br_kind @ ty::BoundRegionKind::Named(did),
-                        ) if did == def_id => Some(ty::BoundRegion {
-                            var: ty::BoundVar::from_usize(idx),
-                            kind: br_kind,
-                        }),
-                        _ => None,
-                    })
-                }
-                ty::LateParamRegionKind::ClosureEnv => {
-                    bound_vars.iter().enumerate().find_map(|(idx, bv)| match bv {
-                        ty::BoundVariableKind::Region(
-                            br_kind @ ty::BoundRegionKind::ClosureEnv,
-                        ) => Some(ty::BoundRegion {
-                            var: ty::BoundVar::from_usize(idx),
-                            kind: br_kind,
-                        }),
-                        _ => None,
-                    })
-                }
-            };
-
-            br.map(|br| ty::Region::new_bound(tcx, ty::INNERMOST, br))
-                .unwrap_or_else(|| ty::Region::new_error(tcx, guar))
-        }
-        _ => r,
-    });
+    let fn_sig = late_param_regions_to_bound(tcx, scope, bound_vars, fn_sig);
 
     ty::Binder::bind_with_vars(fn_sig, bound_vars)
 }

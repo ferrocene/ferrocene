@@ -563,7 +563,8 @@ pub(crate) unsafe fn llvm_optimize(
     prof: &SelfProfilerRef,
     dcx: DiagCtxtHandle<'_>,
     module: &ModuleCodegen<ModuleLlvm>,
-    thin_lto_buffer: Option<&mut *mut llvm::ThinLTOBuffer>,
+    thin_lto_buffer: Option<&mut *mut llvm::Buffer>,
+    thin_lto_summary_buffer: Option<&mut *mut llvm::Buffer>,
     config: &ModuleConfig,
     opt_level: config::OptLevel,
     opt_stage: llvm::OptStage,
@@ -786,6 +787,7 @@ pub(crate) unsafe fn llvm_optimize(
             config.verify_llvm_ir,
             config.lint_llvm_ir,
             thin_lto_buffer,
+            thin_lto_summary_buffer,
             config.emit_thin_lto_summary,
             merge_functions,
             unroll_loops,
@@ -932,13 +934,14 @@ pub(crate) fn optimize(
         // The bitcode obtained during the `codegen` phase is no longer suitable for performing LTO.
         // It may have undergone LTO due to ThinLocal, so we need to obtain the embedded bitcode at
         // this point.
-        let mut thin_lto_buffer = if (module.kind == ModuleKind::Regular
+        let (mut thin_lto_buffer, mut thin_lto_summary_buffer) = if (module.kind
+            == ModuleKind::Regular
             && config.emit_obj == EmitObj::ObjectCode(BitcodeSection::Full))
             || config.emit_thin_lto_summary
         {
-            Some(null_mut())
+            (Some(null_mut()), Some(null_mut()))
         } else {
-            None
+            (None, None)
         };
         unsafe {
             llvm_optimize(
@@ -947,6 +950,7 @@ pub(crate) fn optimize(
                 dcx,
                 module,
                 thin_lto_buffer.as_mut(),
+                thin_lto_summary_buffer.as_mut(),
                 config,
                 opt_level,
                 opt_stage,
@@ -954,7 +958,10 @@ pub(crate) fn optimize(
             )
         };
         if let Some(thin_lto_buffer) = thin_lto_buffer {
-            let thin_lto_buffer = unsafe { ThinBuffer::from_raw_ptr(thin_lto_buffer) };
+            let thin_lto_buffer =
+                unsafe { crate::back::lto::Buffer::from_raw_ptr(thin_lto_buffer) };
+            let thin_lto_summary_buffer =
+                unsafe { crate::back::lto::Buffer::from_raw_ptr(thin_lto_summary_buffer.unwrap()) };
             module.thin_lto_buffer = Some(thin_lto_buffer.data().to_vec());
             let bc_summary_out = cgcx.output_filenames.temp_path_for_cgu(
                 OutputType::ThinLinkBitcode,
@@ -964,7 +971,7 @@ pub(crate) fn optimize(
             if config.emit_thin_lto_summary
                 && let Some(thin_link_bitcode_filename) = bc_summary_out.file_name()
             {
-                let summary_data = thin_lto_buffer.thin_link_data();
+                let summary_data = thin_lto_summary_buffer.data();
                 prof.artifact_size(
                     "llvm_bitcode_summary",
                     thin_link_bitcode_filename.to_string_lossy(),

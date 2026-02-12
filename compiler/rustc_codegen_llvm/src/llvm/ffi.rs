@@ -536,9 +536,6 @@ pub(crate) enum DiagnosticLevel {
 unsafe extern "C" {
     // LLVMRustThinLTOData
     pub(crate) type ThinLTOData;
-
-    // LLVMRustThinLTOBuffer
-    pub(crate) type ThinLTOBuffer;
 }
 
 /// LLVMRustThinLTOModule
@@ -2375,7 +2372,8 @@ unsafe extern "C" {
         NoPrepopulatePasses: bool,
         VerifyIR: bool,
         LintIR: bool,
-        ThinLTOBuffer: Option<&mut *mut ThinLTOBuffer>,
+        ThinLTOBuffer: Option<&mut *mut Buffer>,
+        ThinLTOSummaryBuffer: Option<&mut *mut Buffer>,
         EmitThinLTOSummary: bool,
         MergeFunctions: bool,
         UnrollLoops: bool,
@@ -2464,15 +2462,7 @@ unsafe extern "C" {
     pub(crate) fn LLVMRustModuleCost(M: &Module) -> u64;
     pub(crate) fn LLVMRustModuleInstructionStats(M: &Module) -> u64;
 
-    pub(crate) fn LLVMRustThinLTOBufferCreate(
-        M: &Module,
-        is_thin: bool,
-    ) -> &'static mut ThinLTOBuffer;
-    pub(crate) fn LLVMRustThinLTOBufferFree(M: &'static mut ThinLTOBuffer);
-    pub(crate) fn LLVMRustThinLTOBufferPtr(M: &ThinLTOBuffer) -> *const c_char;
-    pub(crate) fn LLVMRustThinLTOBufferLen(M: &ThinLTOBuffer) -> size_t;
-    pub(crate) fn LLVMRustThinLTOBufferThinLinkDataPtr(M: &ThinLTOBuffer) -> *const c_char;
-    pub(crate) fn LLVMRustThinLTOBufferThinLinkDataLen(M: &ThinLTOBuffer) -> size_t;
+    pub(crate) fn LLVMRustThinLTOBufferCreate(M: &Module, is_thin: bool) -> &'static mut Buffer;
     pub(crate) fn LLVMRustCreateThinLTOData(
         Modules: *const ThinLTOModule,
         NumModules: size_t,

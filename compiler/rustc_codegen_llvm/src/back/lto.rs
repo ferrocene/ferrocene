@@ -634,7 +634,9 @@ pub(crate) fn run_pass_manager(
     };
 
     unsafe {
-        write::llvm_optimize(cgcx, prof, dcx, module, None, config, opt_level, opt_stage, stage);
+        write::llvm_optimize(
+            cgcx, prof, dcx, module, None, None, config, opt_level, opt_stage, stage,
+        );
     }
 
     if cfg!(feature = "llvm_enzyme") && enable_ad && !thin {
@@ -643,7 +645,7 @@ pub(crate) fn run_pass_manager(
         if !config.autodiff.contains(&config::AutoDiff::NoPostopt) {
             unsafe {
                 write::llvm_optimize(
-                    cgcx, prof, dcx, module, None, config, opt_level, opt_stage, stage,
+                    cgcx, prof, dcx, module, None, None, config, opt_level, opt_stage, stage,
                 );
             }
         }
@@ -664,6 +666,11 @@ unsafe impl Send for Buffer {}
 unsafe impl Sync for Buffer {}
 
 impl Buffer {
+    pub(crate) unsafe fn from_raw_ptr(ptr: *mut llvm::Buffer) -> Buffer {
+        let mut ptr = NonNull::new(ptr).unwrap();
+        Buffer(unsafe { ptr.as_mut() })
+    }
+
     pub(crate) fn data(&self) -> &[u8] {
         unsafe {
             let ptr = llvm::LLVMRustBufferPtr(self.0);
@@ -708,48 +715,22 @@ impl Drop for ThinData {
     }
 }
 
-pub struct ThinBuffer(&'static mut llvm::ThinLTOBuffer);
-
-unsafe impl Send for ThinBuffer {}
-unsafe impl Sync for ThinBuffer {}
+pub struct ThinBuffer {
+    data: Buffer,
+}
 
 impl ThinBuffer {
     pub(crate) fn new(m: &llvm::Module, is_thin: bool) -> ThinBuffer {
         unsafe {
             let buffer = llvm::LLVMRustThinLTOBufferCreate(m, is_thin);
-            ThinBuffer(buffer)
-        }
-    }
-
-    pub(crate) unsafe fn from_raw_ptr(ptr: *mut llvm::ThinLTOBuffer) -> ThinBuffer {
-        let mut ptr = NonNull::new(ptr).unwrap();
-        ThinBuffer(unsafe { ptr.as_mut() })
-    }
-
-    pub(crate) fn thin_link_data(&self) -> &[u8] {
-        unsafe {
-            let ptr = llvm::LLVMRustThinLTOBufferThinLinkDataPtr(self.0) as *const _;
-            let len = llvm::LLVMRustThinLTOBufferThinLinkDataLen(self.0);
-            slice::from_raw_parts(ptr, len)
+            ThinBuffer { data: Buffer(buffer) }
         }
     }
 }
 
 impl ThinBufferMethods for ThinBuffer {
     fn data(&self) -> &[u8] {
-        unsafe {
-            let ptr = llvm::LLVMRustThinLTOBufferPtr(self.0) as *const _;
-            let len = llvm::LLVMRustThinLTOBufferLen(self.0);
-            slice::from_raw_parts(ptr, len)
-        }
-    }
-}
-
-impl Drop for ThinBuffer {
-    fn drop(&mut self) {
-        unsafe {
-            llvm::LLVMRustThinLTOBufferFree(&mut *(self.0 as *mut _));
-        }
+        self.data.data()
     }
 }
 

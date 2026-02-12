@@ -6,7 +6,6 @@ fn main() {
     rustc()
         .target(target())
         .print("target-features")
-        .input("-")
         .run()
         .assert_stdout_contains("Features supported by rustc for this target:")
         .assert_stdout_contains("Code-generation features supported by LLVM for this target:")

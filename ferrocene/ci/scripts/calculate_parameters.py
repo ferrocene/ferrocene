@@ -52,6 +52,8 @@ QNX_TARGETS = [
 GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
     "aarch64-unknown-ferrocene.facade",
+    "aarch64r82-unknown-none",
+    "aarch64r82-unknown-none-softfloat",
     "aarch64v8r-unknown-none",
     "aarch64v8r-unknown-none-softfloat",
     "thumbv6m-none-eabi",

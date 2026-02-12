@@ -3,13 +3,19 @@
 // The Cortex-R82 CPU is an implementation of the Arm v8-R AArch64 ISA so
 // it also implements the ISA-level mandatory extensions. We check that with a revision
 //@ add-minicore
-//@ revisions: hf sf r82
+//@ revisions: hf sf hf_r82_cpu hf_r82_target sf_r82_cpu sf_r82_target
 //@ [hf] compile-flags: --target aarch64v8r-unknown-none
 //@ [hf] needs-llvm-components: aarch64
 //@ [sf] compile-flags: --target aarch64v8r-unknown-none-softfloat
 //@ [sf] needs-llvm-components: aarch64
-//@ [r82] compile-flags: --target aarch64v8r-unknown-none -C target-cpu=cortex-r82
-//@ [r82] needs-llvm-components: aarch64
+//@ [hf_r82_cpu] compile-flags: --target aarch64v8r-unknown-none -C target-cpu=cortex-r82
+//@ [hf_r82_cpu] needs-llvm-components: aarch64
+//@ [hf_r82_target] compile-flags: --target aarch64r82-unknown-none
+//@ [hf_r82_target] needs-llvm-components: aarch64
+//@ [sf_r82_cpu] compile-flags: --target aarch64v8r-unknown-none-softfloat -C target-cpu=cortex-r82
+//@ [sf_r82_cpu] needs-llvm-components: aarch64
+//@ [sf_r82_target] compile-flags: --target aarch64r82-unknown-none-softfloat
+//@ [sf_r82_target] needs-llvm-components: aarch64
 //@ build-pass
 //@ ignore-backends: gcc
 

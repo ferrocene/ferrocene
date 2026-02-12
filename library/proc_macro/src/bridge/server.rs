@@ -53,11 +53,6 @@ impl<S: Server> Decode<'_, '_, HandleStore<S>> for MarkedSpan<S> {
     }
 }
 
-struct Dispatcher<S: Server> {
-    handle_store: HandleStore<S>,
-    server: S,
-}
-
 macro_rules! define_server {
     (
         $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)?;)*
@@ -81,16 +76,17 @@ macro_rules! define_server {
 }
 with_api!(define_server, Self::TokenStream, Self::Span, Self::Symbol);
 
+// FIXME(eddyb) `pub` only for `ExecutionStrategy` below.
+pub struct Dispatcher<S: Server> {
+    handle_store: HandleStore<S>,
+    server: S,
+}
+
 macro_rules! define_dispatcher {
     (
         $(fn $method:ident($($arg:ident: $arg_ty:ty),* $(,)?) $(-> $ret_ty:ty)?;)*
     ) => {
-        // FIXME(eddyb) `pub` only for `ExecutionStrategy` below.
-        pub trait DispatcherTrait {
-            fn dispatch(&mut self, buf: Buffer) -> Buffer;
-        }
-
-        impl<S: Server> DispatcherTrait for Dispatcher<S> {
+        impl<S: Server> Dispatcher<S> {
             fn dispatch(&mut self, mut buf: Buffer) -> Buffer {
                 let Dispatcher { handle_store, server } = self;
 
@@ -126,9 +122,9 @@ macro_rules! define_dispatcher {
 with_api!(define_dispatcher, MarkedTokenStream<S>, MarkedSpan<S>, MarkedSymbol<S>);
 
 pub trait ExecutionStrategy {
-    fn run_bridge_and_client(
+    fn run_bridge_and_client<S: Server>(
         &self,
-        dispatcher: &mut impl DispatcherTrait,
+        dispatcher: &mut Dispatcher<S>,
         input: Buffer,
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,
@@ -182,9 +178,9 @@ impl<P> ExecutionStrategy for MaybeCrossThread<P>
 where
     P: MessagePipe<Buffer> + Send + 'static,
 {
-    fn run_bridge_and_client(
+    fn run_bridge_and_client<S: Server>(
         &self,
-        dispatcher: &mut impl DispatcherTrait,
+        dispatcher: &mut Dispatcher<S>,
         input: Buffer,
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,
@@ -205,9 +201,9 @@ where
 pub struct SameThread;
 
 impl ExecutionStrategy for SameThread {
-    fn run_bridge_and_client(
+    fn run_bridge_and_client<S: Server>(
         &self,
-        dispatcher: &mut impl DispatcherTrait,
+        dispatcher: &mut Dispatcher<S>,
         input: Buffer,
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,
@@ -232,9 +228,9 @@ impl<P> ExecutionStrategy for CrossThread<P>
 where
     P: MessagePipe<Buffer> + Send + 'static,
 {
-    fn run_bridge_and_client(
+    fn run_bridge_and_client<S: Server>(
         &self,
-        dispatcher: &mut impl DispatcherTrait,
+        dispatcher: &mut Dispatcher<S>,
         input: Buffer,
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,

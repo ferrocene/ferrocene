@@ -11,7 +11,7 @@ Compliance with subset
 
 To prove compliance with the subset, follow these steps:
 
-1. Ensure that your code successfully compiles with your compilation target.
+1. Ensure that your code successfully compiles with your qualified compilation target.
 2. Ensure that it also compiles with the subset equivalent listed in the table below.
 3. If it succeeds, your code is compliant with the subset.
 4. If it fails, do one of the following:

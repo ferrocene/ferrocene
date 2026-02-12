@@ -153,7 +153,7 @@ impl WriteBackendMethods for LlvmCodegenBackend {
     type ModuleBuffer = back::lto::ModuleBuffer;
     type TargetMachine = OwnedTargetMachine;
     type ThinData = back::lto::ThinData;
-    type ThinBuffer = back::lto::ThinBuffer;
+    type ThinBuffer = back::lto::ModuleBuffer;
     fn print_pass_timings(&self) {
         let timings = llvm::build_string(|s| unsafe { llvm::LLVMRustPrintPassTimings(s) }).unwrap();
         print!("{timings}");
@@ -237,7 +237,7 @@ impl WriteBackendMethods for LlvmCodegenBackend {
         back::lto::prepare_thin(module)
     }
     fn serialize_module(module: ModuleCodegen<Self::Module>) -> (String, Self::ModuleBuffer) {
-        (module.name, back::lto::ModuleBuffer::new(module.module_llvm.llmod()))
+        (module.name, back::lto::ModuleBuffer::new(module.module_llvm.llmod(), false))
     }
 }
 

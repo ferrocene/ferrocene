@@ -29,7 +29,7 @@ use rustc_target::spec::{
 };
 use tracing::{debug, trace};
 
-use crate::back::lto::ThinBuffer;
+use crate::back::lto::ModuleBuffer;
 use crate::back::owned_target_machine::OwnedTargetMachine;
 use crate::back::profiling::{
     LlvmSelfProfiler, selfprofile_after_pass_callback, selfprofile_before_pass_callback,
@@ -1039,7 +1039,7 @@ pub(crate) fn codegen(
                         "LLVM_module_codegen_make_bitcode",
                         &*module.name,
                     );
-                    ThinBuffer::new(llmod, cgcx.lto != Lto::Fat)
+                    ModuleBuffer::new(llmod, cgcx.lto != Lto::Fat)
                 };
                 let data = thin.data();
                 let _timer = prof

@@ -187,7 +187,7 @@ pub(crate) fn run_thin(
     dcx: DiagCtxtHandle<'_>,
     exported_symbols_for_lto: &[String],
     each_linked_rlib_for_lto: &[PathBuf],
-    modules: Vec<(String, ThinBuffer)>,
+    modules: Vec<(String, ModuleBuffer)>,
     cached_modules: Vec<(SerializedModule<ModuleBuffer>, WorkProduct)>,
 ) -> (Vec<ThinModule<LlvmCodegenBackend>>, Vec<WorkProduct>) {
     let (symbols_below_threshold, upstream_modules) =
@@ -203,9 +203,9 @@ pub(crate) fn run_thin(
     thin_lto(cgcx, prof, dcx, modules, upstream_modules, cached_modules, &symbols_below_threshold)
 }
 
-pub(crate) fn prepare_thin(module: ModuleCodegen<ModuleLlvm>) -> (String, ThinBuffer) {
+pub(crate) fn prepare_thin(module: ModuleCodegen<ModuleLlvm>) -> (String, ModuleBuffer) {
     let name = module.name;
-    let buffer = ThinBuffer::new(module.module_llvm.llmod(), true);
+    let buffer = ModuleBuffer::new(module.module_llvm.llmod(), true);
     (name, buffer)
 }
 
@@ -297,7 +297,7 @@ fn fat_lto(
         // way we know of to do that is to serialize them to a string and them parse
         // them later. Not great but hey, that's why it's "fat" LTO, right?
         for module in in_memory {
-            let buffer = ModuleBuffer::new(module.module_llvm.llmod());
+            let buffer = ModuleBuffer::new(module.module_llvm.llmod(), false);
             let llmod_id = CString::new(&module.name[..]).unwrap();
             serialized_modules.push((SerializedModule::Local(buffer), llmod_id));
         }
@@ -400,7 +400,7 @@ fn thin_lto(
     cgcx: &CodegenContext,
     prof: &SelfProfilerRef,
     dcx: DiagCtxtHandle<'_>,
-    modules: Vec<(String, ThinBuffer)>,
+    modules: Vec<(String, ModuleBuffer)>,
     serialized_modules: Vec<(SerializedModule<ModuleBuffer>, CString)>,
     cached_modules: Vec<(SerializedModule<ModuleBuffer>, WorkProduct)>,
     symbols_below_threshold: &[*const libc::c_char],
@@ -688,20 +688,6 @@ impl Drop for Buffer {
     }
 }
 
-pub struct ModuleBuffer(Buffer);
-
-impl ModuleBuffer {
-    pub(crate) fn new(m: &llvm::Module) -> ModuleBuffer {
-        ModuleBuffer(Buffer(unsafe { llvm::LLVMRustModuleSerialize(m) }))
-    }
-}
-
-impl ModuleBufferMethods for ModuleBuffer {
-    fn data(&self) -> &[u8] {
-        self.0.data()
-    }
-}
-
 pub struct ThinData(&'static mut llvm::ThinLTOData);
 
 unsafe impl Send for ThinData {}
@@ -715,20 +701,20 @@ impl Drop for ThinData {
     }
 }
 
-pub struct ThinBuffer {
+pub struct ModuleBuffer {
     data: Buffer,
 }
 
-impl ThinBuffer {
-    pub(crate) fn new(m: &llvm::Module, is_thin: bool) -> ThinBuffer {
+impl ModuleBuffer {
+    pub(crate) fn new(m: &llvm::Module, is_thin: bool) -> ModuleBuffer {
         unsafe {
-            let buffer = llvm::LLVMRustThinLTOBufferCreate(m, is_thin);
-            ThinBuffer { data: Buffer(buffer) }
+            let buffer = llvm::LLVMRustModuleSerialize(m, is_thin);
+            ModuleBuffer { data: Buffer(buffer) }
         }
     }
 }
 
-impl ThinBufferMethods for ThinBuffer {
+impl ModuleBufferMethods for ModuleBuffer {
     fn data(&self) -> &[u8] {
         self.data.data()
     }

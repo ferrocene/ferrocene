@@ -1399,8 +1399,8 @@ extern "C" bool LLVMRustPrepareThinLTOImport(const LLVMRustThinLTOData *Data,
   return true;
 }
 
-extern "C" LLVMRustBuffer *LLVMRustThinLTOBufferCreate(LLVMModuleRef M,
-                                                       bool is_thin) {
+extern "C" LLVMRustBuffer *LLVMRustModuleSerialize(LLVMModuleRef M,
+                                                   bool is_thin) {
   auto Ret = std::make_unique<LLVMRustBuffer>();
   {
     auto OS = raw_string_ostream(Ret->data);

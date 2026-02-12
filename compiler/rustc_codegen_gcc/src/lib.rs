@@ -87,7 +87,7 @@ use rustc_codegen_ssa::back::write::{
 use rustc_codegen_ssa::base::codegen_crate;
 use rustc_codegen_ssa::target_features::cfg_target_feature;
 use rustc_codegen_ssa::traits::{
-    CodegenBackend, ExtraBackendMethods, ThinBufferMethods, WriteBackendMethods,
+    CodegenBackend, ExtraBackendMethods, ModuleBufferMethods, WriteBackendMethods,
 };
 use rustc_codegen_ssa::{CodegenResults, CompiledModule, ModuleCodegen, TargetConfig};
 use rustc_data_structures::fx::FxIndexMap;
@@ -425,7 +425,7 @@ unsafe impl Sync for SyncContext {}
 
 pub struct ThinBuffer;
 
-impl ThinBufferMethods for ThinBuffer {
+impl ModuleBufferMethods for ThinBuffer {
     fn data(&self) -> &[u8] {
         &[]
     }

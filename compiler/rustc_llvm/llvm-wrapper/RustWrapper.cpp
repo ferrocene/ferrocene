@@ -1539,15 +1539,6 @@ extern "C" size_t LLVMRustBufferLen(const LLVMRustBuffer *Buffer) {
   return Buffer->data.length();
 }
 
-extern "C" LLVMRustBuffer *LLVMRustModuleSerialize(LLVMModuleRef M) {
-  auto Ret = std::make_unique<LLVMRustBuffer>();
-  {
-    auto OS = raw_string_ostream(Ret->data);
-    WriteBitcodeToFile(*unwrap(M), OS);
-  }
-  return Ret.release();
-}
-
 extern "C" uint64_t LLVMRustModuleCost(LLVMModuleRef M) {
   auto f = unwrap(M)->functions();
   return std::distance(std::begin(f), std::end(f));

@@ -45,6 +45,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
+    "aarch64-rhivos2-linux-gnu",
     // just a dummy comment so the list doesn't get onelined
     "x86_64-unknown-linux-gnuasan",
     "thumbv7a-none-eabi",

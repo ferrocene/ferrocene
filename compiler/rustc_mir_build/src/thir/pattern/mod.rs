@@ -15,13 +15,14 @@ use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{self as hir, RangeEnd};
 use rustc_index::Idx;
-use rustc_middle::mir::interpret::{LitToConstInput, const_lit_matches_ty};
 use rustc_middle::thir::{
     Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, Pat, PatKind, PatRange, PatRangeBoundary,
 };
 use rustc_middle::ty::adjustment::{PatAdjust, PatAdjustment};
 use rustc_middle::ty::layout::IntegerExt;
-use rustc_middle::ty::{self, CanonicalUserTypeAnnotation, Ty, TyCtxt};
+use rustc_middle::ty::{
+    self, CanonicalUserTypeAnnotation, LitToConstInput, Ty, TyCtxt, const_lit_matches_ty,
+};
 use rustc_middle::{bug, span_bug};
 use rustc_span::ErrorGuaranteed;
 use tracing::{debug, instrument};

@@ -112,7 +112,7 @@ use crate::middle::resolve_bound_vars::{ObjectLifetimeDefault, ResolveBoundVars,
 use crate::middle::stability::DeprecationEntry;
 use crate::mir::interpret::{
     EvalStaticInitializerRawResult, EvalToAllocationRawResult, EvalToConstValueResult,
-    EvalToValTreeResult, GlobalId, LitToConstInput,
+    EvalToValTreeResult, GlobalId,
 };
 use crate::mir::mono::{
     CodegenUnit, CollectionMode, MonoItem, MonoItemPartitions, NormalizationErrorInMono,
@@ -135,8 +135,8 @@ use crate::ty::layout::ValidityRequirement;
 use crate::ty::print::PrintTraitRefExt;
 use crate::ty::util::AlwaysRequiresDrop;
 use crate::ty::{
-    self, CrateInherentImpls, GenericArg, GenericArgsRef, PseudoCanonicalInput, SizedTraitKind, Ty,
-    TyCtxt, TyCtxtFeed,
+    self, CrateInherentImpls, GenericArg, GenericArgsRef, LitToConstInput, PseudoCanonicalInput,
+    SizedTraitKind, Ty, TyCtxt, TyCtxtFeed,
 };
 use crate::{dep_graph, mir, thir};
 

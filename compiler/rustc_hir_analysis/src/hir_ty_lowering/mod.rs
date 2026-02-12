@@ -35,11 +35,10 @@ use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_infer::traits::DynCompatibilityViolation;
 use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::middle::stability::AllowUnstable;
-use rustc_middle::mir::interpret::{LitToConstInput, const_lit_matches_ty};
 use rustc_middle::ty::print::PrintPolyTraitRefExt as _;
 use rustc_middle::ty::{
-    self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, Ty, TyCtxt,
-    TypeSuperFoldable, TypeVisitableExt, TypingMode, Upcast, fold_regions,
+    self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, LitToConstInput, Ty, TyCtxt,
+    TypeSuperFoldable, TypeVisitableExt, TypingMode, Upcast, const_lit_matches_ty, fold_regions,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::AMBIGUOUS_ASSOCIATED_ITEMS;

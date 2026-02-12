@@ -29,8 +29,9 @@
 //!     qemu-hexagon -L <sysroot>/target/hexagon-unknown-linux-musl \
 //!         target/hexagon-unknown-linux-musl/debug/gaussian
 
-#![cfg_attr(target_arch = "hexagon", feature(stdarch_hexagon))]
-#![cfg_attr(target_arch = "hexagon", feature(hexagon_target_feature))]
+#![cfg(target_arch = "hexagon")]
+#![feature(stdarch_hexagon)]
+#![feature(hexagon_target_feature)]
 #![allow(
     unsafe_op_in_unsafe_fn,
     clippy::unwrap_used,
@@ -41,18 +42,22 @@
     dead_code
 )]
 
-#[cfg(all(target_arch = "hexagon", not(target_feature = "hvx-length128b")))]
+#[cfg(not(target_feature = "hvx-length128b"))]
 use core_arch::arch::hexagon::v64::*;
-#[cfg(all(target_arch = "hexagon", target_feature = "hvx-length128b"))]
+#[cfg(target_feature = "hvx-length128b")]
 use core_arch::arch::hexagon::v128::*;
 
 /// Vector length in bytes for HVX 128-byte mode
-#[cfg(all(target_arch = "hexagon", target_feature = "hvx-length128b"))]
+#[cfg(target_feature = "hvx-length128b")]
 const VLEN: usize = 128;
 
 /// Vector length in bytes for HVX 64-byte mode
-#[cfg(all(target_arch = "hexagon", not(target_feature = "hvx-length128b")))]
+#[cfg(not(target_feature = "hvx-length128b"))]
 const VLEN: usize = 64;
+
+/// Image width - must be multiple of VLEN
+const WIDTH: usize = 256;
+const HEIGHT: usize = 16;
 
 /// Vertical 1-2-1 filter pass using byte averaging
 ///
@@ -65,7 +70,6 @@ const VLEN: usize = 64;
 /// - `dst` must point to a valid output buffer for `width` bytes
 /// - `width` must be a multiple of VLEN
 /// - All pointers must be HVX-aligned (128-byte for 128B mode)
-#[cfg(target_arch = "hexagon")]
 #[target_feature(enable = "hvxv60")]
 unsafe fn vertical_121_pass(src: *const u8, stride: isize, width: usize, dst: *mut u8) {
     let inp0 = src.offset(-stride) as *const HvxVector;
@@ -101,7 +105,6 @@ unsafe fn vertical_121_pass(src: *const u8, stride: isize, width: usize, dst: *m
 /// - `src` and `dst` must point to valid buffers of `width` bytes
 /// - `width` must be a multiple of VLEN
 /// - All pointers must be HVX-aligned
-#[cfg(target_arch = "hexagon")]
 #[target_feature(enable = "hvxv60")]
 unsafe fn horizontal_121_pass(src: *const u8, width: usize, dst: *mut u8) {
     let inp = src as *const HvxVector;
@@ -153,7 +156,6 @@ unsafe fn horizontal_121_pass(src: *const u8, width: usize, dst: *mut u8) {
 /// - `width` must be a multiple of VLEN and >= VLEN
 /// - `stride` must be >= `width`
 /// - All buffers must be HVX-aligned (128-byte for 128B mode)
-#[cfg(target_arch = "hexagon")]
 #[target_feature(enable = "hvxv60")]
 pub unsafe fn gaussian3x3u8(
     src: *const u8,
@@ -234,7 +236,7 @@ fn gaussian3x3u8_approx(src: &[u8], stride: usize, width: usize, height: usize, 
     }
 }
 
-/// Generate deterministic test pattern matching test approach
+/// Generate deterministic test pattern
 fn generate_test_pattern(buf: &mut [u8], width: usize, height: usize) {
     for y in 0..height {
         for x in 0..width {
@@ -244,115 +246,58 @@ fn generate_test_pattern(buf: &mut [u8], width: usize, height: usize) {
 }
 
 fn main() {
-    // Test dimensions
-    #[cfg(not(target_arch = "hexagon"))]
-    const WIDTH: usize = 128;
-    #[cfg(target_arch = "hexagon")]
-    const WIDTH: usize = 256; // Must be multiple of VLEN (128)
-    const HEIGHT: usize = 16;
+    // Aligned buffers for HVX
+    #[repr(align(128))]
+    struct AlignedBuf<const N: usize>([u8; N]);
 
-    #[cfg(not(target_arch = "hexagon"))]
-    {
-        let mut src = vec![0u8; WIDTH * HEIGHT];
-        let mut dst_ref = vec![0u8; WIDTH * HEIGHT];
-        let mut dst_approx = vec![0u8; WIDTH * HEIGHT];
+    let mut src = AlignedBuf::<{ WIDTH * HEIGHT }>([0u8; WIDTH * HEIGHT]);
+    let mut dst_hvx = AlignedBuf::<{ WIDTH * HEIGHT }>([0u8; WIDTH * HEIGHT]);
+    let mut tmp = AlignedBuf::<{ WIDTH }>([0u8; WIDTH]);
+    let mut dst_ref = vec![0u8; WIDTH * HEIGHT];
+    let mut dst_approx = vec![0u8; WIDTH * HEIGHT];
 
-        // Generate test pattern
-        generate_test_pattern(&mut src, WIDTH, HEIGHT);
+    // Generate test pattern
+    generate_test_pattern(&mut src.0, WIDTH, HEIGHT);
 
-        // Run reference implementation
-        gaussian3x3u8_reference(&src, WIDTH, WIDTH, HEIGHT, &mut dst_ref);
+    // Run HVX implementation
+    unsafe {
+        gaussian3x3u8(
+            src.0.as_ptr(),
+            WIDTH,
+            WIDTH,
+            HEIGHT,
+            dst_hvx.0.as_mut_ptr(),
+            tmp.0.as_mut_ptr(),
+        );
+    }
 
-        // Run byte-averaging approximation (matches HVX behavior)
-        gaussian3x3u8_approx(&src, WIDTH, WIDTH, HEIGHT, &mut dst_approx);
+    // Run reference
+    gaussian3x3u8_reference(&src.0, WIDTH, WIDTH, HEIGHT, &mut dst_ref);
 
-        // Verify specific output values from reference
-        // These are computed using the exact algorithm on our test pattern
-        // Row 2, cols 1..9 with input pattern ((x + y*7) % 256)
-        // Input: row1=[7,8,9,...], row2=[14,15,16,...], row3=[21,22,23,...]
-        let expected_ref_row2: [u8; 8] = [15, 16, 17, 18, 19, 20, 21, 22];
-        for (i, &expected) in expected_ref_row2.iter().enumerate() {
-            let actual = dst_ref[2 * WIDTH + 1 + i];
+    // Run scalar approximation (should match HVX exactly)
+    gaussian3x3u8_approx(&src.0, WIDTH, WIDTH, HEIGHT, &mut dst_approx);
+
+    // Verify HVX matches the byte-averaging approximation exactly
+    for y in 1..HEIGHT - 1 {
+        for x in 1..WIDTH - 1 {
+            let idx = y * WIDTH + x;
             assert_eq!(
-                actual,
-                expected,
-                "reference mismatch at row 2, col {}: expected {}, got {}",
-                1 + i,
-                expected,
-                actual
+                dst_hvx.0[idx], dst_approx[idx],
+                "HVX output differs from scalar approximation at ({}, {}): hvx={}, approx={}",
+                x, y, dst_hvx.0[idx], dst_approx[idx]
             );
-        }
-
-        // Verify approximation exactly matches reference for this test pattern
-        // The byte-averaging approach avg(avg(a,c), b) produces identical results
-        // to the Hexagon SDK's (1*a + 2*b + 1*c + 2) / 4 for this input pattern
-        for y in 1..HEIGHT - 1 {
-            for x in 1..WIDTH - 1 {
-                let idx = y * WIDTH + x;
-                assert_eq!(
-                    dst_approx[idx], dst_ref[idx],
-                    "Approximation differs from reference at ({}, {}): approx={}, ref={}",
-                    x, y, dst_approx[idx], dst_ref[idx]
-                );
-            }
         }
     }
 
-    #[cfg(target_arch = "hexagon")]
-    {
-        // Aligned buffers for HVX
-        #[repr(align(128))]
-        struct AlignedBuf<const N: usize>([u8; N]);
-
-        let mut src = AlignedBuf::<{ WIDTH * HEIGHT }>([0u8; WIDTH * HEIGHT]);
-        let mut dst_hvx = AlignedBuf::<{ WIDTH * HEIGHT }>([0u8; WIDTH * HEIGHT]);
-        let mut tmp = AlignedBuf::<{ WIDTH }>([0u8; WIDTH]);
-        let mut dst_ref = vec![0u8; WIDTH * HEIGHT];
-        let mut dst_approx = vec![0u8; WIDTH * HEIGHT];
-
-        // Generate test pattern
-        generate_test_pattern(&mut src.0, WIDTH, HEIGHT);
-
-        // Run HVX implementation
-        unsafe {
-            gaussian3x3u8(
-                src.0.as_ptr(),
-                WIDTH,
-                WIDTH,
-                HEIGHT,
-                dst_hvx.0.as_mut_ptr(),
-                tmp.0.as_mut_ptr(),
+    // Verify HVX exactly matches reference for this test pattern
+    for y in 1..HEIGHT - 1 {
+        for x in 1..WIDTH - 1 {
+            let idx = y * WIDTH + x;
+            assert_eq!(
+                dst_hvx.0[idx], dst_ref[idx],
+                "HVX differs from reference at ({}, {}): hvx={}, ref={}",
+                x, y, dst_hvx.0[idx], dst_ref[idx]
             );
-        }
-
-        // Run reference
-        gaussian3x3u8_reference(&src.0, WIDTH, WIDTH, HEIGHT, &mut dst_ref);
-
-        // Run scalar approximation (should match HVX exactly)
-        gaussian3x3u8_approx(&src.0, WIDTH, WIDTH, HEIGHT, &mut dst_approx);
-
-        // Verify HVX matches the byte-averaging approximation exactly
-        for y in 1..HEIGHT - 1 {
-            for x in 1..WIDTH - 1 {
-                let idx = y * WIDTH + x;
-                assert_eq!(
-                    dst_hvx.0[idx], dst_approx[idx],
-                    "HVX output differs from scalar approximation at ({}, {}): hvx={}, approx={}",
-                    x, y, dst_hvx.0[idx], dst_approx[idx]
-                );
-            }
-        }
-
-        // Verify HVX exactly matches reference for this test pattern
-        for y in 1..HEIGHT - 1 {
-            for x in 1..WIDTH - 1 {
-                let idx = y * WIDTH + x;
-                assert_eq!(
-                    dst_hvx.0[idx], dst_ref[idx],
-                    "HVX differs from reference at ({}, {}): hvx={}, ref={}",
-                    x, y, dst_hvx.0[idx], dst_ref[idx]
-                );
-            }
         }
     }
 }

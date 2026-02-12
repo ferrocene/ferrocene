@@ -58,6 +58,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{self as hir};
+use rustc_infer::infer::DefineOpaqueTypes;
 use rustc_macros::extension;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::DepContext;
@@ -278,6 +279,21 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 
             let is_shadowed = self.infcx.probe(|_| {
                 let impl_substs = self.infcx.fresh_args_for_item(DUMMY_SP, impl_def_id);
+                let impl_trait_ref =
+                    tcx.impl_trait_ref(impl_def_id).instantiate(tcx, impl_substs);
+
+                let expected_trait_ref = alias.trait_ref(tcx);
+
+                if let Err(_) = self.infcx.at(&ObligationCause::dummy(), param_env).eq(
+                    DefineOpaqueTypes::No,
+                    expected_trait_ref,
+                    impl_trait_ref,
+                ) {
+                    return false;
+                }
+
+                let trait_def_id = alias.trait_def_id(tcx);
+                let rebased_args = alias.args.rebase_onto(tcx, trait_def_id, impl_substs);
 
                 let leaf_def = match specialization_graph::assoc_def(tcx, impl_def_id, alias.def_id)
                 {
@@ -286,7 +302,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 };
 
                 let impl_item_def_id = leaf_def.item.def_id;
-                let impl_assoc_ty = tcx.type_of(impl_item_def_id).instantiate(tcx, impl_substs);
+                let impl_assoc_ty = tcx.type_of(impl_item_def_id).instantiate(tcx, rebased_args);
 
                 self.infcx.can_eq(param_env, impl_assoc_ty, concrete)
             });

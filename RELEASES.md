@@ -1,45 +1,49 @@
-Version 1.93 (2026-01-22)
+Version 1.93.1 (2026-02-12)
+===========================
+
+<a id="1.93.1"></a>
+
+- [Don't try to recover keyword as non-keyword identifier](https://github.com/rust-lang/rust/pull/150590), fixing an ICE that especially [affected rustfmt](https://github.com/rust-lang/rustfmt/issues/6739).
+- [Fix `clippy::panicking_unwrap` false-positive on field access with implicit deref](https://github.com/rust-lang/rust-clippy/pull/16196).
+- [Revert "Update wasm-related dependencies in CI"](https://github.com/rust-lang/rust/pull/152259), fixing file descriptor leaks on the `wasm32-wasip2` target.
+
+Version 1.93.0 (2026-01-22)
 ==========================
 
-<a id="1.93-Language"></a>
+<a id="1.93.0-Language"></a>
 
 Language
 --------
-- [Add warn-by-default `function_casts_as_integer` lint](https://github.com/rust-lang/rust/pull/141470)
-- [Add future-incompatibility warning for `...` function parameters without a pattern outside of `extern` blocks](https://github.com/rust-lang/rust/pull/143619)
 - [Stabilize several s390x `vector`-related target features and the `is_s390x_feature_detected!` macro](https://github.com/rust-lang/rust/pull/145656)
 - [Stabilize declaration of C-style variadic functions for the `system` ABI](https://github.com/rust-lang/rust/pull/145954)
 - [Emit error when using some keyword as a `cfg` predicate](https://github.com/rust-lang/rust/pull/146978)
-- [Introduce future-compatibility warning for `repr(C)` enums whose discriminant values do not fit into a `c_int` or `c_uint`](https://github.com/rust-lang/rust/pull/147017)
-- [Introduce future-compatibility warning against ignoring `repr(C)` types as part of `repr(transparent)`](https://github.com/rust-lang/rust/pull/147185)
 - [Stabilize `asm_cfg`](https://github.com/rust-lang/rust/pull/147736)
-- [Upgrade the `deref_nullptr` lint from warn-by-default to deny-by-default](https://github.com/rust-lang/rust/pull/148122)
 - [During const-evaluation, support copying pointers byte-by-byte](https://github.com/rust-lang/rust/pull/148259)
-- [Add warn-by-default `const_item_interior_mutations` lint to warn against calls which mutate interior mutable `const` items](https://github.com/rust-lang/rust/pull/148407)
 - [LUB coercions now correctly handle function item types, and functions with differing safeties](https://github.com/rust-lang/rust/pull/148602)
 - [Allow `const` items that contain mutable references to `static` (which is *very* unsafe, but not *always* UB)](https://github.com/rust-lang/rust/pull/148746)
+- [Add warn-by-default `const_item_interior_mutations` lint to warn against calls which mutate interior mutable `const` items](https://github.com/rust-lang/rust/pull/148407)
+- [Add warn-by-default `function_casts_as_integer` lint](https://github.com/rust-lang/rust/pull/141470)
 
 
-<a id="1.93-Compiler"></a>
+<a id="1.93.0-Compiler"></a>
 
 Compiler
 --------
 - [Stabilize `-Cjump-tables=bool`](https://github.com/rust-lang/rust/pull/145974). The flag was previously called `-Zno-jump-tables`.
-- [Promote `riscv64a23-unknown-linux-gnu` to Tier 2 (without host tools)](https://github.com/rust-lang/rust/pull/148435)
 
-
-<a id="1.93-Platform-Support"></a>
+<a id="1.93.0-Platform-Support"></a>
 
 Platform Support
 ----------------
 
+- [Promote `riscv64a23-unknown-linux-gnu` to Tier 2 (without host tools)](https://github.com/rust-lang/rust/pull/148435)
 
 Refer to Rust's [platform support page][platform-support-doc]
 for more information on Rust's tiered platform support.
 
 [platform-support-doc]: https://doc.rust-lang.org/rustc/platform-support.html
 
-<a id="1.93-Libraries"></a>
+<a id="1.93.0-Libraries"></a>
 
 Libraries
 ---------
@@ -49,14 +53,14 @@ Libraries
 - [Don't require `T: RefUnwindSafe` for `vec::IntoIter<T>: UnwindSafe`](https://github.com/rust-lang/rust/pull/145665)
 
 
-<a id="1.93-Stabilized-APIs"></a>
+<a id="1.93.0-Stabilized-APIs"></a>
 
 Stabilized APIs
 ---------------
 
-- [`<MaybeUninit<T>>::assume_init_drop`](https://doc.rust-lang.org/stable/core/mem/union.MaybeUninit.html#method.assume_init_drop)
-- [`<MaybeUninit<T>>::assume_init_ref`](https://doc.rust-lang.org/stable/core/mem/union.MaybeUninit.html#method.assume_init_ref)
-- [`<MaybeUninit<T>>::assume_init_mut`](https://doc.rust-lang.org/stable/core/mem/union.MaybeUninit.html#method.assume_init_mut)
+- [`<[MaybeUninit<T>]>::assume_init_drop`](https://doc.rust-lang.org/stable/core/primitive.slice.html#method.assume_init_drop)
+- [`<[MaybeUninit<T>]>::assume_init_ref`](https://doc.rust-lang.org/stable/core/primitive.slice.html#method.assume_init_ref)
+- [`<[MaybeUninit<T>]>::assume_init_mut`](https://doc.rust-lang.org/stable/core/primitive.slice.html#method.assume_init_mut)
 - [`<[MaybeUninit<T>]>::write_copy_of_slice`](https://doc.rust-lang.org/stable/std/primitive.slice.html#method.write_copy_of_slice)
 - [`<[MaybeUninit<T>]>::write_clone_of_slice`](https://doc.rust-lang.org/stable/std/primitive.slice.html#method.write_clone_of_slice)
 - [`String::into_raw_parts`](https://doc.rust-lang.org/stable/std/string/struct.String.html#method.into_raw_parts)
@@ -67,9 +71,9 @@ Stabilized APIs
 - [`<uN>::unchecked_shl`](https://doc.rust-lang.org/stable/std/primitive.usize.html#method.unchecked_shl)
 - [`<uN>::unchecked_shr`](https://doc.rust-lang.org/stable/std/primitive.usize.html#method.unchecked_shr)
 - [`<[T]>::as_array`](https://doc.rust-lang.org/stable/std/primitive.slice.html#method.as_array)
-- [`<[T]>::as_array_mut`](https://doc.rust-lang.org/stable/std/primitive.slice.html#method.as_mut_array)
+- [`<[T]>::as_mut_array`](https://doc.rust-lang.org/stable/std/primitive.slice.html#method.as_mut_array)
 - [`<*const [T]>::as_array`](https://doc.rust-lang.org/stable/std/primitive.pointer.html#method.as_array)
-- [`<*mut [T]>::as_array_mut`](https://doc.rust-lang.org/stable/std/primitive.pointer.html#method.as_mut_array)
+- [`<*mut [T]>::as_mut_array`](https://doc.rust-lang.org/stable/std/primitive.pointer.html#method.as_mut_array)
 - [`VecDeque::pop_front_if`](https://doc.rust-lang.org/stable/std/collections/struct.VecDeque.html#method.pop_front_if)
 - [`VecDeque::pop_back_if`](https://doc.rust-lang.org/stable/std/collections/struct.VecDeque.html#method.pop_back_if)
 - [`Duration::from_nanos_u128`](https://doc.rust-lang.org/stable/std/time/struct.Duration.html#method.from_nanos_u128)
@@ -79,7 +83,7 @@ Stabilized APIs
 - [`std::fmt::FromFn`](https://doc.rust-lang.org/stable/std/fmt/struct.FromFn.html)
 
 
-<a id="1.93-Cargo"></a>
+<a id="1.93.0-Cargo"></a>
 
 Cargo
 -----
@@ -87,7 +91,7 @@ Cargo
 - [In `cargo tree`, support long forms for `--format` variables](https://github.com/rust-lang/cargo/pull/16204/)
 - [Add `--workspace` to `cargo clean`](https://github.com/rust-lang/cargo/pull/16263/)
 
-<a id="1.93-Rustdoc"></a>
+<a id="1.93.0-Rustdoc"></a>
 
 Rustdoc
 -----
@@ -97,7 +101,7 @@ Rustdoc
 - [Validate usage of crate-level doc attributes](https://github.com/rust-lang/rust/pull/149197).  This means if any of `html_favicon_url`, `html_logo_url`, `html_playground_url`, `issue_tracker_base_url`, or `html_no_source` either has a missing value, an unexpected value, or a value of the wrong type, rustdoc will emit the deny-by-default lint `rustdoc::invalid_doc_attributes`.
 
 
-<a id="1.93-Compatibility-Notes"></a>
+<a id="1.93.0-Compatibility-Notes"></a>
 
 Compatibility Notes
 -------------------
@@ -108,6 +112,10 @@ Compatibility Notes
 - Cargo now sets the `CARGO_CFG_DEBUG_ASSERTIONS` environment variable in more situations. This will cause crates depending on `static-init` versions 1.0.1 to 1.0.3 to fail compilation with "failed to resolve: use of unresolved module or unlinked crate `parking_lot`". See [the linked issue](https://github.com/rust-lang/rust/issues/150646#issuecomment-3718964342) for details.
 - [User written types in the `offset_of!` macro are now checked to be well formed.](https://github.com/rust-lang/rust/issues/150465/)
 - `cargo publish` no longer emits `.crate` files as a final artifact for user access when the `build.build-dir` config is unset
+- [Upgrade the `deref_nullptr` lint from warn-by-default to deny-by-default](https://github.com/rust-lang/rust/pull/148122)
+- [Add future-incompatibility warning for `...` function parameters without a pattern outside of `extern` blocks](https://github.com/rust-lang/rust/pull/143619)
+- [Introduce future-compatibility warning for `repr(C)` enums whose discriminant values do not fit into a `c_int` or `c_uint`](https://github.com/rust-lang/rust/pull/147017)
+- [Introduce future-compatibility warning against ignoring `repr(C)` types as part of `repr(transparent)`](https://github.com/rust-lang/rust/pull/147185)
 
 
 Version 1.92.0 (2025-12-11)

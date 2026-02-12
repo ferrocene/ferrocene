@@ -1,7 +1,7 @@
 //! Server-side traits.
 
 use std::cell::Cell;
-use std::marker::PhantomData;
+use std::sync::mpsc;
 
 use super::*;
 
@@ -163,21 +163,17 @@ impl Drop for RunningSameThreadGuard {
     }
 }
 
-pub struct MaybeCrossThread<P> {
+pub struct MaybeCrossThread {
     cross_thread: bool,
-    marker: PhantomData<P>,
 }
 
-impl<P> MaybeCrossThread<P> {
+impl MaybeCrossThread {
     pub const fn new(cross_thread: bool) -> Self {
-        MaybeCrossThread { cross_thread, marker: PhantomData }
+        MaybeCrossThread { cross_thread }
     }
 }
 
-impl<P> ExecutionStrategy for MaybeCrossThread<P>
-where
-    P: MessagePipe<Buffer> + Send + 'static,
-{
+impl ExecutionStrategy for MaybeCrossThread {
     fn run_bridge_and_client<S: Server>(
         &self,
         dispatcher: &mut Dispatcher<S>,
@@ -186,12 +182,7 @@ where
         force_show_panics: bool,
     ) -> Buffer {
         if self.cross_thread || ALREADY_RUNNING_SAME_THREAD.get() {
-            <CrossThread<P>>::new().run_bridge_and_client(
-                dispatcher,
-                input,
-                run_client,
-                force_show_panics,
-            )
+            CrossThread.run_bridge_and_client(dispatcher, input, run_client, force_show_panics)
         } else {
             SameThread.run_bridge_and_client(dispatcher, input, run_client, force_show_panics)
         }
@@ -216,18 +207,9 @@ impl ExecutionStrategy for SameThread {
     }
 }
 
-pub struct CrossThread<P>(PhantomData<P>);
+pub struct CrossThread;
 
-impl<P> CrossThread<P> {
-    pub const fn new() -> Self {
-        CrossThread(PhantomData)
-    }
-}
-
-impl<P> ExecutionStrategy for CrossThread<P>
-where
-    P: MessagePipe<Buffer> + Send + 'static,
-{
+impl ExecutionStrategy for CrossThread {
     fn run_bridge_and_client<S: Server>(
         &self,
         dispatcher: &mut Dispatcher<S>,
@@ -235,7 +217,7 @@ where
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,
     ) -> Buffer {
-        let (mut server, mut client) = P::new();
+        let (mut server, mut client) = MessagePipe::new();
 
         let join_handle = thread::spawn(move || {
             let mut dispatch = |b: Buffer| -> Buffer {
@@ -255,18 +237,31 @@ where
 }
 
 /// A message pipe used for communicating between server and client threads.
-pub trait MessagePipe<T>: Sized {
+struct MessagePipe<T> {
+    tx: std::sync::mpsc::SyncSender<T>,
+    rx: std::sync::mpsc::Receiver<T>,
+}
+
+impl<T> MessagePipe<T> {
     /// Creates a new pair of endpoints for the message pipe.
-    fn new() -> (Self, Self);
+    fn new() -> (Self, Self) {
+        let (tx1, rx1) = mpsc::sync_channel(1);
+        let (tx2, rx2) = mpsc::sync_channel(1);
+        (MessagePipe { tx: tx1, rx: rx2 }, MessagePipe { tx: tx2, rx: rx1 })
+    }
 
     /// Send a message to the other endpoint of this pipe.
-    fn send(&mut self, value: T);
+    fn send(&mut self, value: T) {
+        self.tx.send(value).unwrap();
+    }
 
     /// Receive a message from the other endpoint of this pipe.
     ///
     /// Returns `None` if the other end of the pipe has been destroyed, and no
     /// message was received.
-    fn recv(&mut self) -> Option<T>;
+    fn recv(&mut self) -> Option<T> {
+        self.rx.recv().ok()
+    }
 }
 
 fn run_server<

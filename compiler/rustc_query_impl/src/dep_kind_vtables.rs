@@ -1,7 +1,6 @@
 use rustc_middle::bug;
 use rustc_middle::dep_graph::{DepKindVTable, DepNodeKey, FingerprintStyle};
 use rustc_middle::query::QueryCache;
-use rustc_middle::ty::TyCtxt;
 
 use crate::plumbing::{force_from_dep_node_inner, try_load_from_on_disk_cache_inner};
 use crate::{QueryDispatcherUnerased, QueryFlags};
@@ -122,7 +121,7 @@ where
     let fingerprint_style = if is_anon {
         FingerprintStyle::Opaque
     } else {
-        <Cache::Key as DepNodeKey<TyCtxt<'tcx>>>::fingerprint_style()
+        <Cache::Key as DepNodeKey<'tcx>>::fingerprint_style()
     };
 
     if is_anon || !fingerprint_style.reconstructible() {

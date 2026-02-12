@@ -25,7 +25,7 @@ use {super::debug::EdgeFilter, std::env};
 
 use super::query::DepGraphQuery;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
-use super::{DepContext, DepKind, DepNode, DepsType, HasDepContext, WorkProductId};
+use super::{DepKind, DepNode, DepsType, HasDepContext, WorkProductId};
 use crate::dep_graph::edges::EdgesVec;
 use crate::ty::TyCtxt;
 use crate::verify_ich::incremental_verify_ich;
@@ -62,7 +62,7 @@ impl From<DepNodeIndex> for QueryInvocationId {
     }
 }
 
-pub struct MarkFrame<'a> {
+pub(crate) struct MarkFrame<'a> {
     index: SerializedDepNodeIndex,
     parent: Option<&'a MarkFrame<'a>>,
 }
@@ -252,7 +252,7 @@ impl DepGraph {
     }
 
     #[inline(always)]
-    pub fn with_task<Ctxt: HasDepContext, A: Debug, R>(
+    pub fn with_task<'tcx, Ctxt: HasDepContext<'tcx>, A: Debug, R>(
         &self,
         key: DepNode,
         cx: Ctxt,
@@ -266,9 +266,9 @@ impl DepGraph {
         }
     }
 
-    pub fn with_anon_task<Tcx: DepContext, OP, R>(
+    pub fn with_anon_task<'tcx, OP, R>(
         &self,
-        cx: Tcx,
+        cx: TyCtxt<'tcx>,
         dep_kind: DepKind,
         op: OP,
     ) -> (R, DepNodeIndex)
@@ -315,7 +315,7 @@ impl DepGraphData {
     ///
     /// [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/queries/incremental-compilation.html
     #[inline(always)]
-    pub fn with_task<Ctxt: HasDepContext, A: Debug, R>(
+    pub fn with_task<'tcx, Ctxt: HasDepContext<'tcx>, A: Debug, R>(
         &self,
         key: DepNode,
         cx: Ctxt,
@@ -329,7 +329,7 @@ impl DepGraphData {
         // 2. Two distinct query keys get mapped to the same `DepNode`
         //    (see for example #48923).
         self.assert_dep_node_not_yet_allocated_in_current_session(
-            cx.dep_context().sess(),
+            cx.dep_context().sess,
             &key,
             || {
                 format!(
@@ -352,8 +352,8 @@ impl DepGraphData {
             (with_deps(TaskDepsRef::Allow(&task_deps)), task_deps.into_inner().reads)
         };
 
-        let dcx = cx.dep_context();
-        let dep_node_index = self.hash_result_and_alloc_node(dcx, key, edges, &result, hash_result);
+        let dep_node_index =
+            self.hash_result_and_alloc_node(cx.dep_context(), key, edges, &result, hash_result);
 
         (result, dep_node_index)
     }
@@ -369,9 +369,9 @@ impl DepGraphData {
     /// FIXME: This could perhaps return a `WithDepNode` to ensure that the
     /// user of this function actually performs the read; we'll have to see
     /// how to make that work with `anon` in `execute_job_incr`, though.
-    pub fn with_anon_task_inner<Tcx: DepContext, OP, R>(
+    pub fn with_anon_task_inner<'tcx, OP, R>(
         &self,
-        cx: Tcx,
+        cx: TyCtxt<'tcx>,
         dep_kind: DepKind,
         op: OP,
     ) -> (R, DepNodeIndex)
@@ -438,17 +438,17 @@ impl DepGraphData {
     }
 
     /// Intern the new `DepNode` with the dependencies up-to-now.
-    fn hash_result_and_alloc_node<Ctxt: DepContext, R>(
+    fn hash_result_and_alloc_node<'tcx, R>(
         &self,
-        cx: &Ctxt,
+        tcx: TyCtxt<'tcx>,
         node: DepNode,
         edges: EdgesVec,
         result: &R,
         hash_result: Option<fn(&mut StableHashingContext<'_>, &R) -> Fingerprint>,
     ) -> DepNodeIndex {
-        let hashing_timer = cx.profiler().incr_result_hashing();
+        let hashing_timer = tcx.prof.incr_result_hashing();
         let current_fingerprint = hash_result.map(|hash_result| {
-            cx.with_stable_hashing_context(|mut hcx| hash_result(&mut hcx, result))
+            tcx.with_stable_hashing_context(|mut hcx| hash_result(&mut hcx, result))
         });
         let dep_node_index = self.alloc_and_color_node(node, edges, current_fingerprint);
         hashing_timer.finish_with_query_invocation_id(dep_node_index.into());
@@ -553,10 +553,10 @@ impl DepGraph {
     /// FIXME: If the code is changed enough for this node to be marked before requiring the
     /// caller's node, we suppose that those changes will be enough to mark this node red and
     /// force a recomputation using the "normal" way.
-    pub fn with_feed_task<Ctxt: DepContext, R>(
+    pub fn with_feed_task<'tcx, R>(
         &self,
         node: DepNode,
-        cx: Ctxt,
+        tcx: TyCtxt<'tcx>,
         result: &R,
         hash_result: Option<fn(&mut StableHashingContext<'_>, &R) -> Fingerprint>,
         format_value_fn: fn(&R) -> String,
@@ -572,7 +572,7 @@ impl DepGraph {
                 let dep_node_index = data.colors.current(prev_index);
                 if let Some(dep_node_index) = dep_node_index {
                     incremental_verify_ich(
-                        cx,
+                        tcx,
                         data,
                         result,
                         prev_index,
@@ -605,7 +605,7 @@ impl DepGraph {
                 }
             });
 
-            data.hash_result_and_alloc_node(&cx, node, edges, result, hash_result)
+            data.hash_result_and_alloc_node(tcx, node, edges, result, hash_result)
         } else {
             // Incremental compilation is turned off. We just execute the task
             // without tracking. We still provide a dep-node index that uniquely
@@ -1051,8 +1051,8 @@ impl DepGraph {
     ///
     /// This method will only load queries that will end up in the disk cache.
     /// Other queries will not be executed.
-    pub fn exec_cache_promotions<Tcx: DepContext>(&self, tcx: Tcx) {
-        let _prof_timer = tcx.profiler().generic_activity("incr_comp_query_cache_promotion");
+    pub fn exec_cache_promotions<'tcx>(&self, tcx: TyCtxt<'tcx>) {
+        let _prof_timer = tcx.prof.generic_activity("incr_comp_query_cache_promotion");
 
         let data = self.data.as_ref().unwrap();
         for prev_index in data.colors.values.indices() {

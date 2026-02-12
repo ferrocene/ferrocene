@@ -15,8 +15,7 @@ use rustc_middle::bug;
 #[expect(unused_imports, reason = "used by doc comments")]
 use rustc_middle::dep_graph::DepKindVTable;
 use rustc_middle::dep_graph::{
-    self, DepContext, DepNode, DepNodeIndex, DepNodeKey, HasDepContext, SerializedDepNodeIndex,
-    dep_kinds,
+    self, DepNode, DepNodeIndex, DepNodeKey, HasDepContext, SerializedDepNodeIndex, dep_kinds,
 };
 use rustc_middle::query::on_disk_cache::{
     AbsoluteBytePos, CacheDecoder, CacheEncoder, EncodedDepNodeIndex,
@@ -141,12 +140,10 @@ impl<'tcx> QueryCtxt<'tcx> {
     }
 }
 
-impl<'tcx> HasDepContext for QueryCtxt<'tcx> {
-    type DepContext = TyCtxt<'tcx>;
-
+impl<'tcx> HasDepContext<'tcx> for QueryCtxt<'tcx> {
     #[inline]
-    fn dep_context(&self) -> &Self::DepContext {
-        &self.tcx
+    fn dep_context(&self) -> TyCtxt<'tcx> {
+        self.tcx
     }
 }
 
@@ -165,7 +162,7 @@ pub(super) fn encode_all_query_results<'tcx>(
 }
 
 pub fn query_key_hash_verify_all<'tcx>(tcx: TyCtxt<'tcx>) {
-    if tcx.sess().opts.unstable_opts.incremental_verify_ich || cfg!(debug_assertions) {
+    if tcx.sess.opts.unstable_opts.incremental_verify_ich || cfg!(debug_assertions) {
         tcx.sess.time("query_key_hash_verify_all", || {
             for verify in super::QUERY_KEY_HASH_VERIFY.iter() {
                 verify(tcx);

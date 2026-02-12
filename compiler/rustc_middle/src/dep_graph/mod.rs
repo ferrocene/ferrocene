@@ -1,12 +1,10 @@
 use std::panic;
 
-use rustc_data_structures::profiling::SelfProfilerRef;
-use rustc_query_system::ich::StableHashingContext;
-use rustc_session::Session;
 use tracing::instrument;
 
 pub use self::dep_node::{
-    DepKind, DepNode, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds, label_strs,
+    DepKind, DepKindVTable, DepNode, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds,
+    label_strs,
 };
 pub use self::graph::{
     DepGraph, DepGraphData, DepNodeIndex, TaskDepsRef, WorkProduct, WorkProductMap, hash_result,
@@ -26,91 +24,18 @@ mod graph;
 mod query;
 mod serialized;
 
-pub trait DepContext: Copy {
-    /// Create a hashing context for hashing new results.
-    fn with_stable_hashing_context<R>(self, f: impl FnOnce(StableHashingContext<'_>) -> R) -> R;
-
-    /// Access the DepGraph.
-    fn dep_graph(&self) -> &DepGraph;
-
-    /// Access the profiler.
-    fn profiler(&self) -> &SelfProfilerRef;
-
-    /// Access the compiler session.
-    fn sess(&self) -> &Session;
-
-    fn dep_kind_vtable(&self, dep_node: DepKind) -> &dep_node::DepKindVTable<Self>;
-
-    #[inline(always)]
-    fn fingerprint_style(self, kind: DepKind) -> FingerprintStyle {
-        self.dep_kind_vtable(kind).fingerprint_style
-    }
-
-    #[inline(always)]
-    /// Return whether this kind always require evaluation.
-    // FIXME: remove this in favour of the version on `TyCtxt`.
-    fn is_eval_always(self, kind: DepKind) -> bool {
-        self.dep_kind_vtable(kind).is_eval_always
-    }
-
-    /// Try to force a dep node to execute and see if it's green.
-    ///
-    /// Returns true if the query has actually been forced. It is valid that a query
-    /// fails to be forced, e.g. when the query key cannot be reconstructed from the
-    /// dep-node or when the query kind outright does not support it.
-    #[inline]
-    #[instrument(skip(self, frame), level = "debug")]
-    fn try_force_from_dep_node(
-        self,
-        dep_node: DepNode,
-        prev_index: SerializedDepNodeIndex,
-        frame: &MarkFrame<'_>,
-    ) -> bool {
-        if let Some(force_fn) = self.dep_kind_vtable(dep_node.kind).force_from_dep_node {
-            match panic::catch_unwind(panic::AssertUnwindSafe(|| {
-                force_fn(self, dep_node, prev_index)
-            })) {
-                Err(value) => {
-                    if !value.is::<rustc_errors::FatalErrorMarker>() {
-                        print_markframe_trace(self.dep_graph(), frame);
-                    }
-                    panic::resume_unwind(value)
-                }
-                Ok(query_has_been_forced) => query_has_been_forced,
-            }
-        } else {
-            false
-        }
-    }
-
-    /// Load data from the on-disk cache.
-    fn try_load_from_on_disk_cache(self, dep_node: &DepNode) {
-        if let Some(try_load_fn) = self.dep_kind_vtable(dep_node.kind).try_load_from_on_disk_cache {
-            try_load_fn(self, *dep_node)
-        }
-    }
-
-    fn with_reduced_queries<T>(self, _: impl FnOnce() -> T) -> T;
+pub trait HasDepContext<'tcx>: Copy {
+    fn dep_context(&self) -> TyCtxt<'tcx>;
 }
 
-pub trait HasDepContext: Copy {
-    type DepContext: self::DepContext;
-
-    fn dep_context(&self) -> &Self::DepContext;
-}
-
-impl<T: DepContext> HasDepContext for T {
-    type DepContext = Self;
-
-    fn dep_context(&self) -> &Self::DepContext {
-        self
+impl<'tcx> HasDepContext<'tcx> for TyCtxt<'tcx> {
+    fn dep_context(&self) -> TyCtxt<'tcx> {
+        *self
     }
 }
 
-impl<T: HasDepContext, Q: Copy> HasDepContext for (T, Q) {
-    type DepContext = T::DepContext;
-
-    fn dep_context(&self) -> &Self::DepContext {
+impl<'tcx, T: HasDepContext<'tcx>, Q: Copy> HasDepContext<'tcx> for (T, Q) {
+    fn dep_context(&self) -> TyCtxt<'tcx> {
         self.0.dep_context()
     }
 }
@@ -142,8 +67,6 @@ impl FingerprintStyle {
         }
     }
 }
-
-pub type DepKindVTable<'tcx> = dep_node::DepKindVTable<TyCtxt<'tcx>>;
 
 pub struct DepsType;
 
@@ -192,33 +115,55 @@ impl DepsType {
     const DEP_KIND_MAX: u16 = dep_node::DEP_KIND_VARIANTS - 1;
 }
 
-impl<'tcx> DepContext for TyCtxt<'tcx> {
+impl<'tcx> TyCtxt<'tcx> {
     #[inline]
-    fn with_stable_hashing_context<R>(self, f: impl FnOnce(StableHashingContext<'_>) -> R) -> R {
-        TyCtxt::with_stable_hashing_context(self, f)
-    }
-
-    #[inline]
-    fn dep_graph(&self) -> &DepGraph {
-        &self.dep_graph
-    }
-
-    #[inline(always)]
-    fn profiler(&self) -> &SelfProfilerRef {
-        &self.prof
-    }
-
-    #[inline(always)]
-    fn sess(&self) -> &Session {
-        self.sess
-    }
-
-    #[inline]
-    fn dep_kind_vtable(&self, dk: DepKind) -> &DepKindVTable<'tcx> {
+    pub fn dep_kind_vtable(self, dk: DepKind) -> &'tcx DepKindVTable<'tcx> {
         &self.dep_kind_vtables[dk.as_usize()]
     }
 
     fn with_reduced_queries<T>(self, f: impl FnOnce() -> T) -> T {
         with_reduced_queries!(f())
+    }
+
+    #[inline(always)]
+    pub fn fingerprint_style(self, kind: DepKind) -> FingerprintStyle {
+        self.dep_kind_vtable(kind).fingerprint_style
+    }
+
+    /// Try to force a dep node to execute and see if it's green.
+    ///
+    /// Returns true if the query has actually been forced. It is valid that a query
+    /// fails to be forced, e.g. when the query key cannot be reconstructed from the
+    /// dep-node or when the query kind outright does not support it.
+    #[inline]
+    #[instrument(skip(self, frame), level = "debug")]
+    fn try_force_from_dep_node(
+        self,
+        dep_node: DepNode,
+        prev_index: SerializedDepNodeIndex,
+        frame: &MarkFrame<'_>,
+    ) -> bool {
+        if let Some(force_fn) = self.dep_kind_vtable(dep_node.kind).force_from_dep_node {
+            match panic::catch_unwind(panic::AssertUnwindSafe(|| {
+                force_fn(self, dep_node, prev_index)
+            })) {
+                Err(value) => {
+                    if !value.is::<rustc_errors::FatalErrorMarker>() {
+                        print_markframe_trace(&self.dep_graph, frame);
+                    }
+                    panic::resume_unwind(value)
+                }
+                Ok(query_has_been_forced) => query_has_been_forced,
+            }
+        } else {
+            false
+        }
+    }
+
+    /// Load data from the on-disk cache.
+    fn try_load_from_on_disk_cache(self, dep_node: &DepNode) {
+        if let Some(try_load_fn) = self.dep_kind_vtable(dep_node.kind).try_load_from_on_disk_cache {
+            try_load_fn(self, *dep_node)
+        }
     }
 }

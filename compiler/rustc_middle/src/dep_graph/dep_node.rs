@@ -67,7 +67,7 @@ use rustc_macros::{Decodable, Encodable};
 use rustc_query_system::ich::StableHashingContext;
 use rustc_span::Symbol;
 
-use super::{DepContext, FingerprintStyle, SerializedDepNodeIndex};
+use super::{FingerprintStyle, SerializedDepNodeIndex};
 use crate::mir::mono::MonoItem;
 use crate::ty::TyCtxt;
 
@@ -117,18 +117,14 @@ impl DepNode {
     /// Creates a new, parameterless DepNode. This method will assert
     /// that the DepNode corresponding to the given DepKind actually
     /// does not require any parameters.
-    pub fn new_no_params<Tcx>(tcx: Tcx, kind: DepKind) -> DepNode
-    where
-        Tcx: super::DepContext,
-    {
+    pub fn new_no_params<'tcx>(tcx: TyCtxt<'tcx>, kind: DepKind) -> DepNode {
         debug_assert_eq!(tcx.fingerprint_style(kind), FingerprintStyle::Unit);
         DepNode { kind, hash: Fingerprint::ZERO.into() }
     }
 
-    pub fn construct<Tcx, Key>(tcx: Tcx, kind: DepKind, arg: &Key) -> DepNode
+    pub fn construct<'tcx, Key>(tcx: TyCtxt<'tcx>, kind: DepKind, arg: &Key) -> DepNode
     where
-        Tcx: super::DepContext,
-        Key: DepNodeKey<Tcx>,
+        Key: DepNodeKey<'tcx>,
     {
         let hash = arg.to_fingerprint(tcx);
         let dep_node = DepNode { kind, hash: hash.into() };
@@ -136,10 +132,10 @@ impl DepNode {
         #[cfg(debug_assertions)]
         {
             if !tcx.fingerprint_style(kind).reconstructible()
-                && (tcx.sess().opts.unstable_opts.incremental_info
-                    || tcx.sess().opts.unstable_opts.query_dep_graph)
+                && (tcx.sess.opts.unstable_opts.incremental_info
+                    || tcx.sess.opts.unstable_opts.query_dep_graph)
             {
-                tcx.dep_graph().register_dep_node_debug_str(dep_node, || arg.to_debug_str(tcx));
+                tcx.dep_graph.register_dep_node_debug_str(dep_node, || arg.to_debug_str(tcx));
             }
         }
 
@@ -149,10 +145,11 @@ impl DepNode {
     /// Construct a DepNode from the given DepKind and DefPathHash. This
     /// method will assert that the given DepKind actually requires a
     /// single DefId/DefPathHash parameter.
-    pub fn from_def_path_hash<Tcx>(tcx: Tcx, def_path_hash: DefPathHash, kind: DepKind) -> Self
-    where
-        Tcx: super::DepContext,
-    {
+    pub fn from_def_path_hash<'tcx>(
+        tcx: TyCtxt<'tcx>,
+        def_path_hash: DefPathHash,
+        kind: DepKind,
+    ) -> Self {
         debug_assert!(tcx.fingerprint_style(kind) == FingerprintStyle::DefPathHash);
         DepNode { kind, hash: def_path_hash.0.into() }
     }
@@ -172,14 +169,14 @@ impl fmt::Debug for DepNode {
 }
 
 /// Trait for query keys as seen by dependency-node tracking.
-pub trait DepNodeKey<Tcx: DepContext>: fmt::Debug + Sized {
+pub trait DepNodeKey<'tcx>: fmt::Debug + Sized {
     fn fingerprint_style() -> FingerprintStyle;
 
     /// This method turns a query key into an opaque `Fingerprint` to be used
     /// in `DepNode`.
-    fn to_fingerprint(&self, _: Tcx) -> Fingerprint;
+    fn to_fingerprint(&self, tcx: TyCtxt<'tcx>) -> Fingerprint;
 
-    fn to_debug_str(&self, tcx: Tcx) -> String;
+    fn to_debug_str(&self, tcx: TyCtxt<'tcx>) -> String;
 
     /// This method tries to recover the query key from the given `DepNode`,
     /// something which is needed when forcing `DepNode`s during red-green
@@ -187,11 +184,11 @@ pub trait DepNodeKey<Tcx: DepContext>: fmt::Debug + Sized {
     /// `fingerprint_style()` is not `FingerprintStyle::Opaque`.
     /// It is always valid to return `None` here, in which case incremental
     /// compilation will treat the query as having changed instead of forcing it.
-    fn recover(tcx: Tcx, dep_node: &DepNode) -> Option<Self>;
+    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self>;
 }
 
 // Blanket impl of `DepNodeKey`, which is specialized by other impls elsewhere.
-impl<Tcx: DepContext, T> DepNodeKey<Tcx> for T
+impl<'tcx, T> DepNodeKey<'tcx> for T
 where
     T: for<'a> HashStable<StableHashingContext<'a>> + fmt::Debug,
 {
@@ -201,7 +198,7 @@ where
     }
 
     #[inline(always)]
-    default fn to_fingerprint(&self, tcx: Tcx) -> Fingerprint {
+    default fn to_fingerprint(&self, tcx: TyCtxt<'tcx>) -> Fingerprint {
         tcx.with_stable_hashing_context(|mut hcx| {
             let mut hasher = StableHasher::new();
             self.hash_stable(&mut hcx, &mut hasher);
@@ -210,7 +207,7 @@ where
     }
 
     #[inline(always)]
-    default fn to_debug_str(&self, tcx: Tcx) -> String {
+    default fn to_debug_str(&self, tcx: TyCtxt<'tcx>) -> String {
         // Make sure to print dep node params with reduced queries since printing
         // may themselves call queries, which may lead to (possibly untracked!)
         // query cycles.
@@ -218,7 +215,7 @@ where
     }
 
     #[inline(always)]
-    default fn recover(_: Tcx, _: &DepNode) -> Option<Self> {
+    default fn recover(_: TyCtxt<'tcx>, _: &DepNode) -> Option<Self> {
         None
     }
 }
@@ -228,7 +225,7 @@ where
 /// Information is retrieved by indexing the `DEP_KINDS` array using the integer value
 /// of the `DepKind`. Overall, this allows to implement `DepContext` using this manual
 /// jump table instead of large matches.
-pub struct DepKindVTable<Tcx: DepContext> {
+pub struct DepKindVTable<'tcx> {
     /// Anonymous queries cannot be replayed from one compiler invocation to the next.
     /// When their result is needed, it is recomputed. They are useful for fine-grained
     /// dependency tracking, and caching within one compiler invocation.
@@ -279,11 +276,12 @@ pub struct DepKindVTable<Tcx: DepContext> {
     /// with kind `MirValidated`, we know that the GUID/fingerprint of the `DepNode`
     /// is actually a `DefPathHash`, and can therefore just look up the corresponding
     /// `DefId` in `tcx.def_path_hash_to_def_id`.
-    pub force_from_dep_node:
-        Option<fn(tcx: Tcx, dep_node: DepNode, prev_index: SerializedDepNodeIndex) -> bool>,
+    pub force_from_dep_node: Option<
+        fn(tcx: TyCtxt<'tcx>, dep_node: DepNode, prev_index: SerializedDepNodeIndex) -> bool,
+    >,
 
     /// Invoke a query to put the on-disk cached value in memory.
-    pub try_load_from_on_disk_cache: Option<fn(Tcx, DepNode)>,
+    pub try_load_from_on_disk_cache: Option<fn(TyCtxt<'tcx>, DepNode)>,
 
     /// The name of this dep kind.
     pub name: &'static &'static str,

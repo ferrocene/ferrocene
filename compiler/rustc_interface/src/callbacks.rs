@@ -13,7 +13,7 @@ use std::fmt;
 
 use rustc_errors::{DiagInner, TRACK_DIAGNOSTIC};
 use rustc_middle::dep_graph::dep_node::default_dep_kind_debug;
-use rustc_middle::dep_graph::{DepContext, DepKind, DepNode, TaskDepsRef};
+use rustc_middle::dep_graph::{DepKind, DepNode, TaskDepsRef};
 use rustc_middle::ty::tls;
 
 fn track_span_parent(def_id: rustc_span::def_id::LocalDefId) {

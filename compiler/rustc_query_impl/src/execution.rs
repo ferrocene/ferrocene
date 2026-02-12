@@ -14,7 +14,7 @@ use rustc_middle::ty::TyCtxt;
 use rustc_middle::verify_ich::incremental_verify_ich;
 use rustc_span::{DUMMY_SP, Span};
 
-use crate::dep_graph::{DepContext, DepNode, DepNodeIndex};
+use crate::dep_graph::{DepNode, DepNodeIndex};
 use crate::job::{QueryJobInfo, QueryJobMap, find_cycle_in_stack, report_cycle};
 use crate::{QueryCtxt, QueryFlags, SemiDynamicQueryDispatcher};
 
@@ -535,7 +535,7 @@ fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: Quer
     // can be forced from `DepNode`.
     debug_assert!(
         !query.will_cache_on_disk_for_key(qcx.tcx, key)
-            || !qcx.dep_context().fingerprint_style(dep_node.kind).reconstructible(),
+            || !qcx.tcx.fingerprint_style(dep_node.kind).reconstructible(),
         "missing on-disk cache entry for {dep_node:?}"
     );
 

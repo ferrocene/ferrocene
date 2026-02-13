@@ -40,4 +40,25 @@ fn i<T: Gat>() {
     let _: Assoc = todo!(); //~ ERROR cannot find type `Assoc` in this scope
 }
 
+fn j<T: First>() {
+    struct Local;
+    impl Local {
+        fn method<U: First>() {
+            let _: Assoc = todo!(); //~ ERROR cannot find type `Assoc` in this scope
+        }
+    }
+
+    let _ = std::marker::PhantomData::<T>;
+}
+
+pub struct S;
+impl S {
+    fn method<T: First>() {
+        fn inner() {
+            let _: Assoc = todo!(); //~ ERROR cannot find type `Assoc` in this scope
+        }
+        inner();
+    }
+}
+
 fn main() {}

@@ -205,10 +205,6 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         })
     }
 
-    fn assoc_type_required_generic_args_suggestion(&self, assoc_type_def_id: DefId) -> String {
-        self.r.item_required_generic_args_suggestion(assoc_type_def_id)
-    }
-
     /// This does best-effort work to generate suggestions for associated types.
     fn suggest_assoc_type_from_bounds(
         &mut self,
@@ -323,7 +319,10 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             record_from_generics(self, generics);
         }
 
-        if let Some(assoc) = self.diag_metadata.current_impl_item {
+        if let Some(item) = self.diag_metadata.current_item
+            && matches!(item.kind, ItemKind::Impl(..))
+            && let Some(assoc) = self.diag_metadata.current_impl_item
+        {
             let generics = match &assoc.kind {
                 AssocItemKind::Const(box ast::ConstItem { generics, .. })
                 | AssocItemKind::Fn(box ast::Fn { generics, .. })
@@ -346,7 +345,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 let assoc_segment = format!(
                     "{}{}",
                     assoc_name,
-                    self.assoc_type_required_generic_args_suggestion(assoc_type_def_id)
+                    self.r.item_required_generic_args_suggestion(assoc_type_def_id)
                 );
                 suggestions.insert(format!("{ty_param}::{assoc_segment}"));
             } else {
@@ -354,7 +353,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     let assoc_segment = format!(
                         "{}{}",
                         assoc_name,
-                        self.assoc_type_required_generic_args_suggestion(assoc_type_def_id)
+                        self.r.item_required_generic_args_suggestion(assoc_type_def_id)
                     );
                     for trait_path in trait_paths {
                         suggestions
@@ -371,24 +370,13 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         let mut suggestions: Vec<String> = suggestions.into_iter().collect();
         suggestions.sort();
 
-        match suggestions.as_slice() {
-            [one] => {
-                err.span_suggestion_verbose(
-                    ident_span,
-                    "use the associated type",
-                    one,
-                    Applicability::MaybeIncorrect,
-                );
-            }
-            _ => {
-                err.span_suggestions(
-                    ident_span,
-                    "use an associated type",
-                    suggestions,
-                    Applicability::MaybeIncorrect,
-                );
-            }
-        };
+        err.span_suggestions_with_style(
+            ident_span,
+            "you might have meant to use an associated type of the same name",
+            suggestions,
+            Applicability::MaybeIncorrect,
+            SuggestionStyle::ShowAlways,
+        );
 
         true
     }

@@ -4,7 +4,7 @@ error[E0425]: cannot find type `Item` in this scope
 LL |     Item: Eq + Debug,
    |     ^^^^
    |
-help: use the associated type
+help: you might have meant to use an associated type of the same name
    |
 LL |     I::Item: Eq + Debug,
    |     +++

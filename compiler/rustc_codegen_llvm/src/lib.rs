@@ -153,7 +153,6 @@ impl WriteBackendMethods for LlvmCodegenBackend {
     type ModuleBuffer = back::lto::ModuleBuffer;
     type TargetMachine = OwnedTargetMachine;
     type ThinData = back::lto::ThinData;
-    type ThinBuffer = back::lto::ModuleBuffer;
     fn print_pass_timings(&self) {
         let timings = llvm::build_string(|s| unsafe { llvm::LLVMRustPrintPassTimings(s) }).unwrap();
         print!("{timings}");
@@ -193,7 +192,7 @@ impl WriteBackendMethods for LlvmCodegenBackend {
         dcx: DiagCtxtHandle<'_>,
         exported_symbols_for_lto: &[String],
         each_linked_rlib_for_lto: &[PathBuf],
-        modules: Vec<(String, Self::ThinBuffer)>,
+        modules: Vec<(String, Self::ModuleBuffer)>,
         cached_modules: Vec<(SerializedModule<Self::ModuleBuffer>, WorkProduct)>,
     ) -> (Vec<ThinModule<Self>>, Vec<WorkProduct>) {
         back::lto::run_thin(
@@ -233,11 +232,8 @@ impl WriteBackendMethods for LlvmCodegenBackend {
     ) -> CompiledModule {
         back::write::codegen(cgcx, prof, shared_emitter, module, config)
     }
-    fn prepare_thin(module: Self::Module) -> Self::ThinBuffer {
-        back::lto::ModuleBuffer::new(module.llmod(), true)
-    }
-    fn serialize_module(module: Self::Module) -> Self::ModuleBuffer {
-        back::lto::ModuleBuffer::new(module.llmod(), false)
+    fn serialize_module(module: Self::Module, is_thin: bool) -> Self::ModuleBuffer {
+        back::lto::ModuleBuffer::new(module.llmod(), is_thin)
     }
 }
 

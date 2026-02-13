@@ -1063,18 +1063,17 @@ fn lower_fn_sig_recovering_infer_ret_ty<'tcx>(
     )
 }
 
-/// Convert `ReLateParam`s in `value` back into `ReBound`s so the returned
-/// `PolyFnSig` properly binds all late-bound vars.
+/// Convert `ReLateParam`s in `value` back into `ReBound`s and bind it with `bound_vars`.
 fn late_param_regions_to_bound<'tcx, T>(
     tcx: TyCtxt<'tcx>,
     scope: DefId,
     bound_vars: &'tcx ty::List<ty::BoundVariableKind<'tcx>>,
     value: T,
-) -> T
+) -> ty::Binder<'tcx, T>
 where
     T: ty::TypeFoldable<TyCtxt<'tcx>>,
 {
-    fold_regions(tcx, value, |r, debruijn| match r.kind() {
+    let value = fold_regions(tcx, value, |r, debruijn| match r.kind() {
         ty::ReLateParam(lp) => {
             // Should be in scope, otherwise inconsistency happens somewhere.
             assert_eq!(lp.scope, scope);
@@ -1123,7 +1122,9 @@ where
             ty::Region::new_bound(tcx, debruijn, br)
         }
         _ => r,
-    })
+    });
+
+    ty::Binder::bind_with_vars(value, bound_vars)
 }
 
 fn recover_infer_ret_ty<'tcx>(
@@ -1216,9 +1217,7 @@ fn recover_infer_ret_ty<'tcx>(
         fn_sig.abi,
     );
 
-    let fn_sig = late_param_regions_to_bound(tcx, scope, bound_vars, fn_sig);
-
-    ty::Binder::bind_with_vars(fn_sig, bound_vars)
+    late_param_regions_to_bound(tcx, scope, bound_vars, fn_sig)
 }
 
 pub fn suggest_impl_trait<'tcx>(

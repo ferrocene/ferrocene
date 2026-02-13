@@ -87,6 +87,10 @@ passes_deprecated_annotation_has_no_effect =
 passes_deprecated_attribute =
     deprecated attribute must be paired with either stable or unstable attribute
 
+passes_diagnostic_diagnostic_on_const_only_for_non_const_trait_impls =
+    `#[diagnostic::on_const]` can only be applied to non-const trait impls
+    .label = this is a const trait impl
+
 passes_diagnostic_diagnostic_on_const_only_for_trait_impls =
     `#[diagnostic::on_const]` can only be applied to trait impls
     .label = not a trait impl
@@ -302,8 +306,6 @@ passes_layout_align =
     align: {$align}
 passes_layout_homogeneous_aggregate =
     homogeneous_aggregate: {$homogeneous_aggregate}
-passes_layout_invalid_attribute =
-    `#[rustc_layout]` can only be applied to `struct`/`enum`/`union` declarations and type aliases
 passes_layout_of =
     layout_of({$normalized_ty}) = {$ty_layout}
 passes_layout_size =

@@ -2,26 +2,30 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
+#![feature(adt_const_params)]
 #![feature(min_specialization)]
 #![feature(rustc_attrs)]
 // tidy-alphabetical-end
+
+use std::marker::ConstParamTy;
 
 use rustc_data_structures::stable_hasher::HashStable;
 use rustc_data_structures::sync::AtomicU64;
 use rustc_middle::arena::Arena;
 use rustc_middle::dep_graph::{self, DepKind, DepKindVTable, DepNodeIndex};
+use rustc_middle::queries::{
+    self, ExternProviders, Providers, QueryCaches, QueryEngine, QueryStates,
+};
+use rustc_middle::query::AsLocalKey;
 use rustc_middle::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use rustc_middle::query::plumbing::{QuerySystem, QuerySystemFns, QueryVTable};
-use rustc_middle::query::{
-    AsLocalKey, ExternProviders, Providers, QueryCaches, QueryEngine, QueryStates, queries,
-};
 use rustc_middle::ty::TyCtxt;
 use rustc_query_system::Value;
 use rustc_query_system::dep_graph::SerializedDepNodeIndex;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{
     CycleError, CycleErrorHandling, HashResult, QueryCache, QueryDispatcher, QueryMap, QueryMode,
-    QueryStackDeferred, QueryState, get_query_incr, get_query_non_incr,
+    QueryState, get_query_incr, get_query_non_incr,
 };
 use rustc_span::{ErrorGuaranteed, Span};
 
@@ -35,29 +39,34 @@ pub use crate::plumbing::{QueryCtxt, query_key_hash_verify_all};
 mod profiling_support;
 pub use self::profiling_support::alloc_self_profile_query_strings;
 
+#[derive(ConstParamTy)] // Allow this struct to be used for const-generic values.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct QueryFlags {
+    /// True if this query has the `anon` modifier.
+    is_anon: bool,
+    /// True if this query has the `depth_limit` modifier.
+    is_depth_limit: bool,
+    /// True if this query has the `feedable` modifier.
+    is_feedable: bool,
+}
+
 /// Combines a [`QueryVTable`] with some additional compile-time booleans
 /// to implement [`QueryDispatcher`], for use by code in [`rustc_query_system`].
 ///
 /// Baking these boolean flags into the type gives a modest but measurable
 /// improvement to compiler perf and compiler code size; see
 /// <https://github.com/rust-lang/rust/pull/151633>.
-struct SemiDynamicQueryDispatcher<
-    'tcx,
-    C: QueryCache,
-    const ANON: bool,
-    const DEPTH_LIMIT: bool,
-    const FEEDABLE: bool,
-> {
+struct SemiDynamicQueryDispatcher<'tcx, C: QueryCache, const FLAGS: QueryFlags> {
     vtable: &'tcx QueryVTable<'tcx, C>,
 }
 
 // Manually implement Copy/Clone, because deriving would put trait bounds on the cache type.
-impl<'tcx, C: QueryCache, const ANON: bool, const DEPTH_LIMIT: bool, const FEEDABLE: bool> Copy
-    for SemiDynamicQueryDispatcher<'tcx, C, ANON, DEPTH_LIMIT, FEEDABLE>
+impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> Copy
+    for SemiDynamicQueryDispatcher<'tcx, C, FLAGS>
 {
 }
-impl<'tcx, C: QueryCache, const ANON: bool, const DEPTH_LIMIT: bool, const FEEDABLE: bool> Clone
-    for SemiDynamicQueryDispatcher<'tcx, C, ANON, DEPTH_LIMIT, FEEDABLE>
+impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> Clone
+    for SemiDynamicQueryDispatcher<'tcx, C, FLAGS>
 {
     fn clone(&self) -> Self {
         *self
@@ -65,8 +74,8 @@ impl<'tcx, C: QueryCache, const ANON: bool, const DEPTH_LIMIT: bool, const FEEDA
 }
 
 // This is `impl QueryDispatcher for SemiDynamicQueryDispatcher`.
-impl<'tcx, C: QueryCache, const ANON: bool, const DEPTH_LIMIT: bool, const FEEDABLE: bool>
-    QueryDispatcher for SemiDynamicQueryDispatcher<'tcx, C, ANON, DEPTH_LIMIT, FEEDABLE>
+impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> QueryDispatcher<'tcx>
+    for SemiDynamicQueryDispatcher<'tcx, C, FLAGS>
 where
     for<'a> C::Key: HashStable<StableHashingContext<'a>>,
 {
@@ -81,29 +90,23 @@ where
     }
 
     #[inline(always)]
-    fn cache_on_disk(self, tcx: TyCtxt<'tcx>, key: &Self::Key) -> bool {
-        (self.vtable.cache_on_disk)(tcx, key)
+    fn will_cache_on_disk_for_key(self, tcx: TyCtxt<'tcx>, key: &Self::Key) -> bool {
+        self.vtable.will_cache_on_disk_for_key_fn.map_or(false, |f| f(tcx, key))
     }
 
     #[inline(always)]
-    fn query_state<'a>(
-        self,
-        qcx: QueryCtxt<'tcx>,
-    ) -> &'a QueryState<Self::Key, QueryStackDeferred<'tcx>>
-    where
-        QueryCtxt<'tcx>: 'a,
-    {
+    fn query_state(self, qcx: QueryCtxt<'tcx>) -> &'tcx QueryState<'tcx, Self::Key> {
         // Safety:
         // This is just manually doing the subfield referencing through pointer math.
         unsafe {
             &*(&qcx.tcx.query_system.states as *const QueryStates<'tcx>)
                 .byte_add(self.vtable.query_state)
-                .cast::<QueryState<Self::Key, QueryStackDeferred<'tcx>>>()
+                .cast::<QueryState<'tcx, Self::Key>>()
         }
     }
 
     #[inline(always)]
-    fn query_cache<'a>(self, qcx: QueryCtxt<'tcx>) -> &'a Self::Cache {
+    fn query_cache(self, qcx: QueryCtxt<'tcx>) -> &'tcx Self::Cache {
         // Safety:
         // This is just manually doing the subfield referencing through pointer math.
         unsafe {
@@ -131,21 +134,18 @@ where
         prev_index: SerializedDepNodeIndex,
         index: DepNodeIndex,
     ) -> Option<Self::Value> {
-        if self.vtable.can_load_from_disk {
-            (self.vtable.try_load_from_disk)(qcx.tcx, key, prev_index, index)
-        } else {
-            None
-        }
+        // `?` will return None immediately for queries that never cache to disk.
+        self.vtable.try_load_from_disk_fn?(qcx.tcx, key, prev_index, index)
     }
 
     #[inline]
-    fn loadable_from_disk(
+    fn is_loadable_from_disk(
         self,
         qcx: QueryCtxt<'tcx>,
         key: &Self::Key,
         index: SerializedDepNodeIndex,
     ) -> bool {
-        (self.vtable.loadable_from_disk)(qcx.tcx, key, index)
+        self.vtable.is_loadable_from_disk_fn.map_or(false, |f| f(qcx.tcx, key, index))
     }
 
     fn value_from_cycle_error(
@@ -164,7 +164,7 @@ where
 
     #[inline(always)]
     fn anon(self) -> bool {
-        ANON
+        FLAGS.is_anon
     }
 
     #[inline(always)]
@@ -174,12 +174,12 @@ where
 
     #[inline(always)]
     fn depth_limit(self) -> bool {
-        DEPTH_LIMIT
+        FLAGS.is_depth_limit
     }
 
     #[inline(always)]
     fn feedable(self) -> bool {
-        FEEDABLE
+        FLAGS.is_feedable
     }
 
     #[inline(always)]
@@ -211,21 +211,23 @@ where
 /// on the type `rustc_query_impl::query_impl::$name::QueryType`.
 trait QueryDispatcherUnerased<'tcx> {
     type UnerasedValue;
-    type Dispatcher: QueryDispatcher<Qcx = QueryCtxt<'tcx>>;
+    type Dispatcher: QueryDispatcher<'tcx, Qcx = QueryCtxt<'tcx>>;
 
     const NAME: &'static &'static str;
 
     fn query_dispatcher(tcx: TyCtxt<'tcx>) -> Self::Dispatcher;
 
-    fn restore_val(value: <Self::Dispatcher as QueryDispatcher>::Value) -> Self::UnerasedValue;
+    fn restore_val(
+        value: <Self::Dispatcher as QueryDispatcher<'tcx>>::Value,
+    ) -> Self::UnerasedValue;
 }
 
-pub fn query_system<'a>(
+pub fn query_system<'tcx>(
     local_providers: Providers,
     extern_providers: ExternProviders,
     on_disk_cache: Option<OnDiskCache>,
     incremental: bool,
-) -> QuerySystem<'a> {
+) -> QuerySystem<'tcx> {
     QuerySystem {
         states: Default::default(),
         arenas: Default::default(),

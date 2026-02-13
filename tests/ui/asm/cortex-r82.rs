@@ -22,6 +22,10 @@ use minicore::*;
  * A `/*  */` comment indicates that the extension is being tested in the ISA level codegen test
  * (`tests/ui/asm/aarch64v8r.rs`)
  *
+ * Note that as we use the hard-float `aarch64v8r-unknown-none` target as the base, the neon
+ * extension is present (`NEON_FPm=1`). This affects which R82-specific extensions are enabled
+ * (see "when `NEON_FPm == 1`" note in Cortex-R82 Processor Technical Reference Manual)
+ *
  * ## References:
  *
  * - Arm Cortex-R82 Processor Technical Reference Manual Revision r3p1 (102670_0301_06_en Issue 6)
@@ -55,7 +59,7 @@ pub fn mandatory_extensions() {
     // FEAT_nTLBPA
     /* FEAT_CRC32 */
     /* FEAT_LSE */
-    feat_rdm();
+    feat_rdm(); // mandatory given that NEON_FPm=1
     /* FEAT_HPDS */
     /* FEAT_PAN */
     // FEAT_HAFDBS
@@ -68,10 +72,10 @@ pub fn mandatory_extensions() {
     /* FEAT_Debugv8p2 */
     /* FEAT_ASMv8p2 */
     // FEAT_IESB
-    feat_fp16();
+    feat_fp16(); // mandatory given that NEON_FPm=1
     // FEAT_PCSRv8p2
-    feat_dotprod();
-    feat_fhm();
+    feat_dotprod(); // mandatory given that NEON_FPm=1
+    feat_fhm(); // mandatory given that NEON_FPm=1
     feat_dpb2();
     /* FEAT_PAuth */
     // FEAT_PACQARMA3
@@ -79,9 +83,9 @@ pub fn mandatory_extensions() {
     // FEAT_FPAC
     // FEAT_FPACCOMBINE
     // FEAT_CONSTPACFIELD
-    feat_jscvt();
+    feat_jscvt(); // mandatory given that NEON_FPm=1
     /* FEAT_LRCPC */
-    feat_fcma();
+    feat_fcma(); // mandatory given that NEON_FPm=1
     // FEAT_DoPD
     // FEAT_SEL2
     /* FEAT_S2FWB */

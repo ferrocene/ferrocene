@@ -100,7 +100,6 @@
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(bigint_helper_methods))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
 #![feature(cfg_select)]
@@ -110,6 +109,7 @@
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(const_select_unpredictable)]
+#![feature(const_unsigned_bigint_helpers)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
@@ -119,19 +119,21 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
 #![feature(panic_internals)]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(set_ptr_value))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(signed_bigint_helpers))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(type_info))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![feature(ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(utf16_extra))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(variant_count))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(widening_mul))]
 // not-alphabetical-end
 //
 // Language features:

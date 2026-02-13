@@ -72,22 +72,27 @@ GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
-    "aarch64-rhivos2-linux-gnu" # This target is technically only supported aarch64 -> aarch64
 ]
 
 # Targets only built (and self-tested!) on Linux.
 AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
+AARCH64_LINUX_BUILD_STD_TARGETS = [
+    "aarch64-rhivos2-linux-gnu" # This target is technically only supported aarch64 -> aarch64
+]
 X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
 X86_64_LINUX_BUILD_STD_TARGETS = [
     "riscv64gc-unknown-linux-gnu",
     "x86_64-unknown-linux-musl",
     "aarch64-unknown-linux-musl",
 ]
+LINUX_BUILD_HOSTS = AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_HOSTS
+LINUX_BUILD_STD_TARGETS = AARCH64_LINUX_BUILD_STD_TARGETS_ALL + X86_64_LINUX_BUILD_STD_TARGETS_ALL
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
 X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
-X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS_ALL
-AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + GENERIC_BUILD_STD_TARGETS
+X86_64_LINUX_SELF_TEST_TARGETS = LINUX_BUILD_HOSTS + LINUX_BUILD_STD_TARGETS + QNX_TARGETS
+AARCH64_LINUX_BUILD_STD_TARGETS_ALL = AARCH64_LINUX_BUILD_STD_TARGETS # Currently, all other targets are built by x86_64
+AARCH64_LINUX_SELF_TEST_TARGETS = LINUX_BUILD_HOSTS + LINUX_BUILD_STD_TARGETS
 
 # Targets only built (and tested!) on Mac
 AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
@@ -207,6 +212,8 @@ def calculate_targets(host_plus_stage: str):
     elif stage == "std":
         if host == "x86_64-unknown-linux-gnu":
             targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
+        if host == "aarch64-unknown-linux-gnu":
+            targets = AARCH64_LINUX_BUILD_STD_TARGETS_ALL
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":

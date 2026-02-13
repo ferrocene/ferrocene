@@ -35,7 +35,7 @@ impl Step for AllCoverageReports {
         };
 
         let mut saw_coverage = false;
-        for entry in builder.read_dir(&outcomes_dir) {
+        for entry in builder.read_dir(&outcomes_dir.join(self.target.to_string())) {
             let name_buf = entry.file_name();
             let name = name_buf.to_str().expect("only UTF-8 file paths supported");
             assert!(name.ends_with(".html"), "unrecognized coverage report format");

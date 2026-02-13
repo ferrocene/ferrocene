@@ -63,10 +63,10 @@ use rustc_data_structures::stable_hasher::{HashStable, StableHasher, StableOrd, 
 use rustc_hir::def_id::DefId;
 use rustc_hir::definitions::DefPathHash;
 use rustc_macros::{Decodable, Encodable};
-use rustc_query_system::ich::StableHashingContext;
 use rustc_span::Symbol;
 
 use super::{FingerprintStyle, SerializedDepNodeIndex};
+use crate::ich::StableHashingContext;
 use crate::mir::mono::MonoItem;
 use crate::ty::{TyCtxt, tls};
 

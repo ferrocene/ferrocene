@@ -181,6 +181,7 @@ attribute_parsers!(
         Single<IgnoreParser>,
         Single<InlineParser>,
         Single<InstructionSetParser>,
+        Single<LangParser>,
         Single<LinkNameParser>,
         Single<LinkOrdinalParser>,
         Single<LinkSectionParser>,

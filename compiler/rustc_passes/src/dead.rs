@@ -22,7 +22,7 @@ use rustc_middle::ty::{self, AssocTag, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::DEAD_CODE;
 use rustc_session::lint::{self, LintExpectationId};
-use rustc_span::{Symbol, kw, sym};
+use rustc_span::{Symbol, kw};
 
 use crate::errors::{
     ChangeFields, IgnoredDerivedImpls, MultipleDeadCodes, ParentInfo, UselessAssignment,
@@ -706,12 +706,6 @@ fn has_allow_dead_code_or_lang_attr(
     tcx: TyCtxt<'_>,
     def_id: LocalDefId,
 ) -> Option<ComesFromAllowExpect> {
-    fn has_lang_attr(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
-        tcx.has_attr(def_id, sym::lang)
-            // Stable attribute for #[lang = "panic_impl"]
-            || tcx.has_attr(def_id, sym::panic_handler)
-    }
-
     fn has_allow_expect_dead_code(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
         let hir_id = tcx.local_def_id_to_hir_id(def_id);
         let lint_level = tcx.lint_level_at_node(lint::builtin::DEAD_CODE, hir_id).level;
@@ -732,7 +726,9 @@ fn has_allow_dead_code_or_lang_attr(
 
     if has_allow_expect_dead_code(tcx, def_id) {
         Some(ComesFromAllowExpect::Yes)
-    } else if has_used_like_attr(tcx, def_id) || has_lang_attr(tcx, def_id) {
+    } else if has_used_like_attr(tcx, def_id)
+        || find_attr!(tcx.get_all_attrs(def_id), AttributeKind::Lang(..))
+    {
         Some(ComesFromAllowExpect::No)
     } else {
         None

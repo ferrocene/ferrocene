@@ -139,3 +139,65 @@ fn slice_ascii_simple() {
     let sparkle_heart = [240, 159, 146, 150];
     assert!(!core::slice::is_ascii_simple(&sparkle_heart));
 }
+
+// covers: `<core::slice::ascii::EscapeAscii<'a> as core::fmt::Display>::fmt`
+#[test]
+fn slice_escape_ascii_display_fmt_nonempty_front() {
+    let slice = b"0\t\r\n'\"\\\x9d";
+    let mut escaped = slice.escape_ascii();
+
+    for s in [
+        "0\\t\\r\\n\\'\\\"\\\\\\x9d",
+        "\\t\\r\\n\\'\\\"\\\\\\x9d",
+        "t\\r\\n\\'\\\"\\\\\\x9d",
+        "\\r\\n\\'\\\"\\\\\\x9d",
+        "r\\n\\'\\\"\\\\\\x9d",
+        "\\n\\'\\\"\\\\\\x9d",
+        "n\\'\\\"\\\\\\x9d",
+        "\\'\\\"\\\\\\x9d",
+        "'\\\"\\\\\\x9d",
+        "\\\"\\\\\\x9d",
+        "\"\\\\\\x9d",
+        "\\\\\\x9d",
+        "\\\\x9d",
+        "\\x9d",
+        "x9d",
+        "9d",
+        "d",
+        "",
+    ] {
+        assert_eq!(format!("{escaped}"), s);
+        escaped.next();
+    }
+}
+
+// covers: `<core::slice::ascii::EscapeAscii<'a> as core::fmt::Display>::fmt`
+#[test]
+fn slice_escape_ascii_display_fmt_nonempty_back() {
+    let slice = b"0\t\r\n'\"\\\x9d";
+    let mut escaped = slice.escape_ascii();
+
+    for s in [
+        "0\\t\\r\\n\\'\\\"\\\\\\x9d",
+        "0\\t\\r\\n\\'\\\"\\\\\\x9",
+        "0\\t\\r\\n\\'\\\"\\\\\\x",
+        "0\\t\\r\\n\\'\\\"\\\\\\",
+        "0\\t\\r\\n\\'\\\"\\\\",
+        "0\\t\\r\\n\\'\\\"\\",
+        "0\\t\\r\\n\\'\\\"",
+        "0\\t\\r\\n\\'\\",
+        "0\\t\\r\\n\\'",
+        "0\\t\\r\\n\\",
+        "0\\t\\r\\n",
+        "0\\t\\r\\",
+        "0\\t\\r",
+        "0\\t\\",
+        "0\\t",
+        "0\\",
+        "0",
+        "",
+    ] {
+        assert_eq!(format!("{escaped}"), s);
+        escaped.next_back();
+    }
+}

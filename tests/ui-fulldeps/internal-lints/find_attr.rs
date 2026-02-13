@@ -21,4 +21,7 @@ fn main() {
     //~^ ERROR use of `AttributeKind` in `find_attr!(...)` invocation
     find_attr!(attrs, AttributeKind::Inline(..) if true => todo!());
     //~^ ERROR use of `AttributeKind` in `find_attr!(...)` invocation
+
+    find_attr!(attrs, wildcard);
+    //~^ ERROR unreachable pattern
 }

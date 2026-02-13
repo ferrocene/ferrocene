@@ -77,8 +77,11 @@ macro_rules! find_attr {
                     rustc_hir::Attribute::Parsed($pattern) $(if $guard)? => {
                         break 'done Some($e);
                     }
-                    // FIXME: doesn't actually trigger in other crates :/
-                    // https://github.com/rust-lang/rust/issues/110613
+                    rustc_hir::Attribute::Unparsed(..) => {}
+                    // In lint emitting, there's a specific exception for this warning.
+                    // It's not usually emitted from inside macros from other crates
+                    // (see https://github.com/rust-lang/rust/issues/110613)
+                    // But this one is!
                     #[deny(unreachable_patterns)]
                     _ => {}
                 }

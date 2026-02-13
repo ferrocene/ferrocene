@@ -48,5 +48,27 @@ LL |     find_attr!(attrs, AttributeKind::Inline(..) if true => todo!());
    = note: `find_attr!(...)` already imports `AttributeKind::*`
    = help: remote `AttributeKind`
 
-error: aborting due to 5 previous errors
+error: unreachable pattern
+  --> $DIR/find_attr.rs:25:5
+   |
+LL |     find_attr!(attrs, wildcard);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+   |
+note: multiple earlier patterns match some of the same values
+  --> $DIR/find_attr.rs:25:5
+   |
+LL |     find_attr!(attrs, wildcard);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |     |
+   |     matches some of the same values
+   |     matches some of the same values
+   |     collectively making this unreachable
+note: the lint level is defined here
+  --> $DIR/find_attr.rs:25:5
+   |
+LL |     find_attr!(attrs, wildcard);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the macro `$crate::find_attr` which comes from the expansion of the macro `find_attr` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aborting due to 6 previous errors
 

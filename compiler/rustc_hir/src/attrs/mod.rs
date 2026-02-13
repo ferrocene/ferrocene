@@ -77,6 +77,9 @@ macro_rules! find_attr {
                     rustc_hir::Attribute::Parsed($pattern) $(if $guard)? => {
                         break 'done Some($e);
                     }
+                    // FIXME: doesn't actually trigger in other crates :/
+                    // https://github.com/rust-lang/rust/issues/110613
+                    #[deny(unreachable_patterns)]
                     _ => {}
                 }
             }

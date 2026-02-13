@@ -1,6 +1,7 @@
 //! Some lints that are only useful in the compiler or crates that use compiler internals, such as
 //! Clippy.
 
+use rustc_ast::{Pat, PatKind, Path};
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::Res;
 use rustc_hir::def_id::DefId;
@@ -12,10 +13,10 @@ use rustc_span::{Span, sym};
 use {rustc_ast as ast, rustc_hir as hir};
 
 use crate::lints::{
-    BadOptAccessDiag, DefaultHashTypesDiag, ImplicitSysrootCrateImportDiag, LintPassByHand,
-    NonGlobImportTypeIrInherent, QueryInstability, QueryUntracked, SpanUseEqCtxtDiag,
-    SymbolInternStringLiteralDiag, TyQualified, TykindDiag, TykindKind, TypeIrDirectUse,
-    TypeIrInherentUsage, TypeIrTraitUsage,
+    AttributeKindInFindAttr, BadOptAccessDiag, DefaultHashTypesDiag,
+    ImplicitSysrootCrateImportDiag, LintPassByHand, NonGlobImportTypeIrInherent, QueryInstability,
+    QueryUntracked, SpanUseEqCtxtDiag, SymbolInternStringLiteralDiag, TyQualified, TykindDiag,
+    TykindKind, TypeIrDirectUse, TypeIrInherentUsage, TypeIrTraitUsage,
 };
 use crate::{EarlyContext, EarlyLintPass, LateContext, LateLintPass, LintContext};
 
@@ -618,6 +619,97 @@ impl EarlyLintPass for ImplicitSysrootCrateImport {
                     ImplicitSysrootCrateImportDiag { name },
                 );
             }
+        }
+    }
+}
+
+declare_tool_lint! {
+    pub rustc::BAD_USE_OF_FIND_ATTR,
+    Allow,
+    "Forbid `AttributeKind::` as a prefix in `find_attr!` macros.",
+    report_in_external_macro: true
+}
+declare_lint_pass!(BadUseOfFindAttr => [BAD_USE_OF_FIND_ATTR]);
+
+impl EarlyLintPass for BadUseOfFindAttr {
+    fn check_arm(&mut self, cx: &EarlyContext<'_>, arm: &rustc_ast::Arm) {
+        fn path_contains_attribute_kind(cx: &EarlyContext<'_>, path: &Path) {
+            for segment in &path.segments {
+                if segment.ident.as_str() == "AttributeKind" {
+                    cx.emit_span_lint(
+                        BAD_USE_OF_FIND_ATTR,
+                        segment.span(),
+                        AttributeKindInFindAttr {},
+                    );
+                }
+            }
+        }
+
+        fn find_attr_kind_in_pat(cx: &EarlyContext<'_>, pat: &Pat) {
+            match &pat.kind {
+                PatKind::Struct(_, path, fields, _) => {
+                    path_contains_attribute_kind(cx, path);
+                    for field in fields {
+                        find_attr_kind_in_pat(cx, &field.pat);
+                    }
+                }
+                PatKind::TupleStruct(_, path, fields) => {
+                    path_contains_attribute_kind(cx, path);
+                    for field in fields {
+                        find_attr_kind_in_pat(cx, &field);
+                    }
+                }
+                PatKind::Or(options) => {
+                    for pat in options {
+                        find_attr_kind_in_pat(cx, pat);
+                    }
+                }
+                PatKind::Path(_, path) => {
+                    path_contains_attribute_kind(cx, path);
+                }
+                PatKind::Tuple(elems) => {
+                    for pat in elems {
+                        find_attr_kind_in_pat(cx, pat);
+                    }
+                }
+                PatKind::Box(pat) => {
+                    find_attr_kind_in_pat(cx, pat);
+                }
+                PatKind::Deref(pat) => {
+                    find_attr_kind_in_pat(cx, pat);
+                }
+                PatKind::Ref(..) => {
+                    find_attr_kind_in_pat(cx, pat);
+                }
+                PatKind::Slice(elems) => {
+                    for pat in elems {
+                        find_attr_kind_in_pat(cx, pat);
+                    }
+                }
+
+                PatKind::Guard(pat, ..) => {
+                    find_attr_kind_in_pat(cx, pat);
+                }
+                PatKind::Paren(pat) => {
+                    find_attr_kind_in_pat(cx, pat);
+                }
+                PatKind::Expr(..)
+                | PatKind::Range(..)
+                | PatKind::MacCall(..)
+                | PatKind::Rest
+                | PatKind::Missing
+                | PatKind::Err(..)
+                | PatKind::Ident(..)
+                | PatKind::Never
+                | PatKind::Wild => {}
+            }
+        }
+
+        if let Some(expn_data) = arm.span.source_callee()
+            && let ExpnKind::Macro(_, name) = expn_data.kind
+            && name.as_str() == "find_attr"
+        {
+            find_attr_kind_in_pat(cx, &arm.pat);
         }
     }
 }

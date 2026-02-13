@@ -14,6 +14,7 @@ aarch64-linux-android
 aarch64-nintendo-switch-freestanding
 aarch64-pc-windows-gnullvm
 aarch64-pc-windows-msvc
+aarch64-rhivos2-linux-gnu
 aarch64-unknown-ferrocene.facade
 aarch64-unknown-ferrocene.subset
 aarch64-unknown-freebsd

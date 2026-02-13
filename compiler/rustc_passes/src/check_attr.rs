@@ -308,6 +308,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcDelayedBugFromInsideQuery
                     | AttributeKind::RustcDenyExplicitImpl(..)
                     | AttributeKind::RustcDeprecatedSafe2024 {..}
+                    | AttributeKind::RustcDiagnosticItem(..)
                     | AttributeKind::RustcDummy
                     | AttributeKind::RustcDumpDefParents
                     | AttributeKind::RustcDumpItemBounds
@@ -392,13 +393,10 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::warn
                             | sym::deny
                             | sym::forbid
-                            // need to be fixed
-                            | sym::deprecated_safe // FIXME(deprecated_safe)
                             // internal
                             | sym::panic_handler
                             | sym::lang
                             | sym::default_lib_allocator
-                            | sym::rustc_diagnostic_item
                             | sym::rustc_nonnull_optimization_guaranteed
                             | sym::rustc_inherit_overflow_checks
                             | sym::rustc_on_unimplemented

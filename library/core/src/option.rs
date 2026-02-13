@@ -585,6 +585,9 @@ use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
+#[cfg(feature = "ferrocene_subset")]
+use crate::ops::{self, ControlFlow, Deref, DerefMut};
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut, Residual, Try};
 use crate::panicking::{panic, panic_display};
 #[cfg(not(feature = "ferrocene_subset"))]

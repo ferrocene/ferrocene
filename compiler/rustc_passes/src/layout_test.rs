@@ -1,5 +1,5 @@
 use rustc_abi::{HasDataLayout, TargetDataLayout};
-use rustc_hir::attrs::{AttributeKind, RustcLayoutType};
+use rustc_hir::attrs::RustcLayoutType;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::find_attr;
@@ -20,7 +20,7 @@ pub fn test_layout(tcx: TyCtxt<'_>) {
         return;
     }
     for id in tcx.hir_crate_items(()).definitions() {
-        if let Some(attrs) = find_attr!(tcx, id, AttributeKind::RustcLayout(attrs) => attrs) {
+        if let Some(attrs) = find_attr!(tcx, id, RustcLayout(attrs) => attrs) {
             // Attribute parsing handles error reporting
             if matches!(
                 tcx.def_kind(id),

@@ -37,7 +37,7 @@ use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::{Diag, ErrorGuaranteed, LintBuffer};
-use rustc_hir::attrs::{AttributeKind, StrippedCfgItem};
+use rustc_hir::attrs::StrippedCfgItem;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap};
 use rustc_hir::{LangItem, attrs as attr, find_attr};
@@ -1442,7 +1442,7 @@ impl<'tcx> TyCtxt<'tcx> {
             field_shuffle_seed ^= user_seed;
         }
 
-        let elt = find_attr!(self, did, AttributeKind::RustcScalableVector { element_count, .. } => element_count
+        let elt = find_attr!(self, did, RustcScalableVector { element_count, .. } => element_count
         )
         .map(|elt| match elt {
             Some(n) => ScalableElt::ElementCount(*n),
@@ -1451,7 +1451,7 @@ impl<'tcx> TyCtxt<'tcx> {
         if elt.is_some() {
             flags.insert(ReprFlags::IS_SCALABLE);
         }
-        if let Some(reprs) = find_attr!(self, did, AttributeKind::Repr { reprs, .. } => reprs) {
+        if let Some(reprs) = find_attr!(self, did, Repr { reprs, .. } => reprs) {
             for (r, _) in reprs {
                 flags.insert(match *r {
                     attr::ReprRust => ReprFlags::empty(),
@@ -1511,7 +1511,7 @@ impl<'tcx> TyCtxt<'tcx> {
         }
 
         // See `TyAndLayout::pass_indirectly_in_non_rustic_abis` for details.
-        if find_attr!(self, did, AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)) {
+        if find_attr!(self, did, RustcPassIndirectlyInNonRusticAbis(..)) {
             flags.insert(ReprFlags::PASS_INDIRECTLY_IN_NON_RUSTIC_ABIS);
         }
 
@@ -1991,11 +1991,7 @@ impl<'tcx> TyCtxt<'tcx> {
             && let Some(def_id) = def_id.as_local()
             && let outer = self.def_span(def_id).ctxt().outer_expn_data()
             && matches!(outer.kind, ExpnKind::Macro(MacroKind::Derive, _))
-            && find_attr!(
-                self,
-                outer.macro_def_id.unwrap(),
-                AttributeKind::RustcBuiltinMacro { .. }
-            )
+            && find_attr!(self, outer.macro_def_id.unwrap(), RustcBuiltinMacro { .. })
         {
             true
         } else {
@@ -2005,7 +2001,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Check if the given `DefId` is `#\[automatically_derived\]`.
     pub fn is_automatically_derived(self, def_id: DefId) -> bool {
-        find_attr!(self, def_id, AttributeKind::AutomaticallyDerived(..))
+        find_attr!(self, def_id, AutomaticallyDerived(..))
     }
 
     /// Looks up the span of `impl_did` if the impl is local; otherwise returns `Err`

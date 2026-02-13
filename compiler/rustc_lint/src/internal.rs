@@ -2,7 +2,6 @@
 //! Clippy.
 
 use rustc_ast::{Pat, PatKind, Path};
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::Res;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{Expr, ExprKind, HirId, find_attr};
@@ -91,7 +90,7 @@ impl<'tcx> LateLintPass<'tcx> for QueryStability {
                 ty::Instance::try_resolve(cx.tcx, cx.typing_env(), callee_def_id, generic_args)
         {
             let def_id = instance.def_id();
-            if find_attr!(cx.tcx, def_id, AttributeKind::RustcLintQueryInstability) {
+            if find_attr!(cx.tcx, def_id, RustcLintQueryInstability) {
                 cx.emit_span_lint(
                     POTENTIAL_QUERY_INSTABILITY,
                     span,
@@ -106,7 +105,7 @@ impl<'tcx> LateLintPass<'tcx> for QueryStability {
                 );
             }
 
-            if find_attr!(cx.tcx, def_id, AttributeKind::RustcLintUntrackedQueryInformation) {
+            if find_attr!(cx.tcx, def_id, RustcLintUntrackedQueryInformation) {
                 cx.emit_span_lint(
                     UNTRACKED_QUERY_INFORMATION,
                     span,
@@ -151,7 +150,7 @@ fn has_unstable_into_iter_predicate<'tcx>(
         };
         // Does the input type's `IntoIterator` implementation have the
         // `rustc_lint_query_instability` attribute on its `into_iter` method?
-        if find_attr!(cx.tcx, instance.def_id(), AttributeKind::RustcLintQueryInstability) {
+        if find_attr!(cx.tcx, instance.def_id(), RustcLintQueryInstability) {
             return true;
         }
     }
@@ -503,13 +502,13 @@ impl LateLintPass<'_> for BadOptAccess {
         let Some(adt_def) = cx.typeck_results().expr_ty(base).ty_adt_def() else { return };
         // Skip types without `#[rustc_lint_opt_ty]` - only so that the rest of the lint can be
         // avoided.
-        if !find_attr!(cx.tcx, adt_def.did(), AttributeKind::RustcLintOptTy) {
+        if !find_attr!(cx.tcx, adt_def.did(), RustcLintOptTy) {
             return;
         }
 
         for field in adt_def.all_fields() {
             if field.name == target.name
-                && let Some(lint_message) = find_attr!(cx.tcx, field.did, AttributeKind::RustcLintOptDenyFieldAccess { lint_message, } => lint_message)
+                && let Some(lint_message) = find_attr!(cx.tcx, field.did, RustcLintOptDenyFieldAccess { lint_message, } => lint_message)
             {
                 cx.emit_span_lint(
                     BAD_OPT_ACCESS,

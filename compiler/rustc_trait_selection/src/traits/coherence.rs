@@ -8,7 +8,6 @@ use std::fmt::Debug;
 
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_errors::{Diag, EmissionGuarantee};
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_hir::find_attr;
@@ -760,7 +759,8 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
             } = cand.kind()
                 && let ty::ImplPolarity::Reservation = infcx.tcx.impl_polarity(def_id)
             {
-                if let Some(message) = find_attr!(infcx.tcx, def_id, AttributeKind::RustcReservationImpl(_, message) => *message)
+                if let Some(message) =
+                    find_attr!(infcx.tcx, def_id, RustcReservationImpl(_, message) => *message)
                 {
                     self.causes.insert(IntercrateAmbiguityCause::ReservationImpl { message });
                 }

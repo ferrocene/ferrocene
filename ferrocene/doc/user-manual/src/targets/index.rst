@@ -223,8 +223,20 @@ Supported targets can often be qualified or quality managed upon request.
      - Bare-metal
      - \-
 
+   * - :target:`powerpc64le-unknown-linux-gnu`
+     - ``powerpc64le-unknown-linux-gnu``
+     - Cross-compilation
+     - Full
+     - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
+
    * - :target:`riscv64gc-unknown-linux-gnu`
      - ``riscv64gc-unknown-linux-gnu``
+     - Cross-compilation
+     - Full
+     - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
+
+   * - :target:`s390x-unknown-linux-gnu`
+     - ``s390x-unknown-linux-gnu``
      - Cross-compilation
      - Full
      - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.

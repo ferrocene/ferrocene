@@ -1859,6 +1859,7 @@ impl<T> Option<T> {
     /// assert_eq!(o2, None);
     /// ```
     #[inline]
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "option_get_or_try_insert_with", issue = "143648")]
     pub fn get_or_try_insert_with<'a, R, F>(
         &'a mut self,

@@ -4084,6 +4084,7 @@ impl<T> [T] {
     /// assert_eq!(a.shift_left([1, 2, 3]), [9, 1, 2]);
     /// assert_eq!(a, [3]);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "slice_shift", issue = "151772")]
     pub const fn shift_left<const N: usize>(&mut self, inserted: [T; N]) -> [T; N] {
         if let Some(shift) = self.len().checked_sub(N) {
@@ -4188,6 +4189,7 @@ impl<T> [T] {
     /// assert_eq!(a.shift_right([1, 2, 3]), [2, 3, 9]);
     /// assert_eq!(a, [1]);
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "slice_shift", issue = "151772")]
     pub const fn shift_right<const N: usize>(&mut self, inserted: [T; N]) -> [T; N] {
         if let Some(shift) = self.len().checked_sub(N) {

@@ -50,14 +50,8 @@ impl Alignment {
     /// assert_eq!(Alignment::MIN.as_usize(), 1);
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_subset"))]
-    pub const MIN: Self = Self(AlignmentEnum::_Align1Shl0);
-||||||| 35a31ba7639
-    pub const MIN: Self = Self(AlignmentEnum::_Align1Shl0);
-=======
     pub const MIN: Self = Self::new(1).unwrap();
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     /// Returns the alignment for a type.
     ///

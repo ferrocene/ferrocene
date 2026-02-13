@@ -97,27 +97,11 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(bigint_helper_methods))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
-||||||| 35a31ba7639
-// tidy-alphabetical-start
-#![feature(array_ptr_get)]
-#![feature(asm_experimental_arch)]
-#![feature(bigint_helper_methods)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
-=======
-// tidy-alphabetical-start
-#![feature(array_ptr_get)]
-#![feature(asm_experimental_arch)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(cfg_select)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(const_carrying_mul_add)]
@@ -135,56 +119,22 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
 #![feature(panic_internals)]
-<<<<<<< HEAD
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_metadata))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(set_ptr_value))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(signed_bigint_helpers))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(type_info))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
-||||||| 35a31ba7639
-#![feature(pattern_type_macro)]
-#![feature(ptr_alignment_type)]
-#![feature(ptr_metadata)]
-#![feature(set_ptr_value)]
-#![feature(slice_ptr_get)]
-#![feature(str_internals)]
-#![feature(str_split_inclusive_remainder)]
-#![feature(str_split_remainder)]
-#![feature(type_info)]
-=======
-#![feature(pattern_type_macro)]
-#![feature(ptr_alignment_type)]
-#![feature(ptr_metadata)]
-#![feature(set_ptr_value)]
-#![feature(signed_bigint_helpers)]
-#![feature(slice_ptr_get)]
-#![feature(str_internals)]
-#![feature(str_split_inclusive_remainder)]
-#![feature(str_split_remainder)]
-#![feature(type_info)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(ub_checks)]
-<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(utf16_extra))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(variant_count))]
+#![cfg_attr(not(feature = "ferrocene_subset"), feature(widening_mul))]
 // not-alphabetical-end
-||||||| 35a31ba7639
-#![feature(unsafe_pinned)]
-#![feature(utf16_extra)]
-#![feature(variant_count)]
-// tidy-alphabetical-end
-=======
-#![feature(unsafe_pinned)]
-#![feature(utf16_extra)]
-#![feature(variant_count)]
-#![feature(widening_mul)]
-// tidy-alphabetical-end
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //
 // Language features:
 // not-alphabetical-start

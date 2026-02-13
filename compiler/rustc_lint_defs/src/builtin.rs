@@ -3456,7 +3456,7 @@ declare_lint! {
     /// but this lint was introduced to avoid breaking any existing
     /// crates which included them.
     pub INVALID_DOC_ATTRIBUTES,
-    Deny,
+    Warn,
     "detects invalid `#[doc(...)]` attributes",
 }
 

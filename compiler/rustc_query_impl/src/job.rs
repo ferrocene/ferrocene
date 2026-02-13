@@ -1,5 +1,6 @@
 use std::io::Write;
 use std::iter;
+use std::ops::ControlFlow;
 use std::sync::Arc;
 
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
@@ -117,41 +118,33 @@ type Waiter = (QueryJobId, usize);
 
 /// Visits all the non-resumable and resumable waiters of a query.
 /// Only waiters in a query are visited.
-/// `visit` is called for every waiter and is passed a query waiting on `query_ref`
-/// and a span indicating the reason the query waited on `query_ref`.
-/// If `visit` returns Some, this function returns.
+/// `visit` is called for every waiter and is passed a query waiting on `query`
+/// and a span indicating the reason the query waited on `query`.
+/// If `visit` returns `Break`, this function also returns `Break`,
+/// and if all `visit` calls returns `Continue` it also returns `Continue`.
 /// For visits of non-resumable waiters it returns the return value of `visit`.
-/// For visits of resumable waiters it returns Some(Some(Waiter)) which has the
-/// required information to resume the waiter.
-/// If all `visit` calls returns None, this function also returns None.
-fn visit_waiters<'tcx, F>(
+/// For visits of resumable waiters it returns information required to resume that waiter.
+fn visit_waiters<'tcx>(
     job_map: &QueryJobMap<'tcx>,
     query: QueryJobId,
-    mut visit: F,
-) -> Option<Option<Waiter>>
-where
-    F: FnMut(Span, QueryJobId) -> Option<Option<Waiter>>,
-{
+    mut visit: impl FnMut(Span, QueryJobId) -> ControlFlow<Option<Waiter>>,
+) -> ControlFlow<Option<Waiter>> {
     // Visit the parent query which is a non-resumable waiter since it's on the same stack
-    if let Some(parent) = job_map.parent_of(query)
-        && let Some(cycle) = visit(job_map.span_of(query), parent)
-    {
-        return Some(cycle);
+    if let Some(parent) = job_map.parent_of(query) {
+        visit(job_map.span_of(query), parent)?;
     }
 
     // Visit the explicit waiters which use condvars and are resumable
     if let Some(latch) = job_map.latch_of(query) {
         for (i, waiter) in latch.info.lock().waiters.iter().enumerate() {
             if let Some(waiter_query) = waiter.query {
-                if visit(waiter.span, waiter_query).is_some() {
-                    // Return a value which indicates that this waiter can be resumed
-                    return Some(Some((query, i)));
-                }
+                // Return a value which indicates that this waiter can be resumed
+                visit(waiter.span, waiter_query).map_break(|_| Some((query, i)))?;
             }
         }
     }
 
-    None
+    ControlFlow::Continue(())
 }
 
 /// Look for query cycles by doing a depth first search starting at `query`.
@@ -164,7 +157,7 @@ fn cycle_check<'tcx>(
     span: Span,
     stack: &mut Vec<(Span, QueryJobId)>,
     visited: &mut FxHashSet<QueryJobId>,
-) -> Option<Option<Waiter>> {
+) -> ControlFlow<Option<Waiter>> {
     if !visited.insert(query) {
         return if let Some(p) = stack.iter().position(|q| q.1 == query) {
             // We detected a query cycle, fix up the initial span and return Some
@@ -173,9 +166,9 @@ fn cycle_check<'tcx>(
             stack.drain(0..p);
             // Replace the span for the first query with the cycle cause
             stack[0].0 = span;
-            Some(None)
+            ControlFlow::Break(None)
         } else {
-            None
+            ControlFlow::Continue(())
         };
     }
 
@@ -188,7 +181,7 @@ fn cycle_check<'tcx>(
     });
 
     // Remove the entry in our stack if we didn't find a cycle
-    if r.is_none() {
+    if r.is_continue() {
         stack.pop();
     }
 
@@ -202,21 +195,18 @@ fn connected_to_root<'tcx>(
     job_map: &QueryJobMap<'tcx>,
     query: QueryJobId,
     visited: &mut FxHashSet<QueryJobId>,
-) -> bool {
+) -> ControlFlow<Option<Waiter>> {
     // We already visited this or we're deliberately ignoring it
     if !visited.insert(query) {
-        return false;
+        return ControlFlow::Continue(());
     }
 
     // This query is connected to the root (it has no query parent), return true
     if job_map.parent_of(query).is_none() {
-        return true;
+        return ControlFlow::Break(None);
     }
 
-    visit_waiters(job_map, query, |_, successor| {
-        connected_to_root(job_map, successor, visited).then_some(None)
-    })
-    .is_some()
+    visit_waiters(job_map, query, |_, successor| connected_to_root(job_map, successor, visited))
 }
 
 // Deterministically pick an query from a list
@@ -253,7 +243,7 @@ fn remove_cycle<'tcx>(
     let mut visited = FxHashSet::default();
     let mut stack = Vec::new();
     // Look for a cycle starting with the last query in `jobs`
-    if let Some(waiter) =
+    if let ControlFlow::Break(waiter) =
         cycle_check(job_map, jobs.pop().unwrap(), DUMMY_SP, &mut stack, &mut visited)
     {
         // The stack is a vector of pairs of spans and queries; reverse it so that
@@ -284,15 +274,15 @@ fn remove_cycle<'tcx>(
                 } else {
                     let mut waiters = Vec::new();
                     // Find all the direct waiters who lead to the root
-                    visit_waiters(job_map, query, |span, waiter| {
+                    let _ = visit_waiters(job_map, query, |span, waiter| {
                         // Mark all the other queries in the cycle as already visited
                         let mut visited = FxHashSet::from_iter(stack.iter().map(|q| q.1));
 
-                        if connected_to_root(job_map, waiter, &mut visited) {
+                        if connected_to_root(job_map, waiter, &mut visited).is_break() {
                             waiters.push((span, waiter));
                         }
 
-                        None
+                        ControlFlow::Continue(())
                     });
                     if waiters.is_empty() {
                         None

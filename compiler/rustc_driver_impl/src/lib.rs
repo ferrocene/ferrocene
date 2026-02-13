@@ -34,7 +34,6 @@ use rustc_data_structures::profiling::{
 };
 pub use rustc_errors::catch_fatal_errors;
 use rustc_errors::emitter::stderr_destination;
-use rustc_errors::registry::Registry;
 use rustc_errors::translation::Translator;
 use rustc_errors::{ColorConfig, DiagCtxt, ErrCode, PResult, markdown};
 use rustc_feature::find_gated_cfg;
@@ -109,21 +108,8 @@ use crate::session_diagnostics::{
 };
 
 pub fn default_translator() -> Translator {
-    Translator::with_fallback_bundle(DEFAULT_LOCALE_RESOURCES.to_vec(), false)
+    Translator::new()
 }
-
-pub static DEFAULT_LOCALE_RESOURCES: &[&str] = &[
-    // tidy-alphabetical-start
-    rustc_borrowck::DEFAULT_LOCALE_RESOURCE,
-    rustc_const_eval::DEFAULT_LOCALE_RESOURCE,
-    rustc_hir_analysis::DEFAULT_LOCALE_RESOURCE,
-    rustc_lint::DEFAULT_LOCALE_RESOURCE,
-    rustc_mir_build::DEFAULT_LOCALE_RESOURCE,
-    rustc_parse::DEFAULT_LOCALE_RESOURCE,
-    rustc_passes::DEFAULT_LOCALE_RESOURCE,
-    rustc_trait_selection::DEFAULT_LOCALE_RESOURCE,
-    // tidy-alphabetical-end
-];
 
 /// Exit status code used for successful compilation and help output.
 pub const EXIT_SUCCESS: i32 = 0;
@@ -185,10 +171,6 @@ impl Callbacks for TimePassesCallbacks {
     }
 }
 
-pub fn diagnostics_registry() -> Registry {
-    Registry::new(rustc_errors::codes::DIAGNOSTICS)
-}
-
 /// This is the primary entry point for rustc.
 pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) {
     let mut default_early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
@@ -216,7 +198,7 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
     let ice_file = ice_path_with_config(Some(&sopts.unstable_opts)).clone();
 
     if let Some(ref code) = matches.opt_str("explain") {
-        handle_explain(&default_early_dcx, diagnostics_registry(), code, sopts.color);
+        handle_explain(&default_early_dcx, code, sopts.color);
         return;
     }
 
@@ -235,7 +217,6 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
         output_dir: odir,
         ice_file,
         file_loader: None,
-        locale_resources: DEFAULT_LOCALE_RESOURCES.to_vec(),
         lint_caps: Default::default(),
         psess_created: None,
         hash_untracked_state: None,
@@ -243,7 +224,6 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
         override_queries: None,
         extra_symbols: Vec::new(),
         make_codegen_backend: None,
-        registry: diagnostics_registry(),
         using_internal_features: &USING_INTERNAL_FEATURES,
     };
 
@@ -443,12 +423,12 @@ pub enum Compilation {
     Continue,
 }
 
-fn handle_explain(early_dcx: &EarlyDiagCtxt, registry: Registry, code: &str, color: ColorConfig) {
+fn handle_explain(early_dcx: &EarlyDiagCtxt, code: &str, color: ColorConfig) {
     // Allow "E0123" or "0123" form.
     let upper_cased_code = code.to_ascii_uppercase();
     if let Ok(code) = upper_cased_code.trim_prefix('E').parse::<u32>()
         && code <= ErrCode::MAX_AS_U32
-        && let Ok(description) = registry.try_find_description(ErrCode::from_u32(code))
+        && let Ok(description) = rustc_errors::codes::try_find_description(ErrCode::from_u32(code))
     {
         let mut is_in_code_block = false;
         let mut text = String::new();
@@ -520,7 +500,7 @@ fn show_md_content_with_pager(content: &str, color: ColorConfig) {
     };
 
     // Try to print via the pager, pretty output if possible.
-    let pager_res: Option<()> = try {
+    let pager_res = try {
         let mut pager = cmd.stdin(Stdio::piped()).spawn().ok()?;
 
         let pager_stdin = pager.stdin.as_mut()?;
@@ -1545,7 +1525,7 @@ fn report_ice(
     extra_info: fn(&DiagCtxt),
     using_internal_features: &AtomicBool,
 ) {
-    let translator = default_translator();
+    let translator = Translator::new();
     let emitter =
         Box::new(rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter::new(
             stderr_destination(rustc_errors::ColorConfig::Auto),

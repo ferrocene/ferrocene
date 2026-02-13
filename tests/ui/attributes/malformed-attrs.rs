@@ -145,8 +145,6 @@ struct Test;
 #[diagnostic::on_unimplemented = 1]
 //~^ WARN malformed
 trait Hey {
-    #[type_const = 1]
-    //~^ ERROR malformed
     const HEY: usize = 5;
 }
 

@@ -17,7 +17,7 @@ LL | #![feature(min_generic_const_args, specialization)]
    = help: consider using `min_specialization` instead, which is more stable and complete
 
 error[E0119]: conflicting implementations of trait `Maybe<()>` for type `()`
-  --> $DIR/overlap-due-to-unsatisfied-const-bound.rs:21:1
+  --> $DIR/overlap-due-to-unsatisfied-const-bound.rs:20:1
    |
 LL | impl<T> Maybe<T> for T {}
    | ---------------------- first implementation here

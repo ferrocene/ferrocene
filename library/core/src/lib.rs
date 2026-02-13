@@ -225,7 +225,7 @@ use prelude::rust_2024::*;
 #[macro_use]
 mod macros;
 
-#[unstable(feature = "assert_matches", issue = "82775")]
+#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]
@@ -324,7 +324,7 @@ pub mod pat;
 pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
 pub mod random;
-#[unstable(feature = "new_range_api", issue = "125687")]
+#[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
 pub mod range;
 pub mod result;
 pub mod sync;

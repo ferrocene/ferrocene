@@ -24,7 +24,6 @@ use rustc_span::source_map::SourceMap;
 use rustc_span::{FileName, SourceFile, Span};
 use tracing::{debug, warn};
 
-use crate::registry::Registry;
 use crate::timings::TimingRecord;
 use crate::translation::Translator;
 use crate::{
@@ -54,7 +53,7 @@ pub type DynEmitter = dyn Emitter + DynSend;
 /// Emitter trait for emitting errors and other structured information.
 pub trait Emitter {
     /// Emit a structured diagnostic.
-    fn emit_diagnostic(&mut self, diag: DiagInner, registry: &Registry);
+    fn emit_diagnostic(&mut self, diag: DiagInner);
 
     /// Emit a notification that an artifact has been output.
     /// Currently only supported for the JSON format.
@@ -66,7 +65,7 @@ pub trait Emitter {
 
     /// Emit a report about future breakage.
     /// Currently only supported for the JSON format.
-    fn emit_future_breakage_report(&mut self, _diags: Vec<DiagInner>, _registry: &Registry) {}
+    fn emit_future_breakage_report(&mut self, _diags: Vec<DiagInner>) {}
 
     /// Emit list of unused externs.
     /// Currently only supported for the JSON format.
@@ -380,9 +379,9 @@ impl Emitter for EmitterWithNote {
         None
     }
 
-    fn emit_diagnostic(&mut self, mut diag: DiagInner, registry: &Registry) {
+    fn emit_diagnostic(&mut self, mut diag: DiagInner) {
         diag.sub(Level::Note, self.note.clone(), MultiSpan::new());
-        self.emitter.emit_diagnostic(diag, registry);
+        self.emitter.emit_diagnostic(diag);
     }
 
     fn translator(&self) -> &Translator {
@@ -399,7 +398,7 @@ impl Emitter for SilentEmitter {
         None
     }
 
-    fn emit_diagnostic(&mut self, _diag: DiagInner, _registry: &Registry) {}
+    fn emit_diagnostic(&mut self, _diag: DiagInner) {}
 
     fn translator(&self) -> &Translator {
         &self.translator

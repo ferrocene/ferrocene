@@ -12,7 +12,7 @@ use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
 use rustc_errors::{
     Applicability, Diag, ErrorGuaranteed, Level, MultiSpan, StashKey, StringPart, Suggestions,
-    pluralize, struct_span_code_err,
+    inline_fluent, pluralize, struct_span_code_err,
 };
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::intravisit::Visitor;
@@ -2263,7 +2263,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 err.highlighted_span_help(
                     self.tcx.def_span(def_id),
                     vec![
-                        StringPart::normal(format!("the trait `{trait_}` ",)),
+                        StringPart::normal(format!("the trait `{trait_}` ")),
                         StringPart::highlighted("is"),
                         StringPart::normal(desc),
                         StringPart::highlighted(self_ty),
@@ -3088,7 +3088,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         {
             err.span_help(
                 self.tcx.def_span(trait_def_id),
-                crate::fluent_generated::trait_selection_trait_has_no_impls,
+                inline_fluent!("this trait has no implementations, consider adding one"),
             );
         } else if !suggested && trait_predicate.polarity() == ty::PredicatePolarity::Positive {
             // Can't show anything else useful, try to find similar impls.

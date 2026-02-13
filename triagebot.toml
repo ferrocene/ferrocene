@@ -795,7 +795,8 @@ zulip_stream = 474880 # #t-compiler/backports
 topic = "#{number}: stable-nominated"
 message_on_add = [
     """\
-@**channel** PR #{number} "{title}" has been nominated for stable backport.
+PR #{number} "{title}" fixes a regression and has been nominated for backport.
+{recipients}, what do you think about it?
 """,
     """\
 /poll Approve stable backport of #{number}?
@@ -1448,28 +1449,6 @@ compiler_leads = [
     "@davidtwco",
     "@wesleywiser",
 ]
-compiler = [
-    "@BoxyUwU",
-    "@chenyukang",
-    "@davidtwco",
-    "@eholk",
-    "@fee1-dead",
-    "@fmease",
-    "@jackh726",
-    "@jieyouxu",
-    "@jdonszelmann",
-    "@JonathanBrouwer",
-    "@madsmtm",
-    "@mati865",
-    "@Nadrieril",
-    "@nnethercote",
-    "@oli-obk",
-    "@petrochenkov",
-    "@SparrowLii",
-    "@tiif",
-    "@WaffleLapkin",
-    "@wesleywiser",
-]
 libs = [
     "@Mark-Simulacrum",
     "@workingjubilee",
@@ -1485,11 +1464,6 @@ infra-ci = [
     "@marcoieni",
     "@jdno",
     "@jieyouxu",
-]
-rustdoc = [
-    "@GuillaumeGomez",
-    "@notriddle",
-    "@fmease",
 ]
 docs = [
     "@ehuss",
@@ -1512,6 +1486,7 @@ diagnostics = [
     "@davidtwco",
     "@oli-obk",
     "@chenyukang",
+    "@TaKO8Ki"
 ]
 parser = [
     "@davidtwco",
@@ -1538,13 +1513,6 @@ mir-opt = [
     "@wesleywiser",
     "@saethlin",
 ]
-types = [
-    "@jackh726",
-    "@lcnr",
-    "@oli-obk",
-    "@spastorino",
-    "@BoxyUwU",
-]
 borrowck = [
     "@davidtwco",
     "@matthewjasper"
@@ -1563,21 +1531,6 @@ style-team = [
     "@calebcartwright",
     "@joshtriplett",
     "@traviscross",
-]
-project-const-traits = [
-    "@fee1-dead",
-    "@fmease",
-    "@oli-obk",
-]
-project-stable-mir = [
-    "@celinval",
-    "@oli-obk",
-    "@scottmcm",
-    "@makai410",
-]
-project-exploit-mitigations = [
-    "@cuviper",
-    "@rcvalle",
 ]
 compiletest = [
     "@jieyouxu",

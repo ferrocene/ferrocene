@@ -44,7 +44,7 @@
           StorageLive(_4);
           StorageLive(_5);
           StorageLive(_6);
--         _6 = const std::ptr::Alignment::of::<[bool; 0]>::{constant#0} as *const [bool; 0] (Transmute);
+-         _6 = const <[bool; 0] as std::mem::SizedTypeProperties>::ALIGNMENT as *const [bool; 0] (Transmute);
 -         _5 = NonNull::<[bool; 0]> { pointer: copy _6 };
 +         _6 = const {0x1 as *const [bool; 0]};
 +         _5 = const NonNull::<[bool; 0]> {{ pointer: {0x1 as *const [bool; 0]} }};

@@ -1,7 +1,7 @@
 //! The main parser interface.
 
 // tidy-alphabetical-start
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(box_patterns)]
 #![feature(debug_closure_helpers)]
 #![feature(default_field_values)]
@@ -74,8 +74,6 @@ const _: () = {
         );
     }
 };
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 // Unwrap the result if `Ok`, otherwise emit the diagnostics and abort.
 pub fn unwrap_or_emit_fatal<T>(expr: Result<T, Vec<Diag<'_>>>) -> T {

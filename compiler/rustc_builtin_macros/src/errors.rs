@@ -678,6 +678,18 @@ pub(crate) enum InvalidFormatStringSuggestion {
         #[primary_span]
         span: Span,
     },
+
+    #[suggestion(
+        "use rust debug printing macro",
+        code = "{replacement}",
+        style = "verbose",
+        applicability = "machine-applicable"
+    )]
+    UseRustDebugPrintingMacro {
+        #[primary_span]
+        macro_span: Span,
+        replacement: String,
+    },
 }
 
 #[derive(Diagnostic)]
@@ -991,20 +1003,6 @@ pub(crate) struct AsmUnsupportedClobberAbi {
 }
 
 #[derive(Diagnostic)]
-#[diag("`test_runner` argument must be a path")]
-pub(crate) struct TestRunnerInvalid {
-    #[primary_span]
-    pub(crate) span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("`#![test_runner(..)]` accepts exactly 1 argument")]
-pub(crate) struct TestRunnerNargs {
-    #[primary_span]
-    pub(crate) span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("expected token: `,`")]
 pub(crate) struct ExpectedCommaInList {
     #[primary_span]
@@ -1084,17 +1082,6 @@ pub(crate) struct AsmExpectedOther {
 pub(crate) struct CfgSelectNoMatches {
     #[primary_span]
     pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("unreachable predicate")]
-pub(crate) struct CfgSelectUnreachable {
-    #[primary_span]
-    #[label("this predicate is never reached")]
-    pub span: Span,
-
-    #[label("always matches")]
-    pub wildcard_span: Span,
 }
 
 #[derive(Diagnostic)]

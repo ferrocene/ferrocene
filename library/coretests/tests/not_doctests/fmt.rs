@@ -57,3 +57,18 @@ fn test_arguments_estimated_capacity_n_128() {
     );
     assert_eq!(args.estimated_capacity(), 380);
 }
+
+// Covers `core::fmt::Formatter::<'a>::pad_formatted_parts`
+#[test]
+fn test_formatter_pad_formatted_parts() {
+    let mut options = fmt::FormattingOptions::new();
+
+    // We have to trigger "if usize::from(width) <= len" but width has to be != 0
+    options.width(Some(1));
+
+    let mut buffer = String::new();
+    let mut f = fmt::Formatter::new(&mut buffer, options);
+
+    fmt::Display::fmt(&123.456, &mut f).unwrap();
+    assert_eq!(buffer, "123.456");
+}

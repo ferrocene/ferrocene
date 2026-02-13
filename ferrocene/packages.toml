@@ -72,6 +72,7 @@ subset = "default"
 [groups.cross-compilation]
 targets = [
   # tidy-alphabetical-start
+  "aarch64-rhivos2-linux-gnu",
   "aarch64-unknown-ferrocene.subset",
   "aarch64-unknown-ferrocene.facade",
   "aarch64-unknown-linux-gnu",

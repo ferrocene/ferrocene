@@ -121,10 +121,13 @@ macro_rules! define_dispatcher {
 }
 with_api!(define_dispatcher, MarkedTokenStream<S>, MarkedSpan<S>, MarkedSymbol<S>);
 
+// This trait is currently only implemented and used once, inside of this crate.
+// We keep it public to allow implementing more complex execution strategies in
+// the future, such as wasm proc-macros.
 pub trait ExecutionStrategy {
-    fn run_bridge_and_client<S: Server>(
+    fn run_bridge_and_client(
         &self,
-        dispatcher: &mut Dispatcher<S>,
+        dispatcher: &mut Dispatcher<impl Server>,
         input: Buffer,
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,
@@ -164,82 +167,55 @@ impl Drop for RunningSameThreadGuard {
 }
 
 pub struct MaybeCrossThread {
-    cross_thread: bool,
+    pub cross_thread: bool,
 }
 
-impl MaybeCrossThread {
-    pub const fn new(cross_thread: bool) -> Self {
-        MaybeCrossThread { cross_thread }
-    }
-}
+pub const SAME_THREAD: MaybeCrossThread = MaybeCrossThread { cross_thread: false };
+pub const CROSS_THREAD: MaybeCrossThread = MaybeCrossThread { cross_thread: true };
 
 impl ExecutionStrategy for MaybeCrossThread {
-    fn run_bridge_and_client<S: Server>(
+    fn run_bridge_and_client(
         &self,
-        dispatcher: &mut Dispatcher<S>,
+        dispatcher: &mut Dispatcher<impl Server>,
         input: Buffer,
         run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
         force_show_panics: bool,
     ) -> Buffer {
         if self.cross_thread || ALREADY_RUNNING_SAME_THREAD.get() {
-            CrossThread.run_bridge_and_client(dispatcher, input, run_client, force_show_panics)
+            let (mut server, mut client) = MessagePipe::new();
+
+            let join_handle = thread::spawn(move || {
+                let mut dispatch = |b: Buffer| -> Buffer {
+                    client.send(b);
+                    client.recv().expect("server died while client waiting for reply")
+                };
+
+                run_client(BridgeConfig {
+                    input,
+                    dispatch: (&mut dispatch).into(),
+                    force_show_panics,
+                })
+            });
+
+            while let Some(b) = server.recv() {
+                server.send(dispatcher.dispatch(b));
+            }
+
+            join_handle.join().unwrap()
         } else {
-            SameThread.run_bridge_and_client(dispatcher, input, run_client, force_show_panics)
-        }
-    }
-}
+            let _guard = RunningSameThreadGuard::new();
 
-pub struct SameThread;
-
-impl ExecutionStrategy for SameThread {
-    fn run_bridge_and_client<S: Server>(
-        &self,
-        dispatcher: &mut Dispatcher<S>,
-        input: Buffer,
-        run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
-        force_show_panics: bool,
-    ) -> Buffer {
-        let _guard = RunningSameThreadGuard::new();
-
-        let mut dispatch = |buf| dispatcher.dispatch(buf);
-
-        run_client(BridgeConfig { input, dispatch: (&mut dispatch).into(), force_show_panics })
-    }
-}
-
-pub struct CrossThread;
-
-impl ExecutionStrategy for CrossThread {
-    fn run_bridge_and_client<S: Server>(
-        &self,
-        dispatcher: &mut Dispatcher<S>,
-        input: Buffer,
-        run_client: extern "C" fn(BridgeConfig<'_>) -> Buffer,
-        force_show_panics: bool,
-    ) -> Buffer {
-        let (mut server, mut client) = MessagePipe::new();
-
-        let join_handle = thread::spawn(move || {
-            let mut dispatch = |b: Buffer| -> Buffer {
-                client.send(b);
-                client.recv().expect("server died while client waiting for reply")
-            };
+            let mut dispatch = |buf| dispatcher.dispatch(buf);
 
             run_client(BridgeConfig { input, dispatch: (&mut dispatch).into(), force_show_panics })
-        });
-
-        while let Some(b) = server.recv() {
-            server.send(dispatcher.dispatch(b));
         }
-
-        join_handle.join().unwrap()
     }
 }
 
 /// A message pipe used for communicating between server and client threads.
 struct MessagePipe<T> {
-    tx: std::sync::mpsc::SyncSender<T>,
-    rx: std::sync::mpsc::Receiver<T>,
+    tx: mpsc::SyncSender<T>,
+    rx: mpsc::Receiver<T>,
 }
 
 impl<T> MessagePipe<T> {

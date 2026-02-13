@@ -12,10 +12,10 @@ use crate::base::{self, *};
 use crate::{errors, proc_macro_server};
 
 fn exec_strategy(sess: &Session) -> impl pm::bridge::server::ExecutionStrategy + 'static {
-    pm::bridge::server::MaybeCrossThread::new(
-        sess.opts.unstable_opts.proc_macro_execution_strategy
+    pm::bridge::server::MaybeCrossThread {
+        cross_thread: sess.opts.unstable_opts.proc_macro_execution_strategy
             == ProcMacroExecutionStrategy::CrossThread,
-    )
+    }
 }
 
 pub struct BangProcMacro {

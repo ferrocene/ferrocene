@@ -8,7 +8,7 @@
 //! * Functions called by the compiler itself.
 
 use rustc_ast as ast;
-use rustc_ast::fmvisit;
+use rustc_ast::visit;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::lang_items::GenericRequirement;

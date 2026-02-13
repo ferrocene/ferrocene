@@ -668,6 +668,15 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcHasIncoherentInherentImplsParse
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcHasIncoherentInherentImpls;
 }
 
+pub(crate) struct PanicHandlerParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for PanicHandlerParser {
+    const PATH: &[Symbol] = &[sym::panic_handler];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS); // Targets are checked per lang item in `rustc_passes`
+    const CREATE: fn(Span) -> AttributeKind = |span| AttributeKind::Lang(LangItem::PanicImpl, span);
+}
+
 pub(crate) struct RustcHiddenTypeOfOpaquesParser;
 
 impl<S: Stage> NoArgsAttributeParser<S> for RustcHiddenTypeOfOpaquesParser {

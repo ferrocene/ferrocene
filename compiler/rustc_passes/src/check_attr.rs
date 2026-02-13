@@ -348,6 +348,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcPassByValue (..)
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
                     | AttributeKind::RustcPreserveUbChecks
+                    | AttributeKind::RustcProcMacroDecls
                     | AttributeKind::RustcReallocator
                     | AttributeKind::RustcRegions
                     | AttributeKind::RustcReservationImpl(..)
@@ -406,7 +407,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::rustc_doc_primitive
                             | sym::rustc_test_marker
                             | sym::rustc_layout
-                            | sym::rustc_proc_macro_decls
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis
                             | sym::rustc_mir

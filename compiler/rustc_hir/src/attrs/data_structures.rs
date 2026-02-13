@@ -1288,6 +1288,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_preserve_ub_checks]`
     RustcPreserveUbChecks,
 
+    /// Represents `#[rustc_proc_macro_decls]`
+    RustcProcMacroDecls,
+
     /// Represents `#[rustc_pub_transparent]` (used by the `repr_transparent_external_private_fields` lint).
     RustcPubTransparent(Span),
 

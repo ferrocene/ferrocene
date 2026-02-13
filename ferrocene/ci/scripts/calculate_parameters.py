@@ -81,6 +81,8 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "riscv64gc-unknown-linux-gnu",
     "x86_64-unknown-linux-musl",
     "aarch64-unknown-linux-musl",
+    "s390x-unknown-linux-gnu",
+    "powerpc64le-unknown-linux-gnu",
 ]
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)

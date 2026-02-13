@@ -27,7 +27,6 @@ extern crate rustc_ast;
 extern crate rustc_codegen_ssa;
 extern crate rustc_data_structures;
 extern crate rustc_errors;
-extern crate rustc_fluent_macro;
 extern crate rustc_fs_util;
 extern crate rustc_hir;
 extern crate rustc_index;
@@ -104,8 +103,6 @@ use tempfile::TempDir;
 
 use crate::back::lto::ModuleBuffer;
 use crate::gcc_util::{target_cpu, to_gcc_features};
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub struct PrintOnPanic<F: Fn() -> String>(pub F);
 
@@ -197,10 +194,6 @@ fn load_libgccjit_if_needed(libgccjit_target_lib_file: &Path) {
 }
 
 impl CodegenBackend for GccCodegenBackend {
-    fn locale_resource(&self) -> &'static str {
-        crate::DEFAULT_LOCALE_RESOURCE
-    }
-
     fn name(&self) -> &'static str {
         "gcc"
     }
@@ -383,7 +376,7 @@ impl ExtraBackendMethods for GccCodegenBackend {
         _features: &[String],
     ) -> TargetMachineFactoryFn<Self> {
         // TODO(antoyo): set opt level.
-        Arc::new(|_| Ok(()))
+        Arc::new(|_, _| ())
     }
 }
 
@@ -430,14 +423,14 @@ unsafe impl Sync for SyncContext {}
 impl WriteBackendMethods for GccCodegenBackend {
     type Module = GccContext;
     type TargetMachine = ();
-    type TargetMachineError = ();
     type ModuleBuffer = ModuleBuffer;
     type ThinData = ThinData;
     type ThinBuffer = ThinBuffer;
 
     fn run_and_optimize_fat_lto(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         shared_emitter: &SharedEmitter,
+        _tm_factory: TargetMachineFactoryFn<Self>,
         // FIXME(bjorn3): Limit LTO exports to these symbols
         _exported_symbols_for_lto: &[String],
         each_linked_rlib_for_lto: &[PathBuf],
@@ -447,7 +440,7 @@ impl WriteBackendMethods for GccCodegenBackend {
     }
 
     fn run_thin_lto(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         dcx: DiagCtxtHandle<'_>,
         // FIXME(bjorn3): Limit LTO exports to these symbols
         _exported_symbols_for_lto: &[String],
@@ -467,7 +460,7 @@ impl WriteBackendMethods for GccCodegenBackend {
     }
 
     fn optimize(
-        _cgcx: &CodegenContext<Self>,
+        _cgcx: &CodegenContext,
         _shared_emitter: &SharedEmitter,
         module: &mut ModuleCodegen<Self::Module>,
         config: &ModuleConfig,
@@ -476,15 +469,16 @@ impl WriteBackendMethods for GccCodegenBackend {
     }
 
     fn optimize_thin(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         _shared_emitter: &SharedEmitter,
+        _tm_factory: TargetMachineFactoryFn<Self>,
         thin: ThinModule<Self>,
     ) -> ModuleCodegen<Self::Module> {
         back::lto::optimize_thin_module(thin, cgcx)
     }
 
     fn codegen(
-        cgcx: &CodegenContext<Self>,
+        cgcx: &CodegenContext,
         shared_emitter: &SharedEmitter,
         module: ModuleCodegen<Self::Module>,
         config: &ModuleConfig,

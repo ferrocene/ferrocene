@@ -20,6 +20,10 @@ impl<'gcc, 'tcx> CodegenCx<'gcc, 'tcx> {
         bytes_in_context(self, bytes)
     }
 
+    pub fn const_u16(&self, i: u16) -> RValue<'gcc> {
+        self.const_uint(self.type_u16(), i as u64)
+    }
+
     fn global_string(&self, string: &str) -> LValue<'gcc> {
         // TODO(antoyo): handle non-null-terminated strings.
         let string = self.context.new_string_literal(string);

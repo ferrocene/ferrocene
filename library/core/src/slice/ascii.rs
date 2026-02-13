@@ -381,6 +381,9 @@ impl<'a> fmt::Display for EscapeAscii<'a> {
         let mut bytes = slice.unwrap_or_default().as_slice();
         let back = back.unwrap_or(EscapeDefault::empty());
 
+        #[ferrocene::annotation(
+            "In the current implementation the `frontiter` in the inner `FlattenCompat` will always be `None`, therefore `front` will also always be empty. Last checked on 13.02.2026"
+        )]
         // usually empty, so the formatter won't have to do any work
         for byte in front {
             f.write_char(byte as char)?;

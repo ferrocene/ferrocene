@@ -182,8 +182,7 @@ impl LocalizedConstraintGraphVisitor for LoanLivenessVisitor<'_> {
         //
         // FIXME: analyze potential unsoundness, possibly in concert with a borrowck
         // implementation in a-mir-formality, fuzzing, or manually crafting counter-examples.
-        let location = self.liveness.location_from_point(node.point);
-        if self.liveness.is_live_at(node.region, location) {
+        if self.liveness.is_live_at_point(node.region, node.point) {
             self.live_loans.insert(node.point, loan);
         }
     }

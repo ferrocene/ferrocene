@@ -1,3 +1,7 @@
+// Regression test for issue #149910.
+// This ensures that the diagnostics logic handles Generic Associated Types (GATs)
+// correctly without crashing (ICE).
+
 trait Trait {
     type Assoc<T>;
 }

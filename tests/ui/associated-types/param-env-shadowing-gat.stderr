@@ -1,5 +1,5 @@
 error[E0308]: mismatched types
-  --> $DIR/param-env-shadowing-gat.rs:10:5
+  --> $DIR/param-env-shadowing-gat.rs:14:5
    |
 LL | fn foo<T: Trait>(x: T::Assoc<T>) -> u32 {
    |                                     --- expected `u32` because of return type

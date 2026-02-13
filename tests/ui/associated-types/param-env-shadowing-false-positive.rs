@@ -1,3 +1,7 @@
+// Regression test for issue #149910.
+// The compiler previously incorrectly claimed that the local param-env bound
+// shadowed the global impl, but they are actually the same.
+
 trait Trait {
     type Assoc;
 }

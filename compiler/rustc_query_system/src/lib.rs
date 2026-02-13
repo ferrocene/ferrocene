@@ -5,4 +5,3 @@
 // tidy-alphabetical-end
 
 pub mod ich;
-pub mod query;

@@ -72,6 +72,7 @@ GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
+    "aarch64-rhivos2-linux-gnu" # This target is technically only supported aarch64 -> aarch64
 ]
 
 # Targets only built (and self-tested!) on Linux.

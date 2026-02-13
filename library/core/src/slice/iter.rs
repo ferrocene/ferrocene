@@ -2309,11 +2309,7 @@ impl<'a, T: 'a, const N: usize> ArrayWindows<'a, T, N> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 23a44d3c704
-=======
-// FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> Clone for ArrayWindows<'_, T, N> {
     fn clone(&self) -> Self {
@@ -2321,7 +2317,7 @@ impl<T, const N: usize> Clone for ArrayWindows<'_, T, N> {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<'a, T, const N: usize> Iterator for ArrayWindows<'a, T, N> {
     type Item = &'a [T; N];
@@ -2395,16 +2391,20 @@ impl<T, const N: usize> ExactSizeIterator for ArrayWindows<'_, T, N> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<T, const N: usize> TrustedLen for ArrayWindows<'_, T, N> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> FusedIterator for ArrayWindows<'_, T, N> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<T, const N: usize> TrustedRandomAccess for ArrayWindows<'_, T, N> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<T, const N: usize> TrustedRandomAccessNoCoerce for ArrayWindows<'_, T, N> {

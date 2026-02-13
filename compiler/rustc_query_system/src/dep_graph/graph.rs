@@ -82,7 +82,7 @@ pub(super) enum DepNodeColor {
     Unknown,
 }
 
-pub(crate) struct DepGraphData<D: Deps> {
+pub struct DepGraphData<D: Deps> {
     /// The new encoding of the dependency graph, optimized for red/green
     /// tracking. The `current` field is the dependency graph of only the
     /// current compilation session: We don't merge the previous dep-graph into
@@ -171,7 +171,7 @@ impl<D: Deps> DepGraph<D> {
     }
 
     #[inline]
-    pub(crate) fn data(&self) -> Option<&DepGraphData<D>> {
+    pub fn data(&self) -> Option<&DepGraphData<D>> {
         self.data.as_deref()
     }
 
@@ -323,7 +323,7 @@ impl<D: Deps> DepGraphData<D> {
     ///
     /// [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/queries/incremental-compilation.html
     #[inline(always)]
-    pub(crate) fn with_task<Ctxt: HasDepContext<Deps = D>, A: Debug, R>(
+    pub fn with_task<Ctxt: HasDepContext<Deps = D>, A: Debug, R>(
         &self,
         key: DepNode,
         cx: Ctxt,
@@ -336,13 +336,17 @@ impl<D: Deps> DepGraphData<D> {
         //    in `DepGraph::try_mark_green()`.
         // 2. Two distinct query keys get mapped to the same `DepNode`
         //    (see for example #48923).
-        self.assert_dep_node_not_yet_allocated_in_current_session(&key, || {
-            format!(
-                "forcing query with already existing `DepNode`\n\
+        self.assert_dep_node_not_yet_allocated_in_current_session(
+            cx.dep_context().sess(),
+            &key,
+            || {
+                format!(
+                    "forcing query with already existing `DepNode`\n\
                  - query-key: {arg:?}\n\
                  - dep-node: {key:?}"
-            )
-        });
+                )
+            },
+        );
 
         let with_deps = |task_deps| D::with_deps(task_deps, || task(cx, arg));
         let (result, edges) = if cx.dep_context().is_eval_always(key.kind) {
@@ -373,7 +377,7 @@ impl<D: Deps> DepGraphData<D> {
     /// FIXME: This could perhaps return a `WithDepNode` to ensure that the
     /// user of this function actually performs the read; we'll have to see
     /// how to make that work with `anon` in `execute_job_incr`, though.
-    pub(crate) fn with_anon_task_inner<Tcx: DepContext<Deps = D>, OP, R>(
+    pub fn with_anon_task_inner<Tcx: DepContext<Deps = D>, OP, R>(
         &self,
         cx: Tcx,
         dep_kind: DepKind,
@@ -627,12 +631,20 @@ impl<D: Deps> DepGraph<D> {
 impl<D: Deps> DepGraphData<D> {
     fn assert_dep_node_not_yet_allocated_in_current_session<S: std::fmt::Display>(
         &self,
+        sess: &Session,
         dep_node: &DepNode,
         msg: impl FnOnce() -> S,
     ) {
         if let Some(prev_index) = self.previous.node_to_index_opt(dep_node) {
-            let current = self.colors.get(prev_index);
-            assert_matches!(current, DepNodeColor::Unknown, "{}", msg())
+            let color = self.colors.get(prev_index);
+            let ok = match color {
+                DepNodeColor::Unknown => true,
+                DepNodeColor::Red => false,
+                DepNodeColor::Green(..) => sess.threads() > 1, // Other threads may mark this green
+            };
+            if !ok {
+                panic!("{}", msg())
+            }
         } else if let Some(nodes_in_current_session) = &self.current.nodes_in_current_session {
             outline(|| {
                 let seen = nodes_in_current_session.lock().contains_key(dep_node);
@@ -653,12 +665,12 @@ impl<D: Deps> DepGraphData<D> {
     /// Returns true if the given node has been marked as green during the
     /// current compilation session. Used in various assertions
     #[inline]
-    pub(crate) fn is_index_green(&self, prev_index: SerializedDepNodeIndex) -> bool {
+    pub fn is_index_green(&self, prev_index: SerializedDepNodeIndex) -> bool {
         matches!(self.colors.get(prev_index), DepNodeColor::Green(_))
     }
 
     #[inline]
-    pub(crate) fn prev_fingerprint_of(&self, prev_index: SerializedDepNodeIndex) -> Fingerprint {
+    pub fn prev_fingerprint_of(&self, prev_index: SerializedDepNodeIndex) -> Fingerprint {
         self.previous.fingerprint_by_index(prev_index)
     }
 
@@ -667,7 +679,7 @@ impl<D: Deps> DepGraphData<D> {
         self.previous.index_to_node(prev_index)
     }
 
-    pub(crate) fn mark_debug_loaded_from_disk(&self, dep_node: DepNode) {
+    pub fn mark_debug_loaded_from_disk(&self, dep_node: DepNode) {
         self.debug_loaded_from_disk.lock().insert(dep_node);
     }
 
@@ -776,17 +788,22 @@ impl<D: Deps> DepGraphData<D> {
         }
     }
 
-    fn promote_node_and_deps_to_current(&self, prev_index: SerializedDepNodeIndex) -> DepNodeIndex {
+    fn promote_node_and_deps_to_current(
+        &self,
+        prev_index: SerializedDepNodeIndex,
+    ) -> Option<DepNodeIndex> {
         self.current.debug_assert_not_in_new_nodes(&self.previous, prev_index);
 
         let dep_node_index = self.current.encoder.send_promoted(prev_index, &self.colors);
 
         #[cfg(debug_assertions)]
-        self.current.record_edge(
-            dep_node_index,
-            *self.previous.index_to_node(prev_index),
-            self.previous.fingerprint_by_index(prev_index),
-        );
+        if let Some(dep_node_index) = dep_node_index {
+            self.current.record_edge(
+                dep_node_index,
+                *self.previous.index_to_node(prev_index),
+                self.previous.fingerprint_by_index(prev_index),
+            );
+        }
 
         dep_node_index
     }
@@ -863,7 +880,7 @@ impl<D: Deps> DepGraphData<D> {
     /// A node will have an index, when it's already been marked green, or when we can mark it
     /// green. This function will mark the current task as a reader of the specified node, when
     /// a node index can be found for that node.
-    pub(crate) fn try_mark_green<'tcx, Qcx: QueryContext<'tcx, Deps = D>>(
+    pub fn try_mark_green<'tcx, Qcx: QueryContext<'tcx, Deps = D>>(
         &self,
         qcx: Qcx,
         dep_node: &DepNode,
@@ -1006,8 +1023,10 @@ impl<D: Deps> DepGraphData<D> {
         // There may be multiple threads trying to mark the same dep node green concurrently
 
         // We allocating an entry for the node in the current dependency graph and
-        // adding all the appropriate edges imported from the previous graph
-        let dep_node_index = self.promote_node_and_deps_to_current(prev_dep_node_index);
+        // adding all the appropriate edges imported from the previous graph.
+        //
+        // `no_hash` nodes may fail this promotion due to already being conservatively colored red.
+        let dep_node_index = self.promote_node_and_deps_to_current(prev_dep_node_index)?;
 
         // ... and finally storing a "Green" entry in the color map.
         // Multiple threads can all write the same color here
@@ -1035,11 +1054,12 @@ impl<D: Deps> DepGraph<D> {
 
     pub fn assert_dep_node_not_yet_allocated_in_current_session<S: std::fmt::Display>(
         &self,
+        sess: &Session,
         dep_node: &DepNode,
         msg: impl FnOnce() -> S,
     ) {
         if let Some(data) = &self.data {
-            data.assert_dep_node_not_yet_allocated_in_current_session(dep_node, msg)
+            data.assert_dep_node_not_yet_allocated_in_current_session(sess, dep_node, msg)
         }
     }
 
@@ -1074,7 +1094,7 @@ impl<D: Deps> DepGraph<D> {
         if let Some(data) = &self.data { data.current.encoder.finish(&data.current) } else { Ok(0) }
     }
 
-    pub(crate) fn next_virtual_depnode_index(&self) -> DepNodeIndex {
+    pub fn next_virtual_depnode_index(&self) -> DepNodeIndex {
         debug_assert!(self.data.is_none());
         let index = self.virtual_dep_node_index.fetch_add(1, Ordering::Relaxed);
         DepNodeIndex::from_u32(index)
@@ -1377,26 +1397,27 @@ impl DepNodeColorMap {
     }
 
     /// This tries to atomically mark a node green and assign `index` as the new
-    /// index. This returns `Ok` if `index` gets assigned, otherwise it returns
-    /// the already allocated index in `Err`.
-    #[inline]
-    pub(super) fn try_mark_green(
+    /// index if `green` is true, otherwise it will try to atomicaly mark it red.
+    ///
+    /// This returns `Ok` if `index` gets assigned or the node is marked red, otherwise it returns
+    /// the already allocated index in `Err` if it is green already. If it was already
+    /// red, `Err(None)` is returned.
+    #[inline(always)]
+    pub(super) fn try_mark(
         &self,
         prev_index: SerializedDepNodeIndex,
         index: DepNodeIndex,
-    ) -> Result<(), DepNodeIndex> {
+        green: bool,
+    ) -> Result<(), Option<DepNodeIndex>> {
         let value = &self.values[prev_index];
         match value.compare_exchange(
             COMPRESSED_UNKNOWN,
-            index.as_u32(),
+            if green { index.as_u32() } else { COMPRESSED_RED },
             Ordering::Relaxed,
             Ordering::Relaxed,
         ) {
             Ok(_) => Ok(()),
-            Err(v) => Err({
-                assert_ne!(v, COMPRESSED_RED, "tried to mark a red node as green");
-                DepNodeIndex::from_u32(v)
-            }),
+            Err(v) => Err(if v == COMPRESSED_RED { None } else { Some(DepNodeIndex::from_u32(v)) }),
         }
     }
 
@@ -1419,7 +1440,7 @@ impl DepNodeColorMap {
     pub(super) fn insert_red(&self, index: SerializedDepNodeIndex) {
         let value = self.values[index].swap(COMPRESSED_RED, Ordering::Release);
         // Sanity check for duplicate nodes
-        assert_eq!(value, COMPRESSED_UNKNOWN, "trying to encode a dep node twice");
+        assert_eq!(value, COMPRESSED_UNKNOWN, "tried to color an already colored node as red");
     }
 }
 

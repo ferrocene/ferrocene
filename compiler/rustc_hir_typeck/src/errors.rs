@@ -590,6 +590,14 @@ pub(crate) struct IntToWide<'tcx> {
     )]
     pub expr_if_nightly: Option<Span>,
     pub known_wide: bool,
+    #[subdiagnostic]
+    pub param_note: Option<IntToWideParamNote>,
+}
+
+#[derive(Subdiagnostic)]
+#[note("the type parameter `{$param}` is not known to be `Sized`, so this pointer may be wide")]
+pub(crate) struct IntToWideParamNote {
+    pub param: Symbol,
 }
 
 #[derive(Subdiagnostic)]
@@ -1145,7 +1153,7 @@ pub(crate) struct CastThinPointerToWidePointer<'tcx> {
     pub expr_ty: Ty<'tcx>,
     pub cast_ty: Ty<'tcx>,
     #[note(
-        "Thin pointers are \"simple\" pointers: they are purely a reference to a
+        "thin pointers are \"simple\" pointers: they are purely a reference to a
         memory address.
 
         Wide pointers are pointers referencing \"Dynamically Sized Types\" (also

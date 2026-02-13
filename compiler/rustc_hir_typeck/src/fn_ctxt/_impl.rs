@@ -45,6 +45,38 @@ use crate::method::{self, MethodCallee};
 use crate::{BreakableCtxt, Diverges, Expectation, FnCtxt, LoweredTy};
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
+    /// Transform generic args for inherent associated type constants (IACs).
+    ///
+    /// IACs have a different generic parameter structure than regular associated constants:
+    /// - Regular assoc const: parent (impl) generic params + own generic params
+    /// - IAC (type_const): Self type + own generic params
+    pub(crate) fn transform_args_for_inherent_type_const(
+        &self,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> GenericArgsRef<'tcx> {
+        let tcx = self.tcx;
+        if !tcx.is_type_const(def_id) {
+            return args;
+        }
+        let Some(assoc_item) = tcx.opt_associated_item(def_id) else {
+            return args;
+        };
+        if !matches!(assoc_item.container, ty::AssocContainer::InherentImpl) {
+            return args;
+        }
+
+        let impl_def_id = assoc_item.container_id(tcx);
+        let generics = tcx.generics_of(def_id);
+        let impl_args = &args[..generics.parent_count];
+        let self_ty = tcx.type_of(impl_def_id).instantiate(tcx, impl_args);
+        // Build new args: [Self, own_args...]
+        let own_args = &args[generics.parent_count..];
+        tcx.mk_args_from_iter(
+            std::iter::once(ty::GenericArg::from(self_ty)).chain(own_args.iter().copied()),
+        )
+    }
+
     /// Produces warning on the given node, if the current point in the
     /// function is unreachable, and there hasn't been another warning.
     pub(crate) fn warn_if_unreachable(&self, id: HirId, span: Span, kind: &str) {
@@ -1281,8 +1313,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             )
         });
 
+        let args_for_user_type = if let Res::Def(DefKind::AssocConst, def_id) = res {
+            self.transform_args_for_inherent_type_const(def_id, args_raw)
+        } else {
+            args_raw
+        };
+
         // First, store the "user args" for later.
-        self.write_user_type_annotation_from_args(hir_id, def_id, args_raw, user_self_ty);
+        self.write_user_type_annotation_from_args(hir_id, def_id, args_for_user_type, user_self_ty);
 
         // Normalize only after registering type annotations.
         let args = self.normalize(span, args_raw);
@@ -1322,6 +1360,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
 
         debug!("instantiate_value_path: type of {:?} is {:?}", hir_id, ty_instantiated);
+
+        let args = if let Res::Def(DefKind::AssocConst, def_id) = res {
+            self.transform_args_for_inherent_type_const(def_id, args)
+        } else {
+            args
+        };
+
         self.write_args(hir_id, args);
 
         (ty_instantiated, res)

@@ -1,6 +1,6 @@
 // tidy-alphabetical-start
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(array_try_map)]
-#![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(decl_macro)]
 #![feature(if_let_guard)]
@@ -25,8 +25,6 @@ use rustc_middle::ty;
 use rustc_middle::util::Providers;
 
 pub use self::errors::ReportErrorExt;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub fn provide(providers: &mut Providers) {
     const_eval::provide(&mut providers.queries);

@@ -11,7 +11,7 @@
 //! This API is completely unstable and subject to change.
 
 // tidy-alphabetical-start
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(associated_type_defaults)]
 #![feature(box_patterns)]
 #![feature(default_field_values)]
@@ -34,5 +34,3 @@ pub mod opaque_types;
 pub mod regions;
 pub mod solve;
 pub mod traits;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }

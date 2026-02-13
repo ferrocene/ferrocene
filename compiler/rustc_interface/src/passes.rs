@@ -12,17 +12,17 @@ use rustc_codegen_ssa::{CodegenResults, CrateInfo};
 use rustc_data_structures::indexmap::IndexMap;
 use rustc_data_structures::jobserver::Proxy;
 use rustc_data_structures::steal::Steal;
-use rustc_data_structures::sync::{AppendOnlyIndexVec, FreezeLock, WorkerLocal};
-use rustc_data_structures::{parallel, thousands};
+use rustc_data_structures::sync::{AppendOnlyIndexVec, FreezeLock, WorkerLocal, par_fns};
+use rustc_data_structures::thousands;
 use rustc_errors::timings::TimingSection;
 use rustc_expand::base::{ExtCtxt, LintStoreExpand};
 use rustc_feature::Features;
 use rustc_fs_util::try_canonicalize;
-use rustc_hir::Attribute;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{LOCAL_CRATE, StableCrateId, StableCrateIdMap};
 use rustc_hir::definitions::Definitions;
 use rustc_hir::limit::Limit;
+use rustc_hir::{Attribute, find_attr};
 use rustc_incremental::setup_dep_graph;
 use rustc_lint::{BufferedEarlyLint, EarlyCheckNode, LintStore, unerased_lint_store};
 use rustc_metadata::EncodedMetadata;
@@ -582,7 +582,7 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
     let deps_output = outputs.path(OutputType::DepInfo);
     let deps_filename = deps_output.as_path();
 
-    let result: io::Result<()> = try {
+    let result = try {
         // Build a list of files used to compile the output and
         // write Makefile-compatible dependency rules
         let mut files: IndexMap<String, (u64, Option<SourceFileHash>)> = sess
@@ -1052,8 +1052,8 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
 
     let sess = tcx.sess;
     sess.time("misc_checking_1", || {
-        parallel!(
-            {
+        par_fns(&mut [
+            &mut || {
                 sess.time("looking_for_entry_point", || tcx.ensure_ok().entry_fn(()));
                 sess.time("check_externally_implementable_items", || {
                     tcx.ensure_ok().check_externally_implementable_items(())
@@ -1065,7 +1065,7 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
 
                 CStore::from_tcx(tcx).report_unused_deps(tcx);
             },
-            {
+            &mut || {
                 tcx.ensure_ok().exportable_items(LOCAL_CRATE);
                 tcx.ensure_ok().stable_order_of_exportable_impls(LOCAL_CRATE);
                 tcx.par_hir_for_each_module(|module| {
@@ -1073,14 +1073,14 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
                     tcx.ensure_ok().check_mod_unstable_api_usage(module);
                 });
             },
-            {
+            &mut || {
                 // We force these queries to run,
                 // since they might not otherwise get called.
                 // This marks the corresponding crate-level attributes
                 // as used, and ensures that their values are valid.
                 tcx.ensure_ok().limits(());
-            }
-        );
+            },
+        ]);
     });
 
     rustc_hir_analysis::check_crate(tcx);
@@ -1116,18 +1116,14 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
             {
                 tcx.ensure_ok().mir_drops_elaborated_and_const_checked(def_id);
             }
-            if tcx.is_coroutine(def_id.to_def_id()) {
-                tcx.ensure_ok().mir_coroutine_witnesses(def_id);
-                let _ = tcx.ensure_ok().check_coroutine_obligations(
-                    tcx.typeck_root_def_id(def_id.to_def_id()).expect_local(),
+            if tcx.is_coroutine(def_id.to_def_id())
+                && (!tcx.is_async_drop_in_place_coroutine(def_id.to_def_id()))
+            {
+                // Eagerly check the unsubstituted layout for cycles.
+                tcx.ensure_ok().layout_of(
+                    ty::TypingEnv::post_analysis(tcx, def_id.to_def_id())
+                        .as_query_input(tcx.type_of(def_id).instantiate_identity()),
                 );
-                if !tcx.is_async_drop_in_place_coroutine(def_id.to_def_id()) {
-                    // Eagerly check the unsubstituted layout for cycles.
-                    tcx.ensure_ok().layout_of(
-                        ty::TypingEnv::post_analysis(tcx, def_id.to_def_id())
-                            .as_query_input(tcx.type_of(def_id).instantiate_identity()),
-                    );
-                }
             }
         });
     });
@@ -1156,39 +1152,39 @@ fn analysis(tcx: TyCtxt<'_>, (): ()) {
     }
 
     sess.time("misc_checking_3", || {
-        parallel!(
-            {
+        par_fns(&mut [
+            &mut || {
                 tcx.ensure_ok().effective_visibilities(());
 
-                parallel!(
-                    {
+                par_fns(&mut [
+                    &mut || {
                         tcx.par_hir_for_each_module(|module| {
                             tcx.ensure_ok().check_private_in_public(module)
                         })
                     },
-                    {
+                    &mut || {
                         tcx.par_hir_for_each_module(|module| {
                             tcx.ensure_ok().check_mod_deathness(module)
                         });
                     },
-                    {
+                    &mut || {
                         sess.time("lint_checking", || {
                             rustc_lint::check_crate(tcx);
                         });
                     },
-                    {
+                    &mut || {
                         tcx.ensure_ok().clashing_extern_declarations(());
-                    }
-                );
+                    },
+                ]);
             },
-            {
+            &mut || {
                 sess.time("privacy_checking_modules", || {
                     tcx.par_hir_for_each_module(|module| {
                         tcx.ensure_ok().check_mod_privacy(module);
                     });
                 });
-            }
-        );
+            },
+        ]);
 
         // This check has to be run after all lints are done processing. We don't
         // define a lint filter, as all lint checks should have finished at this point.
@@ -1227,7 +1223,7 @@ pub(crate) fn start_codegen<'tcx>(
 
     // Hook for tests.
     if let Some((def_id, _)) = tcx.entry_fn(())
-        && tcx.has_attr(def_id, sym::rustc_delayed_bug_from_inside_query)
+        && find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcDelayedBugFromInsideQuery)
     {
         tcx.ensure_ok().trigger_delayed_bug(def_id);
     }

@@ -20,7 +20,6 @@ use std::{fmt, mem, slice};
 
 use attr_wrapper::{AttrWrapper, UsePreAttrPos};
 pub use diagnostics::AttemptLocalParseRecovery;
-pub(crate) use expr::ForbiddenLetReason;
 // Public to use it for custom `if` expressions in rustfmt forks like https://github.com/tucant/rustfmt
 pub use expr::LetChainsPolicy;
 pub(crate) use item::{FnContext, FnParseMode};
@@ -34,9 +33,9 @@ use rustc_ast::tokenstream::{
 };
 use rustc_ast::util::case::Case;
 use rustc_ast::{
-    self as ast, AnonConst, AttrArgs, AttrId, BlockCheckMode, ByRef, Const, CoroutineKind,
-    DUMMY_NODE_ID, DelimArgs, Expr, ExprKind, Extern, HasAttrs, HasTokens, MgcaDisambiguation,
-    Mutability, Recovered, Safety, StrLit, Visibility, VisibilityKind,
+    self as ast, AnonConst, AttrArgs, AttrId, ByRef, Const, CoroutineKind, DUMMY_NODE_ID,
+    DelimArgs, Expr, ExprKind, Extern, HasAttrs, HasTokens, MgcaDisambiguation, Mutability,
+    Recovered, Safety, StrLit, Visibility, VisibilityKind,
 };
 use rustc_ast_pretty::pprust;
 use rustc_data_structures::debug_assert_matches;
@@ -50,7 +49,7 @@ use token_type::TokenTypeSet;
 pub use token_type::{ExpKeywordPair, ExpTokenPair, TokenType};
 use tracing::debug;
 
-use crate::errors::{self, IncorrectVisibilityRestriction, NonStringAbiLiteral};
+use crate::errors::{self, IncorrectVisibilityRestriction, NonStringAbiLiteral, TokenDescription};
 use crate::exp;
 
 #[cfg(test)]
@@ -305,35 +304,6 @@ pub enum Trailing {
 impl From<bool> for Trailing {
     fn from(b: bool) -> Trailing {
         if b { Trailing::Yes } else { Trailing::No }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) enum TokenDescription {
-    ReservedIdentifier,
-    Keyword,
-    ReservedKeyword,
-    DocComment,
-
-    // Expanded metavariables are wrapped in invisible delimiters which aren't
-    // pretty-printed. In error messages we must handle these specially
-    // otherwise we get confusing things in messages like "expected `(`, found
-    // ``". It's better to say e.g. "expected `(`, found type metavariable".
-    MetaVar(MetaVarKind),
-}
-
-impl TokenDescription {
-    pub(super) fn from_token(token: &Token) -> Option<Self> {
-        match token.kind {
-            _ if token.is_special_ident() => Some(TokenDescription::ReservedIdentifier),
-            _ if token.is_used_keyword() => Some(TokenDescription::Keyword),
-            _ if token.is_unused_keyword() => Some(TokenDescription::ReservedKeyword),
-            token::DocComment(..) => Some(TokenDescription::DocComment),
-            token::OpenInvisible(InvisibleOrigin::MetaVar(kind)) => {
-                Some(TokenDescription::MetaVar(kind))
-            }
-            _ => None,
-        }
     }
 }
 
@@ -1299,21 +1269,8 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_mgca_const_block(&mut self, gate_syntax: bool) -> PResult<'a, AnonConst> {
-        let kw_span = self.prev_token.span;
-        let value = self.parse_expr_block(None, kw_span, BlockCheckMode::Default)?;
-        if gate_syntax {
-            self.psess.gated_spans.gate(sym::min_generic_const_args, kw_span.to(value.span));
-        }
-        Ok(AnonConst {
-            id: ast::DUMMY_NODE_ID,
-            value,
-            mgca_disambiguation: MgcaDisambiguation::AnonConst,
-        })
-    }
-
     /// Parses inline const expressions.
-    fn parse_const_block(&mut self, span: Span) -> PResult<'a, Box<Expr>> {
+    fn parse_const_block(&mut self, span: Span, pat: bool) -> PResult<'a, Box<Expr>> {
         self.expect_keyword(exp!(Const))?;
         let (attrs, blk) = self.parse_inner_attrs_and_block(None)?;
         let anon_const = AnonConst {
@@ -1322,7 +1279,18 @@ impl<'a> Parser<'a> {
             mgca_disambiguation: MgcaDisambiguation::AnonConst,
         };
         let blk_span = anon_const.value.span;
-        let kind = ExprKind::ConstBlock(anon_const);
+        let kind = if pat {
+            let guar = self
+                .dcx()
+                .struct_span_err(blk_span, "const blocks cannot be used as patterns")
+                .with_help(
+                    "use a named `const`-item or an `if`-guard (`x if x == const { ... }`) instead",
+                )
+                .emit();
+            ExprKind::Err(guar)
+        } else {
+            ExprKind::ConstBlock(anon_const)
+        };
         Ok(self.mk_expr_with_attrs(span.to(blk_span), kind, attrs))
     }
 

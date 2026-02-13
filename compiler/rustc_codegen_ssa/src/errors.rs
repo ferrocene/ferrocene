@@ -43,14 +43,6 @@ pub(crate) struct CguNotRecorded<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("unknown cgu-reuse-kind `{$kind}` specified")]
-pub(crate) struct UnknownReuseKind {
-    #[primary_span]
-    pub span: Span,
-    pub kind: Symbol,
-}
-
-#[derive(Diagnostic)]
 #[diag("found CGU-reuse attribute but `-Zquery-dep-graph` was not specified")]
 pub(crate) struct MissingQueryDepGraph {
     #[primary_span]
@@ -59,13 +51,13 @@ pub(crate) struct MissingQueryDepGraph {
 
 #[derive(Diagnostic)]
 #[diag(
-    "found malformed codegen unit name `{$user_path}`. codegen units names must always start with the name of the crate (`{$crate_name}` in this case)."
+    "found malformed codegen unit name `{$user_path}`. codegen units names must always start with the name of the crate (`{$crate_name}` in this case)"
 )]
-pub(crate) struct MalformedCguName {
+pub(crate) struct MalformedCguName<'a> {
     #[primary_span]
     pub span: Span,
-    pub user_path: String,
-    pub crate_name: String,
+    pub user_path: &'a str,
+    pub crate_name: &'a str,
 }
 
 #[derive(Diagnostic)]
@@ -76,22 +68,6 @@ pub(crate) struct NoModuleNamed<'a> {
     pub user_path: &'a str,
     pub cgu_name: Symbol,
     pub cgu_names: String,
-}
-
-#[derive(Diagnostic)]
-#[diag("associated value expected for `{$name}`")]
-pub(crate) struct FieldAssociatedValueExpected {
-    #[primary_span]
-    pub span: Span,
-    pub name: Symbol,
-}
-
-#[derive(Diagnostic)]
-#[diag("no field `{$name}`")]
-pub(crate) struct NoField {
-    #[primary_span]
-    pub span: Span,
-    pub name: Symbol,
 }
 
 #[derive(Diagnostic)]
@@ -154,14 +130,14 @@ pub(crate) struct CopyPathBuf {
 // Reports Paths using `Debug` implementation rather than Path's `Display` implementation.
 #[derive(Diagnostic)]
 #[diag("could not copy {$from} to {$to}: {$error}")]
-pub struct CopyPath<'a> {
+pub(crate) struct CopyPath<'a> {
     from: DebugArgPath<'a>,
     to: DebugArgPath<'a>,
     error: Error,
 }
 
 impl<'a> CopyPath<'a> {
-    pub fn new(from: &'a Path, to: &'a Path, error: Error) -> CopyPath<'a> {
+    pub(crate) fn new(from: &'a Path, to: &'a Path, error: Error) -> CopyPath<'a> {
         CopyPath { from: DebugArgPath(from), to: DebugArgPath(to), error }
     }
 }
@@ -178,19 +154,19 @@ impl IntoDiagArg for DebugArgPath<'_> {
 #[diag(
     "option `-o` or `--emit` is used to write binary output type `{$shorthand}` to stdout, but stdout is a tty"
 )]
-pub struct BinaryOutputToTty {
+pub(crate) struct BinaryOutputToTty {
     pub shorthand: &'static str,
 }
 
 #[derive(Diagnostic)]
 #[diag("ignoring emit path because multiple .{$extension} files were produced")]
-pub struct IgnoringEmitPath {
+pub(crate) struct IgnoringEmitPath {
     pub extension: &'static str,
 }
 
 #[derive(Diagnostic)]
 #[diag("ignoring -o because multiple .{$extension} files were produced")]
-pub struct IgnoringOutput {
+pub(crate) struct IgnoringOutput {
     pub extension: &'static str,
 }
 
@@ -562,12 +538,12 @@ pub(crate) struct SelfContainedLinkerMissing;
 
 #[derive(Diagnostic)]
 #[diag(
-    "please ensure that Visual Studio 2017 or later, or Build Tools for Visual Studio were installed with the Visual C++ option."
+    "please ensure that Visual Studio 2017 or later, or Build Tools for Visual Studio were installed with the Visual C++ option"
 )]
 pub(crate) struct CheckInstalledVisualStudio;
 
 #[derive(Diagnostic)]
-#[diag("VS Code is a different product, and is not sufficient.")]
+#[diag("VS Code is a different product, and is not sufficient")]
 pub(crate) struct InsufficientVSCodeProduct;
 
 #[derive(Diagnostic)]
@@ -610,13 +586,13 @@ pub(crate) struct LinkerFileStem;
 
 #[derive(Diagnostic)]
 #[diag(
-    "link against the following native artifacts when linking against this static library. The order and any duplication can be significant on some platforms."
+    "link against the following native artifacts when linking against this static library. The order and any duplication can be significant on some platforms"
 )]
 pub(crate) struct StaticLibraryNativeArtifacts;
 
 #[derive(Diagnostic)]
 #[diag(
-    "native artifacts to link against have been written to {$path}. The order and any duplication can be significant on some platforms."
+    "native artifacts to link against have been written to {$path}. The order and any duplication can be significant on some platforms"
 )]
 pub(crate) struct StaticLibraryNativeArtifactsToFile<'a> {
     pub path: &'a Path,

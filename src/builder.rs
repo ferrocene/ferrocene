@@ -1892,11 +1892,9 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
             (rounded_min.value.to_bits(), rounded_max.value.to_bits())
         };
         fn compute_clamp_bounds<F: Float>(signed: bool, int_width: u64) -> (u128, u128) {
-            let rounded_min =
-                F::from_i128_r(int_min(signed, int_width), Round::TowardZero);
+            let rounded_min = F::from_i128_r(int_min(signed, int_width), Round::TowardZero);
             assert_eq!(rounded_min.status, Status::OK);
-            let rounded_max =
-                F::from_u128_r(int_max(signed, int_width), Round::TowardZero);
+            let rounded_max = F::from_u128_r(int_max(signed, int_width), Round::TowardZero);
             assert!(rounded_max.value.is_finite());
             (rounded_min.value.to_bits(), rounded_max.value.to_bits())
         }

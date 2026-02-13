@@ -955,6 +955,7 @@ impl<'gcc, 'tcx> CodegenCx<'gcc, 'tcx> {
             // cSpell:disable
             TypeKind::Float => "sfti",
             TypeKind::Double => "dfti",
+            TypeKind::FP128 => "tfti",
             // cSpell:enable
             kind => panic!("cannot cast a {:?} to non-native integer", kind),
         };

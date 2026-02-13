@@ -71,6 +71,7 @@ macro_rules! find_attr {
     ($attributes_list: expr, $pattern: pat $(if $guard: expr)? => $e: expr) => {{
         'done: {
             for i in $attributes_list {
+                use rustc_hir::attrs::AttributeKind::*;
                 let i: &rustc_hir::Attribute = i;
                 match i {
                     rustc_hir::Attribute::Parsed($pattern) $(if $guard)? => {

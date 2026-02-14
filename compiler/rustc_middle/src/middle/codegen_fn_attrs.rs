@@ -3,9 +3,6 @@ pub mod ferrocene;
 
 use std::borrow::Cow;
 
-#[rustfmt::skip]
-use ferrocene::Validated;
-
 use rustc_abi::Align;
 use rustc_hir::attrs::{InlineAttr, InstructionSetAttr, Linkage, OptimizeAttr, RtsanSetting};
 use rustc_hir::def_id::DefId;
@@ -117,7 +114,7 @@ pub struct CodegenFnAttrs {
     pub objc_selector: Option<Symbol>,
 
     // Ferrocene addition
-    pub validated: Option<Validated>,
+    pub validated: Option<ferrocene::Validated>,
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, HashStable, PartialEq, Eq)]

@@ -213,7 +213,8 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             // We must have checked the item when it was compiled, so just ignore it.
             info!("no MIR for {owner:?}");
             return;
-        } else if !visited.insert(instance) {
+        }
+        if !visited.insert(instance) {
             // We've already linted this instance (or maybe we're still halfway through linting it).
             // Don't loop forever.
             //

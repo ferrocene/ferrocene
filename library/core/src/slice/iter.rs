@@ -2299,10 +2299,7 @@ impl<'a, T: 'a, const N: usize> ArrayWindows<'a, T, N> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 930ecbcdf89
-=======
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> Clone for ArrayWindows<'_, T, N> {
@@ -2311,7 +2308,7 @@ impl<T, const N: usize> Clone for ArrayWindows<'_, T, N> {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<'a, T, const N: usize> Iterator for ArrayWindows<'a, T, N> {
     type Item = &'a [T; N];

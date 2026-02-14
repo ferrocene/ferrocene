@@ -135,7 +135,6 @@
 // tidy-alphabetical-start
 #![feature(assert_matches)]
 #![feature(atomic_from_mut)]
-#![feature(atomic_try_update)]
 #![feature(bound_as_ref)]
 #![feature(bound_copied)]
 #![feature(char_internals)]

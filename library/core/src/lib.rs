@@ -358,14 +358,8 @@ pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod random;
-<<<<<<< HEAD
-#[unstable(feature = "new_range_api", issue = "125687")]
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 930ecbcdf89
-#[unstable(feature = "new_range_api", issue = "125687")]
-=======
 #[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub mod range;
 pub mod result;
 pub mod sync;

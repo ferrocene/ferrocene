@@ -114,14 +114,13 @@ pub struct JsonStepSystemStats {
     pub cpu_utilization_percent: f64,
 }
 
-<<<<<<< HEAD
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct FerroceneVariantMetadata {
     pub id: String,
     pub human_readable_fields: BTreeMap<String, String>,
-||||||| 930ecbcdf89
-=======
+}
+
 #[derive(Eq, Hash, PartialEq, Debug)]
 pub enum DebuggerKind {
     Gdb,
@@ -143,7 +142,6 @@ impl DebuggerKind {
             None
         }
     }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 fn null_as_f64_nan<'de, D: serde::Deserializer<'de>>(d: D) -> Result<f64, D::Error> {

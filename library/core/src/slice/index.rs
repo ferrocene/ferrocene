@@ -141,14 +141,8 @@ mod private_slice_index {
     #[unstable(feature = "new_range_api", issue = "125687")]
     #[cfg(not(feature = "ferrocene_subset"))]
     impl Sealed for range::Range<usize> {}
-<<<<<<< HEAD
-    #[unstable(feature = "new_range_api", issue = "125687")]
     #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 930ecbcdf89
-    #[unstable(feature = "new_range_api", issue = "125687")]
-=======
     #[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     impl Sealed for range::RangeInclusive<usize> {}
     #[unstable(feature = "new_range_api", issue = "125687")]
     #[cfg(not(feature = "ferrocene_subset"))]

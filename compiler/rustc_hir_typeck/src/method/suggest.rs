@@ -854,7 +854,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         {
             err.span_label(span, format!("`{rcvr_ty}` is not an iterator"));
             if !span.in_external_macro(self.tcx.sess.source_map()) {
-                err.multipart_suggestion_verbose(
+                err.multipart_suggestion(
                     "call `.into_iter()` first",
                     vec![(span.shrink_to_lo(), format!("into_iter()."))],
                     Applicability::MaybeIncorrect,
@@ -1581,7 +1581,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     }
                 }
             }
-            err.multipart_suggestion_verbose(
+            err.multipart_suggestion(
                 "there is a variant with a similar name",
                 suggestion,
                 Applicability::HasPlaceholders,

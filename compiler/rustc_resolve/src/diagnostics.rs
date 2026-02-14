@@ -908,7 +908,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         err.help(msg);
                         return err;
                     }
-                    err.multipart_suggestion_verbose(msg, suggestions, applicability);
+                    err.multipart_suggestion(msg, suggestions, applicability);
                 }
 
                 let module = match module {
@@ -2379,7 +2379,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                             (last_span.shrink_to_hi(), ", ..".to_string()),
                         ]
                     };
-                    err.multipart_suggestion_verbose(
+                    err.multipart_suggestion(
                         format!(
                             "the type `{ident}` of field `{}` is private, but you can construct \
                              the default value defined for it in `{}` using `..` in the struct \

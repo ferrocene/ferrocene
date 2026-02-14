@@ -888,7 +888,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ]);
             // We suggest changing the argument from `mut ident: &Ty` to `ident: &'_ mut Ty` and the
             // assignment from `ident = val;` to `*ident = val;`.
-            err.multipart_suggestion_verbose(
+            err.multipart_suggestion(
                 "you might have meant to mutate the pointed at value being passed in, instead of \
                 changing the reference in the local binding",
                 sugg,

@@ -23,6 +23,9 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
         exit!(1);
     }
 
+    // This guarantees that the coverage information is not stripped away from the binary
+    cargo.rustflag("-Copt-level=2");
+
     cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
     cargo.rustflag("--cfg=ferrocene_coverage");
@@ -66,7 +69,7 @@ pub(crate) fn measure_coverage(
     match &mut *builder.ferrocene_coverage.borrow_mut() {
         storage @ None => {
             // Only clear the paths the first time measure_coverage is called.
-            paths.ensure_clean(builder);
+            paths.ensure_clean(builder, state.target);
 
             *storage = Some(state)
         }
@@ -156,13 +159,12 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     cmd.fail_fast().run(builder);
 
     builder.info("Listing symbols for the certified libcore subset");
-    let symbol_report =
-        builder.ensure(CertifiedCoreSymbols::new(builder, builder.config.host_target));
+    let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, state.target));
 
     let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: builder.config.host_target.subset_equivalent(),
+        certified_target: state.target.subset_equivalent(),
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
@@ -170,6 +172,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let dist_report = paths
         .ferrocene_coverage_dir
+        .join(state.target.to_string())
         .join(html_report.file_name().expect("No coverage report filename determined."));
     builder.info(&format!("Saving coverage report to {}", dist_report.display()));
     builder.copy_link(&html_report, &dist_report, crate::FileType::Regular);
@@ -217,9 +220,9 @@ impl Paths {
         }
     }
 
-    fn ensure_clean(&self, builder: &Builder<'_>) {
+    fn ensure_clean(&self, builder: &Builder<'_>, target: TargetSelection) {
         // directories must be emptied, but still must exist after
-        for dir in [&self.ferrocene_coverage_dir, &self.profraw_dir] {
+        for dir in [&self.ferrocene_coverage_dir.join(target.to_string()), &self.profraw_dir] {
             if dir.exists() {
                 builder.remove_dir(dir);
             }

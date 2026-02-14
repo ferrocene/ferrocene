@@ -3875,23 +3875,17 @@ intrinsics:
     safety:
       unsafe: [neon]
     types:
-      - ['*const i8', int8x8x3_t, '*const int8x8_t', i8]
-      - ['*const i16', int16x4x3_t, '*const int16x4_t', i16]
-      - ['*const i32', int32x2x3_t, '*const int32x2_t', i32]
-      - ['*const i8', int8x16x3_t, '*const int8x16_t', i8]
-      - ['*const i16', int16x8x3_t, '*const int16x8_t', i16]
-      - ['*const i32', int32x4x3_t, '*const int32x4_t', i32]
-      - ['*const f32', float32x2x3_t, '*const float32x2_t', f32]
-      - ['*const f32', float32x4x3_t, '*const float32x4_t', f32]
+      - ['*const i8', int8x8x3_t, i8, "8"]
+      - ['*const i16', int16x4x3_t, i16, "4"]
+      - ['*const i32', int32x2x3_t, i32, "2"]
+      - ['*const i8', int8x16x3_t, i8, "16"]
+      - ['*const i16', int16x8x3_t, i16, "8"]
+      - ['*const i32', int32x4x3_t, i32, "4"]
+      - ['*const f32', float32x2x3_t, f32, "2"]
+      - ['*const f32', float32x4x3_t, f32, "4"]
     compose:
-      - LLVMLink:
-          name: 'vld3{neon_type[1].nox}'
-          arguments:
-            - 'ptr: {type[2]}'
-          links:
-            - link: 'llvm.aarch64.neon.ld3.v{neon_type[1].lane}{type[3]}.p0'
-              arch: aarch64,arm64ec
-      - FnCall: ['_vld3{neon_type[1].nox}', ['a as _']]
+      - FnCall: ["crate::core_arch::macros::deinterleaving_load!", [{ Type: "{type[2]}" }, "{type[3]}", "3", a], [], true]
+
 
   - name: "vld3{neon_type[1].nox}"
     doc: Load multiple 3-element structures to three registers

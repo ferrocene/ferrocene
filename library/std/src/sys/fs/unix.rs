@@ -2132,9 +2132,6 @@ pub fn link(original: &CStr, link: &CStr) -> io::Result<()> {
             // Android has `linkat` on newer versions, but we happen to know
             // `link` always has the correct behavior, so it's here as well.
             target_os = "android",
-            // wasi-sdk-29-and-prior have a buggy `linkat` so use `link` instead
-            // until wasi-sdk is updated (see WebAssembly/wasi-libc#690)
-            target_os = "wasi",
             // Other misc platforms
             target_os = "horizon",
             target_os = "vita",

@@ -167,6 +167,14 @@ pub enum CoverageAttrKind {
     Off,
 }
 
+/// Successfully-parsed value of a `#[rustc_abi(..)]` attribute.
+#[derive(Copy, Debug, Eq, PartialEq, Encodable, Decodable, Clone)]
+#[derive(HashStable_Generic, PrintAttribute)]
+pub enum RustcAbiAttrKind {
+    Debug,
+    AssertEq,
+}
+
 impl Deprecation {
     /// Whether an item marked with #[deprecated(since = "X")] is currently
     /// deprecated (i.e., whether X is not greater than the current rustc
@@ -331,6 +339,8 @@ pub enum NativeLibKind {
         bundle: Option<bool>,
         /// Whether to link static library without throwing any object files away
         whole_archive: Option<bool>,
+        /// Whether to export c static library symbols
+        export_symbols: Option<bool>,
     },
     /// Dynamic library (e.g. `libfoo.so` on Linux)
     /// or an import library corresponding to a dynamic library (e.g. `foo.lib` on Windows/MSVC).
@@ -363,8 +373,8 @@ pub enum NativeLibKind {
 impl NativeLibKind {
     pub fn has_modifiers(&self) -> bool {
         match self {
-            NativeLibKind::Static { bundle, whole_archive } => {
-                bundle.is_some() || whole_archive.is_some()
+            NativeLibKind::Static { bundle, whole_archive, export_symbols } => {
+                bundle.is_some() || whole_archive.is_some() || export_symbols.is_some()
             }
             NativeLibKind::Dylib { as_needed }
             | NativeLibKind::Framework { as_needed }
@@ -714,6 +724,23 @@ pub enum BorrowckGraphvizFormatKind {
     TwoPhase,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcCleanAttribute {
+    pub span: Span,
+    pub cfg: Symbol,
+    pub except: Option<RustcCleanQueries>,
+    pub loaded_from_disk: Option<RustcCleanQueries>,
+}
+
+/// Represents the `except=` or `loaded_from_disk=` argument of `#[rustc_clean]`
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcCleanQueries {
+    pub entries: ThinVec<Symbol>,
+    pub span: Span,
+}
+
 /// Represents parsed *built-in* inert attributes.
 ///
 /// ## Overview
@@ -990,8 +1017,14 @@ pub enum AttributeKind {
     /// Represents [`#[recursion_limit]`](https://doc.rust-lang.org/reference/attributes/limits.html#the-recursion_limit-attribute)
     RecursionLimit { attr_span: Span, limit_span: Span, limit: Limit },
 
+    /// Represents `#[reexport_test_harness_main]`
+    ReexportTestHarnessMain(Symbol),
+
     /// Represents [`#[repr]`](https://doc.rust-lang.org/stable/reference/type-layout.html#representations).
     Repr { reprs: ThinVec<(ReprAttr, Span)>, first_span: Span },
+
+    /// Represents `#[rustc_abi(..)]`
+    RustcAbi { attr_span: Span, kind: RustcAbiAttrKind },
 
     /// Represents `#[rustc_allocator]`
     RustcAllocator,
@@ -1020,6 +1053,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_builtin_macro]`.
     RustcBuiltinMacro { builtin_name: Option<Symbol>, helper_attrs: ThinVec<Symbol>, span: Span },
 
+    /// Represents `#[rustc_clean]`
+    RustcClean(ThinVec<RustcCleanAttribute>),
+
     /// Represents `#[rustc_coherence_is_core]`
     RustcCoherenceIsCore(Span),
 
@@ -1045,6 +1081,12 @@ pub enum AttributeKind {
     /// Represents `#[rustc_deallocator]`
     RustcDeallocator,
 
+    /// Represents `#[rustc_def_path]`
+    RustcDefPath(Span),
+
+    /// Represents `#[rustc_delayed_bug_from_inside_query]`
+    RustcDelayedBugFromInsideQuery,
+
     /// Represents `#[rustc_deny_explicit_impl]`.
     RustcDenyExplicitImpl(Span),
 
@@ -1069,11 +1111,29 @@ pub enum AttributeKind {
     /// Represents `#[rustc_dyn_incompatible_trait]`.
     RustcDynIncompatibleTrait(Span),
 
+    /// Represents `#[rustc_effective_visibility]`.
+    RustcEffectiveVisibility,
+
+    /// Represents `#[rustc_evaluate_where_clauses]`
+    RustcEvaluateWhereClauses,
+
     /// Represents `#[rustc_has_incoherent_inherent_impls]`
     RustcHasIncoherentInherentImpls,
 
     /// Represents `#[rustc_hidden_type_of_opaques]`
     RustcHiddenTypeOfOpaques,
+
+    /// Represents `#[rustc_if_this_changed]`
+    RustcIfThisChanged(Span, Option<Symbol>),
+
+    /// Represents `#[rustc_insignificant_dtor]`
+    RustcInsignificantDtor,
+
+    /// Represents `#[rustc_intrinsic]`
+    RustcIntrinsic,
+
+    /// Represents `#[rustc_intrinsic_const_stable_indirect]`
+    RustcIntrinsicConstStableIndirect,
 
     /// Represents `#[rustc_layout]`
     RustcLayout(ThinVec<RustcLayoutType>),
@@ -1117,6 +1177,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_no_implicit_autorefs]`
     RustcNoImplicitAutorefs,
 
+    /// Represents `#[rustc_no_implicit_bounds]`
+    RustcNoImplicitBounds,
+
     /// Represents `#[rustc_non_const_trait_method]`.
     RustcNonConstTraitMethod,
 
@@ -1135,6 +1198,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_offload_kernel]`
     RustcOffloadKernel,
 
+    /// Represents `#[rustc_outlives]`
+    RustcOutlives,
+
     /// Represents `#[rustc_paren_sugar]`.
     RustcParenSugar(Span),
 
@@ -1152,6 +1218,12 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_reallocator]`
     RustcReallocator,
+
+    /// Represents `#[rustc_regions]`
+    RustcRegions,
+
+    /// Represents `#[rustc_reservation_impl]`
+    RustcReservationImpl(Span, Symbol),
 
     /// Represents `#[rustc_scalable_vector(N)]`
     RustcScalableVector {
@@ -1175,6 +1247,15 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_std_internal_symbol]`.
     RustcStdInternalSymbol(Span),
+
+    /// Represents `#[rustc_strict_coherence]`.
+    RustcStrictCoherence(Span),
+
+    /// Represents `#[rustc_symbol_name]`
+    RustcSymbolName(Span),
+
+    /// Represents `#[rustc_then_this_would_need]`
+    RustcThenThisWouldNeed(Span, ThinVec<Ident>),
 
     /// Represents `#[rustc_unsafe_specialization_marker]`.
     RustcUnsafeSpecializationMarker(Span),
@@ -1206,6 +1287,7 @@ pub enum AttributeKind {
         /// Span of the attribute.
         span: Span,
     },
+
     /// Represents `#[target_feature(enable = "...")]` and
     /// `#[unsafe(force_target_feature(enable = "...")]`.
     TargetFeature { features: ThinVec<(Symbol, Span)>, attr_span: Span, was_forced: bool },
@@ -1215,9 +1297,6 @@ pub enum AttributeKind {
 
     /// Represents `#[track_caller]`
     TrackCaller(Span),
-
-    /// Represents `#[type_const]`.
-    TypeConst(Span),
 
     /// Represents `#[type_length_limit]`
     TypeLengthLimit { attr_span: Span, limit_span: Span, limit: Limit },

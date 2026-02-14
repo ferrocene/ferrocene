@@ -289,7 +289,6 @@ pub(crate) fn create_config(
         output_file: None,
         output_dir: None,
         file_loader: None,
-        locale_resources: rustc_driver::DEFAULT_LOCALE_RESOURCES.to_vec(),
         lint_caps,
         psess_created: None,
         hash_untracked_state: None,
@@ -322,7 +321,6 @@ pub(crate) fn create_config(
         }),
         extra_symbols: Vec::new(),
         make_codegen_backend: None,
-        registry: rustc_driver::diagnostics_registry(),
         ice_file: None,
         using_internal_features: &USING_INTERNAL_FEATURES,
     }

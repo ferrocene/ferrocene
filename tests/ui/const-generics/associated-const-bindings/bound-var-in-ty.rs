@@ -14,8 +14,7 @@
 use std::marker::ConstParamTy_;
 
 trait Trait<T: ConstParamTy_> {
-    #[type_const]
-    const K: T;
+    type const K: T;
 }
 
 fn take(

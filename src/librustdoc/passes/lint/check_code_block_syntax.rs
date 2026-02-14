@@ -5,7 +5,6 @@ use std::sync::Arc;
 
 use rustc_data_structures::sync::Lock;
 use rustc_errors::emitter::Emitter;
-use rustc_errors::registry::Registry;
 use rustc_errors::translation::{Translator, to_fluent_args};
 use rustc_errors::{Applicability, DiagCtxt, DiagInner};
 use rustc_parse::{source_str_to_stream, unwrap_or_emit_fatal};
@@ -150,7 +149,7 @@ struct BufferEmitter {
 }
 
 impl Emitter for BufferEmitter {
-    fn emit_diagnostic(&mut self, diag: DiagInner, _registry: &Registry) {
+    fn emit_diagnostic(&mut self, diag: DiagInner) {
         let mut buffer = self.buffer.borrow_mut();
 
         let fluent_args = to_fluent_args(diag.args.iter());

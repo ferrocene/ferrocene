@@ -5,12 +5,11 @@
 //~| WARN the feature `min_generic_const_args` is incomplete
 
 pub trait IsVoid {
-    #[type_const]
-    const IS_VOID: bool;
+
+    type const IS_VOID: bool;
 }
 impl<T> IsVoid for T {
-    #[type_const]
-    default const IS_VOID: bool = false;
+    default type const IS_VOID: bool = false;
 }
 
 pub trait NotVoid {}

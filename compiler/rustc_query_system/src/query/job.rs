@@ -65,7 +65,7 @@ pub struct QueryJobInfo<'tcx> {
 }
 
 /// Represents an active query job.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct QueryJob<'tcx> {
     pub id: QueryJobId,
 
@@ -79,12 +79,6 @@ pub struct QueryJob<'tcx> {
     latch: Option<QueryLatch<'tcx>>,
 }
 
-impl<'tcx> Clone for QueryJob<'tcx> {
-    fn clone(&self) -> Self {
-        Self { id: self.id, span: self.span, parent: self.parent, latch: self.latch.clone() }
-    }
-}
-
 impl<'tcx> QueryJob<'tcx> {
     /// Creates a new query job.
     #[inline]
@@ -92,7 +86,7 @@ impl<'tcx> QueryJob<'tcx> {
         QueryJob { id, span, parent, latch: None }
     }
 
-    pub(super) fn latch(&mut self) -> QueryLatch<'tcx> {
+    pub fn latch(&mut self) -> QueryLatch<'tcx> {
         if self.latch.is_none() {
             self.latch = Some(QueryLatch::new());
         }
@@ -112,7 +106,7 @@ impl<'tcx> QueryJob<'tcx> {
 }
 
 impl QueryJobId {
-    pub(super) fn find_cycle_in_stack<'tcx>(
+    pub fn find_cycle_in_stack<'tcx>(
         &self,
         query_map: QueryMap<'tcx>,
         current_job: &Option<QueryJobId>,
@@ -188,7 +182,7 @@ struct QueryLatchInfo<'tcx> {
 }
 
 #[derive(Debug)]
-pub(super) struct QueryLatch<'tcx> {
+pub struct QueryLatch<'tcx> {
     info: Arc<Mutex<QueryLatchInfo<'tcx>>>,
 }
 
@@ -206,7 +200,7 @@ impl<'tcx> QueryLatch<'tcx> {
     }
 
     /// Awaits for the query job to complete.
-    pub(super) fn wait_on(
+    pub fn wait_on(
         &self,
         qcx: impl QueryContext<'tcx>,
         query: Option<QueryJobId>,

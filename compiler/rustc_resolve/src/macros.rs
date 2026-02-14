@@ -222,17 +222,19 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
     ) -> LocalExpnId {
         let parent_module =
             parent_module_id.map(|module_id| self.local_def_id(module_id).to_def_id());
-        let expn_id = LocalExpnId::fresh(
-            ExpnData::allow_unstable(
-                ExpnKind::AstPass(pass),
-                call_site,
-                self.tcx.sess.edition(),
-                features.into(),
-                None,
-                parent_module,
-            ),
-            self.create_stable_hashing_context(),
-        );
+        let expn_id = self.tcx.with_stable_hashing_context(|hcx| {
+            LocalExpnId::fresh(
+                ExpnData::allow_unstable(
+                    ExpnKind::AstPass(pass),
+                    call_site,
+                    self.tcx.sess.edition(),
+                    features.into(),
+                    None,
+                    parent_module,
+                ),
+                hcx,
+            )
+        });
 
         let parent_scope =
             parent_module.map_or(self.empty_module, |def_id| self.expect_module(def_id));
@@ -322,17 +324,19 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
 
         let span = invoc.span();
         let def_id = if deleg_impl.is_some() { None } else { res.opt_def_id() };
-        invoc_id.set_expn_data(
-            ext.expn_data(
-                parent_scope.expansion,
-                span,
-                fast_print_path(path),
-                kind,
-                def_id,
-                def_id.map(|def_id| self.macro_def_scope(def_id).nearest_parent_mod()),
-            ),
-            self.create_stable_hashing_context(),
-        );
+        self.tcx.with_stable_hashing_context(|hcx| {
+            invoc_id.set_expn_data(
+                ext.expn_data(
+                    parent_scope.expansion,
+                    span,
+                    fast_print_path(path),
+                    kind,
+                    def_id,
+                    def_id.map(|def_id| self.macro_def_scope(def_id).nearest_parent_mod()),
+                ),
+                hcx,
+            )
+        });
 
         Ok(ext)
     }

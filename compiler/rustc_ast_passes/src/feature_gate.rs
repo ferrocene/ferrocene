@@ -1,5 +1,6 @@
 use rustc_ast::visit::{self, AssocCtxt, FnCtxt, FnKind, Visitor};
 use rustc_ast::{self as ast, AttrVec, NodeId, PatKind, attr, token};
+use rustc_errors::inline_fluent;
 use rustc_feature::{AttributeGate, BUILTIN_ATTRIBUTE_MAP, BuiltinAttribute, Features};
 use rustc_session::Session;
 use rustc_session::parse::{feature_err, feature_warn};
@@ -124,7 +125,7 @@ impl<'a> PostExpansionVisitor<'a> {
             &self,
             non_lifetime_binders,
             non_lt_param_spans,
-            crate::fluent_generated::ast_passes_forbidden_non_lifetime_param
+            inline_fluent!("only lifetime parameters can be used in this context")
         );
 
         // FIXME(non_lifetime_binders): Const bound params are pretty broken.
@@ -247,6 +248,14 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
 
             ast::ItemKind::TyAlias(box ast::TyAlias { ty: Some(ty), .. }) => {
                 self.check_impl_trait(ty, false)
+            }
+            ast::ItemKind::Const(box ast::ConstItem {
+                rhs_kind: ast::ConstItemRhsKind::TypeConst { .. },
+                ..
+            }) => {
+                // Make sure this is only allowed if the feature gate is enabled.
+                // #![feature(min_generic_const_args)]
+                gate!(&self, min_generic_const_args, i.span, "top-level `type const` are unstable");
             }
 
             _ => {}
@@ -421,6 +430,20 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                 }
                 false
             }
+            ast::AssocItemKind::Const(box ast::ConstItem {
+                rhs_kind: ast::ConstItemRhsKind::TypeConst { .. },
+                ..
+            }) => {
+                // Make sure this is only allowed if the feature gate is enabled.
+                // #![feature(min_generic_const_args)]
+                gate!(
+                    &self,
+                    min_generic_const_args,
+                    i.span,
+                    "associated `type const` are unstable"
+                );
+                false
+            }
             _ => false,
         };
         if let ast::Defaultness::Default(_) = i.kind.defaultness() {
@@ -440,6 +463,7 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
 pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
     maybe_stage_features(sess, features, krate);
     check_incompatible_features(sess, features);
+    check_dependent_features(sess, features);
     check_new_solver_banned_features(sess, features);
 
     let mut visitor = PostExpansionVisitor { sess, features };
@@ -526,6 +550,27 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
             }
         }
     }
+    // `mgca_type_const_syntax` is part of `min_generic_const_args` so either
+    // or both are enabled we don't need to emit a feature error.
+    if let Some(spans) = spans.get(&sym::mgca_type_const_syntax) {
+        for span in spans {
+            if visitor.features.min_generic_const_args()
+                || visitor.features.mgca_type_const_syntax()
+                || span.allows_unstable(sym::min_generic_const_args)
+                || span.allows_unstable(sym::mgca_type_const_syntax)
+            {
+                continue;
+            }
+            feature_err(
+                &visitor.sess,
+                sym::min_generic_const_args,
+                *span,
+                "`type const` syntax is experimental",
+            )
+            .emit();
+        }
+    }
+
     gate_all!(global_registration, "global registration is experimental");
     gate_all!(return_type_notation, "return type notation is experimental");
     gate_all!(pin_ergonomics, "pinned reference syntax is experimental");
@@ -644,6 +689,27 @@ fn check_incompatible_features(sess: &Session, features: &Features) {
         {
             let spans = vec![f1_span, f2_span];
             sess.dcx().emit_err(errors::IncompatibleFeatures { spans, f1: f1_name, f2: f2_name });
+        }
+    }
+}
+
+fn check_dependent_features(sess: &Session, features: &Features) {
+    for &(parent, children) in
+        rustc_feature::DEPENDENT_FEATURES.iter().filter(|(parent, _)| features.enabled(*parent))
+    {
+        if children.iter().any(|f| !features.enabled(*f)) {
+            let parent_span = features
+                .enabled_features_iter_stable_order()
+                .find_map(|(name, span)| (name == parent).then_some(span))
+                .unwrap();
+            // FIXME: should probably format this in fluent instead of here
+            let missing = children
+                .iter()
+                .filter(|f| !features.enabled(**f))
+                .map(|s| format!("`{}`", s.as_str()))
+                .intersperse(String::from(", "))
+                .collect();
+            sess.dcx().emit_err(errors::MissingDependentFeatures { parent_span, parent, missing });
         }
     }
 }

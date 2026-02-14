@@ -62,8 +62,7 @@ impl Alignment {
     #[must_use]
     #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn of<T>() -> Self {
-        // This can't actually panic since type alignment is always a power of two.
-        const { Alignment::new(align_of::<T>()).unwrap() }
+        <T as mem::SizedTypeProperties>::ALIGNMENT
     }
 
     /// Returns the [ABI]-required minimum alignment of the type of the value that `val` points to.

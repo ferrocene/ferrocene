@@ -213,8 +213,6 @@ declare_passes! {
     mod validate : Validator;
 }
 
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
-
 pub fn provide(providers: &mut Providers) {
     coverage::query::provide(providers);
     ffi_unwind_calls::provide(&mut providers.queries);
@@ -231,7 +229,6 @@ pub fn provide(providers: &mut Providers) {
         optimized_mir,
         check_liveness: liveness::check_liveness,
         is_mir_available,
-        is_ctfe_mir_available: is_mir_available,
         mir_callgraph_cyclic: inline::cycle::mir_callgraph_cyclic,
         mir_inliner_callees: inline::cycle::mir_inliner_callees,
         promoted_mir,

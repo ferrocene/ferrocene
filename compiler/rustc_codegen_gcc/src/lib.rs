@@ -27,7 +27,6 @@ extern crate rustc_ast;
 extern crate rustc_codegen_ssa;
 extern crate rustc_data_structures;
 extern crate rustc_errors;
-extern crate rustc_fluent_macro;
 extern crate rustc_fs_util;
 extern crate rustc_hir;
 extern crate rustc_index;
@@ -104,8 +103,6 @@ use tempfile::TempDir;
 
 use crate::back::lto::ModuleBuffer;
 use crate::gcc_util::{target_cpu, to_gcc_features};
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub struct PrintOnPanic<F: Fn() -> String>(pub F);
 
@@ -197,10 +194,6 @@ fn load_libgccjit_if_needed(libgccjit_target_lib_file: &Path) {
 }
 
 impl CodegenBackend for GccCodegenBackend {
-    fn locale_resource(&self) -> &'static str {
-        crate::DEFAULT_LOCALE_RESOURCE
-    }
-
     fn name(&self) -> &'static str {
         "gcc"
     }

@@ -7,7 +7,6 @@ use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::jobserver::{self, Proxy};
 use rustc_data_structures::stable_hasher::StableHasher;
-use rustc_errors::registry::Registry;
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed};
 use rustc_lint::LintStore;
 use rustc_middle::ty;
@@ -54,10 +53,9 @@ pub struct Compiler {
 pub(crate) fn parse_cfg(dcx: DiagCtxtHandle<'_>, cfgs: Vec<String>) -> Cfg {
     cfgs.into_iter()
         .map(|s| {
-            let psess = ParseSess::emitter_with_note(
-                vec![rustc_parse::DEFAULT_LOCALE_RESOURCE, rustc_session::DEFAULT_LOCALE_RESOURCE],
-                format!("this occurred on the command line: `--cfg={s}`"),
-            );
+            let psess = ParseSess::emitter_with_note(format!(
+                "this occurred on the command line: `--cfg={s}`"
+            ));
             let filename = FileName::cfg_spec_source_code(&s);
 
             macro_rules! error {
@@ -126,10 +124,9 @@ pub(crate) fn parse_check_cfg(dcx: DiagCtxtHandle<'_>, specs: Vec<String>) -> Ch
     let mut check_cfg = CheckCfg { exhaustive_names, exhaustive_values, ..CheckCfg::default() };
 
     for s in specs {
-        let psess = ParseSess::emitter_with_note(
-            vec![rustc_parse::DEFAULT_LOCALE_RESOURCE, rustc_session::DEFAULT_LOCALE_RESOURCE],
-            format!("this occurred on the command line: `--check-cfg={s}`"),
-        );
+        let psess = ParseSess::emitter_with_note(format!(
+            "this occurred on the command line: `--check-cfg={s}`"
+        ));
         let filename = FileName::cfg_spec_source_code(&s);
 
         const VISIT: &str =
@@ -335,9 +332,6 @@ pub struct Config {
     /// bjorn3 for "hooking rust-analyzer's VFS into rustc at some point for
     /// running rustc without having to save". (See #102759.)
     pub file_loader: Option<Box<dyn FileLoader + Send + Sync>>,
-    /// The list of fluent resources, used for lints declared with
-    /// [`Diagnostic`](rustc_errors::Diagnostic) and [`LintDiagnostic`](rustc_errors::LintDiagnostic).
-    pub locale_resources: Vec<&'static str>,
 
     pub lint_caps: FxHashMap<lint::LintId, lint::Level>,
 
@@ -373,9 +367,6 @@ pub struct Config {
     /// (See #102759.)
     pub make_codegen_backend:
         Option<Box<dyn FnOnce(&config::Options, &Target) -> Box<dyn CodegenBackend> + Send>>,
-
-    /// Registry of diagnostics codes.
-    pub registry: Registry,
 
     /// The inner atomic value is set to true when a feature marked as `internal` is
     /// enabled. Makes it so that "please report a bug" is hidden, as ICEs with
@@ -455,9 +446,6 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
                 Err(e) => early_dcx.early_fatal(format!("failed to load fluent bundle: {e}")),
             };
 
-            let mut locale_resources = config.locale_resources;
-            locale_resources.push(codegen_backend.locale_resource());
-
             let mut sess = rustc_session::build_session(
                 config.opts,
                 CompilerIO {
@@ -467,8 +455,6 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
                     temps_dir,
                 },
                 bundle,
-                config.registry,
-                locale_resources,
                 config.lint_caps,
                 target,
                 util::rustc_version_str().unwrap_or("unknown"),
@@ -477,6 +463,7 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
             );
 
             codegen_backend.init(&sess);
+            sess.replaced_intrinsics = FxHashSet::from_iter(codegen_backend.replaced_intrinsics());
 
             let cfg = parse_cfg(sess.dcx(), config.crate_cfg);
             let mut cfg = config::build_configuration(&sess, cfg);

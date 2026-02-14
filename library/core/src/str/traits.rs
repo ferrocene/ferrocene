@@ -689,7 +689,7 @@ unsafe impl const SliceIndex<str> for ops::RangeInclusive<usize> {
     }
 }
 
-#[unstable(feature = "new_range_api", issue = "125687")]
+#[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
 #[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for range::RangeInclusive<usize> {

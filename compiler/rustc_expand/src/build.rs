@@ -727,7 +727,7 @@ impl<'a> ExtCtxt<'a> {
         span: Span,
         ident: Ident,
         ty: Box<ast::Ty>,
-        rhs: ast::ConstItemRhs,
+        rhs_kind: ast::ConstItemRhsKind,
     ) -> Box<ast::Item> {
         let defaultness = ast::Defaultness::Final;
         self.item(
@@ -740,7 +740,7 @@ impl<'a> ExtCtxt<'a> {
                     // FIXME(generic_const_items): Pass the generics as a parameter.
                     generics: ast::Generics::default(),
                     ty,
-                    rhs: Some(rhs),
+                    rhs_kind,
                     define_opaque: None,
                 }
                 .into(),

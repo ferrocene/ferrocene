@@ -1,5 +1,5 @@
 error: associated constant binding in trait object type mentions `Self`
-  --> $DIR/dyn-compat-const-projection-behind-trait-alias-mentions-self.rs:21:12
+  --> $DIR/dyn-compat-const-projection-behind-trait-alias-mentions-self.rs:20:12
    |
 LL | trait Bound = Trait<Y = { Hold::<Self> }>;
    |                     -------------------- this binding mentions `Self`

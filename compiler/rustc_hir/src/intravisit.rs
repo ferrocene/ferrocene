@@ -1110,7 +1110,7 @@ pub fn walk_const_arg<'v, V: Visitor<'v>>(
         ConstArgKind::Path(qpath) => visitor.visit_qpath(qpath, *hir_id, qpath.span()),
         ConstArgKind::Anon(anon) => visitor.visit_anon_const(*anon),
         ConstArgKind::Error(_) => V::Result::output(), // errors and spans are not important
-        ConstArgKind::Literal(..) => V::Result::output(), // FIXME(mcga)
+        ConstArgKind::Literal { .. } => V::Result::output(), // FIXME(mcga)
     }
 }
 
@@ -1271,7 +1271,7 @@ pub fn walk_trait_item<'v, V: Visitor<'v>>(
     try_visit!(visitor.visit_defaultness(&defaultness));
     try_visit!(visitor.visit_id(hir_id));
     match *kind {
-        TraitItemKind::Const(ref ty, default) => {
+        TraitItemKind::Const(ref ty, default, _) => {
             try_visit!(visitor.visit_ty_unambig(ty));
             visit_opt!(visitor, visit_const_item_rhs, default);
         }

@@ -361,10 +361,6 @@ pub struct DummyCodegenBackend {
 }
 
 impl CodegenBackend for DummyCodegenBackend {
-    fn locale_resource(&self) -> &'static str {
-        ""
-    }
-
     fn name(&self) -> &'static str {
         "dummy"
     }

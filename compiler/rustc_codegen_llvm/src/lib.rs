@@ -43,7 +43,7 @@ use rustc_middle::ty::TyCtxt;
 use rustc_middle::util::Providers;
 use rustc_session::Session;
 use rustc_session::config::{OptLevel, OutputFilenames, PrintKind, PrintRequest};
-use rustc_span::Symbol;
+use rustc_span::{Symbol, sym};
 use rustc_target::spec::{RelocModel, TlsModel};
 
 use crate::llvm::ToLlvmBool;
@@ -73,8 +73,6 @@ mod type_of;
 mod typetree;
 mod va_arg;
 mod value;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub(crate) use macros::TryFromU32;
 
@@ -241,10 +239,6 @@ impl LlvmCodegenBackend {
 }
 
 impl CodegenBackend for LlvmCodegenBackend {
-    fn locale_resource(&self) -> &'static str {
-        crate::DEFAULT_LOCALE_RESOURCE
-    }
-
     fn name(&self) -> &'static str {
         "llvm"
     }
@@ -348,6 +342,10 @@ impl CodegenBackend for LlvmCodegenBackend {
 
     fn target_config(&self, sess: &Session) -> TargetConfig {
         target_config(sess)
+    }
+
+    fn replaced_intrinsics(&self) -> Vec<Symbol> {
+        vec![sym::unchecked_funnel_shl, sym::unchecked_funnel_shr, sym::carrying_mul_add]
     }
 
     fn codegen_crate<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Box<dyn Any> {

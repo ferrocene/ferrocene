@@ -9,6 +9,9 @@ use rustc_hir::attrs::{
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{self as hir, Attribute, LangItem, find_attr, lang_items};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
+    Validated, ValidatedStatus, item_is_validated,
+};
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs,
 };
@@ -67,6 +70,11 @@ fn process_builtin_attrs(
 ) -> InterestingAttributeDiagnosticSpans {
     let mut interesting_spans = InterestingAttributeDiagnosticSpans::default();
     let rust_target_features = tcx.rust_target_features(LOCAL_CRATE);
+
+    // Ferrocene addition
+    if let ValidatedStatus::Validated { .. } = item_is_validated(tcx, did.into()) {
+        codegen_fn_attrs.validated = Some(Validated {});
+    }
 
     let parsed_attrs = attrs
         .iter()

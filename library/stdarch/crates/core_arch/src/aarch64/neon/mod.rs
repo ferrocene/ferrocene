@@ -70,6 +70,30 @@ pub struct float64x2x4_t(
     pub float64x2_t,
 );
 
+/// Helper for the 'shift right and insert' functions.
+macro_rules! shift_right_and_insert {
+    ($ty:ty, $width:literal, $N:expr, $a:expr, $b:expr) => {{
+        type V = Simd<$ty, $width>;
+
+        if $N as u32 == <$ty>::BITS {
+            $a
+        } else {
+            let a: V = transmute($a);
+            let b: V = transmute($b);
+
+            let mask = <$ty>::MAX >> $N;
+            let kept: V = simd_and(a, V::splat(!mask));
+
+            let shift_counts = V::splat($N as $ty);
+            let shifted = simd_shr(b, shift_counts);
+
+            transmute(simd_or(kept, shifted))
+        }
+    }};
+}
+
+pub(crate) use shift_right_and_insert;
+
 /// Duplicate vector element to vector or scalar
 #[inline]
 #[target_feature(enable = "neon")]

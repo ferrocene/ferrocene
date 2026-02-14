@@ -10166,7 +10166,7 @@ intrinsics:
     attr:
       - *neon-stable
       - FnCall: [rustc_legacy_const_generics, ['2']]
-      - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env = "msvc"']]}]]}, {FnCall: [assert_instr, [sri, 'N = 2']]}]]
+      - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env = "msvc"']]}]]}, {FnCall: [assert_instr, [bfxil, 'N = 2']]}]]
     safety: safe
     types:
       - i64
@@ -13722,26 +13722,17 @@ intrinsics:
     static_defs: ['const N: i32']
     safety: safe
     types:
-      - [int8x8_t,  'N >= 1 && N <= 8']
-      - [int8x16_t, 'N >= 1 && N <= 8']
-      - [int16x4_t, 'N >= 1 && N <= 16']
-      - [int16x8_t, 'N >= 1 && N <= 16']
-      - [int32x2_t, 'N >= 1 && N <= 32']
-      - [int32x4_t, 'N >= 1 && N <= 32']
-      - [int64x1_t, 'N >= 1 && N <= 64']
-      - [int64x2_t, 'N >= 1 && N <= 64']
+      - [int8x8_t, u8, '8', 'N >= 1 && N <= 8']
+      - [int8x16_t, u8, '16', 'N >= 1 && N <= 8']
+      - [int16x4_t, u16, '4', 'N >= 1 && N <= 16']
+      - [int16x8_t, u16, '8', 'N >= 1 && N <= 16']
+      - [int32x2_t, u32, '2', 'N >= 1 && N <= 32']
+      - [int32x4_t, u32, '4', 'N >= 1 && N <= 32']
+      - [int64x1_t, u64, '1', 'N >= 1 && N <= 64']
+      - [int64x2_t, u64, '2', 'N >= 1 && N <= 64']
     compose:
-      - FnCall: ['static_assert!', ['{type[1]}']]
-      - LLVMLink:
-          name: "vsri{neon_type[0].N}"
-          arguments:
-            - "a: {neon_type[0]}"
-            - "b: {neon_type[0]}"
-            - "n: i32"
-          links:
-            - link: "llvm.aarch64.neon.vsri.{neon_type[0]}"
-              arch: aarch64,arm64ec
-      - FnCall: ["_vsri{neon_type[0].N}", [a, b, N], [], true]
+      - FnCall: ['static_assert!', ['{type[3]}']]
+      - FnCall: ["super::shift_right_and_insert!", ['{type[1]}', '{type[2]}', N, a, b], [], true]
 
   - name: "vsri{neon_type[0].N}"
     doc: "Shift Right and Insert (immediate)"

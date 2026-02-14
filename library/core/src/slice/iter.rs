@@ -2382,17 +2382,21 @@ impl<T, const N: usize> ExactSizeIterator for ArrayWindows<'_, T, N> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<T, const N: usize> TrustedLen for ArrayWindows<'_, T, N> {}
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> FusedIterator for ArrayWindows<'_, T, N> {}
 
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<T, const N: usize> TrustedRandomAccess for ArrayWindows<'_, T, N> {}
 
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<T, const N: usize> TrustedRandomAccessNoCoerce for ArrayWindows<'_, T, N> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;

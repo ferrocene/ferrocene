@@ -1539,6 +1539,7 @@ impl<T, const N: usize> MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> From<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1547,6 +1548,7 @@ impl<T, const N: usize> From<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> AsRef<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1556,6 +1558,7 @@ impl<T, const N: usize> AsRef<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> AsRef<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1564,6 +1567,7 @@ impl<T, const N: usize> AsRef<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> AsMut<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1573,6 +1577,7 @@ impl<T, const N: usize> AsMut<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> AsMut<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1581,6 +1586,7 @@ impl<T, const N: usize> AsMut<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> From<MaybeUninit<[T; N]>> for [MaybeUninit<T>; N] {
     #[inline]

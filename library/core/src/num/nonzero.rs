@@ -1335,6 +1335,7 @@ macro_rules! nonzero_integer {
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_ascii(b\"1 \").is_err());")]
             /// ```
+            #[cfg(not(feature = "ferrocene_subset"))]
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
             pub const fn from_ascii(src: &[u8]) -> Result<Self, ParseIntError> {
@@ -1390,6 +1391,7 @@ macro_rules! nonzero_integer {
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_ascii_radix(b\"1 \", 10).is_err());")]
             /// ```
+            #[cfg(not(feature = "ferrocene_subset"))]
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
             pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<Self, ParseIntError> {
@@ -1453,6 +1455,7 @@ macro_rules! nonzero_integer {
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_str_radix(\"1 \", 10).is_err());")]
             /// ```
+            #[cfg(not(feature = "ferrocene_subset"))]
             #[unstable(feature = "nonzero_from_str_radix", issue = "152193")]
             #[inline]
             pub const fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError> {

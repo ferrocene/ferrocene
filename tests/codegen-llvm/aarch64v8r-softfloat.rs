@@ -1,6 +1,9 @@
 //@ add-minicore
-//@ compile-flags: --target aarch64v8r-unknown-none-softfloat -Zmerge-functions=disabled
-//@ needs-llvm-components: aarch64
+//@ revisions: v8r r82
+//@ [v8r] compile-flags: --target aarch64v8r-unknown-none-softfloat -Zmerge-functions=disabled
+//@ [v8r] needs-llvm-components: aarch64
+//@ [r82] compile-flags: --target aarch64r82-unknown-none-softfloat -Zmerge-functions=disabled
+//@ [r82] needs-llvm-components: aarch64
 #![crate_type = "lib"]
 #![feature(no_core, lang_items)]
 #![no_core]

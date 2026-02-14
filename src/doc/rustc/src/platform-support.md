@@ -467,7 +467,10 @@ target | std | host | notes
 [`xtensa-esp32s3-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S3
 [`xtensa-esp32s3-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S3
 [`i386-lynx-lynxos178`](platform-support/i386-lynx-lynxos178.md) | * |  | 32-bit x86 LynxOS-178 (2022.07)
+`aarch64r82-unknown-none` | * |   | Arm Cortex-R82 bare metal (hard-float)
+`aarch64r82-unknown-none-softfloat` | * |   | Arm Cortex-R82 bare metal (soft-float)
 `aarch64-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
+`aarch64r82-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `aarch64v8r-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests

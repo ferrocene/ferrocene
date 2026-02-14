@@ -38,13 +38,16 @@ pub struct Finder {
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
+    "aarch64-unknown-ferrocene.subset",
+    "aarch64r82-unknown-ferrocene.facade",
+    "aarch64r82-unknown-none",
+    "aarch64r82-unknown-none-softfloat",
     "aarch64v8r-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
-    "aarch64-unknown-ferrocene.subset",
-    "x86_64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
+    "x86_64-unknown-ferrocene.subset",
     // just a dummy comment so the list doesn't get onelined
     "x86_64-unknown-linux-gnuasan",
     "thumbv7a-none-eabi",

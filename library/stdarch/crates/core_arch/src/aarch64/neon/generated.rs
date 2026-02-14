@@ -12858,6 +12858,7 @@ pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x1_t) -> int64x1_t {
     static_assert!(LANE == 0);
     let atomic_src = crate::sync::atomic::AtomicI64::from_ptr(ptr as *mut i64);
@@ -12876,6 +12877,7 @@ pub unsafe fn vldap1_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x1_t) 
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1q_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x2_t) -> int64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     let atomic_src = crate::sync::atomic::AtomicI64::from_ptr(ptr as *mut i64);
@@ -12894,6 +12896,7 @@ pub unsafe fn vldap1q_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x2_t)
 #[target_feature(enable = "neon,rcpc3")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1q_lane_f64<const LANE: i32>(ptr: *const f64, src: float64x2_t) -> float64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     transmute(vldap1q_lane_s64::<LANE>(ptr as *mut i64, transmute(src)))
@@ -12907,6 +12910,7 @@ pub unsafe fn vldap1q_lane_f64<const LANE: i32>(ptr: *const f64, src: float64x2_
 #[target_feature(enable = "neon,rcpc3")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1_lane_u64<const LANE: i32>(ptr: *const u64, src: uint64x1_t) -> uint64x1_t {
     static_assert!(LANE == 0);
     transmute(vldap1_lane_s64::<LANE>(ptr as *mut i64, transmute(src)))
@@ -12920,6 +12924,7 @@ pub unsafe fn vldap1_lane_u64<const LANE: i32>(ptr: *const u64, src: uint64x1_t)
 #[target_feature(enable = "neon,rcpc3")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1q_lane_u64<const LANE: i32>(ptr: *const u64, src: uint64x2_t) -> uint64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     transmute(vldap1q_lane_s64::<LANE>(ptr as *mut i64, transmute(src)))
@@ -12933,6 +12938,7 @@ pub unsafe fn vldap1q_lane_u64<const LANE: i32>(ptr: *const u64, src: uint64x2_t
 #[target_feature(enable = "neon,rcpc3")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1_lane_p64<const LANE: i32>(ptr: *const p64, src: poly64x1_t) -> poly64x1_t {
     static_assert!(LANE == 0);
     transmute(vldap1_lane_s64::<LANE>(ptr as *mut i64, transmute(src)))
@@ -12946,6 +12952,7 @@ pub unsafe fn vldap1_lane_p64<const LANE: i32>(ptr: *const p64, src: poly64x1_t)
 #[target_feature(enable = "neon,rcpc3")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(ldap1, LANE = 0))]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub unsafe fn vldap1q_lane_p64<const LANE: i32>(ptr: *const p64, src: poly64x2_t) -> poly64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     transmute(vldap1q_lane_s64::<LANE>(ptr as *mut i64, transmute(src)))
@@ -27122,6 +27129,7 @@ pub unsafe fn vst4q_u64(a: *mut u64, b: uint64x2x4_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1_lane_f64<const LANE: i32>(ptr: *mut f64, val: float64x1_t) {
     static_assert!(LANE == 0);
     unsafe { vstl1_lane_s64::<LANE>(ptr as *mut i64, transmute(val)) }
@@ -27133,6 +27141,7 @@ pub fn vstl1_lane_f64<const LANE: i32>(ptr: *mut f64, val: float64x1_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1q_lane_f64<const LANE: i32>(ptr: *mut f64, val: float64x2_t) {
     static_assert_uimm_bits!(LANE, 1);
     unsafe { vstl1q_lane_s64::<LANE>(ptr as *mut i64, transmute(val)) }
@@ -27144,6 +27153,7 @@ pub fn vstl1q_lane_f64<const LANE: i32>(ptr: *mut f64, val: float64x2_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1_lane_u64<const LANE: i32>(ptr: *mut u64, val: uint64x1_t) {
     static_assert!(LANE == 0);
     unsafe { vstl1_lane_s64::<LANE>(ptr as *mut i64, transmute(val)) }
@@ -27155,6 +27165,7 @@ pub fn vstl1_lane_u64<const LANE: i32>(ptr: *mut u64, val: uint64x1_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1q_lane_u64<const LANE: i32>(ptr: *mut u64, val: uint64x2_t) {
     static_assert_uimm_bits!(LANE, 1);
     unsafe { vstl1q_lane_s64::<LANE>(ptr as *mut i64, transmute(val)) }
@@ -27166,6 +27177,7 @@ pub fn vstl1q_lane_u64<const LANE: i32>(ptr: *mut u64, val: uint64x2_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1_lane_p64<const LANE: i32>(ptr: *mut p64, val: poly64x1_t) {
     static_assert!(LANE == 0);
     unsafe { vstl1_lane_s64::<LANE>(ptr as *mut i64, transmute(val)) }
@@ -27177,6 +27189,7 @@ pub fn vstl1_lane_p64<const LANE: i32>(ptr: *mut p64, val: poly64x1_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1q_lane_p64<const LANE: i32>(ptr: *mut p64, val: poly64x2_t) {
     static_assert_uimm_bits!(LANE, 1);
     unsafe { vstl1q_lane_s64::<LANE>(ptr as *mut i64, transmute(val)) }
@@ -27188,6 +27201,7 @@ pub fn vstl1q_lane_p64<const LANE: i32>(ptr: *mut p64, val: poly64x2_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1_lane_s64<const LANE: i32>(ptr: *mut i64, val: int64x1_t) {
     static_assert!(LANE == 0);
     let atomic_dst = ptr as *mut crate::sync::atomic::AtomicI64;
@@ -27203,6 +27217,7 @@ pub fn vstl1_lane_s64<const LANE: i32>(ptr: *mut i64, val: int64x1_t) {
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(stl1, LANE = 0))]
 #[rustc_legacy_const_generics(2)]
 #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
+#[cfg(target_has_atomic = "64")]
 pub fn vstl1q_lane_s64<const LANE: i32>(ptr: *mut i64, val: int64x2_t) {
     static_assert_uimm_bits!(LANE, 1);
     let atomic_dst = ptr as *mut crate::sync::atomic::AtomicI64;

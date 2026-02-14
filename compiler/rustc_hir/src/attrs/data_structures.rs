@@ -1295,6 +1295,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_preserve_ub_checks]`
     RustcPreserveUbChecks,
 
+    /// Represents `#[rustc_proc_macro_decls]`
+    RustcProcMacroDecls,
+
     /// Represents `#[rustc_pub_transparent]` (used by the `repr_transparent_external_private_fields` lint).
     RustcPubTransparent(Span),
 
@@ -1335,6 +1338,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_symbol_name]`
     RustcSymbolName(Span),
+
+    /// Represents `#[rustc_test_marker]`
+    RustcTestMarker(Symbol),
 
     /// Represents `#[rustc_then_this_would_need]`
     RustcThenThisWouldNeed(Span, ThinVec<Ident>),

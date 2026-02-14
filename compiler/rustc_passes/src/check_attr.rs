@@ -15,7 +15,7 @@ use rustc_attr_parsing::{AttributeParser, Late};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_data_structures::unord::UnordMap;
-use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey, inline_fluent};
+use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey, msg};
 use rustc_feature::{
     ACCEPTED_LANG_FEATURES, AttributeDuplicates, AttributeType, BUILTIN_ATTRIBUTE_MAP,
     BuiltinAttribute,
@@ -350,6 +350,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcPassByValue (..)
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
                     | AttributeKind::RustcPreserveUbChecks
+                    | AttributeKind::RustcProcMacroDecls
                     | AttributeKind::RustcReallocator
                     | AttributeKind::RustcRegions
                     | AttributeKind::RustcReservationImpl(..)
@@ -361,6 +362,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcStdInternalSymbol (..)
                     | AttributeKind::RustcStrictCoherence(..)
                     | AttributeKind::RustcSymbolName(..)
+                    | AttributeKind::RustcTestMarker(..)
                     | AttributeKind::RustcThenThisWouldNeed(..)
                     | AttributeKind::RustcTrivialFieldReads
                     | AttributeKind::RustcUnsafeSpecializationMarker(..)
@@ -401,9 +403,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::rustc_on_unimplemented
                             | sym::rustc_do_not_const_check
                             | sym::rustc_doc_primitive
-                            | sym::rustc_test_marker
                             | sym::rustc_layout
-                            | sym::rustc_proc_macro_decls
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis
                             | sym::rustc_mir
@@ -1003,10 +1003,10 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 for (inline2, span2) in rest {
                     if inline2 != inline {
                         let mut spans = MultiSpan::from_spans(vec![*span, *span2]);
-                        spans.push_span_label(*span, inline_fluent!("this attribute..."));
+                        spans.push_span_label(*span, msg!("this attribute..."));
                         spans.push_span_label(
                             *span2,
-                            inline_fluent!("{\".\"}..conflicts with this attribute"),
+                            msg!("{\".\"}..conflicts with this attribute"),
                         );
                         self.dcx().emit_err(errors::DocInlineConflict { spans });
                         return;
@@ -1151,7 +1151,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 &self.tcx.sess,
                 sym::rustdoc_internals,
                 *span,
-                inline_fluent!("the `#[doc(rust_logo)]` attribute is used for Rust branding"),
+                msg!("the `#[doc(rust_logo)]` attribute is used for Rust branding"),
             )
             .emit();
         }

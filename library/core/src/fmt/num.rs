@@ -516,6 +516,7 @@ macro_rules! impl_Exp {
                     }
                     coef_len + 3
                 },
+                #[ferrocene::annotation("Branch is unreachable. See SAFETY comment below.")]
                 _ => {
                     const { assert!($T::MAX.ilog10() < 100) };
                     // SAFETY: A `u256::MAX` would get exponent 77.

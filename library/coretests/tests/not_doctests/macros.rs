@@ -28,3 +28,10 @@ fn test_assert_matches_failure_none() {
     let a = Some(12);
     assert_matches!(a, None);
 }
+
+// Covers `core::panicking::assert_failed_inner`
+#[test]
+#[should_panic = "assertion `left != right` failed\n  left: 5\n right: 5"]
+fn test_assert_failed_inner_ne() {
+    assert_ne!(5, 5);
+}

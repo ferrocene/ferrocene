@@ -137,3 +137,31 @@ test_int_ilog_panic_nonpositive_argument! {
     i128 => i128_ilog_panic_nonpositive_argument,
     isize => isize_ilog_panic_nonpositive_argument,
 }
+
+// Cover `core::fmt::num::imp::exp_u64`
+#[test]
+fn fmt_num_exp_u64() {
+    assert_eq!(format!("{:e}", 100_u64), "1e2");
+    assert_eq!(format!("{:.1e}", 100_u64), "1.0e2");
+    assert_eq!(format!("{:.1e}", 155_u64), "1.6e2");
+    assert_eq!(format!("{:.1e}", 199_u64), "2.0e2");
+    assert_eq!(format!("{:.1e}", 999_u64), "1.0e3");
+    assert_eq!(format!("{:.5e}", 100_u64), "1.00000e2");
+    assert_eq!(format!("{:.5e}", -100_i64), "-1.00000e2");
+    assert_eq!(format!("{:+.5e}", 100_u64), "+1.00000e2");
+    assert_eq!(format!("{:e}", 1_000_000_000_000_u64), "1e12");
+}
+
+// Cover `core::fmt::num::exp_u128`
+#[test]
+fn fmt_num_exp_u128() {
+    assert_eq!(format!("{:e}", 100_u128), "1e2");
+    assert_eq!(format!("{:.1e}", 100_u128), "1.0e2");
+    assert_eq!(format!("{:.1e}", 155_u128), "1.6e2");
+    assert_eq!(format!("{:.1e}", 199_u128), "2.0e2");
+    assert_eq!(format!("{:.1e}", 999_u128), "1.0e3");
+    assert_eq!(format!("{:.5e}", 100_u128), "1.00000e2");
+    assert_eq!(format!("{:.5e}", -100_i128), "-1.00000e2");
+    assert_eq!(format!("{:+.5e}", 100_u128), "+1.00000e2");
+    assert_eq!(format!("{:e}", 1_000_000_000_000_u128), "1e12");
+}

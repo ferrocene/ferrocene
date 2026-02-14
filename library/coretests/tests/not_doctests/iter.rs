@@ -673,3 +673,31 @@ fn test_nth_back_for_range_inclusive() {
 fn test_double_ended_default_nth_back() {
     assert_eq!(None, IterWrapper(0..0).nth_back(10));
 }
+
+// covers `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::count`.
+#[test]
+fn test_chain_count_zero() {
+    let mut iter = (0..2).chain(10..12);
+
+    // ensure both fields a and b of Chain are None
+    iter.nth(100);
+    iter.nth_back(100);
+
+    assert_eq!(0, iter.count());
+}
+
+// covers `<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::size_hint`.
+#[test]
+fn test_take_while_size_hint_zero() {
+    let mut iter = (0..2).take_while(|_| false);
+    while iter.next().is_some() {}
+    assert_eq!((0, Some(0)), iter.size_hint());
+}
+
+// covers `<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold`.
+#[test]
+fn test_take_while_try_fold() {
+    let mut iter = (0..2).take_while(|_| false);
+    while iter.next().is_some() {}
+    assert_eq!(Some(0), iter.try_fold(0, |a, b| Some(a + b)));
+}

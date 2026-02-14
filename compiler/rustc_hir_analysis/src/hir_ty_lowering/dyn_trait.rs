@@ -451,17 +451,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 } else {
                     let reason =
                         if let hir::LifetimeKind::ImplicitObjectLifetimeDefault = lifetime.kind {
-                            if let hir::Node::Ty(hir::Ty {
-                                kind: hir::TyKind::Ref(parent_lifetime, _),
-                                ..
-                            }) = tcx.parent_hir_node(hir_id)
-                                && tcx.named_bound_var(parent_lifetime.hir_id).is_none()
-                            {
-                                // Parent lifetime must have failed to resolve. Don't emit a redundant error.
-                                RegionInferReason::ExplicitObjectLifetime
-                            } else {
-                                RegionInferReason::ObjectLifetimeDefault(span.shrink_to_hi())
-                            }
+                            RegionInferReason::ObjectLifetimeDefault(span.shrink_to_hi())
                         } else {
                             RegionInferReason::ExplicitObjectLifetime
                         };

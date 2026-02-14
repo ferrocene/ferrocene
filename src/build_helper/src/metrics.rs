@@ -114,11 +114,36 @@ pub struct JsonStepSystemStats {
     pub cpu_utilization_percent: f64,
 }
 
+<<<<<<< HEAD
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct FerroceneVariantMetadata {
     pub id: String,
     pub human_readable_fields: BTreeMap<String, String>,
+||||||| 930ecbcdf89
+=======
+#[derive(Eq, Hash, PartialEq, Debug)]
+pub enum DebuggerKind {
+    Gdb,
+    Lldb,
+    Cdb,
+}
+
+impl DebuggerKind {
+    pub fn debuginfo_kind(name: &str) -> Option<DebuggerKind> {
+        let name = name.to_ascii_lowercase();
+
+        if name.contains("debuginfo-gdb") {
+            Some(DebuggerKind::Gdb)
+        } else if name.contains("debuginfo-lldb") {
+            Some(DebuggerKind::Lldb)
+        } else if name.contains("debuginfo-cdb") {
+            Some(DebuggerKind::Cdb)
+        } else {
+            None
+        }
+    }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 fn null_as_f64_nan<'de, D: serde::Deserializer<'de>>(d: D) -> Result<f64, D::Error> {

@@ -17656,8 +17656,13 @@ pub unsafe fn vld1_p64_x4(a: *const p64) -> poly64x1x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
+<<<<<<< HEAD
 #[cfg(target_endian = "little")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 930ecbcdf89
+#[cfg(target_endian = "little")]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -17677,6 +17682,7 @@ pub unsafe fn vld1q_p64_x2(a: *const p64) -> poly64x2x2_t {
     transmute(vld1q_s64_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -17705,12 +17711,47 @@ pub unsafe fn vld1q_p64_x2(a: *const p64) -> poly64x2x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon,aes")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p64_x2(a: *const p64) -> poly64x2x2_t {
+    let mut ret_val: poly64x2x2_t = transmute(vld1q_s64_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
+<<<<<<< HEAD
 #[cfg(target_endian = "little")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 930ecbcdf89
+#[cfg(target_endian = "little")]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -17730,6 +17771,7 @@ pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
     transmute(vld1q_s64_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -17759,12 +17801,48 @@ pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon,aes")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
+    let mut ret_val: poly64x2x3_t = transmute(vld1q_s64_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
+<<<<<<< HEAD
 #[cfg(target_endian = "little")]
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 930ecbcdf89
+#[cfg(target_endian = "little")]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
 #[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
@@ -17783,6 +17861,7 @@ pub unsafe fn vld1q_p64_x3(a: *const p64) -> poly64x2x3_t {
 pub unsafe fn vld1q_p64_x4(a: *const p64) -> poly64x2x4_t {
     transmute(vld1q_s64_x4(transmute(a)))
 }
+<<<<<<< HEAD
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x4)"]
 #[doc = "## Safety"]
@@ -17813,6 +17892,38 @@ pub unsafe fn vld1q_p64_x4(a: *const p64) -> poly64x2x4_t {
     ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [1, 0]) };
     ret_val
 }
+||||||| 930ecbcdf89
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p64_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon,aes")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v8"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(nop))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p64_x4(a: *const p64) -> poly64x2x4_t {
+    let mut ret_val: poly64x2x4_t = transmute(vld1q_s64_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [1, 0]) };
+    ret_val
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Load multiple single-element structures to one, two, three, or four registers."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_s8)"]
 #[doc = "## Safety"]
@@ -18698,7 +18809,6 @@ pub unsafe fn vld1q_s64_x4(a: *const i64) -> int64x2x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -18719,6 +18829,7 @@ pub unsafe fn vld1_u8_x2(a: *const u8) -> uint8x8x2_t {
     transmute(vld1_s8_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -18747,11 +18858,40 @@ pub unsafe fn vld1_u8_x2(a: *const u8) -> uint8x8x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u8_x2(a: *const u8) -> uint8x8x2_t {
+    let mut ret_val: uint8x8x2_t = transmute(vld1_s8_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -18772,6 +18912,7 @@ pub unsafe fn vld1_u8_x3(a: *const u8) -> uint8x8x3_t {
     transmute(vld1_s8_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -18801,11 +18942,41 @@ pub unsafe fn vld1_u8_x3(a: *const u8) -> uint8x8x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u8_x3(a: *const u8) -> uint8x8x3_t {
+    let mut ret_val: uint8x8x3_t = transmute(vld1_s8_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -18826,6 +18997,7 @@ pub unsafe fn vld1_u8_x4(a: *const u8) -> uint8x8x4_t {
     transmute(vld1_s8_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -18856,11 +19028,42 @@ pub unsafe fn vld1_u8_x4(a: *const u8) -> uint8x8x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u8_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u8_x4(a: *const u8) -> uint8x8x4_t {
+    let mut ret_val: uint8x8x4_t = transmute(vld1_s8_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -18881,6 +19084,7 @@ pub unsafe fn vld1q_u8_x2(a: *const u8) -> uint8x16x2_t {
     transmute(vld1q_s8_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -18921,11 +19125,52 @@ pub unsafe fn vld1q_u8_x2(a: *const u8) -> uint8x16x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u8_x2(a: *const u8) -> uint8x16x2_t {
+    let mut ret_val: uint8x16x2_t = transmute(vld1q_s8_x2(transmute(a)));
+    ret_val.0 = unsafe {
+        simd_shuffle!(
+            ret_val.0,
+            ret_val.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.1 = unsafe {
+        simd_shuffle!(
+            ret_val.1,
+            ret_val.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -18946,6 +19191,7 @@ pub unsafe fn vld1q_u8_x3(a: *const u8) -> uint8x16x3_t {
     transmute(vld1q_s8_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -18993,11 +19239,59 @@ pub unsafe fn vld1q_u8_x3(a: *const u8) -> uint8x16x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u8_x3(a: *const u8) -> uint8x16x3_t {
+    let mut ret_val: uint8x16x3_t = transmute(vld1q_s8_x3(transmute(a)));
+    ret_val.0 = unsafe {
+        simd_shuffle!(
+            ret_val.0,
+            ret_val.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.1 = unsafe {
+        simd_shuffle!(
+            ret_val.1,
+            ret_val.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.2 = unsafe {
+        simd_shuffle!(
+            ret_val.2,
+            ret_val.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19018,6 +19312,7 @@ pub unsafe fn vld1q_u8_x4(a: *const u8) -> uint8x16x4_t {
     transmute(vld1q_s8_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19072,11 +19367,66 @@ pub unsafe fn vld1q_u8_x4(a: *const u8) -> uint8x16x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u8_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u8_x4(a: *const u8) -> uint8x16x4_t {
+    let mut ret_val: uint8x16x4_t = transmute(vld1q_s8_x4(transmute(a)));
+    ret_val.0 = unsafe {
+        simd_shuffle!(
+            ret_val.0,
+            ret_val.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.1 = unsafe {
+        simd_shuffle!(
+            ret_val.1,
+            ret_val.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.2 = unsafe {
+        simd_shuffle!(
+            ret_val.2,
+            ret_val.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.3 = unsafe {
+        simd_shuffle!(
+            ret_val.3,
+            ret_val.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19097,6 +19447,7 @@ pub unsafe fn vld1_u16_x2(a: *const u16) -> uint16x4x2_t {
     transmute(vld1_s16_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19125,11 +19476,40 @@ pub unsafe fn vld1_u16_x2(a: *const u16) -> uint16x4x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u16_x2(a: *const u16) -> uint16x4x2_t {
+    let mut ret_val: uint16x4x2_t = transmute(vld1_s16_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19150,6 +19530,7 @@ pub unsafe fn vld1_u16_x3(a: *const u16) -> uint16x4x3_t {
     transmute(vld1_s16_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19179,11 +19560,41 @@ pub unsafe fn vld1_u16_x3(a: *const u16) -> uint16x4x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u16_x3(a: *const u16) -> uint16x4x3_t {
+    let mut ret_val: uint16x4x3_t = transmute(vld1_s16_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19204,6 +19615,7 @@ pub unsafe fn vld1_u16_x4(a: *const u16) -> uint16x4x4_t {
     transmute(vld1_s16_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19234,11 +19646,42 @@ pub unsafe fn vld1_u16_x4(a: *const u16) -> uint16x4x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u16_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u16_x4(a: *const u16) -> uint16x4x4_t {
+    let mut ret_val: uint16x4x4_t = transmute(vld1_s16_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19259,6 +19702,7 @@ pub unsafe fn vld1q_u16_x2(a: *const u16) -> uint16x8x2_t {
     transmute(vld1q_s16_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19287,11 +19731,40 @@ pub unsafe fn vld1q_u16_x2(a: *const u16) -> uint16x8x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u16_x2(a: *const u16) -> uint16x8x2_t {
+    let mut ret_val: uint16x8x2_t = transmute(vld1q_s16_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19312,6 +19785,7 @@ pub unsafe fn vld1q_u16_x3(a: *const u16) -> uint16x8x3_t {
     transmute(vld1q_s16_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19341,11 +19815,41 @@ pub unsafe fn vld1q_u16_x3(a: *const u16) -> uint16x8x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u16_x3(a: *const u16) -> uint16x8x3_t {
+    let mut ret_val: uint16x8x3_t = transmute(vld1q_s16_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19366,6 +19870,7 @@ pub unsafe fn vld1q_u16_x4(a: *const u16) -> uint16x8x4_t {
     transmute(vld1q_s16_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19396,11 +19901,42 @@ pub unsafe fn vld1q_u16_x4(a: *const u16) -> uint16x8x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u16_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u16_x4(a: *const u16) -> uint16x8x4_t {
+    let mut ret_val: uint16x8x4_t = transmute(vld1q_s16_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19421,6 +19957,7 @@ pub unsafe fn vld1_u32_x2(a: *const u32) -> uint32x2x2_t {
     transmute(vld1_s32_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19449,11 +19986,40 @@ pub unsafe fn vld1_u32_x2(a: *const u32) -> uint32x2x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u32_x2(a: *const u32) -> uint32x2x2_t {
+    let mut ret_val: uint32x2x2_t = transmute(vld1_s32_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19474,6 +20040,7 @@ pub unsafe fn vld1_u32_x3(a: *const u32) -> uint32x2x3_t {
     transmute(vld1_s32_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19503,11 +20070,41 @@ pub unsafe fn vld1_u32_x3(a: *const u32) -> uint32x2x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u32_x3(a: *const u32) -> uint32x2x3_t {
+    let mut ret_val: uint32x2x3_t = transmute(vld1_s32_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19528,6 +20125,7 @@ pub unsafe fn vld1_u32_x4(a: *const u32) -> uint32x2x4_t {
     transmute(vld1_s32_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19558,11 +20156,42 @@ pub unsafe fn vld1_u32_x4(a: *const u32) -> uint32x2x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u32_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_u32_x4(a: *const u32) -> uint32x2x4_t {
+    let mut ret_val: uint32x2x4_t = transmute(vld1_s32_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19583,6 +20212,7 @@ pub unsafe fn vld1q_u32_x2(a: *const u32) -> uint32x4x2_t {
     transmute(vld1q_s32_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19611,11 +20241,40 @@ pub unsafe fn vld1q_u32_x2(a: *const u32) -> uint32x4x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u32_x2(a: *const u32) -> uint32x4x2_t {
+    let mut ret_val: uint32x4x2_t = transmute(vld1q_s32_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19636,6 +20295,7 @@ pub unsafe fn vld1q_u32_x3(a: *const u32) -> uint32x4x3_t {
     transmute(vld1q_s32_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19665,11 +20325,41 @@ pub unsafe fn vld1q_u32_x3(a: *const u32) -> uint32x4x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u32_x3(a: *const u32) -> uint32x4x3_t {
+    let mut ret_val: uint32x4x3_t = transmute(vld1q_s32_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19690,6 +20380,7 @@ pub unsafe fn vld1q_u32_x4(a: *const u32) -> uint32x4x4_t {
     transmute(vld1q_s32_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19720,6 +20411,38 @@ pub unsafe fn vld1q_u32_x4(a: *const u32) -> uint32x4x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u32_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u32_x4(a: *const u32) -> uint32x4x4_t {
+    let mut ret_val: uint32x4x4_t = transmute(vld1q_s32_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_u64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19796,7 +20519,6 @@ pub unsafe fn vld1_u64_x4(a: *const u64) -> uint64x1x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19817,6 +20539,7 @@ pub unsafe fn vld1q_u64_x2(a: *const u64) -> uint64x2x2_t {
     transmute(vld1q_s64_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19845,11 +20568,40 @@ pub unsafe fn vld1q_u64_x2(a: *const u64) -> uint64x2x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u64_x2(a: *const u64) -> uint64x2x2_t {
+    let mut ret_val: uint64x2x2_t = transmute(vld1q_s64_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19870,6 +20622,7 @@ pub unsafe fn vld1q_u64_x3(a: *const u64) -> uint64x2x3_t {
     transmute(vld1q_s64_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19899,11 +20652,41 @@ pub unsafe fn vld1q_u64_x3(a: *const u64) -> uint64x2x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u64_x3(a: *const u64) -> uint64x2x3_t {
+    let mut ret_val: uint64x2x3_t = transmute(vld1q_s64_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19924,6 +20707,7 @@ pub unsafe fn vld1q_u64_x4(a: *const u64) -> uint64x2x4_t {
     transmute(vld1q_s64_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -19954,11 +20738,42 @@ pub unsafe fn vld1q_u64_x4(a: *const u64) -> uint64x2x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_u64_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_u64_x4(a: *const u64) -> uint64x2x4_t {
+    let mut ret_val: uint64x2x4_t = transmute(vld1q_s64_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -19979,6 +20794,7 @@ pub unsafe fn vld1_p8_x2(a: *const p8) -> poly8x8x2_t {
     transmute(vld1_s8_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20007,11 +20823,40 @@ pub unsafe fn vld1_p8_x2(a: *const p8) -> poly8x8x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_p8_x2(a: *const p8) -> poly8x8x2_t {
+    let mut ret_val: poly8x8x2_t = transmute(vld1_s8_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20032,6 +20877,7 @@ pub unsafe fn vld1_p8_x3(a: *const p8) -> poly8x8x3_t {
     transmute(vld1_s8_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20061,11 +20907,41 @@ pub unsafe fn vld1_p8_x3(a: *const p8) -> poly8x8x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_p8_x3(a: *const p8) -> poly8x8x3_t {
+    let mut ret_val: poly8x8x3_t = transmute(vld1_s8_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20086,6 +20962,7 @@ pub unsafe fn vld1_p8_x4(a: *const p8) -> poly8x8x4_t {
     transmute(vld1_s8_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20116,11 +20993,42 @@ pub unsafe fn vld1_p8_x4(a: *const p8) -> poly8x8x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p8_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_p8_x4(a: *const p8) -> poly8x8x4_t {
+    let mut ret_val: poly8x8x4_t = transmute(vld1_s8_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20141,6 +21049,7 @@ pub unsafe fn vld1q_p8_x2(a: *const p8) -> poly8x16x2_t {
     transmute(vld1q_s8_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20181,11 +21090,52 @@ pub unsafe fn vld1q_p8_x2(a: *const p8) -> poly8x16x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p8_x2(a: *const p8) -> poly8x16x2_t {
+    let mut ret_val: poly8x16x2_t = transmute(vld1q_s8_x2(transmute(a)));
+    ret_val.0 = unsafe {
+        simd_shuffle!(
+            ret_val.0,
+            ret_val.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.1 = unsafe {
+        simd_shuffle!(
+            ret_val.1,
+            ret_val.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20206,6 +21156,7 @@ pub unsafe fn vld1q_p8_x3(a: *const p8) -> poly8x16x3_t {
     transmute(vld1q_s8_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20253,11 +21204,59 @@ pub unsafe fn vld1q_p8_x3(a: *const p8) -> poly8x16x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p8_x3(a: *const p8) -> poly8x16x3_t {
+    let mut ret_val: poly8x16x3_t = transmute(vld1q_s8_x3(transmute(a)));
+    ret_val.0 = unsafe {
+        simd_shuffle!(
+            ret_val.0,
+            ret_val.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.1 = unsafe {
+        simd_shuffle!(
+            ret_val.1,
+            ret_val.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.2 = unsafe {
+        simd_shuffle!(
+            ret_val.2,
+            ret_val.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20278,6 +21277,7 @@ pub unsafe fn vld1q_p8_x4(a: *const p8) -> poly8x16x4_t {
     transmute(vld1q_s8_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20332,11 +21332,66 @@ pub unsafe fn vld1q_p8_x4(a: *const p8) -> poly8x16x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p8_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p8_x4(a: *const p8) -> poly8x16x4_t {
+    let mut ret_val: poly8x16x4_t = transmute(vld1q_s8_x4(transmute(a)));
+    ret_val.0 = unsafe {
+        simd_shuffle!(
+            ret_val.0,
+            ret_val.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.1 = unsafe {
+        simd_shuffle!(
+            ret_val.1,
+            ret_val.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.2 = unsafe {
+        simd_shuffle!(
+            ret_val.2,
+            ret_val.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val.3 = unsafe {
+        simd_shuffle!(
+            ret_val.3,
+            ret_val.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20357,6 +21412,7 @@ pub unsafe fn vld1_p16_x2(a: *const p16) -> poly16x4x2_t {
     transmute(vld1_s16_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20385,11 +21441,40 @@ pub unsafe fn vld1_p16_x2(a: *const p16) -> poly16x4x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_p16_x2(a: *const p16) -> poly16x4x2_t {
+    let mut ret_val: poly16x4x2_t = transmute(vld1_s16_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20410,6 +21495,7 @@ pub unsafe fn vld1_p16_x3(a: *const p16) -> poly16x4x3_t {
     transmute(vld1_s16_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20439,11 +21525,41 @@ pub unsafe fn vld1_p16_x3(a: *const p16) -> poly16x4x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_p16_x3(a: *const p16) -> poly16x4x3_t {
+    let mut ret_val: poly16x4x3_t = transmute(vld1_s16_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20464,6 +21580,7 @@ pub unsafe fn vld1_p16_x4(a: *const p16) -> poly16x4x4_t {
     transmute(vld1_s16_x4(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20494,11 +21611,42 @@ pub unsafe fn vld1_p16_x4(a: *const p16) -> poly16x4x4_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_p16_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1_p16_x4(a: *const p16) -> poly16x4x4_t {
+    let mut ret_val: poly16x4x4_t = transmute(vld1_s16_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20519,6 +21667,7 @@ pub unsafe fn vld1q_p16_x2(a: *const p16) -> poly16x8x2_t {
     transmute(vld1q_s16_x2(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x2)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20547,11 +21696,40 @@ pub unsafe fn vld1q_p16_x2(a: *const p16) -> poly16x8x2_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x2)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p16_x2(a: *const p16) -> poly16x8x2_t {
+    let mut ret_val: poly16x8x2_t = transmute(vld1q_s16_x2(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20572,6 +21750,7 @@ pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
     transmute(vld1q_s16_x3(transmute(a)))
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x3)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
@@ -20601,11 +21780,41 @@ pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
     ret_val
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+||||||| 930ecbcdf89
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x3)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
+    let mut ret_val: poly16x8x3_t = transmute(vld1q_s16_x3(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x4)"]
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
@@ -20625,6 +21834,7 @@ pub unsafe fn vld1q_p16_x3(a: *const p16) -> poly16x8x3_t {
 pub unsafe fn vld1q_p16_x4(a: *const p16) -> poly16x8x4_t {
     transmute(vld1q_s16_x4(transmute(a)))
 }
+<<<<<<< HEAD
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x4)"]
 #[doc = "## Safety"]
@@ -20655,6 +21865,38 @@ pub unsafe fn vld1q_p16_x4(a: *const p16) -> poly16x8x4_t {
     ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
     ret_val
 }
+||||||| 930ecbcdf89
+#[doc = "Load multiple single-element structures to one, two, three, or four registers"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_p16_x4)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "v7"))]
+#[cfg_attr(all(test, target_arch = "arm"), assert_instr(vld1))]
+#[cfg_attr(
+    all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
+    assert_instr(ld1)
+)]
+#[cfg_attr(
+    not(target_arch = "arm"),
+    stable(feature = "neon_intrinsics", since = "1.59.0")
+)]
+#[cfg_attr(
+    target_arch = "arm",
+    unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
+)]
+pub unsafe fn vld1q_p16_x4(a: *const p16) -> poly16x8x4_t {
+    let mut ret_val: poly16x8x4_t = transmute(vld1q_s16_x4(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    ret_val
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_legacy_const_generics(1)]

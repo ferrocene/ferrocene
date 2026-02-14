@@ -724,7 +724,35 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<Cell<U>> for Cell<T> {}
 #[cfg(not(feature = "ferrocene_subset"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<Cell<U>> for Cell<T> {}
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| 930ecbcdf89
+=======
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> AsRef<[Cell<T>; N]> for Cell<[T; N]> {
+    #[inline]
+    fn as_ref(&self) -> &[Cell<T>; N] {
+        self.as_array_of_cells()
+    }
+}
+
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> AsRef<[Cell<T>]> for Cell<[T; N]> {
+    #[inline]
+    fn as_ref(&self) -> &[Cell<T>] {
+        &*self.as_array_of_cells()
+    }
+}
+
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T> AsRef<[Cell<T>]> for Cell<[T]> {
+    #[inline]
+    fn as_ref(&self) -> &[Cell<T>] {
+        self.as_slice_of_cells()
+    }
+}
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T> Cell<[T]> {
     /// Returns a `&[Cell<T>]` from a `&Cell<[T]>`
     ///

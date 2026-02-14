@@ -16,7 +16,7 @@
 
 use std::cell::Cell;
 use std::iter;
-use std::ops::Bound;
+use std::ops::{Bound, ControlFlow};
 
 use rustc_abi::{ExternAbi, Size};
 use rustc_ast::Recovered;
@@ -26,12 +26,13 @@ use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, E0228, ErrorGuaranteed, StashKey, struct_span_code_err,
 };
 use rustc_hir::attrs::AttributeKind;
-use rustc_hir::def::DefKind;
+use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::intravisit::{InferKind, Visitor, VisitorExt};
+use rustc_hir::intravisit::{self, InferKind, Visitor, VisitorExt};
 use rustc_hir::{self as hir, GenericParamKind, HirId, Node, PreciseCapturingArgKind, find_attr};
 use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_infer::traits::{DynCompatibilityViolation, ObligationCause};
+use rustc_middle::hir::nested_filter;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::util::{Discr, IntTypeExt};
 use rustc_middle::ty::{
@@ -94,6 +95,7 @@ pub(crate) fn provide(providers: &mut Providers) {
         const_param_default,
         anon_const_kind,
         const_of_item,
+        is_rhs_type_const,
         ..*providers
     };
 }
@@ -1274,7 +1276,8 @@ fn impl_trait_header(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::ImplTraitHeader
         .of_trait
         .unwrap_or_else(|| panic!("expected impl trait, found inherent impl on {def_id:?}"));
     let selfty = tcx.type_of(def_id).instantiate_identity();
-    let is_rustc_reservation = tcx.has_attr(def_id, sym::rustc_reservation_impl);
+    let is_rustc_reservation =
+        find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcReservationImpl(..));
 
     check_impl_constness(tcx, impl_.constness, &of_trait.trait_ref);
 
@@ -1511,6 +1514,20 @@ fn anon_const_kind<'tcx>(tcx: TyCtxt<'tcx>, def: LocalDefId) -> ty::AnonConstKin
             let parent_hir_node = tcx.hir_node(tcx.parent_hir_id(const_arg_id));
             if tcx.features().generic_const_exprs() {
                 ty::AnonConstKind::GCE
+            } else if tcx.features().opaque_generic_const_args() {
+                // Only anon consts that are the RHS of a const item can be OGCA.
+                // Note: We can't just check tcx.parent because it needs to be EXACTLY
+                // the RHS, not just part of the RHS.
+                if !is_anon_const_rhs_of_const_item(tcx, def) {
+                    return ty::AnonConstKind::MCG;
+                }
+
+                let body = tcx.hir_body_owned_by(def);
+                let mut visitor = OGCAParamVisitor(tcx);
+                match visitor.visit_body(body) {
+                    ControlFlow::Break(UsesParam) => ty::AnonConstKind::OGCA,
+                    ControlFlow::Continue(()) => ty::AnonConstKind::MCG,
+                }
             } else if tcx.features().min_generic_const_args() {
                 ty::AnonConstKind::MCG
             } else if let hir::Node::Expr(hir::Expr {
@@ -1528,6 +1545,50 @@ fn anon_const_kind<'tcx>(tcx: TyCtxt<'tcx>, def: LocalDefId) -> ty::AnonConstKin
     }
 }
 
+fn is_anon_const_rhs_of_const_item<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> bool {
+    let hir_id = tcx.local_def_id_to_hir_id(def_id);
+    let Some((_, grandparent_node)) = tcx.hir_parent_iter(hir_id).nth(1) else { return false };
+    let (Node::Item(hir::Item { kind: hir::ItemKind::Const(_, _, _, ct_rhs), .. })
+    | Node::ImplItem(hir::ImplItem { kind: hir::ImplItemKind::Const(_, ct_rhs), .. })
+    | Node::TraitItem(hir::TraitItem {
+        kind: hir::TraitItemKind::Const(_, Some(ct_rhs), _),
+        ..
+    })) = grandparent_node
+    else {
+        return false;
+    };
+    let hir::ConstItemRhs::TypeConst(hir::ConstArg {
+        kind: hir::ConstArgKind::Anon(rhs_anon), ..
+    }) = ct_rhs
+    else {
+        return false;
+    };
+    def_id == rhs_anon.def_id
+}
+
+struct OGCAParamVisitor<'tcx>(TyCtxt<'tcx>);
+
+struct UsesParam;
+
+impl<'tcx> Visitor<'tcx> for OGCAParamVisitor<'tcx> {
+    type NestedFilter = nested_filter::OnlyBodies;
+    type Result = ControlFlow<UsesParam>;
+
+    fn maybe_tcx(&mut self) -> TyCtxt<'tcx> {
+        self.0
+    }
+
+    fn visit_path(&mut self, path: &hir::Path<'tcx>, _id: HirId) -> ControlFlow<UsesParam> {
+        if let Res::Def(DefKind::TyParam | DefKind::ConstParam | DefKind::LifetimeParam, _) =
+            path.res
+        {
+            return ControlFlow::Break(UsesParam);
+        }
+
+        intravisit::walk_path(self, path)
+    }
+}
+
 #[instrument(level = "debug", skip(tcx), ret)]
 fn const_of_item<'tcx>(
     tcx: TyCtxt<'tcx>,
@@ -1536,7 +1597,7 @@ fn const_of_item<'tcx>(
     let ct_rhs = match tcx.hir_node_by_def_id(def_id) {
         hir::Node::Item(hir::Item { kind: hir::ItemKind::Const(.., ct), .. }) => *ct,
         hir::Node::TraitItem(hir::TraitItem {
-            kind: hir::TraitItemKind::Const(.., ct), ..
+            kind: hir::TraitItemKind::Const(_, ct, _), ..
         }) => ct.expect("no default value for trait assoc const"),
         hir::Node::ImplItem(hir::ImplItem { kind: hir::ImplItemKind::Const(.., ct), .. }) => *ct,
         _ => {
@@ -1564,5 +1625,24 @@ fn const_of_item<'tcx>(
         ty::EarlyBinder::bind(Const::new_error(tcx, e))
     } else {
         ty::EarlyBinder::bind(ct)
+    }
+}
+
+/// Check if a Const or AssocConst is a type const (mgca)
+fn is_rhs_type_const<'tcx>(tcx: TyCtxt<'tcx>, def: LocalDefId) -> bool {
+    match tcx.hir_node_by_def_id(def) {
+        hir::Node::Item(hir::Item {
+            kind: hir::ItemKind::Const(_, _, _, hir::ConstItemRhs::TypeConst(_)),
+            ..
+        })
+        | hir::Node::ImplItem(hir::ImplItem {
+            kind: hir::ImplItemKind::Const(_, hir::ConstItemRhs::TypeConst(_)),
+            ..
+        })
+        | hir::Node::TraitItem(hir::TraitItem {
+            kind: hir::TraitItemKind::Const(_, _, hir::IsTypeConst::Yes),
+            ..
+        }) => return true,
+        _ => return false,
     }
 }

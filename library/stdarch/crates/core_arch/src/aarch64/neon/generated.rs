@@ -4399,8 +4399,14 @@ pub fn vcmlaq_rot90_laneq_f32<const LANE: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_f32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_f32<const LANE1: i32, const LANE2: i32>(
@@ -4421,8 +4427,14 @@ pub fn vcopy_lane_f32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_s8<const LANE1: i32, const LANE2: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
@@ -4446,8 +4458,14 @@ pub fn vcopy_lane_s8<const LANE1: i32, const LANE2: i32>(a: int8x8_t, b: int8x8_
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_s16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_s16<const LANE1: i32, const LANE2: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
@@ -4467,8 +4485,14 @@ pub fn vcopy_lane_s16<const LANE1: i32, const LANE2: i32>(a: int16x4_t, b: int16
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_s32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_s32<const LANE1: i32, const LANE2: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
@@ -4486,8 +4510,14 @@ pub fn vcopy_lane_s32<const LANE1: i32, const LANE2: i32>(a: int32x2_t, b: int32
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_u8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_u8<const LANE1: i32, const LANE2: i32>(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
@@ -4511,8 +4541,14 @@ pub fn vcopy_lane_u8<const LANE1: i32, const LANE2: i32>(a: uint8x8_t, b: uint8x
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_u16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_u16<const LANE1: i32, const LANE2: i32>(
@@ -4535,8 +4571,14 @@ pub fn vcopy_lane_u16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_u32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_u32<const LANE1: i32, const LANE2: i32>(
@@ -4557,8 +4599,14 @@ pub fn vcopy_lane_u32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_p8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_p8<const LANE1: i32, const LANE2: i32>(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
@@ -4582,8 +4630,14 @@ pub fn vcopy_lane_p8<const LANE1: i32, const LANE2: i32>(a: poly8x8_t, b: poly8x
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_lane_p16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_lane_p16<const LANE1: i32, const LANE2: i32>(
@@ -4606,8 +4660,14 @@ pub fn vcopy_lane_p16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_f32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_f32<const LANE1: i32, const LANE2: i32>(
@@ -4629,8 +4689,14 @@ pub fn vcopy_laneq_f32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_s8<const LANE1: i32, const LANE2: i32>(a: int8x8_t, b: int8x16_t) -> int8x8_t {
@@ -4656,8 +4722,14 @@ pub fn vcopy_laneq_s8<const LANE1: i32, const LANE2: i32>(a: int8x8_t, b: int8x1
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_s16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_s16<const LANE1: i32, const LANE2: i32>(
@@ -4681,8 +4753,14 @@ pub fn vcopy_laneq_s16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_s32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_s32<const LANE1: i32, const LANE2: i32>(
@@ -4704,8 +4782,14 @@ pub fn vcopy_laneq_s32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_u8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_u8<const LANE1: i32, const LANE2: i32>(
@@ -4734,8 +4818,14 @@ pub fn vcopy_laneq_u8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_u16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_u16<const LANE1: i32, const LANE2: i32>(
@@ -4759,8 +4849,14 @@ pub fn vcopy_laneq_u16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_u32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_u32<const LANE1: i32, const LANE2: i32>(
@@ -4782,8 +4878,14 @@ pub fn vcopy_laneq_u32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_p8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_p8<const LANE1: i32, const LANE2: i32>(
@@ -4812,8 +4914,14 @@ pub fn vcopy_laneq_p8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopy_laneq_p16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopy_laneq_p16<const LANE1: i32, const LANE2: i32>(
@@ -4954,8 +5062,14 @@ pub fn vcopyq_lane_p64<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_s8<const LANE1: i32, const LANE2: i32>(a: int8x16_t, b: int8x8_t) -> int8x16_t {
@@ -5325,8 +5439,14 @@ pub fn vcopyq_lane_s8<const LANE1: i32, const LANE2: i32>(a: int8x16_t, b: int8x
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_s16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_s16<const LANE1: i32, const LANE2: i32>(
@@ -5354,8 +5474,14 @@ pub fn vcopyq_lane_s16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_s32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_s32<const LANE1: i32, const LANE2: i32>(
@@ -5379,8 +5505,14 @@ pub fn vcopyq_lane_s32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_u8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_u8<const LANE1: i32, const LANE2: i32>(
@@ -5753,8 +5885,14 @@ pub fn vcopyq_lane_u8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_u16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_u16<const LANE1: i32, const LANE2: i32>(
@@ -5782,8 +5920,14 @@ pub fn vcopyq_lane_u16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_u32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_u32<const LANE1: i32, const LANE2: i32>(
@@ -5807,8 +5951,14 @@ pub fn vcopyq_lane_u32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_p8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_p8<const LANE1: i32, const LANE2: i32>(
@@ -6181,8 +6331,14 @@ pub fn vcopyq_lane_p8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_lane_p16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_lane_p16<const LANE1: i32, const LANE2: i32>(
@@ -6210,8 +6366,14 @@ pub fn vcopyq_lane_p16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_f32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_f32<const LANE1: i32, const LANE2: i32>(
@@ -6234,8 +6396,14 @@ pub fn vcopyq_laneq_f32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_f64)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_f64<const LANE1: i32, const LANE2: i32>(
@@ -6256,8 +6424,14 @@ pub fn vcopyq_laneq_f64<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_s8<const LANE1: i32, const LANE2: i32>(
@@ -6628,8 +6802,14 @@ pub fn vcopyq_laneq_s8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_s16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_s16<const LANE1: i32, const LANE2: i32>(
@@ -6656,8 +6836,14 @@ pub fn vcopyq_laneq_s16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_s32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_s32<const LANE1: i32, const LANE2: i32>(
@@ -6680,8 +6866,14 @@ pub fn vcopyq_laneq_s32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_s64)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_s64<const LANE1: i32, const LANE2: i32>(
@@ -6702,8 +6894,14 @@ pub fn vcopyq_laneq_s64<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_u8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_u8<const LANE1: i32, const LANE2: i32>(
@@ -7074,8 +7272,14 @@ pub fn vcopyq_laneq_u8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_u16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_u16<const LANE1: i32, const LANE2: i32>(
@@ -7102,8 +7306,14 @@ pub fn vcopyq_laneq_u16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_u32)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_u32<const LANE1: i32, const LANE2: i32>(
@@ -7126,8 +7336,14 @@ pub fn vcopyq_laneq_u32<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_u64)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_u64<const LANE1: i32, const LANE2: i32>(
@@ -7148,8 +7364,14 @@ pub fn vcopyq_laneq_u64<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_p8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_p8<const LANE1: i32, const LANE2: i32>(
@@ -7520,8 +7742,14 @@ pub fn vcopyq_laneq_p8<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_p16)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_p16<const LANE1: i32, const LANE2: i32>(
@@ -7548,8 +7776,14 @@ pub fn vcopyq_laneq_p16<const LANE1: i32, const LANE2: i32>(
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vcopyq_laneq_p64)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+||||||| 930ecbcdf89
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 1))]
+=======
+#[cfg_attr(test, assert_instr(mov, LANE1 = 0, LANE2 = 0))]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vcopyq_laneq_p64<const LANE1: i32, const LANE2: i32>(

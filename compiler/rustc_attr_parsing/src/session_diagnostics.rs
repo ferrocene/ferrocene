@@ -532,6 +532,14 @@ pub(crate) struct RustcScalableVectorCountOutOfRange {
     pub n: u128,
 }
 
+#[derive(Diagnostic)]
+#[diag("attribute requires {$opt} to be enabled")]
+pub(crate) struct AttributeRequiresOpt {
+    #[primary_span]
+    pub span: Span,
+    pub opt: &'static str,
+}
+
 pub(crate) enum AttributeParseErrorReason<'a> {
     ExpectedNoArgs,
     ExpectedStringLiteral {
@@ -909,7 +917,7 @@ pub(crate) struct RawDylibOnlyWindows {
 
 #[derive(Diagnostic)]
 #[diag(
-    "invalid linking modifier syntax, expected '+' or '-' prefix before one of: bundle, verbatim, whole-archive, as-needed"
+    "invalid linking modifier syntax, expected '+' or '-' prefix before one of: bundle, verbatim, whole-archive, as-needed, export-symbols"
 )]
 pub(crate) struct InvalidLinkModifier {
     #[primary_span]
@@ -934,6 +942,13 @@ pub(crate) struct ImportNameTypeX86 {
 #[derive(Diagnostic)]
 #[diag("linking modifier `bundle` is only compatible with `static` linking kind")]
 pub(crate) struct BundleNeedsStatic {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("linking modifier `export-symbols` is only compatible with `static` linking kind")]
+pub(crate) struct ExportSymbolsNeedsStatic {
     #[primary_span]
     pub span: Span,
 }

@@ -1,6 +1,7 @@
 // ignore-tidy-filelength
 use std::borrow::Cow;
 use std::fmt;
+use std::ops::Not;
 
 use rustc_abi::ExternAbi;
 use rustc_ast::attr::AttributeExt;
@@ -520,7 +521,10 @@ pub enum ConstArgKind<'hir, Unambig = ()> {
     /// This variant is not always used to represent inference consts, sometimes
     /// [`GenericArg::Infer`] is used instead.
     Infer(Unambig),
-    Literal(LitKind),
+    Literal {
+        lit: LitKind,
+        negated: bool,
+    },
 }
 
 #[derive(Clone, Copy, Debug, HashStable_Generic)]
@@ -1012,10 +1016,14 @@ impl<'hir> Generics<'hir> {
 
                 span_for_parentheses.map_or_else(
                     || {
-                        // We include bounds that come from a `#[derive(_)]` but point at the user's code,
-                        // as we use this method to get a span appropriate for suggestions.
+                        // We include bounds that come from a `#[derive(_)]` but point at the user's
+                        // code, as we use this method to get a span appropriate for suggestions.
                         let bs = bound.span();
-                        bs.can_be_used_for_suggestions().then(|| (bs.shrink_to_hi(), None))
+                        // We use `from_expansion` instead of `can_be_used_for_suggestions` because
+                        // the trait bound from imperfect derives do point at the type parameter,
+                        // but expanded to a where clause, so we want to ignore those. This is only
+                        // true for derive intrinsics.
+                        bs.from_expansion().not().then(|| (bs.shrink_to_hi(), None))
                     },
                     |span| Some((span.shrink_to_hi(), Some(span.shrink_to_lo()))),
                 )
@@ -1953,8 +1961,6 @@ pub struct PatExpr<'hir> {
 pub enum PatExprKind<'hir> {
     Lit {
         lit: Lit,
-        // FIXME: move this into `Lit` and handle negated literal expressions
-        // once instead of matching on unop neg expressions everywhere.
         negated: bool,
     },
     /// A path pattern for a unit struct/variant or a (maybe-associated) constant.
@@ -3193,7 +3199,7 @@ impl<'hir> TraitItem<'hir> {
 
     expect_methods_self_kind! {
         expect_const, (&'hir Ty<'hir>, Option<ConstItemRhs<'hir>>),
-            TraitItemKind::Const(ty, rhs), (ty, *rhs);
+            TraitItemKind::Const(ty, rhs, _), (ty, *rhs);
 
         expect_fn, (&FnSig<'hir>, &TraitFn<'hir>),
             TraitItemKind::Fn(ty, trfn), (ty, trfn);
@@ -3213,11 +3219,32 @@ pub enum TraitFn<'hir> {
     Provided(BodyId),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, HashStable_Generic)]
+pub enum IsTypeConst {
+    No,
+    Yes,
+}
+
+impl From<bool> for IsTypeConst {
+    fn from(value: bool) -> Self {
+        if value { Self::Yes } else { Self::No }
+    }
+}
+
+impl From<IsTypeConst> for bool {
+    fn from(value: IsTypeConst) -> Self {
+        matches!(value, IsTypeConst::Yes)
+    }
+}
+
 /// Represents a trait method or associated constant or type
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub enum TraitItemKind<'hir> {
+    // FIXME(mgca) eventually want to move the option that is around `ConstItemRhs<'hir>`
+    // into `ConstItemRhs`, much like `ast::ConstItemRhsKind`, but for now mark whether
+    // this node is a TypeConst with a flag.
     /// An associated constant with an optional value (otherwise `impl`s must contain a value).
-    Const(&'hir Ty<'hir>, Option<ConstItemRhs<'hir>>),
+    Const(&'hir Ty<'hir>, Option<ConstItemRhs<'hir>>, IsTypeConst),
     /// An associated function with an optional body.
     Fn(FnSig<'hir>, TraitFn<'hir>),
     /// An associated type with (possibly empty) bounds and optional concrete
@@ -4680,7 +4707,7 @@ impl<'hir> OwnerNode<'hir> {
             | OwnerNode::TraitItem(TraitItem {
                 kind:
                     TraitItemKind::Fn(_, TraitFn::Provided(body))
-                    | TraitItemKind::Const(_, Some(ConstItemRhs::Body(body))),
+                    | TraitItemKind::Const(_, Some(ConstItemRhs::Body(body)), _),
                 ..
             })
             | OwnerNode::ImplItem(ImplItem {
@@ -4907,7 +4934,7 @@ impl<'hir> Node<'hir> {
                 _ => None,
             },
             Node::TraitItem(it) => match it.kind {
-                TraitItemKind::Const(ty, _) => Some(ty),
+                TraitItemKind::Const(ty, _, _) => Some(ty),
                 TraitItemKind::Type(_, ty) => ty,
                 _ => None,
             },
@@ -4950,7 +4977,7 @@ impl<'hir> Node<'hir> {
             | Node::TraitItem(TraitItem {
                 owner_id,
                 kind:
-                    TraitItemKind::Const(.., Some(ConstItemRhs::Body(body)))
+                    TraitItemKind::Const(_, Some(ConstItemRhs::Body(body)), _)
                     | TraitItemKind::Fn(_, TraitFn::Provided(body)),
                 ..
             })

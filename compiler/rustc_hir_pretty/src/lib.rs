@@ -937,7 +937,7 @@ impl<'a> State<'a> {
         self.maybe_print_comment(ti.span.lo());
         self.print_attrs(self.attrs(ti.hir_id()));
         match ti.kind {
-            hir::TraitItemKind::Const(ty, default) => {
+            hir::TraitItemKind::Const(ty, default, _) => {
                 self.print_associated_const(ti.ident, ti.generics, ty, default);
             }
             hir::TraitItemKind::Fn(ref sig, hir::TraitFn::Required(arg_idents)) => {
@@ -1158,9 +1158,12 @@ impl<'a> State<'a> {
             ConstArgKind::Anon(anon) => self.print_anon_const(anon),
             ConstArgKind::Error(_) => self.word("/*ERROR*/"),
             ConstArgKind::Infer(..) => self.word("_"),
-            ConstArgKind::Literal(node) => {
+            ConstArgKind::Literal { lit, negated } => {
+                if *negated {
+                    self.word("-");
+                }
                 let span = const_arg.span;
-                self.print_literal(&Spanned { span, node: *node })
+                self.print_literal(&Spanned { span, node: *lit })
             }
         }
     }

@@ -1,12 +1,14 @@
 use std::ops::Deref;
 
+use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sync::{AtomicU64, WorkerLocal};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
 use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
+use rustc_query_system::ich::StableHashingContext;
 pub(crate) use rustc_query_system::query::QueryJobId;
-use rustc_query_system::query::{CycleError, CycleErrorHandling, HashResult, QueryCache};
+use rustc_query_system::query::{CycleError, CycleErrorHandling, QueryCache};
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
@@ -30,9 +32,12 @@ pub type TryLoadFromDiskFn<'tcx, Key, Value> = fn(
 pub type IsLoadableFromDiskFn<'tcx, Key> =
     fn(tcx: TyCtxt<'tcx>, key: &Key, index: SerializedDepNodeIndex) -> bool;
 
+pub type HashResult<V> = Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>;
+
 /// Stores function pointers and other metadata for a particular query.
 ///
-/// Used indirectly by query plumbing in `rustc_query_system`, via a trait.
+/// Used indirectly by query plumbing in `rustc_query_system` via a trait,
+/// and also used directly by query plumbing in `rustc_query_impl`.
 pub struct QueryVTable<'tcx, C: QueryCache> {
     pub name: &'static str,
     pub eval_always: bool,
@@ -45,13 +50,19 @@ pub struct QueryVTable<'tcx, C: QueryCache> {
     pub query_cache: usize,
     pub will_cache_on_disk_for_key_fn: Option<WillCacheOnDiskForKeyFn<'tcx, C::Key>>,
     pub execute_query: fn(tcx: TyCtxt<'tcx>, k: C::Key) -> C::Value,
-    pub compute: fn(tcx: TyCtxt<'tcx>, key: C::Key) -> C::Value,
+    pub compute_fn: fn(tcx: TyCtxt<'tcx>, key: C::Key) -> C::Value,
     pub try_load_from_disk_fn: Option<TryLoadFromDiskFn<'tcx, C::Key, C::Value>>,
     pub is_loadable_from_disk_fn: Option<IsLoadableFromDiskFn<'tcx, C::Key>>,
     pub hash_result: HashResult<C::Value>,
     pub value_from_cycle_error:
         fn(tcx: TyCtxt<'tcx>, cycle_error: &CycleError, guar: ErrorGuaranteed) -> C::Value,
     pub format_value: fn(&C::Value) -> String,
+
+    /// Formats a human-readable description of this query and its key, as
+    /// specified by the `desc` query modifier.
+    ///
+    /// Used when reporting query cycle errors and similar problems.
+    pub description_fn: fn(TyCtxt<'tcx>, C::Key) -> String,
 }
 
 pub struct QuerySystemFns {

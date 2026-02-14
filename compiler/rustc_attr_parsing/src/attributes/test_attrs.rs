@@ -1,3 +1,4 @@
+use rustc_hir::attrs::RustcAbiAttrKind;
 use rustc_session::lint::builtin::ILL_FORMED_ATTRIBUTE_INPUT;
 
 use super::prelude::*;
@@ -112,4 +113,118 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcVarianceOfOpaquesParser {
     const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcVarianceOfOpaques;
+}
+
+pub(crate) struct ReexportTestHarnessMainParser;
+
+impl<S: Stage> SingleAttributeParser<S> for ReexportTestHarnessMainParser {
+    const PATH: &[Symbol] = &[sym::reexport_test_harness_main];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepOutermost;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
+    const TEMPLATE: AttributeTemplate = template!(NameValueStr: "name");
+
+    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        let Some(nv) = args.name_value() else {
+            cx.expected_name_value(
+                args.span().unwrap_or(cx.inner_span),
+                Some(sym::reexport_test_harness_main),
+            );
+            return None;
+        };
+
+        let Some(name) = nv.value_as_str() else {
+            cx.expected_string_literal(nv.value_span, Some(nv.value_as_lit()));
+            return None;
+        };
+
+        Some(AttributeKind::ReexportTestHarnessMain(name))
+    }
+}
+
+pub(crate) struct RustcAbiParser;
+
+impl<S: Stage> SingleAttributeParser<S> for RustcAbiParser {
+    const PATH: &[Symbol] = &[sym::rustc_abi];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
+    const TEMPLATE: AttributeTemplate = template!(OneOf: &[sym::debug, sym::assert_eq]);
+    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepOutermost;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::TyAlias),
+        Allow(Target::Fn),
+        Allow(Target::ForeignFn),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+    ]);
+
+    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        let Some(args) = args.list() else {
+            cx.expected_specific_argument_and_list(cx.attr_span, &[sym::assert_eq, sym::debug]);
+            return None;
+        };
+
+        let Some(arg) = args.single() else {
+            cx.expected_single_argument(cx.attr_span);
+            return None;
+        };
+
+        let fail_incorrect_argument =
+            |span| cx.expected_specific_argument(span, &[sym::assert_eq, sym::debug]);
+
+        let Some(arg) = arg.meta_item() else {
+            fail_incorrect_argument(args.span);
+            return None;
+        };
+
+        let kind: RustcAbiAttrKind = match arg.path().word_sym() {
+            Some(sym::assert_eq) => RustcAbiAttrKind::AssertEq,
+            Some(sym::debug) => RustcAbiAttrKind::Debug,
+            None | Some(_) => {
+                fail_incorrect_argument(arg.span());
+                return None;
+            }
+        };
+
+        Some(AttributeKind::RustcAbi { attr_span: cx.attr_span, kind })
+    }
+}
+
+pub(crate) struct RustcDelayedBugFromInsideQueryParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcDelayedBugFromInsideQueryParser {
+    const PATH: &[Symbol] = &[sym::rustc_delayed_bug_from_inside_query];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Fn)]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcDelayedBugFromInsideQuery;
+}
+
+pub(crate) struct RustcEvaluateWhereClausesParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcEvaluateWhereClausesParser {
+    const PATH: &[Symbol] = &[sym::rustc_evaluate_where_clauses];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Fn),
+        Allow(Target::Method(MethodKind::Inherent)),
+        Allow(Target::Method(MethodKind::Trait { body: true })),
+        Allow(Target::Method(MethodKind::TraitImpl)),
+        Allow(Target::Method(MethodKind::Trait { body: false })),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcEvaluateWhereClauses;
+}
+
+pub(crate) struct RustcOutlivesParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for RustcOutlivesParser {
+    const PATH: &[Symbol] = &[sym::rustc_outlives];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Struct),
+        Allow(Target::Enum),
+        Allow(Target::Union),
+        Allow(Target::TyAlias),
+    ]);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcOutlives;
 }

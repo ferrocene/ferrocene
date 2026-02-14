@@ -465,15 +465,6 @@ pub(crate) struct LangItemOnIncorrectTarget {
     pub actual_target: Target,
 }
 
-#[derive(Diagnostic)]
-#[diag("definition of an unknown lang item: `{$name}`", code = E0522)]
-pub(crate) struct UnknownLangItem {
-    #[primary_span]
-    #[label("definition of unknown lang item `{$name}`")]
-    pub span: Span,
-    pub name: Symbol,
-}
-
 pub(crate) struct InvalidAttrAtCrateLevel {
     pub span: Span,
     pub sugg_span: Option<Span>,

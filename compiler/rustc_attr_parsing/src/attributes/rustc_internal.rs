@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use rustc_ast::{LitIntType, LitKind, MetaItemLit};
+use rustc_hir::LangItem;
 use rustc_hir::attrs::{
     BorrowckGraphvizFormatKind, CguFields, CguKind, DivergingBlockBehavior,
     DivergingFallbackBehavior, RustcCleanAttribute, RustcCleanQueries, RustcLayoutType,
@@ -12,7 +13,7 @@ use rustc_span::Symbol;
 use super::prelude::*;
 use super::util::parse_single_integer;
 use crate::session_diagnostics::{
-    AttributeRequiresOpt, CguFieldsMissing, RustcScalableVectorCountOutOfRange,
+    AttributeRequiresOpt, CguFieldsMissing, RustcScalableVectorCountOutOfRange, UnknownLangItem,
 };
 
 pub(crate) struct RustcMainParser;
@@ -626,6 +627,32 @@ impl<S: Stage> SingleAttributeParser<S> for RustcScalableVectorParser {
     }
 }
 
+pub(crate) struct LangParser;
+
+impl<S: Stage> SingleAttributeParser<S> for LangParser {
+    const PATH: &[Symbol] = &[sym::lang];
+    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepInnermost;
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS); // Targets are checked per lang item in `rustc_passes`
+    const TEMPLATE: AttributeTemplate = template!(NameValueStr: "name");
+
+    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        let Some(nv) = args.name_value() else {
+            cx.expected_name_value(cx.attr_span, None);
+            return None;
+        };
+        let Some(name) = nv.value_as_str() else {
+            cx.expected_string_literal(nv.value_span, Some(nv.value_as_lit()));
+            return None;
+        };
+        let Some(lang_item) = LangItem::from_name(name) else {
+            cx.emit_err(UnknownLangItem { span: cx.attr_span, name });
+            return None;
+        };
+        Some(AttributeKind::Lang(lang_item, cx.attr_span))
+    }
+}
+
 pub(crate) struct RustcHasIncoherentInherentImplsParser;
 
 impl<S: Stage> NoArgsAttributeParser<S> for RustcHasIncoherentInherentImplsParser {
@@ -639,6 +666,15 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcHasIncoherentInherentImplsParse
         Allow(Target::ForeignTy),
     ]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcHasIncoherentInherentImpls;
+}
+
+pub(crate) struct PanicHandlerParser;
+
+impl<S: Stage> NoArgsAttributeParser<S> for PanicHandlerParser {
+    const PATH: &[Symbol] = &[sym::panic_handler];
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS); // Targets are checked per lang item in `rustc_passes`
+    const CREATE: fn(Span) -> AttributeKind = |span| AttributeKind::Lang(LangItem::PanicImpl, span);
 }
 
 pub(crate) struct RustcHiddenTypeOfOpaquesParser;

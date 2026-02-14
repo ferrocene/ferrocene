@@ -6,9 +6,9 @@ use std::sync::Arc;
 use parking_lot::{Condvar, Mutex};
 use rustc_span::Span;
 
-use super::{QueryStackDeferred, QueryStackFrameExtra};
 use crate::query::plumbing::CycleError;
-use crate::query::{QueryContext, QueryStackFrame};
+use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
+use crate::ty::TyCtxt;
 
 /// Represents a span and a query key.
 #[derive(Clone, Debug)]
@@ -98,13 +98,13 @@ impl<'tcx> QueryLatch<'tcx> {
     /// Awaits for the query job to complete.
     pub fn wait_on(
         &self,
-        qcx: impl QueryContext<'tcx>,
+        tcx: TyCtxt<'tcx>,
         query: Option<QueryJobId>,
         span: Span,
     ) -> Result<(), CycleError<QueryStackDeferred<'tcx>>> {
         let waiter =
             Arc::new(QueryWaiter { query, span, cycle: Mutex::new(None), condvar: Condvar::new() });
-        self.wait_on_inner(qcx, &waiter);
+        self.wait_on_inner(tcx, &waiter);
         // FIXME: Get rid of this lock. We have ownership of the QueryWaiter
         // although another thread may still have a Arc reference so we cannot
         // use Arc::get_mut
@@ -116,7 +116,7 @@ impl<'tcx> QueryLatch<'tcx> {
     }
 
     /// Awaits the caller on this latch by blocking the current thread.
-    fn wait_on_inner(&self, qcx: impl QueryContext<'tcx>, waiter: &Arc<QueryWaiter<'tcx>>) {
+    fn wait_on_inner(&self, tcx: TyCtxt<'tcx>, waiter: &Arc<QueryWaiter<'tcx>>) {
         let mut info = self.info.lock();
         if !info.complete {
             // We push the waiter on to the `waiters` list. It can be accessed inside
@@ -129,12 +129,11 @@ impl<'tcx> QueryLatch<'tcx> {
             // we have to be in the `wait` call. This is ensured by the deadlock handler
             // getting the self.info lock.
             rustc_thread_pool::mark_blocked();
-            let proxy = qcx.jobserver_proxy();
-            proxy.release_thread();
+            tcx.jobserver_proxy.release_thread();
             waiter.condvar.wait(&mut info);
             // Release the lock before we potentially block in `acquire_thread`
             drop(info);
-            proxy.acquire_thread();
+            tcx.jobserver_proxy.acquire_thread();
         }
     }
 

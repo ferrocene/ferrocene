@@ -22036,14 +22036,7 @@ pub unsafe fn vld3q_f16(a: *const f16) -> float16x8x3_t {
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld3_f16(a: *const f16) -> float16x4x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld3.v4f16.p0"
-        )]
-        fn _vld3_f16(ptr: *const f16) -> float16x4x3_t;
-    }
-    _vld3_f16(a as _)
+    crate::core_arch::macros::deinterleaving_load!(f16, 4, 3, a)
 }
 #[doc = "Load single 3-element structure and replicate to all lanes of two registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_f16)"]
@@ -22060,14 +22053,7 @@ pub unsafe fn vld3_f16(a: *const f16) -> float16x4x3_t {
 #[unstable(feature = "stdarch_neon_f16", issue = "136306")]
 #[cfg(not(target_arch = "arm64ec"))]
 pub unsafe fn vld3q_f16(a: *const f16) -> float16x8x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld3.v8f16.p0"
-        )]
-        fn _vld3q_f16(ptr: *const f16) -> float16x8x3_t;
-    }
-    _vld3q_f16(a as _)
+    crate::core_arch::macros::deinterleaving_load!(f16, 8, 3, a)
 }
 #[doc = "Load multiple 3-element structures to three registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_f32)"]
@@ -22983,14 +22969,7 @@ pub unsafe fn vld3_p64(a: *const p64) -> poly64x1x3_t {
 #[cfg(not(target_arch = "arm"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vld3_s64(a: *const i64) -> int64x1x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld3.v1i64.p0"
-        )]
-        fn _vld3_s64(ptr: *const int64x1_t) -> int64x1x3_t;
-    }
-    _vld3_s64(a as _)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple 3-element structures to three registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_s64)"]

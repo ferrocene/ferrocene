@@ -5475,6 +5475,32 @@ fn create_delegation_attrs(attrs: &[Attribute]) -> DelegationAttrs {
     DelegationAttrs { flags, to_inherit: to_inherit_attrs }
 }
 
+fn required_generic_args_suggestion(generics: &ast::Generics) -> Option<String> {
+    let required = generics
+        .params
+        .iter()
+        .filter_map(|param| match &param.kind {
+            ast::GenericParamKind::Lifetime => Some("'_"),
+            ast::GenericParamKind::Type { default } => {
+                if default.is_none() {
+                    Some("_")
+                } else {
+                    None
+                }
+            }
+            ast::GenericParamKind::Const { default, .. } => {
+                if default.is_none() {
+                    Some("_")
+                } else {
+                    None
+                }
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if required.is_empty() { None } else { Some(format!("<{}>", required.join(", "))) }
+}
+
 impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, '_, '_> {
     fn visit_item(&mut self, item: &'ast Item) {
         match &item.kind {
@@ -5532,6 +5558,13 @@ impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, '_, '_> {
     fn visit_assoc_item(&mut self, item: &'ast AssocItem, ctxt: AssocCtxt) {
         if let AssocItemKind::Fn(box Fn { sig, .. }) = &item.kind {
             self.collect_fn_info(sig.header, &sig.decl, item.id, &item.attrs);
+        }
+
+        if let AssocItemKind::Type(box ast::TyAlias { generics, .. }) = &item.kind {
+            let def_id = self.r.local_def_id(item.id);
+            if let Some(suggestion) = required_generic_args_suggestion(generics) {
+                self.r.item_required_generic_args_suggestions.insert(def_id, suggestion);
+            }
         }
         visit::walk_assoc_item(self, item, ctxt);
     }

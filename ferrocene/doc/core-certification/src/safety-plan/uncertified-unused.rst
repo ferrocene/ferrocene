@@ -15,8 +15,6 @@ This is achieved in three steps by the customer:
 
 #. Ensure to only use code from the certified subset.
 
-#. Ensure to only use a certified target in the final build.
-
 All uncertified code, and certified code that is not called, is unused code.
 
 Unused code

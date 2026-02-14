@@ -83,13 +83,3 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 * ``--target=x86_64-pc-nto-qnx710``
-
-.. We don't qualify x86_64-unknown-none so we can't certify this target.
-
-Certified equivalent
---------------------
-
-This qualified target has no certified equivalent.
-It remains qualified for use with the Ferrocene compiler, but the core library for this target is not certified.
-
-Refer to :ref:`certified-core-targets` for more information about certified targets.

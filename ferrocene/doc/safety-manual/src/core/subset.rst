@@ -11,7 +11,7 @@ Compliance with subset
 
 To prove compliance with the subset, follow these steps:
 
-1. Ensure that your code successfully compiles with your compilation target.
+1. Ensure that your code successfully compiles with your qualified compilation target.
 2. Ensure that it also compiles with the subset equivalent listed in the table below.
 3. If it succeeds, your code is compliant with the subset.
 4. If it fails, do one of the following:
@@ -19,12 +19,6 @@ To prove compliance with the subset, follow these steps:
    - Remove the non-compliant function and rewrite the code to maintain the semantics.
    - Contact Ferrous Systems to discuss the option of adding your desired function to the certified subset.
    - Keep using the function, but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
-
-.. warning::
-
-   Subset targets can **only** be used to verify compliance with the subset.
-   Subset targets **cannot** be used at runtime as a certified target.
-   When creating a certified production build, use a :ref:`certified target <certified-core-targets>` instead.
 
 .. list-table::
    :align: left

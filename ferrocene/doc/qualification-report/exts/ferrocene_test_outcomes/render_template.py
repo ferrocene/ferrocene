@@ -27,7 +27,6 @@ class RenderOutcomesTemplate(SphinxDirective):
         "target": docutils.parsers.rst.directives.unchanged_required,
         "upcoming": docutils.parsers.rst.directives.unchanged,
         "bare_metal_test_target": docutils.parsers.rst.directives.unchanged,
-        "certified_target": docutils.parsers.rst.directives.unchanged,
         "remote_testing": docutils.parsers.rst.directives.flag,
     }
 
@@ -63,7 +62,6 @@ class RenderOutcomesTemplate(SphinxDirective):
                 "target": self.options["target"],
                 "upcoming": self.options["upcoming"] if "upcoming" in self.options else None,
                 "bare_metal_test_target": self.options.get("bare_metal_test_target"),
-                "certified_target": self.options.get("certified_target"),
                 "remote_testing": "remote_testing" in self.options,
                 "platform_outcomes": outcomes,
             },

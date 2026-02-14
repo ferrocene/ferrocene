@@ -42,7 +42,7 @@ One example test is ``coretests::slice::test_position``. It calls ``.position`` 
       assert_eq!(b.iter().position(|&v| v == 0), None);
   }
 
-This test suite is executed on :ref:`all certified targets of Ferrocene <certified-core-targets>`.
+This test suite is executed on :doc:`all qualified targets of Ferrocene <user-manual:targets/index>`.
 
 The results of the coretests test suite can be found in the "Library Test Suite" section of :doc:`each targets test results <qualification-report:rustc/index>`.
 

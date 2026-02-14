@@ -291,14 +291,14 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     return false;
                 }
 
-                let trait_def_id = alias.trait_def_id(tcx);
-                let rebased_args = alias.args.rebase_onto(tcx, trait_def_id, impl_substs);
-
                 let leaf_def = match specialization_graph::assoc_def(tcx, impl_def_id, alias.def_id)
                 {
                     Ok(leaf) => leaf,
                     Err(_) => return false,
                 };
+
+                let trait_def_id = alias.trait_def_id(tcx);
+                let rebased_args = alias.args.rebase_onto(tcx, trait_def_id, impl_substs);
 
                 let impl_item_def_id = leaf_def.item.def_id;
                 let impl_assoc_ty = tcx.type_of(impl_item_def_id).instantiate(tcx, rebased_args);

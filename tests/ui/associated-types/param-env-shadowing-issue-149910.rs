@@ -1,3 +1,6 @@
+// Regression test for issue #149910.
+// We want to tell the user about param_env shadowing here.
+
 trait Trait {
     type Assoc;
 }

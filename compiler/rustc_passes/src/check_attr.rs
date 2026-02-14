@@ -256,6 +256,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::Fundamental
                     | AttributeKind::Ignore { .. }
                     | AttributeKind::InstructionSet(..)
+                    | AttributeKind::Lang(..)
                     | AttributeKind::LinkName { .. }
                     | AttributeKind::LinkOrdinal { .. }
                     | AttributeKind::LinkSection { .. }
@@ -394,8 +395,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::deny
                             | sym::forbid
                             // internal
-                            | sym::panic_handler
-                            | sym::lang
                             | sym::default_lib_allocator
                             | sym::rustc_nonnull_optimization_guaranteed
                             | sym::rustc_inherit_overflow_checks
@@ -784,15 +783,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::Fn => {
                 // `#[track_caller]` is not valid on weak lang items because they are called via
                 // `extern` declarations and `#[track_caller]` would alter their ABI.
-                if let Some((lang_item, _)) = hir::lang_items::extract(attrs)
-                    && let Some(item) = hir::LangItem::from_name(lang_item)
+                if let Some(item) = find_attr!(attrs, AttributeKind::Lang(item, _) => item)
                     && item.is_weak()
                 {
                     let sig = self.tcx.hir_node(hir_id).fn_sig().unwrap();
 
                     self.dcx().emit_err(errors::LangItemWithTrackCaller {
                         attr_span,
-                        name: lang_item,
+                        name: item.name(),
                         sig_span: sig.span,
                     });
                 }
@@ -856,7 +854,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent)
             | Target::Fn => {
                 // `#[target_feature]` is not allowed in lang items.
-                if let Some((lang_item, _)) = hir::lang_items::extract(attrs)
+                if let Some(lang_item) = find_attr!(attrs, AttributeKind::Lang(lang, _) => lang)
                     // Calling functions with `#[target_feature]` is
                     // not unsafe on WASM, see #84988
                     && !self.tcx.sess.target.is_like_wasm
@@ -866,7 +864,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
                     self.dcx().emit_err(errors::LangItemWithTargetFeature {
                         attr_span,
-                        name: lang_item,
+                        name: lang_item.name(),
                         sig_span: sig.span,
                     });
                 }

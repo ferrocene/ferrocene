@@ -8,6 +8,7 @@ use rustc_ast::token::DocFragmentKind;
 use rustc_ast::{AttrStyle, Path, ast};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
+use rustc_hir::LangItem;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic, PrintAttribute};
 use rustc_span::def_id::DefId;
 use rustc_span::hygiene::Transparency;
@@ -952,6 +953,9 @@ pub enum AttributeKind {
 
     /// Represents `#[instruction_set]`
     InstructionSet(InstructionSetAttr),
+
+    /// Represents `#[lang]`
+    Lang(LangItem, Span),
 
     /// Represents `#[link]`.
     Link(ThinVec<LinkEntry>, Span),

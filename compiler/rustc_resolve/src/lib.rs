@@ -309,7 +309,11 @@ enum ResolutionError<'ra> {
     /// generic parameters must not be used inside const evaluations.
     ///
     /// This error is only emitted when using `min_const_generics`.
-    ParamInNonTrivialAnonConst { name: Symbol, param_kind: ParamKindInNonTrivialAnonConst },
+    ParamInNonTrivialAnonConst {
+        is_ogca: bool,
+        name: Symbol,
+        param_kind: ParamKindInNonTrivialAnonConst,
+    },
     /// generic parameters must not be used inside enum discriminants.
     ///
     /// This error is emitted even with `generic_const_exprs`.

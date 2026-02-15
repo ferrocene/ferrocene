@@ -25530,14 +25530,7 @@ pub fn vsqrth_f16(a: f16) -> f16 {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s8<const N: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
     static_assert!(N >= 1 && N <= 8);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v8i8"
-        )]
-        fn _vsri_n_s8(a: int8x8_t, b: int8x8_t, n: i32) -> int8x8_t;
-    }
-    unsafe { _vsri_n_s8(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u8, 8, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s8)"]
@@ -25548,14 +25541,7 @@ pub fn vsri_n_s8<const N: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s8<const N: i32>(a: int8x16_t, b: int8x16_t) -> int8x16_t {
     static_assert!(N >= 1 && N <= 8);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v16i8"
-        )]
-        fn _vsriq_n_s8(a: int8x16_t, b: int8x16_t, n: i32) -> int8x16_t;
-    }
-    unsafe { _vsriq_n_s8(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u8, 16, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s16)"]
@@ -25566,14 +25552,7 @@ pub fn vsriq_n_s8<const N: i32>(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s16<const N: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
     static_assert!(N >= 1 && N <= 16);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v4i16"
-        )]
-        fn _vsri_n_s16(a: int16x4_t, b: int16x4_t, n: i32) -> int16x4_t;
-    }
-    unsafe { _vsri_n_s16(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u16, 4, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s16)"]
@@ -25584,14 +25563,7 @@ pub fn vsri_n_s16<const N: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s16<const N: i32>(a: int16x8_t, b: int16x8_t) -> int16x8_t {
     static_assert!(N >= 1 && N <= 16);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v8i16"
-        )]
-        fn _vsriq_n_s16(a: int16x8_t, b: int16x8_t, n: i32) -> int16x8_t;
-    }
-    unsafe { _vsriq_n_s16(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u16, 8, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s32)"]
@@ -25602,14 +25574,7 @@ pub fn vsriq_n_s16<const N: i32>(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s32<const N: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
     static_assert!(N >= 1 && N <= 32);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v2i32"
-        )]
-        fn _vsri_n_s32(a: int32x2_t, b: int32x2_t, n: i32) -> int32x2_t;
-    }
-    unsafe { _vsri_n_s32(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u32, 2, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s32)"]
@@ -25620,14 +25585,7 @@ pub fn vsri_n_s32<const N: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s32<const N: i32>(a: int32x4_t, b: int32x4_t) -> int32x4_t {
     static_assert!(N >= 1 && N <= 32);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v4i32"
-        )]
-        fn _vsriq_n_s32(a: int32x4_t, b: int32x4_t, n: i32) -> int32x4_t;
-    }
-    unsafe { _vsriq_n_s32(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u32, 4, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s64)"]
@@ -25638,14 +25596,7 @@ pub fn vsriq_n_s32<const N: i32>(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s64<const N: i32>(a: int64x1_t, b: int64x1_t) -> int64x1_t {
     static_assert!(N >= 1 && N <= 64);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v1i64"
-        )]
-        fn _vsri_n_s64(a: int64x1_t, b: int64x1_t, n: i32) -> int64x1_t;
-    }
-    unsafe { _vsri_n_s64(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u64, 1, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s64)"]
@@ -25656,14 +25607,7 @@ pub fn vsri_n_s64<const N: i32>(a: int64x1_t, b: int64x1_t) -> int64x1_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s64<const N: i32>(a: int64x2_t, b: int64x2_t) -> int64x2_t {
     static_assert!(N >= 1 && N <= 64);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v2i64"
-        )]
-        fn _vsriq_n_s64(a: int64x2_t, b: int64x2_t, n: i32) -> int64x2_t;
-    }
-    unsafe { _vsriq_n_s64(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u64, 2, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_u8)"]
@@ -25825,7 +25769,7 @@ pub fn vsriq_n_p64<const N: i32>(a: poly64x2_t, b: poly64x2_t) -> poly64x2_t {
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[rustc_legacy_const_generics(2)]
-#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(sri, N = 2))]
+#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(bfxil, N = 2))]
 pub fn vsrid_n_s64<const N: i32>(a: i64, b: i64) -> i64 {
     static_assert!(N >= 1 && N <= 64);
     unsafe { transmute(vsri_n_s64::<N>(transmute(a), transmute(b))) }
@@ -25836,7 +25780,7 @@ pub fn vsrid_n_s64<const N: i32>(a: i64, b: i64) -> i64 {
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[rustc_legacy_const_generics(2)]
-#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(sri, N = 2))]
+#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(bfxil, N = 2))]
 pub fn vsrid_n_u64<const N: i32>(a: u64, b: u64) -> u64 {
     static_assert!(N >= 1 && N <= 64);
     unsafe { transmute(vsri_n_u64::<N>(transmute(a), transmute(b))) }

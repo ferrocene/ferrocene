@@ -238,7 +238,7 @@ pub enum LifetimeKind {
 
     /// Indicates an error during lowering (usually `'_` in wrong place)
     /// that was already reported.
-    Error,
+    Error(ErrorGuaranteed),
 
     /// User wrote an anonymous lifetime, either `'_` or nothing (which gets
     /// converted to `'_`). The semantics of this lifetime should be inferred
@@ -258,7 +258,7 @@ impl LifetimeKind {
             // -- but this is because, as far as the code in the compiler is
             // concerned -- `Fresh` variants act equivalently to "some fresh name".
             // They correspond to early-bound regions on an impl, in other words.
-            LifetimeKind::Error | LifetimeKind::Param(..) | LifetimeKind::Static => false,
+            LifetimeKind::Error(..) | LifetimeKind::Param(..) | LifetimeKind::Static => false,
         }
     }
 }

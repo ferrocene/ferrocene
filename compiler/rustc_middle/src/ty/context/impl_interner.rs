@@ -9,11 +9,11 @@ use rustc_hir::def::{CtorKind, CtorOf, DefKind};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{self as hir};
-use rustc_query_system::dep_graph::DepNodeIndex;
 use rustc_span::{DUMMY_SP, Span, Symbol};
 use rustc_type_ir::lang_items::{SolverAdtLangItem, SolverLangItem, SolverTraitLangItem};
 use rustc_type_ir::{CollectAndApply, Interner, TypeFoldable, search_graph};
 
+use crate::dep_graph::DepNodeIndex;
 use crate::infer::canonical::CanonicalVarKinds;
 use crate::query::IntoQueryParam;
 use crate::traits::cache::WithDepNode;

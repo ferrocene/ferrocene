@@ -12476,7 +12476,14 @@ pub unsafe fn _mm512_mask_cvtsepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask32,
 #[stable(feature = "stdarch_x86_avx512", since = "1.89")]
 #[cfg_attr(test, assert_instr(vpmovswb))]
 pub unsafe fn _mm256_mask_cvtsepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask16, a: __m256i) {
-    vpmovswbmem256(mem_addr, a.as_i16x16(), k);
+    let mask = simd_select_bitmask(k, i16x16::splat(!0), i16x16::ZERO);
+
+    let max = simd_splat(i16::from(i8::MAX));
+    let min = simd_splat(i16::from(i8::MIN));
+
+    let v = simd_imax(simd_imin(a.as_i16x16(), max), min);
+    let truncated: i8x16 = simd_cast(v);
+    simd_masked_store!(SimdAlign::Unaligned, mask, mem_addr, truncated);
 }
 
 /// Convert packed signed 16-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
@@ -12487,7 +12494,14 @@ pub unsafe fn _mm256_mask_cvtsepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask16,
 #[stable(feature = "stdarch_x86_avx512", since = "1.89")]
 #[cfg_attr(test, assert_instr(vpmovswb))]
 pub unsafe fn _mm_mask_cvtsepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask8, a: __m128i) {
-    vpmovswbmem128(mem_addr, a.as_i16x8(), k);
+    let mask = simd_select_bitmask(k, i16x8::splat(!0), i16x8::ZERO);
+
+    let max = simd_splat(i16::from(i8::MAX));
+    let min = simd_splat(i16::from(i8::MIN));
+
+    let v = simd_imax(simd_imin(a.as_i16x8(), max), min);
+    let truncated: i8x8 = simd_cast(v);
+    simd_masked_store!(SimdAlign::Unaligned, mask, mem_addr, truncated);
 }
 
 /// Convert packed 16-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
@@ -12555,7 +12569,12 @@ pub unsafe fn _mm512_mask_cvtusepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask32
 #[stable(feature = "stdarch_x86_avx512", since = "1.89")]
 #[cfg_attr(test, assert_instr(vpmovuswb))]
 pub unsafe fn _mm256_mask_cvtusepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask16, a: __m256i) {
-    vpmovuswbmem256(mem_addr, a.as_i16x16(), k);
+    let mask = simd_select_bitmask(k, i16x16::splat(!0), i16x16::ZERO);
+    let mem_addr = mem_addr.cast::<u8>();
+    let max = simd_splat(u16::from(u8::MAX));
+
+    let truncated: u8x16 = simd_cast(simd_imin(a.as_u16x16(), max));
+    simd_masked_store!(SimdAlign::Unaligned, mask, mem_addr, truncated);
 }
 
 /// Convert packed unsigned 16-bit integers in a to packed unsigned 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
@@ -12566,7 +12585,15 @@ pub unsafe fn _mm256_mask_cvtusepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask16
 #[stable(feature = "stdarch_x86_avx512", since = "1.89")]
 #[cfg_attr(test, assert_instr(vpmovuswb))]
 pub unsafe fn _mm_mask_cvtusepi16_storeu_epi8(mem_addr: *mut i8, k: __mmask8, a: __m128i) {
-    vpmovuswbmem128(mem_addr, a.as_i16x8(), k);
+    let mask = simd_select_bitmask(k, i16x8::splat(!0), i16x8::ZERO);
+    let mem_addr = mem_addr.cast::<u8>();
+    let max = simd_splat(u16::from(u8::MAX));
+
+    let v = a.as_u16x8();
+    let v = simd_imin(v, max);
+
+    let truncated: u8x8 = simd_cast(v);
+    simd_masked_store!(SimdAlign::Unaligned, mask, mem_addr, truncated);
 }
 
 #[allow(improper_ctypes)]
@@ -12632,17 +12659,9 @@ unsafe extern "C" {
 
     #[link_name = "llvm.x86.avx512.mask.pmovs.wb.mem.512"]
     fn vpmovswbmem(mem_addr: *mut i8, a: i16x32, mask: u32);
-    #[link_name = "llvm.x86.avx512.mask.pmovs.wb.mem.256"]
-    fn vpmovswbmem256(mem_addr: *mut i8, a: i16x16, mask: u16);
-    #[link_name = "llvm.x86.avx512.mask.pmovs.wb.mem.128"]
-    fn vpmovswbmem128(mem_addr: *mut i8, a: i16x8, mask: u8);
 
     #[link_name = "llvm.x86.avx512.mask.pmovus.wb.mem.512"]
     fn vpmovuswbmem(mem_addr: *mut i8, a: i16x32, mask: u32);
-    #[link_name = "llvm.x86.avx512.mask.pmovus.wb.mem.256"]
-    fn vpmovuswbmem256(mem_addr: *mut i8, a: i16x16, mask: u16);
-    #[link_name = "llvm.x86.avx512.mask.pmovus.wb.mem.128"]
-    fn vpmovuswbmem128(mem_addr: *mut i8, a: i16x8, mask: u8);
 }
 
 #[cfg(test)]

@@ -1,24 +1,69 @@
+use std::fmt::Debug;
 use std::ops::Deref;
 
 use rustc_data_structures::fingerprint::Fingerprint;
+use rustc_data_structures::hash_table::HashTable;
+use rustc_data_structures::sharded::Sharded;
 use rustc_data_structures::sync::{AtomicU64, WorkerLocal};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
-use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
 use rustc_query_system::ich::StableHashingContext;
-pub(crate) use rustc_query_system::query::QueryJobId;
-use rustc_query_system::query::{CycleError, CycleErrorHandling, QueryCache};
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
 use crate::dep_graph;
-use crate::dep_graph::DepKind;
+use crate::dep_graph::{DepKind, DepNodeIndex, SerializedDepNodeIndex};
 use crate::queries::{
     ExternProviders, PerQueryVTables, Providers, QueryArenas, QueryCaches, QueryEngine, QueryStates,
 };
 use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
+use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
+use crate::query::{QueryCache, QueryInfo, QueryJob};
 use crate::ty::TyCtxt;
+
+/// For a particular query, keeps track of "active" keys, i.e. keys whose
+/// evaluation has started but has not yet finished successfully.
+///
+/// (Successful query evaluation for a key is represented by an entry in the
+/// query's in-memory cache.)
+pub struct QueryState<'tcx, K> {
+    pub active: Sharded<HashTable<(K, ActiveKeyStatus<'tcx>)>>,
+}
+
+impl<'tcx, K> Default for QueryState<'tcx, K> {
+    fn default() -> QueryState<'tcx, K> {
+        QueryState { active: Default::default() }
+    }
+}
+
+/// For a particular query and key, tracks the status of a query evaluation
+/// that has started, but has not yet finished successfully.
+///
+/// (Successful query evaluation for a key is represented by an entry in the
+/// query's in-memory cache.)
+pub enum ActiveKeyStatus<'tcx> {
+    /// Some thread is already evaluating the query for this key.
+    ///
+    /// The enclosed [`QueryJob`] can be used to wait for it to finish.
+    Started(QueryJob<'tcx>),
+
+    /// The query panicked. Queries trying to wait on this will raise a fatal error which will
+    /// silently panic.
+    Poisoned,
+}
+
+/// How a particular query deals with query cycle errors.
+///
+/// Inspected by the code that actually handles cycle errors, to decide what
+/// approach to use.
+#[derive(Copy, Clone)]
+pub enum CycleErrorHandling {
+    Error,
+    Fatal,
+    DelayBug,
+    Stash,
+}
 
 pub type WillCacheOnDiskForKeyFn<'tcx, Key> = fn(tcx: TyCtxt<'tcx>, key: &Key) -> bool;
 
@@ -33,6 +78,28 @@ pub type IsLoadableFromDiskFn<'tcx, Key> =
     fn(tcx: TyCtxt<'tcx>, key: &Key, index: SerializedDepNodeIndex) -> bool;
 
 pub type HashResult<V> = Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>;
+
+#[derive(Clone, Debug)]
+pub struct CycleError<I = QueryStackFrameExtra> {
+    /// The query and related span that uses the cycle.
+    pub usage: Option<(Span, QueryStackFrame<I>)>,
+    pub cycle: Vec<QueryInfo<I>>,
+}
+
+impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
+    pub fn lift(&self) -> CycleError<QueryStackFrameExtra> {
+        CycleError {
+            usage: self.usage.as_ref().map(|(span, frame)| (*span, frame.lift())),
+            cycle: self.cycle.iter().map(|info| info.lift()).collect(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum QueryMode {
+    Get,
+    Ensure { check_cache: bool },
+}
 
 /// Stores function pointers and other metadata for a particular query.
 ///

@@ -12,21 +12,19 @@
 use std::marker::ConstParamTy;
 
 use rustc_data_structures::sync::AtomicU64;
-use rustc_middle::arena::Arena;
-use rustc_middle::dep_graph::{self, DepKind, DepKindVTable, DepNode, DepNodeIndex};
+use rustc_middle::dep_graph::{self, DepKind, DepNode, DepNodeIndex, SerializedDepNodeIndex};
 use rustc_middle::queries::{
     self, ExternProviders, Providers, QueryCaches, QueryEngine, QueryStates,
 };
-use rustc_middle::query::AsLocalKey;
 use rustc_middle::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
-use rustc_middle::query::plumbing::{HashResult, QuerySystem, QuerySystemFns, QueryVTable};
-use rustc_middle::ty::TyCtxt;
-use rustc_query_system::dep_graph::SerializedDepNodeIndex;
-use rustc_query_system::query::{
-    CycleError, CycleErrorHandling, QueryCache, QueryMode, QueryState,
+use rustc_middle::query::plumbing::{
+    HashResult, QueryState, QuerySystem, QuerySystemFns, QueryVTable,
 };
+use rustc_middle::query::{AsLocalKey, CycleError, CycleErrorHandling, QueryCache, QueryMode};
+use rustc_middle::ty::TyCtxt;
 use rustc_span::{ErrorGuaranteed, Span};
 
+pub use crate::dep_kind_vtables::make_dep_kind_vtables;
 pub use crate::job::{QueryJobMap, break_query_cycles, print_query_stack};
 pub use crate::plumbing::{QueryCtxt, query_key_hash_verify_all};
 use crate::plumbing::{encode_all_query_results, try_mark_green};
@@ -34,11 +32,13 @@ use crate::profiling_support::QueryKeyStringCache;
 pub use crate::profiling_support::alloc_self_profile_query_strings;
 use crate::values::Value;
 
+#[macro_use]
+mod plumbing;
+
+mod dep_kind_vtables;
 mod error;
 mod execution;
 mod job;
-#[macro_use]
-mod plumbing;
 mod profiling_support;
 mod values;
 

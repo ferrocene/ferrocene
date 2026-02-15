@@ -1,26 +1,187 @@
+use std::panic;
+
 use rustc_data_structures::profiling::SelfProfilerRef;
+use rustc_data_structures::sync::DynSync;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_session::Session;
+use tracing::instrument;
 
+pub use self::dep_node::{
+    DepKind, DepNode, DepNodeExt, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds,
+    label_strs,
+};
+pub use self::graph::{
+    DepGraphData, DepNodeIndex, TaskDepsRef, WorkProduct, WorkProductMap, hash_result,
+};
+use self::graph::{MarkFrame, print_markframe_trace};
+pub use self::query::DepGraphQuery;
+pub use self::serialized::{SerializedDepGraph, SerializedDepNodeIndex};
+pub use crate::dep_graph::debug::{DepNodeFilter, EdgeFilter};
 use crate::ty::print::with_reduced_queries;
 use crate::ty::{self, TyCtxt};
 
-#[macro_use]
-mod dep_node;
+mod debug;
+pub mod dep_node;
 mod dep_node_key;
+mod edges;
+mod graph;
+mod query;
+mod serialized;
 
-pub use rustc_query_system::dep_graph::debug::{DepNodeFilter, EdgeFilter};
-pub use rustc_query_system::dep_graph::{
-    DepContext, DepGraphQuery, DepKind, DepNode, DepNodeIndex, Deps, SerializedDepGraph,
-    SerializedDepNodeIndex, TaskDepsRef, WorkProduct, WorkProductId, WorkProductMap, hash_result,
-};
+pub trait DepContext: Copy {
+    type Deps: Deps;
 
-pub use self::dep_node::{DepNodeExt, dep_kind_from_label, dep_kinds, label_strs};
-pub(crate) use self::dep_node::{make_compile_codegen_unit, make_compile_mono_item, make_metadata};
+    /// Create a hashing context for hashing new results.
+    fn with_stable_hashing_context<R>(self, f: impl FnOnce(StableHashingContext<'_>) -> R) -> R;
 
-pub type DepGraph = rustc_query_system::dep_graph::DepGraph<DepsType>;
+    /// Access the DepGraph.
+    fn dep_graph(&self) -> &graph::DepGraph<Self::Deps>;
 
-pub type DepKindVTable<'tcx> = rustc_query_system::dep_graph::DepKindVTable<TyCtxt<'tcx>>;
+    /// Access the profiler.
+    fn profiler(&self) -> &SelfProfilerRef;
+
+    /// Access the compiler session.
+    fn sess(&self) -> &Session;
+
+    fn dep_kind_vtable(&self, dep_node: DepKind) -> &dep_node::DepKindVTable<Self>;
+
+    #[inline(always)]
+    fn fingerprint_style(self, kind: DepKind) -> FingerprintStyle {
+        self.dep_kind_vtable(kind).fingerprint_style
+    }
+
+    #[inline(always)]
+    /// Return whether this kind always require evaluation.
+    fn is_eval_always(self, kind: DepKind) -> bool {
+        self.dep_kind_vtable(kind).is_eval_always
+    }
+
+    /// Try to force a dep node to execute and see if it's green.
+    ///
+    /// Returns true if the query has actually been forced. It is valid that a query
+    /// fails to be forced, e.g. when the query key cannot be reconstructed from the
+    /// dep-node or when the query kind outright does not support it.
+    #[inline]
+    #[instrument(skip(self, frame), level = "debug")]
+    fn try_force_from_dep_node(
+        self,
+        dep_node: DepNode,
+        prev_index: SerializedDepNodeIndex,
+        frame: &MarkFrame<'_>,
+    ) -> bool {
+        if let Some(force_fn) = self.dep_kind_vtable(dep_node.kind).force_from_dep_node {
+            match panic::catch_unwind(panic::AssertUnwindSafe(|| {
+                force_fn(self, dep_node, prev_index)
+            })) {
+                Err(value) => {
+                    if !value.is::<rustc_errors::FatalErrorMarker>() {
+                        print_markframe_trace(self.dep_graph(), frame);
+                    }
+                    panic::resume_unwind(value)
+                }
+                Ok(query_has_been_forced) => query_has_been_forced,
+            }
+        } else {
+            false
+        }
+    }
+
+    /// Load data from the on-disk cache.
+    fn try_load_from_on_disk_cache(self, dep_node: &DepNode) {
+        if let Some(try_load_fn) = self.dep_kind_vtable(dep_node.kind).try_load_from_on_disk_cache {
+            try_load_fn(self, *dep_node)
+        }
+    }
+
+    fn with_reduced_queries<T>(self, _: impl FnOnce() -> T) -> T;
+}
+
+pub trait Deps: DynSync {
+    /// Execute the operation with provided dependencies.
+    fn with_deps<OP, R>(deps: TaskDepsRef<'_>, op: OP) -> R
+    where
+        OP: FnOnce() -> R;
+
+    /// Access dependencies from current implicit context.
+    fn read_deps<OP>(op: OP)
+    where
+        OP: for<'a> FnOnce(TaskDepsRef<'a>);
+
+    fn name(dep_kind: DepKind) -> &'static str;
+
+    /// We use this for most things when incr. comp. is turned off.
+    const DEP_KIND_NULL: DepKind;
+
+    /// We use this to create a forever-red node.
+    const DEP_KIND_RED: DepKind;
+
+    /// We use this to create a side effect node.
+    const DEP_KIND_SIDE_EFFECT: DepKind;
+
+    /// We use this to create the anon node with zero dependencies.
+    const DEP_KIND_ANON_ZERO_DEPS: DepKind;
+
+    /// This is the highest value a `DepKind` can have. It's used during encoding to
+    /// pack information into the unused bits.
+    const DEP_KIND_MAX: u16;
+}
+
+pub trait HasDepContext: Copy {
+    type Deps: self::Deps;
+    type DepContext: self::DepContext<Deps = Self::Deps>;
+
+    fn dep_context(&self) -> &Self::DepContext;
+}
+
+impl<T: DepContext> HasDepContext for T {
+    type Deps = T::Deps;
+    type DepContext = Self;
+
+    fn dep_context(&self) -> &Self::DepContext {
+        self
+    }
+}
+
+impl<T: HasDepContext, Q: Copy> HasDepContext for (T, Q) {
+    type Deps = T::Deps;
+    type DepContext = T::DepContext;
+
+    fn dep_context(&self) -> &Self::DepContext {
+        self.0.dep_context()
+    }
+}
+
+/// Describes the contents of the fingerprint generated by a given query.
+///
+/// This is mainly for determining whether and how we can reconstruct a key
+/// from the fingerprint.
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum FingerprintStyle {
+    /// The fingerprint is actually a DefPathHash.
+    DefPathHash,
+    /// The fingerprint is actually a HirId.
+    HirId,
+    /// Query key was `()` or equivalent, so fingerprint is just zero.
+    Unit,
+    /// The fingerprint is an opaque hash, and a key cannot be reconstructed from it.
+    Opaque,
+}
+
+impl FingerprintStyle {
+    #[inline]
+    pub const fn reconstructible(self) -> bool {
+        match self {
+            FingerprintStyle::DefPathHash | FingerprintStyle::Unit | FingerprintStyle::HirId => {
+                true
+            }
+            FingerprintStyle::Opaque => false,
+        }
+    }
+}
+
+pub type DepGraph = graph::DepGraph<DepsType>;
+
+pub type DepKindVTable<'tcx> = dep_node::DepKindVTable<TyCtxt<'tcx>>;
 
 pub struct DepsType;
 

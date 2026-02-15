@@ -15,7 +15,6 @@
 #![feature(const_default)]
 #![feature(const_trait_impl)]
 #![feature(control_flow_into_value)]
-#![feature(decl_macro)]
 #![feature(default_field_values)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
@@ -1338,6 +1337,8 @@ pub struct Resolver<'ra, 'tcx> {
 
     /// Amount of lifetime parameters for each item in the crate.
     item_generics_num_lifetimes: FxHashMap<LocalDefId, usize> = default::fx_hash_map(),
+    /// Generic args to suggest for required params (e.g. `<'_>`, `<_, _>`), if any.
+    item_required_generic_args_suggestions: FxHashMap<LocalDefId, String> = default::fx_hash_map(),
     delegation_fn_sigs: LocalDefIdMap<DelegationFnSig> = Default::default(),
     delegation_infos: LocalDefIdMap<DelegationInfo> = Default::default(),
 
@@ -1553,6 +1554,32 @@ impl<'tcx> Resolver<'_, 'tcx> {
             self.item_generics_num_lifetimes[&def_id]
         } else {
             self.tcx.generics_of(def_id).own_counts().lifetimes
+        }
+    }
+
+    fn item_required_generic_args_suggestion(&self, def_id: DefId) -> String {
+        if let Some(def_id) = def_id.as_local() {
+            self.item_required_generic_args_suggestions.get(&def_id).cloned().unwrap_or_default()
+        } else {
+            let required = self
+                .tcx
+                .generics_of(def_id)
+                .own_params
+                .iter()
+                .filter_map(|param| match param.kind {
+                    ty::GenericParamDefKind::Lifetime => Some("'_"),
+                    ty::GenericParamDefKind::Type { has_default, .. }
+                    | ty::GenericParamDefKind::Const { has_default } => {
+                        if has_default {
+                            None
+                        } else {
+                            Some("_")
+                        }
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            if required.is_empty() { String::new() } else { format!("<{}>", required.join(", ")) }
         }
     }
 

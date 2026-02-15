@@ -2,10 +2,12 @@ mod diagnostic;
 mod diagnostic_builder;
 mod error;
 mod message;
+mod msg_macro;
 mod subdiagnostic;
 mod utils;
 
 use diagnostic::{DiagnosticDerive, LintDiagnosticDerive};
+pub(super) use msg_macro::msg_macro;
 use proc_macro2::TokenStream;
 use subdiagnostic::SubdiagnosticDerive;
 use synstructure::Structure;

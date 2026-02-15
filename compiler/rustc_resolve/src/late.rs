@@ -9,13 +9,14 @@
 use std::borrow::Cow;
 use std::collections::hash_map::Entry;
 use std::mem::{replace, swap, take};
-use std::ops::ControlFlow;
+use std::ops::{ControlFlow, Range};
 
 use rustc_ast::visit::{
     AssocCtxt, BoundKind, FnCtxt, FnKind, Visitor, try_visit, visit_opt, walk_list,
 };
 use rustc_ast::*;
 use rustc_data_structures::debug_assert_matches;
+use rustc_data_structures::either::Either;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::codes::*;
@@ -746,7 +747,8 @@ pub(crate) struct DiagMetadata<'ast> {
 
     /// Accumulate the errors due to missed lifetime elision,
     /// and report them all at once for each function.
-    current_elision_failures: Vec<MissingLifetime>,
+    current_elision_failures:
+        Vec<(MissingLifetime, LifetimeElisionCandidate, Either<NodeId, Range<NodeId>>)>,
 }
 
 struct LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
@@ -1782,19 +1784,19 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             match rib.kind {
                 LifetimeRibKind::Item => break,
                 LifetimeRibKind::ConstParamTy => {
-                    self.emit_non_static_lt_in_const_param_ty_error(lifetime);
+                    let guar = self.emit_non_static_lt_in_const_param_ty_error(lifetime);
                     self.record_lifetime_res(
                         lifetime.id,
-                        LifetimeRes::Error,
+                        LifetimeRes::Error(guar),
                         LifetimeElisionCandidate::Ignore,
                     );
                     return;
                 }
                 LifetimeRibKind::ConcreteAnonConst(cause) => {
-                    self.emit_forbidden_non_static_lifetime_error(cause, lifetime);
+                    let guar = self.emit_forbidden_non_static_lifetime_error(cause, lifetime);
                     self.record_lifetime_res(
                         lifetime.id,
-                        LifetimeRes::Error,
+                        LifetimeRes::Error(guar),
                         LifetimeElisionCandidate::Ignore,
                     );
                     return;
@@ -1812,8 +1814,12 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         let outer_res = lifetime_rib_iter
             .find_map(|rib| rib.bindings.get_key_value(&normalized_ident).map(|(&outer, _)| outer));
 
-        self.emit_undeclared_lifetime_error(lifetime, outer_res);
-        self.record_lifetime_res(lifetime.id, LifetimeRes::Error, LifetimeElisionCandidate::Named);
+        let guar = self.emit_undeclared_lifetime_error(lifetime, outer_res);
+        self.record_lifetime_res(
+            lifetime.id,
+            LifetimeRes::Error(guar),
+            LifetimeElisionCandidate::Named,
+        );
     }
 
     #[instrument(level = "debug", skip(self))]
@@ -1878,7 +1884,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     }
                 }
                 LifetimeRibKind::AnonymousReportError => {
-                    if elided {
+                    let guar = if elided {
                         let suggestion = self.lifetime_ribs[i..].iter().rev().find_map(|rib| {
                             if let LifetimeRibKind::Generics {
                                 span,
@@ -1910,7 +1916,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                 self.r.dcx().emit_err(errors::LendingIteratorReportError {
                                     lifetime: lifetime.ident.span,
                                     ty: ty.span,
-                                });
+                                })
                             } else {
                                 let decl = if !trait_id.is_local()
                                     && let Some(assoc) = self.diag_metadata.current_impl_item
@@ -1940,20 +1946,24 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                     },
                                 );
                                 self.point_at_impl_lifetimes(&mut err, i, lifetime.ident.span);
-                                err.emit();
+                                err.emit()
                             }
                         } else {
                             self.r.dcx().emit_err(errors::ElidedAnonymousLifetimeReportError {
                                 span: lifetime.ident.span,
                                 suggestion,
-                            });
+                            })
                         }
                     } else {
                         self.r.dcx().emit_err(errors::ExplicitAnonymousLifetimeReportError {
                             span: lifetime.ident.span,
-                        });
+                        })
                     };
-                    self.record_lifetime_res(lifetime.id, LifetimeRes::Error, elision_candidate);
+                    self.record_lifetime_res(
+                        lifetime.id,
+                        LifetimeRes::Error(guar),
+                        elision_candidate,
+                    );
                     return;
                 }
                 LifetimeRibKind::Elided(res) => {
@@ -1961,8 +1971,11 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     return;
                 }
                 LifetimeRibKind::ElisionFailure => {
-                    self.diag_metadata.current_elision_failures.push(missing_lifetime);
-                    self.record_lifetime_res(lifetime.id, LifetimeRes::Error, elision_candidate);
+                    self.diag_metadata.current_elision_failures.push((
+                        missing_lifetime,
+                        elision_candidate,
+                        Either::Left(lifetime.id),
+                    ));
                     return;
                 }
                 LifetimeRibKind::Item => break,
@@ -1973,8 +1986,8 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 }
             }
         }
-        self.record_lifetime_res(lifetime.id, LifetimeRes::Error, elision_candidate);
-        self.report_missing_lifetime_specifiers(vec![missing_lifetime], None);
+        let guar = self.report_missing_lifetime_specifiers([&missing_lifetime], None);
+        self.record_lifetime_res(lifetime.id, LifetimeRes::Error(guar), elision_candidate);
     }
 
     fn point_at_impl_lifetimes(&mut self, err: &mut Diag<'_>, i: usize, lifetime: Span) {
@@ -2222,16 +2235,17 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                             !segment.has_generic_args,
                             elided_lifetime_span,
                         );
-                        self.r.dcx().emit_err(errors::ImplicitElidedLifetimeNotAllowedHere {
-                            span: path_span,
-                            subdiag,
-                        });
+                        let guar =
+                            self.r.dcx().emit_err(errors::ImplicitElidedLifetimeNotAllowedHere {
+                                span: path_span,
+                                subdiag,
+                            });
                         should_lint = false;
 
                         for id in node_ids {
                             self.record_lifetime_res(
                                 id,
-                                LifetimeRes::Error,
+                                LifetimeRes::Error(guar),
                                 LifetimeElisionCandidate::Named,
                             );
                         }
@@ -2263,14 +2277,11 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         break;
                     }
                     LifetimeRibKind::ElisionFailure => {
-                        self.diag_metadata.current_elision_failures.push(missing_lifetime);
-                        for id in node_ids {
-                            self.record_lifetime_res(
-                                id,
-                                LifetimeRes::Error,
-                                LifetimeElisionCandidate::Ignore,
-                            );
-                        }
+                        self.diag_metadata.current_elision_failures.push((
+                            missing_lifetime,
+                            LifetimeElisionCandidate::Ignore,
+                            Either::Right(node_ids),
+                        ));
                         break;
                     }
                     // `LifetimeRes::Error`, which would usually be used in the case of
@@ -2278,14 +2289,15 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     // we simply resolve to an implicit lifetime, which will be checked later, at
                     // which point a suitable error will be emitted.
                     LifetimeRibKind::AnonymousReportError | LifetimeRibKind::Item => {
+                        let guar =
+                            self.report_missing_lifetime_specifiers([&missing_lifetime], None);
                         for id in node_ids {
                             self.record_lifetime_res(
                                 id,
-                                LifetimeRes::Error,
+                                LifetimeRes::Error(guar),
                                 LifetimeElisionCandidate::Ignore,
                             );
                         }
-                        self.report_missing_lifetime_specifiers(vec![missing_lifetime], None);
                         break;
                     }
                     LifetimeRibKind::Generics { .. } | LifetimeRibKind::ConstParamTy => {}
@@ -2329,7 +2341,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     candidates.push((res, candidate));
                 }
             }
-            LifetimeRes::Infer | LifetimeRes::Error | LifetimeRes::ElidedAnchor { .. } => {}
+            LifetimeRes::Infer | LifetimeRes::Error(..) | LifetimeRes::ElidedAnchor { .. } => {}
         }
     }
 
@@ -2373,7 +2385,23 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 replace(&mut this.diag_metadata.current_elision_failures, outer_failures);
             if !elision_failures.is_empty() {
                 let Err(failure_info) = elision_lifetime else { bug!() };
-                this.report_missing_lifetime_specifiers(elision_failures, Some(failure_info));
+                let guar = this.report_missing_lifetime_specifiers(
+                    elision_failures.iter().map(|(missing_lifetime, ..)| missing_lifetime),
+                    Some(failure_info),
+                );
+                let mut record_res = |lifetime, candidate| {
+                    this.record_lifetime_res(lifetime, LifetimeRes::Error(guar), candidate)
+                };
+                for (_, candidate, nodes) in elision_failures {
+                    match nodes {
+                        Either::Left(node_id) => record_res(node_id, candidate),
+                        Either::Right(node_ids) => {
+                            for lifetime in node_ids {
+                                record_res(lifetime, candidate)
+                            }
+                        }
+                    }
+                }
             }
         });
     }
@@ -3025,9 +3053,13 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 if let GenericParamKind::Lifetime = param.kind
                     && let Some(&original) = seen_lifetimes.get(&ident)
                 {
-                    diagnostics::signal_lifetime_shadowing(self.r.tcx.sess, original, param.ident);
+                    let guar = diagnostics::signal_lifetime_shadowing(
+                        self.r.tcx.sess,
+                        original,
+                        param.ident,
+                    );
                     // Record lifetime res, so lowering knows there is something fishy.
-                    self.record_lifetime_param(param.id, LifetimeRes::Error);
+                    self.record_lifetime_param(param.id, LifetimeRes::Error(guar));
                     continue;
                 }
 
@@ -3035,11 +3067,11 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     Entry::Occupied(entry) => {
                         let span = *entry.get();
                         let err = ResolutionError::NameAlreadyUsedInParameterList(ident, span);
-                        self.report_error(param.ident.span, err);
+                        let guar = self.r.report_error(param.ident.span, err);
                         let rib = match param.kind {
                             GenericParamKind::Lifetime => {
                                 // Record lifetime res, so lowering knows there is something fishy.
-                                self.record_lifetime_param(param.id, LifetimeRes::Error);
+                                self.record_lifetime_param(param.id, LifetimeRes::Error(guar));
                                 continue;
                             }
                             GenericParamKind::Type { .. } => &mut function_type_rib,
@@ -3068,22 +3100,23 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         .iter()
                         .any(|span| span == param.span());
 
-                    self.r
+                    let guar = self
+                        .r
                         .dcx()
                         .create_err(errors::UnderscoreLifetimeIsReserved { span: param.ident.span })
                         .emit_unless_delay(is_raw_underscore_lifetime);
                     // Record lifetime res, so lowering knows there is something fishy.
-                    self.record_lifetime_param(param.id, LifetimeRes::Error);
+                    self.record_lifetime_param(param.id, LifetimeRes::Error(guar));
                     continue;
                 }
 
                 if param.ident.name == kw::StaticLifetime {
-                    self.r.dcx().emit_err(errors::StaticLifetimeIsReserved {
+                    let guar = self.r.dcx().emit_err(errors::StaticLifetimeIsReserved {
                         span: param.ident.span,
                         lifetime: param.ident,
                     });
                     // Record lifetime res, so lowering knows there is something fishy.
-                    self.record_lifetime_param(param.id, LifetimeRes::Error);
+                    self.record_lifetime_param(param.id, LifetimeRes::Error(guar));
                     continue;
                 }
 
@@ -5442,6 +5475,32 @@ fn create_delegation_attrs(attrs: &[Attribute]) -> DelegationAttrs {
     DelegationAttrs { flags, to_inherit: to_inherit_attrs }
 }
 
+fn required_generic_args_suggestion(generics: &ast::Generics) -> Option<String> {
+    let required = generics
+        .params
+        .iter()
+        .filter_map(|param| match &param.kind {
+            ast::GenericParamKind::Lifetime => Some("'_"),
+            ast::GenericParamKind::Type { default } => {
+                if default.is_none() {
+                    Some("_")
+                } else {
+                    None
+                }
+            }
+            ast::GenericParamKind::Const { default, .. } => {
+                if default.is_none() {
+                    Some("_")
+                } else {
+                    None
+                }
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if required.is_empty() { None } else { Some(format!("<{}>", required.join(", "))) }
+}
+
 impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, '_, '_> {
     fn visit_item(&mut self, item: &'ast Item) {
         match &item.kind {
@@ -5499,6 +5558,13 @@ impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, '_, '_> {
     fn visit_assoc_item(&mut self, item: &'ast AssocItem, ctxt: AssocCtxt) {
         if let AssocItemKind::Fn(box Fn { sig, .. }) = &item.kind {
             self.collect_fn_info(sig.header, &sig.decl, item.id, &item.attrs);
+        }
+
+        if let AssocItemKind::Type(box ast::TyAlias { generics, .. }) = &item.kind {
+            let def_id = self.r.local_def_id(item.id);
+            if let Some(suggestion) = required_generic_args_suggestion(generics) {
+                self.r.item_required_generic_args_suggestions.insert(def_id, suggestion);
+            }
         }
         visit::walk_assoc_item(self, item, ctxt);
     }

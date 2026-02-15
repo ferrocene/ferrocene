@@ -4093,7 +4093,6 @@ dependencies = [
  "rustc_passes",
  "rustc_privacy",
  "rustc_query_impl",
- "rustc_query_system",
  "rustc_resolve",
  "rustc_session",
  "rustc_span",
@@ -4226,6 +4225,7 @@ dependencies = [
  "bitflags",
  "either",
  "gsgdt",
+ "parking_lot",
  "polonius-engine",
  "rustc_abi",
  "rustc_apfloat",
@@ -4512,22 +4512,17 @@ dependencies = [
 name = "rustc_query_system"
 version = "0.0.0"
 dependencies = [
- "parking_lot",
  "rustc_abi",
  "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
- "rustc_hashes",
  "rustc_hir",
- "rustc_index",
  "rustc_macros",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
- "rustc_thread_pool",
  "smallvec",
- "tracing",
 ]
 
 [[package]]

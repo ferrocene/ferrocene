@@ -5,7 +5,7 @@ use std::hash::Hash;
 use rustc_abi::{Align, Size};
 use rustc_ast::Mutability;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, IndexEntry};
-use rustc_errors::inline_fluent;
+use rustc_errors::msg;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{self as hir, CRATE_HIR_ID, LangItem};
 use rustc_middle::mir::AssertMessage;
@@ -489,12 +489,12 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 let align = match Align::from_bytes(align) {
                     Ok(a) => a,
                     Err(err) => throw_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "invalid align passed to `{$name}`: {$align} is {$err_kind ->
-    [not_power_of_two] not a power of 2
-    [too_large] too large
-    *[other] {\"\"}
-}"
+                                [not_power_of_two] not a power of 2
+                                [too_large] too large
+                                *[other] {\"\"}
+                            }"
                         ),
                         name = "const_allocate",
                         err_kind = err.diag_ident(),
@@ -519,12 +519,12 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 let align = match Align::from_bytes(align) {
                     Ok(a) => a,
                     Err(err) => throw_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "invalid align passed to `{$name}`: {$align} is {$err_kind ->
-    [not_power_of_two] not a power of 2
-    [too_large] too large
-    *[other] {\"\"}
-}"
+                                [not_power_of_two] not a power of 2
+                                [too_large] too large
+                                *[other] {\"\"}
+                            }"
                         ),
                         name = "const_deallocate",
                         err_kind = err.diag_ident(),

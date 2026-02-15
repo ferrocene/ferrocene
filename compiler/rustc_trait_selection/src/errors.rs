@@ -3,7 +3,7 @@ use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_errors::codes::*;
 use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, DiagMessage, DiagStyledString, Diagnostic,
-    EmissionGuarantee, IntoDiagArg, Level, MultiSpan, Subdiagnostic, inline_fluent,
+    EmissionGuarantee, IntoDiagArg, Level, MultiSpan, Subdiagnostic, msg,
 };
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -102,33 +102,35 @@ pub struct NegativePositiveConflict<'tcx> {
 impl<G: EmissionGuarantee> Diagnostic<'_, G> for NegativePositiveConflict<'_> {
     #[track_caller]
     fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_, G> {
-        let mut diag = Diag::new(dcx, level, inline_fluent!("found both positive and negative implementation of trait `{$trait_desc}`{$self_desc ->
-[none] {\"\"}
-*[default] {\" \"}for type `{$self_desc}`
-}:"));
+        let mut diag = Diag::new(
+            dcx,
+            level,
+            msg!(
+            "found both positive and negative implementation of trait `{$trait_desc}`{$self_desc ->
+                [none] {\"\"}
+                *[default] {\" \"}for type `{$self_desc}`
+            }:"
+        ),
+        );
         diag.arg("trait_desc", self.trait_desc.print_only_trait_path().to_string());
         diag.arg("self_desc", self.self_ty.map_or_else(|| "none".to_string(), |ty| ty.to_string()));
         diag.span(self.impl_span);
         diag.code(E0751);
         match self.negative_impl_span {
             Ok(span) => {
-                diag.span_label(span, inline_fluent!("negative implementation here"));
+                diag.span_label(span, msg!("negative implementation here"));
             }
             Err(cname) => {
-                diag.note(inline_fluent!(
-                    "negative implementation in crate `{$negative_impl_cname}`"
-                ));
+                diag.note(msg!("negative implementation in crate `{$negative_impl_cname}`"));
                 diag.arg("negative_impl_cname", cname.to_string());
             }
         }
         match self.positive_impl_span {
             Ok(span) => {
-                diag.span_label(span, inline_fluent!("positive implementation here"));
+                diag.span_label(span, msg!("positive implementation here"));
             }
             Err(cname) => {
-                diag.note(inline_fluent!(
-                    "positive implementation in crate `{$positive_impl_cname}`"
-                ));
+                diag.note(msg!("positive implementation in crate `{$positive_impl_cname}`"));
                 diag.arg("positive_impl_cname", cname.to_string());
             }
         }
@@ -155,11 +157,11 @@ impl Subdiagnostic for AdjustSignatureBorrow {
             AdjustSignatureBorrow::Borrow { to_borrow } => {
                 diag.arg("borrow_len", to_borrow.len());
                 diag.multipart_suggestion_verbose(
-                    inline_fluent!(
+                    msg!(
                         "consider adjusting the signature so it borrows its {$borrow_len ->
-[one] argument
-*[other] arguments
-}"
+                            [one] argument
+                            *[other] arguments
+                        }"
                     ),
                     to_borrow,
                     Applicability::MaybeIncorrect,
@@ -168,11 +170,11 @@ impl Subdiagnostic for AdjustSignatureBorrow {
             AdjustSignatureBorrow::RemoveBorrow { remove_borrow } => {
                 diag.arg("remove_borrow_len", remove_borrow.len());
                 diag.multipart_suggestion_verbose(
-                    inline_fluent!(
+                    msg!(
                         "consider adjusting the signature so it does not borrow its {$remove_borrow_len ->
-[one] argument
-*[other] arguments
-}"
+                            [one] argument
+                            *[other] arguments
+                        }"
                     ),
                     remove_borrow,
                     Applicability::MaybeIncorrect,
@@ -503,20 +505,20 @@ impl Subdiagnostic for RegionOriginNote<'_> {
             } => {
                 label_or_note(
                     span,
-                    inline_fluent!(
+                    msg!(
                         "...so that the {$requirement ->
-[method_compat] method type is compatible with trait
-[type_compat] associated type is compatible with trait
-[const_compat] const is compatible with trait
-[expr_assignable] expression is assignable
-[if_else_different] `if` and `else` have incompatible types
-[no_else] `if` missing an `else` returns `()`
-[fn_main_correct_type] `main` function has the correct type
-[fn_lang_correct_type] lang item function has the correct type
-[intrinsic_correct_type] intrinsic has the correct type
-[method_correct_type] method receiver has the correct type
-*[other] types are compatible
-}"
+                            [method_compat] method type is compatible with trait
+                            [type_compat] associated type is compatible with trait
+                            [const_compat] const is compatible with trait
+                            [expr_assignable] expression is assignable
+                            [if_else_different] `if` and `else` have incompatible types
+                            [no_else] `if` missing an `else` returns `()`
+                            [fn_main_correct_type] `main` function has the correct type
+                            [fn_lang_correct_type] lang item function has the correct type
+                            [intrinsic_correct_type] intrinsic has the correct type
+                            [method_correct_type] method receiver has the correct type
+                            *[other] types are compatible
+                        }"
                     ),
                 );
                 diag.arg("requirement", requirement);
@@ -529,20 +531,20 @@ impl Subdiagnostic for RegionOriginNote<'_> {
                 // *terrible*.
                 label_or_note(
                     span,
-                    inline_fluent!(
+                    msg!(
                         "...so that {$requirement ->
-[method_compat] method type is compatible with trait
-[type_compat] associated type is compatible with trait
-[const_compat] const is compatible with trait
-[expr_assignable] expression is assignable
-[if_else_different] `if` and `else` have incompatible types
-[no_else] `if` missing an `else` returns `()`
-[fn_main_correct_type] `main` function has the correct type
-[fn_lang_correct_type] lang item function has the correct type
-[intrinsic_correct_type] intrinsic has the correct type
-[method_correct_type] method receiver has the correct type
-*[other] types are compatible
-}"
+                            [method_compat] method type is compatible with trait
+                            [type_compat] associated type is compatible with trait
+                            [const_compat] const is compatible with trait
+                            [expr_assignable] expression is assignable
+                            [if_else_different] `if` and `else` have incompatible types
+                            [no_else] `if` missing an `else` returns `()`
+                            [fn_main_correct_type] `main` function has the correct type
+                            [fn_lang_correct_type] lang item function has the correct type
+                            [intrinsic_correct_type] intrinsic has the correct type
+                            [method_correct_type] method receiver has the correct type
+                            *[other] types are compatible
+                        }"
                     ),
                 );
                 diag.arg("requirement", requirement);
@@ -572,15 +574,15 @@ impl Subdiagnostic for LifetimeMismatchLabels {
     fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         match self {
             LifetimeMismatchLabels::InRet { param_span, ret_span, span, label_var1 } => {
-                diag.span_label(param_span, inline_fluent!("this parameter and the return type are declared with different lifetimes..."));
-                diag.span_label(ret_span, inline_fluent!("{\"\"}"));
+                diag.span_label(param_span, msg!("this parameter and the return type are declared with different lifetimes..."));
+                diag.span_label(ret_span, msg!("{\"\"}"));
                 diag.span_label(
                     span,
-                    inline_fluent!(
+                    msg!(
                         "...but data{$label_var1_exists ->
-[true] {\" \"}from `{$label_var1}`
-*[false] {\"\"}
-} is returned here"
+                            [true] {\" \"}from `{$label_var1}`
+                            *[false] {\"\"}
+                        } is returned here"
                     ),
                 );
                 diag.arg("label_var1_exists", label_var1.is_some());
@@ -597,29 +599,29 @@ impl Subdiagnostic for LifetimeMismatchLabels {
                 if hir_equal {
                     diag.span_label(
                         ty_sup,
-                        inline_fluent!("this type is declared with multiple lifetimes..."),
+                        msg!("this type is declared with multiple lifetimes..."),
                     );
-                    diag.span_label(ty_sub, inline_fluent!("{\"\"}"));
+                    diag.span_label(ty_sub, msg!("{\"\"}"));
                     diag.span_label(
                         span,
-                        inline_fluent!("...but data with one lifetime flows into the other here"),
+                        msg!("...but data with one lifetime flows into the other here"),
                     );
                 } else {
                     diag.span_label(
                         ty_sup,
-                        inline_fluent!("these two types are declared with different lifetimes..."),
+                        msg!("these two types are declared with different lifetimes..."),
                     );
-                    diag.span_label(ty_sub, inline_fluent!("{\"\"}"));
+                    diag.span_label(ty_sub, msg!("{\"\"}"));
                     diag.span_label(
                         span,
-                        inline_fluent!(
+                        msg!(
                             "...but data{$label_var1_exists ->
-[true] {\" \"}from `{$label_var1}`
-*[false] {\"\"}
-} flows{$label_var2_exists ->
-[true] {\" \"}into `{$label_var2}`
-*[false] {\"\"}
-} here"
+                                [true] {\" \"}from `{$label_var1}`
+                                *[false] {\"\"}
+                            } flows{$label_var2_exists ->
+                                [true] {\" \"}into `{$label_var2}`
+                                *[false] {\"\"}
+                            } here"
                         ),
                     );
                     diag.arg("label_var1_exists", label_var1.is_some());
@@ -787,14 +789,14 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                 visitor.suggestions.push(new_param_suggestion);
             }
             diag.multipart_suggestion_verbose(
-                inline_fluent!(
+                msg!(
                     "consider {$is_reuse ->
-[true] reusing
-*[false] introducing
-} a named lifetime parameter{$is_impl ->
-[true] {\" \"}and update trait if needed
-*[false] {\"\"}
-}"
+                        [true] reusing
+                        *[false] introducing
+                    } a named lifetime parameter{$is_impl ->
+                        [true] {\" \"}and update trait if needed
+                        *[false] {\"\"}
+                    }"
                 ),
                 visitor.suggestions,
                 Applicability::MaybeIncorrect,
@@ -805,9 +807,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
             true
         };
         if mk_suggestion() && self.add_note {
-            diag.note(inline_fluent!(
-                "each elided lifetime in input position becomes a distinct lifetime"
-            ));
+            diag.note(msg!("each elided lifetime in input position becomes a distinct lifetime"));
         }
     }
 }
@@ -832,11 +832,11 @@ impl Subdiagnostic for IntroducesStaticBecauseUnmetLifetimeReq {
     fn add_to_diag<G: EmissionGuarantee>(mut self, diag: &mut Diag<'_, G>) {
         self.unmet_requirements.push_span_label(
             self.binding_span,
-            inline_fluent!("introduces a `'static` lifetime requirement"),
+            msg!("introduces a `'static` lifetime requirement"),
         );
         diag.span_note(
             self.unmet_requirements,
-            inline_fluent!("because this has an unmet lifetime requirement"),
+            msg!("because this has an unmet lifetime requirement"),
         );
     }
 }
@@ -1220,12 +1220,10 @@ impl Subdiagnostic for ConsiderBorrowingParamHelp {
         let mut type_param_span: MultiSpan = self.spans.clone().into();
         for &span in &self.spans {
             // Seems like we can't call f() here as Into<DiagMessage> is required
-            type_param_span.push_span_label(
-                span,
-                inline_fluent!("consider borrowing this type parameter in the trait"),
-            );
+            type_param_span
+                .push_span_label(span, msg!("consider borrowing this type parameter in the trait"));
         }
-        let msg = diag.eagerly_translate(inline_fluent!("the lifetime requirements from the `impl` do not correspond to the requirements in the `trait`"));
+        let msg = diag.eagerly_translate(msg!("the lifetime requirements from the `impl` do not correspond to the requirements in the `trait`"));
         diag.span_help(type_param_span, msg);
     }
 }
@@ -1263,18 +1261,16 @@ impl Subdiagnostic for DynTraitConstraintSuggestion {
         let mut multi_span: MultiSpan = vec![self.span].into();
         multi_span.push_span_label(
             self.span,
-            inline_fluent!("this has an implicit `'static` lifetime requirement"),
+            msg!("this has an implicit `'static` lifetime requirement"),
         );
         multi_span.push_span_label(
             self.ident.span,
-            inline_fluent!("calling this method introduces the `impl`'s `'static` requirement"),
+            msg!("calling this method introduces the `impl`'s `'static` requirement"),
         );
-        let msg =
-            diag.eagerly_translate(inline_fluent!("the used `impl` has a `'static` requirement"));
+        let msg = diag.eagerly_translate(msg!("the used `impl` has a `'static` requirement"));
         diag.span_note(multi_span, msg);
-        let msg = diag.eagerly_translate(inline_fluent!(
-            "consider relaxing the implicit `'static` requirement"
-        ));
+        let msg =
+            diag.eagerly_translate(msg!("consider relaxing the implicit `'static` requirement"));
         diag.span_suggestion_verbose(
             self.span.shrink_to_hi(),
             msg,
@@ -1327,20 +1323,17 @@ pub struct ReqIntroducedLocations {
 impl Subdiagnostic for ReqIntroducedLocations {
     fn add_to_diag<G: EmissionGuarantee>(mut self, diag: &mut Diag<'_, G>) {
         for sp in self.spans {
-            self.span.push_span_label(sp, inline_fluent!("`'static` requirement introduced here"));
+            self.span.push_span_label(sp, msg!("`'static` requirement introduced here"));
         }
 
         if self.add_label {
             self.span.push_span_label(
                 self.fn_decl_span,
-                inline_fluent!("requirement introduced by this return type"),
+                msg!("requirement introduced by this return type"),
             );
         }
-        self.span.push_span_label(
-            self.cause_span,
-            inline_fluent!("because of this returned expression"),
-        );
-        let msg = diag.eagerly_translate(inline_fluent!(
+        self.span.push_span_label(self.cause_span, msg!("because of this returned expression"));
+        let msg = diag.eagerly_translate(msg!(
             "\"`'static` lifetime requirement introduced by the return type"
         ));
         diag.span_note(self.span, msg);
@@ -1782,9 +1775,8 @@ pub struct SuggestTuplePatternMany {
 impl Subdiagnostic for SuggestTuplePatternMany {
     fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         diag.arg("path", self.path);
-        let message = diag.eagerly_translate(inline_fluent!(
-            "try wrapping the pattern in a variant of `{$path}`"
-        ));
+        let message =
+            diag.eagerly_translate(msg!("try wrapping the pattern in a variant of `{$path}`"));
         diag.multipart_suggestions(
             message,
             self.compatible_variants.into_iter().map(|variant| {
@@ -2028,13 +2020,13 @@ impl Subdiagnostic for AddPreciseCapturingAndParams {
     fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         diag.arg("new_lifetime", self.new_lifetime);
         diag.multipart_suggestion_verbose(
-            inline_fluent!("add a `use<...>` bound to explicitly capture `{$new_lifetime}` after turning all argument-position `impl Trait` into type parameters, noting that this possibly affects the API of this crate"),
+            msg!("add a `use<...>` bound to explicitly capture `{$new_lifetime}` after turning all argument-position `impl Trait` into type parameters, noting that this possibly affects the API of this crate"),
             self.suggs,
             Applicability::MaybeIncorrect,
         );
         diag.span_note(
             self.apit_spans,
-            inline_fluent!("you could use a `use<...>` bound to explicitly capture `{$new_lifetime}`, but argument-position `impl Trait`s are not nameable"),
+            msg!("you could use a `use<...>` bound to explicitly capture `{$new_lifetime}`, but argument-position `impl Trait`s are not nameable"),
         );
     }
 }
@@ -2175,16 +2167,14 @@ impl Subdiagnostic for AddPreciseCapturingForOvercapture {
             Applicability::MaybeIncorrect
         };
         diag.multipart_suggestion_verbose(
-            inline_fluent!(
-                "use the precise capturing `use<...>` syntax to make the captures explicit"
-            ),
+            msg!("use the precise capturing `use<...>` syntax to make the captures explicit"),
             self.suggs,
             applicability,
         );
         if !self.apit_spans.is_empty() {
             diag.span_note(
                 self.apit_spans,
-                inline_fluent!("you could use a `use<...>` bound to explicitly specify captures, but argument-position `impl Trait`s are not nameable"),
+                msg!("you could use a `use<...>` bound to explicitly specify captures, but argument-position `impl Trait`s are not nameable"),
             );
         }
     }

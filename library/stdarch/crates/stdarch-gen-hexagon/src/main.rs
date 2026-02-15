@@ -72,16 +72,16 @@ impl VectorMode {
     }
 }
 
-/// LLVM tag to fetch the header from
-const LLVM_TAG: &str = "llvmorg-22.1.0-rc1";
+/// LLVM version the header file is from (for reference)
+/// Source: https://github.com/llvm/llvm-project/blob/llvmorg-22.1.0-rc1/clang/lib/Headers/hvx_hexagon_protos.h
+const LLVM_VERSION: &str = "22.1.0-rc1";
 
 /// Maximum HVX architecture version supported by rustc
 /// Check with: rustc --target=hexagon-unknown-linux-musl --print target-features
 const MAX_SUPPORTED_ARCH: u32 = 79;
 
-/// URL template for the HVX header file
-const HEADER_URL: &str =
-    "https://raw.githubusercontent.com/llvm/llvm-project/{tag}/clang/lib/Headers/hvx_hexagon_protos.h";
+/// Local header file path (checked into the repository)
+const HEADER_FILE: &str = "hvx_hexagon_protos.h";
 
 /// Intrinsic information parsed from the LLVM header
 #[derive(Debug, Clone)]
@@ -306,18 +306,14 @@ fn collect_builtins_from_expr(expr: &CompoundExpr, builtins: &mut HashSet<String
     }
 }
 
-/// Download the LLVM HVX header file
-fn download_header() -> Result<String, String> {
-    let url = HEADER_URL.replace("{tag}", LLVM_TAG);
-    println!("Downloading HVX header from: {}", url);
+/// Read the local HVX header file
+fn read_header(crate_dir: &Path) -> Result<String, String> {
+    let header_path = crate_dir.join(HEADER_FILE);
+    println!("Reading HVX header from: {}", header_path.display());
+    println!("  (LLVM version: {})", LLVM_VERSION);
 
-    let response = ureq::get(&url)
-        .call()
-        .map_err(|e| format!("Failed to download header: {}", e))?;
-
-    response
-        .into_string()
-        .map_err(|e| format!("Failed to read response: {}", e))
+    std::fs::read_to_string(&header_path)
+        .map_err(|e| format!("Failed to read header file {}: {}", header_path.display(), e))
 }
 
 /// Parse a C function prototype to extract return type and parameters
@@ -1625,10 +1621,15 @@ fn generate_module_file(
 fn main() -> Result<(), String> {
     println!("=== Hexagon HVX Code Generator ===\n");
 
-    // Download and parse the LLVM header
-    println!("Step 1: Downloading LLVM HVX header...");
-    let header_content = download_header()?;
-    println!("  Downloaded {} bytes", header_content.len());
+    // Get the crate directory first (needed for both reading header and writing output)
+    let crate_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::env::current_dir().unwrap());
+
+    // Read and parse the local LLVM header
+    println!("Step 1: Reading LLVM HVX header...");
+    let header_content = read_header(&crate_dir)?;
+    println!("  Read {} bytes", header_content.len());
 
     println!("\nStep 2: Parsing intrinsic definitions...");
     let all_intrinsics = parse_header(&header_content);
@@ -1678,10 +1679,6 @@ fn main() -> Result<(), String> {
     }
 
     // Generate output files
-    let crate_dir = std::env::var("CARGO_MANIFEST_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::env::current_dir().unwrap());
-
     let hexagon_dir = crate_dir.join("../core_arch/src/hexagon");
 
     // Generate v64.rs (64-byte vector mode)

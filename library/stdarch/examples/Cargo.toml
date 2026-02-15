@@ -10,6 +10,10 @@ description = "Examples of the stdarch crate."
 edition = "2024"
 default-run = "hex"
 
+[features]
+# Enable to build Hexagon-specific examples (requires hexagon target)
+hexagon = []
+
 [dependencies]
 core_arch = { path = "../crates/core_arch" }
 quickcheck = "1.0"
@@ -26,6 +30,7 @@ path = "connect5.rs"
 [[bin]]
 name = "gaussian"
 path = "gaussian.rs"
+required-features = ["hexagon"]
 
 [[example]]
 name = "wasm"

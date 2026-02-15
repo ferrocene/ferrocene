@@ -26,7 +26,7 @@ use rustc_span::{ErrorGuaranteed, Span};
 
 pub use crate::dep_kind_vtables::make_dep_kind_vtables;
 pub use crate::job::{QueryJobMap, break_query_cycles, print_query_stack};
-pub use crate::plumbing::{QueryCtxt, query_key_hash_verify_all};
+pub use crate::plumbing::{collect_active_jobs_from_all_queries, query_key_hash_verify_all};
 use crate::plumbing::{encode_all_query_results, try_mark_green};
 use crate::profiling_support::QueryKeyStringCache;
 pub use crate::profiling_support::alloc_self_profile_query_strings;
@@ -89,11 +89,11 @@ impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> SemiDynamicQueryDispatcher<'t
 
     // Don't use this method to access query results, instead use the methods on TyCtxt.
     #[inline(always)]
-    fn query_state(self, qcx: QueryCtxt<'tcx>) -> &'tcx QueryState<'tcx, C::Key> {
+    fn query_state(self, tcx: TyCtxt<'tcx>) -> &'tcx QueryState<'tcx, C::Key> {
         // Safety:
         // This is just manually doing the subfield referencing through pointer math.
         unsafe {
-            &*(&qcx.tcx.query_system.states as *const QueryStates<'tcx>)
+            &*(&tcx.query_system.states as *const QueryStates<'tcx>)
                 .byte_add(self.vtable.query_state)
                 .cast::<QueryState<'tcx, C::Key>>()
         }
@@ -101,11 +101,11 @@ impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> SemiDynamicQueryDispatcher<'t
 
     // Don't use this method to access query results, instead use the methods on TyCtxt.
     #[inline(always)]
-    fn query_cache(self, qcx: QueryCtxt<'tcx>) -> &'tcx C {
+    fn query_cache(self, tcx: TyCtxt<'tcx>) -> &'tcx C {
         // Safety:
         // This is just manually doing the subfield referencing through pointer math.
         unsafe {
-            &*(&qcx.tcx.query_system.caches as *const QueryCaches<'tcx>)
+            &*(&tcx.query_system.caches as *const QueryCaches<'tcx>)
                 .byte_add(self.vtable.query_cache)
                 .cast::<C>()
         }
@@ -121,30 +121,30 @@ impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> SemiDynamicQueryDispatcher<'t
     /// Calls the actual provider function for this query.
     /// See [`QueryVTable::invoke_provider_fn`] for more details.
     #[inline(always)]
-    fn invoke_provider(self, qcx: QueryCtxt<'tcx>, key: C::Key) -> C::Value {
-        (self.vtable.invoke_provider_fn)(qcx.tcx, key)
+    fn invoke_provider(self, tcx: TyCtxt<'tcx>, key: C::Key) -> C::Value {
+        (self.vtable.invoke_provider_fn)(tcx, key)
     }
 
     #[inline(always)]
     fn try_load_from_disk(
         self,
-        qcx: QueryCtxt<'tcx>,
+        tcx: TyCtxt<'tcx>,
         key: &C::Key,
         prev_index: SerializedDepNodeIndex,
         index: DepNodeIndex,
     ) -> Option<C::Value> {
         // `?` will return None immediately for queries that never cache to disk.
-        self.vtable.try_load_from_disk_fn?(qcx.tcx, key, prev_index, index)
+        self.vtable.try_load_from_disk_fn?(tcx, key, prev_index, index)
     }
 
     #[inline]
     fn is_loadable_from_disk(
         self,
-        qcx: QueryCtxt<'tcx>,
+        tcx: TyCtxt<'tcx>,
         key: &C::Key,
         index: SerializedDepNodeIndex,
     ) -> bool {
-        self.vtable.is_loadable_from_disk_fn.map_or(false, |f| f(qcx.tcx, key, index))
+        self.vtable.is_loadable_from_disk_fn.map_or(false, |f| f(tcx, key, index))
     }
 
     /// Synthesize an error value to let compilation continue after a cycle.

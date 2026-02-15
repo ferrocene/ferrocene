@@ -23,7 +23,7 @@ use {super::debug::EdgeFilter, std::env};
 
 use super::query::DepGraphQuery;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
-use super::{DepKind, DepNode, HasDepContext, WorkProductId, read_deps, with_deps};
+use super::{DepKind, DepNode, WorkProductId, read_deps, with_deps};
 use crate::dep_graph::edges::EdgesVec;
 use crate::ich::StableHashingContext;
 use crate::ty::TyCtxt;
@@ -938,7 +938,7 @@ impl DepGraphData {
 
         // We failed to mark it green, so we try to force the query.
         debug!("trying to force dependency {dep_dep_node:?}");
-        if !tcx.dep_context().try_force_from_dep_node(*dep_dep_node, parent_dep_node_index, frame) {
+        if !tcx.try_force_from_dep_node(*dep_dep_node, parent_dep_node_index, frame) {
             // The DepNode could not be forced.
             debug!("dependency {dep_dep_node:?} could not be forced");
             return None;
@@ -985,10 +985,7 @@ impl DepGraphData {
         let frame = MarkFrame { index: prev_dep_node_index, parent: frame };
 
         // We never try to mark eval_always nodes as green
-        debug_assert!(
-            !tcx.dep_context()
-                .is_eval_always(self.previous.index_to_node(prev_dep_node_index).kind)
-        );
+        debug_assert!(!tcx.is_eval_always(self.previous.index_to_node(prev_dep_node_index).kind));
 
         let prev_deps = self.previous.edge_targets_from(prev_dep_node_index);
 

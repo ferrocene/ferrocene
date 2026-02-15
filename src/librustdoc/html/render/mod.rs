@@ -60,7 +60,7 @@ use rustc_hir::{ConstStability, Mutability, RustcVersion, StabilityLevel, Stable
 use rustc_middle::ty::print::PrintTraitRefExt;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::symbol::{Symbol, sym};
-use rustc_span::{BytePos, DUMMY_SP, FileName};
+use rustc_span::DUMMY_SP;
 use tracing::{debug, info};
 
 pub(crate) use self::context::*;

@@ -329,7 +329,7 @@ pub mod arch {
     /// See the [module documentation](../index.html) for more details.
     #[cfg(any(target_arch = "hexagon", doc))]
     #[doc(cfg(target_arch = "hexagon"))]
-    #[unstable(feature = "stdarch_hexagon", issue = "none")]
+    #[unstable(feature = "stdarch_hexagon", issue = "151523")]
     pub mod hexagon {
         pub use crate::core_arch::hexagon::*;
     }

@@ -192,6 +192,12 @@ Supported targets can often be qualified or quality managed upon request.
      - Full
      - \-
 
+   * - :target:`aarch64-rhivos2-linux-gnu`
+     - ``aarch64-rhivos2-linux-gnu``
+     - Host platform
+     - Full
+     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux.
+
    * - :target:`aarch64v8r-unknown-none`
      - ``aarch64v8r-unknown-none``
      - Cross-compilation

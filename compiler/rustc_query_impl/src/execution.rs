@@ -475,9 +475,9 @@ fn execute_job_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
         // Call the query provider.
         dep_graph_data.with_task(
             dep_node,
-            (tcx, query),
-            key,
-            |(tcx, query), key| query.invoke_provider(tcx, key),
+            tcx,
+            (query, key),
+            |tcx, (query, key)| query.invoke_provider(tcx, key),
             query.hash_result(),
         )
     });

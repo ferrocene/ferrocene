@@ -9,6 +9,7 @@
 #![feature(try_blocks)]
 // tidy-alphabetical-end
 
+use std::fmt;
 use std::marker::ConstParamTy;
 
 use rustc_data_structures::sync::AtomicU64;
@@ -73,6 +74,20 @@ impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> Clone
 {
     fn clone(&self) -> Self {
         *self
+    }
+}
+
+impl<'tcx, C: QueryCache, const FLAGS: QueryFlags> fmt::Debug
+    for SemiDynamicQueryDispatcher<'tcx, C, FLAGS>
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // When debug-printing a query dispatcher (e.g. for ICE or tracing),
+        // just print the query name to know what query we're dealing with.
+        // The other fields and flags are probably just unhelpful noise.
+        //
+        // If there is need for a more detailed dump of all flags and fields,
+        // consider writing a separate dump method and calling it explicitly.
+        f.write_str(self.name())
     }
 }
 

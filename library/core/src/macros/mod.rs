@@ -607,6 +607,9 @@ macro_rules! write {
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args!($($arg)*))
     };
+    ($($arg:tt)*) => {
+        compile_error!("requires a destination and format arguments, like `write!(dest, \"format string\", args...)`")
+    };
 }
 
 /// Writes formatted data into a buffer, with a newline appended.
@@ -644,6 +647,9 @@ macro_rules! writeln {
     };
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args_nl!($($arg)*))
+    };
+    ($($arg:tt)*) => {
+        compile_error!("requires a destination and format arguments, like `writeln!(dest, \"format string\", args...)`")
     };
 }
 

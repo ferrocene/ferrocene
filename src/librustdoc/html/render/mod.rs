@@ -59,8 +59,8 @@ use rustc_hir::def_id::{DefId, DefIdSet};
 use rustc_hir::{ConstStability, Mutability, RustcVersion, StabilityLevel, StableSince};
 use rustc_middle::ty::print::PrintTraitRefExt;
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_span::symbol::{Symbol, sym};
 use rustc_span::DUMMY_SP;
+use rustc_span::symbol::{Symbol, sym};
 use tracing::{debug, info};
 
 pub(crate) use self::context::*;

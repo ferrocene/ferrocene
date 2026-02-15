@@ -656,11 +656,7 @@ impl Pat {
             // A tuple pattern `(P0, .., Pn)` can be reparsed as `(T0, .., Tn)`
             // assuming `T0` to `Tn` are all syntactically valid as types.
             PatKind::Tuple(pats) => {
-                let mut tys = ThinVec::with_capacity(pats.len());
-                // FIXME(#48994) - could just be collected into an Option<Vec>
-                for pat in pats {
-                    tys.push(pat.to_ty()?);
-                }
+                let tys = pats.iter().map(|pat| pat.to_ty()).collect::<Option<ThinVec<_>>>()?;
                 TyKind::Tup(tys)
             }
             _ => return None,
@@ -3873,26 +3869,43 @@ pub struct ConstItem {
     pub ident: Ident,
     pub generics: Generics,
     pub ty: Box<Ty>,
-    pub rhs: Option<ConstItemRhs>,
+    pub rhs_kind: ConstItemRhsKind,
     pub define_opaque: Option<ThinVec<(NodeId, Path)>>,
 }
 
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]
-pub enum ConstItemRhs {
-    TypeConst(AnonConst),
-    Body(Box<Expr>),
+pub enum ConstItemRhsKind {
+    Body { rhs: Option<Box<Expr>> },
+    TypeConst { rhs: Option<AnonConst> },
 }
 
-impl ConstItemRhs {
-    pub fn span(&self) -> Span {
-        self.expr().span
+impl ConstItemRhsKind {
+    pub fn new_body(rhs: Box<Expr>) -> Self {
+        Self::Body { rhs: Some(rhs) }
     }
 
-    pub fn expr(&self) -> &Expr {
+    pub fn span(&self) -> Option<Span> {
+        Some(self.expr()?.span)
+    }
+
+    pub fn expr(&self) -> Option<&Expr> {
         match self {
-            ConstItemRhs::TypeConst(anon_const) => &anon_const.value,
-            ConstItemRhs::Body(expr) => expr,
+            Self::Body { rhs: Some(body) } => Some(&body),
+            Self::TypeConst { rhs: Some(anon) } => Some(&anon.value),
+            _ => None,
         }
+    }
+
+    pub fn has_expr(&self) -> bool {
+        match self {
+            Self::Body { rhs: Some(_) } => true,
+            Self::TypeConst { rhs: Some(_) } => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_type_const(&self) -> bool {
+        matches!(self, &Self::TypeConst { .. })
     }
 }
 

@@ -99,8 +99,6 @@ mod used_muts;
 /// A public API provided for the Rust compiler consumers.
 pub mod consumers;
 
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
-
 /// Associate some local constants with the `'tcx` lifetime
 struct TyCtxtConsts<'tcx>(PhantomData<&'tcx ()>);
 
@@ -122,6 +120,11 @@ fn mir_borrowck(
     assert!(!tcx.is_typeck_child(def.to_def_id()));
     let (input_body, _) = tcx.mir_promoted(def);
     debug!("run query mir_borrowck: {}", tcx.def_path_str(def));
+
+    // We should eagerly check stalled coroutine obligations from HIR typeck.
+    // Not doing so leads to silent normalization failures later, which will
+    // fail to register opaque types in the next solver.
+    tcx.check_coroutine_obligations(def)?;
 
     let input_body: &Body<'_> = &input_body.borrow();
     if let Some(guar) = input_body.tainted_by_errors {
@@ -1207,6 +1210,17 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, '_, 'tcx> {
                 "access_place: suppressing error place_span=`{:?}` kind=`{:?}`",
                 place_span, kind
             );
+
+            // If the place is being mutated, then mark it as such anyway in order to suppress the
+            // `unused_mut` lint, which is likely incorrect once the access place error has been
+            // resolved.
+            if rw == ReadOrWrite::Write(WriteKind::Mutate)
+                && let Ok(root_place) =
+                    self.is_mutable(place_span.0.as_ref(), is_local_mutation_allowed)
+            {
+                self.add_used_mut(root_place, state);
+            }
+
             return;
         }
 

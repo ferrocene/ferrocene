@@ -241,6 +241,7 @@ fn check_unexpected_extension(check: &mut RunningCheck, file_path: &Path, ext: &
 
     const EXTENSION_EXCEPTION_PATHS: &[&str] = &[
         "tests/ui/asm/named-asm-labels.s", // loading an external asm file to test named labels lint
+        "tests/ui/asm/normalize-offsets-for-crlf.s", // loading an external asm file to test CRLF normalization
         "tests/ui/codegen/mismatched-data-layout.json", // testing mismatched data layout w/ custom targets
         "tests/ui/check-cfg/my-awesome-platform.json",  // testing custom targets with cfgs
         "tests/ui/argfile/commandline-argfile-badutf8.args", // passing args via a file
@@ -324,7 +325,7 @@ fn deny_new_nondescriptive_test_names(
             && !stripped_path.starts_with("ui/issues/")
         {
             check.error(format!(
-                "file `tests/{stripped_path}` must begin with a descriptive name, consider `{{reason}}-issue-{issue_n}.rs`",
+                "issue-number-only test names are not descriptive, consider renaming file `tests/{stripped_path}` to `{{reason}}-issue-{issue_n}.rs`",
                 issue_n = &test_name[1],
             ));
         }

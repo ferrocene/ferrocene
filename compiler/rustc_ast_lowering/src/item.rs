@@ -288,7 +288,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 ident,
                 generics,
                 ty,
-                rhs,
+                rhs_kind,
                 define_opaque,
             }) => {
                 let ident = self.lower_ident(*ident);
@@ -301,7 +301,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ty,
                             ImplTraitContext::Disallowed(ImplTraitPosition::ConstTy),
                         );
-                        let rhs = this.lower_const_item_rhs(attrs, rhs.as_ref(), span);
+                        let rhs = this.lower_const_item_rhs(rhs_kind, span);
                         (ty, rhs)
                     },
                 );
@@ -827,7 +827,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
             hir_id,
             def_id: self.local_def_id(v.id),
             data: self.lower_variant_data(hir_id, item_kind, &v.data),
-            disr_expr: v.disr_expr.as_ref().map(|e| self.lower_anon_const_to_anon_const(e)),
+            disr_expr: v
+                .disr_expr
+                .as_ref()
+                .map(|e| self.lower_anon_const_to_anon_const(e, e.value.span)),
             ident: self.lower_ident(v.ident),
             span: self.lower_span(v.span),
         }
@@ -917,7 +920,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 None => Ident::new(sym::integer(index), self.lower_span(f.span)),
             },
             vis_span: self.lower_span(f.vis.span),
-            default: f.default.as_ref().map(|v| self.lower_anon_const_to_anon_const(v)),
+            default: f
+                .default
+                .as_ref()
+                .map(|v| self.lower_anon_const_to_anon_const(v, v.value.span)),
             ty,
             safety: self.lower_safety(f.safety, hir::Safety::Safe),
         }
@@ -935,7 +941,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         let (ident, generics, kind, has_default) = match &i.kind {
             AssocItemKind::Const(box ConstItem {
-                ident, generics, ty, rhs, define_opaque, ..
+                ident,
+                generics,
+                ty,
+                rhs_kind,
+                define_opaque,
+                ..
             }) => {
                 let (generics, kind) = self.lower_generics(
                     generics,
@@ -946,15 +957,18 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ty,
                             ImplTraitContext::Disallowed(ImplTraitPosition::ConstTy),
                         );
-                        let rhs = rhs
-                            .as_ref()
-                            .map(|rhs| this.lower_const_item_rhs(attrs, Some(rhs), i.span));
-                        hir::TraitItemKind::Const(ty, rhs)
+                        // Trait associated consts don't need an expression/body.
+                        let rhs = if rhs_kind.has_expr() {
+                            Some(this.lower_const_item_rhs(rhs_kind, i.span))
+                        } else {
+                            None
+                        };
+                        hir::TraitItemKind::Const(ty, rhs, rhs_kind.is_type_const().into())
                     },
                 );
 
                 if define_opaque.is_some() {
-                    if rhs.is_some() {
+                    if rhs_kind.has_expr() {
                         self.lower_define_opaque(hir_id, &define_opaque);
                     } else {
                         self.dcx().span_err(
@@ -964,7 +978,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     }
                 }
 
-                (*ident, generics, kind, rhs.is_some())
+                (*ident, generics, kind, rhs_kind.has_expr())
             }
             AssocItemKind::Fn(box Fn {
                 sig, ident, generics, body: None, define_opaque, ..
@@ -1148,7 +1162,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         let (ident, (generics, kind)) = match &i.kind {
             AssocItemKind::Const(box ConstItem {
-                ident, generics, ty, rhs, define_opaque, ..
+                ident,
+                generics,
+                ty,
+                rhs_kind,
+                define_opaque,
+                ..
             }) => (
                 *ident,
                 self.lower_generics(
@@ -1161,7 +1180,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ImplTraitContext::Disallowed(ImplTraitPosition::ConstTy),
                         );
                         this.lower_define_opaque(hir_id, &define_opaque);
-                        let rhs = this.lower_const_item_rhs(attrs, rhs.as_ref(), i.span);
+                        let rhs = this.lower_const_item_rhs(rhs_kind, i.span);
                         hir::ImplItemKind::Const(ty, rhs)
                     },
                 ),
@@ -1391,7 +1410,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             // create a fake body so that the entire rest of the compiler doesn't have to deal with
             // this as a special case.
             return self.lower_fn_body(decl, contract, |this| {
-                if attrs.iter().any(|a| a.has_name(sym::rustc_intrinsic))
+                if find_attr!(attrs, AttributeKind::RustcIntrinsic)
                     || this.tcx.is_sdylib_interface_build()
                 {
                     let span = this.lower_span(span);

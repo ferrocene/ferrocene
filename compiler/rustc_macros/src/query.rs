@@ -429,7 +429,14 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
                 $macro!(#feedable_queries);
             }
         }
-        pub mod descs {
+
+        /// Functions that format a human-readable description of each query
+        /// and its key, as specified by the `desc` query modifier.
+        ///
+        /// (The leading `_` avoids collisions with actual query names when
+        /// expanded in `rustc_middle::queries`, and makes this macro-generated
+        /// module easier to search for.)
+        pub mod _description_fns {
             use super::*;
             #query_description_stream
         }

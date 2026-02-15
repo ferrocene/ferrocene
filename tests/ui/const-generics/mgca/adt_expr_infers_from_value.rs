@@ -16,8 +16,7 @@ struct Foo<T> {
     field: T,
 }
 
-#[type_const]
-const WRAP<T: ConstParamTy_, const N: T>: Foo<T> = { Foo::<T> {
+type const WRAP<T: ConstParamTy_, const N: T>: Foo<T> = { Foo::<T> {
     field: N,
 } };
 

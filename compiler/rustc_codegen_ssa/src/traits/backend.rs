@@ -37,10 +37,6 @@ pub trait BackendTypes {
 }
 
 pub trait CodegenBackend {
-    /// Locale resources for diagnostic messages - a string the content of the Fluent resource.
-    /// Called before `init` so that all other functions are able to emit translatable diagnostics.
-    fn locale_resource(&self) -> &'static str;
-
     fn name(&self) -> &'static str;
 
     fn init(&self, _sess: &Session) {}
@@ -77,6 +73,12 @@ pub trait CodegenBackend {
     fn print_passes(&self) {}
 
     fn print_version(&self) {}
+
+    /// Returns a list of all intrinsics that this backend definitely
+    /// replaces, which means their fallback bodies do not need to be monomorphized.
+    fn replaced_intrinsics(&self) -> Vec<Symbol> {
+        vec![]
+    }
 
     /// Value printed by `--print=backend-has-zstd`.
     ///

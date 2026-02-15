@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use rustc_macros::Diagnostic;
-use rustc_span::{Ident, Span, Symbol};
+use rustc_span::{Span, Symbol};
 
 #[derive(Diagnostic)]
 #[diag("unrecognized `DepNode` variant: {$name}")]
@@ -9,13 +9,6 @@ pub(crate) struct UnrecognizedDepNode {
     #[primary_span]
     pub span: Span,
     pub name: Symbol,
-}
-
-#[derive(Diagnostic)]
-#[diag("missing `DepNode` variant")]
-pub(crate) struct MissingDepNode {
-    #[primary_span]
-    pub span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -107,41 +100,11 @@ pub(crate) struct NotLoaded<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("unknown `rustc_clean` argument")]
-pub(crate) struct UnknownRustcCleanArgument {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("no cfg attribute")]
-pub(crate) struct NoCfg {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("associated value expected for `{$ident}`")]
-pub(crate) struct AssociatedValueExpectedFor {
-    #[primary_span]
-    pub span: Span,
-    pub ident: Ident,
-}
-
-#[derive(Diagnostic)]
-#[diag("expected an associated value")]
-pub(crate) struct AssociatedValueExpected {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("found unchecked `#[rustc_clean]` attribute")]
 pub(crate) struct UncheckedClean {
     #[primary_span]
     pub span: Span,
 }
-
 #[derive(Diagnostic)]
 #[diag("unable to delete old {$name} at `{$path}`: {$err}")]
 pub(crate) struct DeleteOld<'a> {
@@ -318,7 +281,7 @@ pub(crate) struct DeleteWorkProduct<'a> {
 
 #[derive(Diagnostic)]
 #[diag(
-    "corrupt incremental compilation artifact found at `{$path}`. This file will automatically be ignored and deleted. If you see this message repeatedly or can provoke it without manually manipulating the compiler's artifacts, please file an issue. The incremental compilation system relies on hardlinks and filesystem locks behaving correctly, and may not deal well with OS crashes, so whatever information you can provide about your filesystem or other state may be very relevant."
+    "corrupt incremental compilation artifact found at `{$path}`. This file will automatically be ignored and deleted. If you see this message repeatedly or can provoke it without manually manipulating the compiler's artifacts, please file an issue. The incremental compilation system relies on hardlinks and filesystem locks behaving correctly, and may not deal well with OS crashes, so whatever information you can provide about your filesystem or other state may be very relevant"
 )]
 pub(crate) struct CorruptFile<'a> {
     pub path: &'a Path,

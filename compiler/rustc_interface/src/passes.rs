@@ -18,11 +18,11 @@ use rustc_errors::timings::TimingSection;
 use rustc_expand::base::{ExtCtxt, LintStoreExpand};
 use rustc_feature::Features;
 use rustc_fs_util::try_canonicalize;
-use rustc_hir::Attribute;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{LOCAL_CRATE, StableCrateId, StableCrateIdMap};
 use rustc_hir::definitions::Definitions;
 use rustc_hir::limit::Limit;
+use rustc_hir::{Attribute, find_attr};
 use rustc_incremental::setup_dep_graph;
 use rustc_lint::{BufferedEarlyLint, EarlyCheckNode, LintStore, unerased_lint_store};
 use rustc_metadata::EncodedMetadata;
@@ -582,7 +582,7 @@ fn write_out_deps(tcx: TyCtxt<'_>, outputs: &OutputFilenames, out_filenames: &[P
     let deps_output = outputs.path(OutputType::DepInfo);
     let deps_filename = deps_output.as_path();
 
-    let result: io::Result<()> = try {
+    let result = try {
         // Build a list of files used to compile the output and
         // write Makefile-compatible dependency rules
         let mut files: IndexMap<String, (u64, Option<SourceFileHash>)> = sess
@@ -1116,18 +1116,14 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
             {
                 tcx.ensure_ok().mir_drops_elaborated_and_const_checked(def_id);
             }
-            if tcx.is_coroutine(def_id.to_def_id()) {
-                tcx.ensure_ok().mir_coroutine_witnesses(def_id);
-                let _ = tcx.ensure_ok().check_coroutine_obligations(
-                    tcx.typeck_root_def_id(def_id.to_def_id()).expect_local(),
+            if tcx.is_coroutine(def_id.to_def_id())
+                && (!tcx.is_async_drop_in_place_coroutine(def_id.to_def_id()))
+            {
+                // Eagerly check the unsubstituted layout for cycles.
+                tcx.ensure_ok().layout_of(
+                    ty::TypingEnv::post_analysis(tcx, def_id.to_def_id())
+                        .as_query_input(tcx.type_of(def_id).instantiate_identity()),
                 );
-                if !tcx.is_async_drop_in_place_coroutine(def_id.to_def_id()) {
-                    // Eagerly check the unsubstituted layout for cycles.
-                    tcx.ensure_ok().layout_of(
-                        ty::TypingEnv::post_analysis(tcx, def_id.to_def_id())
-                            .as_query_input(tcx.type_of(def_id).instantiate_identity()),
-                    );
-                }
             }
         });
     });
@@ -1227,7 +1223,7 @@ pub(crate) fn start_codegen<'tcx>(
 
     // Hook for tests.
     if let Some((def_id, _)) = tcx.entry_fn(())
-        && tcx.has_attr(def_id, sym::rustc_delayed_bug_from_inside_query)
+        && find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcDelayedBugFromInsideQuery)
     {
         tcx.ensure_ok().trigger_delayed_bug(def_id);
     }

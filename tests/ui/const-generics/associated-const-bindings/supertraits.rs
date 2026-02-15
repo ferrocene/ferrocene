@@ -16,8 +16,7 @@ use std::marker::ConstParamTy_;
 trait Trait: SuperTrait {}
 trait SuperTrait: SuperSuperTrait<i32> {}
 trait SuperSuperTrait<T: ConstParamTy_> {
-    #[type_const]
-    const K: T;
+    type const K: T;
 }
 
 fn take(_: impl Trait<K = 0>) {}

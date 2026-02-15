@@ -139,8 +139,6 @@ pub use rustc_errors::BufferedEarlyLint;
 pub use rustc_session::lint::Level::{self, *};
 pub use rustc_session::lint::{FutureIncompatibleInfo, Lint, LintId, LintPass, LintVec};
 
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
-
 pub fn provide(providers: &mut Providers) {
     levels::provide(providers);
     expect::provide(providers);
@@ -297,6 +295,9 @@ fn register_builtins(store: &mut LintStore) {
         UNUSED_ASSIGNMENTS,
         DEAD_CODE,
         UNUSED_MUT,
+        // FIXME: add this lint when it becomes stable,
+        // see https://github.com/rust-lang/rust/issues/115585.
+        // UNREACHABLE_CFG_SELECT_PREDICATES,
         UNREACHABLE_CODE,
         UNREACHABLE_PATTERNS,
         UNUSED_MUST_USE,

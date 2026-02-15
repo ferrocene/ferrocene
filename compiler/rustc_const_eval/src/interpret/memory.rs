@@ -15,7 +15,7 @@ use rustc_abi::{Align, HasDataLayout, Size};
 use rustc_ast::Mutability;
 use rustc_data_structures::assert_matches;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
-use rustc_errors::inline_fluent;
+use rustc_errors::msg;
 use rustc_middle::mir::display_allocation;
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
 use rustc_middle::{bug, throw_ub_format};
@@ -291,12 +291,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         let (alloc_id, offset, _prov) = self.ptr_get_alloc_id(ptr, 0)?;
         if offset.bytes() != 0 {
             throw_ub_custom!(
-                inline_fluent!(
+                msg!(
                     "{$kind ->
-    [dealloc] deallocating
-    [realloc] reallocating
-    *[other] {\"\"}
-} {$ptr} which does not point to the beginning of an object"
+                        [dealloc] deallocating
+                        [realloc] reallocating
+                        *[other] {\"\"}
+                    } {$ptr} which does not point to the beginning of an object"
                 ),
                 ptr = format!("{ptr:?}"),
                 kind = "realloc"
@@ -377,12 +377,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
         if offset.bytes() != 0 {
             throw_ub_custom!(
-                inline_fluent!(
+                msg!(
                     "{$kind ->
-    [dealloc] deallocating
-    [realloc] reallocating
-    *[other] {\"\"}
-} {$ptr} which does not point to the beginning of an object"
+                        [dealloc] deallocating
+                        [realloc] reallocating
+                        *[other] {\"\"}
+                    } {$ptr} which does not point to the beginning of an object"
                 ),
                 ptr = format!("{ptr:?}"),
                 kind = "dealloc",
@@ -394,13 +394,13 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             return Err(match self.tcx.try_get_global_alloc(alloc_id) {
                 Some(GlobalAlloc::Function { .. }) => {
                     err_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "deallocating {$alloc_id}, which is {$kind ->
-    [fn] a function
-    [vtable] a vtable
-    [static_mem] static memory
-    *[other] {\"\"}
-}"
+                                [fn] a function
+                                [vtable] a vtable
+                                [static_mem] static memory
+                                *[other] {\"\"}
+                            }"
                         ),
                         alloc_id = alloc_id,
                         kind = "fn",
@@ -408,13 +408,13 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 }
                 Some(GlobalAlloc::VTable(..)) => {
                     err_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "deallocating {$alloc_id}, which is {$kind ->
-    [fn] a function
-    [vtable] a vtable
-    [static_mem] static memory
-    *[other] {\"\"}
-}"
+                                [fn] a function
+                                [vtable] a vtable
+                                [static_mem] static memory
+                                *[other] {\"\"}
+                            }"
                         ),
                         alloc_id = alloc_id,
                         kind = "vtable",
@@ -422,13 +422,13 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 }
                 Some(GlobalAlloc::TypeId { .. }) => {
                     err_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "deallocating {$alloc_id}, which is {$kind ->
-    [fn] a function
-    [vtable] a vtable
-    [static_mem] static memory
-    *[other] {\"\"}
-}"
+                                [fn] a function
+                                [vtable] a vtable
+                                [static_mem] static memory
+                                *[other] {\"\"}
+                            }"
                         ),
                         alloc_id = alloc_id,
                         kind = "typeid",
@@ -436,13 +436,13 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 }
                 Some(GlobalAlloc::Static(..) | GlobalAlloc::Memory(..)) => {
                     err_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "deallocating {$alloc_id}, which is {$kind ->
-    [fn] a function
-    [vtable] a vtable
-    [static_mem] static memory
-    *[other] {\"\"}
-}"
+                                [fn] a function
+                                [vtable] a vtable
+                                [static_mem] static memory
+                                *[other] {\"\"}
+                            }"
                         ),
                         alloc_id = alloc_id,
                         kind = "static_mem"
@@ -454,14 +454,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         };
 
         if alloc.mutability.is_not() {
-            throw_ub_custom!(
-                inline_fluent!("deallocating immutable allocation {$alloc}"),
-                alloc = alloc_id,
-            );
+            throw_ub_custom!(msg!("deallocating immutable allocation {$alloc}"), alloc = alloc_id,);
         }
         if alloc_kind != kind {
             throw_ub_custom!(
-                inline_fluent!(
+                msg!(
                     "deallocating {$alloc}, which is {$alloc_kind} memory, using {$kind} deallocation operation"
                 ),
                 alloc = alloc_id,
@@ -472,7 +469,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         if let Some((size, align)) = old_size_and_align {
             if size != alloc.size() || align != alloc.align {
                 throw_ub_custom!(
-                    inline_fluent!(
+                    msg!(
                         "incorrect layout on deallocation: {$alloc} has size {$size} and alignment {$align}, but gave size {$size_found} and alignment {$align_found}"
                     ),
                     alloc = alloc_id,
@@ -1593,7 +1590,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     if (src_offset <= dest_offset && src_offset + size > dest_offset)
                         || (dest_offset <= src_offset && dest_offset + size > src_offset)
                     {
-                        throw_ub_custom!(inline_fluent!(
+                        throw_ub_custom!(msg!(
                             "`copy_nonoverlapping` called on overlapping ranges"
                         ));
                     }

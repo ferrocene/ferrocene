@@ -70,6 +70,10 @@ aarch64-stable-jscvt: &aarch64-stable-jscvt
 neon-unstable-feat-lrcpc3: &neon-unstable-feat-lrcpc3
   FnCall: [unstable, ['feature = "stdarch_neon_feat_lrcpc3"', 'issue = "none"']]
 
+# #[cfg(target_has_atomic = "64")]
+cfg-target-has-atomic-64: &cfg-target-has-atomic-64
+  FnCall: [cfg, ['target_has_atomic = "64"']]
+
 # #[unstable(feature = "stdarch_neon_fp8", issue = "none")]
 neon-unstable-fp8: &neon-unstable-fp8
   FnCall: [unstable, ['feature = "stdarch_neon_fp8"', 'issue = "none"']]
@@ -4418,6 +4422,7 @@ intrinsics:
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [ldap1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*const i64', int64x1_t, 'static_assert!', 'LANE == 0']
       - ['*const i64', int64x2_t,'static_assert_uimm_bits!', 'LANE, 1']
@@ -4448,6 +4453,7 @@ intrinsics:
       - FnCall: [target_feature, ['enable = "neon,rcpc3"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [ldap1, 'LANE = 0']]}]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*const u64', uint64x1_t,'static_assert!', 'LANE == 0','']
       #- ['*const f64', float64x1_t,'static_assert!', 'LANE == 0',''] # Fails due to bad IR gen from rust
@@ -4474,6 +4480,7 @@ intrinsics:
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [stl1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*mut i64', int64x1_t,'static_assert!', 'LANE == 0']
       - ['*mut i64', int64x2_t,'static_assert_uimm_bits!', 'LANE, 1']
@@ -4502,6 +4509,7 @@ intrinsics:
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [stl1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*mut u64', uint64x1_t, 'static_assert!', 'LANE == 0','']
       - ['*mut f64', float64x1_t,'static_assert!', 'LANE == 0','']

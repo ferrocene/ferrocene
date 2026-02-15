@@ -312,8 +312,13 @@ fn read_header(crate_dir: &Path) -> Result<String, String> {
     println!("Reading HVX header from: {}", header_path.display());
     println!("  (LLVM version: {})", LLVM_VERSION);
 
-    std::fs::read_to_string(&header_path)
-        .map_err(|e| format!("Failed to read header file {}: {}", header_path.display(), e))
+    std::fs::read_to_string(&header_path).map_err(|e| {
+        format!(
+            "Failed to read header file {}: {}",
+            header_path.display(),
+            e
+        )
+    })
 }
 
 /// Parse a C function prototype to extract return type and parameters

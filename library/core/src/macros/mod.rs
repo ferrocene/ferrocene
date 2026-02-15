@@ -1783,7 +1783,7 @@ pub(crate) mod builtin {
     ///
     /// See also [`std::alloc::GlobalAlloc`](../../../std/alloc/trait.GlobalAlloc.html).
     #[stable(feature = "global_allocator", since = "1.28.0")]
-    #[allow_internal_unstable(rustc_attrs)]
+    #[allow_internal_unstable(rustc_attrs, ptr_alignment_type)]
     #[rustc_builtin_macro]
     pub macro global_allocator($item:item) {
         /* compiler built-in */

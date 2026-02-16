@@ -41,7 +41,10 @@ fn main() {
         .windows(2)
         .find(|pair| {
             let &[first, second] = pair else { unreachable!() };
-            first == OsStr::new("--crate-name") && second == OsStr::new("compiler_builtins")
+            first == OsStr::new("--crate-name")
+                && ["compiler_builtins", "profiler_builtins"]
+                    .map(OsStr::new)
+                    .contains(&second.as_os_str())
         })
         .is_some();
 

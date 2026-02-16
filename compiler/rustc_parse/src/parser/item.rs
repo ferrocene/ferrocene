@@ -6,12 +6,10 @@ use rustc_ast::ast::*;
 use rustc_ast::token::{self, Delimiter, InvisibleOrigin, MetaVarKind, TokenKind};
 use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use rustc_ast::util::case::Case;
-use rustc_ast::{
-    attr, {self as ast},
-};
+use rustc_ast::{self as ast};
 use rustc_ast_pretty::pprust;
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, PResult, StashKey, struct_span_code_err};
+use rustc_errors::{Applicability, PResult, StashKey, msg, struct_span_code_err};
 use rustc_session::lint::builtin::VARARGS_WITHOUT_PATTERN;
 use rustc_span::edit_distance::edit_distance;
 use rustc_span::edition::Edition;
@@ -26,7 +24,7 @@ use super::{
     Parser, PathStyle, Recovered, Trailing, UsePreAttrPos,
 };
 use crate::errors::{self, FnPointerCannotBeAsync, FnPointerCannotBeConst, MacroExpandsToAdtField};
-use crate::{exp, fluent_generated as fluent};
+use crate::exp;
 
 impl<'a> Parser<'a> {
     /// Parses a source module as a crate. This is the main entry point for the parser.
@@ -286,13 +284,13 @@ impl<'a> Parser<'a> {
             // CONST ITEM
             self.recover_const_mut(const_span);
             self.recover_missing_kw_before_item()?;
-            let (ident, generics, ty, rhs) = self.parse_const_item(attrs)?;
+            let (ident, generics, ty, rhs_kind) = self.parse_const_item(false)?;
             ItemKind::Const(Box::new(ConstItem {
                 defaultness: def_(),
                 ident,
                 generics,
                 ty,
-                rhs,
+                rhs_kind,
                 define_opaque: None,
             }))
         } else if let Some(kind) = self.is_reuse_item() {
@@ -303,8 +301,26 @@ impl<'a> Parser<'a> {
             // MODULE ITEM
             self.parse_item_mod(attrs)?
         } else if self.eat_keyword_case(exp!(Type), case) {
-            // TYPE ITEM
-            self.parse_type_alias(def_())?
+            if let Const::Yes(const_span) = self.parse_constness(case) {
+                // TYPE CONST (mgca)
+                self.recover_const_mut(const_span);
+                self.recover_missing_kw_before_item()?;
+                let (ident, generics, ty, rhs_kind) = self.parse_const_item(true)?;
+                // Make sure this is only allowed if the feature gate is enabled.
+                // #![feature(mgca_type_const_syntax)]
+                self.psess.gated_spans.gate(sym::mgca_type_const_syntax, lo.to(const_span));
+                ItemKind::Const(Box::new(ConstItem {
+                    defaultness: def_(),
+                    ident,
+                    generics,
+                    ty,
+                    rhs_kind,
+                    define_opaque: None,
+                }))
+            } else {
+                // TYPE ITEM
+                self.parse_type_alias(def_())?
+            }
         } else if self.eat_keyword_case(exp!(Enum), case) {
             // ENUM ITEM
             self.parse_item_enum()?
@@ -518,7 +534,7 @@ impl<'a> Parser<'a> {
         match self.parse_delim_args() {
             // `( .. )` or `[ .. ]` (followed by `;`), or `{ .. }`.
             Ok(args) => {
-                self.eat_semi_for_macro_if_needed(&args);
+                self.eat_semi_for_macro_if_needed(&args, Some(&path));
                 self.complain_if_pub_macro(vis, false);
                 Ok(MacCall { path, args })
             }
@@ -1113,13 +1129,12 @@ impl<'a> Parser<'a> {
                             define_opaque,
                         }) => {
                             self.dcx().emit_err(errors::AssociatedStaticItemNotAllowed { span });
-                            let rhs = expr.map(ConstItemRhs::Body);
                             AssocItemKind::Const(Box::new(ConstItem {
                                 defaultness: Defaultness::Final,
                                 ident,
                                 generics: Generics::default(),
                                 ty,
-                                rhs,
+                                rhs_kind: ConstItemRhsKind::Body { rhs: expr },
                                 define_opaque,
                             }))
                         }
@@ -1360,7 +1375,7 @@ impl<'a> Parser<'a> {
                 let kind = match ForeignItemKind::try_from(kind) {
                     Ok(kind) => kind,
                     Err(kind) => match kind {
-                        ItemKind::Const(box ConstItem { ident, ty, rhs, .. }) => {
+                        ItemKind::Const(box ConstItem { ident, ty, rhs_kind, .. }) => {
                             let const_span = Some(span.with_hi(ident.span.lo()))
                                 .filter(|span| span.can_be_used_for_suggestions());
                             self.dcx().emit_err(errors::ExternItemCannotBeConst {
@@ -1371,10 +1386,13 @@ impl<'a> Parser<'a> {
                                 ident,
                                 ty,
                                 mutability: Mutability::Not,
-                                expr: rhs.map(|b| match b {
-                                    ConstItemRhs::TypeConst(anon_const) => anon_const.value,
-                                    ConstItemRhs::Body(expr) => expr,
-                                }),
+                                expr: match rhs_kind {
+                                    ConstItemRhsKind::Body { rhs } => rhs,
+                                    ConstItemRhsKind::TypeConst { rhs: Some(anon) } => {
+                                        Some(anon.value)
+                                    }
+                                    ConstItemRhsKind::TypeConst { rhs: None } => None,
+                                },
                                 safety: Safety::Default,
                                 define_opaque: None,
                             }))
@@ -1516,13 +1534,16 @@ impl<'a> Parser<'a> {
 
     /// Parse a constant item with the prefix `"const"` already parsed.
     ///
+    /// If `const_arg` is true, any expression assigned to the const will be parsed
+    /// as a const_arg instead of a body expression.
+    ///
     /// ```ebnf
     /// Const = "const" ($ident | "_") Generics ":" $ty (= $expr)? WhereClause ";" ;
     /// ```
     fn parse_const_item(
         &mut self,
-        attrs: &[Attribute],
-    ) -> PResult<'a, (Ident, Generics, Box<Ty>, Option<ast::ConstItemRhs>)> {
+        const_arg: bool,
+    ) -> PResult<'a, (Ident, Generics, Box<Ty>, ConstItemRhsKind)> {
         let ident = self.parse_ident_or_underscore()?;
 
         let mut generics = self.parse_generics()?;
@@ -1549,14 +1570,15 @@ impl<'a> Parser<'a> {
         let before_where_clause =
             if self.may_recover() { self.parse_where_clause()? } else { WhereClause::default() };
 
-        let rhs = if self.eat(exp!(Eq)) {
-            if attr::contains_name(attrs, sym::type_const) {
-                Some(ConstItemRhs::TypeConst(self.parse_const_arg()?))
-            } else {
-                Some(ConstItemRhs::Body(self.parse_expr()?))
-            }
-        } else {
-            None
+        let rhs = match (self.eat(exp!(Eq)), const_arg) {
+            (true, true) => ConstItemRhsKind::TypeConst {
+                rhs: Some(
+                    self.parse_expr_anon_const(|this, expr| this.mgca_direct_lit_hack(expr))?,
+                ),
+            },
+            (true, false) => ConstItemRhsKind::Body { rhs: Some(self.parse_expr()?) },
+            (false, true) => ConstItemRhsKind::TypeConst { rhs: None },
+            (false, false) => ConstItemRhsKind::Body { rhs: None },
         };
 
         let after_where_clause = self.parse_where_clause()?;
@@ -1565,18 +1587,18 @@ impl<'a> Parser<'a> {
         // Users may be tempted to write such code if they are still used to the deprecated
         // where-clause location on type aliases and associated types. See also #89122.
         if before_where_clause.has_where_token
-            && let Some(rhs) = &rhs
+            && let Some(rhs_span) = rhs.span()
         {
             self.dcx().emit_err(errors::WhereClauseBeforeConstBody {
                 span: before_where_clause.span,
                 name: ident.span,
-                body: rhs.span(),
+                body: rhs_span,
                 sugg: if !after_where_clause.has_where_token {
-                    self.psess.source_map().span_to_snippet(rhs.span()).ok().map(|body_s| {
+                    self.psess.source_map().span_to_snippet(rhs_span).ok().map(|body_s| {
                         errors::WhereClauseBeforeConstBodySugg {
                             left: before_where_clause.span.shrink_to_lo(),
                             snippet: body_s,
-                            right: before_where_clause.span.shrink_to_hi().to(rhs.span()),
+                            right: before_where_clause.span.shrink_to_hi().to(rhs_span),
                         }
                     })
                 } else {
@@ -1721,7 +1743,7 @@ impl<'a> Parser<'a> {
 
             if this.token == token::Bang {
                 if let Err(err) = this.unexpected() {
-                    err.with_note(fluent::parse_macro_expands_to_enum_variant).emit();
+                    err.with_note(msg!("macros cannot expand to enum variants")).emit();
                 }
 
                 this.bump();
@@ -2370,7 +2392,7 @@ impl<'a> Parser<'a> {
         }
 
         let body = self.parse_delim_args()?;
-        self.eat_semi_for_macro_if_needed(&body);
+        self.eat_semi_for_macro_if_needed(&body, None);
         self.complain_if_pub_macro(vis, true);
 
         Ok(ItemKind::MacroDef(
@@ -2395,13 +2417,13 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn eat_semi_for_macro_if_needed(&mut self, args: &DelimArgs) {
+    fn eat_semi_for_macro_if_needed(&mut self, args: &DelimArgs, path: Option<&Path>) {
         if args.need_semicolon() && !self.eat(exp!(Semi)) {
-            self.report_invalid_macro_expansion_item(args);
+            self.report_invalid_macro_expansion_item(args, path);
         }
     }
 
-    fn report_invalid_macro_expansion_item(&self, args: &DelimArgs) {
+    fn report_invalid_macro_expansion_item(&self, args: &DelimArgs, path: Option<&Path>) {
         let span = args.dspan.entire();
         let mut err = self.dcx().struct_span_err(
             span,
@@ -2411,17 +2433,32 @@ impl<'a> Parser<'a> {
         // macros within the same crate (that we can fix), which is sad.
         if !span.from_expansion() {
             let DelimSpan { open, close } = args.dspan;
-            err.multipart_suggestion(
-                "change the delimiters to curly braces",
-                vec![(open, "{".to_string()), (close, '}'.to_string())],
-                Applicability::MaybeIncorrect,
-            );
-            err.span_suggestion(
-                span.with_neighbor(self.token.span).shrink_to_hi(),
-                "add a semicolon",
-                ';',
-                Applicability::MaybeIncorrect,
-            );
+            // Check if this looks like `macro_rules!(name) { ... }`
+            // a common mistake when trying to define a macro.
+            if let Some(path) = path
+                && path.segments.first().is_some_and(|seg| seg.ident.name == sym::macro_rules)
+                && args.delim == Delimiter::Parenthesis
+            {
+                let replace =
+                    if path.span.hi() + rustc_span::BytePos(1) < open.lo() { "" } else { " " };
+                err.multipart_suggestion(
+                    "to define a macro, remove the parentheses around the macro name",
+                    vec![(open, replace.to_string()), (close, String::new())],
+                    Applicability::MachineApplicable,
+                );
+            } else {
+                err.multipart_suggestion(
+                    "change the delimiters to curly braces",
+                    vec![(open, "{".to_string()), (close, '}'.to_string())],
+                    Applicability::MaybeIncorrect,
+                );
+                err.span_suggestion(
+                    span.with_neighbor(self.token.span).shrink_to_hi(),
+                    "add a semicolon",
+                    ';',
+                    Applicability::MaybeIncorrect,
+                );
+            }
         }
         err.emit();
     }

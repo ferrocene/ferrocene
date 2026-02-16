@@ -5,9 +5,10 @@ pub use ReprAttr::*;
 use rustc_abi::Align;
 pub use rustc_ast::attr::data_structures::*;
 use rustc_ast::token::DocFragmentKind;
-use rustc_ast::{AttrStyle, ast};
+use rustc_ast::{AttrStyle, Path, ast};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
+use rustc_hir::LangItem;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic, PrintAttribute};
 use rustc_span::def_id::DefId;
 use rustc_span::hygiene::Transparency;
@@ -47,6 +48,57 @@ pub struct EiiDecl {
     /// whether or not it is unsafe to implement this EII
     pub impl_unsafe: bool,
     pub name: Ident,
+}
+
+#[derive(Copy, Clone, PartialEq, Encodable, Decodable, Debug, HashStable_Generic, PrintAttribute)]
+pub enum CguKind {
+    No,
+    PreDashLto,
+    PostDashLto,
+    Any,
+}
+
+#[derive(Copy, Clone, PartialEq, Encodable, Decodable, Debug, HashStable_Generic, PrintAttribute)]
+pub enum CguFields {
+    PartitionReused { cfg: Symbol, module: Symbol },
+    PartitionCodegened { cfg: Symbol, module: Symbol },
+    ExpectedCguReuse { cfg: Symbol, module: Symbol, kind: CguKind },
+}
+
+#[derive(Copy, Clone, PartialEq, Debug, PrintAttribute)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
+pub enum DivergingFallbackBehavior {
+    /// Always fallback to `()` (aka "always spontaneous decay")
+    ToUnit,
+    /// Always fallback to `!` (which should be equivalent to never falling back + not making
+    /// never-to-any coercions unless necessary)
+    ToNever,
+    /// Don't fallback at all
+    NoFallback,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug, PrintAttribute, Default)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
+pub enum DivergingBlockBehavior {
+    /// This is the current stable behavior:
+    ///
+    /// ```rust
+    /// {
+    ///     return;
+    /// } // block has type = !, even though we are supposedly dropping it with `;`
+    /// ```
+    #[default]
+    Never,
+
+    /// Alternative behavior:
+    ///
+    /// ```ignore (very-unstable-new-attribute)
+    /// #![rustc_never_type_options(diverging_block_default = "unit")]
+    /// {
+    ///     return;
+    /// } // block has type = (), since we are dropping `!` from `return` with `;`
+    /// ```
+    Unit,
 }
 
 #[derive(Copy, Clone, PartialEq, Encodable, Decodable, Debug, HashStable_Generic, PrintAttribute)]
@@ -165,6 +217,14 @@ pub enum DeprecatedSince {
 pub enum CoverageAttrKind {
     On,
     Off,
+}
+
+/// Successfully-parsed value of a `#[rustc_abi(..)]` attribute.
+#[derive(Copy, Debug, Eq, PartialEq, Encodable, Decodable, Clone)]
+#[derive(HashStable_Generic, PrintAttribute)]
+pub enum RustcAbiAttrKind {
+    Debug,
+    AssertEq,
 }
 
 impl Deprecation {
@@ -331,6 +391,8 @@ pub enum NativeLibKind {
         bundle: Option<bool>,
         /// Whether to link static library without throwing any object files away
         whole_archive: Option<bool>,
+        /// Whether to export c static library symbols
+        export_symbols: Option<bool>,
     },
     /// Dynamic library (e.g. `libfoo.so` on Linux)
     /// or an import library corresponding to a dynamic library (e.g. `foo.lib` on Windows/MSVC).
@@ -363,8 +425,8 @@ pub enum NativeLibKind {
 impl NativeLibKind {
     pub fn has_modifiers(&self) -> bool {
         match self {
-            NativeLibKind::Static { bundle, whole_archive } => {
-                bundle.is_some() || whole_archive.is_some()
+            NativeLibKind::Static { bundle, whole_archive, export_symbols } => {
+                bundle.is_some() || whole_archive.is_some() || export_symbols.is_some()
             }
             NativeLibKind::Dylib { as_needed }
             | NativeLibKind::Framework { as_needed }
@@ -699,6 +761,38 @@ pub enum RustcLayoutType {
     Debug,
 }
 
+#[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute, PartialEq, Eq)]
+pub enum RustcMirKind {
+    PeekMaybeInit,
+    PeekMaybeUninit,
+    PeekLiveness,
+    StopAfterDataflow,
+    BorrowckGraphvizPostflow { path: PathBuf },
+    BorrowckGraphvizFormat { format: BorrowckGraphvizFormatKind },
+}
+
+#[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute, PartialEq, Eq)]
+pub enum BorrowckGraphvizFormatKind {
+    TwoPhase,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcCleanAttribute {
+    pub span: Span,
+    pub cfg: Symbol,
+    pub except: Option<RustcCleanQueries>,
+    pub loaded_from_disk: Option<RustcCleanQueries>,
+}
+
+/// Represents the `except=` or `loaded_from_disk=` argument of `#[rustc_clean]`
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcCleanQueries {
+    pub entries: ThinVec<Symbol>,
+    pub span: Span,
+}
+
 /// Represents parsed *built-in* inert attributes.
 ///
 /// ## Overview
@@ -860,6 +954,9 @@ pub enum AttributeKind {
     /// Represents `#[instruction_set]`
     InstructionSet(InstructionSetAttr),
 
+    /// Represents `#[lang]`
+    Lang(LangItem, Span),
+
     /// Represents `#[link]`.
     Link(ThinVec<LinkEntry>, Span),
 
@@ -960,6 +1057,9 @@ pub enum AttributeKind {
     /// Represents `#[pointee]`
     Pointee(Span),
 
+    /// Represents `#[prelude_import]`
+    PreludeImport,
+
     /// Represents `#[proc_macro]`
     ProcMacro(Span),
 
@@ -975,8 +1075,14 @@ pub enum AttributeKind {
     /// Represents [`#[recursion_limit]`](https://doc.rust-lang.org/reference/attributes/limits.html#the-recursion_limit-attribute)
     RecursionLimit { attr_span: Span, limit_span: Span, limit: Limit },
 
+    /// Represents `#[reexport_test_harness_main]`
+    ReexportTestHarnessMain(Symbol),
+
     /// Represents [`#[repr]`](https://doc.rust-lang.org/stable/reference/type-layout.html#representations).
     Repr { reprs: ThinVec<(ReprAttr, Span)>, first_span: Span },
+
+    /// Represents `#[rustc_abi(..)]`
+    RustcAbi { attr_span: Span, kind: RustcAbiAttrKind },
 
     /// Represents `#[rustc_allocator]`
     RustcAllocator,
@@ -1005,6 +1111,15 @@ pub enum AttributeKind {
     /// Represents `#[rustc_builtin_macro]`.
     RustcBuiltinMacro { builtin_name: Option<Symbol>, helper_attrs: ThinVec<Symbol>, span: Span },
 
+    /// Represents `#[rustc_capture_analysis]`
+    RustcCaptureAnalysis,
+
+    /// Represents `#[rustc_expected_cgu_reuse]`, `#[rustc_partition_codegened]` and `#[rustc_partition_reused]`.
+    RustcCguTestAttr(ThinVec<(Span, CguFields)>),
+
+    /// Represents `#[rustc_clean]`
+    RustcClean(ThinVec<RustcCleanAttribute>),
+
     /// Represents `#[rustc_coherence_is_core]`
     RustcCoherenceIsCore(Span),
 
@@ -1027,11 +1142,26 @@ pub enum AttributeKind {
     /// Represents `#[rustc_const_stable_indirect]`.
     RustcConstStabilityIndirect,
 
+    /// Represents `#[rustc_conversion_suggestion]`
+    RustcConversionSuggestion,
+
     /// Represents `#[rustc_deallocator]`
     RustcDeallocator,
 
+    /// Represents `#[rustc_def_path]`
+    RustcDefPath(Span),
+
+    /// Represents `#[rustc_delayed_bug_from_inside_query]`
+    RustcDelayedBugFromInsideQuery,
+
     /// Represents `#[rustc_deny_explicit_impl]`.
     RustcDenyExplicitImpl(Span),
+
+    /// Represents `#[rustc_deprecated_safe_2024]`
+    RustcDeprecatedSafe2024 { suggestion: Symbol },
+
+    /// Represents `#[rustc_diagnostic_item]`
+    RustcDiagnosticItem(Symbol),
 
     /// Represents `#[rustc_dummy]`.
     RustcDummy,
@@ -1054,8 +1184,29 @@ pub enum AttributeKind {
     /// Represents `#[rustc_dyn_incompatible_trait]`.
     RustcDynIncompatibleTrait(Span),
 
+    /// Represents `#[rustc_effective_visibility]`.
+    RustcEffectiveVisibility,
+
+    /// Represents `#[rustc_evaluate_where_clauses]`
+    RustcEvaluateWhereClauses,
+
     /// Represents `#[rustc_has_incoherent_inherent_impls]`
     RustcHasIncoherentInherentImpls,
+
+    /// Represents `#[rustc_hidden_type_of_opaques]`
+    RustcHiddenTypeOfOpaques,
+
+    /// Represents `#[rustc_if_this_changed]`
+    RustcIfThisChanged(Span, Option<Symbol>),
+
+    /// Represents `#[rustc_insignificant_dtor]`
+    RustcInsignificantDtor,
+
+    /// Represents `#[rustc_intrinsic]`
+    RustcIntrinsic,
+
+    /// Represents `#[rustc_intrinsic_const_stable_indirect]`
+    RustcIntrinsicConstStableIndirect,
 
     /// Represents `#[rustc_layout]`
     RustcLayout(ThinVec<RustcLayoutType>),
@@ -1087,14 +1238,29 @@ pub enum AttributeKind {
     /// Represents `#[rustc_main]`.
     RustcMain,
 
+    /// Represents `#[rustc_mir]`.
+    RustcMir(ThinVec<RustcMirKind>),
+
     /// Represents `#[rustc_must_implement_one_of]`
     RustcMustImplementOneOf { attr_span: Span, fn_names: ThinVec<Ident> },
 
     /// Represents `#[rustc_never_returns_null_ptr]`
     RustcNeverReturnsNullPointer,
 
+    /// Represents `#[rustc_never_type_options]`.
+    RustcNeverTypeOptions {
+        fallback: Option<DivergingFallbackBehavior>,
+        diverging_block_default: Option<DivergingBlockBehavior>,
+    },
+
     /// Represents `#[rustc_no_implicit_autorefs]`
     RustcNoImplicitAutorefs,
+
+    /// Represents `#[rustc_no_implicit_bounds]`
+    RustcNoImplicitBounds,
+
+    /// Represents `#[rustc_no_mir_inline]`
+    RustcNoMirInline,
 
     /// Represents `#[rustc_non_const_trait_method]`.
     RustcNonConstTraitMethod,
@@ -1114,6 +1280,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_offload_kernel]`
     RustcOffloadKernel,
 
+    /// Represents `#[rustc_outlives]`
+    RustcOutlives,
+
     /// Represents `#[rustc_paren_sugar]`.
     RustcParenSugar(Span),
 
@@ -1123,11 +1292,23 @@ pub enum AttributeKind {
     /// Represents `#[rustc_pass_indirectly_in_non_rustic_abis]`
     RustcPassIndirectlyInNonRusticAbis(Span),
 
+    /// Represents `#[rustc_preserve_ub_checks]`
+    RustcPreserveUbChecks,
+
+    /// Represents `#[rustc_proc_macro_decls]`
+    RustcProcMacroDecls,
+
     /// Represents `#[rustc_pub_transparent]` (used by the `repr_transparent_external_private_fields` lint).
     RustcPubTransparent(Span),
 
     /// Represents `#[rustc_reallocator]`
     RustcReallocator,
+
+    /// Represents `#[rustc_regions]`
+    RustcRegions,
+
+    /// Represents `#[rustc_reservation_impl]`
+    RustcReservationImpl(Span, Symbol),
 
     /// Represents `#[rustc_scalable_vector(N)]`
     RustcScalableVector {
@@ -1151,6 +1332,21 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_std_internal_symbol]`.
     RustcStdInternalSymbol(Span),
+
+    /// Represents `#[rustc_strict_coherence]`.
+    RustcStrictCoherence(Span),
+
+    /// Represents `#[rustc_symbol_name]`
+    RustcSymbolName(Span),
+
+    /// Represents `#[rustc_test_marker]`
+    RustcTestMarker(Symbol),
+
+    /// Represents `#[rustc_then_this_would_need]`
+    RustcThenThisWouldNeed(Span, ThinVec<Ident>),
+
+    /// Represents `#[rustc_trivial_field_reads]`
+    RustcTrivialFieldReads,
 
     /// Represents `#[rustc_unsafe_specialization_marker]`.
     RustcUnsafeSpecializationMarker(Span),
@@ -1182,18 +1378,19 @@ pub enum AttributeKind {
         /// Span of the attribute.
         span: Span,
     },
+
     /// Represents `#[target_feature(enable = "...")]` and
     /// `#[unsafe(force_target_feature(enable = "...")]`.
     TargetFeature { features: ThinVec<(Symbol, Span)>, attr_span: Span, was_forced: bool },
+
+    /// Represents `#![test_runner(path)]`
+    TestRunner(Path),
 
     /// Represents `#[thread_local]`
     ThreadLocal,
 
     /// Represents `#[track_caller]`
     TrackCaller(Span),
-
-    /// Represents `#[type_const]`.
-    TypeConst(Span),
 
     /// Represents `#[type_length_limit]`
     TypeLengthLimit { attr_span: Span, limit_span: Span, limit: Limit },

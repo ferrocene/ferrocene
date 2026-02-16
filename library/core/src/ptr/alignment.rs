@@ -13,7 +13,12 @@ use crate::{cmp, fmt, hash, mem, num};
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(transparent)]
-pub struct Alignment(AlignmentEnum);
+pub struct Alignment {
+    // This field is never used directly (nor is the enum),
+    // as it's just there to convey the validity invariant.
+    // (Hopefully it'll eventually be a pattern type instead.)
+    _inner_repr_trick: AlignmentEnum,
+}
 
 // Alignment is `repr(usize)`, but via extra steps.
 const _: () = assert!(size_of::<Alignment>() == size_of::<usize>());
@@ -37,7 +42,7 @@ impl Alignment {
     /// assert_eq!(Alignment::MIN.as_usize(), 1);
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    pub const MIN: Self = Self(AlignmentEnum::_Align1Shl0);
+    pub const MIN: Self = Self::new(1).unwrap();
 
     /// Returns the alignment for a type.
     ///
@@ -47,8 +52,7 @@ impl Alignment {
     #[inline]
     #[must_use]
     pub const fn of<T>() -> Self {
-        // This can't actually panic since type alignment is always a power of two.
-        const { Alignment::new(align_of::<T>()).unwrap() }
+        <T as mem::SizedTypeProperties>::ALIGNMENT
     }
 
     /// Returns the [ABI]-required minimum alignment of the type of the value that `val` points to.
@@ -108,7 +112,6 @@ impl Alignment {
     ///
     /// ```
     /// #![feature(ptr_alignment_type)]
-    /// #![feature(layout_for_ptr)]
     /// use std::ptr::Alignment;
     ///
     /// assert_eq!(unsafe { Alignment::of_val_raw(&5i32) }.as_usize(), 4);
@@ -166,7 +169,10 @@ impl Alignment {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
     pub const fn as_usize(self) -> usize {
-        self.0 as usize
+        // Going through `as_nonzero` helps this be more clearly the inverse of
+        // `new_unchecked`, letting MIR optimizations fold it away.
+
+        self.as_nonzero().get()
     }
 
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.

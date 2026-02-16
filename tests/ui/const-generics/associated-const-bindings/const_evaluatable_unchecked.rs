@@ -8,8 +8,7 @@
 #![allow(incomplete_features)]
 
 pub trait TraitA<T> {
-    #[type_const]
-    const K: u8 = 0;
+    type const K: u8 = 0;
 }
 pub trait TraitB<T> {}
 

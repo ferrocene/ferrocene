@@ -17,9 +17,11 @@ declare_lint_pass! {
         AARCH64_SOFTFLOAT_NEON,
         ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE,
         AMBIGUOUS_ASSOCIATED_ITEMS,
+        AMBIGUOUS_DERIVE_HELPERS,
         AMBIGUOUS_GLOB_IMPORTED_TRAITS,
         AMBIGUOUS_GLOB_IMPORTS,
         AMBIGUOUS_GLOB_REEXPORTS,
+        AMBIGUOUS_IMPORT_VISIBILITIES,
         AMBIGUOUS_PANIC_IMPORTS,
         ARITHMETIC_OVERFLOW,
         ASM_SUB_REGISTER,
@@ -122,6 +124,7 @@ declare_lint_pass! {
         UNKNOWN_LINTS,
         UNNAMEABLE_TEST_ITEMS,
         UNNAMEABLE_TYPES,
+        UNREACHABLE_CFG_SELECT_PREDICATES,
         UNREACHABLE_CODE,
         UNREACHABLE_PATTERNS,
         UNSAFE_ATTR_OUTSIDE_UNSAFE,
@@ -852,6 +855,34 @@ declare_lint! {
     pub UNREACHABLE_PATTERNS,
     Warn,
     "detects unreachable patterns"
+}
+
+declare_lint! {
+    /// The `unreachable_cfg_select_predicates` lint detects unreachable configuration
+    /// predicates in the `cfg_select!` macro.
+    ///
+    /// ### Example
+    ///
+    /// ```rust
+    /// #![feature(cfg_select)]
+    /// cfg_select! {
+    ///     _ => (),
+    ///     windows => (),
+    /// }
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// This usually indicates a mistake in how the predicates are specified or
+    /// ordered. In this example, the `_` predicate will always match, so the
+    /// `windows` is impossible to reach. Remember, arms match in order, you
+    /// probably wanted to put the `windows` case above the `_` case.
+    pub UNREACHABLE_CFG_SELECT_PREDICATES,
+    Warn,
+    "detects unreachable configuration predicates in the cfg_select macro",
+    @feature_gate = cfg_select;
 }
 
 declare_lint! {
@@ -3457,7 +3488,7 @@ declare_lint! {
     /// but this lint was introduced to avoid breaking any existing
     /// crates which included them.
     pub INVALID_DOC_ATTRIBUTES,
-    Deny,
+    Warn,
     "detects invalid `#[doc(...)]` attributes",
 }
 
@@ -4238,6 +4269,75 @@ declare_lint! {
 }
 
 declare_lint! {
+    /// The `ambiguous_derive_helpers` lint detects cases where a derive macro's helper attribute
+    /// is the same name as that of a built-in attribute.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,ignore (proc-macro)
+    /// #![crate_type = "proc-macro"]
+    /// #![deny(ambiguous_derive_helpers)]
+    ///
+    /// use proc_macro::TokenStream;
+    ///
+    /// #[proc_macro_derive(Trait, attributes(ignore))]
+    /// pub fn example(input: TokenStream) -> TokenStream {
+    ///     TokenStream::new()
+    /// }
+    /// ```
+    ///
+    /// Produces:
+    ///
+    /// ```text
+    /// warning: there exists a built-in attribute with the same name
+    ///   --> file.rs:5:39
+    ///    |
+    ///  5 | #[proc_macro_derive(Trait, attributes(ignore))]
+    ///    |                                       ^^^^^^
+    ///    |
+    ///    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+    ///    = note: for more information, see issue #151152 <https://github.com/rust-lang/rust/issues/151152>
+    ///    = note: `#[deny(ambiguous_derive_helpers)]` (part of `#[deny(future_incompatible)]`) on by default
+    /// ```
+    ///
+    /// ### Explanation
+    ///
+    /// Attempting to use this helper attribute will throw an error:
+    ///
+    /// ```rust,ignore (needs-dependency)
+    /// #[derive(Trait)]
+    /// struct Example {
+    ///     #[ignore]
+    ///     fields: ()
+    /// }
+    /// ```
+    ///
+    /// Produces:
+    ///
+    /// ```text
+    /// error[E0659]: `ignore` is ambiguous
+    ///  --> src/lib.rs:5:7
+    ///   |
+    /// 5 |     #[ignore]
+    ///   |       ^^^^^^ ambiguous name
+    ///   |
+    ///   = note: ambiguous because of a name conflict with a builtin attribute
+    ///   = note: `ignore` could refer to a built-in attribute
+    /// note: `ignore` could also refer to the derive helper attribute defined here
+    ///  --> src/lib.rs:3:10
+    ///   |
+    /// 3 | #[derive(Trait)]
+    ///   |          ^^^^^
+    /// ```
+    pub AMBIGUOUS_DERIVE_HELPERS,
+    Warn,
+    "detects derive helper attributes that are ambiguous with built-in attributes",
+    @future_incompatible = FutureIncompatibleInfo {
+        reason: fcw!(FutureReleaseError #151276),
+    };
+}
+
+declare_lint! {
     /// The `private_interfaces` lint detects types in a primary interface of an item,
     /// that are more private than the item itself. Primary interface of an item is all
     /// its interface except for bounds on generic parameters and where clauses.
@@ -4561,6 +4661,55 @@ declare_lint! {
     @future_incompatible = FutureIncompatibleInfo {
         reason: fcw!(FutureReleaseError #147319),
         report_in_deps: false,
+    };
+}
+
+declare_lint! {
+    /// The `ambiguous_import_visibilities` lint detects imports that should report ambiguity
+    /// errors, but previously didn't do that due to rustc bugs.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,compile_fail
+    /// #![deny(unknown_lints)]
+    /// #![deny(ambiguous_import_visibilities)]
+    /// mod reexport {
+    ///     mod m {
+    ///         pub struct S {}
+    ///     }
+    ///
+    ///     macro_rules! mac {
+    ///         () => { use m::S; }
+    ///     }
+    ///
+    ///     pub use m::*;
+    ///     mac!();
+    ///
+    ///     pub use S as Z; // ambiguous visibility
+    /// }
+    ///
+    /// fn main() {
+    ///     reexport::Z {};
+    /// }
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// Previous versions of Rust compile it successfully because it
+    /// fetched the glob import's visibility for `pub use S as Z` import, and ignored the private
+    /// `use m::S` import that appeared later.
+    ///
+    /// This is a [future-incompatible] lint to transition this to a
+    /// hard error in the future.
+    ///
+    /// [future-incompatible]: ../index.md#future-incompatible-lints
+    pub AMBIGUOUS_IMPORT_VISIBILITIES,
+    Warn,
+    "detects certain glob imports that require reporting an ambiguity error",
+    @future_incompatible = FutureIncompatibleInfo {
+        reason: fcw!(FutureReleaseError #149145),
     };
 }
 

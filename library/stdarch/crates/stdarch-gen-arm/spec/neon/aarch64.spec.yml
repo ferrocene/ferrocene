@@ -13,9 +13,9 @@ auto_llvm_sign_conversion: false
 neon-stable: &neon-stable
   FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
 
-# #[stable(feature = "stdarch_neon_fp16", since = "CURRENT_RUSTC_VERSION")]
+# #[stable(feature = "stdarch_neon_fp16", since = "1.94.0")]
 neon-stable-fp16: &neon-stable-fp16
-  FnCall: [stable, ['feature = "stdarch_neon_fp16"', 'since = "CURRENT_RUSTC_VERSION"']]
+  FnCall: [stable, ['feature = "stdarch_neon_fp16"', 'since = "1.94.0"']]
 
 # #[cfg(not(target_arch = "arm64ec"))]
 target-not-arm64ec: &target-not-arm64ec
@@ -69,6 +69,10 @@ aarch64-stable-jscvt: &aarch64-stable-jscvt
 # #[unstable(feature = "stdarch_neon_feat_lrcpc3", issue = "none")]
 neon-unstable-feat-lrcpc3: &neon-unstable-feat-lrcpc3
   FnCall: [unstable, ['feature = "stdarch_neon_feat_lrcpc3"', 'issue = "none"']]
+
+# #[cfg(target_has_atomic = "64")]
+cfg-target-has-atomic-64: &cfg-target-has-atomic-64
+  FnCall: [cfg, ['target_has_atomic = "64"']]
 
 # #[unstable(feature = "stdarch_neon_fp8", issue = "none")]
 neon-unstable-fp8: &neon-unstable-fp8
@@ -4418,6 +4422,7 @@ intrinsics:
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [ldap1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*const i64', int64x1_t, 'static_assert!', 'LANE == 0']
       - ['*const i64', int64x2_t,'static_assert_uimm_bits!', 'LANE, 1']
@@ -4448,6 +4453,7 @@ intrinsics:
       - FnCall: [target_feature, ['enable = "neon,rcpc3"']]
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [ldap1, 'LANE = 0']]}]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*const u64', uint64x1_t,'static_assert!', 'LANE == 0','']
       #- ['*const f64', float64x1_t,'static_assert!', 'LANE == 0',''] # Fails due to bad IR gen from rust
@@ -4474,6 +4480,7 @@ intrinsics:
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [stl1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*mut i64', int64x1_t,'static_assert!', 'LANE == 0']
       - ['*mut i64', int64x2_t,'static_assert_uimm_bits!', 'LANE, 1']
@@ -4502,6 +4509,7 @@ intrinsics:
       - FnCall: [cfg_attr, [{FnCall: [all, [test, {FnCall: [not, ['target_env= "msvc"']]}]]}, {FnCall: [assert_instr, [stl1, 'LANE = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ["2"]]
       - *neon-unstable-feat-lrcpc3
+      - *cfg-target-has-atomic-64
     types:
       - ['*mut u64', uint64x1_t, 'static_assert!', 'LANE == 0','']
       - ['*mut f64', float64x1_t,'static_assert!', 'LANE == 0','']
@@ -8958,7 +8966,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 1']]}]]
+      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ['1', '3']]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     static_defs: ['const LANE1: i32, const LANE2: i32']
@@ -8983,7 +8991,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 1']]}]]
+      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ['1', '3']]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     static_defs: ['const LANE1: i32, const LANE2: i32']
@@ -9008,7 +9016,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 1']]}]]
+      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ['1', '3']]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     static_defs: ['const LANE1: i32, const LANE2: i32']
@@ -9037,7 +9045,7 @@ intrinsics:
     arguments: ["a: {neon_type[0]}", "b: {neon_type[1]}"]
     return_type: "{neon_type[2]}"
     attr:
-      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 1']]}]]
+      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [mov, 'LANE1 = 0', 'LANE2 = 0']]}]]
       - FnCall: [rustc_legacy_const_generics, ['1', '3']]
       - FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
     static_defs: ['const LANE1: i32, const LANE2: i32']

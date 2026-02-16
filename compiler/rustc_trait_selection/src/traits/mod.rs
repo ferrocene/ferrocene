@@ -16,7 +16,7 @@ pub mod project;
 pub mod query;
 #[allow(hidden_glob_reexports)]
 mod select;
-mod specialize;
+pub mod specialize;
 mod structural_normalize;
 #[allow(hidden_glob_reexports)]
 mod util;
@@ -680,6 +680,20 @@ pub fn try_evaluate_const<'tcx>(
                     let typing_env = ty::TypingEnv::post_analysis(tcx, uv.def);
 
                     (args, typing_env)
+                }
+                Some(ty::AnonConstKind::OGCA) => {
+                    if infcx.typing_mode() != TypingMode::PostAnalysis {
+                        // OGCA anon consts should be treated as always having generics
+                        // during anything before codegen (or maybe MIR opts too).
+                        return Err(EvaluateConstErr::HasGenericsOrInfers);
+                    }
+
+                    if uv.args.has_non_region_param() || uv.args.has_non_region_infer() {
+                        return Err(EvaluateConstErr::HasGenericsOrInfers);
+                    }
+
+                    let typing_env = ty::TypingEnv::fully_monomorphized();
+                    (uv.args, typing_env)
                 }
                 Some(ty::AnonConstKind::MCG) | Some(ty::AnonConstKind::NonTypeSystem) | None => {
                     // We are only dealing with "truly" generic/uninferred constants here:

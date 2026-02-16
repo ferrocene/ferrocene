@@ -459,8 +459,8 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                         span: self.mk_sp(start, self.pos + Pos::from_usize(repeats * c.len_utf8())),
                         escaped: escaped_char(c),
                         sugg,
-                        null: if c == '\x00' { Some(errors::UnknownTokenNull) } else { None },
-                        invisible: if INVISIBLE_CHARACTERS.contains(&c) { Some(errors::InvisibleCharacter) } else { None },
+                        null: c == '\x00',
+                        invisible: INVISIBLE_CHARACTERS.contains(&c),
                         repeat: if repeats > 0 {
                             swallow_next_invalid = repeats;
                             Some(errors::UnknownTokenRepeat { repeats })
@@ -623,7 +623,7 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
             self.dcx().emit_err(errors::FrontmatterInvalidInfostring { span });
         }
 
-        let last_line_start = real_s.rfind('\n').map_or(0, |i| i + 1);
+        let last_line_start = real_s.rfind('\n').map_or(line_end, |i| i + 1);
 
         let content = &real_s[line_end..last_line_start];
         if let Some(cr_offset) = content.find('\r') {

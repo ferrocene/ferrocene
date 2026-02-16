@@ -157,6 +157,7 @@ pub fn files_modified(ci_info: &CiInfo, pred: impl Fn(&str) -> bool) -> bool {
 }
 
 pub mod alphabetical;
+pub mod arg_parser;
 pub mod bins;
 pub mod debug_artifacts;
 pub mod deps;
@@ -167,10 +168,6 @@ pub mod extdeps;
 pub mod extra_checks;
 pub mod features;
 pub mod filenames;
-pub mod fluent_alphabetical;
-pub mod fluent_lowercase;
-pub mod fluent_period;
-mod fluent_used;
 pub mod gcc_submodule;
 pub(crate) mod iter_header;
 pub mod known_bug;

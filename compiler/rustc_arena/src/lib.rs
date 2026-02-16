@@ -13,7 +13,6 @@
 #![cfg_attr(test, feature(test))]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![doc(test(no_crate_inject, attr(deny(warnings), allow(internal_features))))]
-#![feature(core_intrinsics)]
 #![feature(decl_macro)]
 #![feature(dropck_eyepatch)]
 #![feature(never_type)]
@@ -26,7 +25,7 @@ use std::cell::{Cell, RefCell};
 use std::marker::PhantomData;
 use std::mem::{self, MaybeUninit};
 use std::ptr::{self, NonNull};
-use std::{cmp, intrinsics, slice};
+use std::{cmp, hint, slice};
 
 use smallvec::SmallVec;
 
@@ -452,7 +451,7 @@ impl DroplessArena {
             let bytes = align_up(layout.size(), DROPLESS_ALIGNMENT);
 
             // Tell LLVM that `end` is aligned to DROPLESS_ALIGNMENT.
-            unsafe { intrinsics::assume(end == align_down(end, DROPLESS_ALIGNMENT)) };
+            unsafe { hint::assert_unchecked(end == align_down(end, DROPLESS_ALIGNMENT)) };
 
             if let Some(sub) = end.checked_sub(bytes) {
                 let new_end = align_down(sub, layout.align());
@@ -508,19 +507,6 @@ impl DroplessArena {
             mem.copy_from_nonoverlapping(slice.as_ptr(), slice.len());
             slice::from_raw_parts_mut(mem, slice.len())
         }
-    }
-
-    /// Used by `Lift` to check whether this slice is allocated
-    /// in this arena.
-    #[inline]
-    pub fn contains_slice<T>(&self, slice: &[T]) -> bool {
-        for chunk in self.chunks.borrow_mut().iter_mut() {
-            let ptr = slice.as_ptr().cast::<u8>().cast_mut();
-            if chunk.start() <= ptr && chunk.end() >= ptr {
-                return true;
-            }
-        }
-        false
     }
 
     /// Allocates a string slice that is copied into the `DroplessArena`, returning a

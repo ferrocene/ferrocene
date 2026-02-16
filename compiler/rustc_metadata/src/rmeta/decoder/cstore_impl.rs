@@ -11,7 +11,8 @@ use rustc_middle::bug;
 use rustc_middle::metadata::{AmbigModChild, ModChild};
 use rustc_middle::middle::exported_symbols::ExportedSymbol;
 use rustc_middle::middle::stability::DeprecationEntry;
-use rustc_middle::query::{ExternProviders, LocalCrate};
+use rustc_middle::queries::ExternProviders;
+use rustc_middle::query::LocalCrate;
 use rustc_middle::ty::fast_reject::SimplifiedType;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::util::Providers;
@@ -134,8 +135,8 @@ macro_rules! provide_one {
     ($tcx:ident, $def_id:ident, $other:ident, $cdata:ident, $name:ident => $compute:block) => {
         fn $name<'tcx>(
             $tcx: TyCtxt<'tcx>,
-            def_id_arg: rustc_middle::query::queries::$name::Key<'tcx>,
-        ) -> rustc_middle::query::queries::$name::ProvidedValue<'tcx> {
+            def_id_arg: rustc_middle::queries::$name::Key<'tcx>,
+        ) -> rustc_middle::queries::$name::ProvidedValue<'tcx> {
             let _prof_timer =
                 $tcx.prof.generic_activity(concat!("metadata_decode_entry_", stringify!($name)));
 
@@ -323,7 +324,6 @@ provide! { tcx, def_id, other, cdata,
     inherent_impls => { cdata.get_inherent_implementations_for_type(tcx, def_id.index) }
     attrs_for_def => { tcx.arena.alloc_from_iter(cdata.get_item_attrs(tcx, def_id.index)) }
     is_mir_available => { cdata.is_item_mir_available(tcx, def_id.index) }
-    is_ctfe_mir_available => { cdata.is_ctfe_mir_available(tcx, def_id.index) }
     cross_crate_inlinable => { table_direct }
 
     dylib_dependency_formats => { cdata.get_dylib_dependency_formats(tcx) }
@@ -418,6 +418,7 @@ provide! { tcx, def_id, other, cdata,
     }
     anon_const_kind => { table }
     const_of_item => { table }
+    is_rhs_type_const => { table }
 }
 
 pub(in crate::rmeta) fn provide(providers: &mut Providers) {

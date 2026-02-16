@@ -17,6 +17,9 @@ macro_rules! uint_impl {
         fsh_op = $fsh_op:literal,
         fshl_result = $fshl_result:literal,
         fshr_result = $fshr_result:literal,
+        clmul_lhs = $clmul_rhs:literal,
+        clmul_rhs = $clmul_lhs:literal,
+        clmul_result = $clmul_result:literal,
         swap_op = $swap_op:literal,
         swapped = $swapped:literal,
         reversed = $reversed:literal,
@@ -480,6 +483,62 @@ macro_rules! uint_impl {
             assert!(n < Self::BITS, "attempt to funnel shift right with overflow");
             // SAFETY: just checked that `shift` is in-range
             unsafe { intrinsics::unchecked_funnel_shr(self, rhs, n) }
+        }
+
+        /// Performs a carry-less multiplication, returning the lower bits.
+        ///
+        /// This operation is similar to long multiplication, except that exclusive or is used
+        /// instead of addition. The implementation is equivalent to:
+        ///
+        /// ```no_run
+        #[doc = concat!("pub fn carryless_mul(lhs: ", stringify!($SelfT), ", rhs: ", stringify!($SelfT), ") -> ", stringify!($SelfT), "{")]
+        ///     let mut retval = 0;
+        #[doc = concat!("    for i in 0..",  stringify!($SelfT), "::BITS {")]
+        ///         if (rhs >> i) & 1 != 0 {
+        ///             // long multiplication would use +=
+        ///             retval ^= lhs << i;
+        ///         }
+        ///     }
+        ///     retval
+        /// }
+        /// ```
+        ///
+        /// The actual implementation is more efficient, and on some platforms lowers directly to a
+        /// dedicated instruction.
+        ///
+        /// # Uses
+        ///
+        /// Carryless multiplication can be used to turn a bitmask of quote characters into a
+        /// bit mask of characters surrounded by quotes:
+        ///
+        /// ```no_run
+        /// r#"abc xxx "foobar" zzz "a"!"#; // input string
+        ///  0b0000000010000001000001010; // quote_mask
+        ///  0b0000000001111110000000100; // quote_mask.carryless_mul(!0) & !quote_mask
+        /// ```
+        ///
+        /// Another use is in cryptography, where carryless multiplication allows for efficient
+        /// implementations of polynomial multiplication in `GF(2)[X]`, the polynomial ring
+        /// over `GF(2)`.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// #![feature(uint_carryless_mul)]
+        ///
+        #[doc = concat!("let a = ", $clmul_lhs, stringify!($SelfT), ";")]
+        #[doc = concat!("let b = ", $clmul_rhs, stringify!($SelfT), ";")]
+        ///
+        #[doc = concat!("assert_eq!(a.carryless_mul(b), ", $clmul_result, ");")]
+        /// ```
+        #[rustc_const_unstable(feature = "uint_carryless_mul", issue = "152080")]
+        #[doc(alias = "clmul")]
+        #[unstable(feature = "uint_carryless_mul", issue = "152080")]
+        #[must_use = "this returns the result of the operation, \
+                      without modifying the original"]
+        #[inline(always)]
+        pub const fn carryless_mul(self, rhs: Self) -> Self {
+            intrinsics::carryless_mul(self, rhs)
         }
 
         /// Reverses the byte order of the integer.
@@ -2807,7 +2866,7 @@ macro_rules! uint_impl {
         /// assert_eq!((sum1, sum0), (9, 6));
         /// ```
         #[stable(feature = "unsigned_bigint_helpers", since = "1.91.0")]
-        #[rustc_const_unstable(feature = "bigint_helper_methods", issue = "85532")]
+        #[rustc_const_unstable(feature = "const_unsigned_bigint_helpers", issue = "152015")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
@@ -2899,7 +2958,7 @@ macro_rules! uint_impl {
         #[doc = concat!("assert_eq!((diff1, diff0), (3, ", stringify!($SelfT), "::MAX));")]
         /// ```
         #[stable(feature = "unsigned_bigint_helpers", since = "1.91.0")]
-        #[rustc_const_unstable(feature = "bigint_helper_methods", issue = "85532")]
+        #[rustc_const_unstable(feature = "const_unsigned_bigint_helpers", issue = "152015")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
@@ -3011,14 +3070,14 @@ macro_rules! uint_impl {
         /// # Examples
         ///
         /// ```
-        /// #![feature(bigint_helper_methods)]
+        /// #![feature(widening_mul)]
         #[doc = concat!("assert_eq!(5_", stringify!($SelfT), ".widening_mul(7), (35, 0));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.widening_mul(", stringify!($SelfT), "::MAX), (1, ", stringify!($SelfT), "::MAX - 1));")]
         /// ```
         ///
         /// Compared to other `*_mul` methods:
         /// ```
-        /// #![feature(bigint_helper_methods)]
+        /// #![feature(widening_mul)]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::widening_mul(1 << ", stringify!($BITS_MINUS_ONE), ", 6), (0, 3));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::overflowing_mul(1 << ", stringify!($BITS_MINUS_ONE), ", 6), (0, true));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::wrapping_mul(1 << ", stringify!($BITS_MINUS_ONE), ", 6), 0);")]
@@ -3028,12 +3087,12 @@ macro_rules! uint_impl {
         /// Please note that this example is shared among integer types, which is why `u32` is used.
         ///
         /// ```
-        /// #![feature(bigint_helper_methods)]
+        /// #![feature(widening_mul)]
         /// assert_eq!(5u32.widening_mul(2), (10, 0));
         /// assert_eq!(1_000_000_000u32.widening_mul(10), (1410065408, 2));
         /// ```
-        #[unstable(feature = "bigint_helper_methods", issue = "85532")]
-        #[rustc_const_unstable(feature = "bigint_helper_methods", issue = "85532")]
+        #[unstable(feature = "widening_mul", issue = "152016")]
+        #[rustc_const_unstable(feature = "widening_mul", issue = "152016")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
@@ -3072,7 +3131,6 @@ macro_rules! uint_impl {
         /// implementing it for wider-than-native types.
         ///
         /// ```
-        /// #![feature(bigint_helper_methods)]
         /// fn scalar_mul_eq(little_endian_digits: &mut Vec<u16>, multiplicand: u16) {
         ///     let mut carry = 0;
         ///     for d in little_endian_digits.iter_mut() {
@@ -3097,7 +3155,8 @@ macro_rules! uint_impl {
         /// except that it gives the value of the overflow instead of just whether one happened:
         ///
         /// ```
-        /// #![feature(bigint_helper_methods)]
+        /// # #![allow(unused_features)]
+        /// #![feature(const_unsigned_bigint_helpers)]
         /// let r = u8::carrying_mul(7, 13, 0);
         /// assert_eq!((r.0, r.1 != 0), u8::overflowing_mul(7, 13));
         /// let r = u8::carrying_mul(13, 42, 0);
@@ -3109,14 +3168,15 @@ macro_rules! uint_impl {
         /// [`wrapping_add`](Self::wrapping_add) methods:
         ///
         /// ```
-        /// #![feature(bigint_helper_methods)]
+        /// # #![allow(unused_features)]
+        /// #![feature(const_unsigned_bigint_helpers)]
         /// assert_eq!(
         ///     789_u16.carrying_mul(456, 123).0,
         ///     789_u16.wrapping_mul(456).wrapping_add(123),
         /// );
         /// ```
         #[stable(feature = "unsigned_bigint_helpers", since = "1.91.0")]
-        #[rustc_const_unstable(feature = "bigint_helper_methods", issue = "85532")]
+        #[rustc_const_unstable(feature = "const_unsigned_bigint_helpers", issue = "152015")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
@@ -3182,7 +3242,7 @@ macro_rules! uint_impl {
         /// );
         /// ```
         #[stable(feature = "unsigned_bigint_helpers", since = "1.91.0")]
-        #[rustc_const_unstable(feature = "bigint_helper_methods", issue = "85532")]
+        #[rustc_const_unstable(feature = "const_unsigned_bigint_helpers", issue = "152015")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]

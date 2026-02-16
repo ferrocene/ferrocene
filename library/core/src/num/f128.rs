@@ -108,6 +108,17 @@ pub mod consts {
     pub const FRAC_1_SQRT_3: f128 =
         0.577350269189625764509148780501957455647601751270126876018602_f128;
 
+    /// sqrt(5)
+    #[unstable(feature = "more_float_constants", issue = "146939")]
+    // Also, #[unstable(feature = "f128", issue = "116909")]
+    pub const SQRT_5: f128 = 2.23606797749978969640917366873127623544061835961152572427089_f128;
+
+    /// 1/sqrt(5)
+    #[unstable(feature = "more_float_constants", issue = "146939")]
+    // Also, #[unstable(feature = "f128", issue = "116909")]
+    pub const FRAC_1_SQRT_5: f128 =
+        0.447213595499957939281834733746255247088123671922305144854179_f128;
+
     /// Euler's number (e)
     #[unstable(feature = "f128", issue = "116909")]
     pub const E: f128 = 2.71828182845904523536028747135266249775724709369995957496697_f128;
@@ -137,11 +148,19 @@ pub mod consts {
     pub const LN_10: f128 = 2.30258509299404568401799145468436420760110148862877297603333_f128;
 }
 
-#[doc(test(attr(feature(cfg_target_has_reliable_f16_f128), allow(internal_features))))]
+#[doc(test(attr(
+    feature(cfg_target_has_reliable_f16_f128),
+    allow(internal_features, unused_features)
+)))]
 impl f128 {
     /// The radix or base of the internal representation of `f128`.
     #[unstable(feature = "f128", issue = "116909")]
     pub const RADIX: u32 = 2;
+
+    /// The size of this float type in bits.
+    // #[unstable(feature = "f128", issue = "116909")]
+    #[unstable(feature = "float_bits_const", issue = "151073")]
+    pub const BITS: u32 = 128;
 
     /// Number of significant digits in base 2.
     ///
@@ -1454,7 +1473,11 @@ impl f128 {
 // Functions in this module fall into `core_float_math`
 // #[unstable(feature = "core_float_math", issue = "137578")]
 #[cfg(not(test))]
-#[doc(test(attr(feature(cfg_target_has_reliable_f16_f128), expect(internal_features))))]
+#[doc(test(attr(
+    feature(cfg_target_has_reliable_f16_f128),
+    expect(internal_features),
+    allow(unused_features)
+)))]
 impl f128 {
     /// Returns the largest integer less than or equal to `self`.
     ///

@@ -14,7 +14,7 @@ mod tests;
 use std::ops::ControlFlow;
 
 use either::Either;
-use hir::{DefWithBody, EditionedFileId, InFile, InRealFile, MacroKind, Name, Semantics};
+use hir::{DefWithBody, EditionedFileId, InFile, InRealFile, MacroKind, Semantics};
 use ide_db::{FxHashMap, FxHashSet, MiniCore, Ranker, RootDatabase, SymbolKind};
 use syntax::{
     AstNode, AstToken, NodeOrToken,
@@ -257,8 +257,7 @@ fn traverse(
 
     // FIXME: accommodate range highlighting
     let mut body_stack: Vec<Option<DefWithBody>> = vec![];
-    let mut per_body_cache: FxHashMap<DefWithBody, (FxHashSet<_>, FxHashMap<Name, u32>)> =
-        FxHashMap::default();
+    let mut per_body_cache: FxHashMap<DefWithBody, FxHashSet<_>> = FxHashMap::default();
 
     // Walk all nodes, keeping track of whether we are inside a macro or not.
     // If in macro, expand it first and highlight the expanded code.
@@ -422,14 +421,11 @@ fn traverse(
         }
 
         let edition = descended_element.file_id.edition(sema.db);
-        let (unsafe_ops, bindings_shadow_count) = match current_body {
-            Some(current_body) => {
-                let (ops, bindings) = per_body_cache
-                    .entry(current_body)
-                    .or_insert_with(|| (sema.get_unsafe_ops(current_body), Default::default()));
-                (&*ops, Some(bindings))
-            }
-            None => (&empty, None),
+        let unsafe_ops = match current_body {
+            Some(current_body) => per_body_cache
+                .entry(current_body)
+                .or_insert_with(|| sema.get_unsafe_ops(current_body)),
+            None => &empty,
         };
         let is_unsafe_node =
             |node| unsafe_ops.contains(&InFile::new(descended_element.file_id, node));
@@ -438,7 +434,6 @@ fn traverse(
                 let hl = highlight::name_like(
                     sema,
                     krate,
-                    bindings_shadow_count,
                     &is_unsafe_node,
                     config.syntactic_name_ref_highlighting,
                     name_like,
@@ -513,21 +508,21 @@ fn string_injections(
             );
 
             if !string.is_raw() {
-                highlight_escape_string(hl, &string);
+                highlight_escape_string(hl, config, &string);
             }
         }
     } else if let Some(byte_string) = ast::ByteString::cast(token.clone()) {
         if !byte_string.is_raw() {
-            highlight_escape_string(hl, &byte_string);
+            highlight_escape_string(hl, config, &byte_string);
         }
     } else if let Some(c_string) = ast::CString::cast(token.clone()) {
         if !c_string.is_raw() {
-            highlight_escape_string(hl, &c_string);
+            highlight_escape_string(hl, config, &c_string);
         }
     } else if let Some(char) = ast::Char::cast(token.clone()) {
-        highlight_escape_char(hl, &char)
+        highlight_escape_char(hl, config, &char)
     } else if let Some(byte) = ast::Byte::cast(token) {
-        highlight_escape_byte(hl, &byte)
+        highlight_escape_byte(hl, config, &byte)
     }
     ControlFlow::Continue(())
 }
@@ -586,7 +581,11 @@ fn descend_token(
 
 fn filter_by_config(highlight: &mut Highlight, config: &HighlightConfig<'_>) -> bool {
     match &mut highlight.tag {
-        HlTag::StringLiteral if !config.strings => return false,
+        HlTag::StringLiteral | HlTag::EscapeSequence | HlTag::InvalidEscapeSequence
+            if !config.strings =>
+        {
+            return false;
+        }
         HlTag::Comment if !config.comments => return false,
         // If punctuation is disabled, make the macro bang part of the macro call again.
         tag @ HlTag::Punctuation(HlPunct::MacroBang) => {

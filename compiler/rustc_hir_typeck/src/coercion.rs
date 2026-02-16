@@ -50,7 +50,8 @@ use rustc_infer::traits::{
 };
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::{
-    Adjust, Adjustment, AllowTwoPhase, AutoBorrow, AutoBorrowMutability, PointerCoercion,
+    Adjust, Adjustment, AllowTwoPhase, AutoBorrow, AutoBorrowMutability, DerefAdjustKind,
+    PointerCoercion,
 };
 use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt};
@@ -595,7 +596,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
                 let mutbl = AutoBorrowMutability::new(mutbl_b, AllowTwoPhase::No);
 
                 Some((
-                    Adjustment { kind: Adjust::Deref(None), target: ty_a },
+                    Adjustment { kind: Adjust::Deref(DerefAdjustKind::Builtin), target: ty_a },
                     Adjustment {
                         kind: Adjust::Borrow(AutoBorrow::Ref(mutbl)),
                         target: Ty::new_ref(self.tcx, r_borrow, ty_a, mutbl_b),
@@ -606,7 +607,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
                 coerce_mutbls(mt_a, mt_b)?;
 
                 Some((
-                    Adjustment { kind: Adjust::Deref(None), target: ty_a },
+                    Adjustment { kind: Adjust::Deref(DerefAdjustKind::Builtin), target: ty_a },
                     Adjustment {
                         kind: Adjust::Borrow(AutoBorrow::RawPtr(mt_b)),
                         target: Ty::new_ptr(self.tcx, ty_a, mt_b),
@@ -643,7 +644,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
                 .infcx
                 .visit_proof_tree(
                     Goal::new(self.tcx, self.param_env, pred),
-                    &mut CoerceVisitor { fcx: self.fcx, span: self.cause.span },
+                    &mut CoerceVisitor { fcx: self.fcx, span: self.cause.span, errored: false },
                 )
                 .is_break()
             {
@@ -936,7 +937,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
             self.unify_and(
                 a_raw,
                 b,
-                [Adjustment { kind: Adjust::Deref(None), target: mt_a.ty }],
+                [Adjustment { kind: Adjust::Deref(DerefAdjustKind::Builtin), target: mt_a.ty }],
                 Adjust::Borrow(AutoBorrow::RawPtr(mutbl_b)),
                 ForceLeakCheck::No,
             )
@@ -1960,6 +1961,10 @@ impl<'tcx> CoerceMany<'tcx> {
 struct CoerceVisitor<'a, 'tcx> {
     fcx: &'a FnCtxt<'a, 'tcx>,
     span: Span,
+    /// Whether the coercion is impossible. If so we sometimes still try to
+    /// coerce in these cases to emit better errors. This changes the behavior
+    /// when hitting the recursion limit.
+    errored: bool,
 }
 
 impl<'tcx> ProofTreeVisitor<'tcx> for CoerceVisitor<'_, 'tcx> {
@@ -1986,6 +1991,7 @@ impl<'tcx> ProofTreeVisitor<'tcx> for CoerceVisitor<'_, 'tcx> {
             // If we prove the `Unsize` or `CoerceUnsized` goal, continue recursing.
             Ok(Certainty::Yes) => ControlFlow::Continue(()),
             Err(NoSolution) => {
+                self.errored = true;
                 // Even if we find no solution, continue recursing if we find a single candidate
                 // for which we're shallowly certain it holds to get the right error source.
                 if let [only_candidate] = &goal.candidates()[..]
@@ -2016,6 +2022,17 @@ impl<'tcx> ProofTreeVisitor<'tcx> for CoerceVisitor<'_, 'tcx> {
                     ControlFlow::Break(())
                 }
             }
+        }
+    }
+
+    fn on_recursion_limit(&mut self) -> Self::Result {
+        if self.errored {
+            // This prevents accidentally committing unfulfilled unsized coercions while trying to
+            // find the error source for diagnostics.
+            // See https://github.com/rust-lang/trait-system-refactor-initiative/issues/266.
+            ControlFlow::Break(())
+        } else {
+            ControlFlow::Continue(())
         }
     }
 }

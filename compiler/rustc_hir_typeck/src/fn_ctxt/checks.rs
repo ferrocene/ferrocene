@@ -5,6 +5,7 @@ use itertools::Itertools;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::codes::*;
 use rustc_errors::{Applicability, Diag, ErrorGuaranteed, MultiSpan, a_or_an, listify, pluralize};
+use rustc_hir::attrs::DivergingBlockBehavior;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::Visitor;
@@ -45,29 +46,6 @@ rustc_index::newtype_index! {
     #[orderable]
     #[debug_format = "GenericIdx({})"]
     pub(crate) struct GenericIdx {}
-}
-
-#[derive(Clone, Copy, Default)]
-pub(crate) enum DivergingBlockBehavior {
-    /// This is the current stable behavior:
-    ///
-    /// ```rust
-    /// {
-    ///     return;
-    /// } // block has type = !, even though we are supposedly dropping it with `;`
-    /// ```
-    #[default]
-    Never,
-
-    /// Alternative behavior:
-    ///
-    /// ```ignore (very-unstable-new-attribute)
-    /// #![rustc_never_type_options(diverging_block_default = "unit")]
-    /// {
-    ///     return;
-    /// } // block has type = (), since we are dropping `!` from `return` with `;`
-    /// ```
-    Unit,
 }
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
@@ -2647,7 +2625,15 @@ impl<'a, 'b, 'tcx> FnCallDiagCtxt<'a, 'b, 'tcx> {
                 // To suggest a multipart suggestion when encountering `foo(1, "")` where the def
                 // was `fn foo(())`.
                 let (_, expected_ty) = self.formal_and_expected_inputs[expected_idx];
-                suggestions.push((*arg_span, self.ty_to_snippet(expected_ty, expected_idx)));
+                // Check if the new suggestion would overlap with any existing suggestion.
+                // This can happen when we have both removal suggestions (which may include
+                // adjacent commas) and type replacement suggestions for the same span.
+                let dominated = suggestions
+                    .iter()
+                    .any(|(span, _)| span.contains(*arg_span) || arg_span.overlaps(*span));
+                if !dominated {
+                    suggestions.push((*arg_span, self.ty_to_snippet(expected_ty, expected_idx)));
+                }
             }
         }
     }

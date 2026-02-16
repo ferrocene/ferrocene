@@ -10,9 +10,9 @@ auto_big_endian: true
 neon-stable: &neon-stable
   FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]
 
-# #[stable(feature = "stdarch_neon_fp16", since = "CURRENT_RUSTC_VERSION")]
+# #[stable(feature = "stdarch_neon_fp16", since = "1.94.0")]
 neon-stable-fp16: &neon-stable-fp16
-  FnCall: [stable, ['feature = "stdarch_neon_fp16"', 'since = "CURRENT_RUSTC_VERSION"']]
+  FnCall: [stable, ['feature = "stdarch_neon_fp16"', 'since = "1.94.0"']]
 
 # #[cfg_attr(target_arch = "arm", unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800"))]
 neon-cfg-arm-unstable: &neon-cfg-arm-unstable
@@ -55,9 +55,9 @@ neon-target-aarch64-arm64ec: &neon-target-aarch64-arm64ec
 neon-not-arm-stable: &neon-not-arm-stable
   FnCall: [cfg_attr, [{ FnCall: [not, ['target_arch = "arm"']]}, {FnCall: [stable, ['feature = "neon_intrinsics"', 'since = "1.59.0"']]}]]
 
-# #[cfg_attr(not(target_arch = "arm"), stable(feature = "stdarch_neon_fp16", since = "CURRENT_RUSTC_VERSION"))]
+# #[cfg_attr(not(target_arch = "arm"), stable(feature = "stdarch_neon_fp16", since = "1.94.0"))]
 neon-not-arm-stable-fp16: &neon-not-arm-stable-fp16
-  FnCall: [cfg_attr, [{ FnCall: [not, ['target_arch = "arm"']]}, {FnCall: [stable, ['feature = "stdarch_neon_fp16"', 'since = "CURRENT_RUSTC_VERSION"']]}]]
+  FnCall: [cfg_attr, [{ FnCall: [not, ['target_arch = "arm"']]}, {FnCall: [stable, ['feature = "stdarch_neon_fp16"', 'since = "1.94.0"']]}]]
 
 # #[cfg_attr(all(test, not(target_env = "msvc"))]
 msvc-disabled: &msvc-disabled
@@ -2703,8 +2703,8 @@ intrinsics:
     attr:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
-      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld1]]}]]
-      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld1]]}]]
+      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
     safety:
@@ -2717,13 +2717,12 @@ intrinsics:
       - ["*const f32", float32x2x4_t]
       - ["*const f32", float32x4x4_t]
     compose:
-      - LLVMLink:
-          name: "vld1x{neon_type[1].tuple}.{neon_type[1]}"
-          links:
-            - link: "llvm.aarch64.neon.ld1x{neon_type[1].tuple}.v{neon_type[1].lane}f{neon_type[1].base}.p0"
-              arch: aarch64,arm64ec
-            - link: "llvm.arm.neon.vld1x{neon_type[1].tuple}.v{neon_type[1].lane}f{neon_type[1].base}.p0"
-              arch: arm
+      - FnCall:
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - a
+                - cast
+                - []
 
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
@@ -2732,8 +2731,8 @@ intrinsics:
     attr:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
-      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld1]]}]]
-      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld1]]}]]
+      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
     safety:
@@ -2764,13 +2763,12 @@ intrinsics:
       - ["*const i64", int64x2x3_t]
       - ["*const i64", int64x2x4_t]
     compose:
-      - LLVMLink:
-          name: "ld1x{neon_type[1].tuple}.{neon_type[1]}"
-          links:
-            - link: "llvm.aarch64.neon.ld1x{neon_type[1].tuple}.v{neon_type[1].lane}i{neon_type[1].base}.p0"
-              arch: aarch64,arm64ec
-            - link: "llvm.arm.neon.vld1x{neon_type[1].tuple}.v{neon_type[1].lane}i{neon_type[1].base}.p0"
-              arch: arm
+      - FnCall:
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - a
+                - cast
+                - []
 
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
@@ -2779,8 +2777,8 @@ intrinsics:
     attr:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
-      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld1]]}]]
-      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld1]]}]]
+      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
     big_endian_inverse: false
@@ -2825,12 +2823,11 @@ intrinsics:
       - ["*const p16", poly16x8x4_t, int16x8x4_t]
     compose:
       - FnCall:
-          - transmute
-          - - FnCall:
-                - "vld1{neon_type[2].no}"
-                - - FnCall:
-                      - transmute
-                      - - a
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - a
+                - cast
+                - []
 
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
@@ -2841,7 +2838,7 @@ intrinsics:
       - *neon-aes
       - *neon-v8
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [nop]]}]]
-      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld1]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
     big_endian_inverse: false
@@ -2855,12 +2852,11 @@ intrinsics:
       - ["*const p64", poly64x2x4_t, int64x2x4_t]
     compose:
       - FnCall:
-          - transmute
-          - - FnCall:
-                - "vld1{neon_type[2].no}"
-                - - FnCall:
-                      - transmute
-                      - - a
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - a
+                - cast
+                - []
 
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
@@ -2870,8 +2866,8 @@ intrinsics:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-aes
       - *neon-v8
-      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld1]]}]]
-      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld1]]}]]
+      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
     safety:
@@ -2880,12 +2876,11 @@ intrinsics:
       - ["*const p64", poly64x1x2_t, int64x1x2_t]
     compose:
       - FnCall:
-          - transmute
-          - - FnCall:
-                - "vld1{neon_type[2].no}"
-                - - FnCall:
-                      - transmute
-                      - - a
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - a
+                - cast
+                - []
 
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
@@ -2895,7 +2890,7 @@ intrinsics:
       - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
       - *neon-v7
       - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vld1]]}]]
-      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld1]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [ld]]}]]
       - *arm-fp16
       - *neon-unstable-f16
       - *target-not-arm64ec
@@ -2909,13 +2904,12 @@ intrinsics:
       - ["*const f16", float16x4x4_t]
       - ["*const f16", float16x8x4_t]
     compose:
-      - LLVMLink:
-          name: "vld1x{neon_type[1].tuple}.{neon_type[1]}"
-          links:
-            - link: "llvm.aarch64.neon.ld1x{neon_type[1].tuple}.v{neon_type[1].lane}f{neon_type[1].base}.p0"
-              arch: aarch64,arm64ec
-            - link: "llvm.arm.neon.vld1x{neon_type[1].tuple}.v{neon_type[1].lane}f{neon_type[1].base}.p0"
-              arch: arm
+      - FnCall:
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - a
+                - cast
+                - []
 
   - name: "vld1{type[2]}_{neon_type[1]}"
     doc: "Load one single-element structure to one lane of one register"

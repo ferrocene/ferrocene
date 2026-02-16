@@ -420,6 +420,8 @@ declare_features! (
     (unstable, const_async_blocks, "1.53.0", Some(85368)),
     /// Allows `const { ... }` as a shorthand for `const _: () = const { ... };` for module items.
     (unstable, const_block_items, "CURRENT_RUSTC_VERSION", Some(149226)),
+    /// Allows defining and calling c-variadic functions in const contexts.
+    (unstable, const_c_variadic, "CURRENT_RUSTC_VERSION", Some(151787)),
     /// Allows `const || {}` closures in const contexts.
     (incomplete, const_closures, "1.68.0", Some(106003)),
     /// Allows using `[const] Destruct` bounds and calling drop impls in const contexts.
@@ -454,8 +456,6 @@ declare_features! (
     /// Allows the use of default values on struct definitions and the construction of struct
     /// literals with the functional update syntax without a base.
     (unstable, default_field_values, "1.85.0", Some(132162)),
-    /// Allows using `#[deprecated_safe]` to deprecate the safeness of a function or trait
-    (unstable, deprecated_safe, "1.61.0", Some(94978)),
     /// Allows having using `suggestion` in the `#[deprecated]` attribute.
     (unstable, deprecated_suggestion, "1.61.0", Some(94785)),
     /// Allows deref patterns.

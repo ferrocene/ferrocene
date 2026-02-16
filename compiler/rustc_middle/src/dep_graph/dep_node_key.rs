@@ -2,12 +2,11 @@ use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalModDefId, ModDefId};
 use rustc_hir::definitions::DefPathHash;
 use rustc_hir::{HirId, ItemLocalId, OwnerId};
-use rustc_query_system::dep_graph::{DepContext, DepNode, DepNodeKey, FingerprintStyle};
 
-use crate::dep_graph::DepNodeExt;
+use crate::dep_graph::{DepNode, DepNodeKey, FingerprintStyle};
 use crate::ty::TyCtxt;
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for () {
+impl<'tcx> DepNodeKey<'tcx> for () {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::Unit
@@ -24,7 +23,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for () {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for DefId {
+impl<'tcx> DepNodeKey<'tcx> for DefId {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::DefPathHash
@@ -46,7 +45,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for DefId {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for LocalDefId {
+impl<'tcx> DepNodeKey<'tcx> for LocalDefId {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::DefPathHash
@@ -68,7 +67,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for LocalDefId {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for OwnerId {
+impl<'tcx> DepNodeKey<'tcx> for OwnerId {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::DefPathHash
@@ -90,7 +89,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for OwnerId {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for CrateNum {
+impl<'tcx> DepNodeKey<'tcx> for CrateNum {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::DefPathHash
@@ -113,7 +112,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for CrateNum {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for (DefId, DefId) {
+impl<'tcx> DepNodeKey<'tcx> for (DefId, DefId) {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::Opaque
@@ -140,7 +139,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for (DefId, DefId) {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for HirId {
+impl<'tcx> DepNodeKey<'tcx> for HirId {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::HirId
@@ -183,7 +182,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for HirId {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for ModDefId {
+impl<'tcx> DepNodeKey<'tcx> for ModDefId {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::DefPathHash
@@ -205,7 +204,7 @@ impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for ModDefId {
     }
 }
 
-impl<'tcx> DepNodeKey<TyCtxt<'tcx>> for LocalModDefId {
+impl<'tcx> DepNodeKey<'tcx> for LocalModDefId {
     #[inline(always)]
     fn fingerprint_style() -> FingerprintStyle {
         FingerprintStyle::DefPathHash

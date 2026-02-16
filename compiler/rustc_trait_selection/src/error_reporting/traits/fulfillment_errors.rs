@@ -11,8 +11,8 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
 use rustc_errors::{
-    Applicability, Diag, ErrorGuaranteed, Level, MultiSpan, StashKey, StringPart, Suggestions,
-    inline_fluent, pluralize, struct_span_code_err,
+    Applicability, Diag, ErrorGuaranteed, Level, MultiSpan, StashKey, StringPart, Suggestions, msg,
+    pluralize, struct_span_code_err,
 };
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::intravisit::Visitor;
@@ -277,6 +277,28 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         };
 
                         let mut err = struct_span_code_err!(self.dcx(), span, E0277, "{}", err_msg);
+
+                        let trait_def_id = main_trait_predicate.def_id();
+                        if self.tcx.is_diagnostic_item(sym::From, trait_def_id)
+                            || self.tcx.is_diagnostic_item(sym::TryFrom, trait_def_id)
+                        {
+                            let found_ty = leaf_trait_predicate.skip_binder().trait_ref.args.type_at(1);
+                            let ty = main_trait_predicate.skip_binder().self_ty();
+                            if let Some(cast_ty) = self.find_explicit_cast_type(
+                                obligation.param_env,
+                                found_ty,
+                                ty,
+                            ) {
+                                let found_ty_str = self.tcx.short_string(found_ty, &mut long_ty_file);
+                                let cast_ty_str = self.tcx.short_string(cast_ty, &mut long_ty_file);
+                                err.help(
+                                    format!(
+                                        "consider casting the `{found_ty_str}` value to `{cast_ty_str}`",
+                                    ),
+                                );
+                            }
+                        }
+
                         *err.long_ty_path() = long_ty_file;
 
                         let mut suggested = false;
@@ -2241,7 +2263,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 err.highlighted_span_help(
                     self.tcx.def_span(def_id),
                     vec![
-                        StringPart::normal(format!("the trait `{trait_}` ",)),
+                        StringPart::normal(format!("the trait `{trait_}` ")),
                         StringPart::highlighted("is"),
                         StringPart::normal(desc),
                         StringPart::highlighted(self_ty),
@@ -2932,6 +2954,69 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         })
     }
 
+    /// If `found_ty` is a reference that can be explicitly cast to another reference type for which
+    /// a `From` / `TryFrom` impl exists for `self_ty`, return that type.
+    fn find_explicit_cast_type(
+        &self,
+        param_env: ty::ParamEnv<'tcx>,
+        found_ty: Ty<'tcx>,
+        self_ty: Ty<'tcx>,
+    ) -> Option<Ty<'tcx>> {
+        let ty::Ref(region, inner_ty, mutbl) = *found_ty.kind() else {
+            return None;
+        };
+
+        let mut derefs = (self.autoderef_steps)(inner_ty).into_iter();
+        derefs.next(); // skip the first one, which is inner_ty itself
+        let deref_target = derefs.into_iter().next()?.0;
+
+        let cast_ty = Ty::new_ref(self.tcx, region, deref_target, mutbl);
+
+        let Some(from_def_id) = self.tcx.get_diagnostic_item(sym::From) else {
+            return None;
+        };
+        let Some(try_from_def_id) = self.tcx.get_diagnostic_item(sym::TryFrom) else {
+            return None;
+        };
+
+        if self.has_impl_for_type(
+            param_env,
+            ty::TraitRef::new(
+                self.tcx,
+                from_def_id,
+                self.tcx.mk_args(&[self_ty.into(), cast_ty.into()]),
+            ),
+        ) {
+            Some(cast_ty)
+        } else if self.has_impl_for_type(
+            param_env,
+            ty::TraitRef::new(
+                self.tcx,
+                try_from_def_id,
+                self.tcx.mk_args(&[self_ty.into(), cast_ty.into()]),
+            ),
+        ) {
+            Some(cast_ty)
+        } else {
+            None
+        }
+    }
+
+    fn has_impl_for_type(
+        &self,
+        param_env: ty::ParamEnv<'tcx>,
+        trait_ref: ty::TraitRef<'tcx>,
+    ) -> bool {
+        let obligation = Obligation::new(
+            self.tcx,
+            ObligationCause::dummy(),
+            param_env,
+            ty::TraitPredicate { trait_ref, polarity: ty::PredicatePolarity::Positive },
+        );
+
+        self.predicate_must_hold_modulo_regions(&obligation)
+    }
+
     fn add_tuple_trait_message(
         &self,
         obligation_cause_code: &ObligationCauseCode<'tcx>,
@@ -3003,7 +3088,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         {
             err.span_help(
                 self.tcx.def_span(trait_def_id),
-                inline_fluent!("this trait has no implementations, consider adding one"),
+                msg!("this trait has no implementations, consider adding one"),
             );
         } else if !suggested && trait_predicate.polarity() == ty::PredicatePolarity::Positive {
             // Can't show anything else useful, try to find similar impls.

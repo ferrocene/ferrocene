@@ -354,6 +354,7 @@ pub enum Mode {
 }
 
 impl Mode {
+<<<<<<< HEAD
     pub fn is_tool(&self) -> bool {
         match self {
             Mode::ToolBootstrap
@@ -365,6 +366,16 @@ impl Mode {
         }
     }
 
+||||||| 381e9ef09ef
+    pub fn is_tool(&self) -> bool {
+        match self {
+            Mode::ToolBootstrap | Mode::ToolRustcPrivate | Mode::ToolStd | Mode::ToolTarget => true,
+            Mode::Std | Mode::Codegen | Mode::Rustc => false,
+        }
+    }
+
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn must_support_dlopen(&self) -> bool {
         match self {
             Mode::Std | Mode::Codegen => true,

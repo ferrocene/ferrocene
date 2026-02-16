@@ -6,12 +6,13 @@ use std::borrow::Cow;
 use either::{Left, Right};
 use rustc_abi::{self as abi, ExternAbi, FieldIdx, Integer, VariantIdx};
 use rustc_data_structures::assert_matches;
-use rustc_errors::inline_fluent;
+use rustc_errors::msg;
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::DefId;
+use rustc_hir::find_attr;
 use rustc_middle::ty::layout::{IntegerExt, TyAndLayout};
 use rustc_middle::ty::{self, AdtDef, Instance, Ty, VariantDef};
 use rustc_middle::{bug, mir, span_bug};
-use rustc_span::sym;
 use rustc_target::callconv::{ArgAbi, FnAbi, PassMode};
 use tracing::field::Empty;
 use tracing::{info, instrument, trace};
@@ -19,7 +20,7 @@ use tracing::{info, instrument, trace};
 use super::{
     CtfeProvenance, FnVal, ImmTy, InterpCx, InterpResult, MPlaceTy, Machine, OpTy, PlaceTy,
     Projectable, Provenance, ReturnAction, ReturnContinuation, Scalar, StackPopInfo, interp_ok,
-    throw_ub, throw_ub_custom, throw_unsup_format,
+    throw_ub, throw_ub_custom,
 };
 use crate::enter_trace_span;
 use crate::interpret::EnteredTraceSpan;
@@ -91,6 +92,9 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 let (_, field) = layout.non_1zst_field(self).unwrap();
                 self.unfold_transparent(field, may_unfold)
             }
+            ty::Pat(base, _) => self.layout_of(*base).expect(
+                "if the layout of a pattern type could be computed, so can the layout of its base",
+            ),
             // Not a transparent type, no further unfolding.
             _ => layout,
         }
@@ -142,7 +146,10 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         // Check if the inner type is one of the NPO-guaranteed ones.
         // For that we first unpeel transparent *structs* (but not unions).
         let is_npo = |def: AdtDef<'tcx>| {
-            self.tcx.has_attr(def.did(), sym::rustc_nonnull_optimization_guaranteed)
+            find_attr!(
+                self.tcx.get_all_attrs(def.did()),
+                AttributeKind::RustcNonnullOptimizationGuaranteed
+            )
         };
         let inner = self.unfold_transparent(inner, /* may_unfold */ |def| {
             // Stop at NPO types so that we don't miss that attribute in the check below!
@@ -294,9 +301,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         }
         // Find next caller arg.
         let Some((caller_arg, caller_abi)) = caller_args.next() else {
-            throw_ub_custom!(inline_fluent!(
-                "calling a function with fewer arguments than it requires"
-            ));
+            throw_ub_custom!(msg!("calling a function with fewer arguments than it requires"));
         };
         assert_eq!(caller_arg.layout().layout, caller_abi.layout.layout);
         // Sadly we cannot assert that `caller_arg.layout().ty` and `caller_abi.layout.ty` are
@@ -353,22 +358,40 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
     ) -> InterpResult<'tcx> {
         let _trace = enter_trace_span!(M, step::init_stack_frame, %instance, tracing_separate_thread = Empty);
 
-        // Compute callee information.
-        // FIXME: for variadic support, do we have to somehow determine callee's extra_args?
-        let callee_fn_abi = self.fn_abi_of_instance(instance, ty::List::empty())?;
-
-        if callee_fn_abi.c_variadic || caller_fn_abi.c_variadic {
-            throw_unsup_format!("calling a c-variadic function is not supported");
-        }
+        // The first order of business is to figure out the callee signature.
+        // However, that requires the list of variadic arguments.
+        // We use the *caller* information to determine where to split the list of arguments,
+        // and then later check that the callee indeed has the same number of fixed arguments.
+        let extra_tys = if caller_fn_abi.c_variadic {
+            let fixed_count = usize::try_from(caller_fn_abi.fixed_count).unwrap();
+            let extra_tys = args[fixed_count..].iter().map(|arg| arg.layout().ty);
+            self.tcx.mk_type_list_from_iter(extra_tys)
+        } else {
+            ty::List::empty()
+        };
+        let callee_fn_abi = self.fn_abi_of_instance(instance, extra_tys)?;
 
         if caller_fn_abi.conv != callee_fn_abi.conv {
             throw_ub_custom!(
-                rustc_errors::inline_fluent!(
+                rustc_errors::msg!(
                     "calling a function with calling convention \"{$callee_conv}\" using calling convention \"{$caller_conv}\""
                 ),
                 callee_conv = format!("{}", callee_fn_abi.conv),
                 caller_conv = format!("{}", caller_fn_abi.conv),
             )
+        }
+
+        if caller_fn_abi.c_variadic != callee_fn_abi.c_variadic {
+            throw_ub!(CVariadicMismatch {
+                caller_is_c_variadic: caller_fn_abi.c_variadic,
+                callee_is_c_variadic: callee_fn_abi.c_variadic,
+            });
+        }
+        if caller_fn_abi.c_variadic && caller_fn_abi.fixed_count != callee_fn_abi.fixed_count {
+            throw_ub!(CVariadicFixedCountMismatch {
+                caller: caller_fn_abi.fixed_count,
+                callee: callee_fn_abi.fixed_count,
+            });
         }
 
         // Check that all target features required by the callee (i.e., from
@@ -443,6 +466,10 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             // `pass_argument` would be the loop body. It takes care to
             // not advance `caller_iter` for ignored arguments.
             let mut callee_args_abis = callee_fn_abi.args.iter().enumerate();
+            // Determine whether there is a special VaList argument. This is always the
+            // last argument, and since arguments start at index 1 that's `arg_count`.
+            let va_list_arg =
+                callee_fn_abi.c_variadic.then(|| mir::Local::from_usize(body.arg_count));
             for local in body.args_iter() {
                 // Construct the destination place for this argument. At this point all
                 // locals are still dead, so we cannot construct a `PlaceTy`.
@@ -451,7 +478,31 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 // type, but the result gets cached so this avoids calling the instantiation
                 // query *again* the next time this local is accessed.
                 let ty = self.layout_of_local(self.frame(), local, None)?.ty;
-                if Some(local) == body.spread_arg {
+                if Some(local) == va_list_arg {
+                    // This is the last callee-side argument of a variadic function.
+                    // This argument is a VaList holding the remaining caller-side arguments.
+                    self.storage_live(local)?;
+
+                    let place = self.eval_place(dest)?;
+                    let mplace = self.force_allocation(&place)?;
+
+                    // Consume the remaining arguments by putting them into the variable argument
+                    // list.
+                    let varargs = self.allocate_varargs(&mut caller_args, &mut callee_args_abis)?;
+                    // When the frame is dropped, these variable arguments are deallocated.
+                    self.frame_mut().va_list = varargs.clone();
+                    let key = self.va_list_ptr(varargs.into());
+
+                    // Zero the VaList, so it is fully initialized.
+                    self.write_bytes_ptr(
+                        mplace.ptr(),
+                        (0..mplace.layout.size.bytes()).map(|_| 0u8),
+                    )?;
+
+                    // Store the "key" pointer in the right field.
+                    let key_mplace = self.va_list_key_field(&mplace)?;
+                    self.write_pointer(key, &key_mplace)?;
+                } else if Some(local) == body.spread_arg {
                     // Make the local live once, then fill in the value field by field.
                     self.storage_live(local)?;
                     // Must be a tuple
@@ -490,15 +541,13 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             if instance.def.requires_caller_location(*self.tcx) {
                 callee_args_abis.next().unwrap();
             }
-            // Now we should have no more caller args or callee arg ABIs
+            // Now we should have no more caller args or callee arg ABIs.
             assert!(
                 callee_args_abis.next().is_none(),
                 "mismatch between callee ABI and callee body arguments"
             );
             if caller_args.next().is_some() {
-                throw_ub_custom!(inline_fluent!(
-                    "calling a function with more arguments than it expected"
-                ));
+                throw_ub_custom!(msg!("calling a function with more arguments than it expected"));
             }
             // Don't forget to check the return type!
             if !self.check_argument_compat(&caller_fn_abi.ret, &callee_fn_abi.ret)? {
@@ -698,7 +747,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 let vtable_entries = self.vtable_entries(receiver_trait.principal(), dyn_ty);
                 let Some(ty::VtblEntry::Method(fn_inst)) = vtable_entries.get(idx).copied() else {
                     // FIXME(fee1-dead) these could be variants of the UB info enum instead of this
-                    throw_ub_custom!(inline_fluent!(
+                    throw_ub_custom!(msg!(
                         "`dyn` call trying to call something that is not a method"
                     ));
                 };
@@ -897,7 +946,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             }
         );
         if unwinding && self.frame_idx() == 0 {
-            throw_ub_custom!(inline_fluent!("unwinding past the topmost frame of the stack"));
+            throw_ub_custom!(msg!("unwinding past the topmost frame of the stack"));
         }
 
         // Get out the return value. Must happen *before* the frame is popped as we have to get the

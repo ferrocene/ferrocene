@@ -193,7 +193,7 @@ fn display_help() -> ExitCode {
 // Ferrocene addition: report bugs downstream, not upstream.
 const BUG_REPORT_URL: &str = "https://github.com/ferrocene/ferrocene/issues/new";
 
-pub fn main() -> ExitCode {
+fn main() -> ExitCode {
     let early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
 
     rustc_driver::init_rustc_env_logger(&early_dcx);
@@ -258,7 +258,7 @@ pub fn main() -> ExitCode {
             return match writeln!(&mut anstream::stdout().lock(), "{version_info}") {
                 Ok(()) => ExitCode::SUCCESS,
                 Err(_) => ExitCode::FAILURE,
-            }
+            };
         }
 
         // Setting RUSTC_WRAPPER causes Cargo to pass 'rustc' as the first argument.

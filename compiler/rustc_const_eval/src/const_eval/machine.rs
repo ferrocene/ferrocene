@@ -5,11 +5,12 @@ use std::hash::Hash;
 use rustc_abi::{Align, Size};
 use rustc_ast::Mutability;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, IndexEntry};
-use rustc_errors::inline_fluent;
+use rustc_errors::msg;
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{self as hir, CRATE_HIR_ID, LangItem};
+use rustc_hir::{self as hir, CRATE_HIR_ID, LangItem, find_attr};
 use rustc_middle::mir::AssertMessage;
-use rustc_middle::mir::interpret::{Pointer, ReportedErrorInfo};
+use rustc_middle::mir::interpret::ReportedErrorInfo;
 use rustc_middle::query::TyCtxtAt;
 use rustc_middle::ty::layout::{HasTypingEnv, TyAndLayout, ValidityRequirement};
 use rustc_middle::ty::{self, Ty, TyCtxt};
@@ -22,7 +23,7 @@ use super::error::*;
 use crate::errors::{LongRunning, LongRunningWarn};
 use crate::interpret::{
     self, AllocId, AllocInit, AllocRange, ConstAllocation, CtfeProvenance, FnArg, Frame,
-    GlobalAlloc, ImmTy, InterpCx, InterpResult, OpTy, PlaceTy, RangeSet, Scalar,
+    GlobalAlloc, ImmTy, InterpCx, InterpResult, OpTy, PlaceTy, Pointer, RangeSet, Scalar,
     compile_time_machine, err_inval, interp_ok, throw_exhaust, throw_inval, throw_ub,
     throw_ub_custom, throw_unsup, throw_unsup_format,
 };
@@ -440,7 +441,9 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
             // sensitive check here. But we can at least rule out functions that are not const at
             // all. That said, we have to allow calling functions inside a `const trait`. These
             // *are* const-checked!
-            if !ecx.tcx.is_const_fn(def) || ecx.tcx.has_attr(def, sym::rustc_do_not_const_check) {
+            if !ecx.tcx.is_const_fn(def)
+                || find_attr!(ecx.tcx.get_all_attrs(def), AttributeKind::RustcDoNotConstCheck)
+            {
                 // We certainly do *not* want to actually call the fn
                 // though, so be sure we return here.
                 throw_unsup_format!("calling non-const function `{}`", instance)
@@ -489,12 +492,12 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 let align = match Align::from_bytes(align) {
                     Ok(a) => a,
                     Err(err) => throw_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "invalid align passed to `{$name}`: {$align} is {$err_kind ->
-    [not_power_of_two] not a power of 2
-    [too_large] too large
-    *[other] {\"\"}
-}"
+                                [not_power_of_two] not a power of 2
+                                [too_large] too large
+                                *[other] {\"\"}
+                            }"
                         ),
                         name = "const_allocate",
                         err_kind = err.diag_ident(),
@@ -519,12 +522,12 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 let align = match Align::from_bytes(align) {
                     Ok(a) => a,
                     Err(err) => throw_ub_custom!(
-                        inline_fluent!(
+                        msg!(
                             "invalid align passed to `{$name}`: {$align} is {$err_kind ->
-    [not_power_of_two] not a power of 2
-    [too_large] too large
-    *[other] {\"\"}
-}"
+                                [not_power_of_two] not a power of 2
+                                [too_large] too large
+                                *[other] {\"\"}
+                            }"
                         ),
                         name = "const_deallocate",
                         err_kind = err.diag_ident(),

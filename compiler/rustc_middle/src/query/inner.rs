@@ -1,13 +1,13 @@
 //! Helper functions that serve as the immediate implementation of
 //! `tcx.$query(..)` and its variations.
 
-use rustc_query_system::dep_graph::{DepKind, DepNodeKey};
-use rustc_query_system::query::{QueryCache, QueryMode};
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
 
 use crate::dep_graph;
+use crate::dep_graph::{DepKind, DepNodeKey};
 use crate::query::erase::{self, Erasable, Erased};
 use crate::query::plumbing::QueryVTable;
+use crate::query::{QueryCache, QueryMode};
 use crate::ty::TyCtxt;
 
 /// Checks whether there is already a value for this key in the in-memory
@@ -105,7 +105,7 @@ pub(crate) fn query_feed<'tcx, Cache>(
     value: Cache::Value,
 ) where
     Cache: QueryCache,
-    Cache::Key: DepNodeKey<TyCtxt<'tcx>>,
+    Cache::Key: DepNodeKey<'tcx>,
 {
     let format_value = query_vtable.format_value;
 

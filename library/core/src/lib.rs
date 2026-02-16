@@ -87,6 +87,7 @@
 #![allow(incomplete_features)]
 #![warn(multiple_supertrait_upcastable)]
 #![allow(internal_features)]
+#![allow(unused_features)]
 #![deny(ffi_unwind_calls)]
 #![warn(unreachable_pub)]
 // Do not check link redundancy on bootstrapping phase
@@ -97,11 +98,23 @@
 // of conflicts we have when merging main.
 //
 // Library features:
+<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
+||||||| 381e9ef09ef
+// tidy-alphabetical-start
+#![feature(array_ptr_get)]
+#![feature(asm_experimental_arch)]
+#![feature(bstr)]
+#![feature(bstr_internals)]
+=======
+// tidy-alphabetical-start
+#![feature(asm_experimental_arch)]
+#![feature(bstr_internals)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(cfg_select)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(const_carrying_mul_add)]
@@ -109,16 +122,26 @@
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(const_select_unpredictable)]
-#![feature(const_unsigned_bigint_helpers)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
 #![feature(internal_impls_macro)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ip))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(is_ascii_octdigit))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
+||||||| 381e9ef09ef
+#![feature(ip)]
+#![feature(is_ascii_octdigit)]
+#![feature(link_cfg)]
+#![feature(offset_of_enum)]
+=======
+#![feature(link_cfg)]
+#![feature(offset_of_enum)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(panic_internals)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_metadata))]
@@ -129,12 +152,36 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(type_info))]
+||||||| 381e9ef09ef
+#![feature(pattern_type_macro)]
+#![feature(ptr_alignment_type)]
+#![feature(ptr_metadata)]
+#![feature(set_ptr_value)]
+#![feature(signed_bigint_helpers)]
+#![feature(slice_ptr_get)]
+#![feature(str_internals)]
+#![feature(str_split_inclusive_remainder)]
+#![feature(str_split_remainder)]
+#![feature(type_info)]
+=======
+#![feature(pattern_type_macro)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(ub_checks)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(utf16_extra))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(variant_count))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(widening_mul))]
 // not-alphabetical-end
+||||||| 381e9ef09ef
+#![feature(unsafe_pinned)]
+#![feature(utf16_extra)]
+#![feature(variant_count)]
+#![feature(widening_mul)]
+// tidy-alphabetical-end
+=======
+// tidy-alphabetical-end
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //
 // Language features:
 // not-alphabetical-start
@@ -178,7 +225,6 @@
 #![feature(optimize_attribute)]
 #![feature(pattern_types)]
 #![feature(prelude_import)]
-#![feature(reborrow)]
 #![feature(repr_simd)]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
@@ -191,6 +237,7 @@
 #![feature(trait_alias)]
 #![feature(transparent_unions)]
 #![feature(try_blocks)]
+#![feature(uint_carryless_mul)]
 #![feature(unboxed_closures)]
 #![feature(unsized_fn_params)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(with_negative_coherence))]
@@ -238,6 +285,7 @@ use prelude::rust_2024::*;
 #[macro_use]
 mod macros;
 
+<<<<<<< HEAD
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
@@ -245,6 +293,11 @@ mod macros;
 pub mod ferrocene_test;
 
 #[unstable(feature = "assert_matches", issue = "82775")]
+||||||| 381e9ef09ef
+#[unstable(feature = "assert_matches", issue = "82775")]
+=======
+#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]

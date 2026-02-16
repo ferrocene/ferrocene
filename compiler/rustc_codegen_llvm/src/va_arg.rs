@@ -1122,7 +1122,7 @@ pub(super) fn emit_va_arg<'ll, 'tcx>(
             AllowHigherAlign::Yes,
             ForceRightAdjust::No,
         ),
-        Arch::Wasm32 => emit_ptr_va_arg(
+        Arch::Wasm32 | Arch::Wasm64 => emit_ptr_va_arg(
             bx,
             addr,
             target_ty,
@@ -1135,7 +1135,6 @@ pub(super) fn emit_va_arg<'ll, 'tcx>(
             AllowHigherAlign::Yes,
             ForceRightAdjust::No,
         ),
-        Arch::Wasm64 => bug!("c-variadic functions are not fully implemented for wasm64"),
         Arch::CSky => emit_ptr_va_arg(
             bx,
             addr,

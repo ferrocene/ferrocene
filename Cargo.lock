@@ -1300,9 +1300,9 @@ dependencies = [
 
 [[package]]
 name = "ena"
-version = "0.14.3"
+version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d248bdd43ce613d87415282f69b9bb99d947d290b10962dd6c56233312c2ad5"
+checksum = "eabffdaee24bd1bf95c5ef7cec31260444317e72ea56c4c91750e8b7ee58d5f1"
 dependencies = [
  "log",
 ]
@@ -3689,7 +3689,6 @@ dependencies = [
  "serde_json",
  "smallvec",
  "tempfile",
- "thin-vec",
  "thorin-dwp",
  "tracing",
  "wasm-encoder 0.219.2",
@@ -4096,7 +4095,6 @@ dependencies = [
  "rustc_passes",
  "rustc_privacy",
  "rustc_query_impl",
- "rustc_query_system",
  "rustc_resolve",
  "rustc_session",
  "rustc_span",
@@ -4229,6 +4227,7 @@ dependencies = [
  "bitflags",
  "either",
  "gsgdt",
+ "parking_lot",
  "polonius-engine",
  "rustc_abi",
  "rustc_apfloat",
@@ -4495,6 +4494,7 @@ name = "rustc_query_impl"
 version = "0.0.0"
 dependencies = [
  "measureme",
+ "rustc_abi",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hashes",
@@ -4502,9 +4502,10 @@ dependencies = [
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
- "rustc_query_system",
  "rustc_serialize",
+ "rustc_session",
  "rustc_span",
+ "rustc_thread_pool",
  "tracing",
 ]
 
@@ -4512,22 +4513,17 @@ dependencies = [
 name = "rustc_query_system"
 version = "0.0.0"
 dependencies = [
- "parking_lot",
  "rustc_abi",
  "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
- "rustc_hashes",
  "rustc_hir",
- "rustc_index",
  "rustc_macros",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
- "rustc_thread_pool",
  "smallvec",
- "tracing",
 ]
 
 [[package]]
@@ -5564,7 +5560,6 @@ dependencies = [
  "build_helper",
  "cargo_metadata 0.21.0",
  "clap",
- "fluent-syntax",
  "globset",
  "ignore",
  "miropt-test-tools",

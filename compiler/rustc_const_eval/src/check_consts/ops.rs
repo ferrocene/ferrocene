@@ -2,7 +2,7 @@
 
 use hir::{ConstContext, LangItem};
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, Diag, MultiSpan, inline_fluent};
+use rustc_errors::{Applicability, Diag, MultiSpan, msg};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
 use rustc_infer::infer::TyCtxtInferExt;
@@ -72,6 +72,27 @@ pub(crate) struct FnCallIndirect;
 impl<'tcx> NonConstOp<'tcx> for FnCallIndirect {
     fn build_error(&self, ccx: &ConstCx<'_, 'tcx>, span: Span) -> Diag<'tcx> {
         ccx.dcx().create_err(errors::UnallowedFnPointerCall { span, kind: ccx.const_kind() })
+    }
+}
+
+/// A c-variadic function call.
+#[derive(Debug)]
+pub(crate) struct FnCallCVariadic;
+impl<'tcx> NonConstOp<'tcx> for FnCallCVariadic {
+    fn status_in_item(&self, _ccx: &ConstCx<'_, 'tcx>) -> Status {
+        Status::Unstable {
+            gate: sym::const_c_variadic,
+            gate_already_checked: false,
+            safe_to_expose_on_stable: false,
+            is_function_call: true,
+        }
+    }
+
+    fn build_error(&self, ccx: &ConstCx<'_, 'tcx>, span: Span) -> Diag<'tcx> {
+        ccx.tcx.sess.create_feature_err(
+            errors::NonConstCVariadicCall { span, kind: ccx.const_kind() },
+            sym::const_c_variadic,
+        )
     }
 }
 
@@ -181,7 +202,7 @@ impl<'tcx> NonConstOp<'tcx> for FnCallNonConst<'tcx> {
         );
 
         if let ConstContext::Static(_) = ccx.const_kind() {
-            err.note(inline_fluent!(
+            err.note(msg!(
                 "consider wrapping this expression in `std::sync::LazyLock::new(|| ...)`"
             ));
         }

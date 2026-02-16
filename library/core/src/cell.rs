@@ -814,7 +814,6 @@ impl<T, const N: usize> Cell<[T; N]> {
 /// following is unsound:
 ///
 /// ```rust
-/// #![feature(cell_get_cloned)]
 /// # use std::cell::Cell;
 ///
 /// #[derive(Copy, Debug)]

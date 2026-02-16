@@ -103,25 +103,39 @@ pub mod probestack;
 // ferrocene addition: symbol needed by profiler-builtins on 32-bit ARM
 #[cfg(all(ferrocene_facade_secretsauce, target_arch = "arm"))]
 #[unsafe(no_mangle)]
-fn __atomic_fetch_add_8(ptr: *mut u64, val: u64, _model: i32) -> u64 {
-    unsafe {
-        let __kuser_cmpxchg64: extern "C" fn(
-            oldval: *const u64,
-            newval: *const u64,
-            ptr: *mut u64,
-        ) -> i32 = core::mem::transmute(0xffff0f60_usize);
+fn __atomic_fetch_add_8(ptr: *mut u64, val: u64, model: i32) -> u64 {
+    use core::sync::atomic::Ordering::*;
 
-        let mut old;
-        let mut new;
-        loop {
-            old = ptr.read_volatile();
-            new = old + val;
+    let ptr = ptr.cast::<u32>();
+    let atomic_lsb = unsafe { core::sync::atomic::AtomicU32::from_ptr(ptr) };
 
-            if __kuser_cmpxchg64(&old, &new, ptr) == 0 {
-                break;
-            }
-        }
+    let Ok(val) = u32::try_from(val) else {
+        panic!("__atomic_fetch_add_8 val is too large");
+    };
 
-        old
+    let Ok(model) = i8::try_from(model) else {
+        panic!("__atomic_fetch_add_8 model is outside range");
+    };
+
+    const RELAXED: i8 = Relaxed as _;
+    const RELEASE: i8 = Release as _;
+    const ACQUIRE: i8 = Acquire as _;
+    const ACQ_REL: i8 = AcqRel as _;
+    const SEQ_CST: i8 = SeqCst as _;
+
+    let ordering = match model {
+        RELAXED => Relaxed,
+        RELEASE => Release,
+        ACQUIRE => Acquire,
+        ACQ_REL => AcqRel,
+        SEQ_CST => SeqCst,
+        _ => panic!("__atomic_fetch_add_8 model is invalid"),
+    };
+
+    let fetch = atomic_lsb.fetch_add(val, ordering);
+    if fetch == u32::MAX {
+        panic!("__atomic_fetch_add_8 overflowed");
     }
+
+    fetch.into()
 }

@@ -1,22 +1,69 @@
+use std::fmt::Debug;
 use std::ops::Deref;
 
+use rustc_data_structures::fingerprint::Fingerprint;
+use rustc_data_structures::hash_table::HashTable;
+use rustc_data_structures::sharded::Sharded;
 use rustc_data_structures::sync::{AtomicU64, WorkerLocal};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::hir_id::OwnerId;
 use rustc_macros::HashStable;
-use rustc_query_system::dep_graph::{DepNodeIndex, SerializedDepNodeIndex};
-pub(crate) use rustc_query_system::query::QueryJobId;
-use rustc_query_system::query::{CycleError, CycleErrorHandling, HashResult, QueryCache};
+use rustc_query_system::ich::StableHashingContext;
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
 use crate::dep_graph;
-use crate::dep_graph::DepKind;
+use crate::dep_graph::{DepKind, DepNodeIndex, SerializedDepNodeIndex};
 use crate::queries::{
     ExternProviders, PerQueryVTables, Providers, QueryArenas, QueryCaches, QueryEngine, QueryStates,
 };
 use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
+use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
+use crate::query::{QueryCache, QueryInfo, QueryJob};
 use crate::ty::TyCtxt;
+
+/// For a particular query, keeps track of "active" keys, i.e. keys whose
+/// evaluation has started but has not yet finished successfully.
+///
+/// (Successful query evaluation for a key is represented by an entry in the
+/// query's in-memory cache.)
+pub struct QueryState<'tcx, K> {
+    pub active: Sharded<HashTable<(K, ActiveKeyStatus<'tcx>)>>,
+}
+
+impl<'tcx, K> Default for QueryState<'tcx, K> {
+    fn default() -> QueryState<'tcx, K> {
+        QueryState { active: Default::default() }
+    }
+}
+
+/// For a particular query and key, tracks the status of a query evaluation
+/// that has started, but has not yet finished successfully.
+///
+/// (Successful query evaluation for a key is represented by an entry in the
+/// query's in-memory cache.)
+pub enum ActiveKeyStatus<'tcx> {
+    /// Some thread is already evaluating the query for this key.
+    ///
+    /// The enclosed [`QueryJob`] can be used to wait for it to finish.
+    Started(QueryJob<'tcx>),
+
+    /// The query panicked. Queries trying to wait on this will raise a fatal error which will
+    /// silently panic.
+    Poisoned,
+}
+
+/// How a particular query deals with query cycle errors.
+///
+/// Inspected by the code that actually handles cycle errors, to decide what
+/// approach to use.
+#[derive(Copy, Clone)]
+pub enum CycleErrorHandling {
+    Error,
+    Fatal,
+    DelayBug,
+    Stash,
+}
 
 pub type WillCacheOnDiskForKeyFn<'tcx, Key> = fn(tcx: TyCtxt<'tcx>, key: &Key) -> bool;
 
@@ -30,9 +77,34 @@ pub type TryLoadFromDiskFn<'tcx, Key, Value> = fn(
 pub type IsLoadableFromDiskFn<'tcx, Key> =
     fn(tcx: TyCtxt<'tcx>, key: &Key, index: SerializedDepNodeIndex) -> bool;
 
+pub type HashResult<V> = Option<fn(&mut StableHashingContext<'_>, &V) -> Fingerprint>;
+
+#[derive(Clone, Debug)]
+pub struct CycleError<I = QueryStackFrameExtra> {
+    /// The query and related span that uses the cycle.
+    pub usage: Option<(Span, QueryStackFrame<I>)>,
+    pub cycle: Vec<QueryInfo<I>>,
+}
+
+impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
+    pub fn lift(&self) -> CycleError<QueryStackFrameExtra> {
+        CycleError {
+            usage: self.usage.as_ref().map(|(span, frame)| (*span, frame.lift())),
+            cycle: self.cycle.iter().map(|info| info.lift()).collect(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum QueryMode {
+    Get,
+    Ensure { check_cache: bool },
+}
+
 /// Stores function pointers and other metadata for a particular query.
 ///
-/// Used indirectly by query plumbing in `rustc_query_system`, via a trait.
+/// Used indirectly by query plumbing in `rustc_query_system` via a trait,
+/// and also used directly by query plumbing in `rustc_query_impl`.
 pub struct QueryVTable<'tcx, C: QueryCache> {
     pub name: &'static str,
     pub eval_always: bool,
@@ -44,14 +116,33 @@ pub struct QueryVTable<'tcx, C: QueryCache> {
     // Offset of this query's cache field in the QueryCaches struct
     pub query_cache: usize,
     pub will_cache_on_disk_for_key_fn: Option<WillCacheOnDiskForKeyFn<'tcx, C::Key>>,
-    pub execute_query: fn(tcx: TyCtxt<'tcx>, k: C::Key) -> C::Value,
-    pub compute: fn(tcx: TyCtxt<'tcx>, key: C::Key) -> C::Value,
+
+    /// Function pointer that calls `tcx.$query(key)` for this query and
+    /// discards the returned value.
+    ///
+    /// This is a weird thing to be doing, and probably not what you want.
+    /// It is used for loading query results from disk-cache in some cases.
+    pub call_query_method_fn: fn(tcx: TyCtxt<'tcx>, key: C::Key),
+
+    /// Function pointer that actually calls this query's provider.
+    /// Also performs some associated secondary tasks; see the macro-defined
+    /// implementation in `mod invoke_provider_fn` for more details.
+    ///
+    /// This should be the only code that calls the provider function.
+    pub invoke_provider_fn: fn(tcx: TyCtxt<'tcx>, key: C::Key) -> C::Value,
+
     pub try_load_from_disk_fn: Option<TryLoadFromDiskFn<'tcx, C::Key, C::Value>>,
     pub is_loadable_from_disk_fn: Option<IsLoadableFromDiskFn<'tcx, C::Key>>,
     pub hash_result: HashResult<C::Value>,
     pub value_from_cycle_error:
         fn(tcx: TyCtxt<'tcx>, cycle_error: &CycleError, guar: ErrorGuaranteed) -> C::Value,
     pub format_value: fn(&C::Value) -> String,
+
+    /// Formats a human-readable description of this query and its key, as
+    /// specified by the `desc` query modifier.
+    ///
+    /// Used when reporting query cycle errors and similar problems.
+    pub description_fn: fn(TyCtxt<'tcx>, C::Key) -> String,
 }
 
 pub struct QuerySystemFns {
@@ -284,36 +375,28 @@ macro_rules! define_callbacks {
                 ($V)
             );
 
-            /// This function takes `ProvidedValue` and converts it to an erased `Value` by
-            /// allocating it on an arena if the query has the `arena_cache` modifier. The
-            /// value is then erased and returned. This will happen when computing the query
-            /// using a provider or decoding a stored result.
+            /// This helper function takes a value returned by the query provider
+            /// (or loaded from disk, or supplied by query feeding), allocates
+            /// it in an arena if requested by the `arena_cache` modifier, and
+            /// then returns an erased copy of it.
             #[inline(always)]
             pub fn provided_to_erased<'tcx>(
-                _tcx: TyCtxt<'tcx>,
+                tcx: TyCtxt<'tcx>,
                 provided_value: ProvidedValue<'tcx>,
             ) -> Erased<Value<'tcx>> {
-                // Store the provided value in an arena and get a reference
-                // to it, for queries with `arena_cache`.
-                let value: Value<'tcx> = query_if_arena!([$($modifiers)*]
-                    {
-                        use $crate::query::arena_cached::ArenaCached;
-
-                        if mem::needs_drop::<<$V as ArenaCached<'tcx>>::Allocated>() {
-                            <$V as ArenaCached>::alloc_in_arena(
-                                |v| _tcx.query_system.arenas.$name.alloc(v),
-                                provided_value,
-                            )
-                        } else {
-                            <$V as ArenaCached>::alloc_in_arena(
-                                |v| _tcx.arena.dropless.alloc(v),
-                                provided_value,
-                            )
-                        }
-                    }
-                    // Otherwise, the provided value is the value.
-                    (provided_value)
-                );
+                // For queries with the `arena_cache` modifier, store the
+                // provided value in an arena and get a reference to it.
+                let value: Value<'tcx> = query_if_arena!([$($modifiers)*] {
+                    <$V as $crate::query::arena_cached::ArenaCached>::alloc_in_arena(
+                        tcx,
+                        &tcx.query_system.arenas.$name,
+                        provided_value,
+                    )
+                } {
+                    // Otherwise, the provided value is the value (and `tcx` is unused).
+                    let _ = tcx;
+                    provided_value
+                });
                 erase::erase_val(value)
             }
 
@@ -446,10 +529,14 @@ macro_rules! define_callbacks {
         }
 
         pub struct Providers {
-            $(pub $name: for<'tcx> fn(
-                TyCtxt<'tcx>,
-                $name::LocalKey<'tcx>,
-            ) -> $name::ProvidedValue<'tcx>,)*
+            $(
+                /// This is the provider for the query. Use `Find references` on this to
+                /// navigate between the provider assignment and the query definition.
+                pub $name: for<'tcx> fn(
+                    TyCtxt<'tcx>,
+                    $name::LocalKey<'tcx>,
+                ) -> $name::ProvidedValue<'tcx>,
+            )*
         }
 
         pub struct ExternProviders {

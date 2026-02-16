@@ -1,5 +1,5 @@
 // tidy-alphabetical-start
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(box_patterns)]
 #![feature(file_buffered)]
 #![feature(if_let_guard)]
@@ -54,8 +54,6 @@ pub mod mono_item;
 pub mod size_of_val;
 pub mod target_features;
 pub mod traits;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub struct ModuleCodegen<M> {
     /// The name of the module. When the crate may be saved between

@@ -52,8 +52,7 @@ impl Alignment {
     #[inline]
     #[must_use]
     pub const fn of<T>() -> Self {
-        // This can't actually panic since type alignment is always a power of two.
-        const { Alignment::new(align_of::<T>()).unwrap() }
+        <T as mem::SizedTypeProperties>::ALIGNMENT
     }
 
     /// Returns the [ABI]-required minimum alignment of the type of the value that `val` points to.
@@ -113,7 +112,6 @@ impl Alignment {
     ///
     /// ```
     /// #![feature(ptr_alignment_type)]
-    /// #![feature(layout_for_ptr)]
     /// use std::ptr::Alignment;
     ///
     /// assert_eq!(unsafe { Alignment::of_val_raw(&5i32) }.as_usize(), 4);

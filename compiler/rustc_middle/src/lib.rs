@@ -27,8 +27,9 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::direct_use_of_rustc_type_ir)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
+#![cfg_attr(doc, feature(intra_doc_pointers))]
 #![feature(allocator_api)]
-#![feature(assert_matches)]
 #![feature(associated_type_defaults)]
 #![feature(box_as_ptr)]
 #![feature(box_patterns)]
@@ -43,7 +44,6 @@
 #![feature(file_buffered)]
 #![feature(gen_blocks)]
 #![feature(if_let_guard)]
-#![feature(intra_doc_pointers)]
 #![feature(min_specialization)]
 #![feature(negative_impls)]
 #![feature(never_type)]
@@ -51,12 +51,12 @@
 #![feature(range_bounds_is_empty)]
 #![feature(rustc_attrs)]
 #![feature(sized_hierarchy)]
+#![feature(trait_alias)]
 #![feature(try_blocks)]
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
 #![feature(try_trait_v2_yeet)]
 #![feature(type_alias_impl_trait)]
-#![feature(unwrap_infallible)]
 #![feature(yeet_expr)]
 #![recursion_limit = "256"]
 // tidy-alphabetical-end
@@ -81,7 +81,7 @@ pub mod thir;
 pub mod traits;
 pub mod ty;
 pub mod util;
-mod values;
+pub mod verify_ich;
 
 #[macro_use]
 pub mod query;
@@ -92,5 +92,3 @@ pub mod dep_graph;
 
 // Allows macros to refer to this crate as `::rustc_middle`
 extern crate self as rustc_middle;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }

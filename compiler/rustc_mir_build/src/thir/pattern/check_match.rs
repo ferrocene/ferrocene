@@ -3,7 +3,7 @@ use rustc_ast::Mutability;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, ErrorGuaranteed, MultiSpan, struct_span_code_err};
+use rustc_errors::{Applicability, ErrorGuaranteed, MultiSpan, msg, struct_span_code_err};
 use rustc_hir::def::*;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{self as hir, BindingMode, ByRef, HirId, MatchSource};
@@ -29,7 +29,6 @@ use rustc_trait_selection::infer::InferCtxtExt;
 use tracing::instrument;
 
 use crate::errors::*;
-use crate::fluent_generated as fluent;
 
 pub(crate) fn check_match(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(), ErrorGuaranteed> {
     let typeck_results = tcx.typeck(def_id);
@@ -986,22 +985,16 @@ fn report_unreachable_pattern<'p, 'tcx>(
             let mut iter = covering_pats.iter();
             let mut multispan = MultiSpan::from_span(pat_span);
             for p in iter.by_ref().take(CAP_COVERED_BY_MANY) {
-                multispan.push_span_label(
-                    p.data().span,
-                    fluent::mir_build_unreachable_matches_same_values,
-                );
+                multispan.push_span_label(p.data().span, msg!("matches some of the same values"));
             }
             let remain = iter.count();
             if remain == 0 {
-                multispan.push_span_label(
-                    pat_span,
-                    fluent::mir_build_unreachable_making_this_unreachable,
-                );
+                multispan.push_span_label(pat_span, msg!("collectively making this unreachable"));
             } else {
                 lint.covered_by_many_n_more_count = remain;
                 multispan.push_span_label(
                     pat_span,
-                    fluent::mir_build_unreachable_making_this_unreachable_n_more,
+                    msg!("...and {$covered_by_many_n_more_count} other patterns collectively make this unreachable"),
                 );
             }
             lint.covered_by_many = Some(multispan);

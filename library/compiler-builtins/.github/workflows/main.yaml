@@ -70,12 +70,14 @@ jobs:
           os: ubuntu-24.04
         - target: powerpc64le-unknown-linux-gnu
           os: ubuntu-24.04
-        - target: powerpc64le-unknown-linux-gnu
-          os: ubuntu-24.04-ppc64le
+        # - target: powerpc64le-unknown-linux-gnu
+        #   os: ubuntu-24.04-ppc64le
+        #   # FIXME(rust#151807): remove once PPC builds work again.
+        #   channel: nightly-2026-01-23
         - target: riscv64gc-unknown-linux-gnu
           os: ubuntu-24.04
-        - target: s390x-unknown-linux-gnu
-          os: ubuntu-24.04-s390x
+        # - target: s390x-unknown-linux-gnu
+        #   os: ubuntu-24.04-s390x
         - target: thumbv6m-none-eabi
           os: ubuntu-24.04
         - target: thumbv7em-none-eabi
@@ -228,7 +230,27 @@ jobs:
         # poorly with build scripts)
         cargo build -p compiler_builtins -p libm \
           --target etc/thumbv7em-none-eabi-renamed.json \
-          -Zbuild-std=core
+          -Zbuild-std=core \
+          -Zjson-target-spec
+
+  # FIXME: move this target to test job once https://github.com/rust-lang/rust/pull/150138 merged.
+  build-thumbv6k:
+    name: Build thumbv6k
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      run: |
+        rustup update nightly --no-self-update
+        rustup default nightly
+        rustup component add rust-src
+    - uses: Swatinem/rust-cache@v2
+    - run: |
+        cargo build -p compiler_builtins -p libm \
+          --target etc/thumbv6-none-eabi.json \
+          -Zbuild-std=core \
+          -Zjson-target-spec
 
   benchmarks:
     name: Benchmarks
@@ -354,6 +376,7 @@ jobs:
     needs:
       - benchmarks
       - build-custom
+      - build-thumbv6k
       - clippy
       - extensive
       - miri

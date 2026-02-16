@@ -22,13 +22,18 @@ use rustc_codegen_ssa::traits::{
     ArgAbiBuilderMethods, BaseTypeCodegenMethods, BuilderMethods, ConstCodegenMethods,
     IntrinsicCallBuilderMethods, LayoutTypeCodegenMethods,
 };
+use rustc_data_structures::fx::FxHashSet;
 use rustc_middle::bug;
-use rustc_middle::ty::layout::{FnAbiOf, LayoutOf};
+#[cfg(feature = "master")]
+use rustc_middle::ty::layout::FnAbiOf;
+use rustc_middle::ty::layout::LayoutOf;
 use rustc_middle::ty::{self, Instance, Ty};
 use rustc_span::{Span, Symbol, sym};
 use rustc_target::callconv::{ArgAbi, PassMode};
 
-use crate::abi::{FnAbiGccExt, GccType};
+#[cfg(feature = "master")]
+use crate::abi::FnAbiGccExt;
+use crate::abi::GccType;
 use crate::builder::Builder;
 use crate::common::{SignType, TypeReflection};
 use crate::context::CodegenCx;
@@ -203,6 +208,7 @@ fn get_simple_function_f128<'gcc, 'tcx>(
     let f128_type = cx.type_f128();
     let func_name = match name {
         sym::ceilf128 => "ceilf128",
+        sym::fabsf128 => "fabsf128",
         sym::floorf128 => "floorf128",
         sym::truncf128 => "truncf128",
         sym::roundf128 => "roundf128",
@@ -257,6 +263,7 @@ fn f16_builtin<'gcc, 'tcx>(
     let builtin_name = match name {
         sym::ceilf16 => "__builtin_ceilf",
         sym::copysignf16 => "__builtin_copysignf",
+        sym::fabsf16 => "fabsf",
         sym::floorf16 => "__builtin_floorf",
         sym::fmaf16 => "fmaf",
         sym::maxnumf16 => "__builtin_fmaxf",
@@ -323,6 +330,7 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
             }
             sym::ceilf16
             | sym::copysignf16
+            | sym::fabsf16
             | sym::floorf16
             | sym::fmaf16
             | sym::maxnumf16
@@ -617,8 +625,6 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
                 *func
             } else {
                 self.linkage.set(FunctionType::Extern);
-                let fn_abi = self.fn_abi_of_instance(instance, ty::List::empty());
-                let fn_ty = fn_abi.gcc_type(self);
 
                 let func = match sym {
                     "llvm.fma.f16" => {
@@ -631,13 +637,7 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
 
                 self.intrinsics.borrow_mut().insert(sym.to_string(), func);
 
-                self.on_stack_function_params
-                    .borrow_mut()
-                    .insert(func, fn_ty.on_stack_param_indices);
-                #[cfg(feature = "master")]
-                for fn_attr in fn_ty.fn_attributes {
-                    func.add_attribute(fn_attr);
-                }
+                self.on_stack_function_params.borrow_mut().insert(func, FxHashSet::default());
 
                 crate::attributes::from_fn_attrs(self, func, instance);
 
@@ -651,15 +651,15 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
         let fn_ptr = func.get_address(None);
         let fn_ty = fn_ptr.get_type();
 
-        let mut llargs = vec![];
+        let mut call_args = vec![];
 
         for arg in args {
             match arg.val {
                 OperandValue::ZeroSized => {}
-                OperandValue::Immediate(_) => llargs.push(arg.immediate()),
+                OperandValue::Immediate(_) => call_args.push(arg.immediate()),
                 OperandValue::Pair(a, b) => {
-                    llargs.push(a);
-                    llargs.push(b);
+                    call_args.push(a);
+                    call_args.push(b);
                 }
                 OperandValue::Ref(op_place_val) => {
                     let mut llval = op_place_val.llval;
@@ -676,13 +676,13 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
                         // We store bools as `i8` so we need to truncate to `i1`.
                         llval = self.to_immediate_scalar(llval, scalar);
                     }
-                    llargs.push(llval);
+                    call_args.push(llval);
                 }
             }
         }
 
         // FIXME directly use the llvm intrinsic adjustment functions here
-        let llret = self.call(fn_ty, None, None, fn_ptr, &llargs, None, None);
+        let llret = self.call(fn_ty, None, None, fn_ptr, &call_args, None, None);
         if is_cleanup {
             self.apply_attrs_to_cleanup_callsite(llret);
         }
@@ -723,7 +723,8 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
     }
 
     fn va_end(&mut self, _va_list: RValue<'gcc>) -> RValue<'gcc> {
-        unimplemented!();
+        // TODO(antoyo): implement.
+        self.context.new_rvalue_from_int(self.int_type, 0)
     }
 }
 

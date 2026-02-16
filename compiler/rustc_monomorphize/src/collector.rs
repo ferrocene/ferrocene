@@ -1085,7 +1085,9 @@ fn should_codegen_locally<'tcx>(tcx: TyCtxt<'tcx>, instance: Instance<'tcx>) -> 
         return false;
     }
 
-    if !tcx.is_mir_available(def_id) {
+    // See comment in should_encode_mir in rustc_metadata for why we don't report
+    // an error for constructors.
+    if !tcx.is_mir_available(def_id) && !matches!(tcx.def_kind(def_id), DefKind::Ctor(..)) {
         tcx.dcx().emit_fatal(NoOptimizedMir {
             span: tcx.def_span(def_id),
             crate_name: tcx.crate_name(def_id.krate),

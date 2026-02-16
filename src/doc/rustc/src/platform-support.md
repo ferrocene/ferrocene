@@ -148,6 +148,12 @@ target | std | notes
 [`aarch64-apple-ios`](platform-support/apple-ios.md) | ✓ | ARM64 iOS
 [`aarch64-apple-ios-macabi`](platform-support/apple-ios-macabi.md) | ✓ | Mac Catalyst on ARM64
 [`aarch64-apple-ios-sim`](platform-support/apple-ios.md) | ✓ | Apple iOS Simulator on ARM64
+[`aarch64-apple-tvos`](platform-support/apple-tvos.md) | ✓ | ARM64 tvOS
+[`aarch64-apple-tvos-sim`](platform-support/apple-tvos.md) | ✓ | ARM64 tvOS Simulator
+[`aarch64-apple-visionos`](platform-support/apple-visionos.md) | ✓ | ARM64 Apple visionOS
+[`aarch64-apple-visionos-sim`](platform-support/apple-visionos.md) | ✓ | ARM64 Apple visionOS Simulator
+[`aarch64-apple-watchos`](platform-support/apple-watchos.md) | ✓ | ARM64 Apple WatchOS
+[`aarch64-apple-watchos-sim`](platform-support/apple-watchos.md) | ✓ | ARM64 Apple WatchOS Simulator
 [`aarch64-linux-android`](platform-support/android.md) | ✓ | ARM64 Android
 [`aarch64-unknown-fuchsia`](platform-support/fuchsia.md) | ✓ | ARM64 Fuchsia
 [`aarch64-unknown-none`](platform-support/aarch64-unknown-none.md) | * | Bare ARM64, hardfloat
@@ -183,11 +189,13 @@ target | std | notes
 [`riscv32imac-unknown-none-elf`](platform-support/riscv32-unknown-none-elf.md) | * | Bare RISC-V (RV32IMAC ISA)
 [`riscv32imafc-unknown-none-elf`](platform-support/riscv32-unknown-none-elf.md) | * | Bare RISC-V (RV32IMAFC ISA)
 [`riscv32imc-unknown-none-elf`](platform-support/riscv32-unknown-none-elf.md) | * | Bare RISC-V (RV32IMC ISA)
+[`riscv64a23-unknown-linux-gnu`](platform-support/riscv64a23-unknown-linux-gnu.md) | ✓ | RISC-V Linux (kernel 6.8.0+, glibc 2.39)
 [`riscv64gc-unknown-linux-musl`](platform-support/riscv64gc-unknown-linux-musl.md) | ✓ |RISC-V Linux (kernel 4.20+, musl 1.2.5)
 `riscv64gc-unknown-none-elf` | * | Bare RISC-V (RV64IMAFDC ISA)
 [`riscv64im-unknown-none-elf`](platform-support/riscv64im-unknown-none-elf.md) | * | Bare RISC-V (RV64IM ISA)
 `riscv64imac-unknown-none-elf` | * | Bare RISC-V (RV64IMAC ISA)
 `sparc64-unknown-linux-gnu` | ✓ | SPARC Linux (kernel 4.4+, glibc 2.23)
+[`s390x-unknown-none-softfloat`](platform-support/s390x-unknown-none-softfloat.md) | * | Bare S390x (softfloat ABI)
 [`thumbv6m-none-eabi`](platform-support/thumbv6m-none-eabi.md) | * | Bare Armv6-M
 [`thumbv7em-none-eabi`](platform-support/thumbv7em-none-eabi.md) | * | Bare Armv7E-M
 [`thumbv7em-none-eabihf`](platform-support/thumbv7em-none-eabi.md) | * | Bare Armv7E-M, hardfloat
@@ -249,12 +257,6 @@ host tools.
 
 target | std | host | notes
 -------|:---:|:----:|-------
-[`aarch64-apple-tvos`](platform-support/apple-tvos.md) | ✓ |  | ARM64 tvOS
-[`aarch64-apple-tvos-sim`](platform-support/apple-tvos.md) | ✓ |  | ARM64 tvOS Simulator
-[`aarch64-apple-visionos`](platform-support/apple-visionos.md) | ✓ |  | ARM64 Apple visionOS
-[`aarch64-apple-visionos-sim`](platform-support/apple-visionos.md) | ✓ |  | ARM64 Apple visionOS Simulator
-[`aarch64-apple-watchos`](platform-support/apple-watchos.md) | ✓ |  | ARM64 Apple WatchOS
-[`aarch64-apple-watchos-sim`](platform-support/apple-watchos.md) | ✓ |  | ARM64 Apple WatchOS Simulator
 [`aarch64-kmc-solid_asp3`](platform-support/kmc-solid.md) | ✓ |  | ARM64 SOLID with TOPPERS/ASP3
 [`aarch64-nintendo-switch-freestanding`](platform-support/aarch64-nintendo-switch-freestanding.md) | * |  | ARM64 Nintendo Switch, Horizon
 [`aarch64-unknown-freebsd`](platform-support/freebsd.md) | ✓ | ✓ | ARM64 FreeBSD
@@ -405,7 +407,6 @@ target | std | host | notes
 [`riscv64gc-unknown-openbsd`](platform-support/openbsd.md) | ✓ | ✓ | OpenBSD/riscv64
 [`riscv64gc-unknown-redox`](platform-support/redox.md) | ✓ |  | RISC-V 64bit Redox OS
 [`riscv64imac-unknown-nuttx-elf`](platform-support/nuttx.md) | ✓ |  | RISC-V 64bit with NuttX
-[`riscv64a23-unknown-linux-gnu`](platform-support/riscv64a23-unknown-linux-gnu.md) | ✓ | ✓ | RISC-V Linux (kernel 6.8.0+, glibc 2.39)
 [`s390x-unknown-linux-musl`](platform-support/s390x-unknown-linux-musl.md) | ✓ |  | S390x Linux (kernel 3.2, musl 1.2.5)
 `sparc-unknown-linux-gnu` | ✓ |  | 32-bit SPARC Linux
 [`sparc-unknown-none-elf`](./platform-support/sparc-unknown-none-elf.md) | * |  | Bare 32-bit SPARC V7+

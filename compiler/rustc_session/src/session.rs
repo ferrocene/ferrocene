@@ -19,7 +19,7 @@ use rustc_errors::timings::TimingSectionHandler;
 use rustc_errors::translation::Translator;
 use rustc_errors::{
     Diag, DiagCtxt, DiagCtxtHandle, DiagMessage, Diagnostic, ErrorGuaranteed, FatalAbort,
-    TerminalUrl, fallback_fluent_bundle,
+    TerminalUrl,
 };
 use rustc_hir::limit::Limit;
 use rustc_macros::HashStable_Generic;
@@ -158,6 +158,9 @@ pub struct Session {
     /// The names of intrinsics that the current codegen backend replaces
     /// with its own implementations.
     pub replaced_intrinsics: FxHashSet<Symbol>,
+
+    /// Does the codegen backend support ThinLTO?
+    pub thin_lto_supported: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -606,8 +609,17 @@ impl Session {
             }
             config::LtoCli::Thin => {
                 // The user explicitly asked for ThinLTO
+                if !self.thin_lto_supported {
+                    // Backend doesn't support ThinLTO, disable LTO.
+                    self.dcx().emit_warn(errors::ThinLtoNotSupportedByBackend);
+                    return config::Lto::No;
+                }
                 return config::Lto::Thin;
             }
+        }
+
+        if !self.thin_lto_supported {
+            return config::Lto::No;
         }
 
         // Ok at this point the target doesn't require anything and the user
@@ -967,8 +979,6 @@ pub fn build_session(
     sopts: config::Options,
     io: CompilerIO,
     fluent_bundle: Option<Arc<rustc_errors::FluentBundle>>,
-    registry: rustc_errors::registry::Registry,
-    fluent_resources: Vec<&'static str>,
     driver_lint_caps: FxHashMap<lint::LintId, lint::Level>,
     target: Target,
     cfg_version: &'static str,
@@ -986,19 +996,12 @@ pub fn build_session(
     let cap_lints_allow = sopts.lint_cap.is_some_and(|cap| cap == lint::Allow);
     let can_emit_warnings = !(warnings_allow || cap_lints_allow);
 
-    let translator = Translator {
-        fluent_bundle,
-        fallback_fluent_bundle: fallback_fluent_bundle(
-            fluent_resources,
-            sopts.unstable_opts.translate_directionality_markers,
-        ),
-    };
+    let translator = Translator { fluent_bundle };
     let source_map = rustc_span::source_map::get_source_map().unwrap();
     let emitter = default_emitter(&sopts, Arc::clone(&source_map), translator);
 
-    let mut dcx = DiagCtxt::new(emitter)
-        .with_flags(sopts.unstable_opts.dcx_flags(can_emit_warnings))
-        .with_registry(registry);
+    let mut dcx =
+        DiagCtxt::new(emitter).with_flags(sopts.unstable_opts.dcx_flags(can_emit_warnings));
     if let Some(ice_file) = ice_file {
         dcx = dcx.with_ice_file(ice_file);
     }
@@ -1097,6 +1100,7 @@ pub fn build_session(
         host_filesearch,
         invocation_temp,
         replaced_intrinsics: FxHashSet::default(), // filled by `run_compiler`
+        thin_lto_supported: true,                  // filled by `run_compiler`
     };
 
     validate_commandline_args_with_session_available(&sess);
@@ -1432,8 +1436,7 @@ impl EarlyDiagCtxt {
 fn mk_emitter(output: ErrorOutputType) -> Box<DynEmitter> {
     // FIXME(#100717): early errors aren't translated at the moment, so this is fine, but it will
     // need to reference every crate that might emit an early error for translation to work.
-    let translator =
-        Translator::with_fallback_bundle(vec![rustc_errors::DEFAULT_LOCALE_RESOURCE], false);
+    let translator = Translator::new();
     let emitter: Box<DynEmitter> = match output {
         config::ErrorOutputType::HumanReadable { kind, color_config } => match kind {
             HumanReadableErrorType { short, unicode } => Box::new(

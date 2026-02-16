@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::memmap::{Mmap, MmapMut};
-use rustc_data_structures::sync::{join, par_for_each_in};
+use rustc_data_structures::sync::{par_for_each_in, par_join};
 use rustc_data_structures::temp_dir::MaybeTempDir;
 use rustc_data_structures::thousands::usize_with_underscores;
 use rustc_feature::Features;
@@ -1102,12 +1102,8 @@ fn should_encode_mir(
     def_id: LocalDefId,
 ) -> (bool, bool) {
     match tcx.def_kind(def_id) {
-        // Constructors
-        DefKind::Ctor(_, _) => {
-            let mir_opt_base = tcx.sess.opts.output_types.should_codegen()
-                || tcx.sess.opts.unstable_opts.always_encode_mir;
-            (true, mir_opt_base)
-        }
+        // instance_mir uses mir_for_ctfe rather than optimized_mir for constructors
+        DefKind::Ctor(_, _) => (true, false),
         // Constants
         DefKind::AnonConst | DefKind::InlineConst | DefKind::AssocConst | DefKind::Const => {
             (true, false)
@@ -1117,11 +1113,10 @@ fn should_encode_mir(
         DefKind::SyntheticCoroutineBody => (false, true),
         // Full-fledged functions + closures
         DefKind::AssocFn | DefKind::Fn | DefKind::Closure => {
-            let generics = tcx.generics_of(def_id);
             let opt = tcx.sess.opts.unstable_opts.always_encode_mir
                 || (tcx.sess.opts.output_types.should_codegen()
                     && reachable_set.contains(&def_id)
-                    && (generics.requires_monomorphization(tcx)
+                    && (tcx.generics_of(def_id).requires_monomorphization(tcx)
                         || tcx.cross_crate_inlinable(def_id)));
             // The function has a `const` modifier or is in a `const trait`.
             let is_const_fn = tcx.is_const_fn(def_id.to_def_id());
@@ -1444,7 +1439,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                         | hir::ConstArgKind::TupleCall(..)
                         | hir::ConstArgKind::Tup(..)
                         | hir::ConstArgKind::Path(..)
-                        | hir::ConstArgKind::Literal(..)
+                        | hir::ConstArgKind::Literal { .. }
                         | hir::ConstArgKind::Infer(..) => true,
                         hir::ConstArgKind::Anon(..) => false,
                     },
@@ -1634,6 +1629,9 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if let DefKind::Impl { .. } | DefKind::Trait = def_kind {
                 let table = tcx.associated_types_for_impl_traits_in_trait_or_impl(def_id);
                 record!(self.tables.associated_types_for_impl_traits_in_trait_or_impl[def_id] <- table);
+            }
+            if let DefKind::AssocConst | DefKind::Const = def_kind {
+                record!(self.tables.is_rhs_type_const[def_id] <- self.tcx.is_rhs_type_const(def_id));
             }
         }
 
@@ -2463,7 +2461,7 @@ pub fn encode_metadata(tcx: TyCtxt<'_>, path: &Path, ref_path: Option<&Path>) {
         // Prefetch some queries used by metadata encoding.
         // This is not necessary for correctness, but is only done for performance reasons.
         // It can be removed if it turns out to cause trouble or be detrimental to performance.
-        join(
+        par_join(
             || prefetch_mir(tcx),
             || {
                 let _ = tcx.exported_non_generic_symbols(LOCAL_CRATE);

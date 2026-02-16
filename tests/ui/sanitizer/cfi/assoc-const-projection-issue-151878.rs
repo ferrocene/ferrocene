@@ -8,8 +8,7 @@
 #![expect(incomplete_features)]
 
 trait Trait {
-    #[type_const]
-    const N: usize = 0;
+    type const N: usize = 0;
     fn process(&self, _: [u8; Self::N]) {}
 }
 

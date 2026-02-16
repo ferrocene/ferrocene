@@ -876,7 +876,7 @@ pub struct TestReachabilityVisitor<'a, 'tcx> {
 
 impl<'a, 'tcx> TestReachabilityVisitor<'a, 'tcx> {
     fn effective_visibility_diagnostic(&self, def_id: LocalDefId) {
-        if self.tcx.has_attr(def_id, sym::rustc_effective_visibility) {
+        if find_attr!(self.tcx.get_all_attrs(def_id), AttributeKind::RustcEffectiveVisibility) {
             let mut error_msg = String::new();
             let span = self.tcx.def_span(def_id.to_def_id());
             if let Some(effective_vis) = self.effective_visibilities.effective_vis(def_id) {
@@ -1157,14 +1157,14 @@ impl<'tcx> TypePrivacyVisitor<'tcx> {
         let typeck_results = self
             .maybe_typeck_results
             .unwrap_or_else(|| span_bug!(span, "`hir::Expr` or `hir::Pat` outside of a body"));
-        let result: ControlFlow<()> = try {
+        try {
             self.visit(typeck_results.node_type(id))?;
             self.visit(typeck_results.node_args(id))?;
             if let Some(adjustments) = typeck_results.adjustments().get(id) {
                 adjustments.iter().try_for_each(|adjustment| self.visit(adjustment.target))?;
             }
-        };
-        result.is_break()
+        }
+        .is_break()
     }
 
     fn check_def_id(&self, def_id: DefId, kind: &str, descr: &dyn fmt::Display) -> bool {

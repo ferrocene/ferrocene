@@ -5,12 +5,12 @@ use std::ffi::OsStr;
 use rustc_ast::tokenstream::TokenStream;
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalModDefId};
 use rustc_hir::hir_id::OwnerId;
-use rustc_query_system::dep_graph::DepNodeIndex;
-use rustc_query_system::query::{DefIdCache, DefaultCache, SingleCache, VecCache};
 use rustc_span::{DUMMY_SP, Ident, LocalExpnId, Span, Symbol};
 
+use crate::dep_graph::DepNodeIndex;
 use crate::infer::canonical::CanonicalQueryInput;
 use crate::mir::mono::CollectionMode;
+use crate::query::{DefIdCache, DefaultCache, SingleCache, VecCache};
 use crate::ty::fast_reject::SimplifiedType;
 use crate::ty::layout::ValidityRequirement;
 use crate::ty::{self, GenericArg, GenericArgsRef, Ty, TyCtxt};
@@ -28,7 +28,7 @@ pub trait Key: Sized {
     /// In practice the cache type must implement [`QueryCache`], though that
     /// constraint is not enforced here.
     ///
-    /// [`QueryCache`]: rustc_query_system::query::QueryCache
+    /// [`QueryCache`]: rustc_middle::query::QueryCache
     type Cache<V> = DefaultCache<Self, V>;
 
     /// In the event that a cycle occurs, if no explicit span has been
@@ -87,7 +87,7 @@ impl<'tcx> Key for (Ty<'tcx>, Option<ty::ExistentialTraitRef<'tcx>>) {
     }
 }
 
-impl<'tcx> Key for mir::interpret::LitToConstInput<'tcx> {
+impl<'tcx> Key for ty::LitToConstInput<'tcx> {
     fn default_span(&self, _tcx: TyCtxt<'_>) -> Span {
         DUMMY_SP
     }

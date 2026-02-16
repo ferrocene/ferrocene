@@ -17,7 +17,7 @@ New features
 
   * :target-with-tuple:`aarch64v8r-unknown-none`
   * :target-with-tuple:`s390x-unknown-linux-gnu`
-  * :target-with-tuple:`ppc64le-unknown-linux-gnu`
+  * :target-with-tuple:`powerpc64le-unknown-linux-gnu`
 
 * Certify the ``core::fmt`` module.
 

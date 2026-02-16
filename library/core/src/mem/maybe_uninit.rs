@@ -1539,6 +1539,62 @@ impl<T, const N: usize> MaybeUninit<[T; N]> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> From<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
+    #[inline]
+    fn from(arr: [MaybeUninit<T>; N]) -> Self {
+        arr.transpose()
+    }
+}
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> AsRef<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
+    #[inline]
+    fn as_ref(&self) -> &[MaybeUninit<T>; N] {
+        // SAFETY: T and MaybeUninit<T> have the same layout
+        unsafe { &*ptr::from_ref(self).cast() }
+    }
+}
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> AsRef<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
+    #[inline]
+    fn as_ref(&self) -> &[MaybeUninit<T>] {
+        &*AsRef::<[MaybeUninit<T>; N]>::as_ref(self)
+    }
+}
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> AsMut<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
+    #[inline]
+    fn as_mut(&mut self) -> &mut [MaybeUninit<T>; N] {
+        // SAFETY: T and MaybeUninit<T> have the same layout
+        unsafe { &mut *ptr::from_mut(self).cast() }
+    }
+}
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> AsMut<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
+    #[inline]
+    fn as_mut(&mut self) -> &mut [MaybeUninit<T>] {
+        &mut *AsMut::<[MaybeUninit<T>; N]>::as_mut(self)
+    }
+}
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
+impl<T, const N: usize> From<MaybeUninit<[T; N]>> for [MaybeUninit<T>; N] {
+    #[inline]
+    fn from(arr: MaybeUninit<[T; N]>) -> Self {
+        arr.transpose()
+    }
+}
+
 impl<T, const N: usize> [MaybeUninit<T>; N] {
     /// Transposes a `[MaybeUninit<T>; N]` into a `MaybeUninit<[T; N]>`.
     ///

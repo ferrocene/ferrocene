@@ -64,6 +64,7 @@
 #![feature(generic_assert_internals)]
 #![feature(hasher_prefixfree_extras)]
 #![feature(hashmap_internals)]
+#![feature(int_from_ascii)]
 #![feature(int_lowest_highest_one)]
 #![feature(int_roundings)]
 #![feature(ip)]
@@ -88,6 +89,7 @@
 #![feature(new_range_api)]
 #![feature(next_index)]
 #![feature(non_exhaustive_omitted_patterns_lint)]
+#![feature(nonzero_from_str_radix)]
 #![feature(numfmt)]
 #![feature(option_reduce)]
 #![feature(pattern)]
@@ -133,7 +135,6 @@
 // tidy-alphabetical-start
 #![feature(assert_matches)]
 #![feature(atomic_from_mut)]
-#![feature(atomic_try_update)]
 #![feature(bound_as_ref)]
 #![feature(bound_copied)]
 #![feature(char_internals)]

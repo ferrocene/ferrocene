@@ -12,6 +12,7 @@ extern crate tracing;
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{self, Write};
+use std::process::ExitCode;
 use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
@@ -125,10 +126,16 @@ fn main() {
     rustc_driver::install_ice_hook("https://github.com/ferrocene/ferrocene/issues/new", |_| ());
     let handler = EarlyDiagCtxt::new(ErrorOutputType::default());
     rustc_driver::init_rustc_env_logger(&handler);
-    std::process::exit(rustc_driver::catch_with_exit_code(move || {
+    let exit_code = rustc_driver::catch_with_exit_code(move || {
         let args: Vec<String> = std::env::args().collect();
         rustc_driver::run_compiler(&args, &mut LoadCoreSymbols)
-    }))
+    });
+    let exit_code = if exit_code == ExitCode::SUCCESS {
+        rustc_driver::EXIT_SUCCESS
+    } else {
+        rustc_driver::EXIT_FAILURE
+    };
+    std::process::exit(exit_code);
 }
 
 fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {

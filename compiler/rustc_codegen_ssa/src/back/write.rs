@@ -1981,11 +1981,7 @@ impl SharedEmitter {
 }
 
 impl Emitter for SharedEmitter {
-    fn emit_diagnostic(
-        &mut self,
-        mut diag: rustc_errors::DiagInner,
-        _registry: &rustc_errors::registry::Registry,
-    ) {
+    fn emit_diagnostic(&mut self, mut diag: rustc_errors::DiagInner) {
         // Check that we aren't missing anything interesting when converting to
         // the cut-down local `DiagInner`.
         assert!(!diag.span.has_span_labels());

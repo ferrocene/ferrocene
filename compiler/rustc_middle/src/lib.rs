@@ -81,7 +81,6 @@ pub mod thir;
 pub mod traits;
 pub mod ty;
 pub mod util;
-mod values;
 
 #[macro_use]
 pub mod query;
@@ -92,5 +91,3 @@ pub mod dep_graph;
 
 // Allows macros to refer to this crate as `::rustc_middle`
 extern crate self as rustc_middle;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }

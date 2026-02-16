@@ -56,7 +56,8 @@ This API is completely unstable and subject to change.
 */
 
 // tidy-alphabetical-start
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
+#![feature(default_field_values)]
 #![feature(gen_blocks)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
@@ -84,12 +85,9 @@ mod variance;
 
 pub use errors::NoVariantNamed;
 use rustc_abi::{CVariadicStatus, ExternAbi};
-use rustc_hir::attrs::AttributeKind;
+use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_hir::lints::DelayedLint;
-use rustc_hir::{
-    find_attr, {self as hir},
-};
 use rustc_middle::mir::interpret::GlobalId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{Const, Ty, TyCtxt};
@@ -100,8 +98,6 @@ use rustc_trait_selection::traits;
 
 pub use crate::collect::suggest_impl_trait;
 use crate::hir_ty_lowering::HirTyLowerer;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 fn check_c_variadic_abi(tcx: TyCtxt<'_>, decl: &hir::FnDecl<'_>, abi: ExternAbi, span: Span) {
     if !decl.c_variadic {
@@ -237,7 +233,7 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
             }
             DefKind::Const
                 if !tcx.generics_of(item_def_id).own_requires_monomorphization()
-                    && !find_attr!(tcx.get_all_attrs(item_def_id), AttributeKind::TypeConst(_)) =>
+                    && !tcx.is_type_const(item_def_id) =>
             {
                 // FIXME(generic_const_items): Passing empty instead of identity args is fishy but
                 //                             seems to be fine for now. Revisit this!

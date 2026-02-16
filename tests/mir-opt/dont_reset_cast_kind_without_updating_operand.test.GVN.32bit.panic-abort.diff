@@ -75,8 +75,7 @@
   
       bb0: {
           StorageLive(_1);
--         StorageLive(_2);
-+         nop;
+          StorageLive(_2);
           StorageLive(_3);
           StorageLive(_4);
 -         _4 = ();
@@ -111,7 +110,7 @@
   
       bb3: {
 -         _22 = handle_alloc_error(move _18) -> unwind unreachable;
-+         _22 = handle_alloc_error(const Layout {{ size: 0_usize, align: std::ptr::Alignment(std::ptr::alignment::AlignmentEnum::_Align1Shl0) }}) -> unwind unreachable;
++         _22 = handle_alloc_error(const Layout {{ size: 0_usize, align: std::ptr::Alignment {{ _inner_repr_trick: std::ptr::alignment::AlignmentEnum::_Align1Shl0 }} }}) -> unwind unreachable;
       }
   
       bb4: {
@@ -144,12 +143,10 @@
           StorageDead(_4);
           _2 = &_3;
           _1 = &(*_2);
--         StorageDead(_2);
+          StorageDead(_2);
 -         StorageLive(_5);
--         _10 = copy (*_1);
 +         nop;
-+         nop;
-+         _10 = copy (*_2);
+          _10 = copy (*_1);
           _11 = copy ((_10.0: std::ptr::Unique<()>).0: std::ptr::NonNull<()>) as *const () (Transmute);
           _5 = &raw const (*_11);
 -         StorageLive(_6);
@@ -190,12 +187,12 @@
           StorageLive(_24);
 -         _24 = copy _17 as std::ptr::Alignment (Transmute);
 -         _18 = Layout { size: copy _16, align: move _24 };
-+         _24 = const std::ptr::Alignment(std::ptr::alignment::AlignmentEnum::_Align1Shl0);
-+         _18 = const Layout {{ size: 0_usize, align: std::ptr::Alignment(std::ptr::alignment::AlignmentEnum::_Align1Shl0) }};
++         _24 = const std::ptr::Alignment {{ _inner_repr_trick: std::ptr::alignment::AlignmentEnum::_Align1Shl0 }};
++         _18 = const Layout {{ size: 0_usize, align: std::ptr::Alignment {{ _inner_repr_trick: std::ptr::alignment::AlignmentEnum::_Align1Shl0 }} }};
           StorageDead(_24);
           StorageLive(_19);
 -         _19 = std::alloc::Global::alloc_impl_runtime(copy _18, const false) -> [return: bb7, unwind unreachable];
-+         _19 = std::alloc::Global::alloc_impl_runtime(const Layout {{ size: 0_usize, align: std::ptr::Alignment(std::ptr::alignment::AlignmentEnum::_Align1Shl0) }}, const false) -> [return: bb7, unwind unreachable];
++         _19 = std::alloc::Global::alloc_impl_runtime(const Layout {{ size: 0_usize, align: std::ptr::Alignment {{ _inner_repr_trick: std::ptr::alignment::AlignmentEnum::_Align1Shl0 }} }}, const false) -> [return: bb7, unwind unreachable];
       }
   
       bb7: {

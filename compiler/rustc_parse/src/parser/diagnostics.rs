@@ -12,7 +12,7 @@ use rustc_ast::{
 use rustc_ast_pretty::pprust;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::{
-    Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, PResult, Subdiagnostic, Suggestions,
+    Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, PResult, Subdiagnostic, Suggestions, msg,
     pluralize,
 };
 use rustc_session::errors::ExprParenthesesNeeded;
@@ -35,16 +35,16 @@ use crate::errors::{
     ExpectedIdentifier, ExpectedSemi, ExpectedSemiSugg, GenericParamsWithoutAngleBrackets,
     GenericParamsWithoutAngleBracketsSugg, HelpIdentifierStartsWithNumber, HelpUseLatestEdition,
     InInTypo, IncorrectAwait, IncorrectSemicolon, IncorrectUseOfAwait, IncorrectUseOfUse,
-    PatternMethodParamWithoutBody, QuestionMarkInType, QuestionMarkInTypeSugg, SelfParamNotFirst,
-    StructLiteralBodyWithoutPath, StructLiteralBodyWithoutPathSugg, SuggAddMissingLetStmt,
-    SuggEscapeIdentifier, SuggRemoveComma, TernaryOperator, TernaryOperatorSuggestion,
-    UnexpectedConstInGenericParam, UnexpectedConstParamDeclaration,
+    MisspelledKw, PatternMethodParamWithoutBody, QuestionMarkInType, QuestionMarkInTypeSugg,
+    SelfParamNotFirst, StructLiteralBodyWithoutPath, StructLiteralBodyWithoutPathSugg,
+    SuggAddMissingLetStmt, SuggEscapeIdentifier, SuggRemoveComma, TernaryOperator,
+    TernaryOperatorSuggestion, UnexpectedConstInGenericParam, UnexpectedConstParamDeclaration,
     UnexpectedConstParamDeclarationSugg, UnmatchedAngleBrackets, UseEqInstead, WrapType,
 };
+use crate::exp;
 use crate::parser::FnContext;
 use crate::parser::attr::InnerAttrPolicy;
 use crate::parser::item::IsDotDotDot;
-use crate::{exp, fluent_generated as fluent};
 
 /// Creates a placeholder argument.
 pub(super) fn dummy_arg(ident: Ident, guar: ErrorGuaranteed) -> Param {
@@ -210,22 +210,6 @@ impl std::fmt::Display for UnaryFixity {
             Self::Post => write!(f, "postfix"),
         }
     }
-}
-
-#[derive(Debug, rustc_macros::Subdiagnostic)]
-#[suggestion(
-    parse_misspelled_kw,
-    applicability = "machine-applicable",
-    code = "{similar_kw}",
-    style = "verbose"
-)]
-struct MisspelledKw {
-    // We use a String here because `Symbol::into_diag_arg` calls `Symbol::to_ident_string`, which
-    // prefix the keyword with a `r#` because it aims to print the symbol as an identifier.
-    similar_kw: String,
-    #[primary_span]
-    span: Span,
-    is_incorrect_case: bool,
 }
 
 /// Checks if the given `lookup` identifier is similar to any keyword symbol in `candidates`.
@@ -1288,7 +1272,7 @@ impl<'a> Parser<'a> {
                         // We made sense of it. Improve the error message.
                         e.span_suggestion_verbose(
                             binop.span.shrink_to_lo(),
-                            fluent::parse_sugg_turbofish_syntax,
+                            msg!("use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments"),
                             "::",
                             Applicability::MaybeIncorrect,
                         );
@@ -3039,27 +3023,53 @@ impl<'a> Parser<'a> {
         long_kind: &TokenKind,
         short_kind: &TokenKind,
     ) -> bool {
-        (0..3).all(|i| self.look_ahead(i, |tok| tok == long_kind))
-            && self.look_ahead(3, |tok| tok == short_kind)
+        if long_kind == short_kind {
+            // For conflict marker chars like `%` and `\`.
+            (0..7).all(|i| self.look_ahead(i, |tok| tok == long_kind))
+        } else {
+            // For conflict marker chars like `<` and `|`.
+            (0..3).all(|i| self.look_ahead(i, |tok| tok == long_kind))
+                && self.look_ahead(3, |tok| tok == short_kind || tok == long_kind)
+        }
     }
 
-    fn conflict_marker(&mut self, long_kind: &TokenKind, short_kind: &TokenKind) -> Option<Span> {
+    fn conflict_marker(
+        &mut self,
+        long_kind: &TokenKind,
+        short_kind: &TokenKind,
+        expected: Option<usize>,
+    ) -> Option<(Span, usize)> {
         if self.is_vcs_conflict_marker(long_kind, short_kind) {
             let lo = self.token.span;
-            for _ in 0..4 {
-                self.bump();
+            if self.psess.source_map().span_to_margin(lo) != Some(0) {
+                return None;
             }
-            return Some(lo.to(self.prev_token.span));
+            let mut len = 0;
+            while self.token.kind == *long_kind || self.token.kind == *short_kind {
+                if self.token.kind.break_two_token_op(1).is_some() {
+                    len += 2;
+                } else {
+                    len += 1;
+                }
+                self.bump();
+                if expected == Some(len) {
+                    break;
+                }
+            }
+            if expected.is_some() && expected != Some(len) {
+                return None;
+            }
+            return Some((lo.to(self.prev_token.span), len));
         }
         None
     }
 
     pub(super) fn recover_vcs_conflict_marker(&mut self) {
         // <<<<<<<
-        let Some(start) = self.conflict_marker(&TokenKind::Shl, &TokenKind::Lt) else {
+        let Some((start, len)) = self.conflict_marker(&TokenKind::Shl, &TokenKind::Lt, None) else {
             return;
         };
-        let mut spans = Vec::with_capacity(3);
+        let mut spans = Vec::with_capacity(2);
         spans.push(start);
         // |||||||
         let mut middlediff3 = None;
@@ -3071,13 +3081,19 @@ impl<'a> Parser<'a> {
             if self.token == TokenKind::Eof {
                 break;
             }
-            if let Some(span) = self.conflict_marker(&TokenKind::OrOr, &TokenKind::Or) {
+            if let Some((span, _)) =
+                self.conflict_marker(&TokenKind::OrOr, &TokenKind::Or, Some(len))
+            {
                 middlediff3 = Some(span);
             }
-            if let Some(span) = self.conflict_marker(&TokenKind::EqEq, &TokenKind::Eq) {
+            if let Some((span, _)) =
+                self.conflict_marker(&TokenKind::EqEq, &TokenKind::Eq, Some(len))
+            {
                 middle = Some(span);
             }
-            if let Some(span) = self.conflict_marker(&TokenKind::Shr, &TokenKind::Gt) {
+            if let Some((span, _)) =
+                self.conflict_marker(&TokenKind::Shr, &TokenKind::Gt, Some(len))
+            {
                 spans.push(span);
                 end = Some(span);
                 break;

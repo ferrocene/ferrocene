@@ -1086,11 +1086,6 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
 
             let Some((name, decl_span)) = self.checked_places.names[index] else { continue };
 
-            // By convention, underscore-prefixed bindings are explicitly allowed to be unused.
-            if name.as_str().starts_with('_') {
-                continue;
-            }
-
             let is_maybe_drop_guard = maybe_drop_guard(
                 tcx,
                 self.typing_env,
@@ -1117,6 +1112,11 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                 let Some(hir_id) = source_info.scope.lint_root(&self.body.source_scopes) else {
                     continue;
                 };
+
+                // By convention, underscore-prefixed bindings are allowed to be unused explicitly
+                if name.as_str().starts_with('_') {
+                    break;
+                }
 
                 match kind {
                     AccessKind::Assign => {
@@ -1243,9 +1243,12 @@ struct TransferFunction<'a, 'tcx> {
 impl<'tcx> Visitor<'tcx> for TransferFunction<'_, 'tcx> {
     fn visit_statement(&mut self, statement: &Statement<'tcx>, location: Location) {
         match statement.kind {
-            // `ForLet(None)` fake read erroneously marks the just-assigned local as live.
-            // This defeats the purpose of the analysis for `let` bindings.
-            StatementKind::FakeRead(box (FakeReadCause::ForLet(None), _)) => return,
+            // `ForLet(None)` and `ForGuardBinding` fake reads erroneously mark the just-assigned
+            // locals as live. This defeats the purpose of the analysis for such bindings.
+            StatementKind::FakeRead(box (
+                FakeReadCause::ForLet(None) | FakeReadCause::ForGuardBinding,
+                _,
+            )) => return,
             // Handle self-assignment by restricting the read/write they do.
             StatementKind::Assign(box (ref dest, ref rvalue))
                 if self.self_assignment.contains(&location) =>

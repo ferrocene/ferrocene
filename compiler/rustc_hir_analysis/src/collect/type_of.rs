@@ -63,7 +63,7 @@ pub(super) fn type_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::EarlyBinder<'_
                 let args = ty::GenericArgs::identity_for_item(tcx, def_id);
                 Ty::new_fn_def(tcx, def_id.to_def_id(), args)
             }
-            TraitItemKind::Const(ty, rhs) => rhs
+            TraitItemKind::Const(ty, rhs, _) => rhs
                 .and_then(|rhs| {
                     ty.is_suggestable_infer_ty().then(|| {
                         infer_placeholder_type(
@@ -420,9 +420,9 @@ fn infer_placeholder_type<'tcx>(
     kind: &'static str,
 ) -> Ty<'tcx> {
     let tcx = cx.tcx();
-    // If the type is omitted on a #[type_const] we can't run
+    // If the type is omitted on a `type const` we can't run
     // type check on since that requires the const have a body
-    // which type_consts don't.
+    // which `type const`s don't.
     let ty = if tcx.is_type_const(def_id.to_def_id()) {
         if let Some(trait_item_def_id) = tcx.trait_item_of(def_id.to_def_id()) {
             tcx.type_of(trait_item_def_id).instantiate_identity()
@@ -430,7 +430,7 @@ fn infer_placeholder_type<'tcx>(
             Ty::new_error_with_message(
                 tcx,
                 ty_span,
-                "constant with #[type_const] requires an explicit type",
+                "constant with `type const` requires an explicit type",
             )
         }
     } else {

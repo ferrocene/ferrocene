@@ -13,7 +13,7 @@ use rustc_middle::ty::{
     self as ty, IsSuggestable, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt,
     TypeVisitor, Upcast,
 };
-use rustc_span::{ErrorGuaranteed, Ident, Span, kw, sym};
+use rustc_span::{ErrorGuaranteed, Ident, Span, kw};
 use rustc_trait_selection::traits;
 use smallvec::SmallVec;
 use tracing::{debug, instrument};
@@ -171,7 +171,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let tcx = self.tcx();
 
         // Skip adding any default bounds if `#![rustc_no_implicit_bounds]`
-        if tcx.has_attr(CRATE_DEF_ID, sym::rustc_no_implicit_bounds) {
+        if find_attr!(tcx.get_all_attrs(CRATE_DEF_ID), AttributeKind::RustcNoImplicitBounds) {
             return;
         }
 
@@ -285,7 +285,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         context: ImpliedBoundsContext<'tcx>,
     ) -> bool {
         let collected = collect_bounds(hir_bounds, context, trait_def_id);
-        !self.tcx().has_attr(CRATE_DEF_ID, sym::rustc_no_implicit_bounds) && !collected.any()
+        !find_attr!(self.tcx().get_all_attrs(CRATE_DEF_ID), AttributeKind::RustcNoImplicitBounds)
+            && !collected.any()
     }
 
     fn reject_duplicate_relaxed_bounds(&self, relaxed_bounds: SmallVec<[&PolyTraitRef<'_>; 1]>) {
@@ -362,7 +363,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         param_ty: Ty<'tcx>,
         hir_bounds: I,
         bounds: &mut Vec<(ty::Clause<'tcx>, Span)>,
-        bound_vars: &'tcx ty::List<ty::BoundVariableKind>,
+        bound_vars: &'tcx ty::List<ty::BoundVariableKind<'tcx>>,
         predicate_filter: PredicateFilter,
         overlapping_assoc_constraints: OverlappingAsssocItemConstraints,
     ) where
@@ -603,22 +604,19 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         });
 
                         if let ty::AssocTag::Const = assoc_tag
-                            && !find_attr!(
-                                self.tcx().get_all_attrs(assoc_item.def_id),
-                                AttributeKind::TypeConst(_)
-                            )
+                            && !self.tcx().is_type_const(assoc_item.def_id)
                         {
                             if tcx.features().min_generic_const_args() {
                                 let mut err = self.dcx().struct_span_err(
                                     constraint.span,
-                                    "use of trait associated const without `#[type_const]`",
+                                    "use of trait associated const not defined as `type const`",
                                 );
-                                err.note("the declaration in the trait must be marked with `#[type_const]`");
+                                err.note("the declaration in the trait must begin with `type const` not just `const` alone");
                                 return Err(err.emit());
                             } else {
                                 let err = self.dcx().span_delayed_bug(
                                     constraint.span,
-                                    "use of trait associated const without `#[type_const]`",
+                                    "use of trait associated const defined as `type const`",
                                 );
                                 return Err(err);
                             }
@@ -1000,7 +998,9 @@ impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for GenericParamAndBoundVarCollector<'_, 't
                             .delayed_bug(format!("unexpected bound region kind: {:?}", br.kind));
                         return ControlFlow::Break(guar);
                     }
-                    ty::BoundRegionKind::NamedAnon(_) => bug!("only used for pretty printing"),
+                    ty::BoundRegionKind::NamedForPrinting(_) => {
+                        bug!("only used for pretty printing")
+                    }
                 });
             }
             _ => {}

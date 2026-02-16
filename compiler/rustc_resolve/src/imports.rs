@@ -406,8 +406,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             }
         } else if !old_glob_decl.vis().is_at_least(glob_decl.vis(), self.tcx) {
             // We are glob-importing the same item but with greater visibility.
-            old_glob_decl.vis.set_unchecked(glob_decl.vis());
-            old_glob_decl
+            // FIXME: Update visibility in place, but without regressions
+            // (#152004, #151124, #152347).
+            glob_decl
         } else if glob_decl.is_ambiguity_recursive() && !old_glob_decl.is_ambiguity_recursive() {
             // Overwriting a non-ambiguous glob import with an ambiguous glob import.
             old_glob_decl.ambiguity.set_unchecked(Some(glob_decl));
@@ -1189,7 +1190,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     ident,
                     ns,
                     &import.parent_scope,
-                    Some(Finalize { report_private: false, ..finalize }),
+                    Some(Finalize {
+                        report_private: false,
+                        import_vis: Some(import.vis),
+                        ..finalize
+                    }),
                     bindings[ns].get().decl(),
                     Some(import),
                 );
@@ -1498,7 +1503,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     ScopeSet::All(ns),
                     &import.parent_scope,
                     None,
-                    false,
                     decls[ns].get().decl(),
                     None,
                 ) {

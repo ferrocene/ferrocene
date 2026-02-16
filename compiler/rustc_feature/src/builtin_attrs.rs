@@ -862,13 +862,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         register_tool, CrateLevel, template!(List: &["tool1, tool2, ..."]), DuplicatesOk,
         EncodeCrossCrate::No, experimental!(register_tool),
     ),
-
-    // lang-team MCP 147
-    gated!(
-        deprecated_safe, Normal, template!(List: &[r#"since = "version", note = "...""#]), ErrorFollowing,
-        EncodeCrossCrate::Yes, experimental!(deprecated_safe),
-    ),
-
     // `#[cfi_encoding = ""]`
     gated!(
         cfi_encoding, Normal, template!(NameValueStr: "encoding"), ErrorPreceding,
@@ -886,13 +879,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     gated!(
         patchable_function_entry, Normal, template!(List: &["prefix_nops = m, entry_nops = n"]), ErrorPreceding,
         EncodeCrossCrate::Yes, experimental!(patchable_function_entry)
-    ),
-
-    // Probably temporary component of min_generic_const_args.
-    // `#[type_const] const ASSOC: usize;`
-    gated!(
-        type_const, Normal, template!(Word), ErrorFollowing,
-        EncodeCrossCrate::Yes, min_generic_const_args, experimental!(type_const),
     ),
 
     // The `#[loop_match]` and `#[const_continue]` attributes are part of the
@@ -1328,6 +1314,12 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         ErrorFollowing, EncodeCrossCrate::Yes,
         "`#[rustc_has_incoherent_inherent_impls]` allows the addition of incoherent inherent impls for \
          the given type by annotating all impl items with `#[rustc_allow_incoherent_impl]`"
+    ),
+    rustc_attr!(
+        rustc_non_const_trait_method, AttributeType::Normal, template!(Word),
+        ErrorFollowing, EncodeCrossCrate::No,
+        "`#[rustc_non_const_trait_method]` should only used by the standard library to mark trait methods \
+        as non-const to allow large traits an easier transition to const"
     ),
 
     BuiltinAttribute {

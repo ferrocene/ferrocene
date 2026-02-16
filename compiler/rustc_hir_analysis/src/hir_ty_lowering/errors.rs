@@ -3,7 +3,7 @@ use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::unord::UnordMap;
 use rustc_errors::codes::*;
 use rustc_errors::{
-    Applicability, Diag, ErrorGuaranteed, MultiSpan, SuggestionStyle, listify, pluralize,
+    Applicability, Diag, ErrorGuaranteed, MultiSpan, SuggestionStyle, listify, msg, pluralize,
     struct_span_code_err,
 };
 use rustc_hir::def::{CtorOf, DefKind, Res};
@@ -31,7 +31,6 @@ use crate::errors::{
     self, AssocItemConstraintsNotAllowedHere, ManualImplementation, ParenthesizedFnTraitExpansion,
     TraitObjectDeclaredWithNoTraits,
 };
-use crate::fluent_generated as fluent;
 use crate::hir_ty_lowering::{AssocItemQSelf, HirTyLowerer};
 
 impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
@@ -305,7 +304,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                             // was also not an exact match, so we also suggest changing it.
                             err.span_suggestion_verbose(
                                 assoc_ident.span,
-                                fluent::hir_analysis_assoc_item_not_found_similar_in_other_trait_with_bound_sugg,
+                                msg!("...and changing the associated {$assoc_kind} name"),
                                 suggested_name,
                                 Applicability::MaybeIncorrect,
                             );

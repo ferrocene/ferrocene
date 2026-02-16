@@ -1,5 +1,5 @@
 // tidy-alphabetical-start
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(box_patterns)]
 #![feature(const_type_name)]
 #![feature(cow_is_borrowed)]
@@ -91,20 +91,32 @@ macro_rules! declare_passes {
             )+
         )*
 
-        static PASS_NAMES: LazyLock<FxIndexSet<&str>> = LazyLock::new(|| [
+        static PASS_NAMES: LazyLock<FxIndexSet<&str>> = LazyLock::new(|| {
+            let mut set = FxIndexSet::default();
             // Fake marker pass
-            "PreCodegen",
+            set.insert("PreCodegen");
             $(
                 $(
-                    stringify!($pass_name),
-                    $(
-                        $(
-                            $mod_name::$pass_name::$ident.name(),
-                        )*
-                    )?
+                    set.extend(pass_names!($mod_name : $pass_name $( { $($ident),* } )? ));
                 )+
             )*
-        ].into_iter().collect());
+            set
+        });
+    };
+}
+
+macro_rules! pass_names {
+    // pass groups: only pass names inside are considered pass_names
+    ($mod_name:ident : $pass_group:ident { $($pass_name:ident),* $(,)? }) => {
+        [
+            $(
+                $mod_name::$pass_group::$pass_name.name(),
+            )*
+        ]
+    };
+    // lone pass names: stringify the struct or enum name
+    ($mod_name:ident : $pass_name:ident) => {
+        [stringify!($pass_name)]
     };
 }
 
@@ -201,8 +213,6 @@ declare_passes! {
     mod validate : Validator;
 }
 
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
-
 pub fn provide(providers: &mut Providers) {
     coverage::query::provide(providers);
     ffi_unwind_calls::provide(&mut providers.queries);
@@ -219,7 +229,6 @@ pub fn provide(providers: &mut Providers) {
         optimized_mir,
         check_liveness: liveness::check_liveness,
         is_mir_available,
-        is_ctfe_mir_available: is_mir_available,
         mir_callgraph_cyclic: inline::cycle::mir_callgraph_cyclic,
         mir_inliner_callees: inline::cycle::mir_inliner_callees,
         promoted_mir,

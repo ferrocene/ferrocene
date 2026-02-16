@@ -427,7 +427,7 @@ macro_rules! common_visitor_and_walkers {
             Const,
             ConstBlockItem,
             ConstItem,
-            ConstItemRhs,
+            ConstItemRhsKind,
             Defaultness,
             Delegation,
             DelegationMac,

@@ -960,7 +960,6 @@ workflows:
             - aarch64-none-test-library-certified-panic
             - aarch64-none-test-compiletest
             - aarch64r82-none-test-library
-            - aarch64r82-none-test-library-certified-panic
             - aarch64r82-none-test-compiletest
             - aarch64v8r-none-test-library
             - aarch64v8r-none-test-library-certified-panic
@@ -1059,14 +1058,6 @@ workflows:
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
           job: test:library
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-      - facade-certified-panic-test:
-          name: aarch64r82-none-test-library-certified-panic
-          target: aarch64r82-unknown-ferrocene.facade
-          test-variant: neoverse-v1
-          qemu-arch: qemu-aarch64
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

@@ -1,4 +1,5 @@
 use rustc_hir::attrs::{DeprecatedSince, Deprecation};
+use rustc_hir::{RustcVersion, VERSION_PLACEHOLDER};
 
 use super::prelude::*;
 use super::util::parse_version;
@@ -143,6 +144,8 @@ impl<S: Stage> SingleAttributeParser<S> for DeprecationParser {
                 DeprecatedSince::Future
             } else if !is_rustc {
                 DeprecatedSince::NonStandard(since)
+            } else if since.as_str() == VERSION_PLACEHOLDER {
+                DeprecatedSince::RustcVersion(RustcVersion::CURRENT)
             } else if let Some(version) = parse_version(since) {
                 DeprecatedSince::RustcVersion(version)
             } else {

@@ -919,7 +919,7 @@ impl SyntaxExtension {
     fn get_hide_backtrace(attrs: &[hir::Attribute]) -> bool {
         // FIXME(estebank): instead of reusing `#[rustc_diagnostic_item]` as a proxy, introduce a
         // new attribute purely for this under the `#[diagnostic]` namespace.
-        ast::attr::find_by_name(attrs, sym::rustc_diagnostic_item).is_some()
+        find_attr!(attrs, AttributeKind::RustcDiagnosticItem(..))
     }
 
     /// Constructs a syntax extension with the given properties
@@ -962,15 +962,6 @@ impl SyntaxExtension {
 
         let stability = find_attr!(attrs, AttributeKind::Stability { stability, .. } => *stability);
 
-        // FIXME(jdonszelmann): make it impossible to miss the or_else in the typesystem
-        if let Some(sp) =
-            find_attr!(attrs, AttributeKind::RustcConstStability { span, .. } => *span)
-        {
-            sess.dcx().emit_err(errors::MacroConstStability {
-                span: sp,
-                head_span: sess.source_map().guess_head_span(span),
-            });
-        }
         if let Some(sp) = find_attr!(attrs, AttributeKind::RustcBodyStability{ span, .. } => *span)
         {
             sess.dcx().emit_err(errors::MacroBodyStability {

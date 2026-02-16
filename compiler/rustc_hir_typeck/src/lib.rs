@@ -1,5 +1,5 @@
 // tidy-alphabetical-start
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(box_patterns)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
@@ -66,8 +66,6 @@ use crate::diverges::Diverges;
 use crate::expectation::Expectation;
 use crate::fn_ctxt::LoweredTy;
 use crate::gather_locals::GatherLocalsVisitor;
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 #[macro_export]
 macro_rules! type_error_struct {

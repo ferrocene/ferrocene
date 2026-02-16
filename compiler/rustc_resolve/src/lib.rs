@@ -8,14 +8,13 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![cfg_attr(bootstrap, feature(ptr_as_ref_unchecked))]
 #![feature(arbitrary_self_types)]
-#![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(const_default)]
 #![feature(const_trait_impl)]
 #![feature(control_flow_into_value)]
-#![feature(decl_macro)]
 #![feature(default_field_values)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
@@ -72,7 +71,6 @@ use rustc_middle::ty::{
     self, DelegationFnSig, DelegationInfo, Feed, MainDefinition, RegisteredTools,
     ResolverAstLowering, ResolverGlobalCtxt, TyCtxt, TyCtxtFeed, Visibility,
 };
-use rustc_query_system::ich::StableHashingContext;
 use rustc_session::config::CrateType;
 use rustc_session::lint::builtin::PRIVATE_MACRO_USE;
 use rustc_span::hygiene::{ExpnId, LocalExpnId, MacroKind, SyntaxContext, Transparency};
@@ -97,8 +95,6 @@ pub mod rustdoc;
 pub use macros::registered_tools_ast;
 
 use crate::ref_mut::{CmCell, CmRefCell};
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Determinacy {
@@ -1341,6 +1337,8 @@ pub struct Resolver<'ra, 'tcx> {
 
     /// Amount of lifetime parameters for each item in the crate.
     item_generics_num_lifetimes: FxHashMap<LocalDefId, usize> = default::fx_hash_map(),
+    /// Generic args to suggest for required params (e.g. `<'_>`, `<_, _>`), if any.
+    item_required_generic_args_suggestions: FxHashMap<LocalDefId, String> = default::fx_hash_map(),
     delegation_fn_sigs: LocalDefIdMap<DelegationFnSig> = Default::default(),
     delegation_infos: LocalDefIdMap<DelegationInfo> = Default::default(),
 
@@ -1556,6 +1554,32 @@ impl<'tcx> Resolver<'_, 'tcx> {
             self.item_generics_num_lifetimes[&def_id]
         } else {
             self.tcx.generics_of(def_id).own_counts().lifetimes
+        }
+    }
+
+    fn item_required_generic_args_suggestion(&self, def_id: DefId) -> String {
+        if let Some(def_id) = def_id.as_local() {
+            self.item_required_generic_args_suggestions.get(&def_id).cloned().unwrap_or_default()
+        } else {
+            let required = self
+                .tcx
+                .generics_of(def_id)
+                .own_params
+                .iter()
+                .filter_map(|param| match param.kind {
+                    ty::GenericParamDefKind::Lifetime => Some("'_"),
+                    ty::GenericParamDefKind::Type { has_default, .. }
+                    | ty::GenericParamDefKind::Const { has_default } => {
+                        if has_default {
+                            None
+                        } else {
+                            Some("_")
+                        }
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            if required.is_empty() { String::new() } else { format!("<{}>", required.join(", ")) }
         }
     }
 
@@ -1839,10 +1863,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             delegation_infos: self.delegation_infos,
         };
         ResolverOutputs { global_ctxt, ast_lowering }
-    }
-
-    fn create_stable_hashing_context(&self) -> StableHashingContext<'_> {
-        StableHashingContext::new(self.tcx.sess, self.tcx.untracked())
     }
 
     fn cstore(&self) -> FreezeReadGuard<'_, CStore> {

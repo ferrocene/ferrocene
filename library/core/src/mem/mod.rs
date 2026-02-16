@@ -1260,7 +1260,10 @@ pub trait SizedTypeProperties: Sized {
 
     #[doc(hidden)]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    const ALIGNMENT: Alignment = Alignment::of::<Self>();
+    const ALIGNMENT: Alignment = {
+        // This can't panic since type alignment is always a power of two.
+        Alignment::new(Self::ALIGN).unwrap()
+    };
 
     /// `true` if this type requires no storage.
     /// `false` if its [size](size_of) is greater than zero.

@@ -184,8 +184,7 @@ pub(crate) fn run_in_thread_pool_with_globals<
     use rustc_data_structures::defer;
     use rustc_data_structures::sync::FromDyn;
     use rustc_middle::ty::tls;
-    use rustc_query_impl::QueryCtxt;
-    use rustc_query_system::query::{QueryContext, break_query_cycles};
+    use rustc_query_impl::{QueryCtxt, break_query_cycles};
 
     let thread_stack_size = init_stack_size(thread_builder_diag);
 
@@ -249,7 +248,7 @@ internal compiler error: query cycle handler thread panicked, aborting process";
                             tls::with(|tcx| {
                                 // Accessing session globals is sound as they outlive `GlobalCtxt`.
                                 // They are needed to hash query keys containing spans or symbols.
-                                let query_map = rustc_span::set_session_globals_then(
+                                let job_map = rustc_span::set_session_globals_then(
                                     unsafe { &*(session_globals as *const SessionGlobals) },
                                     || {
                                         // Ensure there were no errors collecting all active jobs.
@@ -259,7 +258,7 @@ internal compiler error: query cycle handler thread panicked, aborting process";
                                         )
                                     },
                                 );
-                                break_query_cycles(query_map, &registry);
+                                break_query_cycles(job_map, &registry);
                             })
                         })
                     });

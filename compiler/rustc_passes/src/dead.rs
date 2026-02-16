@@ -10,10 +10,11 @@ use hir::def_id::{LocalDefIdMap, LocalDefIdSet};
 use rustc_abi::FieldIdx;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::{ErrorGuaranteed, MultiSpan};
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::intravisit::{self, Visitor};
-use rustc_hir::{self as hir, Node, PatKind, QPath};
+use rustc_hir::{self as hir, Node, PatKind, QPath, find_attr};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::middle::privacy::Level;
 use rustc_middle::query::Providers;
@@ -21,7 +22,7 @@ use rustc_middle::ty::{self, AssocTag, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::DEAD_CODE;
 use rustc_session::lint::{self, LintExpectationId};
-use rustc_span::{Symbol, kw, sym};
+use rustc_span::{Symbol, kw};
 
 use crate::errors::{
     ChangeFields, IgnoredDerivedImpls, MultipleDeadCodes, ParentInfo, UselessAssignment,
@@ -380,7 +381,10 @@ impl<'tcx> MarkSymbolVisitor<'tcx> {
             && let impl_of = self.tcx.parent(impl_item.owner_id.to_def_id())
             && self.tcx.is_automatically_derived(impl_of)
             && let trait_ref = self.tcx.impl_trait_ref(impl_of).instantiate_identity()
-            && self.tcx.has_attr(trait_ref.def_id, sym::rustc_trivial_field_reads)
+            && find_attr!(
+                self.tcx.get_all_attrs(trait_ref.def_id),
+                AttributeKind::RustcTrivialFieldReads
+            )
         {
             if let ty::Adt(adt_def, _) = trait_ref.self_ty().kind()
                 && let Some(adt_def_id) = adt_def.did().as_local()
@@ -702,12 +706,6 @@ fn has_allow_dead_code_or_lang_attr(
     tcx: TyCtxt<'_>,
     def_id: LocalDefId,
 ) -> Option<ComesFromAllowExpect> {
-    fn has_lang_attr(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
-        tcx.has_attr(def_id, sym::lang)
-            // Stable attribute for #[lang = "panic_impl"]
-            || tcx.has_attr(def_id, sym::panic_handler)
-    }
-
     fn has_allow_expect_dead_code(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
         let hir_id = tcx.local_def_id_to_hir_id(def_id);
         let lint_level = tcx.lint_level_at_node(lint::builtin::DEAD_CODE, hir_id).level;
@@ -728,7 +726,9 @@ fn has_allow_dead_code_or_lang_attr(
 
     if has_allow_expect_dead_code(tcx, def_id) {
         Some(ComesFromAllowExpect::Yes)
-    } else if has_used_like_attr(tcx, def_id) || has_lang_attr(tcx, def_id) {
+    } else if has_used_like_attr(tcx, def_id)
+        || find_attr!(tcx.get_all_attrs(def_id), AttributeKind::Lang(..))
+    {
         Some(ComesFromAllowExpect::No)
     } else {
         None

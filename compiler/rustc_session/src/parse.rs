@@ -280,8 +280,8 @@ pub struct ParseSess {
 
 impl ParseSess {
     /// Used for testing.
-    pub fn new(locale_resources: Vec<&'static str>) -> Self {
-        let translator = Translator::with_fallback_bundle(locale_resources, false);
+    pub fn new() -> Self {
+        let translator = Translator::new();
         let sm = Arc::new(SourceMap::new(FilePathMapping::empty()));
         let emitter = Box::new(
             AnnotateSnippetEmitter::new(stderr_destination(ColorConfig::Auto), translator)
@@ -313,8 +313,8 @@ impl ParseSess {
         }
     }
 
-    pub fn emitter_with_note(locale_resources: Vec<&'static str>, note: String) -> Self {
-        let translator = Translator::with_fallback_bundle(locale_resources, false);
+    pub fn emitter_with_note(note: String) -> Self {
+        let translator = Translator::new();
         let sm = Arc::new(SourceMap::new(FilePathMapping::empty()));
         let emitter = Box::new(AnnotateSnippetEmitter::new(
             stderr_destination(ColorConfig::Auto),

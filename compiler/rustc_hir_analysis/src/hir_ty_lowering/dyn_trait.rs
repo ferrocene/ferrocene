@@ -451,17 +451,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 } else {
                     let reason =
                         if let hir::LifetimeKind::ImplicitObjectLifetimeDefault = lifetime.kind {
-                            if let hir::Node::Ty(hir::Ty {
-                                kind: hir::TyKind::Ref(parent_lifetime, _),
-                                ..
-                            }) = tcx.parent_hir_node(hir_id)
-                                && tcx.named_bound_var(parent_lifetime.hir_id).is_none()
-                            {
-                                // Parent lifetime must have failed to resolve. Don't emit a redundant error.
-                                RegionInferReason::ExplicitObjectLifetime
-                            } else {
-                                RegionInferReason::ObjectLifetimeDefault
-                            }
+                            RegionInferReason::ObjectLifetimeDefault(span.shrink_to_hi())
                         } else {
                             RegionInferReason::ExplicitObjectLifetime
                         };
@@ -592,7 +582,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             if span.can_be_used_for_suggestions()
                 && poly_trait_ref.trait_ref.trait_def_id().is_some()
                 && !self.maybe_suggest_impl_trait(span, hir_id, hir_bounds, &mut diag)
-                && !self.maybe_suggest_dyn_trait(hir_id, sugg, &mut diag)
+                && !self.maybe_suggest_dyn_trait(hir_id, span, sugg, &mut diag)
             {
                 self.maybe_suggest_add_generic_impl_trait(span, hir_id, &mut diag);
             }
@@ -750,10 +740,14 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     fn maybe_suggest_dyn_trait(
         &self,
         hir_id: hir::HirId,
+        span: Span,
         sugg: Vec<(Span, String)>,
         diag: &mut Diag<'_>,
     ) -> bool {
         let tcx = self.tcx();
+        if span.in_derive_expansion() {
+            return false;
+        }
 
         // Look at the direct HIR parent, since we care about the relationship between
         // the type and the thing that directly encloses it.

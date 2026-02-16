@@ -40,7 +40,7 @@
           StorageLive(_1);
           StorageLive(_2);
           StorageLive(_3);
--         _3 = const std::ptr::Alignment::of::<u8>::{constant#0};
+-         _3 = const <u8 as std::mem::SizedTypeProperties>::ALIGNMENT;
 -         _2 = copy _3 as *mut u8 (Transmute);
 +         _3 = const std::ptr::Alignment {{ _inner_repr_trick: std::ptr::alignment::AlignmentEnum::_Align1Shl0 }};
 +         _2 = const {0x1 as *mut u8};

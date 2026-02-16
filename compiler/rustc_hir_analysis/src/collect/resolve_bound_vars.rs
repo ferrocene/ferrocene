@@ -663,7 +663,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                 LifetimeKind::Param(def_id) => {
                     self.resolve_lifetime_ref(def_id, lt);
                 }
-                LifetimeKind::Error => {}
+                LifetimeKind::Error(..) => {}
                 LifetimeKind::ImplicitObjectLifetimeDefault
                 | LifetimeKind::Infer
                 | LifetimeKind::Static => {
@@ -804,7 +804,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                         // If the user wrote an explicit name, use that.
                         self.visit_lifetime(&*lifetime);
                     }
-                    LifetimeKind::Error => {}
+                    LifetimeKind::Error(..) => {}
                 }
             }
             hir::TyKind::Ref(lifetime_ref, ref mt) => {
@@ -859,7 +859,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                     }
                 })
             }
-            Const(_, _) => self.visit_early(trait_item.hir_id(), trait_item.generics, |this| {
+            Const(_, _, _) => self.visit_early(trait_item.hir_id(), trait_item.generics, |this| {
                 intravisit::walk_trait_item(this, trait_item)
             }),
         }
@@ -891,8 +891,10 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
             hir::LifetimeKind::Param(param_def_id) => {
                 self.resolve_lifetime_ref(param_def_id, lifetime_ref)
             }
-            // If we've already reported an error, just ignore `lifetime_ref`.
-            hir::LifetimeKind::Error => {}
+            // Keep track of lifetimes about which errors have already been reported
+            hir::LifetimeKind::Error(guar) => {
+                self.insert_lifetime(lifetime_ref, ResolvedArg::Error(guar))
+            }
             // Those will be resolved by typechecking.
             hir::LifetimeKind::ImplicitObjectLifetimeDefault | hir::LifetimeKind::Infer => {}
         }
@@ -1695,7 +1697,8 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                 | DefKind::Union
                 | DefKind::Enum
                 | DefKind::TyAlias
-                | DefKind::Trait,
+                | DefKind::Trait
+                | DefKind::TraitAlias,
                 def_id,
             ) if depth == 0 => Some(def_id),
             _ => None,
@@ -1865,7 +1868,7 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
             if constraint.gen_args.parenthesized == hir::GenericArgsParentheses::ReturnTypeNotation
             {
                 let bound_vars = if let Some(type_def_id) = type_def_id
-                    && self.tcx.def_kind(type_def_id) == DefKind::Trait
+                    && let DefKind::Trait | DefKind::TraitAlias = self.tcx.def_kind(type_def_id)
                     && let Some((mut bound_vars, assoc_fn)) = BoundVarContext::supertrait_hrtb_vars(
                         self.tcx,
                         type_def_id,

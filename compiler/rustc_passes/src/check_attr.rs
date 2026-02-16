@@ -15,7 +15,7 @@ use rustc_attr_parsing::{AttributeParser, Late};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_data_structures::unord::UnordMap;
-use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey};
+use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey, msg};
 use rustc_feature::{
     ACCEPTED_LANG_FEATURES, AttributeDuplicates, AttributeType, BUILTIN_ATTRIBUTE_MAP,
     BuiltinAttribute,
@@ -54,23 +54,23 @@ use rustc_trait_selection::infer::{TyCtxtInferExt, ValuePairs};
 use rustc_trait_selection::traits::ObligationCtxt;
 use tracing::debug;
 
-use crate::{errors, fluent_generated as fluent};
+use crate::errors;
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_unimplemented_only_for_traits)]
+#[diag("`#[diagnostic::on_unimplemented]` can only be applied to trait definitions")]
 struct DiagnosticOnUnimplementedOnlyForTraits;
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_const_only_for_trait_impls)]
+#[diag("`#[diagnostic::on_const]` can only be applied to trait impls")]
 struct DiagnosticOnConstOnlyForTraitImpls {
-    #[label]
+    #[label("not a trait impl")]
     item_span: Span,
 }
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_const_only_for_non_const_trait_impls)]
+#[diag("`#[diagnostic::on_const]` can only be applied to non-const trait impls")]
 struct DiagnosticOnConstOnlyForNonConstTraitImpls {
-    #[label]
+    #[label("this is a const trait impl")]
     item_span: Span,
 }
 
@@ -256,6 +256,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::Fundamental
                     | AttributeKind::Ignore { .. }
                     | AttributeKind::InstructionSet(..)
+                    | AttributeKind::Lang(..)
                     | AttributeKind::LinkName { .. }
                     | AttributeKind::LinkOrdinal { .. }
                     | AttributeKind::LinkSection { .. }
@@ -282,22 +283,33 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::PatternComplexityLimit { .. }
                     | AttributeKind::PinV2(..)
                     | AttributeKind::Pointee(..)
+                    | AttributeKind::PreludeImport
                     | AttributeKind::ProfilerRuntime
                     | AttributeKind::RecursionLimit { .. }
+                    | AttributeKind::ReexportTestHarnessMain(..)
                     // handled below this loop and elsewhere
                     | AttributeKind::Repr { .. }
+                    | AttributeKind::RustcAbi { .. }
                     | AttributeKind::RustcAllocator
                     | AttributeKind::RustcAllocatorZeroed
                     | AttributeKind::RustcAllocatorZeroedVariant { .. }
                     | AttributeKind::RustcAsPtr(..)
                     | AttributeKind::RustcBodyStability { .. }
                     | AttributeKind::RustcBuiltinMacro { .. }
+                    | AttributeKind::RustcCaptureAnalysis
+                    | AttributeKind::RustcCguTestAttr(..)
+                    | AttributeKind::RustcClean(..)
                     | AttributeKind::RustcCoherenceIsCore(..)
                     | AttributeKind::RustcCoinductive(..)
                     | AttributeKind::RustcConfusables { .. }
                     | AttributeKind::RustcConstStabilityIndirect
+                    | AttributeKind::RustcConversionSuggestion
                     | AttributeKind::RustcDeallocator
+                    | AttributeKind::RustcDefPath(..)
+                    | AttributeKind::RustcDelayedBugFromInsideQuery
                     | AttributeKind::RustcDenyExplicitImpl(..)
+                    | AttributeKind::RustcDeprecatedSafe2024 {..}
+                    | AttributeKind::RustcDiagnosticItem(..)
                     | AttributeKind::RustcDummy
                     | AttributeKind::RustcDumpDefParents
                     | AttributeKind::RustcDumpItemBounds
@@ -305,8 +317,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcDumpUserArgs
                     | AttributeKind::RustcDumpVtable(..)
                     | AttributeKind::RustcDynIncompatibleTrait(..)
+                    | AttributeKind::RustcEffectiveVisibility
+                    | AttributeKind::RustcEvaluateWhereClauses
                     | AttributeKind::RustcHasIncoherentInherentImpls
                     | AttributeKind::RustcHiddenTypeOfOpaques
+                    | AttributeKind::RustcIfThisChanged(..)
+                    | AttributeKind::RustcInsignificantDtor
+                    | AttributeKind::RustcIntrinsic
+                    | AttributeKind::RustcIntrinsicConstStableIndirect
                     | AttributeKind::RustcLayout(..)
                     | AttributeKind::RustcLayoutScalarValidRangeEnd(..)
                     | AttributeKind::RustcLayoutScalarValidRangeStart(..)
@@ -318,29 +336,41 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcMain
                     | AttributeKind::RustcMir(_)
                     | AttributeKind::RustcNeverReturnsNullPointer
+                    | AttributeKind::RustcNeverTypeOptions {..}
                     | AttributeKind::RustcNoImplicitAutorefs
+                    | AttributeKind::RustcNoImplicitBounds
+                    | AttributeKind::RustcNoMirInline
                     | AttributeKind::RustcNonConstTraitMethod
                     | AttributeKind::RustcNounwind
                     | AttributeKind::RustcObjcClass { .. }
                     | AttributeKind::RustcObjcSelector { .. }
                     | AttributeKind::RustcOffloadKernel
+                    | AttributeKind::RustcOutlives
                     | AttributeKind::RustcParenSugar(..)
                     | AttributeKind::RustcPassByValue (..)
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
                     | AttributeKind::RustcPreserveUbChecks
+                    | AttributeKind::RustcProcMacroDecls
                     | AttributeKind::RustcReallocator
+                    | AttributeKind::RustcRegions
+                    | AttributeKind::RustcReservationImpl(..)
                     | AttributeKind::RustcScalableVector { .. }
                     | AttributeKind::RustcShouldNotBeCalledOnConstItems(..)
                     | AttributeKind::RustcSimdMonomorphizeLaneLimit(..)
                     | AttributeKind::RustcSkipDuringMethodDispatch { .. }
                     | AttributeKind::RustcSpecializationTrait(..)
                     | AttributeKind::RustcStdInternalSymbol (..)
+                    | AttributeKind::RustcStrictCoherence(..)
+                    | AttributeKind::RustcSymbolName(..)
+                    | AttributeKind::RustcTestMarker(..)
+                    | AttributeKind::RustcThenThisWouldNeed(..)
+                    | AttributeKind::RustcTrivialFieldReads
                     | AttributeKind::RustcUnsafeSpecializationMarker(..)
                     | AttributeKind::RustcVariance
                     | AttributeKind::RustcVarianceOfOpaques
                     | AttributeKind::ShouldPanic { .. }
+                    | AttributeKind::TestRunner(..)
                     | AttributeKind::ThreadLocal
-                    | AttributeKind::TypeConst{..}
                     | AttributeKind::TypeLengthLimit { .. }
                     | AttributeKind::UnstableFeatureBound(..)
                     | AttributeKind::Used { .. }
@@ -356,10 +386,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::diagnostic, sym::on_const, ..] => {
                             self.check_diagnostic_on_const(attr.span(), hir_id, target, item)
                         }
-                        [sym::rustc_clean, ..]
-                        | [sym::rustc_dirty, ..]
-                        | [sym::rustc_if_this_changed, ..]
-                        | [sym::rustc_then_this_would_need, ..] => self.check_rustc_dirty_clean(attr),
                         [sym::autodiff_forward, ..] | [sym::autodiff_reverse, ..] => {
                             self.check_autodiff(hir_id, attr, span, target)
                         }
@@ -370,53 +396,20 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::warn
                             | sym::deny
                             | sym::forbid
-                            // need to be fixed
-                            | sym::deprecated_safe // FIXME(deprecated_safe)
                             // internal
-                            | sym::prelude_import
-                            | sym::panic_handler
-                            | sym::lang
                             | sym::default_lib_allocator
-                            | sym::rustc_diagnostic_item
-                            | sym::rustc_no_mir_inline
-                            | sym::rustc_insignificant_dtor
                             | sym::rustc_nonnull_optimization_guaranteed
-                            | sym::rustc_intrinsic
                             | sym::rustc_inherit_overflow_checks
-                            | sym::rustc_intrinsic_const_stable_indirect
-                            | sym::rustc_trivial_field_reads
                             | sym::rustc_on_unimplemented
                             | sym::rustc_do_not_const_check
-                            | sym::rustc_reservation_impl
                             | sym::rustc_doc_primitive
-                            | sym::rustc_conversion_suggestion
-                            | sym::rustc_deprecated_safe_2024
-                            | sym::rustc_test_marker
-                            | sym::rustc_abi
                             | sym::rustc_layout
-                            | sym::rustc_proc_macro_decls
-                            | sym::rustc_never_type_options
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis
-                            | sym::rustc_regions
-                            | sym::rustc_strict_coherence
                             | sym::rustc_mir
-                            | sym::rustc_effective_visibility
-                            | sym::rustc_outlives
-                            | sym::rustc_symbol_name
-                            | sym::rustc_evaluate_where_clauses
-                            | sym::rustc_delayed_bug_from_inside_query
-                            | sym::rustc_def_path
-                            | sym::rustc_partition_reused
-                            | sym::rustc_partition_codegened
-                            | sym::rustc_expected_cgu_reuse
                             // crate-level attrs, are checked below
                             | sym::feature
-                            | sym::register_tool
-                            | sym::rustc_no_implicit_bounds
-                            | sym::test_runner
-                            | sym::reexport_test_harness_main,
-                            ..
+                            | sym::register_tool,                            ..
                         ] => {}
                         [name, rest@..] => {
                             match BUILTIN_ATTRIBUTE_MAP.get(name) {
@@ -790,15 +783,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::Fn => {
                 // `#[track_caller]` is not valid on weak lang items because they are called via
                 // `extern` declarations and `#[track_caller]` would alter their ABI.
-                if let Some((lang_item, _)) = hir::lang_items::extract(attrs)
-                    && let Some(item) = hir::LangItem::from_name(lang_item)
+                if let Some(item) = find_attr!(attrs, AttributeKind::Lang(item, _) => item)
                     && item.is_weak()
                 {
                     let sig = self.tcx.hir_node(hir_id).fn_sig().unwrap();
 
                     self.dcx().emit_err(errors::LangItemWithTrackCaller {
                         attr_span,
-                        name: lang_item,
+                        name: item.name(),
                         sig_span: sig.span,
                     });
                 }
@@ -862,7 +854,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent)
             | Target::Fn => {
                 // `#[target_feature]` is not allowed in lang items.
-                if let Some((lang_item, _)) = hir::lang_items::extract(attrs)
+                if let Some(lang_item) = find_attr!(attrs, AttributeKind::Lang(lang, _) => lang)
                     // Calling functions with `#[target_feature]` is
                     // not unsafe on WASM, see #84988
                     && !self.tcx.sess.target.is_like_wasm
@@ -872,7 +864,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
                     self.dcx().emit_err(errors::LangItemWithTargetFeature {
                         attr_span,
-                        name: lang_item,
+                        name: lang_item.name(),
                         sig_span: sig.span,
                     });
                 }
@@ -1011,8 +1003,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 for (inline2, span2) in rest {
                     if inline2 != inline {
                         let mut spans = MultiSpan::from_spans(vec![*span, *span2]);
-                        spans.push_span_label(*span, fluent::passes_doc_inline_conflict_first);
-                        spans.push_span_label(*span2, fluent::passes_doc_inline_conflict_second);
+                        spans.push_span_label(*span, msg!("this attribute..."));
+                        spans.push_span_label(
+                            *span2,
+                            msg!("{\".\"}..conflicts with this attribute"),
+                        );
                         self.dcx().emit_err(errors::DocInlineConflict { spans });
                         return;
                     }
@@ -1156,7 +1151,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 &self.tcx.sess,
                 sym::rustdoc_internals,
                 *span,
-                fluent::passes_doc_rust_logo,
+                msg!("the `#[doc(rust_logo)]` attribute is used for Rust branding"),
             )
             .emit();
         }
@@ -1257,14 +1252,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     arg_count,
                 });
             }
-        }
-    }
-
-    /// Checks that the dep-graph debugging attributes are only present when the query-dep-graph
-    /// option is passed to the compiler.
-    fn check_rustc_dirty_clean(&self, attr: &Attribute) {
-        if !self.tcx.sess.opts.unstable_opts.query_dep_graph {
-            self.dcx().emit_err(errors::RustcDirtyClean { span: attr.span() });
         }
     }
 

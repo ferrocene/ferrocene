@@ -3296,19 +3296,10 @@ impl Target {
     pub fn search(
         target_tuple: &TargetTuple,
         sysroot: &Path,
-        unstable_options: bool,
     ) -> Result<(Target, TargetWarnings), String> {
         use std::{env, fs};
 
-        fn load_file(
-            path: &Path,
-            unstable_options: bool,
-        ) -> Result<(Target, TargetWarnings), String> {
-            if !unstable_options {
-                return Err(
-                    "custom targets are unstable and require `-Zunstable-options`".to_string()
-                );
-            }
+        fn load_file(path: &Path) -> Result<(Target, TargetWarnings), String> {
             let contents = fs::read_to_string(path).map_err(|e| e.to_string())?;
             Target::from_json(&contents)
         }
@@ -3332,7 +3323,7 @@ impl Target {
                 for dir in env::split_paths(&target_path) {
                     let p = dir.join(&path);
                     if p.is_file() {
-                        return load_file(&p, unstable_options);
+                        return load_file(&p);
                     }
                 }
 
@@ -3345,7 +3336,7 @@ impl Target {
                     Path::new("target.json"),
                 ]);
                 if p.is_file() {
-                    return load_file(&p, unstable_options);
+                    return load_file(&p);
                 }
 
                 Err(format!("could not find specification for target {target_tuple:?}"))

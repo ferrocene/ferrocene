@@ -86,12 +86,12 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "aarch64-unknown-linux-musl",
 ]
 LINUX_BUILD_HOSTS = AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_HOSTS
-LINUX_BUILD_STD_TARGETS = AARCH64_LINUX_BUILD_STD_TARGETS_ALL + X86_64_LINUX_BUILD_STD_TARGETS_ALL
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
 X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
-X86_64_LINUX_SELF_TEST_TARGETS = LINUX_BUILD_HOSTS + LINUX_BUILD_STD_TARGETS + QNX_TARGETS
 AARCH64_LINUX_BUILD_STD_TARGETS_ALL = AARCH64_LINUX_BUILD_STD_TARGETS # Currently, all other targets are built by x86_64
+LINUX_BUILD_STD_TARGETS = AARCH64_LINUX_BUILD_STD_TARGETS_ALL + X86_64_LINUX_BUILD_STD_TARGETS_ALL
+X86_64_LINUX_SELF_TEST_TARGETS = LINUX_BUILD_HOSTS + LINUX_BUILD_STD_TARGETS + QNX_TARGETS
 AARCH64_LINUX_SELF_TEST_TARGETS = LINUX_BUILD_HOSTS + LINUX_BUILD_STD_TARGETS
 
 # Targets only built (and tested!) on Mac
@@ -210,12 +210,13 @@ def calculate_targets(host_plus_stage: str):
             case _:
                 raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":
-        if host == "x86_64-unknown-linux-gnu":
-            targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
-        if host == "aarch64-unknown-linux-gnu":
-            targets = AARCH64_LINUX_BUILD_STD_TARGETS_ALL
-        else:
-            raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
+        match host:
+            case "x86_64-unknown-linux-gnu":
+                targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
+            case "aarch64-unknown-linux-gnu":
+                targets = AARCH64_LINUX_BUILD_STD_TARGETS_ALL
+            case _:
+                raise Exception(f"Only the `x86_64-unknown-linux-gnu` and `aarch64-unknown-linux-gnu` currently runs the `std-only` stage, got host: {host}")
     elif stage == "self-test":
         match host:
             case "aarch64-unknown-linux-gnu":

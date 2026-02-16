@@ -84,7 +84,7 @@ targets = [
   "armebv7r-none-eabihf",
   "armv7r-none-eabihf",
   "armv8r-none-eabihf",
-  "ppc64le-unknown-linux-gnu",
+  "powerpc64le-unknown-linux-gnu",
   "riscv64gc-unknown-linux-gnu",
   "s390x-unknown-linux-gnu",
   "thumbv6m-none-eabi",

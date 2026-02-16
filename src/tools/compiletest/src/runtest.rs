@@ -1312,7 +1312,7 @@ impl<'test> TestCx<'test> {
             let crate_name = path_to_crate_name(&proc_macro.path);
             add_extern(
                 rustc,
-                None, // `extern_modifiers`
+                proc_macro.extern_modifiers.as_deref(),
                 &crate_name,
                 &proc_macro.path,
                 AuxType::ProcMacro,
@@ -1438,7 +1438,7 @@ impl<'test> TestCx<'test> {
         } else if aux_type.is_some() {
             panic!("aux_type {aux_type:?} not expected");
         } else if aux_props.no_prefer_dynamic {
-            (AuxType::Dylib, None)
+            (AuxType::Lib, None)
         } else if self.config.target.contains("emscripten")
             || (self.config.target.contains("musl")
                 && !aux_props.force_host
@@ -1670,6 +1670,11 @@ impl<'test> TestCx<'test> {
                 if self.props.force_host { &*self.config.host } else { &*self.config.target };
 
             compiler.arg(&format!("--target={}", target));
+            if target.ends_with(".json") {
+                // `-Zunstable-options` is necessary when compiletest is running with custom targets
+                // (such as synthetic targets used to bless mir-opt tests).
+                compiler.arg("-Zunstable-options");
+            }
         }
         self.set_revision_flags(&mut compiler);
 

@@ -334,7 +334,7 @@ pub(crate) fn clean_const<'tcx>(constant: &hir::ConstArg<'tcx>) -> ConstantKind 
         }
         hir::ConstArgKind::Anon(anon) => ConstantKind::Anonymous { body: anon.body },
         hir::ConstArgKind::Infer(..) | hir::ConstArgKind::Error(..) => ConstantKind::Infer,
-        hir::ConstArgKind::Literal(..) => {
+        hir::ConstArgKind::Literal { .. } => {
             ConstantKind::Path { path: "/* LITERAL */".to_string().into() }
         }
     }
@@ -1209,14 +1209,14 @@ fn clean_trait_item<'tcx>(trait_item: &hir::TraitItem<'tcx>, cx: &mut DocContext
     let local_did = trait_item.owner_id.to_def_id();
     cx.with_param_env(local_did, |cx| {
         let inner = match trait_item.kind {
-            hir::TraitItemKind::Const(ty, Some(default)) => {
+            hir::TraitItemKind::Const(ty, Some(default), _) => {
                 ProvidedAssocConstItem(Box::new(Constant {
                     generics: enter_impl_trait(cx, |cx| clean_generics(trait_item.generics, cx)),
                     kind: clean_const_item_rhs(default, local_did),
                     type_: clean_ty(ty, cx),
                 }))
             }
-            hir::TraitItemKind::Const(ty, None) => {
+            hir::TraitItemKind::Const(ty, None, _) => {
                 let generics = enter_impl_trait(cx, |cx| clean_generics(trait_item.generics, cx));
                 RequiredAssocConstItem(generics, Box::new(clean_ty(ty, cx)))
             }
@@ -1829,7 +1829,7 @@ pub(crate) fn clean_ty<'tcx>(ty: &hir::Ty<'tcx>, cx: &mut DocContext<'tcx>) -> T
                 | hir::ConstArgKind::TupleCall(..)
                 | hir::ConstArgKind::Tup(..)
                 | hir::ConstArgKind::Array(..)
-                | hir::ConstArgKind::Literal(..) => {
+                | hir::ConstArgKind::Literal { .. } => {
                     let ct = lower_const_arg_for_rustdoc(cx.tcx, const_arg, cx.tcx.types.usize);
                     print_const(cx, ct)
                 }
@@ -3178,7 +3178,7 @@ fn clean_assoc_item_constraint<'tcx>(
 }
 
 fn clean_bound_vars<'tcx>(
-    bound_vars: &ty::List<ty::BoundVariableKind>,
+    bound_vars: &ty::List<ty::BoundVariableKind<'tcx>>,
     cx: &mut DocContext<'tcx>,
 ) -> Vec<GenericParamDef> {
     bound_vars

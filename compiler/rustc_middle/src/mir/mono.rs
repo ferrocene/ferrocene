@@ -18,6 +18,7 @@ use rustc_span::{Span, Symbol};
 use rustc_target::spec::SymbolVisibility;
 use tracing::debug;
 
+use crate::dep_graph::dep_node::{make_compile_codegen_unit, make_compile_mono_item};
 use crate::dep_graph::{DepNode, WorkProduct, WorkProductId};
 use crate::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use crate::ty::{self, GenericArgs, Instance, InstanceKind, SymbolName, Ty, TyCtxt};
@@ -290,7 +291,7 @@ impl<'tcx> MonoItem<'tcx> {
 
     // Only used by rustc_codegen_cranelift
     pub fn codegen_dep_node(&self, tcx: TyCtxt<'tcx>) -> DepNode {
-        crate::dep_graph::make_compile_mono_item(tcx, self)
+        make_compile_mono_item(tcx, self)
     }
 
     /// Returns the item's `CrateNum`
@@ -576,7 +577,7 @@ impl<'tcx> CodegenUnit<'tcx> {
     }
 
     pub fn codegen_dep_node(&self, tcx: TyCtxt<'tcx>) -> DepNode {
-        crate::dep_graph::make_compile_codegen_unit(tcx, self.name())
+        make_compile_codegen_unit(tcx, self.name())
     }
 }
 

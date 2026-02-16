@@ -24,15 +24,15 @@ use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
 use rustc_session::lint::BuiltinLintDiag;
 use rustc_session::lint::builtin::{
-    ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_PANIC_IMPORTS,
-    MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
+    ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_IMPORT_VISIBILITIES,
+    AMBIGUOUS_PANIC_IMPORTS, MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
 };
 use rustc_session::utils::was_invoked_from_cargo;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::source_map::{SourceMap, Spanned};
-use rustc_span::{BytePos, DUMMY_SP, Ident, Span, Symbol, SyntaxContext, kw, sym};
+use rustc_span::{BytePos, Ident, Span, Symbol, SyntaxContext, kw, sym};
 use thin_vec::{ThinVec, thin_vec};
 use tracing::{debug, instrument};
 
@@ -41,6 +41,7 @@ use crate::errors::{
     ExplicitUnsafeTraits, MacroDefinedLater, MacroRulesNot, MacroSuggMovePosition,
     MaybeMissingMacroRulesName,
 };
+use crate::hygiene::Macros20NormalizedSyntaxContext;
 use crate::imports::{Import, ImportKind};
 use crate::late::{DiagMetadata, PatternSource, Rib};
 use crate::{
@@ -144,6 +145,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 };
 
                 let lint = match ambiguity_warning {
+                    _ if ambiguity_error.ambig_vis.is_some() => AMBIGUOUS_IMPORT_VISIBILITIES,
                     AmbiguityWarning::GlobImport => AMBIGUOUS_GLOB_IMPORTS,
                     AmbiguityWarning::PanicImport => AMBIGUOUS_PANIC_IMPORTS,
                 };
@@ -1013,11 +1015,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     span,
                     name,
                     param_kind: is_type,
-                    help: self
-                        .tcx
-                        .sess
-                        .is_nightly_build()
-                        .then_some(errs::ParamInNonTrivialAnonConstHelp),
+                    help: self.tcx.sess.is_nightly_build(),
                 })
             }
             ResolutionError::ParamInEnumDiscriminant { name, param_kind: is_type } => self
@@ -1163,11 +1161,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         suggestions: &mut Vec<TypoSuggestion>,
         scope_set: ScopeSet<'ra>,
         ps: &ParentScope<'ra>,
-        ctxt: SyntaxContext,
+        sp: Span,
         filter_fn: &impl Fn(Res) -> bool,
     ) {
-        let ctxt = DUMMY_SP.with_ctxt(ctxt);
-        self.cm().visit_scopes(scope_set, ps, ctxt, None, |this, scope, use_prelude, _| {
+        let ctxt = Macros20NormalizedSyntaxContext::new(sp.ctxt());
+        self.cm().visit_scopes(scope_set, ps, ctxt, sp, None, |this, scope, use_prelude, _| {
             match scope {
                 Scope::DeriveHelpers(expn_id) => {
                     let res = Res::NonMacroAttr(NonMacroAttrKind::DeriveHelper);
@@ -1269,8 +1267,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         filter_fn: &impl Fn(Res) -> bool,
     ) -> Option<TypoSuggestion> {
         let mut suggestions = Vec::new();
-        let ctxt = ident.span.ctxt();
-        self.add_scope_set_candidates(&mut suggestions, scope_set, parent_scope, ctxt, filter_fn);
+        self.add_scope_set_candidates(
+            &mut suggestions,
+            scope_set,
+            parent_scope,
+            ident.span,
+            filter_fn,
+        );
 
         // Make sure error reporting is deterministic.
         suggestions.sort_by(|a, b| a.candidate.as_str().cmp(b.candidate.as_str()));
@@ -1422,14 +1425,12 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         // a note about editions
                         let note = if let Some(did) = did {
                             let requires_note = !did.is_local()
-                                && this.tcx.get_attrs(did, sym::rustc_diagnostic_item).any(
-                                    |attr| {
-                                        [sym::TryInto, sym::TryFrom, sym::FromIterator]
-                                            .map(|x| Some(x))
-                                            .contains(&attr.value_str())
-                                    },
+                                && find_attr!(
+                                    this.tcx.get_all_attrs(did),
+                                    AttributeKind::RustcDiagnosticItem(
+                                        sym::TryInto | sym::TryFrom | sym::FromIterator
+                                    )
                                 );
-
                             requires_note.then(|| {
                                 format!(
                                     "'{}' is included in the prelude starting in Edition 2021",
@@ -1709,7 +1710,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 ScopeSet::All(ns),
                 parent_scope,
                 None,
-                false,
                 None,
                 None,
             ) else {
@@ -1990,7 +1990,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn ambiguity_diagnostic(&self, ambiguity_error: &AmbiguityError<'ra>) -> errors::Ambiguity {
-        let AmbiguityError { kind, ident, b1, b2, scope1, scope2, .. } = *ambiguity_error;
+        let AmbiguityError { kind, ambig_vis, ident, b1, b2, scope1, scope2, .. } =
+            *ambiguity_error;
         let extern_prelude_ambiguity = || {
             // Note: b1 may come from a module scope, as an extern crate item in module.
             matches!(scope2, Scope::ExternPreludeFlags)
@@ -2069,9 +2070,18 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             None
         };
 
+        let ambig_vis = ambig_vis.map(|(vis1, vis2)| {
+            format!(
+                "{} or {}",
+                vis1.to_string(CRATE_DEF_ID, self.tcx),
+                vis2.to_string(CRATE_DEF_ID, self.tcx)
+            )
+        });
+
         errors::Ambiguity {
             ident,
             help,
+            ambig_vis,
             kind: kind.descr(),
             b1_note,
             b1_help_msgs,
@@ -2546,7 +2556,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                             ScopeSet::All(ns_to_try),
                             parent_scope,
                             None,
-                            false,
                             ignore_decl,
                             ignore_import,
                         )
@@ -2650,7 +2659,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 ScopeSet::All(ValueNS),
                 parent_scope,
                 None,
-                false,
                 ignore_decl,
                 ignore_import,
             ) {

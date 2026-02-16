@@ -15,7 +15,7 @@ use rustc_attr_parsing::{AttributeParser, Late};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_data_structures::unord::UnordMap;
-use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey};
+use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, StashKey, msg};
 use rustc_feature::{
     ACCEPTED_LANG_FEATURES, AttributeDuplicates, AttributeType, BUILTIN_ATTRIBUTE_MAP,
     BuiltinAttribute,
@@ -54,16 +54,23 @@ use rustc_trait_selection::infer::{TyCtxtInferExt, ValuePairs};
 use rustc_trait_selection::traits::ObligationCtxt;
 use tracing::debug;
 
-use crate::{errors, fluent_generated as fluent};
+use crate::errors;
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_unimplemented_only_for_traits)]
+#[diag("`#[diagnostic::on_unimplemented]` can only be applied to trait definitions")]
 struct DiagnosticOnUnimplementedOnlyForTraits;
 
 #[derive(LintDiagnostic)]
-#[diag(passes_diagnostic_diagnostic_on_const_only_for_trait_impls)]
+#[diag("`#[diagnostic::on_const]` can only be applied to trait impls")]
 struct DiagnosticOnConstOnlyForTraitImpls {
-    #[label]
+    #[label("not a trait impl")]
+    item_span: Span,
+}
+
+#[derive(LintDiagnostic)]
+#[diag("`#[diagnostic::on_const]` can only be applied to non-const trait impls")]
+struct DiagnosticOnConstOnlyForNonConstTraitImpls {
+    #[label("this is a const trait impl")]
     item_span: Span,
 }
 
@@ -150,7 +157,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         span: attr_span,
                         stability: Stability { level, feature },
                     }
-                    | AttributeKind::ConstStability {
+                    | AttributeKind::RustcConstStability {
                         span: attr_span,
                         stability: PartialConstStability { level, feature, .. },
                     },
@@ -168,7 +175,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Attribute::Parsed(AttributeKind::AllowInternalUnsafe(attr_span) | AttributeKind::AllowInternalUnstable(.., attr_span)) => {
                     self.check_macro_only_attr(*attr_span, span, target, attrs)
                 }
-                Attribute::Parsed(AttributeKind::AllowConstFnUnstable(_, first_span)) => {
+                Attribute::Parsed(AttributeKind::RustcAllowConstFnUnstable(_, first_span)) => {
                     self.check_rustc_allow_const_fn_unstable(hir_id, *first_span, span, target)
                 }
                 Attribute::Parsed(AttributeKind::Deprecation {span: attr_span, .. }) => {
@@ -180,7 +187,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Attribute::Parsed(AttributeKind::RustcObjectLifetimeDefault) => {
                     self.check_object_lifetime_default(hir_id);
                 }
-                &Attribute::Parsed(AttributeKind::PubTransparent(attr_span)) => {
+                &Attribute::Parsed(AttributeKind::RustcPubTransparent(attr_span)) => {
                     self.check_rustc_pub_transparent(attr_span, span, attrs)
                 }
                 Attribute::Parsed(AttributeKind::Align { align, span: attr_span }) => {
@@ -226,29 +233,21 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Attribute::Parsed(AttributeKind::DoNotRecommend{attr_span}) => {self.check_do_not_recommend(*attr_span, hir_id, target, item)},
                 Attribute::Parsed(
                     // tidy-alphabetical-start
-                    AttributeKind::AllowIncoherentImpl(..)
-                    | AttributeKind::AsPtr(..)
+                    AttributeKind::RustcAllowIncoherentImpl(..)
                     | AttributeKind::AutomaticallyDerived(..)
-                    | AttributeKind::BodyStability { .. }
                     | AttributeKind::CfgAttrTrace
                     | AttributeKind::CfgTrace(..)
                     | AttributeKind::CfiEncoding { .. }
-                    | AttributeKind::Coinductive(..)
                     | AttributeKind::Cold(..)
                     | AttributeKind::CollapseDebugInfo(..)
                     | AttributeKind::CompilerBuiltins
-                    | AttributeKind::Confusables { .. }
-                    | AttributeKind::ConstStabilityIndirect
                     | AttributeKind::Coroutine(..)
                     | AttributeKind::Coverage (..)
                     | AttributeKind::CrateName { .. }
                     | AttributeKind::CrateType(..)
                     | AttributeKind::DebuggerVisualizer(..)
-                    | AttributeKind::DenyExplicitImpl(..)
                     // `#[doc]` is actually a lot more than just doc comments, so is checked below
                     | AttributeKind::DocComment {..}
-                    | AttributeKind::Dummy
-                    | AttributeKind::DynIncompatibleTrait(..)
                     | AttributeKind::EiiDeclaration { .. }
                     | AttributeKind::EiiForeignItem
                     | AttributeKind::ExportName { .. }
@@ -257,12 +256,12 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::Fundamental
                     | AttributeKind::Ignore { .. }
                     | AttributeKind::InstructionSet(..)
+                    | AttributeKind::Lang(..)
                     | AttributeKind::LinkName { .. }
                     | AttributeKind::LinkOrdinal { .. }
                     | AttributeKind::LinkSection { .. }
                     | AttributeKind::Linkage(..)
                     | AttributeKind::MacroEscape( .. )
-                    | AttributeKind::MacroTransparency(_)
                     | AttributeKind::MacroUse { .. }
                     | AttributeKind::Marker(..)
                     | AttributeKind::MoveSizeLimit { .. }
@@ -277,64 +276,106 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::NoMain
                     | AttributeKind::NoMangle(..)
                     | AttributeKind::NoStd { .. }
-                    | AttributeKind::ObjcClass { .. }
-                    | AttributeKind::ObjcSelector { .. }
                     | AttributeKind::Optimize(..)
                     | AttributeKind::PanicRuntime
-                    | AttributeKind::ParenSugar(..)
-                    | AttributeKind::PassByValue (..)
                     | AttributeKind::PatchableFunctionEntry { .. }
                     | AttributeKind::Path(..)
                     | AttributeKind::PatternComplexityLimit { .. }
                     | AttributeKind::PinV2(..)
                     | AttributeKind::Pointee(..)
+                    | AttributeKind::PreludeImport
                     | AttributeKind::ProfilerRuntime
                     | AttributeKind::RecursionLimit { .. }
+                    | AttributeKind::ReexportTestHarnessMain(..)
                     // handled below this loop and elsewhere
                     | AttributeKind::Repr { .. }
+                    | AttributeKind::RustcAbi { .. }
                     | AttributeKind::RustcAllocator
                     | AttributeKind::RustcAllocatorZeroed
                     | AttributeKind::RustcAllocatorZeroedVariant { .. }
+                    | AttributeKind::RustcAsPtr(..)
+                    | AttributeKind::RustcBodyStability { .. }
                     | AttributeKind::RustcBuiltinMacro { .. }
+                    | AttributeKind::RustcCaptureAnalysis
+                    | AttributeKind::RustcCguTestAttr(..)
+                    | AttributeKind::RustcClean(..)
                     | AttributeKind::RustcCoherenceIsCore(..)
+                    | AttributeKind::RustcCoinductive(..)
+                    | AttributeKind::RustcConfusables { .. }
+                    | AttributeKind::RustcConstStabilityIndirect
+                    | AttributeKind::RustcConversionSuggestion
                     | AttributeKind::RustcDeallocator
+                    | AttributeKind::RustcDefPath(..)
+                    | AttributeKind::RustcDelayedBugFromInsideQuery
+                    | AttributeKind::RustcDenyExplicitImpl(..)
+                    | AttributeKind::RustcDeprecatedSafe2024 {..}
+                    | AttributeKind::RustcDiagnosticItem(..)
+                    | AttributeKind::RustcDummy
                     | AttributeKind::RustcDumpDefParents
                     | AttributeKind::RustcDumpItemBounds
                     | AttributeKind::RustcDumpPredicates
                     | AttributeKind::RustcDumpUserArgs
                     | AttributeKind::RustcDumpVtable(..)
+                    | AttributeKind::RustcDynIncompatibleTrait(..)
+                    | AttributeKind::RustcEffectiveVisibility
+                    | AttributeKind::RustcEvaluateWhereClauses
                     | AttributeKind::RustcHasIncoherentInherentImpls
+                    | AttributeKind::RustcHiddenTypeOfOpaques
+                    | AttributeKind::RustcIfThisChanged(..)
+                    | AttributeKind::RustcInsignificantDtor
+                    | AttributeKind::RustcIntrinsic
+                    | AttributeKind::RustcIntrinsicConstStableIndirect
+                    | AttributeKind::RustcLayout(..)
                     | AttributeKind::RustcLayoutScalarValidRangeEnd(..)
                     | AttributeKind::RustcLayoutScalarValidRangeStart(..)
                     | AttributeKind::RustcLintOptDenyFieldAccess { .. }
                     | AttributeKind::RustcLintOptTy
                     | AttributeKind::RustcLintQueryInstability
                     | AttributeKind::RustcLintUntrackedQueryInformation
+                    | AttributeKind::RustcMacroTransparency(_)
                     | AttributeKind::RustcMain
+                    | AttributeKind::RustcMir(_)
                     | AttributeKind::RustcNeverReturnsNullPointer
+                    | AttributeKind::RustcNeverTypeOptions {..}
                     | AttributeKind::RustcNoImplicitAutorefs
+                    | AttributeKind::RustcNoImplicitBounds
+                    | AttributeKind::RustcNoMirInline
+                    | AttributeKind::RustcNonConstTraitMethod
                     | AttributeKind::RustcNounwind
+                    | AttributeKind::RustcObjcClass { .. }
+                    | AttributeKind::RustcObjcSelector { .. }
                     | AttributeKind::RustcOffloadKernel
+                    | AttributeKind::RustcOutlives
+                    | AttributeKind::RustcParenSugar(..)
+                    | AttributeKind::RustcPassByValue (..)
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
+                    | AttributeKind::RustcPreserveUbChecks
+                    | AttributeKind::RustcProcMacroDecls
                     | AttributeKind::RustcReallocator
+                    | AttributeKind::RustcRegions
+                    | AttributeKind::RustcReservationImpl(..)
                     | AttributeKind::RustcScalableVector { .. }
                     | AttributeKind::RustcShouldNotBeCalledOnConstItems(..)
                     | AttributeKind::RustcSimdMonomorphizeLaneLimit(..)
+                    | AttributeKind::RustcSkipDuringMethodDispatch { .. }
+                    | AttributeKind::RustcSpecializationTrait(..)
+                    | AttributeKind::RustcStdInternalSymbol (..)
+                    | AttributeKind::RustcStrictCoherence(..)
+                    | AttributeKind::RustcSymbolName(..)
+                    | AttributeKind::RustcTestMarker(..)
+                    | AttributeKind::RustcThenThisWouldNeed(..)
+                    | AttributeKind::RustcTrivialFieldReads
+                    | AttributeKind::RustcUnsafeSpecializationMarker(..)
                     | AttributeKind::RustcVariance
                     | AttributeKind::RustcVarianceOfOpaques
                     | AttributeKind::ShouldPanic { .. }
-                    | AttributeKind::SkipDuringMethodDispatch { .. }
-                    | AttributeKind::SpecializationTrait(..)
-                    | AttributeKind::StdInternalSymbol (..)
+                    | AttributeKind::TestRunner(..)
                     | AttributeKind::ThreadLocal
-                    | AttributeKind::TypeConst{..}
                     | AttributeKind::TypeLengthLimit { .. }
-                    | AttributeKind::UnsafeSpecializationMarker(..)
                     | AttributeKind::UnstableFeatureBound(..)
                     | AttributeKind::Used { .. }
                     | AttributeKind::WindowsSubsystem(..)
                     // tidy-alphabetical-end
-
                 ) => { /* do nothing  */ }
                 Attribute::Unparsed(attr_item) => {
                     style = Some(attr_item.style);
@@ -345,10 +386,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::diagnostic, sym::on_const, ..] => {
                             self.check_diagnostic_on_const(attr.span(), hir_id, target, item)
                         }
-                        [sym::rustc_clean, ..]
-                        | [sym::rustc_dirty, ..]
-                        | [sym::rustc_if_this_changed, ..]
-                        | [sym::rustc_then_this_would_need, ..] => self.check_rustc_dirty_clean(attr),
                         [sym::autodiff_forward, ..] | [sym::autodiff_reverse, ..] => {
                             self.check_autodiff(hir_id, attr, span, target)
                         }
@@ -359,55 +396,20 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::warn
                             | sym::deny
                             | sym::forbid
-                            // need to be fixed
-                            | sym::deprecated_safe // FIXME(deprecated_safe)
                             // internal
-                            | sym::prelude_import
-                            | sym::panic_handler
-                            | sym::lang
                             | sym::default_lib_allocator
-                            | sym::rustc_diagnostic_item
-                            | sym::rustc_no_mir_inline
-                            | sym::rustc_insignificant_dtor
                             | sym::rustc_nonnull_optimization_guaranteed
-                            | sym::rustc_intrinsic
                             | sym::rustc_inherit_overflow_checks
-                            | sym::rustc_intrinsic_const_stable_indirect
-                            | sym::rustc_trivial_field_reads
                             | sym::rustc_on_unimplemented
                             | sym::rustc_do_not_const_check
-                            | sym::rustc_reservation_impl
                             | sym::rustc_doc_primitive
-                            | sym::rustc_conversion_suggestion
-                            | sym::rustc_deprecated_safe_2024
-                            | sym::rustc_test_marker
-                            | sym::rustc_abi
                             | sym::rustc_layout
-                            | sym::rustc_proc_macro_decls
-                            | sym::rustc_never_type_options
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis
-                            | sym::rustc_regions
-                            | sym::rustc_strict_coherence
-                            | sym::rustc_hidden_type_of_opaques
                             | sym::rustc_mir
-                            | sym::rustc_effective_visibility
-                            | sym::rustc_outlives
-                            | sym::rustc_symbol_name
-                            | sym::rustc_evaluate_where_clauses
-                            | sym::rustc_delayed_bug_from_inside_query
-                            | sym::rustc_def_path
-                            | sym::rustc_partition_reused
-                            | sym::rustc_partition_codegened
-                            | sym::rustc_expected_cgu_reuse
                             // crate-level attrs, are checked below
                             | sym::feature
-                            | sym::register_tool
-                            | sym::rustc_no_implicit_bounds
-                            | sym::test_runner
-                            | sym::reexport_test_harness_main
-                            | sym::rustc_preserve_ub_checks,
-                            ..
+                            | sym::register_tool,                            ..
                         ] => {}
                         [name, rest@..] => {
                             match BUILTIN_ATTRIBUTE_MAP.get(name) {
@@ -628,7 +630,16 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         if target == (Target::Impl { of_trait: true }) {
             match item.unwrap() {
                 ItemLike::Item(it) => match it.expect_impl().constness {
-                    Constness::Const => {}
+                    Constness::Const => {
+                        let item_span = self.tcx.hir_span(hir_id);
+                        self.tcx.emit_node_span_lint(
+                            MISPLACED_DIAGNOSTIC_ATTRIBUTES,
+                            hir_id,
+                            attr_span,
+                            DiagnosticOnConstOnlyForNonConstTraitImpls { item_span },
+                        );
+                        return;
+                    }
                     Constness::NotConst => return,
                 },
                 ItemLike::ForeignItem => {}
@@ -772,15 +783,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::Fn => {
                 // `#[track_caller]` is not valid on weak lang items because they are called via
                 // `extern` declarations and `#[track_caller]` would alter their ABI.
-                if let Some((lang_item, _)) = hir::lang_items::extract(attrs)
-                    && let Some(item) = hir::LangItem::from_name(lang_item)
+                if let Some(item) = find_attr!(attrs, AttributeKind::Lang(item, _) => item)
                     && item.is_weak()
                 {
                     let sig = self.tcx.hir_node(hir_id).fn_sig().unwrap();
 
                     self.dcx().emit_err(errors::LangItemWithTrackCaller {
                         attr_span,
-                        name: lang_item,
+                        name: item.name(),
                         sig_span: sig.span,
                     });
                 }
@@ -844,7 +854,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent)
             | Target::Fn => {
                 // `#[target_feature]` is not allowed in lang items.
-                if let Some((lang_item, _)) = hir::lang_items::extract(attrs)
+                if let Some(lang_item) = find_attr!(attrs, AttributeKind::Lang(lang, _) => lang)
                     // Calling functions with `#[target_feature]` is
                     // not unsafe on WASM, see #84988
                     && !self.tcx.sess.target.is_like_wasm
@@ -854,7 +864,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
                     self.dcx().emit_err(errors::LangItemWithTargetFeature {
                         attr_span,
-                        name: lang_item,
+                        name: lang_item.name(),
                         sig_span: sig.span,
                     });
                 }
@@ -993,8 +1003,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 for (inline2, span2) in rest {
                     if inline2 != inline {
                         let mut spans = MultiSpan::from_spans(vec![*span, *span2]);
-                        spans.push_span_label(*span, fluent::passes_doc_inline_conflict_first);
-                        spans.push_span_label(*span2, fluent::passes_doc_inline_conflict_second);
+                        spans.push_span_label(*span, msg!("this attribute..."));
+                        spans.push_span_label(
+                            *span2,
+                            msg!("{\".\"}..conflicts with this attribute"),
+                        );
                         self.dcx().emit_err(errors::DocInlineConflict { spans });
                         return;
                     }
@@ -1138,7 +1151,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 &self.tcx.sess,
                 sym::rustdoc_internals,
                 *span,
-                fluent::passes_doc_rust_logo,
+                msg!("the `#[doc(rust_logo)]` attribute is used for Rust branding"),
             )
             .emit();
         }
@@ -1239,14 +1252,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     arg_count,
                 });
             }
-        }
-    }
-
-    /// Checks that the dep-graph debugging attributes are only present when the query-dep-graph
-    /// option is passed to the compiler.
-    fn check_rustc_dirty_clean(&self, attr: &Attribute) {
-        if !self.tcx.sess.opts.unstable_opts.query_dep_graph {
-            self.dcx().emit_err(errors::RustcDirtyClean { span: attr.span() });
         }
     }
 

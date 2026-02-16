@@ -409,8 +409,7 @@ pub const unsafe fn assume(b: bool) {
 /// Therefore, implementations must not require the user to uphold
 /// any safety invariants.
 ///
-/// This intrinsic does not have a stable counterpart.
-#[unstable(feature = "core_intrinsics", issue = "none")]
+/// The stabilized version of this intrinsic is [`core::hint::cold_path`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
@@ -2179,6 +2178,19 @@ pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
     unsafe { a.unchecked_funnel_shr(b, shift) }
 }
 
+/// Carryless multiply.
+///
+/// Safe versions of this intrinsic are available on the integer primitives
+/// via the `carryless_mul` method. For example, [`u32::carryless_mul`].
+#[rustc_intrinsic]
+#[rustc_nounwind]
+#[rustc_const_unstable(feature = "uint_carryless_mul", issue = "152080")]
+#[unstable(feature = "uint_carryless_mul", issue = "152080")]
+#[miri::intrinsic_fallback_is_spec]
+pub const fn carryless_mul<T: [const] fallback::CarrylessMul>(a: T, b: T) -> T {
+    a.carryless_mul(b)
+}
+
 /// This is an implementation detail of [`crate::ptr::read`] and should
 /// not be used anywhere else.  See its comments for why this exists.
 ///
@@ -2887,7 +2899,7 @@ pub const fn type_name<T: ?Sized>() -> &'static str;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
+pub const fn type_id<T: ?Sized>() -> crate::any::TypeId;
 
 /// Tests (at compile-time) if two [`crate::any::TypeId`] instances identify the
 /// same type. This is necessary because at const-eval time the actual discriminating

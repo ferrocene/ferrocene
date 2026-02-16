@@ -1,11 +1,13 @@
 use std::num::NonZero;
 use std::ops::Deref;
+use std::path::PathBuf;
 
 use rustc_abi::Align;
+use rustc_ast::ast::{Path, join_path_idents};
 use rustc_ast::attr::data_structures::CfgEntry;
 use rustc_ast::attr::version::RustcVersion;
 use rustc_ast::token::{CommentKind, DocFragmentKind};
-use rustc_ast::{AttrStyle, IntTy, UintTy};
+use rustc_ast::{AttrId, AttrStyle, IntTy, UintTy};
 use rustc_ast_pretty::pp::Printer;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_span::def_id::DefId;
@@ -96,6 +98,24 @@ impl<T: PrintAttribute> PrintAttribute for FxIndexMap<T, Span> {
         p.word("]");
     }
 }
+impl PrintAttribute for PathBuf {
+    fn should_render(&self) -> bool {
+        true
+    }
+
+    fn print_attribute(&self, p: &mut Printer) {
+        p.word(self.display().to_string());
+    }
+}
+impl PrintAttribute for Path {
+    fn should_render(&self) -> bool {
+        true
+    }
+
+    fn print_attribute(&self, p: &mut Printer) {
+        p.word(join_path_idents(self.segments.iter().map(|seg| seg.ident)));
+    }
+}
 
 macro_rules! print_skip {
     ($($t: ty),* $(,)?) => {$(
@@ -170,7 +190,7 @@ macro_rules! print_tup {
 }
 
 print_tup!(A B C D E F G H);
-print_skip!(Span, (), ErrorGuaranteed);
+print_skip!(Span, (), ErrorGuaranteed, AttrId);
 print_disp!(u8, u16, u128, usize, bool, NonZero<u32>, Limit);
 print_debug!(
     Symbol,

@@ -28,19 +28,17 @@ use rustc_errors::codes::*;
 use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, FatalError, struct_span_code_err,
 };
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{self as hir, AnonConst, GenericArg, GenericArgs, HirId, find_attr};
+use rustc_hir::{self as hir, AnonConst, GenericArg, GenericArgs, HirId};
 use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_infer::traits::DynCompatibilityViolation;
 use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::middle::stability::AllowUnstable;
-use rustc_middle::mir::interpret::LitToConstInput;
 use rustc_middle::ty::print::PrintPolyTraitRefExt as _;
 use rustc_middle::ty::{
-    self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, Ty, TyCtxt,
-    TypeSuperFoldable, TypeVisitableExt, TypingMode, Upcast, fold_regions,
+    self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, LitToConstInput, Ty, TyCtxt,
+    TypeSuperFoldable, TypeVisitableExt, TypingMode, Upcast, const_lit_matches_ty, fold_regions,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::AMBIGUOUS_ASSOCIATED_ITEMS;
@@ -105,7 +103,7 @@ pub enum RegionInferReason<'a> {
     /// Lifetime on a trait object that is spelled explicitly, e.g. `+ 'a` or `+ '_`.
     ExplicitObjectLifetime,
     /// A trait object's lifetime when it is elided, e.g. `dyn Any`.
-    ObjectLifetimeDefault,
+    ObjectLifetimeDefault(Span),
     /// Generic lifetime parameter
     Param(&'a ty::GenericParamDef),
     RegionPredicate,
@@ -404,6 +402,11 @@ impl<'tcx> ForbidMCGParamUsesFolder<'tcx> {
             if let Some(impl_) = parent_impl {
                 diag.span_note(impl_.self_ty.span, "not a concrete type");
             }
+        }
+        if self.tcx.features().min_generic_const_args()
+            && !self.tcx.features().opaque_generic_const_args()
+        {
+            diag.help("add `#![feature(opaque_generic_const_args)]` to allow generic expressions as the RHS of const items");
         }
         diag.emit()
     }
@@ -1423,14 +1426,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             LowerTypeRelativePathMode::Const,
         )? {
             TypeRelativePath::AssocItem(def_id, args) => {
-                if !find_attr!(self.tcx().get_all_attrs(def_id), AttributeKind::TypeConst(_)) {
-                    let mut err = self.dcx().struct_span_err(
-                        span,
-                        "use of trait associated const without `#[type_const]`",
-                    );
-                    err.note("the declaration in the trait must be marked with `#[type_const]`");
-                    return Err(err.emit());
-                }
+                self.require_type_const_attribute(def_id, span)?;
                 let ct = Const::new_unevaluated(tcx, ty::UnevaluatedConst::new(def_id, args));
                 let ct = self.check_param_uses_if_mcg(ct, span, false);
                 Ok(ct)
@@ -1886,30 +1882,18 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         item_def_id: DefId,
         trait_segment: Option<&hir::PathSegment<'tcx>>,
         item_segment: &hir::PathSegment<'tcx>,
-    ) -> Const<'tcx> {
-        match self.lower_resolved_assoc_item_path(
+    ) -> Result<Const<'tcx>, ErrorGuaranteed> {
+        let (item_def_id, item_args) = self.lower_resolved_assoc_item_path(
             span,
             opt_self_ty,
             item_def_id,
             trait_segment,
             item_segment,
             ty::AssocTag::Const,
-        ) {
-            Ok((item_def_id, item_args)) => {
-                if !find_attr!(self.tcx().get_all_attrs(item_def_id), AttributeKind::TypeConst(_)) {
-                    let mut err = self.dcx().struct_span_err(
-                        span,
-                        "use of `const` in the type system without `#[type_const]`",
-                    );
-                    err.note("the declaration must be marked with `#[type_const]`");
-                    return Const::new_error(self.tcx(), err.emit());
-                }
-
-                let uv = ty::UnevaluatedConst::new(item_def_id, item_args);
-                Const::new_unevaluated(self.tcx(), uv)
-            }
-            Err(guar) => Const::new_error(self.tcx(), guar),
-        }
+        )?;
+        self.require_type_const_attribute(item_def_id, span)?;
+        let uv = ty::UnevaluatedConst::new(item_def_id, item_args);
+        Ok(Const::new_unevaluated(self.tcx(), uv))
     }
 
     /// Lower a [resolved][hir::QPath::Resolved] (type-level) associated item path.
@@ -2310,7 +2294,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             Some(rbv::ResolvedArg::LateBound(debruijn, index, _)) => ty::Const::new_bound(
                 tcx,
                 debruijn,
-                ty::BoundConst { var: ty::BoundVar::from_u32(index) },
+                ty::BoundConst::new(ty::BoundVar::from_u32(index)),
             ),
             Some(rbv::ResolvedArg::Error(guar)) => ty::Const::new_error(tcx, guar),
             arg => bug!("unexpected bound var resolution for {:?}: {arg:?}", path_hir_id),
@@ -2397,8 +2381,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             hir::ConstArgKind::Anon(anon) => self.lower_const_arg_anon(anon),
             hir::ConstArgKind::Infer(()) => self.ct_infer(None, const_arg.span),
             hir::ConstArgKind::Error(e) => ty::Const::new_error(tcx, e),
-            hir::ConstArgKind::Literal(kind) => {
-                self.lower_const_arg_literal(&kind, ty, const_arg.span)
+            hir::ConstArgKind::Literal { lit, negated } => {
+                self.lower_const_arg_literal(&lit, negated, ty, const_arg.span)
             }
         }
     }
@@ -2480,7 +2464,13 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 let parent_did = tcx.parent(*def_id);
                 (tcx.adt_def(parent_did), fn_args, parent_did)
             }
-            _ => return non_adt_or_variant_res(),
+            _ => {
+                let e = self.dcx().span_err(
+                    span,
+                    "complex const arguments must be placed inside of a `const` block",
+                );
+                return Const::new_error(tcx, e);
+            }
         };
 
         let variant_def = adt_def.variant_with_id(variant_did);
@@ -2669,6 +2659,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 self.lower_const_param(def_id, hir_id)
             }
             Res::Def(DefKind::Const, did) => {
+                if let Err(guar) = self.require_type_const_attribute(did, span) {
+                    return Const::new_error(self.tcx(), guar);
+                }
+
                 assert_eq!(opt_self_ty, None);
                 let [leading_segments @ .., segment] = path.segments else { bug!() };
                 let _ = self
@@ -2719,6 +2713,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     trait_segment,
                     path.segments.last().unwrap(),
                 )
+                .unwrap_or_else(|guar| Const::new_error(tcx, guar))
             }
             Res::Def(DefKind::Static { .. }, _) => {
                 span_bug!(span, "use of bare `static` ConstArgKind::Path's not yet supported")
@@ -2805,10 +2800,25 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     }
 
     #[instrument(skip(self), level = "debug")]
-    fn lower_const_arg_literal(&self, kind: &LitKind, ty: Ty<'tcx>, span: Span) -> Const<'tcx> {
+    fn lower_const_arg_literal(
+        &self,
+        kind: &LitKind,
+        neg: bool,
+        ty: Ty<'tcx>,
+        span: Span,
+    ) -> Const<'tcx> {
         let tcx = self.tcx();
-        let input = LitToConstInput { lit: *kind, ty, neg: false };
-        tcx.at(span).lit_to_const(input)
+        if let LitKind::Err(guar) = *kind {
+            return ty::Const::new_error(tcx, guar);
+        }
+        let input = LitToConstInput { lit: *kind, ty, neg };
+        match tcx.at(span).lit_to_const(input) {
+            Some(value) => ty::Const::new_value(tcx, value.valtree, value.ty),
+            None => {
+                let e = tcx.dcx().span_err(span, "type annotations needed for the literal");
+                ty::Const::new_error(tcx, e)
+            }
+        }
     }
 
     #[instrument(skip(self), level = "debug")]
@@ -2837,11 +2847,43 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             _ => None,
         };
 
-        lit_input
-            // Allow the `ty` to be an alias type, though we cannot handle it here, we just go through
-            // the more expensive anon const code path.
-            .filter(|l| !l.ty.has_aliases())
-            .map(|l| tcx.at(expr.span).lit_to_const(l))
+        lit_input.and_then(|l| {
+            if const_lit_matches_ty(tcx, &l.lit, l.ty, l.neg) {
+                tcx.at(expr.span)
+                    .lit_to_const(l)
+                    .map(|value| ty::Const::new_value(tcx, value.valtree, value.ty))
+            } else {
+                None
+            }
+        })
+    }
+
+    fn require_type_const_attribute(
+        &self,
+        def_id: DefId,
+        span: Span,
+    ) -> Result<(), ErrorGuaranteed> {
+        let tcx = self.tcx();
+        if tcx.is_type_const(def_id) {
+            Ok(())
+        } else {
+            let mut err = self.dcx().struct_span_err(
+                span,
+                "use of `const` in the type system not defined as `type const`",
+            );
+            if def_id.is_local() {
+                let name = tcx.def_path_str(def_id);
+                err.span_suggestion(
+                    tcx.def_span(def_id).shrink_to_lo(),
+                    format!("add `type` before `const` for `{name}`"),
+                    format!("type "),
+                    Applicability::MaybeIncorrect,
+                );
+            } else {
+                err.note("only consts marked defined as `type const` may be used in types");
+            }
+            Err(err.emit())
+        }
     }
 
     fn lower_delegation_ty(&self, idx: hir::InferDelegationKind) -> Ty<'tcx> {
@@ -3196,8 +3238,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     #[instrument(level = "trace", skip(self, generate_err))]
     fn validate_late_bound_regions<'cx>(
         &'cx self,
-        constrained_regions: FxIndexSet<ty::BoundRegionKind>,
-        referenced_regions: FxIndexSet<ty::BoundRegionKind>,
+        constrained_regions: FxIndexSet<ty::BoundRegionKind<'tcx>>,
+        referenced_regions: FxIndexSet<ty::BoundRegionKind<'tcx>>,
         generate_err: impl Fn(&str) -> Diag<'cx>,
     ) {
         for br in referenced_regions.difference(&constrained_regions) {

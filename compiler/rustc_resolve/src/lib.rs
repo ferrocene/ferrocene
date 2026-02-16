@@ -8,17 +8,16 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
+#![cfg_attr(bootstrap, feature(ptr_as_ref_unchecked))]
 #![feature(arbitrary_self_types)]
-#![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(const_default)]
 #![feature(const_trait_impl)]
 #![feature(control_flow_into_value)]
-#![feature(decl_macro)]
 #![feature(default_field_values)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
-#![feature(ptr_as_ref_unchecked)]
 #![feature(rustc_attrs)]
 #![feature(trim_prefix_suffix)]
 #![recursion_limit = "256"]
@@ -72,7 +71,6 @@ use rustc_middle::ty::{
     self, DelegationFnSig, DelegationInfo, Feed, MainDefinition, RegisteredTools,
     ResolverAstLowering, ResolverGlobalCtxt, TyCtxt, TyCtxtFeed, Visibility,
 };
-use rustc_query_system::ich::StableHashingContext;
 use rustc_session::config::CrateType;
 use rustc_session::lint::builtin::PRIVATE_MACRO_USE;
 use rustc_span::hygiene::{ExpnId, LocalExpnId, MacroKind, SyntaxContext, Transparency};
@@ -97,8 +95,6 @@ pub mod rustdoc;
 pub use macros::registered_tools_ast;
 
 use crate::ref_mut::{CmCell, CmRefCell};
-
-rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Determinacy {
@@ -576,6 +572,12 @@ impl IdentKey {
     }
 
     #[inline]
+    fn new_adjusted(ident: Ident, expn_id: ExpnId) -> (IdentKey, Option<ExpnId>) {
+        let (ctxt, def) = Macros20NormalizedSyntaxContext::new_adjusted(ident.span.ctxt(), expn_id);
+        (IdentKey { name: ident.name, ctxt }, def)
+    }
+
+    #[inline]
     fn with_root_ctxt(name: Symbol) -> Self {
         let ctxt = Macros20NormalizedSyntaxContext::new_unchecked(SyntaxContext::root());
         IdentKey { name, ctxt }
@@ -963,6 +965,7 @@ enum AmbiguityWarning {
 
 struct AmbiguityError<'ra> {
     kind: AmbiguityKind,
+    ambig_vis: Option<(Visibility, Visibility)>,
     ident: Ident,
     b1: Decl<'ra>,
     b2: Decl<'ra>,
@@ -1334,6 +1337,8 @@ pub struct Resolver<'ra, 'tcx> {
 
     /// Amount of lifetime parameters for each item in the crate.
     item_generics_num_lifetimes: FxHashMap<LocalDefId, usize> = default::fx_hash_map(),
+    /// Generic args to suggest for required params (e.g. `<'_>`, `<_, _>`), if any.
+    item_required_generic_args_suggestions: FxHashMap<LocalDefId, String> = default::fx_hash_map(),
     delegation_fn_sigs: LocalDefIdMap<DelegationFnSig> = Default::default(),
     delegation_infos: LocalDefIdMap<DelegationInfo> = Default::default(),
 
@@ -1549,6 +1554,32 @@ impl<'tcx> Resolver<'_, 'tcx> {
             self.item_generics_num_lifetimes[&def_id]
         } else {
             self.tcx.generics_of(def_id).own_counts().lifetimes
+        }
+    }
+
+    fn item_required_generic_args_suggestion(&self, def_id: DefId) -> String {
+        if let Some(def_id) = def_id.as_local() {
+            self.item_required_generic_args_suggestions.get(&def_id).cloned().unwrap_or_default()
+        } else {
+            let required = self
+                .tcx
+                .generics_of(def_id)
+                .own_params
+                .iter()
+                .filter_map(|param| match param.kind {
+                    ty::GenericParamDefKind::Lifetime => Some("'_"),
+                    ty::GenericParamDefKind::Type { has_default, .. }
+                    | ty::GenericParamDefKind::Const { has_default } => {
+                        if has_default {
+                            None
+                        } else {
+                            Some("_")
+                        }
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            if required.is_empty() { String::new() } else { format!("<{}>", required.join(", ")) }
         }
     }
 
@@ -1834,10 +1865,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         ResolverOutputs { global_ctxt, ast_lowering }
     }
 
-    fn create_stable_hashing_context(&self) -> StableHashingContext<'_> {
-        StableHashingContext::new(self.tcx.sess, self.tcx.untracked())
-    }
-
     fn cstore(&self) -> FreezeReadGuard<'_, CStore> {
         CStore::from_tcx(self.tcx)
     }
@@ -1923,7 +1950,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         &mut self,
         current_trait: Option<Module<'ra>>,
         parent_scope: &ParentScope<'ra>,
-        ctxt: Span,
+        sp: Span,
         assoc_item: Option<(Symbol, Namespace)>,
     ) -> Vec<TraitCandidate> {
         let mut found_traits = Vec::new();
@@ -1940,7 +1967,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         let scope_set = ScopeSet::All(TypeNS);
-        self.cm().visit_scopes(scope_set, parent_scope, ctxt, None, |mut this, scope, _, _| {
+        let ctxt = Macros20NormalizedSyntaxContext::new(sp.ctxt());
+        self.cm().visit_scopes(scope_set, parent_scope, ctxt, sp, None, |mut this, scope, _, _| {
             match scope {
                 Scope::ModuleNonGlobs(module, _) => {
                     this.get_mut().traits_in_module(module, assoc_item, &mut found_traits);
@@ -2080,6 +2108,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         if let Some(b2) = used_decl.ambiguity.get() {
             let ambiguity_error = AmbiguityError {
                 kind: AmbiguityKind::GlobVsGlob,
+                ambig_vis: None,
                 ident,
                 b1: used_decl,
                 b2,
@@ -2549,6 +2578,8 @@ struct Finalize {
     used: Used = Used::Other,
     /// Finalizing early or late resolution.
     stage: Stage = Stage::Early,
+    /// Nominal visibility of the import item, in case we are resolving an import's final segment.
+    import_vis: Option<Visibility> = None,
 }
 
 impl Finalize {
@@ -2723,7 +2754,7 @@ mod ref_mut {
 }
 
 mod hygiene {
-    use rustc_span::SyntaxContext;
+    use rustc_span::{ExpnId, SyntaxContext};
 
     /// A newtype around `SyntaxContext` that can only keep contexts produced by
     /// [SyntaxContext::normalize_to_macros_2_0].
@@ -2734,6 +2765,15 @@ mod hygiene {
         #[inline]
         pub(crate) fn new(ctxt: SyntaxContext) -> Macros20NormalizedSyntaxContext {
             Macros20NormalizedSyntaxContext(ctxt.normalize_to_macros_2_0())
+        }
+
+        #[inline]
+        pub(crate) fn new_adjusted(
+            mut ctxt: SyntaxContext,
+            expn_id: ExpnId,
+        ) -> (Macros20NormalizedSyntaxContext, Option<ExpnId>) {
+            let def = ctxt.normalize_to_macros_2_0_and_adjust(expn_id);
+            (Macros20NormalizedSyntaxContext(ctxt), def)
         }
 
         #[inline]

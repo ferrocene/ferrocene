@@ -6,10 +6,9 @@ use hir::def_id::{DefId, DefIdMap, LocalDefId};
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_errors::codes::*;
 use rustc_errors::{Applicability, ErrorGuaranteed, MultiSpan, pluralize, struct_span_code_err};
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::intravisit::VisitorExt;
-use rustc_hir::{self as hir, AmbigArg, GenericParamKind, ImplItemKind, find_attr, intravisit};
+use rustc_hir::{self as hir, AmbigArg, GenericParamKind, ImplItemKind, intravisit};
 use rustc_infer::infer::{self, BoundRegionConversionTime, InferCtxt, TyCtxtInferExt};
 use rustc_infer::traits::util;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
@@ -218,7 +217,7 @@ fn compare_method_predicate_entailment<'tcx>(
         trait_m_predicates.instantiate_own(tcx, trait_to_impl_args).map(|(predicate, _)| predicate),
     );
 
-    let is_conditionally_const = tcx.is_conditionally_const(impl_def_id);
+    let is_conditionally_const = tcx.is_conditionally_const(impl_m.def_id);
     if is_conditionally_const {
         // Augment the hybrid param-env with the const conditions
         // of the impl header and the trait method.
@@ -592,7 +591,7 @@ pub(super) fn collect_return_position_impl_trait_in_trait_tys<'tcx>(
                 ty,
                 Ty::new_placeholder(
                     tcx,
-                    ty::Placeholder::new(
+                    ty::PlaceholderType::new(
                         universe,
                         ty::BoundTy { var: idx, kind: ty::BoundTyKind::Anon },
                     ),
@@ -1845,7 +1844,7 @@ fn compare_synthetic_generics<'tcx>(
                 // The case where the impl method uses `impl Trait` but the trait method uses
                 // explicit generics
                 err.span_label(impl_span, "expected generic parameter, found `impl Trait`");
-                let _: Option<_> = try {
+                try {
                     // try taking the name from the trait impl
                     // FIXME: this is obviously suboptimal since the name can already be used
                     // as another generic argument
@@ -1882,7 +1881,7 @@ fn compare_synthetic_generics<'tcx>(
                 // The case where the trait method uses `impl Trait`, but the impl method uses
                 // explicit generics.
                 err.span_label(impl_span, "expected `impl Trait`, found generic parameter");
-                let _: Option<_> = try {
+                try {
                     let impl_m = impl_m.def_id.as_local()?;
                     let impl_m = tcx.hir_expect_impl_item(impl_m);
                     let (sig, _) = impl_m.expect_fn();
@@ -2051,12 +2050,8 @@ fn compare_type_const<'tcx>(
     impl_const_item: ty::AssocItem,
     trait_const_item: ty::AssocItem,
 ) -> Result<(), ErrorGuaranteed> {
-    let impl_is_type_const =
-        find_attr!(tcx.get_all_attrs(impl_const_item.def_id), AttributeKind::TypeConst(_));
-    let trait_type_const_span = find_attr!(
-        tcx.get_all_attrs(trait_const_item.def_id),
-        AttributeKind::TypeConst(sp) => *sp
-    );
+    let impl_is_type_const = tcx.is_type_const(impl_const_item.def_id);
+    let trait_type_const_span = tcx.type_const_span(trait_const_item.def_id);
 
     if let Some(trait_type_const_span) = trait_type_const_span
         && !impl_is_type_const
@@ -2065,14 +2060,14 @@ fn compare_type_const<'tcx>(
             .dcx()
             .struct_span_err(
                 tcx.def_span(impl_const_item.def_id),
-                "implementation of `#[type_const]` const must be marked with `#[type_const]`",
+                "implementation of a `type const` must also be marked as `type const`",
             )
             .with_span_note(
                 MultiSpan::from_spans(vec![
                     tcx.def_span(trait_const_item.def_id),
                     trait_type_const_span,
                 ]),
-                "trait declaration of const is marked with `#[type_const]`",
+                "trait declaration of const is marked as `type const`",
             )
             .emit());
     }
@@ -2551,7 +2546,7 @@ fn param_env_with_gat_bounds<'tcx>(
             }
         };
 
-        let mut bound_vars: smallvec::SmallVec<[ty::BoundVariableKind; 8]> =
+        let mut bound_vars: smallvec::SmallVec<[ty::BoundVariableKind<'tcx>; 8]> =
             smallvec::SmallVec::with_capacity(tcx.generics_of(impl_ty.def_id).own_params.len());
         // Extend the impl's identity args with late-bound GAT vars
         let normalize_impl_ty_args = ty::GenericArgs::identity_for_item(tcx, container_id)
@@ -2587,7 +2582,7 @@ fn param_env_with_gat_bounds<'tcx>(
                     ty::Const::new_bound(
                         tcx,
                         ty::INNERMOST,
-                        ty::BoundConst { var: ty::BoundVar::from_usize(bound_vars.len() - 1) },
+                        ty::BoundConst::new(ty::BoundVar::from_usize(bound_vars.len() - 1)),
                     )
                     .into()
                 }

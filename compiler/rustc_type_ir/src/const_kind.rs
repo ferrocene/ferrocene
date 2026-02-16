@@ -26,10 +26,10 @@ pub enum ConstKind<I: Interner> {
     Infer(InferConst),
 
     /// Bound const variable, used only when preparing a trait query.
-    Bound(BoundVarIndexKind, I::BoundConst),
+    Bound(BoundVarIndexKind, ty::BoundConst<I>),
 
     /// A placeholder const - universally quantified higher-ranked const.
-    Placeholder(I::PlaceholderConst),
+    Placeholder(ty::PlaceholderConst<I>),
 
     /// An unnormalized const item such as an anon const or assoc const or free const item.
     /// Right now anything other than anon consts does not actually work properly but this
@@ -199,4 +199,24 @@ impl<I: Interner> ValTreeKind<I> {
             ValTreeKind::Leaf(_) => None,
         }
     }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[cfg_attr(
+    feature = "nightly",
+    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+)]
+pub enum AnonConstKind {
+    /// `feature(generic_const_exprs)` anon consts are allowed to use arbitrary generic parameters in scope
+    GCE,
+    /// stable `min_const_generics` anon consts are not allowed to use any generic parameters
+    MCG,
+    /// `feature(opaque_generic_const_args)` anon consts are allowed to use arbitrary
+    /// generic parameters in scope, but only if they syntactically reference them.
+    OGCA,
+    /// anon consts used as the length of a repeat expr are syntactically allowed to use generic parameters
+    /// but must not depend on the actual instantiation. See #76200 for more information
+    RepeatExprCount,
+    /// anon consts outside of the type system, e.g. enum discriminants
+    NonTypeSystem,
 }

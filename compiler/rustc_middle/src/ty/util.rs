@@ -10,11 +10,11 @@ use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::ErrorGuaranteed;
 use rustc_hashes::Hash128;
-use rustc_hir as hir;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_hir::limit::Limit;
+use rustc_hir::{self as hir, find_attr};
 use rustc_index::bit_set::GrowableBitSet;
 use rustc_macros::{HashStable, TyDecodable, TyEncodable, extension};
 use rustc_span::sym;
@@ -642,12 +642,8 @@ impl<'tcx> TyCtxt<'tcx> {
     /// has its own type-checking context or "inference environment".
     ///
     /// For example, a closure has its own `DefId`, but it is type-checked
-    /// with the containing item. Similarly, an inline const block has its
-    /// own `DefId` but it is type-checked together with the containing item.
-    ///
-    /// Therefore, when we fetch the
-    /// `typeck` the closure, for example, we really wind up
-    /// fetching the `typeck` the enclosing fn item.
+    /// with the containing item. Therefore, when we fetch the `typeck` of the closure,
+    /// for example, we really wind up fetching the `typeck` of the enclosing fn item.
     pub fn typeck_root_def_id(self, def_id: DefId) -> DefId {
         let mut def_id = def_id;
         while self.is_typeck_child(def_id) {
@@ -1193,14 +1189,23 @@ impl<'tcx> Ty<'tcx> {
         }
     }
 
+    /// Checks whether values of this type `T` implement the `UnsafeUnpin` trait.
+    pub fn is_unsafe_unpin(self, tcx: TyCtxt<'tcx>, typing_env: ty::TypingEnv<'tcx>) -> bool {
+        self.is_trivially_unpin() || tcx.is_unsafe_unpin_raw(typing_env.as_query_input(self))
+    }
+
     /// Checks whether values of this type `T` implement the `Unpin` trait.
+    ///
+    /// Note that this is a safe trait, so it cannot be very semantically meaningful.
+    /// However, as a hack to mitigate <https://github.com/rust-lang/rust/issues/63818> until a
+    /// proper solution is implemented, we do give special semantics to the `Unpin` trait.
     pub fn is_unpin(self, tcx: TyCtxt<'tcx>, typing_env: ty::TypingEnv<'tcx>) -> bool {
         self.is_trivially_unpin() || tcx.is_unpin_raw(typing_env.as_query_input(self))
     }
 
-    /// Fast path helper for testing if a type is `Unpin`.
+    /// Fast path helper for testing if a type is `Unpin` *and* `UnsafeUnpin`.
     ///
-    /// Returning true means the type is known to be `Unpin`. Returning
+    /// Returning true means the type is known to be `Unpin` and `UnsafeUnpin`. Returning
     /// `false` means nothing -- could be `Unpin`, might not be.
     fn is_trivially_unpin(self) -> bool {
         match self.kind() {
@@ -1683,7 +1688,9 @@ pub fn is_doc_notable_trait(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
 /// the compiler to make some assumptions about its shape; if the user doesn't use a feature gate, they may
 /// cause an ICE that we otherwise may want to prevent.
 pub fn intrinsic_raw(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<ty::IntrinsicDef> {
-    if tcx.features().intrinsics() && tcx.has_attr(def_id, sym::rustc_intrinsic) {
+    if tcx.features().intrinsics()
+        && find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcIntrinsic)
+    {
         let must_be_overridden = match tcx.hir_node_by_def_id(def_id) {
             hir::Node::Item(hir::Item { kind: hir::ItemKind::Fn { has_body, .. }, .. }) => {
                 !has_body
@@ -1693,7 +1700,10 @@ pub fn intrinsic_raw(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<ty::Intrinsi
         Some(ty::IntrinsicDef {
             name: tcx.item_name(def_id),
             must_be_overridden,
-            const_stable: tcx.has_attr(def_id, sym::rustc_intrinsic_const_stable_indirect),
+            const_stable: find_attr!(
+                tcx.get_all_attrs(def_id),
+                AttributeKind::RustcIntrinsicConstStableIndirect
+            ),
         })
     } else {
         None

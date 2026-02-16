@@ -923,7 +923,7 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(),
                 );
                 check_where_clauses(wfcx, def_id);
 
-                if find_attr!(tcx.get_all_attrs(def_id), AttributeKind::TypeConst(_)) {
+                if tcx.is_type_const(def_id) {
                     wfcheck::check_type_const(wfcx, def_id, ty, true)?;
                 }
                 Ok(())
@@ -1701,7 +1701,10 @@ pub(super) fn check_transparent<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>) 
             ty::Array(ty, _) => check_unsuited(tcx, typing_env, *ty),
             ty::Adt(def, args) => {
                 if !def.did().is_local()
-                    && !find_attr!(tcx.get_all_attrs(def.did()), AttributeKind::PubTransparent(_))
+                    && !find_attr!(
+                        tcx.get_all_attrs(def.did()),
+                        AttributeKind::RustcPubTransparent(_)
+                    )
                 {
                     let non_exhaustive = def.is_variant_list_non_exhaustive()
                         || def.variants().iter().any(ty::VariantDef::is_field_list_non_exhaustive);

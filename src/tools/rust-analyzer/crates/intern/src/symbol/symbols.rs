@@ -110,6 +110,7 @@ define_symbols! {
     win64_dash_unwind = "win64-unwind",
     x86_dash_interrupt = "x86-interrupt",
     rust_dash_preserve_dash_none = "preserve-none",
+    _0_u8 = "0_u8",
 
     @PLAIN:
     __ra_fixup,
@@ -285,6 +286,7 @@ define_symbols! {
     Into,
     into_future,
     into_iter,
+    into_try_type,
     IntoFuture,
     IntoIter,
     IntoIterator,
@@ -526,10 +528,17 @@ define_symbols! {
     arbitrary_self_types,
     arbitrary_self_types_pointers,
     supertrait_item_shadowing,
+    new_range,
+    range,
+    RangeCopy,
+    RangeFromCopy,
+    RangeInclusiveCopy,
+    RangeToInclusiveCopy,
     hash,
     partial_cmp,
     cmp,
     CoerceUnsized,
     DispatchFromDyn,
     define_opaque,
+    marker,
 }

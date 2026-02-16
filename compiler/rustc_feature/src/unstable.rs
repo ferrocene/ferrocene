@@ -373,6 +373,8 @@ declare_features! (
     (unstable, async_for_loop, "1.77.0", Some(118898)),
     /// Allows `async` trait bound modifier.
     (unstable, async_trait_bounds, "1.85.0", Some(62290)),
+    /// Target features on avr.
+    (unstable, avr_target_feature, "CURRENT_RUSTC_VERSION", Some(146889)),
     /// Allows using Intel AVX10 target features and intrinsics
     (unstable, avx10_target_feature, "1.88.0", Some(138843)),
     /// Target features on bpf.
@@ -392,6 +394,8 @@ declare_features! (
     (unstable, cfg_sanitize, "1.41.0", Some(39699)),
     /// Allows `cfg(sanitizer_cfi_generalize_pointers)` and `cfg(sanitizer_cfi_normalize_integers)`.
     (unstable, cfg_sanitizer_cfi, "1.77.0", Some(89653)),
+    /// Provides a native way to easily manage multiple conditional flags without having to rewrite each clause multiple times.
+    (unstable, cfg_select, "CURRENT_RUSTC_VERSION", Some(115585)),
     /// Allows `cfg(target(abi = "..."))`.
     (unstable, cfg_target_compact, "1.63.0", Some(96901)),
     /// Allows `cfg(target_has_atomic_load_store = "...")`.
@@ -450,8 +454,6 @@ declare_features! (
     /// Allows the use of default values on struct definitions and the construction of struct
     /// literals with the functional update syntax without a base.
     (unstable, default_field_values, "1.85.0", Some(132162)),
-    /// Allows using `#[deprecated_safe]` to deprecate the safeness of a function or trait
-    (unstable, deprecated_safe, "1.61.0", Some(94978)),
     /// Allows having using `suggestion` in the `#[deprecated]` attribute.
     (unstable, deprecated_suggestion, "1.61.0", Some(94785)),
     /// Allows deref patterns.
@@ -557,6 +559,8 @@ declare_features! (
     (unstable, macro_metavar_expr_concat, "1.81.0", Some(124225)),
     /// Allows `#[marker]` on certain traits allowing overlapping implementations.
     (unstable, marker_trait_attr, "1.30.0", Some(29864)),
+    /// Enable mgca `type const` syntax before expansion.
+    (incomplete, mgca_type_const_syntax, "CURRENT_RUSTC_VERSION", Some(132980)),
     /// Enables the generic const args MVP (only bare paths, not arbitrary computation).
     (incomplete, min_generic_const_args, "1.84.0", Some(132980)),
     /// A minimal, sound subset of specialization intended to be used by the
@@ -601,6 +605,8 @@ declare_features! (
     (unstable, offset_of_enum, "1.75.0", Some(120141)),
     /// Allows using fields with slice type in offset_of!
     (unstable, offset_of_slice, "1.81.0", Some(126151)),
+    /// Allows using generics in more complex const expressions, based on definitional equality.
+    (unstable, opaque_generic_const_args, "CURRENT_RUSTC_VERSION", Some(151972)),
     /// Allows using `#[optimize(X)]`.
     (unstable, optimize_attribute, "1.34.0", Some(54882)),
     /// Allows specifying nop padding on functions for dynamic patching.
@@ -777,4 +783,10 @@ pub const INCOMPATIBLE_FEATURES: &[(Symbol, Symbol)] = &[
     // Experimental match ergonomics rulesets are incompatible with each other, to simplify the
     // boolean logic required to tell which typing rules to use.
     (sym::ref_pat_eat_one_layer_2024, sym::ref_pat_eat_one_layer_2024_structural),
+];
+
+/// Some features require one or more other features to be enabled.
+pub const DEPENDENT_FEATURES: &[(Symbol, &[Symbol])] = &[
+    (sym::opaque_generic_const_args, &[sym::min_generic_const_args]),
+    (sym::unsized_const_params, &[sym::adt_const_params]),
 ];

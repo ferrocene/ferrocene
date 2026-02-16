@@ -3,7 +3,7 @@
 #![feature(macro_metavar_expr)]
 #![feature(never_type)]
 #![feature(rustc_private)]
-#![feature(assert_matches)]
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![feature(unwrap_infallible)]
 #![recursion_limit = "512"]
 #![allow(clippy::missing_errors_doc, clippy::missing_panics_doc, clippy::must_use_candidate)]
@@ -108,7 +108,7 @@ use rustc_middle::hir::nested_filter;
 use rustc_middle::hir::place::PlaceBase;
 use rustc_middle::lint::LevelAndSource;
 use rustc_middle::mir::{AggregateKind, Operand, RETURN_PLACE, Rvalue, StatementKind, TerminatorKind};
-use rustc_middle::ty::adjustment::{Adjust, Adjustment, AutoBorrow, PointerCoercion};
+use rustc_middle::ty::adjustment::{Adjust, Adjustment, AutoBorrow, DerefAdjustKind, PointerCoercion};
 use rustc_middle::ty::layout::IntegerExt;
 use rustc_middle::ty::{
     self as rustc_ty, Binder, BorrowKind, ClosureKind, EarlyBinder, GenericArgKind, GenericArgsRef, IntTy, Ty, TyCtxt,
@@ -477,8 +477,8 @@ pub fn expr_custom_deref_adjustment(cx: &LateContext<'_>, e: &Expr<'_>) -> Optio
         .expr_adjustments(e)
         .iter()
         .find_map(|a| match a.kind {
-            Adjust::Deref(Some(d)) => Some(Some(d.mutbl)),
-            Adjust::Deref(None) => None,
+            Adjust::Deref(DerefAdjustKind::Overloaded(d)) => Some(Some(d.mutbl)),
+            Adjust::Deref(DerefAdjustKind::Builtin) => None,
             _ => Some(None),
         })
         .and_then(|x| x)
@@ -2343,11 +2343,7 @@ fn with_test_item_names(tcx: TyCtxt<'_>, module: LocalModDefId, f: impl FnOnce(&
                         // We could also check for the type name `test::TestDescAndFn`
                         && let Res::Def(DefKind::Struct, _) = path.res
                 {
-                    let has_test_marker = tcx
-                        .hir_attrs(item.hir_id())
-                        .iter()
-                        .any(|a| a.has_name(sym::rustc_test_marker));
-                    if has_test_marker {
+                    if find_attr!(tcx.hir_attrs(item.hir_id()), AttributeKind::RustcTestMarker(..)) {
                         names.push(ident.name);
                     }
                 }
@@ -3537,7 +3533,9 @@ pub fn expr_adjustment_requires_coercion(cx: &LateContext<'_>, expr: &Expr<'_>) 
     cx.typeck_results().expr_adjustments(expr).iter().any(|adj| {
         matches!(
             adj.kind,
-            Adjust::Deref(Some(_)) | Adjust::Pointer(PointerCoercion::Unsize) | Adjust::NeverToAny
+            Adjust::Deref(DerefAdjustKind::Overloaded(_))
+                | Adjust::Pointer(PointerCoercion::Unsize)
+                | Adjust::NeverToAny
         )
     })
 }

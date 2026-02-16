@@ -58,8 +58,8 @@ pub fn check(
     tools_path: &Path,
     npm: &Path,
     cargo: &Path,
-    extra_checks: Option<&str>,
-    pos_args: &[String],
+    extra_checks: Option<Vec<String>>,
+    pos_args: Vec<String>,
     tidy_ctx: TidyCtx,
 ) {
     let mut check = tidy_ctx.start_check("extra_checks");
@@ -88,8 +88,8 @@ fn check_impl(
     tools_path: &Path,
     npm: &Path,
     cargo: &Path,
-    extra_checks: Option<&str>,
-    pos_args: &[String],
+    extra_checks: Option<Vec<String>>,
+    pos_args: Vec<String>,
     tidy_ctx: &TidyCtx,
 ) -> Result<(), Error> {
     let show_diff =
@@ -99,9 +99,7 @@ fn check_impl(
     // Split comma-separated args up
     let mut lint_args = match extra_checks {
         Some(s) => s
-            .strip_prefix("--extra-checks=")
-            .unwrap()
-            .split(',')
+            .iter()
             .map(|s| {
                 if s == "spellcheck:fix" {
                     eprintln!("warning: `spellcheck:fix` is no longer valid, use `--extra-checks=spellcheck --bless`");
@@ -336,9 +334,9 @@ fn check_impl(
 
     if js_lint {
         if bless {
-            eprintln!("linting javascript files");
-        } else {
             eprintln!("linting javascript files and applying suggestions");
+        } else {
+            eprintln!("linting javascript files");
         }
         let res = rustdoc_js::lint(outdir, librustdoc_path, tools_path, bless);
         if res.is_err() {

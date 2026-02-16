@@ -1,22 +1,21 @@
 // tidy-alphabetical-start
+#![cfg_attr(bootstrap, feature(assert_matches))]
 #![doc(
     html_root_url = "https://doc.rust-lang.org/nightly/",
     html_playground_url = "https://play.rust-lang.org/"
 )]
 #![feature(ascii_char)]
 #![feature(ascii_char_variants)]
-#![feature(assert_matches)]
-#![feature(box_into_inner)]
 #![feature(box_patterns)]
 #![feature(file_buffered)]
 #![feature(formatting_options)]
 #![feature(if_let_guard)]
-#![feature(iter_advance_by)]
 #![feature(iter_intersperse)]
 #![feature(iter_order_by)]
 #![feature(rustc_private)]
 #![feature(test)]
 #![feature(trim_prefix_suffix)]
+#![recursion_limit = "256"]
 #![warn(rustc::internal)]
 // tidy-alphabetical-end
 
@@ -71,7 +70,7 @@ extern crate tikv_jemalloc_sys as _;
 use std::env::{self, VarError};
 use std::io::{self, IsTerminal};
 use std::path::Path;
-use std::process;
+use std::process::ExitCode;
 
 use rustc_errors::DiagCtxtHandle;
 use rustc_hir::def_id::LOCAL_CRATE;
@@ -126,7 +125,7 @@ mod visit;
 mod visit_ast;
 mod visit_lib;
 
-pub fn main() {
+pub fn main() -> ExitCode {
     let mut early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
 
     rustc_driver::install_ice_hook(
@@ -164,11 +163,10 @@ pub fn main() {
         Err(error) => early_dcx.early_fatal(error.to_string()),
     }
 
-    let exit_code = rustc_driver::catch_with_exit_code(|| {
+    rustc_driver::catch_with_exit_code(|| {
         let at_args = rustc_driver::args::raw_args(&early_dcx);
         main_args(&mut early_dcx, &at_args);
-    });
-    process::exit(exit_code);
+    })
 }
 
 fn init_logging(early_dcx: &EarlyDiagCtxt) {

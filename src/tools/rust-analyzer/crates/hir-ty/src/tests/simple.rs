@@ -64,20 +64,37 @@ fn type_alias_in_struct_lit() {
 
 #[test]
 fn infer_ranges() {
-    check_types(
+    check_no_mismatches(
         r#"
-//- minicore: range
-fn test() {
-    let a = ..;
-    let b = 1..;
-    let c = ..2u32;
-    let d = 1..2usize;
-    let e = ..=10;
-    let f = 'a'..='z';
+//- minicore: range, new_range
 
-    let t = (a, b, c, d, e, f);
-    t;
-} //^ (RangeFull, RangeFrom<i32>, RangeTo<u32>, Range<usize>, RangeToInclusive<i32>, RangeInclusive<char>)
+fn test() {
+    let _: core::ops::RangeFull = ..;
+    let _: core::ops::RangeFrom<i32> = 1..;
+    let _: core::ops::RangeTo<u32> = ..2u32;
+    let _: core::ops::Range<usize> = 1..2usize;
+    let _: core::ops::RangeToInclusive<i32> = ..=10;
+    let _: core::ops::RangeInclusive<char> = 'a'..='z';
+}
+"#,
+    );
+}
+
+#[test]
+fn infer_ranges_new_range() {
+    check_no_mismatches(
+        r#"
+//- minicore: range, new_range
+#![feature(new_range)]
+
+fn test() {
+    let _: core::ops::RangeFull = ..;
+    let _: core::range::RangeFrom<i32> = 1..;
+    let _: core::ops::RangeTo<u32> = ..2u32;
+    let _: core::range::Range<usize> = 1..2usize;
+    let _: core::range::RangeToInclusive<i32> = ..=10;
+    let _: core::range::RangeInclusive<char> = 'a'..='z';
+}
 "#,
     );
 }
@@ -2135,11 +2152,11 @@ async fn main() {
     let z: core::ops::ControlFlow<(), _> = try { () };
     let w = const { 92 };
     let t = 'a: { 92 };
+    let u = try bikeshed core::ops::ControlFlow<(), _> { () };
 }
         "#,
         expect![[r#"
-            16..193 '{     ...2 }; }': ()
-            16..193 '{     ...2 }; }': impl Future<Output = ()>
+            16..256 '{     ...) }; }': ()
             26..27 'x': i32
             30..43 'unsafe { 92 }': i32
             39..41 '92': i32
@@ -2160,6 +2177,13 @@ async fn main() {
             176..177 't': i32
             180..190 ''a: { 92 }': i32
             186..188 '92': i32
+            200..201 'u': ControlFlow<(), ()>
+            204..253 'try bi...{ () }': ControlFlow<(), ()>
+            204..253 'try bi...{ () }': fn from_output<ControlFlow<(), ()>>(<ControlFlow<(), ()> as Try>::Output) -> ControlFlow<(), ()>
+            204..253 'try bi...{ () }': ControlFlow<(), ()>
+            204..253 'try bi...{ () }': ControlFlow<(), ()>
+            204..253 'try bi...{ () }': ControlFlow<(), ()>
+            249..251 '()': ()
         "#]],
     )
 }
@@ -3981,5 +4005,72 @@ fn foo() {
             54..55 'a': i32
             51..55: expected fn() -> i32, got impl Fn() -> i32
         "#]],
+    );
+}
+
+#[test]
+fn naked_asm_returns_never() {
+    check_no_mismatches(
+        r#"
+//- minicore: asm
+
+#[unsafe(naked)]
+extern "C" fn foo() -> ! {
+    core::arch::naked_asm!("");
+}
+    "#,
+    );
+}
+
+#[test]
+fn regression_21478() {
+    check_infer(
+        r#"
+//- minicore: unsize, coerce_unsized
+struct LazyLock<T>(T);
+
+impl<T> LazyLock<T> {
+    const fn new() -> Self {
+        loop {}
+    }
+
+    fn force(this: &Self) -> &T {
+        loop {}
+    }
+}
+
+static VALUES_LAZY_LOCK: LazyLock<[u32; { 0 }]> = LazyLock::new();
+
+fn foo() {
+    let _ = LazyLock::force(&VALUES_LAZY_LOCK);
+}
+    "#,
+        expect![[r#"
+            73..96 '{     ...     }': LazyLock<T>
+            83..90 'loop {}': !
+            88..90 '{}': ()
+            111..115 'this': &'? LazyLock<T>
+            130..153 '{     ...     }': &'? T
+            140..147 'loop {}': !
+            145..147 '{}': ()
+            207..220 'LazyLock::new': fn new<[u32; _]>() -> LazyLock<[u32; _]>
+            207..222 'LazyLock::new()': LazyLock<[u32; _]>
+            234..285 '{     ...CK); }': ()
+            244..245 '_': &'? [u32; _]
+            248..263 'LazyLock::force': fn force<[u32; _]>(&'? LazyLock<[u32; _]>) -> &'? [u32; _]
+            248..282 'LazyLo..._LOCK)': &'? [u32; _]
+            264..281 '&VALUE...Y_LOCK': &'? LazyLock<[u32; _]>
+            265..281 'VALUES...Y_LOCK': LazyLock<[u32; _]>
+        "#]],
+    );
+}
+
+#[test]
+fn include_bytes_len_mismatch() {
+    check_no_mismatches(
+        r#"
+//- minicore: include_bytes
+static S: &[u8; 158] = include_bytes!("/foo/bar/baz.txt");
+    "#,
     );
 }

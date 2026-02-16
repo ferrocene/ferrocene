@@ -43,6 +43,7 @@
 //!     dispatch_from_dyn: unsize, pin
 //!     hash: sized
 //!     include:
+//!     include_bytes:
 //!     index: sized
 //!     infallible:
 //!     int_impl: size_of, transmute
@@ -58,6 +59,7 @@
 //!     pin:
 //!     pointee: copy, send, sync, ord, hash, unpin, phantom_data
 //!     range:
+//!     new_range:
 //!     receiver: deref
 //!     result:
 //!     send: sized
@@ -175,7 +177,9 @@ pub mod marker {
 
     // region:clone
     impl<T: PointeeSized> Clone for PhantomData<T> {
-        fn clone(&self) -> Self { Self }
+        fn clone(&self) -> Self {
+            Self
+        }
     }
     // endregion:clone
 
@@ -950,6 +954,9 @@ pub mod ops {
             #[lang = "from_residual"]
             fn from_residual(residual: R) -> Self;
         }
+        pub const trait Residual<O>: Sized {
+            type TryType: [const] Try<Output = O, Residual = Self>;
+        }
         #[lang = "Try"]
         pub trait Try: FromResidual<Self::Residual> {
             type Output;
@@ -958,6 +965,12 @@ pub mod ops {
             fn from_output(output: Self::Output) -> Self;
             #[lang = "branch"]
             fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
+        }
+        #[lang = "into_try_type"]
+        pub const fn residual_into_try_type<R: [const] Residual<O>, O>(
+            r: R,
+        ) -> <R as Residual<O>>::TryType {
+            FromResidual::from_residual(r)
         }
 
         impl<B, C> Try for ControlFlow<B, C> {
@@ -982,6 +995,10 @@ pub mod ops {
                 }
             }
         }
+
+        impl<B, C> Residual<C> for ControlFlow<B, Infallible> {
+            type TryType = ControlFlow<B, C>;
+        }
         // region:option
         impl<T> Try for Option<T> {
             type Output = T;
@@ -1004,6 +1021,10 @@ pub mod ops {
                     Some(_) => loop {},
                 }
             }
+        }
+
+        impl<T> const Residual<T> for Option<Infallible> {
+            type TryType = Option<T>;
         }
         // endregion:option
         // region:result
@@ -1034,10 +1055,14 @@ pub mod ops {
                 }
             }
         }
+
+        impl<T, E> const Residual<T> for Result<Infallible, E> {
+            type TryType = Result<T, E>;
+        }
         // endregion:from
         // endregion:result
     }
-    pub use self::try_::{ControlFlow, FromResidual, Try};
+    pub use self::try_::{ControlFlow, FromResidual, Residual, Try};
     // endregion:try
 
     // region:add
@@ -1128,6 +1153,32 @@ pub mod ops {
     // endregion:dispatch_from_dyn
 }
 
+// region:new_range
+pub mod range {
+    #[lang = "RangeCopy"]
+    pub struct Range<Idx> {
+        pub start: Idx,
+        pub end: Idx,
+    }
+
+    #[lang = "RangeFromCopy"]
+    pub struct RangeFrom<Idx> {
+        pub start: Idx,
+    }
+
+    #[lang = "RangeInclusiveCopy"]
+    pub struct RangeInclusive<Idx> {
+        pub start: Idx,
+        pub end: Idx,
+    }
+
+    #[lang = "RangeToInclusiveCopy"]
+    pub struct RangeToInclusive<Idx> {
+        pub end: Idx,
+    }
+}
+// endregion:new_range
+
 // region:eq
 pub mod cmp {
     use crate::marker::PointeeSized;
@@ -1144,7 +1195,9 @@ pub mod cmp {
 
     // region:builtin_impls
     impl PartialEq for () {
-        fn eq(&self, other: &()) -> bool { true }
+        fn eq(&self, other: &()) -> bool {
+            true
+        }
     }
     // endregion:builtin_impls
 
@@ -1567,10 +1620,7 @@ pub mod pin {
     }
     // endregion:dispatch_from_dyn
     // region:coerce_unsized
-    impl<Ptr, U> crate::ops::CoerceUnsized<Pin<U>> for Pin<Ptr> where
-        Ptr: crate::ops::CoerceUnsized<U>
-    {
-    }
+    impl<Ptr, U> crate::ops::CoerceUnsized<Pin<U>> for Pin<Ptr> where Ptr: crate::ops::CoerceUnsized<U> {}
     // endregion:coerce_unsized
 }
 // endregion:pin
@@ -1792,9 +1842,9 @@ pub mod iter {
                 fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self;
             }
         }
-        pub use self::collect::{IntoIterator, FromIterator};
+        pub use self::collect::{FromIterator, IntoIterator};
     }
-    pub use self::traits::{IntoIterator, FromIterator, Iterator};
+    pub use self::traits::{FromIterator, IntoIterator, Iterator};
 }
 // endregion:iterator
 
@@ -1878,6 +1928,10 @@ mod arch {
     }
     #[rustc_builtin_macro]
     pub macro global_asm("assembly template", $(operands,)* $(options($(option),*))?) {
+        /* compiler built-in */
+    }
+    #[rustc_builtin_macro]
+    pub macro naked_asm("assembly template", $(operands,)* $(options($(option),*))?) {
         /* compiler built-in */
     }
 }
@@ -2008,6 +2062,14 @@ mod macros {
     }
     // endregion:include
 
+    // region:include_bytes
+    #[rustc_builtin_macro]
+    #[macro_export]
+    macro_rules! include_bytes {
+        ($file:expr $(,)?) => {{ /* compiler built-in */ }};
+    }
+    // endregion:include_bytes
+
     // region:concat
     #[rustc_builtin_macro]
     #[macro_export]
@@ -2087,30 +2149,30 @@ macro_rules! column {
 pub mod prelude {
     pub mod v1 {
         pub use crate::{
-            clone::Clone,                            // :clone
-            cmp::{Eq, PartialEq},                    // :eq
-            cmp::{Ord, PartialOrd},                  // :ord
-            convert::AsMut,                          // :as_mut
-            convert::AsRef,                          // :as_ref
-            convert::{From, Into, TryFrom, TryInto}, // :from
-            default::Default,                        // :default
-            iter::{IntoIterator, Iterator, FromIterator}, // :iterator
-            macros::builtin::{derive, derive_const}, // :derive
-            marker::Copy,                            // :copy
-            marker::Send,                            // :send
-            marker::Sized,                           // :sized
-            marker::Sync,                            // :sync
-            mem::drop,                               // :drop
-            mem::size_of,                            // :size_of
-            ops::Drop,                               // :drop
-            ops::{AsyncFn, AsyncFnMut, AsyncFnOnce}, // :async_fn
-            ops::{Fn, FnMut, FnOnce},                // :fn
-            option::Option::{self, None, Some},      // :option
-            panic,                                   // :panic
-            result::Result::{self, Err, Ok},         // :result
-            str::FromStr,                            // :str
-            fmt::derive::Debug,                      // :fmt, derive
-            hash::derive::Hash,                      // :hash, derive
+            clone::Clone,                                 // :clone
+            cmp::{Eq, PartialEq},                         // :eq
+            cmp::{Ord, PartialOrd},                       // :ord
+            convert::AsMut,                               // :as_mut
+            convert::AsRef,                               // :as_ref
+            convert::{From, Into, TryFrom, TryInto},      // :from
+            default::Default,                             // :default
+            fmt::derive::Debug,                           // :fmt, derive
+            hash::derive::Hash,                           // :hash, derive
+            iter::{FromIterator, IntoIterator, Iterator}, // :iterator
+            macros::builtin::{derive, derive_const},      // :derive
+            marker::Copy,                                 // :copy
+            marker::Send,                                 // :send
+            marker::Sized,                                // :sized
+            marker::Sync,                                 // :sync
+            mem::drop,                                    // :drop
+            mem::size_of,                                 // :size_of
+            ops::Drop,                                    // :drop
+            ops::{AsyncFn, AsyncFnMut, AsyncFnOnce},      // :async_fn
+            ops::{Fn, FnMut, FnOnce},                     // :fn
+            option::Option::{self, None, Some},           // :option
+            panic,                                        // :panic
+            result::Result::{self, Err, Ok},              // :result
+            str::FromStr,                                 // :str
         };
     }
 

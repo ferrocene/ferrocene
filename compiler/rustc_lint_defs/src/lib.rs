@@ -748,6 +748,10 @@ pub enum BuiltinLintDiag {
     },
     UnusedVisibility(Span),
     AttributeLint(AttributeLintKind),
+    UnreachableCfg {
+        span: Span,
+        wildcard_span: Option<Span>,
+    },
 }
 
 #[derive(Debug, HashStable_Generic)]
@@ -796,6 +800,7 @@ pub enum AttributeLintKind {
         attr_name: Symbol,
     },
     DocInvalid,
+    AmbiguousDeriveHelpers,
     DocUnknownInclude {
         span: Span,
         inner: &'static str,
@@ -826,6 +831,9 @@ pub enum AttributeLintKind {
         span: Span,
         suggested: Option<Symbol>,
     },
+    MalformedDoc,
+    ExpectedNoArgs,
+    ExpectedNameValue,
 }
 
 pub type RegisteredTools = FxIndexSet<Ident>;

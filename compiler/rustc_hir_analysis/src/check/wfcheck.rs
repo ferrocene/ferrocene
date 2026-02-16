@@ -5,7 +5,7 @@ use hir::intravisit::{self, Visitor};
 use rustc_abi::{ExternAbi, ScalableElt};
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, ErrorGuaranteed, pluralize, struct_span_code_err};
+use rustc_errors::{Applicability, ErrorGuaranteed, msg, pluralize, struct_span_code_err};
 use rustc_hir::attrs::{AttributeKind, EiiDecl, EiiImpl, EiiImplResolution};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -42,8 +42,8 @@ use {rustc_ast as ast, rustc_hir as hir};
 use super::compare_eii::compare_eii_function_types;
 use crate::autoderef::Autoderef;
 use crate::constrained_generic_params::{Parameter, identify_constrained_generic_params};
+use crate::errors;
 use crate::errors::InvalidReceiverTyHint;
-use crate::{errors, fluent_generated as fluent};
 
 pub(super) struct WfCheckingCtxt<'a, 'tcx> {
     pub(super) ocx: ObligationCtxt<'a, 'tcx, FulfillmentError<'tcx>>,
@@ -953,7 +953,7 @@ pub(crate) fn check_associated_item(
                 wfcx.register_wf_obligation(span, loc, ty.into());
 
                 let has_value = item.defaultness(tcx).has_value();
-                if find_attr!(tcx.get_all_attrs(def_id), AttributeKind::TypeConst(_)) {
+                if tcx.is_type_const(def_id) {
                     check_type_const(wfcx, def_id, ty, has_value)?;
                 }
 
@@ -1567,11 +1567,40 @@ pub(super) fn check_where_clauses<'tcx>(wfcx: &WfCheckingCtxt<'_, 'tcx>, def_id:
 
     let predicates = predicates.instantiate_identity(tcx);
 
+    let assoc_const_obligations: Vec<_> = predicates
+        .predicates
+        .iter()
+        .copied()
+        .zip(predicates.spans.iter().copied())
+        .filter_map(|(clause, sp)| {
+            let proj = clause.as_projection_clause()?;
+            let pred_binder = proj
+                .map_bound(|pred| {
+                    pred.term.as_const().map(|ct| {
+                        let assoc_const_ty = tcx
+                            .type_of(pred.projection_term.def_id)
+                            .instantiate(tcx, pred.projection_term.args);
+                        ty::ClauseKind::ConstArgHasType(ct, assoc_const_ty)
+                    })
+                })
+                .transpose();
+            pred_binder.map(|pred_binder| {
+                let cause = traits::ObligationCause::new(
+                    sp,
+                    wfcx.body_def_id,
+                    ObligationCauseCode::WhereClause(def_id.to_def_id(), sp),
+                );
+                Obligation::new(tcx, cause, wfcx.param_env, pred_binder)
+            })
+        })
+        .collect();
+
     assert_eq!(predicates.predicates.len(), predicates.spans.len());
     let wf_obligations = predicates.into_iter().flat_map(|(p, sp)| {
         traits::wf::clause_obligations(infcx, wfcx.param_env, wfcx.body_def_id, p, sp)
     });
-    let obligations: Vec<_> = wf_obligations.chain(default_obligations).collect();
+    let obligations: Vec<_> =
+        wf_obligations.chain(default_obligations).chain(assoc_const_obligations).collect();
     wfcx.register_obligations(obligations);
 }
 
@@ -1740,7 +1769,7 @@ fn check_method_receiver<'tcx>(
                             the `arbitrary_self_types` feature",
                     ),
                 )
-                .with_help(fluent::hir_analysis_invalid_receiver_ty_help)
+                .with_help(msg!("consider changing to `self`, `&self`, `&mut self`, or a type implementing `Receiver` such as `self: Box<Self>`, `self: Rc<Self>`, or `self: Arc<Self>`"))
                 .emit()
             }
             None | Some(ArbitrarySelfTypesLevel::Basic)
@@ -1764,7 +1793,7 @@ fn check_method_receiver<'tcx>(
                             the `arbitrary_self_types_pointers` feature",
                     ),
                 )
-                .with_help(fluent::hir_analysis_invalid_receiver_ty_help)
+                .with_help(msg!("consider changing to `self`, `&self`, `&mut self`, or a type implementing `Receiver` such as `self: Box<Self>`, `self: Rc<Self>`, or `self: Arc<Self>`"))
                 .emit()
             }
             _ =>
@@ -2442,8 +2471,8 @@ fn lint_redundant_lifetimes<'tcx>(
 }
 
 #[derive(LintDiagnostic)]
-#[diag(hir_analysis_redundant_lifetime_args)]
-#[note]
+#[diag("unnecessary lifetime parameter `{$victim}`")]
+#[note("you can use the `{$candidate}` lifetime directly, in place of `{$victim}`")]
 struct RedundantLifetimeArgsLint<'tcx> {
     /// The lifetime we have found to be redundant.
     victim: ty::Region<'tcx>,

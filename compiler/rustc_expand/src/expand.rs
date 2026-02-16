@@ -19,14 +19,14 @@ use rustc_attr_parsing::{
 };
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_data_structures::stack::ensure_sufficient_stack;
-use rustc_errors::PResult;
+use rustc_errors::{PResult, msg};
 use rustc_feature::Features;
 use rustc_hir::Target;
 use rustc_hir::def::MacroKinds;
 use rustc_hir::limit::Limit;
 use rustc_parse::parser::{
     AllowConstBlockItems, AttemptLocalParseRecovery, CommaRecoveryMode, ForceCollect, Parser,
-    RecoverColon, RecoverComma, token_descr,
+    RecoverColon, RecoverComma, Recovery, token_descr,
 };
 use rustc_session::Session;
 use rustc_session::lint::builtin::{UNUSED_ATTRIBUTES, UNUSED_DOC_COMMENTS};
@@ -42,7 +42,6 @@ use crate::errors::{
     RecursionLimitReached, RemoveExprNotSupported, RemoveNodeNotSupported, UnsupportedKeyValue,
     WrongFragmentKind,
 };
-use crate::fluent_generated;
 use crate::mbe::diagnostics::annotate_err_with_kind;
 use crate::module::{
     DirOwnership, ParsedExternalMod, mod_dir_path, mod_file_path_from_attr, parse_external_mod,
@@ -508,6 +507,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         // Unresolved macros produce dummy outputs as a recovery measure.
         invocations.reverse();
         let mut expanded_fragments = Vec::new();
+        let mut expanded_fragments_len = 0;
         let mut undetermined_invocations = Vec::new();
         let (mut progress, mut force) = (false, !self.monotonic);
         loop {
@@ -602,6 +602,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                         expanded_fragments.push(Vec::new());
                     }
                     expanded_fragments[depth - 1].push((expn_id, expanded_fragment));
+                    expanded_fragments_len += 1;
                     invocations.extend(derive_invocations.into_iter().rev());
                 }
                 ExpandResult::Retry(invoc) => {
@@ -622,7 +623,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         self.cx.force_mode = orig_force_mode;
 
         // Finally incorporate all the expanded macros into the input AST fragment.
-        let mut placeholder_expander = PlaceholderExpander::default();
+        let mut placeholder_expander = PlaceholderExpander::with_capacity(expanded_fragments_len);
         while let Some(expanded_fragments) = expanded_fragments.pop() {
             for (expn_id, expanded_fragment) in expanded_fragments.into_iter().rev() {
                 placeholder_expander
@@ -1050,7 +1051,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                             self.sess,
                             sym::proc_macro_hygiene,
                             item.span,
-                            fluent_generated::expand_file_modules_in_proc_macro_input_are_unstable,
+                            msg!("file modules in proc macro input are unstable"),
                         )
                         .emit();
                     }
@@ -2170,7 +2171,7 @@ impl<'a, 'b> InvocationCollector<'a, 'b> {
                 call.span(),
                 self.cx.current_expansion.lint_node_id,
                 Some(self.cx.ecfg.features),
-                ShouldEmit::ErrorsAndLints { recover: true },
+                ShouldEmit::ErrorsAndLints { recovery: Recovery::Allowed },
             );
 
             let current_span = if let Some(sp) = span { sp.to(attr.span) } else { attr.span };
@@ -2220,7 +2221,7 @@ impl<'a, 'b> InvocationCollector<'a, 'b> {
             // Target doesn't matter for `cfg` parsing.
             Target::Crate,
             self.cfg().features,
-            ShouldEmit::ErrorsAndLints { recover: true },
+            ShouldEmit::ErrorsAndLints { recovery: Recovery::Allowed },
             parse_cfg,
             &CFG_TEMPLATE,
         ) else {

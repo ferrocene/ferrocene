@@ -76,8 +76,9 @@ pub use self::closure::{
     place_to_string_for_capture,
 };
 pub use self::consts::{
-    AnonConstKind, AtomicOrdering, Const, ConstInt, ConstKind, ConstToValTreeResult, Expr,
-    ExprKind, ScalarInt, SimdAlign, UnevaluatedConst, ValTree, ValTreeKindExt, Value,
+    AtomicOrdering, Const, ConstInt, ConstKind, ConstToValTreeResult, Expr, ExprKind,
+    LitToConstInput, ScalarInt, SimdAlign, UnevaluatedConst, ValTree, ValTreeKindExt, Value,
+    const_lit_matches_ty,
 };
 pub use self::context::{
     CtxtInterners, CurrentGcx, Feed, FreeRegionInfo, GlobalCtxt, Lift, TyCtxt, TyCtxtFeed, tls,
@@ -405,6 +406,12 @@ impl<Id: Into<DefId>> Visibility<Id> {
             Visibility::Public => self.is_public(),
             Visibility::Restricted(id) => self.is_accessible_from(id, tcx),
         }
+    }
+}
+
+impl<Id: Into<DefId> + Copy> Visibility<Id> {
+    pub fn min(self, vis: Visibility<Id>, tcx: TyCtxt<'_>) -> Visibility<Id> {
+        if self.is_at_least(vis, tcx) { vis } else { self }
     }
 }
 

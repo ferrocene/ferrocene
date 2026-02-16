@@ -513,6 +513,7 @@ impl Step for RustAnalyzer {
             // This builds a proc macro against the bootstrap libproc_macro, which is not ABI
             // compatible with the ABI proc-macro-srv expects to load.
             cargo.arg("--exclude=proc-macro-srv");
+            cargo.arg("--exclude=proc-macro-srv-cli");
         }
 
         let mut skip_tests = vec![];
@@ -1299,19 +1300,19 @@ impl Step for Tidy {
     /// for the `dev` or `nightly` channels.
     fn run(self, builder: &Builder<'_>) {
         let mut cmd = builder.tool_cmd(Tool::Tidy);
-        cmd.arg(&builder.src);
-        cmd.arg(&builder.initial_cargo);
-        cmd.arg(&builder.out);
+        cmd.arg(format!("--root-path={}", &builder.src.display()));
+        cmd.arg(format!("--cargo-path={}", &builder.initial_cargo.display()));
+        cmd.arg(format!("--output-dir={}", &builder.out.display()));
         // Tidy is heavily IO constrained. Still respect `-j`, but use a higher limit if `jobs` hasn't been configured.
         let jobs = builder.config.jobs.unwrap_or_else(|| {
             8 * std::thread::available_parallelism().map_or(1, std::num::NonZeroUsize::get) as u32
         });
-        cmd.arg(jobs.to_string());
+        cmd.arg(format!("--concurrency={jobs}"));
         // pass the path to the yarn command used for installing js deps.
         if let Some(yarn) = &builder.config.yarn {
-            cmd.arg(yarn);
+            cmd.arg(format!("--npm-path={}", yarn.display()));
         } else {
-            cmd.arg("yarn");
+            cmd.arg("--npm-path=yarn");
         }
         if builder.is_verbose() {
             cmd.arg("--verbose");
@@ -2182,6 +2183,9 @@ Please disable assertions with `rust.debug-assertions = false`.
         }
         for flag in targetflags {
             cmd.arg("--target-rustcflags").arg(flag);
+        }
+        if target.is_synthetic() {
+            cmd.arg("--target-rustcflags").arg("-Zunstable-options");
         }
 
         cmd.arg("--python").arg(
@@ -3155,7 +3159,7 @@ impl Step for CrateRustdoc {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.paths(&["src/librustdoc", "src/tools/rustdoc"])
+        run.path("src/librustdoc").path("src/tools/rustdoc")
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {
@@ -3816,7 +3820,7 @@ impl Step for CodegenCranelift {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.paths(&["compiler/rustc_codegen_cranelift"])
+        run.path("compiler/rustc_codegen_cranelift")
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {
@@ -3937,7 +3941,7 @@ impl Step for CodegenGCC {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.paths(&["compiler/rustc_codegen_gcc"])
+        run.path("compiler/rustc_codegen_gcc")
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {

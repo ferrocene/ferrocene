@@ -4,8 +4,7 @@ use std::slice;
 
 pub(crate) use gen_trait_fn_body::gen_trait_fn_body;
 use hir::{
-    DisplayTarget, HasAttrs as HirHasAttrs, HirDisplay, InFile, ModuleDef, PathResolution,
-    Semantics,
+    HasAttrs as HirHasAttrs, HirDisplay, InFile, ModuleDef, PathResolution, Semantics,
     db::{ExpandDatabase, HirDatabase},
 };
 use ide_db::{
@@ -84,6 +83,17 @@ pub fn extract_trivial_expression(block_expr: &ast::BlockExpr) -> Option<ast::Ex
         }
     }
     None
+}
+
+pub(crate) fn wrap_block(expr: &ast::Expr) -> ast::BlockExpr {
+    if let ast::Expr::BlockExpr(block) = expr
+        && let Some(first) = block.syntax().first_token()
+        && first.kind() == T!['{']
+    {
+        block.reset_indent()
+    } else {
+        make::block_expr(None, Some(expr.reset_indent().indent(1.into())))
+    }
 }
 
 /// This is a method with a heuristics to support test methods annotated with custom test annotations, such as
@@ -825,13 +835,12 @@ enum ReferenceConversionType {
 }
 
 impl<'db> ReferenceConversion<'db> {
-    pub(crate) fn convert_type(
-        &self,
-        db: &'db dyn HirDatabase,
-        display_target: DisplayTarget,
-    ) -> ast::Type {
+    pub(crate) fn convert_type(&self, db: &'db dyn HirDatabase, module: hir::Module) -> ast::Type {
         let ty = match self.conversion {
-            ReferenceConversionType::Copy => self.ty.display(db, display_target).to_string(),
+            ReferenceConversionType::Copy => self
+                .ty
+                .display_source_code(db, module.into(), true)
+                .unwrap_or_else(|_| "_".to_owned()),
             ReferenceConversionType::AsRefStr => "&str".to_owned(),
             ReferenceConversionType::AsRefSlice => {
                 let type_argument_name = self
@@ -839,8 +848,8 @@ impl<'db> ReferenceConversion<'db> {
                     .type_arguments()
                     .next()
                     .unwrap()
-                    .display(db, display_target)
-                    .to_string();
+                    .display_source_code(db, module.into(), true)
+                    .unwrap_or_else(|_| "_".to_owned());
                 format!("&[{type_argument_name}]")
             }
             ReferenceConversionType::Dereferenced => {
@@ -849,8 +858,8 @@ impl<'db> ReferenceConversion<'db> {
                     .type_arguments()
                     .next()
                     .unwrap()
-                    .display(db, display_target)
-                    .to_string();
+                    .display_source_code(db, module.into(), true)
+                    .unwrap_or_else(|_| "_".to_owned());
                 format!("&{type_argument_name}")
             }
             ReferenceConversionType::Option => {
@@ -859,16 +868,22 @@ impl<'db> ReferenceConversion<'db> {
                     .type_arguments()
                     .next()
                     .unwrap()
-                    .display(db, display_target)
-                    .to_string();
+                    .display_source_code(db, module.into(), true)
+                    .unwrap_or_else(|_| "_".to_owned());
                 format!("Option<&{type_argument_name}>")
             }
             ReferenceConversionType::Result => {
                 let mut type_arguments = self.ty.type_arguments();
-                let first_type_argument_name =
-                    type_arguments.next().unwrap().display(db, display_target).to_string();
-                let second_type_argument_name =
-                    type_arguments.next().unwrap().display(db, display_target).to_string();
+                let first_type_argument_name = type_arguments
+                    .next()
+                    .unwrap()
+                    .display_source_code(db, module.into(), true)
+                    .unwrap_or_else(|_| "_".to_owned());
+                let second_type_argument_name = type_arguments
+                    .next()
+                    .unwrap()
+                    .display_source_code(db, module.into(), true)
+                    .unwrap_or_else(|_| "_".to_owned());
                 format!("Result<&{first_type_argument_name}, &{second_type_argument_name}>")
             }
         };

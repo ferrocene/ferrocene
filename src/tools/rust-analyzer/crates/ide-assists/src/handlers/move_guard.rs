@@ -1,9 +1,10 @@
-use itertools::Itertools;
+use itertools::{Itertools, chain};
 use syntax::{
     SyntaxKind::WHITESPACE,
+    TextRange,
     ast::{
         AstNode, BlockExpr, ElseBranch, Expr, IfExpr, MatchArm, Pat, edit::AstNodeEdit, make,
-        syntax_factory::SyntaxFactory,
+        prec::ExprPrecedence, syntax_factory::SyntaxFactory,
     },
     syntax_editor::Element,
 };
@@ -44,13 +45,26 @@ pub(crate) fn move_guard_to_arm_body(acc: &mut Assists, ctx: &AssistContext<'_>)
         cov_mark::hit!(move_guard_inapplicable_in_arm_body);
         return None;
     }
-    let space_before_guard = guard.syntax().prev_sibling_or_token();
+    let rest_arms = rest_arms(&match_arm, ctx.selection_trimmed())?;
+    let space_before_delete = chain(
+        guard.syntax().prev_sibling_or_token(),
+        rest_arms.iter().filter_map(|it| it.syntax().prev_sibling_or_token()),
+    );
     let space_after_arrow = match_arm.fat_arrow_token()?.next_sibling_or_token();
 
-    let guard_condition = guard.condition()?.reset_indent();
     let arm_expr = match_arm.expr()?;
-    let then_branch = make::block_expr(None, Some(arm_expr.reset_indent().indent(1.into())));
-    let if_expr = make::expr_if(guard_condition, then_branch, None).indent(arm_expr.indent_level());
+    let if_branch = chain([&match_arm], &rest_arms)
+        .rfold(None, |else_branch, arm| {
+            if let Some(guard) = arm.guard() {
+                let then_branch = crate::utils::wrap_block(&arm.expr()?);
+                let guard_condition = guard.condition()?.reset_indent();
+                Some(make::expr_if(guard_condition, then_branch, else_branch).into())
+            } else {
+                arm.expr().map(|it| crate::utils::wrap_block(&it).into())
+            }
+        })?
+        .indent(arm_expr.indent_level());
+    let ElseBranch::IfExpr(if_expr) = if_branch else { return None };
 
     let target = guard.syntax().text_range();
     acc.add(
@@ -59,10 +73,13 @@ pub(crate) fn move_guard_to_arm_body(acc: &mut Assists, ctx: &AssistContext<'_>)
         target,
         |builder| {
             let mut edit = builder.make_editor(match_arm.syntax());
-            if let Some(element) = space_before_guard
-                && element.kind() == WHITESPACE
-            {
-                edit.delete(element);
+            for element in space_before_delete {
+                if element.kind() == WHITESPACE {
+                    edit.delete(element);
+                }
+            }
+            for rest_arm in &rest_arms {
+                edit.delete(rest_arm.syntax());
             }
             if let Some(element) = space_after_arrow
                 && element.kind() == WHITESPACE
@@ -109,6 +126,7 @@ pub(crate) fn move_arm_cond_to_match_guard(
     let match_arm: MatchArm = ctx.find_node_at_offset::<MatchArm>()?;
     let match_pat = match_arm.pat()?;
     let arm_body = match_arm.expr()?;
+    let arm_guard = match_arm.guard().and_then(|it| it.condition());
 
     let mut replace_node = None;
     let if_expr: IfExpr = IfExpr::cast(arm_body.syntax().clone()).or_else(|| {
@@ -149,6 +167,25 @@ pub(crate) fn move_arm_cond_to_match_guard(
                 0
             };
             let indent_level = match_arm.indent_level();
+            let make_guard = |cond: Option<Expr>| {
+                let condition = match (arm_guard.clone(), cond) {
+                    (None, None) => return None,
+                    (None, Some(it)) | (Some(it), None) => it,
+                    (Some(lhs), Some(rhs)) => {
+                        let op_expr = |expr: Expr| {
+                            if expr.precedence().needs_parentheses_in(ExprPrecedence::LAnd) {
+                                make.expr_paren(expr).into()
+                            } else {
+                                expr
+                            }
+                        };
+                        let op = syntax::ast::BinaryOp::LogicOp(syntax::ast::LogicOp::And);
+                        let expr_bin = make.expr_bin(op_expr(lhs), op, op_expr(rhs));
+                        expr_bin.into()
+                    }
+                };
+                Some(make.match_guard(condition))
+            };
 
             for (cond, block) in conds_blocks {
                 let only_expr = block.statements().next().is_none();
@@ -156,8 +193,7 @@ pub(crate) fn move_arm_cond_to_match_guard(
                     Some(then_expr) if only_expr => then_expr,
                     _ => block.dedent(dedent.into()).into(),
                 };
-                let guard = make.match_guard(cond);
-                let new_arm = make.match_arm(match_pat.clone(), Some(guard), expr);
+                let new_arm = make.match_arm(match_pat.clone(), make_guard(Some(cond)), expr);
                 replace_arms.push(new_arm);
             }
             if let Some(block) = tail {
@@ -170,7 +206,7 @@ pub(crate) fn move_arm_cond_to_match_guard(
                     }
                     _ => block.dedent(dedent.into()).into(),
                 };
-                let new_arm = make.match_arm(match_pat, None, expr);
+                let new_arm = make.match_arm(match_pat, make_guard(None), expr);
                 replace_arms.push(new_arm);
             } else {
                 // There's no else branch. Add a pattern without guard, unless the following match
@@ -185,7 +221,7 @@ pub(crate) fn move_arm_cond_to_match_guard(
                     }
                     _ => {
                         let block_expr = make.expr_empty_block().into();
-                        replace_arms.push(make.match_arm(match_pat, None, block_expr));
+                        replace_arms.push(make.match_arm(match_pat, make_guard(None), block_expr));
                     }
                 }
             }
@@ -200,6 +236,25 @@ pub(crate) fn move_arm_cond_to_match_guard(
             builder.add_file_edits(ctx.vfs_file_id(), edit);
         },
     )
+}
+
+fn rest_arms(match_arm: &MatchArm, selection: TextRange) -> Option<Vec<MatchArm>> {
+    match_arm
+        .parent_match()
+        .match_arm_list()?
+        .arms()
+        .skip_while(|it| it != match_arm)
+        .skip(1)
+        .take_while(move |it| {
+            selection.is_empty() || crate::utils::is_selected(it, selection, false)
+        })
+        .take_while(move |it| {
+            it.pat()
+                .zip(match_arm.pat())
+                .is_some_and(|(a, b)| a.syntax().text() == b.syntax().text())
+        })
+        .collect::<Vec<_>>()
+        .into()
 }
 
 // Parses an if-else-if chain to get the conditions and the then branches until we encounter an else
@@ -326,6 +381,144 @@ fn main() {
     }
 
     #[test]
+    fn move_multiple_guard_to_arm_body_works() {
+        check_assist(
+            move_guard_to_arm_body,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 $0if x % 3 == 0 => false,
+        x @ 0..30 if x % 2 == 0 => true,
+        _ => false
+    }
+}
+"#,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 => if x % 3 == 0 {
+            false
+        } else if x % 2 == 0 {
+            true
+        },
+        _ => false
+    }
+}
+"#,
+        );
+
+        check_assist(
+            move_guard_to_arm_body,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 $0if x % 3 == 0 => false,
+        x @ 0..30 if x % 2 == 0 => true,
+        x @ 0..30 => false,
+        _ => true
+    }
+}
+"#,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 => if x % 3 == 0 {
+            false
+        } else if x % 2 == 0 {
+            true
+        } else {
+            false
+        },
+        _ => true
+    }
+}
+"#,
+        );
+
+        check_assist(
+            move_guard_to_arm_body,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 if x % 3 == 0 => false,
+        x @ 0..30 $0if x % 2 == 0$0 => true,
+        x @ 0..30 => false,
+        _ => true
+    }
+}
+"#,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 if x % 3 == 0 => false,
+        x @ 0..30 => if x % 2 == 0 {
+            true
+        },
+        x @ 0..30 => false,
+        _ => true
+    }
+}
+"#,
+        );
+
+        check_assist(
+            move_guard_to_arm_body,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 $0if x % 3 == 0 => false,
+        x @ 0..30 $0if x % 2 == 0 => true,
+        x @ 0..30 => false,
+        _ => true
+    }
+}
+"#,
+            r#"
+fn main() {
+    match 92 {
+        x @ 0..30 => if x % 3 == 0 {
+            false
+        } else if x % 2 == 0 {
+            true
+        },
+        x @ 0..30 => false,
+        _ => true
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn move_guard_to_block_arm_body_works() {
+        check_assist(
+            move_guard_to_arm_body,
+            r#"
+fn main() {
+    match 92 {
+        x $0if x > 10 => {
+            let _ = true;
+            false
+        },
+        _ => true
+    }
+}
+"#,
+            r#"
+fn main() {
+    match 92 {
+        x => if x > 10 {
+            let _ = true;
+            false
+        },
+        _ => true
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
     fn move_let_guard_to_arm_body_works() {
         check_assist(
             move_guard_to_arm_body,
@@ -376,9 +569,7 @@ fn main() {
             && true
             && true {
             {
-                {
-                    false
-                }
+                false
             }
         },
         _ => true
@@ -1079,6 +1270,42 @@ fn main() {
             3
         }
         x => {}
+    }
+}
+"#,
+        )
+    }
+
+    #[test]
+    fn move_arm_cond_to_match_guard_elseif_exist_guard() {
+        check_assist(
+            move_arm_cond_to_match_guard,
+            r#"
+fn main() {
+    let cond = true;
+    match 92 {
+        3 => true,
+        x if cond => if x $0> 10 {
+            false
+        } else if x > 5 {
+            true
+        } else if x > 4 || x < -2 {
+            false
+        } else {
+            true
+        },
+    }
+}
+"#,
+            r#"
+fn main() {
+    let cond = true;
+    match 92 {
+        3 => true,
+        x if cond && x > 10 => false,
+        x if cond && x > 5 => true,
+        x if cond && (x > 4 || x < -2) => false,
+        x if cond => true,
     }
 }
 "#,

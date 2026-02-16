@@ -74,7 +74,7 @@ pub(super) fn try_expr(
                 ast::Fn(fn_) => sema.to_def(&fn_)?.ret_type(sema.db),
                 ast::Item(__) => return None,
                 ast::ClosureExpr(closure) => sema.type_of_expr(&closure.body()?)?.original,
-                ast::BlockExpr(block_expr) => if matches!(block_expr.modifier(), Some(ast::BlockModifier::Async(_) | ast::BlockModifier::Try(_)| ast::BlockModifier::Const(_))) {
+                ast::BlockExpr(block_expr) => if matches!(block_expr.modifier(), Some(ast::BlockModifier::Async(_) | ast::BlockModifier::Try { .. } | ast::BlockModifier::Const(_))) {
                     sema.type_of_expr(&block_expr.into())?.original
                 } else {
                     continue;
@@ -272,9 +272,9 @@ pub(super) fn struct_rest_pat(
     edition: Edition,
     display_target: DisplayTarget,
 ) -> HoverResult {
-    let missing_fields = sema.record_pattern_missing_fields(pattern);
+    let matched_fields = sema.record_pattern_matched_fields(pattern);
 
-    // if there are no missing fields, the end result is a hover that shows ".."
+    // if there are no matched fields, the end result is a hover that shows ".."
     // should be left in to indicate that there are no more fields in the pattern
     // example, S {a: 1, b: 2, ..} when struct S {a: u32, b: u32}
 
@@ -285,13 +285,13 @@ pub(super) fn struct_rest_pat(
             targets.push(item);
         }
     };
-    for (_, t) in &missing_fields {
+    for (_, t) in &matched_fields {
         walk_and_push_ty(sema.db, t, &mut push_new_def);
     }
 
     res.markup = {
         let mut s = String::from(".., ");
-        for (f, _) in &missing_fields {
+        for (f, _) in &matched_fields {
             s += f.display(sema.db, display_target).to_string().as_ref();
             s += ", ";
         }

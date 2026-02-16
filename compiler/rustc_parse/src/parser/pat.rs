@@ -785,10 +785,8 @@ impl<'a> Parser<'a> {
         } else if self.eat_keyword(exp!(Box)) {
             self.parse_pat_box()?
         } else if self.check_inline_const(0) {
-            // Parse `const pat`.
-            // NOTE: This will always error later during AST lowering because
-            // inline const cannot be used as patterns.
-            let const_expr = self.parse_const_block(lo.to(self.token.span))?;
+            // Parse `const pat`
+            let const_expr = self.parse_const_block(lo.to(self.token.span), true)?;
 
             if let Some(re) = self.parse_range_end() {
                 self.parse_pat_range_begin_with(const_expr, re)?
@@ -1283,7 +1281,7 @@ impl<'a> Parser<'a> {
             .then_some(self.prev_token.span);
 
         let bound = if self.check_inline_const(0) {
-            self.parse_const_block(self.token.span)
+            self.parse_const_block(self.token.span, true)
         } else if self.check_path() {
             let lo = self.token.span;
             let (qself, path) = if self.eat_lt() {
@@ -1749,6 +1747,12 @@ impl<'a> Parser<'a> {
             hi = self.prev_token.span;
             let ann = BindingMode(by_ref, mutability);
             let fieldpat = self.mk_pat_ident(boxed_span.to(hi), ann, fieldname);
+            if matches!(
+                fieldpat.kind,
+                PatKind::Ident(BindingMode(ByRef::Yes(..), Mutability::Mut), ..)
+            ) {
+                self.psess.gated_spans.gate(sym::mut_ref, fieldpat.span);
+            }
             let subpat = if is_box {
                 self.mk_pat(lo.to(hi), PatKind::Box(Box::new(fieldpat)))
             } else {

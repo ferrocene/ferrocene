@@ -2,7 +2,7 @@ error[E0277]: the trait bound `(): LocalTrait` is not satisfied
   --> $DIR/nightly-only-unstable.rs:25:21
    |
 LL |     use_local_trait(());
-   |     --------------- ^^ the nightly-only, unstable trait `LocalTrait` is not implemented for `()`
+   |     --------------- ^^ the trait `LocalTrait` is not implemented for `()`
    |     |
    |     required by a bound introduced by this call
    |
@@ -21,7 +21,7 @@ error[E0277]: the trait bound `(): ForeignTrait` is not satisfied
   --> $DIR/nightly-only-unstable.rs:31:23
    |
 LL |     use_foreign_trait(());
-   |     ----------------- ^^ the nightly-only, unstable trait `ForeignTrait` is not implemented for `()`
+   |     ----------------- ^^ the trait `ForeignTrait` is not implemented for `()`
    |     |
    |     required by a bound introduced by this call
    |

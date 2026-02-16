@@ -25,12 +25,12 @@ fn main() {
     use_local_trait(());
     //~^ ERROR the trait bound `(): LocalTrait` is not satisfied
     //[normal]~| NOTE the trait `LocalTrait` is not implemented for `()`
-    //[force]~| NOTE the nightly-only, unstable trait `LocalTrait` is not implemented for `()`
+    //[force]~| NOTE the trait `LocalTrait` is not implemented for `()`
     //~| NOTE required by a bound introduced by this call
 
     use_foreign_trait(());
     //~^ ERROR the trait bound `(): ForeignTrait` is not satisfied
     //[normal]~| NOTE the nightly-only, unstable trait `ForeignTrait` is not implemented for `()`
-    //[force]~| NOTE the nightly-only, unstable trait `ForeignTrait` is not implemented for `()`
+    //[force]~| NOTE the trait `ForeignTrait` is not implemented for `()`
     //~| NOTE required by a bound introduced by this call
 }

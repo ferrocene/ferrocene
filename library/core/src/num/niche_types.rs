@@ -112,7 +112,7 @@ impl const Default for Nanoseconds {
 
 const HALF_USIZE: usize = usize::MAX >> 1;
 
-#[cfg(not(feature = "ferrocene_subset"))]
+// Ferrocene annotation: This was split for subset purposes.
 define_valid_range_type! {
     pub struct NonZeroU8Inner(u8 is 1..);
     pub struct NonZeroU16Inner(u16 is 1..);
@@ -130,13 +130,17 @@ define_valid_range_type! {
     pub struct NonZeroUsizeInner(usize is 1..);
     pub struct NonZeroIsizeInner(isize is ..0 | 1..);
 
+    pub struct NonZeroCharInner(char is '\u{1}' ..= '\u{10ffff}');
+}
+
+// Ferrocene annotation: This was split for subset purposes.
+#[cfg(not(feature = "ferrocene_subset"))]
+define_valid_range_type! {
     pub struct U32NotAllOnes(u32 is 0..u32::MAX);
     pub struct I32NotAllOnes(i32 is ..-1 | 0..);
 
     pub struct U64NotAllOnes(u64 is 0..u64::MAX);
     pub struct I64NotAllOnes(i64 is ..-1 | 0..);
-
-    pub struct NonZeroCharInner(char is '\u{1}' ..= '\u{10ffff}');
 }
 
 #[cfg(not(feature = "ferrocene_subset"))]

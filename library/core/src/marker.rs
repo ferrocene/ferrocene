@@ -941,41 +941,13 @@ marker_impls! {
 /// This is part of [RFC 3467](https://rust-lang.github.io/rfcs/3467-unsafe-pinned.html), and is
 /// tracked by [#125735](https://github.com/rust-lang/rust/issues/125735).
 #[lang = "unsafe_unpin"]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-pub(crate) unsafe auto trait UnsafeUnpin {}
-||||||| 381e9ef09ef
-pub(crate) unsafe auto trait UnsafeUnpin {}
-=======
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
 pub unsafe auto trait UnsafeUnpin {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 381e9ef09ef
-=======
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T: ?Sized> UnsafeUnpin for PhantomData<T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T: ?Sized> UnsafeUnpin for *const T {}
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T: ?Sized> UnsafeUnpin for *mut T {}
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T: ?Sized> UnsafeUnpin for &T {}
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
-||||||| 381e9ef09ef
-unsafe impl<T: ?Sized> UnsafeUnpin for PhantomData<T> {}
-unsafe impl<T: ?Sized> UnsafeUnpin for *const T {}
-unsafe impl<T: ?Sized> UnsafeUnpin for *mut T {}
-unsafe impl<T: ?Sized> UnsafeUnpin for &T {}
-unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
-=======
+
 marker_impls! {
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
     unsafe UnsafeUnpin for
@@ -985,7 +957,6 @@ marker_impls! {
         {T: ?Sized} &T,
         {T: ?Sized} &mut T,
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Types that do not require any pinning guarantees.
 ///
@@ -1080,12 +1051,8 @@ impl !Unpin for PhantomPinned {}
 // continue working. Ideally PhantomPinned could just wrap an `UnsafePinned<()>` to get the same
 // effect, but we can't add a new field to an already stable unit struct -- that would be a breaking
 // change.
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| 381e9ef09ef
-=======
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl !UnsafeUnpin for PhantomPinned {}
 
 #[cfg(not(feature = "ferrocene_subset"))]

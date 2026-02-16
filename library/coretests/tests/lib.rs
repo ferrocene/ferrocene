@@ -89,14 +89,7 @@
 #![feature(non_exhaustive_omitted_patterns_lint)]
 #![feature(nonzero_from_str_radix)]
 #![feature(numfmt)]
-<<<<<<< HEAD
-#![feature(option_reduce)]
-||||||| 381e9ef09ef
 #![feature(one_sided_range)]
-#![feature(option_reduce)]
-=======
-#![feature(one_sided_range)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
@@ -138,7 +131,6 @@
 #![feature(ferrocene_test)]
 // Ferrocene addition: Features required for tests
 // tidy-alphabetical-start
-#![feature(assert_matches)]
 #![feature(atomic_from_mut)]
 #![feature(bound_as_ref)]
 #![feature(bound_copied)]
@@ -148,7 +140,7 @@
 #![feature(debug_closure_helpers)]
 #![feature(duration_millis_float)]
 #![feature(maybe_uninit_as_bytes)]
-#![feature(one_sided_range)]
+#![feature(option_reduce)]
 #![feature(pointer_try_cast_aligned)]
 #![feature(range_into_bounds)]
 #![feature(slice_iter_mut_as_mut_slice)]

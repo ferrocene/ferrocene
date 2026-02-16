@@ -1032,7 +1032,11 @@ impl Builder<'_> {
             }
 
             // For everything else, crate stability shouldn't matter, so don't set a flag.
-            Mode::ToolBootstrap | Mode::ToolRustcPrivate | Mode::ToolStd | Mode::ToolTarget => {}
+            Mode::ToolBootstrap
+            | Mode::ToolRustcPrivate
+            | Mode::ToolStd
+            | Mode::ToolTarget
+            | Mode::ToolCustom { .. } => {}
         }
 
         if let Some(x) = self.crt_static(target) {

@@ -6,3 +6,5 @@
 //~| NOTE `forbid` lint level was set on command line (`-F dead_code`)
 fn main() {
 }
+
+// ferrocene-annotations: um_rustc_F

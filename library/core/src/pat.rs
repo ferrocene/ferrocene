@@ -63,6 +63,7 @@ impl_range_pat! {
     u8, u16, u32, u64, u128, usize,
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "pattern_type_range_trait", issue = "123646")]
 impl const RangePattern for char {
     const MIN: Self = char::MIN;

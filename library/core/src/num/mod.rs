@@ -274,6 +274,7 @@ macro_rules! widening_carryless_mul_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn widening_carryless_mul(self, rhs: $SelfT) -> $WideT {
             (self as $WideT).carryless_mul(rhs as $WideT)
         }
@@ -283,6 +284,7 @@ macro_rules! widening_carryless_mul_impl {
 macro_rules! carrying_carryless_mul_impl {
     (u128, u256) => {
         carrying_carryless_mul_impl! { @internal u128 =>
+            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn carrying_carryless_mul(self, rhs: Self, carry: Self) -> (Self, Self) {
                 let x0 = self as u64;
                 let x1 = (self >> 64) as u64;
@@ -313,6 +315,7 @@ macro_rules! carrying_carryless_mul_impl {
     };
     ($SelfT:ty, $WideT:ty) => {
         carrying_carryless_mul_impl! { @internal $SelfT =>
+            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn carrying_carryless_mul(self, rhs: Self, carry: Self) -> (Self, Self) {
                 // Can't use widening_carryless_mul because it's not implemented for usize.
                 let p = (self as $WideT).carryless_mul(rhs as $WideT);

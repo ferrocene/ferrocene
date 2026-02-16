@@ -87,25 +87,6 @@ where
     }
 }
 
-<<<<<<< HEAD
-#[inline(never)]
-#[cold]
-#[track_caller]
-#[cfg(not(feature = "ferrocene_subset"))]
-const fn str_index_overflow_fail() -> ! {
-    panic!("attempted to index str up to maximum usize");
-}
-
-||||||| 381e9ef09ef
-#[inline(never)]
-#[cold]
-#[track_caller]
-const fn str_index_overflow_fail() -> ! {
-    panic!("attempted to index str up to maximum usize");
-}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 /// Implements substring slicing with syntax `&self[..]` or `&mut self[..]`.
 ///
 /// Returns a slice of the whole string, i.e., returns `&self` or `&mut

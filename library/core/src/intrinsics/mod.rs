@@ -3630,14 +3630,8 @@ pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize
 ///
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
-||||||| 381e9ef09ef
-pub unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
-=======
 pub const unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Duplicates a variable argument list. The returned list is initially at the same position as
 /// the one in `src`, but can be advanced independently.
@@ -3649,14 +3643,8 @@ pub const unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
 /// when a variable argument list is used incorrectly.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
-||||||| 381e9ef09ef
-pub fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
-=======
 pub const fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     src.duplicate()
 }
 
@@ -3675,13 +3663,7 @@ pub const fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
 ///
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub unsafe fn va_end(ap: &mut VaList<'_>) {
-||||||| 381e9ef09ef
-pub unsafe fn va_end(ap: &mut VaList<'_>) {
-=======
 pub const unsafe fn va_end(ap: &mut VaList<'_>) {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /* deliberately does nothing */
 }

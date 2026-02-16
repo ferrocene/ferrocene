@@ -3260,7 +3260,12 @@ pub fn vcmla_lane_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_f16(a, b, c)
     }
@@ -3336,7 +3341,12 @@ pub fn vcmlaq_lane_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_f32(a, b, c)
     }
@@ -3361,7 +3371,12 @@ pub fn vcmla_laneq_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_f16(a, b, c)
     }
@@ -3437,7 +3452,12 @@ pub fn vcmlaq_laneq_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_f32(a, b, c)
     }
@@ -3551,7 +3571,12 @@ pub fn vcmla_rot180_lane_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_rot180_f16(a, b, c)
     }
@@ -3627,7 +3652,12 @@ pub fn vcmlaq_rot180_lane_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_rot180_f32(a, b, c)
     }
@@ -3652,7 +3682,12 @@ pub fn vcmla_rot180_laneq_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_rot180_f16(a, b, c)
     }
@@ -3728,7 +3763,12 @@ pub fn vcmlaq_rot180_laneq_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_rot180_f32(a, b, c)
     }
@@ -3842,7 +3882,12 @@ pub fn vcmla_rot270_lane_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_rot270_f16(a, b, c)
     }
@@ -3918,7 +3963,12 @@ pub fn vcmlaq_rot270_lane_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_rot270_f32(a, b, c)
     }
@@ -3943,7 +3993,12 @@ pub fn vcmla_rot270_laneq_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_rot270_f16(a, b, c)
     }
@@ -4019,7 +4074,12 @@ pub fn vcmlaq_rot270_laneq_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_rot270_f32(a, b, c)
     }
@@ -4133,7 +4193,12 @@ pub fn vcmla_rot90_lane_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_rot90_f16(a, b, c)
     }
@@ -4209,7 +4274,12 @@ pub fn vcmlaq_rot90_lane_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_rot90_f32(a, b, c)
     }
@@ -4234,7 +4304,12 @@ pub fn vcmla_rot90_laneq_f16<const LANE: i32>(
         let c: float16x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmla_rot90_f16(a, b, c)
     }
@@ -4310,7 +4385,12 @@ pub fn vcmlaq_rot90_laneq_f32<const LANE: i32>(
         let c: float32x4_t = simd_shuffle!(
             c,
             c,
-            [2 * LANE as u32, 2 * LANE as u32 + 1, 2 * LANE as u32, 2 * LANE as u32 + 1]
+            [
+                2 * LANE as u32,
+                2 * LANE as u32 + 1,
+                2 * LANE as u32,
+                2 * LANE as u32 + 1
+            ]
         );
         vcmlaq_rot90_f32(a, b, c)
     }
@@ -4888,82 +4968,354 @@ pub fn vcopyq_lane_s8<const LANE1: i32, const LANE2: i32>(a: int8x16_t, b: int8x
             0 => simd_shuffle!(
                 a,
                 b,
-                [16 + LANE2 as u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    16 + LANE2 as u32,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             1 => simd_shuffle!(
                 a,
                 b,
-                [0, 16 + LANE2 as u32, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    16 + LANE2 as u32,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             2 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 16 + LANE2 as u32, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    16 + LANE2 as u32,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             3 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 16 + LANE2 as u32, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    16 + LANE2 as u32,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             4 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 16 + LANE2 as u32, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    16 + LANE2 as u32,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             5 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 16 + LANE2 as u32, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    16 + LANE2 as u32,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             6 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 16 + LANE2 as u32, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    16 + LANE2 as u32,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             7 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 16 + LANE2 as u32, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    16 + LANE2 as u32,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             8 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 16 + LANE2 as u32, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    16 + LANE2 as u32,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             9 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 16 + LANE2 as u32, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    16 + LANE2 as u32,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             10 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 16 + LANE2 as u32, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    16 + LANE2 as u32,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             11 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16 + LANE2 as u32, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    16 + LANE2 as u32,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             12 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16 + LANE2 as u32, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    16 + LANE2 as u32,
+                    13,
+                    14,
+                    15
+                ]
             ),
             13 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16 + LANE2 as u32, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    16 + LANE2 as u32,
+                    14,
+                    15
+                ]
             ),
             14 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 + LANE2 as u32, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    16 + LANE2 as u32,
+                    15
+                ]
             ),
             15 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16 + LANE2 as u32]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    16 + LANE2 as u32
+                ]
             ),
             _ => unreachable_unchecked(),
         }
@@ -5044,82 +5396,354 @@ pub fn vcopyq_lane_u8<const LANE1: i32, const LANE2: i32>(
             0 => simd_shuffle!(
                 a,
                 b,
-                [16 + LANE2 as u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    16 + LANE2 as u32,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             1 => simd_shuffle!(
                 a,
                 b,
-                [0, 16 + LANE2 as u32, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    16 + LANE2 as u32,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             2 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 16 + LANE2 as u32, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    16 + LANE2 as u32,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             3 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 16 + LANE2 as u32, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    16 + LANE2 as u32,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             4 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 16 + LANE2 as u32, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    16 + LANE2 as u32,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             5 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 16 + LANE2 as u32, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    16 + LANE2 as u32,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             6 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 16 + LANE2 as u32, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    16 + LANE2 as u32,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             7 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 16 + LANE2 as u32, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    16 + LANE2 as u32,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             8 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 16 + LANE2 as u32, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    16 + LANE2 as u32,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             9 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 16 + LANE2 as u32, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    16 + LANE2 as u32,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             10 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 16 + LANE2 as u32, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    16 + LANE2 as u32,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             11 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16 + LANE2 as u32, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    16 + LANE2 as u32,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             12 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16 + LANE2 as u32, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    16 + LANE2 as u32,
+                    13,
+                    14,
+                    15
+                ]
             ),
             13 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16 + LANE2 as u32, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    16 + LANE2 as u32,
+                    14,
+                    15
+                ]
             ),
             14 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 + LANE2 as u32, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    16 + LANE2 as u32,
+                    15
+                ]
             ),
             15 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16 + LANE2 as u32]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    16 + LANE2 as u32
+                ]
             ),
             _ => unreachable_unchecked(),
         }
@@ -5200,82 +5824,354 @@ pub fn vcopyq_lane_p8<const LANE1: i32, const LANE2: i32>(
             0 => simd_shuffle!(
                 a,
                 b,
-                [16 + LANE2 as u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    16 + LANE2 as u32,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             1 => simd_shuffle!(
                 a,
                 b,
-                [0, 16 + LANE2 as u32, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    16 + LANE2 as u32,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             2 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 16 + LANE2 as u32, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    16 + LANE2 as u32,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             3 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 16 + LANE2 as u32, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    16 + LANE2 as u32,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             4 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 16 + LANE2 as u32, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    16 + LANE2 as u32,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             5 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 16 + LANE2 as u32, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    16 + LANE2 as u32,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             6 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 16 + LANE2 as u32, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    16 + LANE2 as u32,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             7 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 16 + LANE2 as u32, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    16 + LANE2 as u32,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             8 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 16 + LANE2 as u32, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    16 + LANE2 as u32,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             9 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 16 + LANE2 as u32, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    16 + LANE2 as u32,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             10 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 16 + LANE2 as u32, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    16 + LANE2 as u32,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             11 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16 + LANE2 as u32, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    16 + LANE2 as u32,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             12 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16 + LANE2 as u32, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    16 + LANE2 as u32,
+                    13,
+                    14,
+                    15
+                ]
             ),
             13 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16 + LANE2 as u32, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    16 + LANE2 as u32,
+                    14,
+                    15
+                ]
             ),
             14 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 + LANE2 as u32, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    16 + LANE2 as u32,
+                    15
+                ]
             ),
             15 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16 + LANE2 as u32]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    16 + LANE2 as u32
+                ]
             ),
             _ => unreachable_unchecked(),
         }
@@ -5375,82 +6271,354 @@ pub fn vcopyq_laneq_s8<const LANE1: i32, const LANE2: i32>(
             0 => simd_shuffle!(
                 a,
                 b,
-                [16 + LANE2 as u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    16 + LANE2 as u32,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             1 => simd_shuffle!(
                 a,
                 b,
-                [0, 16 + LANE2 as u32, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    16 + LANE2 as u32,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             2 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 16 + LANE2 as u32, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    16 + LANE2 as u32,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             3 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 16 + LANE2 as u32, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    16 + LANE2 as u32,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             4 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 16 + LANE2 as u32, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    16 + LANE2 as u32,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             5 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 16 + LANE2 as u32, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    16 + LANE2 as u32,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             6 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 16 + LANE2 as u32, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    16 + LANE2 as u32,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             7 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 16 + LANE2 as u32, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    16 + LANE2 as u32,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             8 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 16 + LANE2 as u32, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    16 + LANE2 as u32,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             9 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 16 + LANE2 as u32, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    16 + LANE2 as u32,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             10 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 16 + LANE2 as u32, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    16 + LANE2 as u32,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             11 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16 + LANE2 as u32, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    16 + LANE2 as u32,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             12 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16 + LANE2 as u32, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    16 + LANE2 as u32,
+                    13,
+                    14,
+                    15
+                ]
             ),
             13 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16 + LANE2 as u32, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    16 + LANE2 as u32,
+                    14,
+                    15
+                ]
             ),
             14 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 + LANE2 as u32, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    16 + LANE2 as u32,
+                    15
+                ]
             ),
             15 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16 + LANE2 as u32]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    16 + LANE2 as u32
+                ]
             ),
             _ => unreachable_unchecked(),
         }
@@ -5549,82 +6717,354 @@ pub fn vcopyq_laneq_u8<const LANE1: i32, const LANE2: i32>(
             0 => simd_shuffle!(
                 a,
                 b,
-                [16 + LANE2 as u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    16 + LANE2 as u32,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             1 => simd_shuffle!(
                 a,
                 b,
-                [0, 16 + LANE2 as u32, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    16 + LANE2 as u32,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             2 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 16 + LANE2 as u32, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    16 + LANE2 as u32,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             3 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 16 + LANE2 as u32, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    16 + LANE2 as u32,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             4 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 16 + LANE2 as u32, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    16 + LANE2 as u32,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             5 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 16 + LANE2 as u32, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    16 + LANE2 as u32,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             6 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 16 + LANE2 as u32, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    16 + LANE2 as u32,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             7 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 16 + LANE2 as u32, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    16 + LANE2 as u32,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             8 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 16 + LANE2 as u32, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    16 + LANE2 as u32,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             9 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 16 + LANE2 as u32, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    16 + LANE2 as u32,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             10 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 16 + LANE2 as u32, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    16 + LANE2 as u32,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             11 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16 + LANE2 as u32, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    16 + LANE2 as u32,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             12 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16 + LANE2 as u32, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    16 + LANE2 as u32,
+                    13,
+                    14,
+                    15
+                ]
             ),
             13 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16 + LANE2 as u32, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    16 + LANE2 as u32,
+                    14,
+                    15
+                ]
             ),
             14 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 + LANE2 as u32, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    16 + LANE2 as u32,
+                    15
+                ]
             ),
             15 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16 + LANE2 as u32]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    16 + LANE2 as u32
+                ]
             ),
             _ => unreachable_unchecked(),
         }
@@ -5723,82 +7163,354 @@ pub fn vcopyq_laneq_p8<const LANE1: i32, const LANE2: i32>(
             0 => simd_shuffle!(
                 a,
                 b,
-                [16 + LANE2 as u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    16 + LANE2 as u32,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             1 => simd_shuffle!(
                 a,
                 b,
-                [0, 16 + LANE2 as u32, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    16 + LANE2 as u32,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             2 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 16 + LANE2 as u32, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    16 + LANE2 as u32,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             3 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 16 + LANE2 as u32, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    16 + LANE2 as u32,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             4 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 16 + LANE2 as u32, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    16 + LANE2 as u32,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             5 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 16 + LANE2 as u32, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    16 + LANE2 as u32,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             6 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 16 + LANE2 as u32, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    16 + LANE2 as u32,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             7 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 16 + LANE2 as u32, 8, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    16 + LANE2 as u32,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             8 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 16 + LANE2 as u32, 9, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    16 + LANE2 as u32,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             9 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 16 + LANE2 as u32, 10, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    16 + LANE2 as u32,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             10 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 16 + LANE2 as u32, 11, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    16 + LANE2 as u32,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             11 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16 + LANE2 as u32, 12, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    16 + LANE2 as u32,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
             ),
             12 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16 + LANE2 as u32, 13, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    16 + LANE2 as u32,
+                    13,
+                    14,
+                    15
+                ]
             ),
             13 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16 + LANE2 as u32, 14, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    16 + LANE2 as u32,
+                    14,
+                    15
+                ]
             ),
             14 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 + LANE2 as u32, 15]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    16 + LANE2 as u32,
+                    15
+                ]
             ),
             15 => simd_shuffle!(
                 a,
                 b,
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16 + LANE2 as u32]
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    16 + LANE2 as u32
+                ]
             ),
             _ => unreachable_unchecked(),
         }
@@ -10775,7 +12487,7 @@ pub unsafe fn vld2q_lane_f64<const LANE: i32>(a: *const f64, b: float64x2x2_t) -
             link_name = "llvm.aarch64.neon.ld2lane.v2f64.p0"
         )]
         fn _vld2q_lane_f64(a: float64x2_t, b: float64x2_t, n: i64, ptr: *const i8)
-        -> float64x2x2_t;
+            -> float64x2x2_t;
     }
     _vld2q_lane_f64(b.0, b.1, LANE as i64, a as _)
 }
@@ -11864,7 +13576,11 @@ pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
 pub unsafe fn vldap1_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x1_t) -> int64x1_t {
     static_assert!(LANE == 0);
     let atomic_src = crate::sync::atomic::AtomicI64::from_ptr(ptr as *mut i64);
-    simd_insert!(src, LANE as u32, atomic_src.load(crate::sync::atomic::Ordering::Acquire))
+    simd_insert!(
+        src,
+        LANE as u32,
+        atomic_src.load(crate::sync::atomic::Ordering::Acquire)
+    )
 }
 #[doc = "Load-acquire RCpc one single-element structure to one lane of one register"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vldap1q_lane_s64)"]
@@ -11880,7 +13596,11 @@ pub unsafe fn vldap1_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x1_t) 
 pub unsafe fn vldap1q_lane_s64<const LANE: i32>(ptr: *const i64, src: int64x2_t) -> int64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     let atomic_src = crate::sync::atomic::AtomicI64::from_ptr(ptr as *mut i64);
-    simd_insert!(src, LANE as u32, atomic_src.load(crate::sync::atomic::Ordering::Acquire))
+    simd_insert!(
+        src,
+        LANE as u32,
+        atomic_src.load(crate::sync::atomic::Ordering::Acquire)
+    )
 }
 #[doc = "Load-acquire RCpc one single-element structure to one lane of one register"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vldap1q_lane_f64)"]
@@ -14244,7 +15964,10 @@ pub fn vmul_lane_f64<const LANE: i32>(a: float64x1_t, b: float64x1_t) -> float64
 pub fn vmul_laneq_f16<const LANE: i32>(a: float16x4_t, b: float16x8_t) -> float16x4_t {
     static_assert_uimm_bits!(LANE, 3);
     unsafe {
-        simd_mul(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        simd_mul(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Floating-point multiply"]
@@ -14439,7 +16162,10 @@ pub fn vmull_high_laneq_s16<const LANE: i32>(a: int16x8_t, b: int16x8_t) -> int3
 pub fn vmull_high_lane_s32<const LANE: i32>(a: int32x4_t, b: int32x2_t) -> int64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     unsafe {
-        vmull_high_s32(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmull_high_s32(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Multiply long"]
@@ -14453,7 +16179,10 @@ pub fn vmull_high_lane_s32<const LANE: i32>(a: int32x4_t, b: int32x2_t) -> int64
 pub fn vmull_high_laneq_s32<const LANE: i32>(a: int32x4_t, b: int32x4_t) -> int64x2_t {
     static_assert_uimm_bits!(LANE, 2);
     unsafe {
-        vmull_high_s32(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmull_high_s32(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Multiply long"]
@@ -14527,7 +16256,10 @@ pub fn vmull_high_laneq_u16<const LANE: i32>(a: uint16x8_t, b: uint16x8_t) -> ui
 pub fn vmull_high_lane_u32<const LANE: i32>(a: uint32x4_t, b: uint32x2_t) -> uint64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     unsafe {
-        vmull_high_u32(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmull_high_u32(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Multiply long"]
@@ -14541,7 +16273,10 @@ pub fn vmull_high_lane_u32<const LANE: i32>(a: uint32x4_t, b: uint32x2_t) -> uin
 pub fn vmull_high_laneq_u32<const LANE: i32>(a: uint32x4_t, b: uint32x4_t) -> uint64x2_t {
     static_assert_uimm_bits!(LANE, 2);
     unsafe {
-        vmull_high_u32(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmull_high_u32(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Multiply long"]
@@ -14894,7 +16629,10 @@ pub fn vmulxq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
 pub fn vmulx_lane_f16<const LANE: i32>(a: float16x4_t, b: float16x4_t) -> float16x4_t {
     static_assert_uimm_bits!(LANE, 2);
     unsafe {
-        vmulx_f16(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmulx_f16(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Floating-point multiply extended"]
@@ -14909,7 +16647,10 @@ pub fn vmulx_lane_f16<const LANE: i32>(a: float16x4_t, b: float16x4_t) -> float1
 pub fn vmulx_laneq_f16<const LANE: i32>(a: float16x4_t, b: float16x8_t) -> float16x4_t {
     static_assert_uimm_bits!(LANE, 3);
     unsafe {
-        vmulx_f16(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmulx_f16(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Floating-point multiply extended"]
@@ -15009,7 +16750,10 @@ pub fn vmulx_laneq_f32<const LANE: i32>(a: float32x2_t, b: float32x4_t) -> float
 pub fn vmulxq_lane_f32<const LANE: i32>(a: float32x4_t, b: float32x2_t) -> float32x4_t {
     static_assert_uimm_bits!(LANE, 1);
     unsafe {
-        vmulxq_f32(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmulxq_f32(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Floating-point multiply extended"]
@@ -15023,7 +16767,10 @@ pub fn vmulxq_lane_f32<const LANE: i32>(a: float32x4_t, b: float32x2_t) -> float
 pub fn vmulxq_laneq_f32<const LANE: i32>(a: float32x4_t, b: float32x4_t) -> float32x4_t {
     static_assert_uimm_bits!(LANE, 2);
     unsafe {
-        vmulxq_f32(a, simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]))
+        vmulxq_f32(
+            a,
+            simd_shuffle!(b, b, [LANE as u32, LANE as u32, LANE as u32, LANE as u32]),
+        )
     }
 }
 #[doc = "Floating-point multiply extended"]
@@ -15477,7 +17224,11 @@ pub fn vpaddq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x16_t = transmute(vpaddq_s8(transmute(a), transmute(b)));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Add Pairwise"]
@@ -17163,7 +18914,11 @@ pub fn vqdmulls_s32(a: i32, b: i32) -> i64 {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqmovn_high_s16(a: int8x8_t, b: int16x8_t) -> int8x16_t {
     unsafe {
-        simd_shuffle!(a, vqmovn_s16(b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+        simd_shuffle!(
+            a,
+            vqmovn_s16(b),
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        )
     }
 }
 #[doc = "Signed saturating extract narrow"]
@@ -17195,7 +18950,11 @@ pub fn vqmovn_high_s64(a: int32x2_t, b: int64x2_t) -> int32x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqmovn_high_u16(a: uint8x8_t, b: uint16x8_t) -> uint8x16_t {
     unsafe {
-        simd_shuffle!(a, vqmovn_u16(b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+        simd_shuffle!(
+            a,
+            vqmovn_u16(b),
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        )
     }
 }
 #[doc = "Signed saturating extract narrow"]
@@ -17301,7 +19060,11 @@ pub fn vqmovns_u32(a: u32) -> u16 {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqmovun_high_s16(a: uint8x8_t, b: int16x8_t) -> uint8x16_t {
     unsafe {
-        simd_shuffle!(a, vqmovun_s16(b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+        simd_shuffle!(
+            a,
+            vqmovun_s16(b),
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        )
     }
 }
 #[doc = "Signed saturating extract unsigned narrow"]
@@ -19216,10 +20979,20 @@ pub fn vqtbl2_u8(a: uint8x16x2_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl2_u8(a: uint8x16x2_t, b: uint8x8_t) -> uint8x8_t {
     let mut a: uint8x16x2_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x8_t = transmute(vqtbl2(transmute(a.0), transmute(a.1), b));
@@ -19247,15 +21020,29 @@ pub fn vqtbl2q_u8(a: uint8x16x2_t, b: uint8x16_t) -> uint8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl2q_u8(a: uint8x16x2_t, b: uint8x16_t) -> uint8x16_t {
     let mut a: uint8x16x2_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x16_t = transmute(vqtbl2q(transmute(a.0), transmute(a.1), b));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Table look-up"]
@@ -19279,10 +21066,20 @@ pub fn vqtbl2_p8(a: poly8x16x2_t, b: uint8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl2_p8(a: poly8x16x2_t, b: uint8x8_t) -> poly8x8_t {
     let mut a: poly8x16x2_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x8_t = transmute(vqtbl2(transmute(a.0), transmute(a.1), b));
@@ -19310,15 +21107,29 @@ pub fn vqtbl2q_p8(a: poly8x16x2_t, b: uint8x16_t) -> poly8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl2q_p8(a: poly8x16x2_t, b: uint8x16_t) -> poly8x16_t {
     let mut a: poly8x16x2_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x16_t = transmute(vqtbl2q(transmute(a.0), transmute(a.1), b));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Table look-up"]
@@ -19396,12 +21207,27 @@ pub fn vqtbl3_u8(a: uint8x16x3_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl3_u8(a: uint8x16x3_t, b: uint8x8_t) -> uint8x8_t {
     let mut a: uint8x16x3_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x8_t =
@@ -19430,18 +21256,37 @@ pub fn vqtbl3q_u8(a: uint8x16x3_t, b: uint8x16_t) -> uint8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl3q_u8(a: uint8x16x3_t, b: uint8x16_t) -> uint8x16_t {
     let mut a: uint8x16x3_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x16_t =
             transmute(vqtbl3q(transmute(a.0), transmute(a.1), transmute(a.2), b));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Table look-up"]
@@ -19465,12 +21310,27 @@ pub fn vqtbl3_p8(a: poly8x16x3_t, b: uint8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl3_p8(a: poly8x16x3_t, b: uint8x8_t) -> poly8x8_t {
     let mut a: poly8x16x3_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x8_t =
@@ -19499,18 +21359,37 @@ pub fn vqtbl3q_p8(a: poly8x16x3_t, b: uint8x16_t) -> poly8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl3q_p8(a: poly8x16x3_t, b: uint8x16_t) -> poly8x16_t {
     let mut a: poly8x16x3_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x16_t =
             transmute(vqtbl3q(transmute(a.0), transmute(a.1), transmute(a.2), b));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Table look-up"]
@@ -19588,7 +21467,15 @@ pub fn vqtbl4q_s8(a: int8x16x4_t, b: uint8x16_t) -> int8x16_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
-    unsafe { transmute(vqtbl4(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b)) }
+    unsafe {
+        transmute(vqtbl4(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ))
+    }
 }
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_u8)"]
@@ -19600,18 +21487,43 @@ pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
     let mut a: uint8x16x4_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.3 =
-        unsafe { simd_shuffle!(a.3, a.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: uint8x8_t =
-            transmute(vqtbl4(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b));
+        let ret_val: uint8x8_t = transmute(vqtbl4(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
     }
 }
@@ -19624,7 +21536,15 @@ pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { transmute(vqtbl4q(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b)) }
+    unsafe {
+        transmute(vqtbl4q(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ))
+    }
 }
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_u8)"]
@@ -19636,20 +21556,49 @@ pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
     let mut a: uint8x16x4_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.3 =
-        unsafe { simd_shuffle!(a.3, a.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: uint8x16_t =
-            transmute(vqtbl4q(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        let ret_val: uint8x16_t = transmute(vqtbl4q(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Table look-up"]
@@ -19661,7 +21610,15 @@ pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
-    unsafe { transmute(vqtbl4(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b)) }
+    unsafe {
+        transmute(vqtbl4(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ))
+    }
 }
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_p8)"]
@@ -19673,18 +21630,43 @@ pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
     let mut a: poly8x16x4_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.3 =
-        unsafe { simd_shuffle!(a.3, a.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: poly8x8_t =
-            transmute(vqtbl4(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b));
+        let ret_val: poly8x8_t = transmute(vqtbl4(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
     }
 }
@@ -19697,7 +21679,15 @@ pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4q_p8(a: poly8x16x4_t, b: uint8x16_t) -> poly8x16_t {
-    unsafe { transmute(vqtbl4q(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b)) }
+    unsafe {
+        transmute(vqtbl4q(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ))
+    }
 }
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_p8)"]
@@ -19709,20 +21699,49 @@ pub fn vqtbl4q_p8(a: poly8x16x4_t, b: uint8x16_t) -> poly8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbl4q_p8(a: poly8x16x4_t, b: uint8x16_t) -> poly8x16_t {
     let mut a: poly8x16x4_t = a;
-    a.0 =
-        unsafe { simd_shuffle!(a.0, a.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.1 =
-        unsafe { simd_shuffle!(a.1, a.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.2 =
-        unsafe { simd_shuffle!(a.2, a.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    a.3 =
-        unsafe { simd_shuffle!(a.3, a.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: poly8x16_t =
-            transmute(vqtbl4q(transmute(a.0), transmute(a.1), transmute(a.2), transmute(a.3), b));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        let ret_val: poly8x16_t = transmute(vqtbl4q(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Extended table look-up"]
@@ -19895,10 +21914,20 @@ pub fn vqtbx2_u8(a: uint8x8_t, b: uint8x16x2_t, c: uint8x8_t) -> uint8x8_t {
 pub fn vqtbx2_u8(a: uint8x8_t, b: uint8x16x2_t, c: uint8x8_t) -> uint8x8_t {
     let mut b: uint8x16x2_t = b;
     let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x8_t = transmute(vqtbx2(transmute(a), transmute(b.0), transmute(b.1), c));
@@ -19928,16 +21957,30 @@ pub fn vqtbx2q_u8(a: uint8x16_t, b: uint8x16x2_t, c: uint8x16_t) -> uint8x16_t {
     let mut b: uint8x16x2_t = b;
     let a: uint8x16_t =
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x16_t =
         unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x16_t =
             transmute(vqtbx2q(transmute(a), transmute(b.0), transmute(b.1), c));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Extended table look-up"]
@@ -19962,10 +22005,20 @@ pub fn vqtbx2_p8(a: poly8x8_t, b: poly8x16x2_t, c: uint8x8_t) -> poly8x8_t {
 pub fn vqtbx2_p8(a: poly8x8_t, b: poly8x16x2_t, c: uint8x8_t) -> poly8x8_t {
     let mut b: poly8x16x2_t = b;
     let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x8_t = transmute(vqtbx2(transmute(a), transmute(b.0), transmute(b.1), c));
@@ -19995,16 +22048,30 @@ pub fn vqtbx2q_p8(a: poly8x16_t, b: poly8x16x2_t, c: uint8x16_t) -> poly8x16_t {
     let mut b: poly8x16x2_t = b;
     let a: poly8x16_t =
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x16_t =
         unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x16_t =
             transmute(vqtbx2q(transmute(a), transmute(b.0), transmute(b.1), c));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Extended table look-up"]
@@ -20021,7 +22088,7 @@ fn vqtbx3(a: int8x8_t, b: int8x16_t, c: int8x16_t, d: int8x16_t, e: uint8x8_t) -
             link_name = "llvm.aarch64.neon.tbx3.v8i8"
         )]
         fn _vqtbx3(a: int8x8_t, b: int8x16_t, c: int8x16_t, d: int8x16_t, e: uint8x8_t)
-        -> int8x8_t;
+            -> int8x8_t;
     }
     unsafe { _vqtbx3(a, b, c, d, e) }
 }
@@ -20077,7 +22144,15 @@ pub fn vqtbx3q_s8(a: int8x16_t, b: int8x16x3_t, c: uint8x16_t) -> int8x16_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
-    unsafe { transmute(vqtbx3(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c)) }
+    unsafe {
+        transmute(vqtbx3(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ))
+    }
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_u8)"]
@@ -20090,16 +22165,36 @@ pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
 pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
     let mut b: uint8x16x3_t = b;
     let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: uint8x8_t =
-            transmute(vqtbx3(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c));
+        let ret_val: uint8x8_t = transmute(vqtbx3(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
     }
 }
@@ -20112,7 +22207,15 @@ pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbx3q_u8(a: uint8x16_t, b: uint8x16x3_t, c: uint8x16_t) -> uint8x16_t {
-    unsafe { transmute(vqtbx3q(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c)) }
+    unsafe {
+        transmute(vqtbx3q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ))
+    }
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_u8)"]
@@ -20126,18 +22229,42 @@ pub fn vqtbx3q_u8(a: uint8x16_t, b: uint8x16x3_t, c: uint8x16_t) -> uint8x16_t {
     let mut b: uint8x16x3_t = b;
     let a: uint8x16_t =
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x16_t =
         unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: uint8x16_t =
-            transmute(vqtbx3q(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        let ret_val: uint8x16_t = transmute(vqtbx3q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Extended table look-up"]
@@ -20149,7 +22276,15 @@ pub fn vqtbx3q_u8(a: uint8x16_t, b: uint8x16x3_t, c: uint8x16_t) -> uint8x16_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
-    unsafe { transmute(vqtbx3(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c)) }
+    unsafe {
+        transmute(vqtbx3(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ))
+    }
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_p8)"]
@@ -20162,16 +22297,36 @@ pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
 pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
     let mut b: poly8x16x3_t = b;
     let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: poly8x8_t =
-            transmute(vqtbx3(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c));
+        let ret_val: poly8x8_t = transmute(vqtbx3(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
     }
 }
@@ -20184,7 +22339,15 @@ pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vqtbx3q_p8(a: poly8x16_t, b: poly8x16x3_t, c: uint8x16_t) -> poly8x16_t {
-    unsafe { transmute(vqtbx3q(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c)) }
+    unsafe {
+        transmute(vqtbx3q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ))
+    }
 }
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_p8)"]
@@ -20198,18 +22361,42 @@ pub fn vqtbx3q_p8(a: poly8x16_t, b: poly8x16x3_t, c: uint8x16_t) -> poly8x16_t {
     let mut b: poly8x16x3_t = b;
     let a: poly8x16_t =
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x16_t =
         unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
-        let ret_val: poly8x16_t =
-            transmute(vqtbx3q(transmute(a), transmute(b.0), transmute(b.1), transmute(b.2), c));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        let ret_val: poly8x16_t = transmute(vqtbx3q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Extended table look-up"]
@@ -20325,14 +22512,34 @@ pub fn vqtbx4_u8(a: uint8x8_t, b: uint8x16x4_t, c: uint8x8_t) -> uint8x8_t {
 pub fn vqtbx4_u8(a: uint8x8_t, b: uint8x16x4_t, c: uint8x8_t) -> uint8x8_t {
     let mut b: uint8x16x4_t = b;
     let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.3 =
-        unsafe { simd_shuffle!(b.3, b.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x8_t = transmute(vqtbx4(
@@ -20378,14 +22585,34 @@ pub fn vqtbx4q_u8(a: uint8x16_t, b: uint8x16x4_t, c: uint8x16_t) -> uint8x16_t {
     let mut b: uint8x16x4_t = b;
     let a: uint8x16_t =
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.3 =
-        unsafe { simd_shuffle!(b.3, b.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x16_t =
         unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
@@ -20397,7 +22624,11 @@ pub fn vqtbx4q_u8(a: uint8x16_t, b: uint8x16x4_t, c: uint8x16_t) -> uint8x16_t {
             transmute(b.3),
             c,
         ));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Extended table look-up"]
@@ -20431,14 +22662,34 @@ pub fn vqtbx4_p8(a: poly8x8_t, b: poly8x16x4_t, c: uint8x8_t) -> poly8x8_t {
 pub fn vqtbx4_p8(a: poly8x8_t, b: poly8x16x4_t, c: uint8x8_t) -> poly8x8_t {
     let mut b: poly8x16x4_t = b;
     let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.3 =
-        unsafe { simd_shuffle!(b.3, b.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x8_t = transmute(vqtbx4(
@@ -20484,14 +22735,34 @@ pub fn vqtbx4q_p8(a: poly8x16_t, b: poly8x16x4_t, c: uint8x16_t) -> poly8x16_t {
     let mut b: poly8x16x4_t = b;
     let a: poly8x16_t =
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.0 =
-        unsafe { simd_shuffle!(b.0, b.0, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.1 =
-        unsafe { simd_shuffle!(b.1, b.1, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.2 =
-        unsafe { simd_shuffle!(b.2, b.2, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
-    b.3 =
-        unsafe { simd_shuffle!(b.3, b.3, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
     let c: uint8x16_t =
         unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
@@ -20503,7 +22774,11 @@ pub fn vqtbx4q_p8(a: poly8x16_t, b: poly8x16x4_t, c: uint8x16_t) -> poly8x16_t {
             transmute(b.3),
             c,
         ));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Rotate and exclusive OR"]
@@ -20593,7 +22868,11 @@ pub fn vrbitq_u8(a: uint8x16_t) -> uint8x16_t {
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: uint8x16_t = transmute(vrbitq_s8(transmute(a)));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Reverse bit order"]
@@ -20646,7 +22925,11 @@ pub fn vrbitq_p8(a: poly8x16_t) -> poly8x16_t {
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     unsafe {
         let ret_val: poly8x16_t = transmute(vrbitq_s8(transmute(a)));
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Reciprocal estimate."]
@@ -21386,7 +23669,11 @@ pub fn vreinterpretq_s8_f64(a: float64x2_t) -> int8x16_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
     unsafe {
         let ret_val: int8x16_t = transmute(a);
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Vector reinterpret cast operation"]
@@ -21482,7 +23769,11 @@ pub fn vreinterpretq_u8_f64(a: float64x2_t) -> uint8x16_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
     unsafe {
         let ret_val: uint8x16_t = transmute(a);
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Vector reinterpret cast operation"]
@@ -21578,7 +23869,11 @@ pub fn vreinterpretq_p8_f64(a: float64x2_t) -> poly8x16_t {
     let a: float64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
     unsafe {
         let ret_val: poly8x16_t = transmute(a);
-        simd_shuffle!(ret_val, ret_val, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
     }
 }
 #[doc = "Vector reinterpret cast operation"]
@@ -26739,7 +29034,9 @@ pub fn vsubw_high_u32(a: uint64x2_t, b: uint32x4_t) -> uint64x2_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbl1_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
-    vqtbl1_s8(vcombine_s8(a, unsafe { crate::mem::zeroed() }), unsafe { transmute(b) })
+    vqtbl1_s8(vcombine_s8(a, unsafe { crate::mem::zeroed() }), unsafe {
+        transmute(b)
+    })
 }
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl1_u8)"]
@@ -26837,7 +29134,10 @@ pub fn vtbl2_p8(a: poly8x8x2_t, b: uint8x8_t) -> poly8x8_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbl3_s8(a: int8x8x3_t, b: int8x8_t) -> int8x8_t {
-    let x = int8x16x2_t(vcombine_s8(a.0, a.1), vcombine_s8(a.2, unsafe { crate::mem::zeroed() }));
+    let x = int8x16x2_t(
+        vcombine_s8(a.0, a.1),
+        vcombine_s8(a.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), transmute(b))) }
 }
 #[doc = "Table look-up"]
@@ -26849,7 +29149,10 @@ pub fn vtbl3_s8(a: int8x8x3_t, b: int8x8_t) -> int8x8_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbl3_u8(a: uint8x8x3_t, b: uint8x8_t) -> uint8x8_t {
-    let x = uint8x16x2_t(vcombine_u8(a.0, a.1), vcombine_u8(a.2, unsafe { crate::mem::zeroed() }));
+    let x = uint8x16x2_t(
+        vcombine_u8(a.0, a.1),
+        vcombine_u8(a.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), b)) }
 }
 #[doc = "Table look-up"]
@@ -26866,7 +29169,10 @@ pub fn vtbl3_u8(a: uint8x8x3_t, b: uint8x8_t) -> uint8x8_t {
     a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
     a.2 = unsafe { simd_shuffle!(a.2, a.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    let x = uint8x16x2_t(vcombine_u8(a.0, a.1), vcombine_u8(a.2, unsafe { crate::mem::zeroed() }));
+    let x = uint8x16x2_t(
+        vcombine_u8(a.0, a.1),
+        vcombine_u8(a.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         let ret_val: uint8x8_t = transmute(vqtbl2(transmute(x.0), transmute(x.1), b));
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
@@ -26881,7 +29187,10 @@ pub fn vtbl3_u8(a: uint8x8x3_t, b: uint8x8_t) -> uint8x8_t {
 #[cfg_attr(test, assert_instr(tbl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbl3_p8(a: poly8x8x3_t, b: uint8x8_t) -> poly8x8_t {
-    let x = poly8x16x2_t(vcombine_p8(a.0, a.1), vcombine_p8(a.2, unsafe { crate::mem::zeroed() }));
+    let x = poly8x16x2_t(
+        vcombine_p8(a.0, a.1),
+        vcombine_p8(a.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), b)) }
 }
 #[doc = "Table look-up"]
@@ -26898,7 +29207,10 @@ pub fn vtbl3_p8(a: poly8x8x3_t, b: uint8x8_t) -> poly8x8_t {
     a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
     a.2 = unsafe { simd_shuffle!(a.2, a.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
     let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    let x = poly8x16x2_t(vcombine_p8(a.0, a.1), vcombine_p8(a.2, unsafe { crate::mem::zeroed() }));
+    let x = poly8x16x2_t(
+        vcombine_p8(a.0, a.1),
+        vcombine_p8(a.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         let ret_val: poly8x8_t = transmute(vqtbl2(transmute(x.0), transmute(x.1), b));
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
@@ -27012,7 +29324,11 @@ pub fn vtbx1_u8(a: uint8x8_t, b: uint8x8_t, c: uint8x8_t) -> uint8x8_t {
     unsafe {
         simd_select(
             simd_lt::<uint8x8_t, int8x8_t>(c, transmute(u8x8::splat(8))),
-            transmute(vqtbx1(transmute(a), transmute(vcombine_u8(b, crate::mem::zeroed())), c)),
+            transmute(vqtbx1(
+                transmute(a),
+                transmute(vcombine_u8(b, crate::mem::zeroed())),
+                c,
+            )),
             a,
         )
     }
@@ -27028,7 +29344,11 @@ pub fn vtbx1_p8(a: poly8x8_t, b: poly8x8_t, c: uint8x8_t) -> poly8x8_t {
     unsafe {
         simd_select(
             simd_lt::<uint8x8_t, int8x8_t>(c, transmute(u8x8::splat(8))),
-            transmute(vqtbx1(transmute(a), transmute(vcombine_p8(b, crate::mem::zeroed())), c)),
+            transmute(vqtbx1(
+                transmute(a),
+                transmute(vcombine_p8(b, crate::mem::zeroed())),
+                c,
+            )),
             a,
         )
     }
@@ -27113,11 +29433,19 @@ pub fn vtbx2_p8(a: poly8x8_t, b: poly8x8x2_t, c: uint8x8_t) -> poly8x8_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbx3_s8(a: int8x8_t, b: int8x8x3_t, c: int8x8_t) -> int8x8_t {
-    let x = int8x16x2_t(vcombine_s8(b.0, b.1), vcombine_s8(b.2, unsafe { crate::mem::zeroed() }));
+    let x = int8x16x2_t(
+        vcombine_s8(b.0, b.1),
+        vcombine_s8(b.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         transmute(simd_select(
             simd_lt::<int8x8_t, int8x8_t>(transmute(c), transmute(i8x8::splat(24))),
-            transmute(vqtbx2(transmute(a), transmute(x.0), transmute(x.1), transmute(c))),
+            transmute(vqtbx2(
+                transmute(a),
+                transmute(x.0),
+                transmute(x.1),
+                transmute(c),
+            )),
             a,
         ))
     }
@@ -27131,7 +29459,10 @@ pub fn vtbx3_s8(a: int8x8_t, b: int8x8x3_t, c: int8x8_t) -> int8x8_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbx3_u8(a: uint8x8_t, b: uint8x8x3_t, c: uint8x8_t) -> uint8x8_t {
-    let x = uint8x16x2_t(vcombine_u8(b.0, b.1), vcombine_u8(b.2, unsafe { crate::mem::zeroed() }));
+    let x = uint8x16x2_t(
+        vcombine_u8(b.0, b.1),
+        vcombine_u8(b.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         transmute(simd_select(
             simd_lt::<uint8x8_t, int8x8_t>(transmute(c), transmute(u8x8::splat(24))),
@@ -27155,7 +29486,10 @@ pub fn vtbx3_u8(a: uint8x8_t, b: uint8x8x3_t, c: uint8x8_t) -> uint8x8_t {
     b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
     b.2 = unsafe { simd_shuffle!(b.2, b.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    let x = uint8x16x2_t(vcombine_u8(b.0, b.1), vcombine_u8(b.2, unsafe { crate::mem::zeroed() }));
+    let x = uint8x16x2_t(
+        vcombine_u8(b.0, b.1),
+        vcombine_u8(b.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         let ret_val: uint8x8_t = transmute(simd_select(
             simd_lt::<uint8x8_t, int8x8_t>(transmute(c), transmute(u8x8::splat(24))),
@@ -27174,7 +29508,10 @@ pub fn vtbx3_u8(a: uint8x8_t, b: uint8x8x3_t, c: uint8x8_t) -> uint8x8_t {
 #[cfg_attr(test, assert_instr(tbx))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vtbx3_p8(a: poly8x8_t, b: poly8x8x3_t, c: uint8x8_t) -> poly8x8_t {
-    let x = poly8x16x2_t(vcombine_p8(b.0, b.1), vcombine_p8(b.2, unsafe { crate::mem::zeroed() }));
+    let x = poly8x16x2_t(
+        vcombine_p8(b.0, b.1),
+        vcombine_p8(b.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         transmute(simd_select(
             simd_lt::<poly8x8_t, int8x8_t>(transmute(c), transmute(u8x8::splat(24))),
@@ -27198,7 +29535,10 @@ pub fn vtbx3_p8(a: poly8x8_t, b: poly8x8x3_t, c: uint8x8_t) -> poly8x8_t {
     b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
     b.2 = unsafe { simd_shuffle!(b.2, b.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
     let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
-    let x = poly8x16x2_t(vcombine_p8(b.0, b.1), vcombine_p8(b.2, unsafe { crate::mem::zeroed() }));
+    let x = poly8x16x2_t(
+        vcombine_p8(b.0, b.1),
+        vcombine_p8(b.2, unsafe { crate::mem::zeroed() }),
+    );
     unsafe {
         let ret_val: poly8x8_t = transmute(simd_select(
             simd_lt::<poly8x8_t, int8x8_t>(transmute(c), transmute(u8x8::splat(24))),
@@ -27421,7 +29761,13 @@ pub fn vtrn1_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(trn1))]
 pub fn vtrn1q_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30]
+        )
+    }
 }
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn1_s16)"]
@@ -27466,7 +29812,13 @@ pub fn vtrn1_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(trn1))]
 pub fn vtrn1q_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30]
+        )
+    }
 }
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn1_u16)"]
@@ -27511,7 +29863,13 @@ pub fn vtrn1_p8(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(trn1))]
 pub fn vtrn1q_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30]
+        )
+    }
 }
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn1_p16)"]
@@ -27639,7 +29997,13 @@ pub fn vtrn2_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(trn2))]
 pub fn vtrn2q_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe { simd_shuffle!(a, b, [1, 17, 3, 19, 5, 21, 7, 23, 9, 25, 11, 27, 13, 29, 15, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [1, 17, 3, 19, 5, 21, 7, 23, 9, 25, 11, 27, 13, 29, 15, 31]
+        )
+    }
 }
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn2_s16)"]
@@ -27684,7 +30048,13 @@ pub fn vtrn2_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(trn2))]
 pub fn vtrn2q_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { simd_shuffle!(a, b, [1, 17, 3, 19, 5, 21, 7, 23, 9, 25, 11, 27, 13, 29, 15, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [1, 17, 3, 19, 5, 21, 7, 23, 9, 25, 11, 27, 13, 29, 15, 31]
+        )
+    }
 }
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn2_u16)"]
@@ -27729,7 +30099,13 @@ pub fn vtrn2_p8(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(trn2))]
 pub fn vtrn2q_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
-    unsafe { simd_shuffle!(a, b, [1, 17, 3, 19, 5, 21, 7, 23, 9, 25, 11, 27, 13, 29, 15, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [1, 17, 3, 19, 5, 21, 7, 23, 9, 25, 11, 27, 13, 29, 15, 31]
+        )
+    }
 }
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn2_p16)"]
@@ -28163,7 +30539,13 @@ pub fn vuzp1_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(uzp1))]
 pub fn vuzp1q_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
+        )
+    }
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp1_s16)"]
@@ -28213,7 +30595,13 @@ pub fn vuzp1_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(uzp1))]
 pub fn vuzp1q_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
+        )
+    }
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp1_u16)"]
@@ -28263,7 +30651,13 @@ pub fn vuzp1_p8(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(uzp1))]
 pub fn vuzp1q_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
+        )
+    }
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp1_p16)"]
@@ -28405,7 +30799,13 @@ pub fn vuzp2_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(uzp2))]
 pub fn vuzp2q_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe { simd_shuffle!(a, b, [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
+        )
+    }
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp2_s16)"]
@@ -28455,7 +30855,13 @@ pub fn vuzp2_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(uzp2))]
 pub fn vuzp2q_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { simd_shuffle!(a, b, [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
+        )
+    }
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp2_u16)"]
@@ -28505,7 +30911,13 @@ pub fn vuzp2_p8(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(uzp2))]
 pub fn vuzp2q_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
-    unsafe { simd_shuffle!(a, b, [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
+        )
+    }
 }
 #[doc = "Unzip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vuzp2_p16)"]
@@ -28616,7 +31028,13 @@ pub fn vzip1_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(zip1))]
 pub fn vzip1q_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]
+        )
+    }
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip1_s16)"]
@@ -28686,7 +31104,13 @@ pub fn vzip1_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(zip1))]
 pub fn vzip1q_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]
+        )
+    }
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip1_u16)"]
@@ -28756,7 +31180,13 @@ pub fn vzip1_p8(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(zip1))]
 pub fn vzip1q_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
-    unsafe { simd_shuffle!(a, b, [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]
+        )
+    }
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip1_p16)"]
@@ -28858,7 +31288,13 @@ pub fn vzip2_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(zip2))]
 pub fn vzip2q_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe { simd_shuffle!(a, b, [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]
+        )
+    }
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip2_s16)"]
@@ -28928,7 +31364,13 @@ pub fn vzip2_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(zip2))]
 pub fn vzip2q_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
-    unsafe { simd_shuffle!(a, b, [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]
+        )
+    }
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip2_u16)"]
@@ -28998,7 +31440,13 @@ pub fn vzip2_p8(a: poly8x8_t, b: poly8x8_t) -> poly8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(zip2))]
 pub fn vzip2q_p8(a: poly8x16_t, b: poly8x16_t) -> poly8x16_t {
-    unsafe { simd_shuffle!(a, b, [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]) }
+    unsafe {
+        simd_shuffle!(
+            a,
+            b,
+            [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]
+        )
+    }
 }
 #[doc = "Zip vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vzip2_p16)"]

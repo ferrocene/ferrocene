@@ -312,6 +312,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcDeprecatedSafe2024 {..}
                     | AttributeKind::RustcDiagnosticItem(..)
                     | AttributeKind::RustcDoNotConstCheck
+                    | AttributeKind::RustcDocPrimitive(..)
                     | AttributeKind::RustcDummy
                     | AttributeKind::RustcDumpDefParents
                     | AttributeKind::RustcDumpItemBounds
@@ -402,7 +403,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             // internal
                             | sym::rustc_inherit_overflow_checks
                             | sym::rustc_on_unimplemented
-                            | sym::rustc_doc_primitive
                             | sym::rustc_layout
                             | sym::rustc_autodiff
                             | sym::rustc_capture_analysis

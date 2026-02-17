@@ -133,7 +133,7 @@ fn __atomic_fetch_add_8(ptr: *mut u64, val: u64, model: i32) -> u64 {
     };
 
     let fetch = atomic_lsb.fetch_add(val, ordering);
-    if fetch == u32::MAX {
+    if fetch > u32::MAX - val {
         panic!("__atomic_fetch_add_8 overflowed");
     }
 

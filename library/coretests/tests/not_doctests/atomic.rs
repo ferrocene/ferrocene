@@ -152,3 +152,22 @@ fn atomic_fence() {
 fn atomic_fence_relaxed() {
     atomic::fence(atomic::Ordering::Relaxed);
 }
+
+// covers `core::sync::atomic::<$atomic_t>::fetch_update`
+macro_rules! test_atomic_fetch_update {
+    ($($fn:ident => $atomic_t:ty,)*) => { $(
+        #[test]
+        fn $fn() {
+            let atomic = <$atomic_t>::new(5);
+
+            assert_eq!(atomic.fetch_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Ok(5)); // success
+            assert_eq!(atomic.fetch_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Err(10)); // failure
+        }
+    )*};
+}
+test_atomic_fetch_update!(
+    atomic_u8_fetch_update => atomic::AtomicU8,
+    atomic_u16_fetch_update => atomic::AtomicU16,
+    atomic_u32_fetch_update => atomic::AtomicU32,
+    atomic_usize_fetch_update => atomic::AtomicUsize,
+);

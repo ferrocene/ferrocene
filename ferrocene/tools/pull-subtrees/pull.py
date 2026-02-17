@@ -149,9 +149,9 @@ def fetch_latest_commit(subtree):
         else:
             raise RuntimeError(f"no suitable tags found in {subtree.repo}")
     elif isinstance(subtree.pull, PullBranch):
-        ref = subtree.pull.name
+        ref = 'refs/heads/' + subtree.pull.name
     elif isinstance(subtree.pull, PullTag):
-        ref = subtree.pull.name
+        ref = 'refs/tags/' + subtree.pull.name
     else:
         raise RuntimeError(f"unknown subtree.pull: {subtree.pull}")
 

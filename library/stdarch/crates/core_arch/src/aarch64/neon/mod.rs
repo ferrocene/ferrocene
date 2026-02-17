@@ -1093,6 +1093,14 @@ mod tests {
         test_vld1q_f32_x3(f32, 12, float32x4x3_t, vst1q_f32_x3, vld1q_f32_x3);
         test_vld1q_f32_x4(f32, 16, float32x4x4_t, vst1q_f32_x4, vld1q_f32_x4);
 
+        test_vld1_f64_x2(f64, 2, float64x1x2_t, vst1_f64_x2, vld1_f64_x2);
+        test_vld1_f64_x3(f64, 3, float64x1x3_t, vst1_f64_x3, vld1_f64_x3);
+        test_vld1_f64_x4(f64, 4, float64x1x4_t, vst1_f64_x4, vld1_f64_x4);
+
+        test_vld1q_f64_x2(f64, 4, float64x2x2_t, vst1q_f64_x2, vld1q_f64_x2);
+        test_vld1q_f64_x3(f64, 6, float64x2x3_t, vst1q_f64_x3, vld1q_f64_x3);
+        test_vld1q_f64_x4(f64, 8, float64x2x4_t, vst1q_f64_x4, vld1q_f64_x4);
+
         test_vld1_s8_x2(i8, 16, int8x8x2_t, vst1_s8_x2, vld1_s8_x2);
         test_vld1_s8_x3(i8, 24, int8x8x3_t, vst1_s8_x3, vld1_s8_x3);
         test_vld1_s8_x4(i8, 32, int8x8x4_t, vst1_s8_x4, vld1_s8_x4);

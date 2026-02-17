@@ -33216,15 +33216,7 @@ pub fn vmull_p8(a: poly8x8_t, b: poly8x8_t) -> poly16x8_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub fn vmull_s16(a: int16x4_t, b: int16x4_t) -> int32x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.smull.v4i32"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vmulls.v4i32")]
-        fn _vmull_s16(a: int16x4_t, b: int16x4_t) -> int32x4_t;
-    }
-    unsafe { _vmull_s16(a, b) }
+    unsafe { simd_mul(simd_cast(a), simd_cast(b)) }
 }
 #[doc = "Signed multiply long"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmull_s32)"]
@@ -33245,15 +33237,7 @@ pub fn vmull_s16(a: int16x4_t, b: int16x4_t) -> int32x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub fn vmull_s32(a: int32x2_t, b: int32x2_t) -> int64x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.smull.v2i64"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vmulls.v2i64")]
-        fn _vmull_s32(a: int32x2_t, b: int32x2_t) -> int64x2_t;
-    }
-    unsafe { _vmull_s32(a, b) }
+    unsafe { simd_mul(simd_cast(a), simd_cast(b)) }
 }
 #[doc = "Signed multiply long"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmull_s8)"]
@@ -33274,15 +33258,7 @@ pub fn vmull_s32(a: int32x2_t, b: int32x2_t) -> int64x2_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub fn vmull_s8(a: int8x8_t, b: int8x8_t) -> int16x8_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.smull.v8i16"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vmulls.v8i16")]
-        fn _vmull_s8(a: int8x8_t, b: int8x8_t) -> int16x8_t;
-    }
-    unsafe { _vmull_s8(a, b) }
+    unsafe { simd_mul(simd_cast(a), simd_cast(b)) }
 }
 #[doc = "Unsigned multiply long"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmull_u8)"]
@@ -33303,15 +33279,7 @@ pub fn vmull_s8(a: int8x8_t, b: int8x8_t) -> int16x8_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub fn vmull_u8(a: uint8x8_t, b: uint8x8_t) -> uint16x8_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.umull.v8i16"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vmullu.v8i16")]
-        fn _vmull_u8(a: uint8x8_t, b: uint8x8_t) -> uint16x8_t;
-    }
-    unsafe { _vmull_u8(a, b) }
+    unsafe { simd_mul(simd_cast(a), simd_cast(b)) }
 }
 #[doc = "Unsigned multiply long"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmull_u16)"]
@@ -33332,15 +33300,7 @@ pub fn vmull_u8(a: uint8x8_t, b: uint8x8_t) -> uint16x8_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub fn vmull_u16(a: uint16x4_t, b: uint16x4_t) -> uint32x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.umull.v4i32"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vmullu.v4i32")]
-        fn _vmull_u16(a: uint16x4_t, b: uint16x4_t) -> uint32x4_t;
-    }
-    unsafe { _vmull_u16(a, b) }
+    unsafe { simd_mul(simd_cast(a), simd_cast(b)) }
 }
 #[doc = "Unsigned multiply long"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmull_u32)"]
@@ -33361,15 +33321,7 @@ pub fn vmull_u16(a: uint16x4_t, b: uint16x4_t) -> uint32x4_t {
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
 pub fn vmull_u32(a: uint32x2_t, b: uint32x2_t) -> uint64x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.umull.v2i64"
-        )]
-        #[cfg_attr(target_arch = "arm", link_name = "llvm.arm.neon.vmullu.v2i64")]
-        fn _vmull_u32(a: uint32x2_t, b: uint32x2_t) -> uint64x2_t;
-    }
-    unsafe { _vmull_u32(a, b) }
+    unsafe { simd_mul(simd_cast(a), simd_cast(b)) }
 }
 #[doc = "Vector bitwise not."]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vmvn_p8)"]

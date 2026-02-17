@@ -6507,13 +6507,10 @@ intrinsics:
       - ["s16", int16x4_t, int32x4_t]
       - ["s32", int32x2_t, int64x2_t]
     compose:
-      - LLVMLink:
-          name: "smull.{neon_type[1]}"
-          links:
-            - link: "llvm.aarch64.neon.smull.{neon_type[2]}"
-              arch: aarch64,arm64ec
-            - link: "llvm.arm.neon.vmulls.{neon_type[2]}"
-              arch: arm
+      - FnCall:
+          - simd_mul
+          - - FnCall: ['simd_cast', [a]]
+            - FnCall: ['simd_cast', [b]]
 
   - name: "vmull{neon_type[1].no}"
     doc: "Unsigned multiply long"
@@ -6531,13 +6528,10 @@ intrinsics:
       - ["u16", uint16x4_t, uint32x4_t]
       - ["u32", uint32x2_t, uint64x2_t]
     compose:
-      - LLVMLink:
-          name: "smull.{neon_type[1]}"
-          links:
-            - link: "llvm.aarch64.neon.umull.{neon_type[2]}"
-              arch: aarch64,arm64ec
-            - link: "llvm.arm.neon.vmullu.{neon_type[2]}"
-              arch: arm
+      - FnCall:
+          - simd_mul
+          - - FnCall: ['simd_cast', [a]]
+            - FnCall: ['simd_cast', [b]]
 
   - name: "vmull{neon_type[1].no}"
     doc: "Polynomial multiply long"

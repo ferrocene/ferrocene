@@ -2,8 +2,8 @@
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
 use rustc_errors::{Diag, MultiSpan};
-use rustc_hir::HirId;
 use rustc_hir::def_id::DefId;
+use rustc_hir::{HirId, LangItem};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
@@ -106,16 +106,22 @@ impl<'tcx> LintState<'tcx> {
             lint_node: _,
         }) = use_.from_instantiation
         {
-            let callee_descr = format!(
-                "generic {} `{}`",
-                tcx.def_descr(pre_mono_item),
-                rustc_middle::ty::print::with_no_trimmed_paths!(tcx.def_path_str(pre_mono_item))
-            );
+            let caller_desc = tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args);
 
-            let msg = format!(
-                "{callee_descr} instantiated by `{}`",
-                tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args)
-            );
+            let drop = tcx.require_lang_item(LangItem::Drop, caller_span);
+            let msg = if let Some(impl_) = tcx.trait_impl_of_assoc(use_.def_id()) && tcx.impl_trait_id(impl_) == drop {
+                let dropped_ty = tcx.type_of(impl_).skip_binder();
+                // Call to drop(), injected by the compiler.
+                format!("`{dropped_ty}` dropped here, in `{caller_desc}`")
+            } else {
+                let callee_descr = format!(
+                    "generic {} `{}`",
+                    tcx.def_descr(pre_mono_item),
+                    rustc_middle::ty::print::with_no_trimmed_paths!(tcx.def_path_str(pre_mono_item))
+                );
+
+                format!("{callee_descr} instantiated by `{caller_desc}`")
+            };
 
             if let Some(multi) = validated_span {
                 multi.push_span_label(caller_span, msg);

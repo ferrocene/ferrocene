@@ -17,7 +17,7 @@ fn has_drop_unreachable() {
 
 #[ferrocene::prevalidated] //~ NOTE marked
 pub fn has_drop_reachable() { //~ NOTE validated
-    ExplicitDropImpl; //~ NOTE instantiated by
+    ExplicitDropImpl; //~ NOTE dropped here
 }
 
 //~? ERROR unvalidated

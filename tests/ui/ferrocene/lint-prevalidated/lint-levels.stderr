@@ -32,7 +32,7 @@ note: `reachable` is validated
   --> $DIR/lint-levels.rs:36:8
    |
 LL | fn uninstantiated_generic_indirect<T>(val: T) {}
-   |                                                - generic function `std::ptr::drop_in_place` instantiated by `uninstantiated_generic_indirect::<Unvalidated>`
+   |                                                - `Unvalidated` dropped here, in `uninstantiated_generic_indirect::<Unvalidated>`
 ...
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here

@@ -14,7 +14,7 @@ LL | #[ferrocene::prevalidated]
 LL | pub fn has_drop_reachable() {
    |        ^^^^^^^^^^^^^^^^^^
 LL |     DropGlueOnly(ExplicitDropImpl);
-   |                                   - generic function `core::ptr::drop_in_place` instantiated by `has_drop_reachable`
+   |                                   - `ExplicitDropImpl` dropped here, in `has_drop_reachable`
 note: the lint level is defined here
   --> $DIR/drop-glue.rs:10:9
    |

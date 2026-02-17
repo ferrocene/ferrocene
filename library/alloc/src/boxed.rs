@@ -238,6 +238,10 @@ pub struct Box<
 
 /// Monomorphic function for allocating an uninit `Box`.
 #[inline]
+// The is a separate function to avoid doing it in every generic version, but it
+// looks small to the mir inliner (particularly in panic=abort) so leave it to
+// the backend to decide whether pulling it in everywhere is worth doing.
+#[rustc_no_mir_inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[cfg(not(no_global_oom_handling))]
 fn box_new_uninit(layout: Layout) -> *mut u8 {

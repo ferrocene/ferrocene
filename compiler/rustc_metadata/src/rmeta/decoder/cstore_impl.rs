@@ -382,7 +382,7 @@ provide! { tcx, def_id, other, cdata,
     implementations_of_trait => { cdata.get_implementations_of_trait(tcx, other) }
     crate_incoherent_impls => { cdata.get_incoherent_impls(tcx, other) }
 
-    dep_kind => { cdata.dep_kind }
+    crate_dep_kind => { cdata.dep_kind }
     module_children => {
         tcx.arena.alloc_from_iter(cdata.get_module_children(tcx, def_id.index))
     }

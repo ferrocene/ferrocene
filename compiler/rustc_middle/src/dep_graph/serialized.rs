@@ -288,13 +288,14 @@ impl SerializedDepGraph {
             if index[node.kind.as_usize()].insert(node.key_fingerprint, idx).is_some() {
                 // Empty nodes and side effect nodes can have duplicates
                 if node.kind != DepKind::Null && node.kind != DepKind::SideEffect {
-                    let name = node.kind.name();
+                    let kind = node.kind;
                     panic!(
-                    "Error: A dep graph node ({name}) does not have an unique index. \
-                     Running a clean build on a nightly compiler with `-Z incremental-verify-ich` \
-                     can help narrow down the issue for reporting. A clean build may also work around the issue.\n
-                     DepNode: {node:?}"
-                )
+                        "Error: A dep graph node ({kind:?}) does not have an unique index. \
+                         Running a clean build on a nightly compiler with \
+                         `-Z incremental-verify-ich` can help narrow down the issue for reporting. \
+                         A clean build may also work around the issue.\n
+                         DepNode: {node:?}"
+                    )
                 }
             }
         }

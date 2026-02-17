@@ -630,8 +630,6 @@ macro_rules! define_queries {
             {
                 type UnerasedValue = queries::$name::Value<'tcx>;
 
-                const NAME: &'static &'static str = &stringify!($name);
-
                 #[inline(always)]
                 fn query_dispatcher(tcx: TyCtxt<'tcx>)
                     -> SemiDynamicQueryDispatcher<'tcx, queries::$name::Storage<'tcx>, FLAGS>

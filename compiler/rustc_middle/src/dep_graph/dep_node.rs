@@ -83,10 +83,6 @@ impl DepKind {
         *self as usize
     }
 
-    pub(crate) fn name(self) -> &'static str {
-        DEP_KIND_NAMES[self.as_usize()]
-    }
-
     /// This is the highest value a `DepKind` can have. It's used during encoding to
     /// pack information into the unused bits.
     pub(crate) const MAX: u16 = DEP_KIND_NUM_VARIANTS - 1;
@@ -287,9 +283,6 @@ pub struct DepKindVTable<'tcx> {
 
     /// Invoke a query to put the on-disk cached value in memory.
     pub try_load_from_on_disk_cache: Option<fn(TyCtxt<'tcx>, DepNode)>,
-
-    /// The name of this dep kind.
-    pub name: &'static &'static str,
 }
 
 /// A "work product" corresponds to a `.o` (or other) file that we
@@ -371,12 +364,6 @@ macro_rules! define_dep_nodes {
             assert!(deps.len() <= u16::MAX as usize);
             deps.len() as u16
         };
-
-        /// List containing the name of each dep kind as a static string,
-        /// indexable by `DepKind`.
-        pub(crate) const DEP_KIND_NAMES: &[&str] = &[
-            $( self::label_strs::$variant, )*
-        ];
 
         pub(super) fn dep_kind_from_label_string(label: &str) -> Result<DepKind, ()> {
             match label {

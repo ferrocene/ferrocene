@@ -1,5 +1,5 @@
 error: validated function calls an unvalidated function
-  --> $DIR/lint-uncertified-ignores-tests.rs:10:5
+  --> $DIR/ignores-tests.rs:10:5
    |
 LL | fn normal_def() {}
    |    ---------- `normal_def` is unvalidated
@@ -8,16 +8,16 @@ LL |     normal_def();
    |     ^^^^^^^^^^
    |
 note: `validated` is validated
-  --> $DIR/lint-uncertified-ignores-tests.rs:9:8
+  --> $DIR/ignores-tests.rs:9:8
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | pub fn validated() {
    |        ^^^^^^^^^
 note: the lint level is defined here
-  --> $DIR/lint-uncertified-ignores-tests.rs:3:9
+  --> $DIR/ignores-tests.rs:3:9
    |
-LL | #![deny(ferrocene::uncertified)]
+LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error

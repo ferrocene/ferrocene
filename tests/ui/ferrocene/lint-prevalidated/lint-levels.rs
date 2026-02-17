@@ -1,11 +1,11 @@
 // Unlike most other lints, post-mono lint levels are controlled at the *instantiation* site, not at
-// the place where an uncertified function is actually called.
+// the place where an unvalidated function is actually called.
 
 //@ build-pass
 
 #![crate_type = "lib"]
 // NOTE: never takes effect, always overridden by a more specific lint control
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 fn unvalidated() {}
 //~^ NOTE unvalidated
@@ -20,12 +20,12 @@ impl Clone for Unvalidated {
 }
 
 #[ferrocene::prevalidated]
-#[warn(ferrocene::uncertified)] //~ NOTE lint level
+#[warn(ferrocene::unvalidated)] //~ NOTE lint level
 fn uninstantiated_generic_indirect<T>(val: T) {} //~ NOTE instantiated
 
 #[ferrocene::prevalidated]
 fn uninstantiated_generic_direct<T: Clone>(val: T) {
-    #[warn(ferrocene::uncertified)] //~ NOTE lint level
+    #[warn(ferrocene::unvalidated)] //~ NOTE lint level
     val.clone(); //~ WARN calls
 }
 
@@ -35,7 +35,7 @@ fn uninstantiated_generic_direct<T: Clone>(val: T) {
 #[ferrocene::prevalidated] //~ NOTE marked
 pub fn reachable() { //~ NOTE validated
     uninstantiated_generic_indirect(Unvalidated);
-    #[warn(ferrocene::uncertified)]
+    #[warn(ferrocene::unvalidated)]
     uninstantiated_generic_direct(Unvalidated); //~ NOTE instantiated
     // no-op: lint already emitted
     // FIXME: ideally this would error now, since there's no lint control here.
@@ -45,7 +45,7 @@ pub fn reachable() { //~ NOTE validated
 
 #[ferrocene::prevalidated] //~ NOTE marked
 fn unreachable() { //~ NOTE is validated
-    #[warn(ferrocene::uncertified)] //~ NOTE lint level
+    #[warn(ferrocene::unvalidated)] //~ NOTE lint level
     unvalidated();
     //~^ WARN calls
 }

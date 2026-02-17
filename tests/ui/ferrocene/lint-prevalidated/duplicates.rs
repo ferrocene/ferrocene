@@ -8,7 +8,7 @@
 
 #![crate_type = "lib"]
 #![no_std]
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 fn normal_def() {}
 

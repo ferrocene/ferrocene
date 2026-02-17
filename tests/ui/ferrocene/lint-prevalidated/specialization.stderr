@@ -1,5 +1,5 @@
 error: validated function calls an unvalidated method
-  --> $DIR/lint-uncertified-specialization.rs:25:5
+  --> $DIR/specialization.rs:25:5
    |
 LL |     fn foo(&self) -> usize { 1 }
    |        --- `<bool as SpecializeMe>::foo` is unvalidated
@@ -8,16 +8,16 @@ LL |     true.foo();
    |     ^^^^^^^^
    |
 note: `bar` is validated
-  --> $DIR/lint-uncertified-specialization.rs:23:4
+  --> $DIR/specialization.rs:23:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | fn bar() {
    |    ^^^
 note: the lint level is defined here
-  --> $DIR/lint-uncertified-specialization.rs:6:9
+  --> $DIR/specialization.rs:6:9
    |
-LL | #![deny(ferrocene::uncertified)]
+LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error

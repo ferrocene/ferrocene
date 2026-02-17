@@ -1,13 +1,13 @@
-#![deny(ferrocene::uncertified)] //~ NOTE defined here
+#![deny(ferrocene::unvalidated)] //~ NOTE defined here
 #![crate_type = "lib"]
 
 //@ build-fail
-//@ aux-build: uncertified-post-mono.rs
+//@ aux-build: unvalidated-post-mono.rs
 //@ revisions: dedup no-dedup
 //@[dedup] compile-flags: -Z deduplicate-diagnostics=yes
 
-extern crate uncertified_post_mono;
-use uncertified_post_mono::uninstantiated_generic;
+extern crate unvalidated_post_mono;
+use unvalidated_post_mono::uninstantiated_generic;
 
 //~? ERROR calls an unvalidated method
 //~? ERROR calls an unvalidated associated function

@@ -3,9 +3,9 @@
 // You can still use traits as long as the impls use custom types.
 
 #![crate_type = "lib"]
-#![deny(ferrocene::uncertified)] //~ NOTE lint level
+#![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
-trait UncertifiedDefault {
+trait UnvalidatedDefault {
     fn foo(&self) {} //~ NOTE unvalidated
     //~^ NOTE unvalidated
 }
@@ -16,7 +16,7 @@ trait CertifiedDefault {
 }
 
 struct OverridesDefault;
-impl UncertifiedDefault for OverridesDefault {
+impl UnvalidatedDefault for OverridesDefault {
     #[ferrocene::prevalidated]
     fn foo(&self) {}
 }
@@ -26,7 +26,7 @@ impl CertifiedDefault for OverridesDefault {
 }
 
 struct UsesDefault;
-impl UncertifiedDefault for UsesDefault {}
+impl UnvalidatedDefault for UsesDefault {}
 impl CertifiedDefault for UsesDefault {}
 
 #[ferrocene::prevalidated] //~ NOTE marked
@@ -36,8 +36,8 @@ fn test() { //~ NOTE is validated
     UsesDefault.foo(); //~ ERROR unvalidated
     UsesDefault.bar(); // ok
 
-    let _: &dyn UncertifiedDefault = &OverridesDefault; // ok
-    let _: &dyn UncertifiedDefault = &UsesDefault; //~ ERROR unvalidated
+    let _: &dyn UnvalidatedDefault = &OverridesDefault; // ok
+    let _: &dyn UnvalidatedDefault = &UsesDefault; //~ ERROR unvalidated
     //~^ NOTE trait object
     //~^^ NOTE must assume
     let _: &dyn CertifiedDefault = &OverridesDefault; //~ ERROR unvalidated

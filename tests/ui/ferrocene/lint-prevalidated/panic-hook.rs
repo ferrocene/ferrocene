@@ -1,8 +1,8 @@
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 use std::panic::{PanicHookInfo, set_hook};
 
-fn uncertified_panic_hook(_: &PanicHookInfo) {}
+fn unvalidated_panic_hook(_: &PanicHookInfo) {}
 fn main() {
-    set_hook(Box::new(uncertified_panic_hook)); //~ ERROR unvalidated
+    set_hook(Box::new(unvalidated_panic_hook)); //~ ERROR unvalidated
 }

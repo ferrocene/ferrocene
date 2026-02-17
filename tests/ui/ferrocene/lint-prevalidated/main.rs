@@ -1,5 +1,5 @@
 #![crate_type = "bin"]
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 fn normal_def() {}
 

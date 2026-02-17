@@ -1,5 +1,5 @@
 #![crate_type = "lib"]
-#![deny(ferrocene::uncertified)] //~ NOTE lint level
+#![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
 struct Unvalidated;
 

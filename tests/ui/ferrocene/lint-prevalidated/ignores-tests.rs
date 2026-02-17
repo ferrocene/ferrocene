@@ -1,6 +1,6 @@
 //@ compile-flags: --test
 #![crate_type = "lib"]
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 fn normal_def() {}
 

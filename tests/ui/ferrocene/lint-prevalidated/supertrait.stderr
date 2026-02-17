@@ -1,5 +1,5 @@
 error: validated function possibly calls an unvalidated method
-  --> $DIR/lint-uncertified-supertrait.rs:16:29
+  --> $DIR/supertrait.rs:16:29
    |
 LL |     fn foo(&self) {}
    |        --- `<Unvalidated as SuperTrait>::foo` is unvalidated
@@ -10,16 +10,16 @@ LL |     let x: &dyn BaseTrait = &Unvalidated;
    = note: once `Unvalidated` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as SuperTrait>::foo`
 note: `validated` is validated
-  --> $DIR/lint-uncertified-supertrait.rs:15:4
+  --> $DIR/supertrait.rs:15:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | fn validated() {
    |    ^^^^^^^^^
 note: the lint level is defined here
-  --> $DIR/lint-uncertified-supertrait.rs:2:9
+  --> $DIR/supertrait.rs:2:9
    |
-LL | #![deny(ferrocene::uncertified)]
+LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error

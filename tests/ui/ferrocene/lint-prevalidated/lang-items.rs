@@ -1,7 +1,7 @@
 //! Test that we don't lint on `<{closure type} as Fn>::call`.
 
 // Don't use regular core, so this is independent of any `ferrocene::prevalidated` attributes we
-// ship. This variant uses lang items from minicore. Avoid this and use `lint-uncertified-trait-ops`
+// ship. This variant uses lang items from minicore. Avoid this and use `lint-unvalidated-trait-ops`
 // where possible.
 
 //@ add-minicore
@@ -11,7 +11,7 @@
 #![feature(no_core)]
 #![no_std]
 #![no_core]
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 extern crate minicore;
 use minicore::*;

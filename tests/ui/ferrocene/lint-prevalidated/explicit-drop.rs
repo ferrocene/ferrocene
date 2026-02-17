@@ -6,7 +6,7 @@
 
 #![crate_type = "lib"]
 #![no_std]
-#![deny(ferrocene::uncertified)] //~ NOTE lint level
+#![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
 struct ExplicitDropImpl;
 

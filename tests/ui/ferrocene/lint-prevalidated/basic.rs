@@ -8,7 +8,7 @@
 //@[dedup] compile-flags: -Z deduplicate-diagnostics=yes
 
 #![crate_type = "lib"]
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 
 use std::clone::Clone;
 use std::cmp::{PartialEq, PartialOrd};
@@ -20,7 +20,7 @@ fn normal_def() {
 fn normal_def2() {}
 
 #[ferrocene::prevalidated]
-const fn marked_certified() {}
+const fn marked_validated() {}
 
 const fn const_fn() {}
 
@@ -98,7 +98,7 @@ static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Un
 //~^ ERROR unvalidated
 
 #[ferrocene::prevalidated]
-fn certified() {
+fn validated() {
     normal_def(); //~ ERROR unvalidated
     let fn_ptr: fn() = normal_def; //[no-dedup]~ ERROR unvalidated
     fn_ptr(); // ok
@@ -118,13 +118,13 @@ fn certified() {
         (core::mem::transmute::<usize, fn()>(ptr_to_int))();
     }
 
-    let dyn_trait_partially_certified: &dyn PartialEq<Unvalidated> = &Unvalidated;
+    let dyn_trait_partially_validated: &dyn PartialEq<Unvalidated> = &Unvalidated;
     //~^ ERROR unvalidated
-    dyn_trait_partially_certified.eq(&Unvalidated); // ok
-    dyn_trait_partially_certified.ne(&Unvalidated); // ok
+    dyn_trait_partially_validated.eq(&Unvalidated); // ok
+    dyn_trait_partially_validated.ne(&Unvalidated); // ok
 
-    let dyn_trait_fully_certified: &dyn ToString = &Validated; // ok: this impl is validated
-    dyn_trait_fully_certified.to_string(); // ok
+    let dyn_trait_fully_validated: &dyn ToString = &Validated; // ok: this impl is validated
+    dyn_trait_fully_validated.to_string(); // ok
 
     Ctor; // ok
     mbe!(); // caught in macro definition above; maybe we should have both spans?
@@ -133,7 +133,7 @@ fn certified() {
     //[no-dedup]~^ ERROR unvalidated
    Unvalidated::generic_inherent_fn::<usize>(1); //~ ERROR unvalidated
 
-    marked_certified(); // ok
+    marked_validated(); // ok
 
     UNCERTIFIED_CONST; // ok
     UNCERTIFIED_CLOSURE_CONST(); //~ ERROR unvalidated
@@ -155,6 +155,6 @@ fn certified() {
 }
 
 #[ferrocene::prevalidated]
-const CERTIFIED_CONST2: () = marked_certified(); // ok
+const CERTIFIED_CONST2: () = marked_validated(); // ok
 
 const UNCERTIFIED_CONST: () = const_fn(); // ok

@@ -3,7 +3,7 @@
 //@ build-fail
 
 #![crate_type = "lib"]
-#![deny(ferrocene::uncertified)] //~ NOTE lint level
+#![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
 fn unvalidated() {} //~ NOTE unvalidated
 
@@ -20,7 +20,7 @@ fn uninstantiated_generic_indirect<T>(val: T) {
 } //~ NOTE instantiated
 
 #[ferrocene::prevalidated] //~ NOTE marked
-#[allow(ferrocene::uncertified)]
+#[allow(ferrocene::unvalidated)]
 pub fn reachable_allowed() { //~ NOTE validated
     uninstantiated_generic_indirect(Validated);
 }

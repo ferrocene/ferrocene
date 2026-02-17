@@ -9,7 +9,7 @@
 
 #![crate_type = "lib"]
 #![no_std]
-#![deny(ferrocene::uncertified)]
+#![deny(ferrocene::unvalidated)]
 #![feature(try_trait_v2)]
 
 use core::ops::*;

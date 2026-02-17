@@ -1,4 +1,4 @@
-#![deny(ferrocene::uncertified)] //~ NOTE defined here
+#![deny(ferrocene::unvalidated)] //~ NOTE defined here
 #![crate_type = "lib"]
 // want to extend this to modules
 // FIXME: this doesn't work at crate level, "custom inner attributes are unstable"

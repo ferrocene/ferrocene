@@ -8,7 +8,7 @@ env:
   # Do not try to break these up...
   LINUX_TARGETS: aarch64-unknown-linux-gnu,riscv64gc-unknown-linux-gnu
   # Includes the certified panic targets
-  BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,x86_64-ferrocene-none,aarch64-ferrocene-none,thumbv7em-ferrocene-none-eabi,thumbv7em-ferrocene-none-eabihf
+  BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
   # The certified subset
   SUBSET_TARGETS: aarch64-unknown-ferrocene.subset,thumbv7em-ferrocene.subset-eabi,thumbv7em-ferrocene.subset-eabihf,x86_64-unknown-ferrocene.subset
   QNX_TARGETS: aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710

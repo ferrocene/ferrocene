@@ -27,4 +27,4 @@ Functional Safety Documentation
 Binaries in the delivery
 ------------------------
 
-The `rust-std-<TARGET>.tar.xz` archives contain the precompiled core library for each certified target.
+The `rust-std-<TARGET>.tar.xz` archives contain the precompiled core library for each qualified target.

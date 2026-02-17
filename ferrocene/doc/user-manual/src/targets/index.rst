@@ -71,11 +71,6 @@ Qualified targets may be removed from future release after a deprecation period 
 1 year after announcement or when circumstances outside our control require removal,
 for example when the target vendor no longer supports the target.
 
-Most qualified targets come with a "certified equivalent" target. This
-certified target allows using the certified core library. The core library is
-not certified when using qualified targets, only when using certified targets.
-Refer to :ref:`certified-core-targets`.
-
 Only stable releases of qualified targets are qualified. Other releases, such
 as beta, should be considered Quality Managed. Such releases can be
 qualified upon request.

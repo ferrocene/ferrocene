@@ -17,6 +17,16 @@ New features
 
   * :target-with-tuple:`aarch64v8r-unknown-none`
 
+* Certify the ``core::fmt`` module.
+
+  * This module contains the code to format Rust data structures into human-readable output. This enables customers to use this functionality in certified contexts.
+  * Retire "certified panic runtime" compilation targets. They were used to certify panicking without certifying the formatting code, but are now obsolete. Following targets are being retired:
+
+    * ``aarch64-ferrocene-none``
+    * ``thumbv7em-ferrocene-none-eabi``
+    * ``thumbv7em-ferrocene-none-eabihf``
+    * ``x86_64-ferrocene-none``
+
 New experimental features
 -------------------------
 

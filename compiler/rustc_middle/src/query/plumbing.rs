@@ -262,88 +262,36 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 }
 
-/// Calls either `query_ensure` or `query_ensure_error_guaranteed`, depending
-/// on whether the list of modifiers contains `return_result_from_ensure_ok`.
-macro_rules! query_ensure_select {
-    ([]$($args:tt)*) => {
-        crate::query::inner::query_ensure($($args)*)
-    };
-    ([(return_result_from_ensure_ok) $($rest:tt)*]$($args:tt)*) => {
-        crate::query::inner::query_ensure_error_guaranteed($($args)*)
-    };
-    ([$other:tt $($modifiers:tt)*]$($args:tt)*) => {
-        query_ensure_select!([$($modifiers)*]$($args)*)
-    };
-}
-
 macro_rules! query_helper_param_ty {
     (DefId) => { impl $crate::query::IntoQueryParam<DefId> };
     (LocalDefId) => { impl $crate::query::IntoQueryParam<LocalDefId> };
     ($K:ty) => { $K };
 }
 
-macro_rules! query_if_arena {
-    ([] $arena:tt $no_arena:tt) => {
-        $no_arena
-    };
-    ([(arena_cache) $($rest:tt)*] $arena:tt $no_arena:tt) => {
-        $arena
-    };
-    ([$other:tt $($modifiers:tt)*]$($args:tt)*) => {
-        query_if_arena!([$($modifiers)*]$($args)*)
+// Expands to `$yes` if the `arena_cache` modifier is present, `$no` otherwise.
+macro_rules! if_arena_cache {
+    ([] $then:tt $no:tt) => { $no };
+    ([(arena_cache) $($modifiers:tt)*] $yes:tt $no:tt) => { $yes };
+    ([$other:tt $($modifiers:tt)*] $yes:tt $no:tt) => {
+        if_arena_cache!([$($modifiers)*] $yes $no)
     };
 }
 
-/// If `separate_provide_extern`, then the key can be projected to its
-/// local key via `<$K as AsLocalKey>::LocalKey`.
-macro_rules! local_key_if_separate_extern {
-    ([] $($K:tt)*) => {
-        $($K)*
-    };
-    ([(separate_provide_extern) $($rest:tt)*] $($K:tt)*) => {
-        <$($K)* as $crate::query::AsLocalKey>::LocalKey
-    };
-    ([$other:tt $($modifiers:tt)*] $($K:tt)*) => {
-        local_key_if_separate_extern!([$($modifiers)*] $($K)*)
+// Expands to `$yes` if the `separate_provide_extern` modifier is present, `$no` otherwise.
+macro_rules! if_separate_provide_extern {
+    ([] $then:tt $no:tt) => { $no };
+    ([(separate_provide_extern) $($modifiers:tt)*] $yes:tt $no:tt) => { $yes };
+    ([$other:tt $($modifiers:tt)*] $yes:tt $no:tt) => {
+        if_separate_provide_extern!([$($modifiers)*] $yes $no)
     };
 }
 
-macro_rules! separate_provide_extern_decl {
-    ([][$name:ident]) => {
-        ()
-    };
-    ([(separate_provide_extern) $($rest:tt)*][$name:ident]) => {
-        for<'tcx> fn(
-            TyCtxt<'tcx>,
-            $name::Key<'tcx>,
-        ) -> $name::ProvidedValue<'tcx>
-    };
-    ([$other:tt $($modifiers:tt)*][$($args:tt)*]) => {
-        separate_provide_extern_decl!([$($modifiers)*][$($args)*])
-    };
-}
-
-macro_rules! ensure_ok_result {
-    ( [] ) => {
-        ()
-    };
-    ( [(return_result_from_ensure_ok) $($rest:tt)*] ) => {
-        Result<(), ErrorGuaranteed>
-    };
-    ( [$other:tt $($modifiers:tt)*] ) => {
-        ensure_ok_result!( [$($modifiers)*] )
-    };
-}
-
-macro_rules! separate_provide_extern_default {
-    ([][$name:ident]) => {
-        ()
-    };
-    ([(separate_provide_extern) $($rest:tt)*][$name:ident]) => {
-        |_, key| $crate::query::plumbing::default_extern_query(stringify!($name), &key)
-    };
-    ([$other:tt $($modifiers:tt)*][$($args:tt)*]) => {
-        separate_provide_extern_default!([$($modifiers)*][$($args)*])
+// Expands to `$yes` if the `return_result_from_ensure_ok` modifier is present, `$no` otherwise.
+macro_rules! if_return_result_from_ensure_ok {
+    ([] $then:tt $no:tt) => { $no };
+    ([(return_result_from_ensure_ok) $($modifiers:tt)*] $yes:tt $no:tt) => { $yes };
+    ([$other:tt $($modifiers:tt)*] $yes:tt $no:tt) => {
+        if_return_result_from_ensure_ok!([$($modifiers)*] $yes $no)
     };
 }
 
@@ -361,12 +309,16 @@ macro_rules! define_callbacks {
             pub type Key<'tcx> = $($K)*;
             pub type Value<'tcx> = $V;
 
-            pub type LocalKey<'tcx> = local_key_if_separate_extern!([$($modifiers)*] $($K)*);
+            pub type LocalKey<'tcx> = if_separate_provide_extern!(
+                [$($modifiers)*]   
+                (<$($K)* as $crate::query::AsLocalKey>::LocalKey)
+                ($($K)*)
+            );
 
             /// This type alias specifies the type returned from query providers and the type
             /// used for decoding. For regular queries this is the declared returned type `V`,
             /// but `arena_cache` will use `<V as ArenaCached>::Provided` instead.
-            pub type ProvidedValue<'tcx> = query_if_arena!(
+            pub type ProvidedValue<'tcx> = if_arena_cache!(
                 [$($modifiers)*]
                 (<$V as $crate::query::arena_cached::ArenaCached<'tcx>>::Provided)
                 ($V)
@@ -383,17 +335,21 @@ macro_rules! define_callbacks {
             ) -> Erased<Value<'tcx>> {
                 // For queries with the `arena_cache` modifier, store the
                 // provided value in an arena and get a reference to it.
-                let value: Value<'tcx> = query_if_arena!([$($modifiers)*] {
-                    <$V as $crate::query::arena_cached::ArenaCached>::alloc_in_arena(
-                        tcx,
-                        &tcx.query_system.arenas.$name,
-                        provided_value,
-                    )
-                } {
-                    // Otherwise, the provided value is the value (and `tcx` is unused).
-                    let _ = tcx;
-                    provided_value
-                });
+                let value: Value<'tcx> = if_arena_cache!(
+                    [$($modifiers)*]
+                    {
+                        <$V as $crate::query::arena_cached::ArenaCached>::alloc_in_arena(
+                            tcx,
+                            &tcx.query_system.arenas.$name,
+                            provided_value,
+                        )
+                    }
+                    {
+                        // Otherwise, the provided value is the value (and `tcx` is unused).
+                        let _ = tcx;
+                        provided_value
+                    }
+                );
                 erase::erase_val(value)
             }
 
@@ -436,7 +392,8 @@ macro_rules! define_callbacks {
         pub struct QueryArenas<'tcx> {
             $(
                 $(#[$attr])*
-                pub $name: query_if_arena!([$($modifiers)*]
+                pub $name: if_arena_cache!(
+                    [$($modifiers)*]
                     // Use the `ArenaCached` helper trait to determine the arena's value type.
                     (TypedArena<<$V as $crate::query::arena_cached::ArenaCached<'tcx>>::Allocated>)
                     // No arena for this query, so the field type is `()`.
@@ -451,21 +408,30 @@ macro_rules! define_callbacks {
         }
 
         impl<'tcx> $crate::query::TyCtxtEnsureOk<'tcx> {
-            $($(#[$attr])*
-            #[inline(always)]
-            pub fn $name(
-                self,
-                key: query_helper_param_ty!($($K)*),
-            ) -> ensure_ok_result!([$($modifiers)*]) {
-                query_ensure_select!(
+            $(
+                $(#[$attr])*
+                #[inline(always)]
+                pub fn $name(
+                    self,
+                    key: query_helper_param_ty!($($K)*),
+                ) -> if_return_result_from_ensure_ok!(
                     [$($modifiers)*]
-                    self.tcx,
-                    self.tcx.query_system.fns.engine.$name,
-                    &self.tcx.query_system.caches.$name,
-                    $crate::query::IntoQueryParam::into_query_param(key),
-                    false,
-                )
-            })*
+                    (Result<(), ErrorGuaranteed>)
+                    ()
+                ) {
+                    if_return_result_from_ensure_ok!(
+                        [$($modifiers)*]
+                        (crate::query::inner::query_ensure_error_guaranteed)
+                        (crate::query::inner::query_ensure)
+                    )(
+                        self.tcx,
+                        self.tcx.query_system.fns.engine.$name,
+                        &self.tcx.query_system.caches.$name,
+                        $crate::query::IntoQueryParam::into_query_param(key),
+                        false,
+                    )
+                }
+            )*
         }
 
         impl<'tcx> $crate::query::TyCtxtEnsureDone<'tcx> {
@@ -537,7 +503,13 @@ macro_rules! define_callbacks {
         }
 
         pub struct ExternProviders {
-            $(pub $name: separate_provide_extern_decl!([$($modifiers)*][$name]),)*
+            $(
+                pub $name: if_separate_provide_extern!(
+                    [$($modifiers)*]
+                    (for<'tcx> fn(TyCtxt<'tcx>, $name::Key<'tcx>) -> $name::ProvidedValue<'tcx>)
+                    ()
+                ),
+            )*
         }
 
         impl Default for Providers {
@@ -551,7 +523,16 @@ macro_rules! define_callbacks {
         impl Default for ExternProviders {
             fn default() -> Self {
                 ExternProviders {
-                    $($name: separate_provide_extern_default!([$($modifiers)*][$name]),)*
+                    $(
+                        $name: if_separate_provide_extern!(
+                            [$($modifiers)*]
+                            (|_, key| $crate::query::plumbing::default_extern_query(
+                                stringify!($name),
+                                &key
+                            ))
+                            ()
+                        ),
+                    )*
                 }
             }
         }

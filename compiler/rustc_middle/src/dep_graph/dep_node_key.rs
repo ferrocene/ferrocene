@@ -18,7 +18,7 @@ impl<'tcx> DepNodeKey<'tcx> for () {
     }
 
     #[inline(always)]
-    fn recover(_: TyCtxt<'tcx>, _: &DepNode) -> Option<Self> {
+    fn try_recover_key(_: TyCtxt<'tcx>, _: &DepNode) -> Option<Self> {
         Some(())
     }
 }
@@ -40,7 +40,7 @@ impl<'tcx> DepNodeKey<'tcx> for DefId {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
         dep_node.extract_def_id(tcx)
     }
 }
@@ -62,7 +62,7 @@ impl<'tcx> DepNodeKey<'tcx> for LocalDefId {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
         dep_node.extract_def_id(tcx).map(|id| id.expect_local())
     }
 }
@@ -84,7 +84,7 @@ impl<'tcx> DepNodeKey<'tcx> for OwnerId {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
         dep_node.extract_def_id(tcx).map(|id| OwnerId { def_id: id.expect_local() })
     }
 }
@@ -107,7 +107,7 @@ impl<'tcx> DepNodeKey<'tcx> for CrateNum {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
         dep_node.extract_def_id(tcx).map(|id| id.krate)
     }
 }
@@ -166,7 +166,7 @@ impl<'tcx> DepNodeKey<'tcx> for HirId {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
         if tcx.key_fingerprint_style(dep_node.kind) == KeyFingerprintStyle::HirId {
             let (local_hash, local_id) = Fingerprint::from(dep_node.key_fingerprint).split();
             let def_path_hash = DefPathHash::new(tcx.stable_crate_id(LOCAL_CRATE), local_hash);
@@ -199,8 +199,8 @@ impl<'tcx> DepNodeKey<'tcx> for ModDefId {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
-        DefId::recover(tcx, dep_node).map(ModDefId::new_unchecked)
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+        DefId::try_recover_key(tcx, dep_node).map(ModDefId::new_unchecked)
     }
 }
 
@@ -221,7 +221,7 @@ impl<'tcx> DepNodeKey<'tcx> for LocalModDefId {
     }
 
     #[inline(always)]
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
-        LocalDefId::recover(tcx, dep_node).map(LocalModDefId::new_unchecked)
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self> {
+        LocalDefId::try_recover_key(tcx, dep_node).map(LocalModDefId::new_unchecked)
     }
 }

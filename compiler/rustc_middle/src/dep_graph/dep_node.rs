@@ -213,7 +213,7 @@ pub trait DepNodeKey<'tcx>: fmt::Debug + Sized {
     /// `fingerprint_style()` is not `FingerprintStyle::Opaque`.
     /// It is always valid to return `None` here, in which case incremental
     /// compilation will treat the query as having changed instead of forcing it.
-    fn recover(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self>;
+    fn try_recover_key(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> Option<Self>;
 }
 
 // Blanket impl of `DepNodeKey`, which is specialized by other impls elsewhere.
@@ -244,7 +244,7 @@ where
     }
 
     #[inline(always)]
-    default fn recover(_: TyCtxt<'tcx>, _: &DepNode) -> Option<Self> {
+    default fn try_recover_key(_: TyCtxt<'tcx>, _: &DepNode) -> Option<Self> {
         None
     }
 }

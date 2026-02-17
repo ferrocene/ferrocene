@@ -396,7 +396,7 @@ pub(crate) fn try_load_from_on_disk_cache_inner<'tcx, C: QueryCache, const FLAGS
 ) {
     debug_assert!(tcx.dep_graph.is_green(&dep_node));
 
-    let key = C::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
+    let key = C::Key::try_recover_key(tcx, &dep_node).unwrap_or_else(|| {
         panic!(
             "Failed to recover key for {dep_node:?} with key fingerprint {}",
             dep_node.key_fingerprint
@@ -465,7 +465,7 @@ pub(crate) fn force_from_dep_node_inner<'tcx, C: QueryCache, const FLAGS: QueryF
         "calling force_from_dep_node() on dep_kinds::codegen_unit"
     );
 
-    if let Some(key) = C::Key::recover(tcx, &dep_node) {
+    if let Some(key) = C::Key::try_recover_key(tcx, &dep_node) {
         force_query(query, tcx, key, dep_node);
         true
     } else {

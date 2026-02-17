@@ -230,7 +230,7 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
     callbacks.config(&mut config);
 
     // Ferrocene addition
-    // We have to do things in this strange way because ferrocene::certified works on THIR, and the
+    // We have to do things in this strange way because ferrocene::unvalidated works on THIR, and the
     // LateLintPass trait runs later than unsafety-checking, which means that normally if we try to
     // read THIR bodies we'll get an ICE. Tell unsafety-checking not to steal the THIR.
     config.opts.unstable_opts.no_steal_thir = true;

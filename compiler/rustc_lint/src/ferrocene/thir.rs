@@ -101,9 +101,9 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 debug!("saw call to {instance:?}");
                 UseKind::Called(instance)
             }
-            // We assume all closure definitions in this function are also certified.
+            // We assume all closure definitions in this function are also validated.
             // However, we still need to check the closure body to make sure it doesn't call
-            // uncertified functions.
+            // unvalidated functions.
             thir::ExprKind::Closure(ref expr) => {
                 // Closures are never an owner, so we need to hang onto the original owner so that
                 // our synthesized HirIds are valid.

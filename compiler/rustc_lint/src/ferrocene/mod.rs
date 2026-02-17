@@ -1,4 +1,4 @@
-//! This module contains the [`ferrocene::uncertified`](UNCERTIFIED) lint pass.
+//! This module contains the [`ferrocene::unvalidated`](UNVALIDATED) lint pass.
 //!
 //! ## Architecture
 //! There are two main passes: the [THIR pass](thir) and the
@@ -12,7 +12,7 @@
 //!
 //! The post-mono pass only runs on code that has been monomorphized for codegen.
 //! In particular, it only runs on reachable code; it's very possible to have dead code that uses an
-//! uncertified item, which is fine as long as it's never actually sent to LLVM.
+//! unvalidated item, which is fine as long as it's never actually sent to LLVM.
 //! In most cases, but not all, this will be caught by the THIR pass.
 //!
 //! ### instantiations
@@ -43,7 +43,7 @@
 //! #[ferrocene::prevalidated]
 //! fn returns_ptr() -> fn() { unvalidated } // not ok
 //! ```
-//! We have no idea whether some certified code is going to call `option.map(returns_ptr())`.
+//! We have no idea whether some validated code is going to call `option.map(returns_ptr())`.
 //! So we need to lint at the cast site instead.
 //!
 //! It might be possible to do fancy dataflow analysis to only disallow this if the pointer
@@ -67,9 +67,9 @@
 //! walk the const body at the definition site.
 //!
 //! ```
-//! fn uncertified_panic(_: &PanicInfo) -> ! { loop {} }
-//! const PANIC_HOOK: fn(&PanicInfo) -> ! = uncertified_panic;
-//! set_panic(PANIC_HOOK); // not ok: uncertified_panic called at runtime
+//! fn unvalidated_panic(_: &PanicInfo) -> ! { loop {} }
+//! const PANIC_HOOK: fn(&PanicInfo) -> ! = unvalidated_panic;
+//! set_panic(PANIC_HOOK); // not ok: unvalidated_panic called at runtime
 //! ```
 //!
 //! ### trait object coercions
@@ -79,9 +79,9 @@
 //! [`LintState::check_dyn_trait_coercion`] for examples of how this works.
 //!
 //! ```
-//! struct Uncertified;
-//! impl Clone for Uncertified { fn clone(&self) {} }
-//! let x: &dyn Clone = &Uncertified; // not ok: might call x.clone() later.
+//! struct Unvalidated;
+//! impl Clone for Unvalidated { fn clone(&self) {} }
+//! let x: &dyn Clone = &Unvalidated; // not ok: might call x.clone() later.
 //! ```
 //!
 //! ### THIR
@@ -139,24 +139,24 @@
 //! - [Typing/parameter environments](https://rustc-dev-guide.rust-lang.org/typing-parameter-envs.html)
 //! - [Monomorphization](https://rustc-dev-guide.rust-lang.org/backend/monomorph.html)
 
-// NOTE: UNCERTIFIED is public.
+// NOTE: UNVALIDATED is public.
 declare_tool_lint! {
-    /// The `ferrocene::uncertified` lint detects verified code that calls unverified functions.
-    /// This is not allowed if you want your code to be certified by a safety assessor.
+    /// The `ferrocene::unvalidated` lint detects verified code that calls unverified functions.
+    /// This is not allowed if you want your code to be validated by a safety assessor.
     ///
     /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
     ///
     /// This lint is allowed-by-default, to avoid loud warnings for people using ferrocene as a
-    /// "normal" compiler. To enable it, add `#![warn(ferrocene::uncertified)]` to each crate in
+    /// "normal" compiler. To enable it, add `#![warn(ferrocene::unvalidated)]` to each crate in
     /// your build, or add it to `[lints]` in Cargo.toml.
-    pub ferrocene::UNCERTIFIED,
+    pub ferrocene::UNVALIDATED,
     Allow,
     "a verified function called an unverified function",
     report_in_external_macro: true
 }
 
-// NOTE: LintUncertified is public.
-declare_lint_pass!(LintUncertified => [UNCERTIFIED]);
+// NOTE: LintUnvalidated is public.
+declare_lint_pass!(LintUnvalidated => [UNVALIDATED]);
 
 pub use post_mono::lint_validated_roots;
 
@@ -186,7 +186,7 @@ use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::thir::LintThir;
 use crate::{LateContext, LateLintPass};
 
-impl<'tcx> LateLintPass<'tcx> for LintUncertified {
+impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
     }
@@ -222,10 +222,10 @@ impl<'tcx> LintState<'tcx> {
                         None => item_span,
                     };
                     // FIXME: this should probably be `WARN unused attibute` instead?
-                    span_bug!(span, "annotated certified with no body? {kind:?} {item:?}");
+                    span_bug!(span, "annotated validated with no body? {kind:?} {item:?}");
                 }
             }
-            debug!("ignoring certified item with no body: {item:?}");
+            debug!("ignoring validated item with no body: {item:?}");
             return None;
         }
 
@@ -245,7 +245,7 @@ impl<'tcx> LintState<'tcx> {
         let callee = use_.def_id();
 
         if matches!(item_is_validated(tcx, callee), ValidatedStatus::Validated { .. }) {
-            debug!("no need to lint call to certified {callee:?}");
+            debug!("no need to lint call to validated {callee:?}");
             return;
         }
 
@@ -279,7 +279,7 @@ impl<'tcx> InstantiateResult<'tcx> {
     }
 }
 
-/// A use of an uncertified item.
+/// A use of an unvalidated item.
 #[derive(Copy, Clone, Debug)]
 struct Use<'tcx> {
     kind: UseKind<'tcx>,

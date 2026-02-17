@@ -253,7 +253,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                             span_bug!(span, "{kind:?} should have been a const_fn_def?")
                         }
                         // ok: see reasoning in THIR pass, we have checks to ensure all function
-                        // pointers we can get came from a certified function.
+                        // pointers we can get came from a validated function.
                         ty::FnPtr(..) => {}
                         _ => {
                             // If this is anything other than a function item, it can't have generics and
@@ -279,7 +279,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             }
             TerminatorKind::Drop { place, target: _, unwind: _, replace: _, drop, async_fut } => {
                 if drop.is_some() || async_fut.is_some() {
-                    span_bug!(span, "ferrocene::certified doesn't know how to check async drop");
+                    span_bug!(span, "ferrocene::validated doesn't know how to check async drop");
                 }
 
                 let (ty, env) = self.monomorphize_args(place.ty(self.body, tcx));

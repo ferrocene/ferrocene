@@ -255,7 +255,7 @@ late_lint_methods!(
             LifetimeSyntax: LifetimeSyntax,
 
             // Ferrocene addition
-            LintUncertified: LintUncertified,
+            LintUnvalidated: LintUnvalidated,
         ]
     ]
 );

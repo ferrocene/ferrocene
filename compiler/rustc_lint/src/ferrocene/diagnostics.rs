@@ -8,7 +8,7 @@ use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
 use crate::ferrocene::post_mono::InstantiationSite;
-use crate::ferrocene::{LintState, UNCERTIFIED, Use, UseKind};
+use crate::ferrocene::{LintState, UNVALIDATED, Use, UseKind};
 
 /// Diagnostics.
 impl<'tcx> LintState<'tcx> {
@@ -24,7 +24,7 @@ impl<'tcx> LintState<'tcx> {
         let (callee, receiver_span) = (use_.def_id(), use_.span);
 
         debug!("linting node {lint_node:?}");
-        tcx.node_span_lint(UNCERTIFIED, lint_node, receiver_span, |diag| {
+        tcx.node_span_lint(UNVALIDATED, lint_node, receiver_span, |diag| {
             let callee_descr = tcx.def_descr(callee);
             let owner_descr = tcx.def_descr(owner.into());
             diag.primary_message(format!(
@@ -50,7 +50,7 @@ impl<'tcx> LintState<'tcx> {
                 ));
             }
 
-            // Don't show this "takes place in a certified function" label more than once per function.
+            // Don't show this "takes place in a validated function" label more than once per function.
             // We really do need this as a separate bit of state from shown_lints because the lint might not be
             // emitted. ideally we would just `cancel` the diagnostic if we don't want to emit it,
             // but we don't get an owned `Diag` from `node_span_lint` :(

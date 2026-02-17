@@ -50,7 +50,7 @@ impl<'tcx> LintState<'tcx> {
             // FIXME: feature(unboxed_closures)
             None if source.is_adt() => None,
             // Don't remove this panic. If you do so before adding `check_dyn_trait_coercion` to
-            // the post-mono pass, it will fail to catch real uses of uncertified items in
+            // the post-mono pass, it will fail to catch real uses of unvalidated items in
             // non-degenerate programs.
             None => span_bug!(
                 span,
@@ -156,8 +156,8 @@ impl<'tcx> LintState<'tcx> {
             // Reference to a function or function pointer.
             ty::Ref(_, ty, _) => self.instance_of_ty(*ty, fn_trait_ref, try_instantiate, span),
             // We assume that all functions pointers are valid. Proof:
-            // 1. If the function was certified, no problem.
-            // 2. If the function was uncertified, and is a literal or assigned to a local
+            // 1. If the function was validated, no problem.
+            // 2. If the function was unvalidated, and is a literal or assigned to a local
             //    variable, then either:
             //    - We can resolve it to a concrete instance, in which case we would have caught it in ZstLiteral above.
             //    - We can't resolve it yet, but it stays a unique function type, so we will
@@ -166,13 +166,13 @@ impl<'tcx> LintState<'tcx> {
             //    have enough info to catch it post-mono when it's called. In this case we
             //    catch it in `ReifyFnPtr` above.
             // 3. If the function was passed as an argument, then either:
-            //   - We were called by an uncertified function. No problem.
-            //   - We were called by a certified function. This lint will run on that
+            //   - We were called by an unvalidated function. No problem.
+            //   - We were called by a validated function. This lint will run on that
             //   function too, and we will catch it there at the time it is checked /
             //   monomorphized.
             // 4. If this is a closure then either:
             //   - It was defined in this function, in which case we treat it as also
-            //   certified.
+            //   validated.
             //   - It was passed as an argument, which is ok by 3).
             //   - It is a global const/static, so we catch it in NamedConst/StaticRef above.
             ty::FnPtr(..) => None,
@@ -294,7 +294,7 @@ impl<'tcx> LintState<'tcx> {
 
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
-    /// FIXME: list all uncertified functions, not just the first.
+    /// FIXME: list all unvalidated functions, not just the first.
     fn find_unvalidated_impl_fn(
         &self,
         impl_source: ImplSource<'tcx, ()>,
@@ -433,7 +433,7 @@ impl<'tcx> LintState<'tcx> {
                                     ExistentialPredicate::AutoTrait(_) => None,
                                     // We don't care about associated type bounds.
                                     // They restrict which impl is selected, but that's all they do.
-                                    // We already require the implementation of the trait to be certified
+                                    // We already require the implementation of the trait to be validated
                                     // (that's the `Trait` predicate below), so which impl gets picked
                                     // doesn't matter as long we know which one it is.
                                     ExistentialPredicate::Projection(_) => None,

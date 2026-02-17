@@ -175,3 +175,19 @@ fn test_utf8_chunks_next() {
     assert_eq!("�", chunks.next().unwrap().valid());
     assert!(chunks.next().is_none());
 }
+
+// covers:
+// - `<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::count`
+// - `<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::last`
+// - `<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::nth`
+// - `<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::rposition`
+// - `<core::str::iter::Bytes<'_> as core::iter::traits::iterator::Iterator>::size_hint`
+#[test]
+fn test_bytes_iter_methods() {
+    let s = "hello, world!".to_owned();
+    assert_eq!(s.bytes().count(), 13);
+    assert_eq!(s.bytes().last(), Some(b'!'));
+    assert_eq!(s.bytes().nth(5), Some(b','));
+    assert_eq!(s.bytes().rposition(|b| b == b','), Some(5));
+    assert_eq!(s.bytes().size_hint(), (13, Some(13)));
+}

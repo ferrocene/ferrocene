@@ -57,10 +57,11 @@ pub(super) struct InstantiationSite<'tcx> {
     pub(super) lint_node: HirId,
     pub(super) caller_span: Span,
     pub(super) caller_instance: Instance<'tcx>,
-    /// `caller_instance`, but before we called `expect_instance`.
-    /// This may not be the same as `caller_instance.def_id()` if we resolved an associated function
+    /// `callee_instance`, but before we called `expect_instance`.
+    /// This may not be the same as `use_.def_id()` if we resolved an associated function
     /// to an implementation.
-    pub(super) pre_mono_item: DefId,
+    pub(super) pre_mono_callee: DefId,
+    pub(super) drop_fn: Option<DefId>,
 }
 
 /// Lint all used items recursively, starting from validated roots.
@@ -131,18 +132,18 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
         };
         let call_span = operand.span(self.body);
 
-        let Some((pre_mono_call, generic_args)) = operand.const_fn_def() else {
+        let Some((pre_mono_callee, generic_args)) = operand.const_fn_def() else {
             span_bug!(
                 call_span,
                 "don't know how to handle ReifyFnPointer cast of non-constant fn {operand:?}"
             );
         };
 
-        let callee_instance = self.monomorphize_instance(pre_mono_call, generic_args, call_span);
+        let callee_instance = self.monomorphize_instance(pre_mono_callee, generic_args, call_span);
         // FIXME: want to also check this in THIR pass
         let use_ = self.use_(UseKind::FnPtrCast(callee_instance), call_span);
         let source_info = self.body.source_info(location);
-        self.on_edge(use_, source_info, pre_mono_call);
+        self.on_edge(use_, source_info, pre_mono_callee);
     }
 }
 
@@ -151,7 +152,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         Use { kind, span, from_instantiation: self.from_instantiation }
     }
 
-    fn on_edge(&mut self, use_: Use<'tcx>, source_info: &SourceInfo, pre_mono_call: DefId) {
+    fn on_edge(&mut self, use_: Use<'tcx>, source_info: &SourceInfo, pre_mono_callee: DefId) {
         let callee_instance = use_.expect_instance();
 
         // Recurse into the instantiated call. Keep the call span for diagnostics.
@@ -180,13 +181,18 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_in_place_fn() {
                 // We want to show a better span; drop_in_place is never interesting since the body is
                 // synthesized by a MIR shim anyway.
-                self.from_instantiation.unwrap()
+                // Note that we saw it, though, so diagnostics can say "dropped here".
+                InstantiationSite {
+                    drop_fn: Some(callee_instance.def_id()),
+                    ..self.from_instantiation.unwrap()
+                }
             } else {
                 InstantiationSite {
+                    drop_fn: None,
                     lint_node,
                     caller_instance: self.instance,
                     caller_span: use_.span,
-                    pre_mono_item: pre_mono_call,
+                    pre_mono_callee,
                 }
             };
         trace!("recurse into {callee_instance:?}, lint_node={lint_node:?}");

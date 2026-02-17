@@ -102,25 +102,35 @@ impl<'tcx> LintState<'tcx> {
         if let Some(InstantiationSite {
             caller_span,
             caller_instance,
-            pre_mono_item,
+            pre_mono_callee,
+            drop_fn,
             lint_node: _,
         }) = use_.from_instantiation
         {
-            let caller_desc = tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args);
+            let caller_descr =
+                tcx.def_path_str_with_args(caller_instance.def_id(), caller_instance.args);
 
             let drop = tcx.require_lang_item(LangItem::Drop, caller_span);
-            let msg = if let Some(impl_) = tcx.trait_impl_of_assoc(use_.def_id()) && tcx.impl_trait_id(impl_) == drop {
+            let get_drop_impl = |def_id| {
+                tcx.trait_impl_of_assoc(def_id).filter(|impl_| tcx.impl_trait_id(impl_) == drop)
+            };
+
+            let msg = if let Some(impl_) =
+                get_drop_impl(use_.def_id()).or(drop_fn.and_then(|drop| get_drop_impl(drop)))
+            {
                 let dropped_ty = tcx.type_of(impl_).skip_binder();
                 // Call to drop(), injected by the compiler.
-                format!("`{dropped_ty}` dropped here, in `{caller_desc}`")
+                format!("`{dropped_ty}` dropped here, in `{caller_descr}`")
             } else {
                 let callee_descr = format!(
                     "generic {} `{}`",
-                    tcx.def_descr(pre_mono_item),
-                    rustc_middle::ty::print::with_no_trimmed_paths!(tcx.def_path_str(pre_mono_item))
+                    tcx.def_descr(pre_mono_callee),
+                    rustc_middle::ty::print::with_no_trimmed_paths!(
+                        tcx.def_path_str(pre_mono_callee)
+                    )
                 );
 
-                format!("{callee_descr} instantiated by `{caller_desc}`")
+                format!("{callee_descr} instantiated by `{caller_descr}`")
             };
 
             if let Some(multi) = validated_span {
@@ -131,17 +141,12 @@ impl<'tcx> LintState<'tcx> {
                     format!("{msg}, which is called from a validated entrypoint"),
                 );
             }
-            // } else {
-            //     diag.note(format!(
-            //             "{callee_descr} instantiated by validated entrypoint {}",
-            //             tcx.def_path_str(self.item)
-            //     ));
         }
     }
 }
 
 impl<'tcx> Use<'tcx> {
-    pub(super) fn present_tense(self) -> &'static str {
+    fn present_tense(self) -> &'static str {
         match self.kind {
             UseKind::Called(..) => "calls",
             // originally this said "type-erases" but that's unfamiliar jargon, and it's not clear

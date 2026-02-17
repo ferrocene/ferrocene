@@ -11,7 +11,7 @@ note: `reachable_allowed` is validated
   --> $DIR/allow-still-recurses.rs:24:8
    |
 LL | }
-   | - generic function `std::ptr::drop_in_place` instantiated by `uninstantiated_generic_indirect::<Validated>`
+   | - `Validated` dropped here, in `uninstantiated_generic_indirect::<Validated>`
 LL |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here

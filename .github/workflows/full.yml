@@ -223,6 +223,7 @@ jobs:
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target x86_64-unknown-linux-gnu --test-variant ${{ matrix.variant }}
       host-triple: ${{ matrix.host }}
+      triples: "x86_64-unknown-linux-gnu"
       runner: ${{ matrix.runner }}
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -256,8 +257,9 @@ jobs:
       run-name: ${{ matrix.suite }} (${{ matrix.variant }})
       script: |
         uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py ${{ matrix.suite }}) --ferrocene-test-one-crate-per-cargo-call --target aarch64-unknown-ferrocene.facade --test-variant ${{ matrix.variant }}
-      build-metrics-artifact: test-aarch64-unknown-linux-gnu-on-${{ matrix.host }}-${{ matrix.suite }}
+      build-metrics-artifact: test-aarch64-unknown-none-on-${{ matrix.host }}-${{ matrix.suite }}
       host-triple: ${{ matrix.host }}
+      triples: "aarch64-unknown-ferrocene.facade"
       runner: ${{ matrix.runner }}
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -294,6 +296,7 @@ jobs:
       build-metrics-artifact: test-thumbv7em-none-eabi-on-${{ matrix.host }}-${{ matrix.suite }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
+      triples: "thumbv7em-ferrocene.facade-eabi"
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -329,6 +332,7 @@ jobs:
       build-metrics-artifact: test-thumbv7em-none-eabihf-on-${{ matrix.host }}-${{ matrix.suite }}
       runner: ${{ matrix.runner }}
       host-triple: ${{ matrix.host }}
+      triples: "thumbv7em-ferrocene.facade-eabihf"
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}

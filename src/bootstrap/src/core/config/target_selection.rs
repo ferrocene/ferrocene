@@ -108,6 +108,7 @@ impl TargetSelection {
 
         match &*self.triple {
             "aarch64-unknown-ferrocene.facade"
+            | "aarch64r82-unknown-ferrocene.facade"
             | "aarch64v8r-unknown-ferrocene.facade"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-ferrocene.facade-eabihf" => true,
@@ -132,9 +133,15 @@ impl TargetSelection {
     pub fn try_subset_equivalent(&self) -> Option<TargetSelection> {
         let target_tuple = match self.triple.as_ref() {
             "x86_64-unknown-linux-gnu" => "x86_64-unknown-ferrocene.subset",
-            "aarch64-unknown-none" | "aarch64-apple-darwin" => "aarch64-unknown-ferrocene.subset",
-            "thumbv7em-none-eabi" => "thumbv7em-ferrocene.subset-eabi",
-            "thumbv7em-none-eabihf" => "thumbv7em-ferrocene.subset-eabihf",
+            "aarch64-unknown-none"
+            | "aarch64-apple-darwin"
+            | "aarch64-unknown-ferrocene.facade" => "aarch64-unknown-ferrocene.subset",
+            "thumbv7em-none-eabi" | "thumbv7em-ferrocene.facade-eabi" => {
+                "thumbv7em-ferrocene.subset-eabi"
+            }
+            "thumbv7em-none-eabihf" | "thumbv7em-ferrocene.facade-eabihf" => {
+                "thumbv7em-ferrocene.subset-eabihf"
+            }
             target if target.contains("ferrocene.subset") => target,
             _ => return None,
         };

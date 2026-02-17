@@ -901,6 +901,8 @@ workflows:
             - aarch64-qnx-test-compiletest
             - aarch64-none-test-library
             - aarch64-none-test-compiletest
+            - aarch64r82-none-test-library
+            - aarch64r82-none-test-compiletest
             - aarch64v8r-none-test-library
             - aarch64v8r-none-test-compiletest
             - thumbv7em-eabihf-test-library
@@ -963,6 +965,25 @@ workflows:
           name: aarch64-none-test-library
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
+          qemu-arch: qemu-aarch64
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64r82-none-test-compiletest
+          target: aarch64r82-unknown-ferrocene.facade
+          test-variant: 2021-neoverse-v1
+          qemu-arch: qemu-aarch64
+          job: qnx:compiletest-no-only-hosts
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - facade-generic-test:
+          name: aarch64r82-none-test-library
+          target: aarch64r82-unknown-ferrocene.facade
+          test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
           job: test:library
           resource-class: large # 4-core

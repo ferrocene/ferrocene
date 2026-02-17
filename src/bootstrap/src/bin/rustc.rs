@@ -16,6 +16,7 @@
 //! never get replaced.
 
 use std::env;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command};
 use std::time::Instant;
@@ -34,6 +35,22 @@ mod proc_macro_deps;
 fn main() {
     let orig_args = env::args_os().skip(1).collect::<Vec<_>>();
     let mut args = orig_args.clone();
+
+    // Ferrocene addition: do not enable `-Cinstrument-coverage` in the `compiler_builtins` crate.
+    let remove_coverage_instrumentation = args
+        .windows(2)
+        .find(|pair| {
+            let &[first, second] = pair else { unreachable!() };
+            first == OsStr::new("--crate-name")
+                && ["compiler_builtins", "profiler_builtins"]
+                    .map(OsStr::new)
+                    .contains(&second.as_os_str())
+        })
+        .is_some();
+
+    if remove_coverage_instrumentation {
+        args.retain(|arg| arg != OsStr::new("-Cinstrument-coverage"));
+    }
 
     let stage = parse_rustc_stage();
     let verbose = parse_rustc_verbose();

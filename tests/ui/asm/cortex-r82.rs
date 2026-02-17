@@ -1,8 +1,11 @@
 // Codegen test of mandatory Cortex-R82 extensions
 
 //@ add-minicore
-//@ compile-flags: --target aarch64v8r-unknown-none -C target-cpu=cortex-r82
-//@ needs-llvm-components: aarch64
+//@ revisions: cpu target
+//@ [cpu] compile-flags: --target aarch64v8r-unknown-none -C target-cpu=cortex-r82
+//@ [cpu] needs-llvm-components: aarch64
+//@ [target] compile-flags: --target aarch64r82-unknown-none
+//@ [target] needs-llvm-components: aarch64
 //@ build-pass
 //@ ignore-backends: gcc
 

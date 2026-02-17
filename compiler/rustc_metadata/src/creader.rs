@@ -1001,19 +1001,10 @@ impl CStore {
         self.injected_panic_runtime = Some(cnum);
     }
 
-    // Ferrocene addition:
-    // We add `krate` so we can determine if we should run coverage.
-    // See https://github.com/ferrocene/ferrocene/pull/1379.
-    fn inject_profiler_runtime(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {
+    fn inject_profiler_runtime(&mut self, tcx: TyCtxt<'_>) {
         let needs_profiler_runtime =
             tcx.sess.instrument_coverage() || tcx.sess.opts.cg.profile_generate.enabled();
         if !needs_profiler_runtime || tcx.sess.opts.unstable_opts.no_profiler_runtime {
-            return;
-        }
-
-        // Ferrocene addition: we don't need to add the profiler runtime when we are building the
-        // profiler runtime itself.
-        if attr::contains_name(&krate.attrs, sym::profiler_runtime) {
             return;
         }
 
@@ -1264,7 +1255,7 @@ impl CStore {
     pub fn postprocess(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {
         self.inject_compiler_builtins(tcx, krate);
         self.inject_forced_externs(tcx);
-        self.inject_profiler_runtime(tcx, krate);
+        self.inject_profiler_runtime(tcx);
         self.inject_allocator_crate(tcx, krate);
         self.inject_panic_runtime(tcx, krate);
 

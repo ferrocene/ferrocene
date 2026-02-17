@@ -37,6 +37,9 @@ import yaml
 class PullLatestTag:
     pass
 
+@dataclass
+class PullTag:
+    name: str
 
 @dataclass
 class PullBranch:
@@ -72,6 +75,8 @@ def parse_configuration(path):
             pull = PullLatestTag()
         elif raw_pull.startswith("branch:"):
             pull = PullBranch(name=raw_pull.removeprefix("branch:"))
+        elif raw_pull.startswith("tag:"):
+            pull = PullTag(name=raw_pull.removeprefix("tag:"))
         else:
             err(f"invalid pull key: {raw_pull}")
             poisoned = True
@@ -144,6 +149,8 @@ def fetch_latest_commit(subtree):
         else:
             raise RuntimeError(f"no suitable tags found in {subtree.repo}")
     elif isinstance(subtree.pull, PullBranch):
+        ref = subtree.pull.name
+    elif isinstance(subtree.pull, PullTag):
         ref = subtree.pull.name
     else:
         raise RuntimeError(f"unknown subtree.pull: {subtree.pull}")

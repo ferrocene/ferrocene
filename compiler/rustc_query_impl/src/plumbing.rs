@@ -397,7 +397,10 @@ pub(crate) fn try_load_from_on_disk_cache_inner<'tcx, C: QueryCache, const FLAGS
     debug_assert!(tcx.dep_graph.is_green(&dep_node));
 
     let key = C::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
-        panic!("Failed to recover key for {:?} with hash {}", dep_node, dep_node.hash)
+        panic!(
+            "Failed to recover key for {dep_node:?} with key fingerprint {}",
+            dep_node.key_fingerprint
+        )
     });
     if query.will_cache_on_disk_for_key(tcx, &key) {
         // Call `tcx.$query(key)` for its side-effect of loading the disk-cached

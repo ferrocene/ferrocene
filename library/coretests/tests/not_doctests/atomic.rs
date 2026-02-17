@@ -171,3 +171,25 @@ test_atomic_fetch_update!(
     atomic_u32_fetch_update => atomic::AtomicU32,
     atomic_usize_fetch_update => atomic::AtomicUsize,
 );
+
+// covers `<core::sync::atomic::<$atomic_t>:: as core::fmt::Debug>::fmt`
+macro_rules! test_atomic_debug_fmt {
+    ($($(#[$attr:meta])* $fn:ident => $atomic_t:ty : $val:literal == $str:literal,)*) => { $(
+        #[test]
+        $(#[$attr])*
+        fn $fn() {
+            let atomic = <$atomic_t>::new($val);
+
+            assert_eq!(format!("{atomic:?}"), $str);
+        }
+    )*};
+}
+test_atomic_debug_fmt!(
+    atomic_u8_debug_fmt => atomic::AtomicU8: 5 == "5",
+    atomic_u16_debug_fmt => atomic::AtomicU16: 5 == "5",
+    atomic_u32_debug_fmt => atomic::AtomicU32: 5 == "5",
+    #[cfg(target_has_atomic = "64")]
+    atomic_u64_debug_fmt => atomic::AtomicU64: 5 == "5",
+    atomic_usize_debug_fmt => atomic::AtomicUsize: 5 == "5",
+    atomic_bool_debug_fmt => atomic::AtomicBool: true == "true",
+);

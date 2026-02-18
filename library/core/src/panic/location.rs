@@ -1,9 +1,6 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ffi::CStr;
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 use crate::marker::PhantomData;
 use crate::ptr::NonNull;
@@ -51,7 +48,6 @@ pub struct Location<'a> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl PartialEq for Location<'_> {
     fn eq(&self, other: &Self) -> bool {
         // Compare col / line first as they're cheaper to compare and more likely to differ,
@@ -61,11 +57,9 @@ impl PartialEq for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Eq for Location<'_> {}
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Ord for Location<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.file()
@@ -76,7 +70,6 @@ impl Ord for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl PartialOrd for Location<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -84,7 +77,6 @@ impl PartialOrd for Location<'_> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Hash for Location<'_> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.file().hash(state);
@@ -242,7 +234,6 @@ impl<'a> Location<'a> {
     #[inline]
     #[stable(feature = "file_with_nul", since = "1.92.0")]
     #[rustc_const_stable(feature = "file_with_nul", since = "1.92.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn file_as_c_str(&self) -> &'a CStr {
         let filename = self.filename.as_ptr();
 

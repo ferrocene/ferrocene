@@ -1,9 +1,7 @@
 #![unstable(feature = "ptr_metadata", issue = "81513")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::TrivialClone;
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::{Hash, Hasher};
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 use crate::marker::{Freeze, PointeeSized};
@@ -197,7 +195,6 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 
     /// Returns the size of the type associated with this vtable.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     pub fn size_of(self) -> usize {
         // Note that "size stored in vtable" is *not* the same as "result of size_of_val_raw".
@@ -208,7 +205,6 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 
     /// Returns the alignment of the type associated with this vtable.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     pub fn align_of(self) -> usize {
         // SAFETY: DynMetadata always contains a valid vtable pointer
@@ -216,7 +212,6 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 
     /// Returns the size and alignment together as a `Layout`
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     pub fn layout(self) -> crate::alloc::Layout {
         // SAFETY: the compiler emitted this vtable for a concrete Rust type which
@@ -237,7 +232,6 @@ impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
 
 // Manual impls needed to avoid `Dyn: $Trait` bounds.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Unpin for DynMetadata<Dyn> {}
 
 impl<Dyn: PointeeSized> Copy for DynMetadata<Dyn> {}
@@ -250,14 +244,11 @@ impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 unsafe impl<Dyn: PointeeSized> TrivialClone for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Eq for DynMetadata<Dyn> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> PartialEq for DynMetadata<Dyn> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -265,7 +256,6 @@ impl<Dyn: PointeeSized> PartialEq for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Ord for DynMetadata<Dyn> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -274,7 +264,6 @@ impl<Dyn: PointeeSized> Ord for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> PartialOrd for DynMetadata<Dyn> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<crate::cmp::Ordering> {
@@ -282,7 +271,6 @@ impl<Dyn: PointeeSized> PartialOrd for DynMetadata<Dyn> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Dyn: PointeeSized> Hash for DynMetadata<Dyn> {
     #[inline]
     fn hash<H: Hasher>(&self, hasher: &mut H) {

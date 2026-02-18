@@ -53,23 +53,19 @@
     issue = "none"
 )]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ffi::va_list::{VaArgSafe, VaList};
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
 use crate::{mem, ptr};
 
 mod bounds;
 pub mod fallback;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod gpu;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod mir;
 pub mod simd;
 
 // These imports are used for simplifying intra-doc links
 #[allow(unused_imports)]
 #[cfg(all(target_has_atomic = "8", target_has_atomic = "32", target_has_atomic = "ptr"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, Ordering};
 
 /// A type for atomic ordering parameters for intrinsics. This is a separate type from
@@ -221,7 +217,6 @@ pub unsafe fn atomic_xor<T: Copy, U: Copy, const ORD: AtomicOrdering>(dst: *mut 
 /// [`atomic`] signed integer types via the `fetch_max` method. For example, [`AtomicI32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn atomic_max<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T) -> T;
 
 /// Minimum with the current value using a signed comparison.
@@ -231,7 +226,6 @@ pub unsafe fn atomic_max<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T
 /// [`atomic`] signed integer types via the `fetch_min` method. For example, [`AtomicI32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn atomic_min<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T) -> T;
 
 /// Minimum with the current value using an unsigned comparison.
@@ -280,7 +274,6 @@ pub unsafe fn atomic_singlethreadfence<const ORD: AtomicOrdering>();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn prefetch_read_data<T, const LOCALITY: i32>(data: *const T) {
     // This operation is a no-op, unless it is overridden by the backend.
     let _ = data;
@@ -295,7 +288,6 @@ pub const fn prefetch_read_data<T, const LOCALITY: i32>(data: *const T) {
 /// to (3) - extremely local keep in cache.
 ///
 /// This intrinsic does not have a stable counterpart.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
@@ -316,7 +308,6 @@ pub const fn prefetch_write_data<T, const LOCALITY: i32>(data: *const T) {
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn prefetch_read_instruction<T, const LOCALITY: i32>(data: *const T) {
     // This operation is a no-op, unless it is overridden by the backend.
     let _ = data;
@@ -334,7 +325,6 @@ pub const fn prefetch_read_instruction<T, const LOCALITY: i32>(data: *const T) {
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn prefetch_write_instruction<T, const LOCALITY: i32>(data: *const T) {
     // This operation is a no-op, unless it is overridden by the backend.
     let _ = data;
@@ -345,7 +335,6 @@ pub const fn prefetch_write_instruction<T, const LOCALITY: i32>(data: *const T) 
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn breakpoint();
 
 /// Magic intrinsic that derives its meaning from attributes
@@ -359,7 +348,6 @@ pub fn breakpoint();
 /// This intrinsic should not be used outside of the compiler.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn rustc_peek<T>(_: T) -> T;
 
 /// Aborts the execution of the process.
@@ -542,7 +530,6 @@ pub const fn assert_zero_valid<T>();
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn assert_mem_uninitialized_valid<T>();
 
 /// Gets a reference to a static `Location` indicating where it was called.
@@ -971,7 +958,6 @@ pub const unsafe fn slice_get_unchecked<
 /// Consider using [`pointer::mask`] instead.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn ptr_mask<T>(ptr: *const T, mask: usize) -> *const T;
 
 /// Equivalent to the appropriate `llvm.memcpy.p0i8.0i8.*` intrinsic, with
@@ -987,7 +973,6 @@ pub fn ptr_mask<T>(ptr: *const T, mask: usize) -> *const T;
 /// [`copy_nonoverlapping`]: ptr::copy_nonoverlapping
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn volatile_copy_nonoverlapping_memory<T>(dst: *mut T, src: *const T, count: usize);
 /// Equivalent to the appropriate `llvm.memmove.p0i8.0i8.*` intrinsic, with
 /// a size of `count * size_of::<T>()` and an alignment of `align_of::<T>()`.
@@ -998,7 +983,6 @@ pub unsafe fn volatile_copy_nonoverlapping_memory<T>(dst: *mut T, src: *const T,
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn volatile_copy_memory<T>(dst: *mut T, src: *const T, count: usize);
 /// Equivalent to the appropriate `llvm.memset.p0i8.*` intrinsic, with a
 /// size of `count * size_of::<T>()` and an alignment of `align_of::<T>()`.
@@ -1012,7 +996,6 @@ pub unsafe fn volatile_copy_memory<T>(dst: *mut T, src: *const T, count: usize);
 /// [`write_bytes`]: ptr::write_bytes
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn volatile_set_memory<T>(dst: *mut T, val: u8, count: usize);
 
 /// Performs a volatile load from the `src` pointer.
@@ -1035,7 +1018,6 @@ pub unsafe fn volatile_store<T>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[rustc_diagnostic_item = "intrinsics_unaligned_volatile_load"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn unaligned_volatile_load<T>(src: *const T) -> T;
 /// Performs a volatile store to the `dst` pointer.
 /// The pointer is not required to be aligned.
@@ -1044,7 +1026,6 @@ pub unsafe fn unaligned_volatile_load<T>(src: *const T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[rustc_diagnostic_item = "intrinsics_unaligned_volatile_store"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn unaligned_volatile_store<T>(dst: *mut T, val: T);
 
 /// Returns the square root of an `f16`
@@ -1053,7 +1034,6 @@ pub unsafe fn unaligned_volatile_store<T>(dst: *mut T, val: T);
 /// [`f16::sqrt`](../../std/primitive.f16.html#method.sqrt)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sqrtf16(x: f16) -> f16;
 /// Returns the square root of an `f32`
 ///
@@ -1075,7 +1055,6 @@ pub fn sqrtf64(x: f64) -> f64;
 /// [`f128::sqrt`](../../std/primitive.f128.html#method.sqrt)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sqrtf128(x: f128) -> f128;
 
 /// Raises an `f16` to an integer power.
@@ -1084,7 +1063,6 @@ pub fn sqrtf128(x: f128) -> f128;
 /// [`f16::powi`](../../std/primitive.f16.html#method.powi)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powif16(a: f16, x: i32) -> f16;
 /// Raises an `f32` to an integer power.
 ///
@@ -1092,7 +1070,6 @@ pub fn powif16(a: f16, x: i32) -> f16;
 /// [`f32::powi`](../../std/primitive.f32.html#method.powi)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powif32(a: f32, x: i32) -> f32;
 /// Raises an `f64` to an integer power.
 ///
@@ -1100,7 +1077,6 @@ pub fn powif32(a: f32, x: i32) -> f32;
 /// [`f64::powi`](../../std/primitive.f64.html#method.powi)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powif64(a: f64, x: i32) -> f64;
 /// Raises an `f128` to an integer power.
 ///
@@ -1108,7 +1084,6 @@ pub fn powif64(a: f64, x: i32) -> f64;
 /// [`f128::powi`](../../std/primitive.f128.html#method.powi)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powif128(a: f128, x: i32) -> f128;
 
 /// Returns the sine of an `f16`.
@@ -1117,7 +1092,6 @@ pub fn powif128(a: f128, x: i32) -> f128;
 /// [`f16::sin`](../../std/primitive.f16.html#method.sin)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sinf16(x: f16) -> f16;
 /// Returns the sine of an `f32`.
 ///
@@ -1125,7 +1099,6 @@ pub fn sinf16(x: f16) -> f16;
 /// [`f32::sin`](../../std/primitive.f32.html#method.sin)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sinf32(x: f32) -> f32;
 /// Returns the sine of an `f64`.
 ///
@@ -1133,7 +1106,6 @@ pub fn sinf32(x: f32) -> f32;
 /// [`f64::sin`](../../std/primitive.f64.html#method.sin)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sinf64(x: f64) -> f64;
 /// Returns the sine of an `f128`.
 ///
@@ -1141,7 +1113,6 @@ pub fn sinf64(x: f64) -> f64;
 /// [`f128::sin`](../../std/primitive.f128.html#method.sin)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn sinf128(x: f128) -> f128;
 
 /// Returns the cosine of an `f16`.
@@ -1150,7 +1121,6 @@ pub fn sinf128(x: f128) -> f128;
 /// [`f16::cos`](../../std/primitive.f16.html#method.cos)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn cosf16(x: f16) -> f16;
 /// Returns the cosine of an `f32`.
 ///
@@ -1158,7 +1128,6 @@ pub fn cosf16(x: f16) -> f16;
 /// [`f32::cos`](../../std/primitive.f32.html#method.cos)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn cosf32(x: f32) -> f32;
 /// Returns the cosine of an `f64`.
 ///
@@ -1166,7 +1135,6 @@ pub fn cosf32(x: f32) -> f32;
 /// [`f64::cos`](../../std/primitive.f64.html#method.cos)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn cosf64(x: f64) -> f64;
 /// Returns the cosine of an `f128`.
 ///
@@ -1174,7 +1142,6 @@ pub fn cosf64(x: f64) -> f64;
 /// [`f128::cos`](../../std/primitive.f128.html#method.cos)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn cosf128(x: f128) -> f128;
 
 /// Raises an `f16` to an `f16` power.
@@ -1183,7 +1150,6 @@ pub fn cosf128(x: f128) -> f128;
 /// [`f16::powf`](../../std/primitive.f16.html#method.powf)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powf16(a: f16, x: f16) -> f16;
 /// Raises an `f32` to an `f32` power.
 ///
@@ -1191,7 +1157,6 @@ pub fn powf16(a: f16, x: f16) -> f16;
 /// [`f32::powf`](../../std/primitive.f32.html#method.powf)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powf32(a: f32, x: f32) -> f32;
 /// Raises an `f64` to an `f64` power.
 ///
@@ -1199,7 +1164,6 @@ pub fn powf32(a: f32, x: f32) -> f32;
 /// [`f64::powf`](../../std/primitive.f64.html#method.powf)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powf64(a: f64, x: f64) -> f64;
 /// Raises an `f128` to an `f128` power.
 ///
@@ -1207,7 +1171,6 @@ pub fn powf64(a: f64, x: f64) -> f64;
 /// [`f128::powf`](../../std/primitive.f128.html#method.powf)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn powf128(a: f128, x: f128) -> f128;
 
 /// Returns the exponential of an `f16`.
@@ -1216,7 +1179,6 @@ pub fn powf128(a: f128, x: f128) -> f128;
 /// [`f16::exp`](../../std/primitive.f16.html#method.exp)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn expf16(x: f16) -> f16;
 /// Returns the exponential of an `f32`.
 ///
@@ -1224,7 +1186,6 @@ pub fn expf16(x: f16) -> f16;
 /// [`f32::exp`](../../std/primitive.f32.html#method.exp)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn expf32(x: f32) -> f32;
 /// Returns the exponential of an `f64`.
 ///
@@ -1232,7 +1193,6 @@ pub fn expf32(x: f32) -> f32;
 /// [`f64::exp`](../../std/primitive.f64.html#method.exp)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn expf64(x: f64) -> f64;
 /// Returns the exponential of an `f128`.
 ///
@@ -1240,7 +1200,6 @@ pub fn expf64(x: f64) -> f64;
 /// [`f128::exp`](../../std/primitive.f128.html#method.exp)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn expf128(x: f128) -> f128;
 
 /// Returns 2 raised to the power of an `f16`.
@@ -1249,7 +1208,6 @@ pub fn expf128(x: f128) -> f128;
 /// [`f16::exp2`](../../std/primitive.f16.html#method.exp2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn exp2f16(x: f16) -> f16;
 /// Returns 2 raised to the power of an `f32`.
 ///
@@ -1257,7 +1215,6 @@ pub fn exp2f16(x: f16) -> f16;
 /// [`f32::exp2`](../../std/primitive.f32.html#method.exp2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn exp2f32(x: f32) -> f32;
 /// Returns 2 raised to the power of an `f64`.
 ///
@@ -1265,7 +1222,6 @@ pub fn exp2f32(x: f32) -> f32;
 /// [`f64::exp2`](../../std/primitive.f64.html#method.exp2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn exp2f64(x: f64) -> f64;
 /// Returns 2 raised to the power of an `f128`.
 ///
@@ -1273,7 +1229,6 @@ pub fn exp2f64(x: f64) -> f64;
 /// [`f128::exp2`](../../std/primitive.f128.html#method.exp2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn exp2f128(x: f128) -> f128;
 
 /// Returns the natural logarithm of an `f16`.
@@ -1282,7 +1237,6 @@ pub fn exp2f128(x: f128) -> f128;
 /// [`f16::ln`](../../std/primitive.f16.html#method.ln)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn logf16(x: f16) -> f16;
 /// Returns the natural logarithm of an `f32`.
 ///
@@ -1290,7 +1244,6 @@ pub fn logf16(x: f16) -> f16;
 /// [`f32::ln`](../../std/primitive.f32.html#method.ln)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn logf32(x: f32) -> f32;
 /// Returns the natural logarithm of an `f64`.
 ///
@@ -1298,7 +1251,6 @@ pub fn logf32(x: f32) -> f32;
 /// [`f64::ln`](../../std/primitive.f64.html#method.ln)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn logf64(x: f64) -> f64;
 /// Returns the natural logarithm of an `f128`.
 ///
@@ -1306,7 +1258,6 @@ pub fn logf64(x: f64) -> f64;
 /// [`f128::ln`](../../std/primitive.f128.html#method.ln)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn logf128(x: f128) -> f128;
 
 /// Returns the base 10 logarithm of an `f16`.
@@ -1315,7 +1266,6 @@ pub fn logf128(x: f128) -> f128;
 /// [`f16::log10`](../../std/primitive.f16.html#method.log10)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log10f16(x: f16) -> f16;
 /// Returns the base 10 logarithm of an `f32`.
 ///
@@ -1323,7 +1273,6 @@ pub fn log10f16(x: f16) -> f16;
 /// [`f32::log10`](../../std/primitive.f32.html#method.log10)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log10f32(x: f32) -> f32;
 /// Returns the base 10 logarithm of an `f64`.
 ///
@@ -1331,7 +1280,6 @@ pub fn log10f32(x: f32) -> f32;
 /// [`f64::log10`](../../std/primitive.f64.html#method.log10)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log10f64(x: f64) -> f64;
 /// Returns the base 10 logarithm of an `f128`.
 ///
@@ -1339,7 +1287,6 @@ pub fn log10f64(x: f64) -> f64;
 /// [`f128::log10`](../../std/primitive.f128.html#method.log10)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log10f128(x: f128) -> f128;
 
 /// Returns the base 2 logarithm of an `f16`.
@@ -1348,7 +1295,6 @@ pub fn log10f128(x: f128) -> f128;
 /// [`f16::log2`](../../std/primitive.f16.html#method.log2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log2f16(x: f16) -> f16;
 /// Returns the base 2 logarithm of an `f32`.
 ///
@@ -1356,7 +1302,6 @@ pub fn log2f16(x: f16) -> f16;
 /// [`f32::log2`](../../std/primitive.f32.html#method.log2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log2f32(x: f32) -> f32;
 /// Returns the base 2 logarithm of an `f64`.
 ///
@@ -1364,7 +1309,6 @@ pub fn log2f32(x: f32) -> f32;
 /// [`f64::log2`](../../std/primitive.f64.html#method.log2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log2f64(x: f64) -> f64;
 /// Returns the base 2 logarithm of an `f128`.
 ///
@@ -1372,7 +1316,6 @@ pub fn log2f64(x: f64) -> f64;
 /// [`f128::log2`](../../std/primitive.f128.html#method.log2)
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn log2f128(x: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values.
@@ -1406,7 +1349,6 @@ pub const fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values, non-deterministically executing
@@ -1421,7 +1363,6 @@ pub const fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 /// example.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -1435,7 +1376,6 @@ pub const fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 /// example.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -1449,7 +1389,6 @@ pub const fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 /// example.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -1463,7 +1402,6 @@ pub const fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 /// example.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns the largest integer less than or equal to an `f16`.
@@ -1473,7 +1411,6 @@ pub const fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn floorf16(x: f16) -> f16;
 /// Returns the largest integer less than or equal to an `f32`.
 ///
@@ -1482,7 +1419,6 @@ pub const fn floorf16(x: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn floorf32(x: f32) -> f32;
 /// Returns the largest integer less than or equal to an `f64`.
 ///
@@ -1491,7 +1427,6 @@ pub const fn floorf32(x: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn floorf64(x: f64) -> f64;
 /// Returns the largest integer less than or equal to an `f128`.
 ///
@@ -1500,7 +1435,6 @@ pub const fn floorf64(x: f64) -> f64;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn floorf128(x: f128) -> f128;
 
 /// Returns the smallest integer greater than or equal to an `f16`.
@@ -1510,7 +1444,6 @@ pub const fn floorf128(x: f128) -> f128;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn ceilf16(x: f16) -> f16;
 /// Returns the smallest integer greater than or equal to an `f32`.
 ///
@@ -1519,7 +1452,6 @@ pub const fn ceilf16(x: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn ceilf32(x: f32) -> f32;
 /// Returns the smallest integer greater than or equal to an `f64`.
 ///
@@ -1528,7 +1460,6 @@ pub const fn ceilf32(x: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn ceilf64(x: f64) -> f64;
 /// Returns the smallest integer greater than or equal to an `f128`.
 ///
@@ -1537,7 +1468,6 @@ pub const fn ceilf64(x: f64) -> f64;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn ceilf128(x: f128) -> f128;
 
 /// Returns the integer part of an `f16`.
@@ -1547,7 +1477,6 @@ pub const fn ceilf128(x: f128) -> f128;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn truncf16(x: f16) -> f16;
 /// Returns the integer part of an `f32`.
 ///
@@ -1556,7 +1485,6 @@ pub const fn truncf16(x: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn truncf32(x: f32) -> f32;
 /// Returns the integer part of an `f64`.
 ///
@@ -1565,7 +1493,6 @@ pub const fn truncf32(x: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn truncf64(x: f64) -> f64;
 /// Returns the integer part of an `f128`.
 ///
@@ -1574,7 +1501,6 @@ pub const fn truncf64(x: f64) -> f64;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn truncf128(x: f128) -> f128;
 
 /// Returns the nearest integer to an `f16`. Rounds half-way cases to the number with an even
@@ -1585,7 +1511,6 @@ pub const fn truncf128(x: f128) -> f128;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn round_ties_even_f16(x: f16) -> f16;
 
 /// Returns the nearest integer to an `f32`. Rounds half-way cases to the number with an even
@@ -1596,7 +1521,6 @@ pub const fn round_ties_even_f16(x: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn round_ties_even_f32(x: f32) -> f32;
 
 /// Returns the nearest integer to an `f64`. Rounds half-way cases to the number with an even
@@ -1607,7 +1531,6 @@ pub const fn round_ties_even_f32(x: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn round_ties_even_f64(x: f64) -> f64;
 
 /// Returns the nearest integer to an `f128`. Rounds half-way cases to the number with an even
@@ -1618,7 +1541,6 @@ pub const fn round_ties_even_f64(x: f64) -> f64;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn round_ties_even_f128(x: f128) -> f128;
 
 /// Returns the nearest integer to an `f16`. Rounds half-way cases away from zero.
@@ -1628,7 +1550,6 @@ pub const fn round_ties_even_f128(x: f128) -> f128;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn roundf16(x: f16) -> f16;
 /// Returns the nearest integer to an `f32`. Rounds half-way cases away from zero.
 ///
@@ -1637,7 +1558,6 @@ pub const fn roundf16(x: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn roundf32(x: f32) -> f32;
 /// Returns the nearest integer to an `f64`. Rounds half-way cases away from zero.
 ///
@@ -1646,7 +1566,6 @@ pub const fn roundf32(x: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn roundf64(x: f64) -> f64;
 /// Returns the nearest integer to an `f128`. Rounds half-way cases away from zero.
 ///
@@ -1655,7 +1574,6 @@ pub const fn roundf64(x: f64) -> f64;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn roundf128(x: f128) -> f128;
 
 /// Float addition that allows optimizations based on algebraic rules.
@@ -1664,7 +1582,6 @@ pub const fn roundf128(x: f128) -> f128;
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn fadd_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float subtraction that allows optimizations based on algebraic rules.
@@ -1673,7 +1590,6 @@ pub unsafe fn fadd_fast<T: Copy>(a: T, b: T) -> T;
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn fsub_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float multiplication that allows optimizations based on algebraic rules.
@@ -1682,7 +1598,6 @@ pub unsafe fn fsub_fast<T: Copy>(a: T, b: T) -> T;
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn fmul_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float division that allows optimizations based on algebraic rules.
@@ -1691,7 +1606,6 @@ pub unsafe fn fmul_fast<T: Copy>(a: T, b: T) -> T;
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn fdiv_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float remainder that allows optimizations based on algebraic rules.
@@ -1700,7 +1614,6 @@ pub unsafe fn fdiv_fast<T: Copy>(a: T, b: T) -> T;
 /// This intrinsic does not have a stable counterpart.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn frem_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Converts with LLVM’s fptoui/fptosi, which may return undef for values out of range
@@ -1709,7 +1622,6 @@ pub unsafe fn frem_fast<T: Copy>(a: T, b: T) -> T;
 /// Stabilized as [`f32::to_int_unchecked`] and [`f64::to_int_unchecked`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn float_to_int_unchecked<Float: Copy, Int: Copy>(value: Float) -> Int;
 
 /// Float addition that allows optimizations based on algebraic rules.
@@ -1717,7 +1629,6 @@ pub unsafe fn float_to_int_unchecked<Float: Copy, Int: Copy>(value: Float) -> In
 /// Stabilized as [`f16::algebraic_add`], [`f32::algebraic_add`], [`f64::algebraic_add`] and [`f128::algebraic_add`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fadd_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float subtraction that allows optimizations based on algebraic rules.
@@ -1725,7 +1636,6 @@ pub const fn fadd_algebraic<T: Copy>(a: T, b: T) -> T;
 /// Stabilized as [`f16::algebraic_sub`], [`f32::algebraic_sub`], [`f64::algebraic_sub`] and [`f128::algebraic_sub`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fsub_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float multiplication that allows optimizations based on algebraic rules.
@@ -1733,7 +1643,6 @@ pub const fn fsub_algebraic<T: Copy>(a: T, b: T) -> T;
 /// Stabilized as [`f16::algebraic_mul`], [`f32::algebraic_mul`], [`f64::algebraic_mul`] and [`f128::algebraic_mul`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fmul_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float division that allows optimizations based on algebraic rules.
@@ -1741,7 +1650,6 @@ pub const fn fmul_algebraic<T: Copy>(a: T, b: T) -> T;
 /// Stabilized as [`f16::algebraic_div`], [`f32::algebraic_div`], [`f64::algebraic_div`] and [`f128::algebraic_div`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fdiv_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float remainder that allows optimizations based on algebraic rules.
@@ -1749,7 +1657,6 @@ pub const fn fdiv_algebraic<T: Copy>(a: T, b: T) -> T;
 /// Stabilized as [`f16::algebraic_rem`], [`f32::algebraic_rem`], [`f64::algebraic_rem`] and [`f128::algebraic_rem`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn frem_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Returns the number of bits set in an integer type `T`
@@ -2364,7 +2271,6 @@ pub const fn discriminant_value<T>(v: &T) -> <T as DiscriminantKind>::Discrimina
 /// version of this intrinsic, `std::panic::catch_unwind`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn catch_unwind(
     _try_fn: fn(*mut u8),
     _data: *mut u8,
@@ -2379,14 +2285,12 @@ pub unsafe fn catch_unwind(
 /// in ways that are not allowed for regular writes).
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn nontemporal_store<T>(ptr: *mut T, val: T);
 
 /// See documentation of `<*const T>::offset_from` for details.
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn ptr_offset_from<T>(ptr: *const T, base: *const T) -> isize;
 
 /// See documentation of `<*const T>::offset_from_unsigned` for details.
@@ -2434,7 +2338,6 @@ pub const fn ptr_guaranteed_cmp<T>(ptr: *const T, other: *const T) -> u8 {
 /// which is UB if any of their inputs are `undef`.)
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn raw_eq<T>(a: &T, b: &T) -> bool;
 
 /// Lexicographically compare `[left, left + bytes)` and `[right, right + bytes)`
@@ -2462,7 +2365,6 @@ pub const unsafe fn compare_bytes(left: *const u8, right: *const u8, bytes: usiz
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn black_box<T>(dummy: T) -> T;
 
 /// Selects which function to call depending on the context.
@@ -2764,7 +2666,6 @@ pub const fn overflow_checks() -> bool {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn const_allocate(_size: usize, _align: usize) -> *mut u8 {
     // const eval overrides this function, but runtime code for now just returns null pointers.
     // See <https://github.com/rust-lang/rust/issues/93935>.
@@ -2786,7 +2687,6 @@ pub const unsafe fn const_allocate(_size: usize, _align: usize) -> *mut u8 {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize) {
     // Runtime NOP
 }
@@ -2819,7 +2719,6 @@ pub const unsafe fn const_make_global(ptr: *mut u8) -> *const u8 {
 #[rustc_const_unstable(feature = "contracts", issue = "128044")]
 #[lang = "contract_check_requires"]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {
     const_eval_select!(
         @capture[C: Fn() -> bool + Copy] { cond: C } :
@@ -2849,7 +2748,6 @@ pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {
 #[rustc_const_unstable(feature = "contracts", issue = "128044")]
 #[lang = "contract_check_ensures"]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(
     cond: Option<C>,
     ret: Ret,
@@ -2882,7 +2780,6 @@ pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn vtable_size(ptr: *const ()) -> usize;
 
 /// The intrinsic will return the alignment stored in that vtable.
@@ -2893,7 +2790,6 @@ pub unsafe fn vtable_size(ptr: *const ()) -> usize;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn vtable_align(ptr: *const ()) -> usize;
 
 /// The intrinsic returns the `U` vtable for `T` if `T` can be coerced to the trait object type `U`.
@@ -2981,7 +2877,6 @@ pub const fn offset_of<T: PointeeSized>(variant: u32, field: u32) -> usize;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn variant_count<T>() -> usize;
 
 /// The size of the referenced value in bytes.
@@ -3013,7 +2908,6 @@ pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 /// Compute the type information of a concrete type.
 /// It can only be called at compile time, the backends do
 /// not implement it.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_intrinsic]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 pub const fn type_of(_id: crate::any::TypeId) -> crate::mem::type_info::Type {
@@ -3132,7 +3026,6 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize);
 /// The stabilized version of this intrinsic is [`f16::min`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minnumf16(x: f16, y: f16) -> f16;
 
 /// Returns the minimum of two `f32` values, ignoring NaN.
@@ -3167,7 +3060,6 @@ pub const fn minnumf32(x: f32, y: f32) -> f32;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minnumf64(x: f64, y: f64) -> f64;
 
 /// Returns the minimum of two `f128` values, ignoring NaN.
@@ -3184,7 +3076,6 @@ pub const fn minnumf64(x: f64, y: f64) -> f64;
 /// The stabilized version of this intrinsic is [`f128::min`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minnumf128(x: f128, y: f128) -> f128;
 
 /// Returns the minimum of two `f16` values, propagating NaN.
@@ -3199,7 +3090,6 @@ pub const fn minnumf128(x: f128, y: f128) -> f128;
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minimumf16(x: f16, y: f16) -> f16 {
     if x < y {
         x
@@ -3225,7 +3115,6 @@ pub const fn minimumf16(x: f16, y: f16) -> f16 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minimumf32(x: f32, y: f32) -> f32 {
     if x < y {
         x
@@ -3251,7 +3140,6 @@ pub const fn minimumf32(x: f32, y: f32) -> f32 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minimumf64(x: f64, y: f64) -> f64 {
     if x < y {
         x
@@ -3277,7 +3165,6 @@ pub const fn minimumf64(x: f64, y: f64) -> f64 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minimumf128(x: f128, y: f128) -> f128 {
     if x < y {
         x
@@ -3305,7 +3192,6 @@ pub const fn minimumf128(x: f128, y: f128) -> f128 {
 /// The stabilized version of this intrinsic is [`f16::max`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maxnumf16(x: f16, y: f16) -> f16;
 
 /// Returns the maximum of two `f32` values, ignoring NaN.
@@ -3340,7 +3226,6 @@ pub const fn maxnumf32(x: f32, y: f32) -> f32;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maxnumf64(x: f64, y: f64) -> f64;
 
 /// Returns the maximum of two `f128` values, ignoring NaN.
@@ -3357,7 +3242,6 @@ pub const fn maxnumf64(x: f64, y: f64) -> f64;
 /// The stabilized version of this intrinsic is [`f128::max`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maxnumf128(x: f128, y: f128) -> f128;
 
 /// Returns the maximum of two `f16` values, propagating NaN.
@@ -3372,7 +3256,6 @@ pub const fn maxnumf128(x: f128, y: f128) -> f128;
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maximumf16(x: f16, y: f16) -> f16 {
     if x > y {
         x
@@ -3397,7 +3280,6 @@ pub const fn maximumf16(x: f16, y: f16) -> f16 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maximumf32(x: f32, y: f32) -> f32 {
     if x > y {
         x
@@ -3422,7 +3304,6 @@ pub const fn maximumf32(x: f32, y: f32) -> f32 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maximumf64(x: f64, y: f64) -> f64 {
     if x > y {
         x
@@ -3447,7 +3328,6 @@ pub const fn maximumf64(x: f64, y: f64) -> f64 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn maximumf128(x: f128, y: f128) -> f128 {
     if x > y {
         x
@@ -3492,7 +3372,6 @@ pub const fn fabsf64(x: f64) -> f64;
 /// [`f128::abs`](../../std/primitive.f128.html#method.abs)
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn fabsf128(x: f128) -> f128;
 
 /// Copies the sign from `y` to `x` for `f16` values.
@@ -3501,7 +3380,6 @@ pub const fn fabsf128(x: f128) -> f128;
 /// [`f16::copysign`](../../std/primitive.f16.html#method.copysign)
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn copysignf16(x: f16, y: f16) -> f16;
 
 /// Copies the sign from `y` to `x` for `f32` values.
@@ -3527,7 +3405,6 @@ pub const fn copysignf64(x: f64, y: f64) -> f64;
 /// [`f128::copysign`](../../std/primitive.f128.html#method.copysign)
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn copysignf128(x: f128, y: f128) -> f128;
 
 /// Generates the LLVM body for the automatic differentiation of `f` using Enzyme,
@@ -3614,7 +3491,6 @@ pub const fn offload<F, T: crate::marker::Tuple, R>(
 /// Inform Miri that a given pointer definitely has a certain alignment.
 #[cfg(miri)]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize) {
     unsafe extern "Rust" {
         /// Miri-provided extern function to promise that a given pointer is properly aligned for
@@ -3652,7 +3528,6 @@ pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize
 ///
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
 
 /// Duplicates a variable argument list. The returned list is initially at the same position as
@@ -3665,7 +3540,6 @@ pub const unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaList<'_>) -> T;
 /// when a variable argument list is used incorrectly.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
     src.duplicate()
 }
@@ -3685,7 +3559,6 @@ pub const fn va_copy<'f>(src: &VaList<'f>) -> VaList<'f> {
 ///
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn va_end(ap: &mut VaList<'_>) {
     /* deliberately does nothing */
 }

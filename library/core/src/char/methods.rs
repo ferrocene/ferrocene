@@ -4,10 +4,8 @@ use super::*;
 use crate::panic::const_panic;
 use crate::slice;
 use crate::str::from_utf8_unchecked_mut;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::unicode::printable::is_printable;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::unicode::{self, conversions};
 
 // Ferrocene addition: imports for certified subset
@@ -108,7 +106,6 @@ impl char {
     /// The version numbering scheme is explained in
     /// [Unicode 11.0 or later, Section 3.1 Versions of the Unicode Standard](https://www.unicode.org/versions/Unicode11.0.0/ch03.pdf#page=4).
     #[stable(feature = "assoc_char_consts", since = "1.52.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const UNICODE_VERSION: (u8, u8, u8) = crate::unicode::UNICODE_VERSION;
 
     /// Creates an iterator over the native endian UTF-16 encoded code points in `iter`,
@@ -202,7 +199,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_u32(i: u32) -> Option<char> {
         super::convert::from_u32(i)
     }
@@ -297,7 +293,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
         super::convert::from_digit(num, radix)
     }
@@ -352,7 +347,6 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_char_classify", since = "1.87.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_digit(self, radix: u32) -> bool {
         self.to_digit(radix).is_some()
     }
@@ -475,7 +469,6 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_unicode(self) -> EscapeUnicode {
         EscapeUnicode::new(self)
     }
@@ -599,7 +592,6 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn escape_default(self) -> EscapeDefault {
         match self {
             '\t' => EscapeDefault::backslash(ascii::Char::SmallT),
@@ -693,7 +685,6 @@ impl char {
     #[rustc_const_stable(feature = "const_char_len_utf", since = "1.52.0")]
     #[inline]
     #[must_use]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn len_utf16(self) -> usize {
         len_utf16(self as u32)
     }
@@ -768,7 +759,6 @@ impl char {
     #[stable(feature = "unicode_encode_char", since = "1.15.0")]
     #[rustc_const_stable(feature = "const_char_encode_utf16", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn encode_utf16(self, dst: &mut [u16]) -> &mut [u16] {
         encode_utf16_raw(self as u32, dst)
     }
@@ -797,7 +787,6 @@ impl char {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_alphabetic(self) -> bool {
         match self {
             'a'..='z' | 'A'..='Z' => true,
@@ -839,7 +828,6 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unicode_case_lookup", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_lowercase(self) -> bool {
         match self {
             'a'..='z' => true,
@@ -881,7 +869,6 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unicode_case_lookup", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_uppercase(self) -> bool {
         match self {
             'A'..='Z' => true,
@@ -915,7 +902,6 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_char_classify", since = "1.87.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_whitespace(self) -> bool {
         match self {
             ' ' | '\x09'..='\x0d' => true,
@@ -945,7 +931,6 @@ impl char {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_alphanumeric(self) -> bool {
         if self.is_ascii() {
             self.is_ascii_alphanumeric()
@@ -976,7 +961,6 @@ impl char {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_control(self) -> bool {
         // According to
         // https://www.unicode.org/policies/stability_policy.html#Property_Value,
@@ -1013,7 +997,6 @@ impl char {
     #[inline]
     #[doc(hidden)]
     #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_cased(self) -> bool {
         if self.is_ascii() { self.is_ascii_alphabetic() } else { unicode::Cased(self) }
     }
@@ -1030,7 +1013,6 @@ impl char {
     #[inline]
     #[doc(hidden)]
     #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_case_ignorable(self) -> bool {
         if self.is_ascii() {
             matches!(self, '\'' | '.' | ':' | '^' | '`')
@@ -1075,7 +1057,6 @@ impl char {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn is_numeric(self) -> bool {
         match self {
             '0'..='9' => true,
@@ -1146,7 +1127,6 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn to_lowercase(self) -> ToLowercase {
         ToLowercase(CaseMappingIter::new(conversions::to_lower(self)))
     }
@@ -1240,7 +1220,6 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn to_uppercase(self) -> ToUppercase {
         ToUppercase(CaseMappingIter::new(conversions::to_upper(self)))
     }
@@ -1275,7 +1254,6 @@ impl char {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_ascii(&self) -> Option<ascii::Char> {
         if self.is_ascii() {
             // SAFETY: Just checked that this is ASCII.
@@ -1294,7 +1272,6 @@ impl char {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn as_ascii_unchecked(&self) -> ascii::Char {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -1332,7 +1309,6 @@ impl char {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_ascii_uppercase(&self) -> char {
         if self.is_ascii_lowercase() {
             (*self as u8).ascii_change_case_unchecked() as char
@@ -1367,7 +1343,6 @@ impl char {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_ascii_lowercase(&self) -> char {
         if self.is_ascii_uppercase() {
             (*self as u8).ascii_change_case_unchecked() as char
@@ -1396,7 +1371,6 @@ impl char {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn eq_ignore_ascii_case(&self, other: &char) -> bool {
         self.to_ascii_lowercase() == other.to_ascii_lowercase()
     }
@@ -1423,7 +1397,6 @@ impl char {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn make_ascii_uppercase(&mut self) {
         *self = self.to_ascii_uppercase();
     }
@@ -1450,7 +1423,6 @@ impl char {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn make_ascii_lowercase(&mut self) {
         *self = self.to_ascii_lowercase();
     }
@@ -1487,7 +1459,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_alphabetic(&self) -> bool {
         matches!(*self, 'A'..='Z' | 'a'..='z')
     }
@@ -1522,7 +1493,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_uppercase(&self) -> bool {
         matches!(*self, 'A'..='Z')
     }
@@ -1557,7 +1527,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_lowercase(&self) -> bool {
         matches!(*self, 'a'..='z')
     }
@@ -1595,7 +1564,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_alphanumeric(&self) -> bool {
         matches!(*self, '0'..='9') | matches!(*self, 'A'..='Z') | matches!(*self, 'a'..='z')
     }
@@ -1630,7 +1598,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_digit(&self) -> bool {
         matches!(*self, '0'..='9')
     }
@@ -1662,7 +1629,6 @@ impl char {
     #[must_use]
     #[unstable(feature = "is_ascii_octdigit", issue = "101288")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_octdigit(&self) -> bool {
         matches!(*self, '0'..='7')
     }
@@ -1700,7 +1666,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_hexdigit(&self) -> bool {
         matches!(*self, '0'..='9') | matches!(*self, 'A'..='F') | matches!(*self, 'a'..='f')
     }
@@ -1739,7 +1704,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_punctuation(&self) -> bool {
         matches!(*self, '!'..='/')
             | matches!(*self, ':'..='@')
@@ -1777,7 +1741,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_graphic(&self) -> bool {
         matches!(*self, '!'..='~')
     }
@@ -1829,7 +1792,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_whitespace(&self) -> bool {
         matches!(*self, '\t' | '\n' | '\x0C' | '\r' | ' ')
     }
@@ -1866,7 +1828,6 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_control(&self) -> bool {
         matches!(*self, '\0'..='\x1F' | '\x7F')
     }
@@ -1906,7 +1867,6 @@ const fn len_utf8(code: u32) -> usize {
 
 #[inline]
 #[must_use]
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn len_utf16(code: u32) -> usize {
     if (code & 0xFFFF) == code { 1 } else { 2 }
 }
@@ -2014,7 +1974,6 @@ pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8) {
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
 #[doc(hidden)]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn encode_utf16_raw(mut code: u32, dst: &mut [u16]) -> &mut [u16] {
     let len = len_utf16(code);
     match (len, &mut *dst) {

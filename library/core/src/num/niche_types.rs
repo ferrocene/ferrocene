@@ -144,7 +144,6 @@ define_valid_range_type! {
 }
 
 // Ferrocene annotation: This was split for subset purposes.
-#[cfg(not(feature = "ferrocene_subset"))]
 define_valid_range_type! {
     pub struct U32NotAllOnes(u32 is 0..u32::MAX);
     pub struct I32NotAllOnes(i32 is ..-1 | 0..);
@@ -153,40 +152,31 @@ define_valid_range_type! {
     pub struct I64NotAllOnes(i64 is ..-1 | 0..);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait NotAllOnesHelper {
     type Type;
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 pub type NotAllOnes<T> = <T as NotAllOnesHelper>::Type;
-#[cfg(not(feature = "ferrocene_subset"))]
 impl NotAllOnesHelper for u32 {
     type Type = U32NotAllOnes;
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 impl NotAllOnesHelper for i32 {
     type Type = I32NotAllOnes;
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 impl NotAllOnesHelper for u64 {
     type Type = U64NotAllOnes;
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 impl NotAllOnesHelper for i64 {
     type Type = I64NotAllOnes;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 define_valid_range_type! {
     pub struct CodePointInner(u32 is 0..=0x10ffff);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl CodePointInner {
     pub const ZERO: Self = CodePointInner::new(0).unwrap();
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Default for CodePointInner {
     #[inline]
     fn default() -> Self {

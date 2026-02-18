@@ -140,7 +140,6 @@ pub(super) const fn usize(val: NonZero<usize>) -> u32 {
     impl_fn(unsafe { NonZero::new_unchecked(val.get() as _) })
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! define_signed_ilog10 {
     ($($ty:ident => $impl_fn:ident,)*) => {$(
         // 0 < val <= $ty::MAX
@@ -163,7 +162,6 @@ macro_rules! define_signed_ilog10 {
     )*};
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 define_signed_ilog10! {
     i8 => u8_impl,
     i16 => u16_impl,

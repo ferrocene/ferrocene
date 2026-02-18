@@ -1,9 +1,6 @@
 use crate::intrinsics::unlikely;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
     FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, TrustedRandomAccess,
     TrustedRandomAccessNoCoerce,
@@ -171,7 +168,6 @@ where
     }
 
     #[doc(hidden)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -262,15 +258,12 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> FusedIterator for Skip<I> where I: FusedIterator {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: TrustedFused> TrustedFused for Skip<I> {}
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> SourceIter for Skip<I>
 where
     I: SourceIter,
@@ -285,7 +278,6 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Skip<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
@@ -293,12 +285,10 @@ unsafe impl<I: InPlaceIterable> InPlaceIterable for Skip<I> {
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedRandomAccess for Skip<I> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Skip<I>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -311,5 +301,4 @@ where
 // bound is never `None`. I: TrustedRandomAccess happens to provide this guarantee while
 // I: TrustedLen would not.
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedLen for Skip<I> where I: Iterator + TrustedRandomAccess {}

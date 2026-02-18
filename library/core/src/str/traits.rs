@@ -1,13 +1,10 @@
 //! Trait implementations for `str`.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::ParseBoolError;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
 use crate::intrinsics::unchecked_sub;
 use crate::slice::SliceIndex;
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ops, ptr, range};
 
 // Ferrocene addition: imports for certified subset
@@ -23,7 +20,6 @@ use crate::{ops, ptr};
 /// culturally-accepted standards requires locale-specific data that is outside the scope of
 /// the `str` type.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Ord for str {
     #[inline]
     fn cmp(&self, other: &str) -> Ordering {
@@ -53,7 +49,6 @@ impl const Eq for str {}
 /// culturally-accepted standards requires locale-specific data that is outside the scope of
 /// the `str` type.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl PartialOrd for str {
     #[inline]
     fn partial_cmp(&self, other: &str) -> Option<Ordering> {
@@ -78,7 +73,6 @@ where
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> const ops::IndexMut<I> for str
 where
     I: [const] SliceIndex<str>,
@@ -103,7 +97,6 @@ where
 /// Equivalent to `&self[0 .. len]` or `&mut self[0 .. len]`.
 #[stable(feature = "str_checked_slicing", since = "1.20.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for ops::RangeFull {
     type Output = str;
     #[inline]
@@ -280,7 +273,6 @@ unsafe impl const SliceIndex<str> for ops::Range<usize> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for range::Range<usize> {
     type Output = str;
     #[inline]
@@ -398,7 +390,6 @@ unsafe impl const SliceIndex<str> for range::Range<usize> {
 /// a character (as defined by `is_char_boundary`), if `begin > end`, or if
 /// `end > len`.
 #[stable(feature = "slice_index_str_with_ops_bound_pair", since = "1.73.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl SliceIndex<str> for (ops::Bound<usize>, ops::Bound<usize>) {
     type Output = str;
 
@@ -591,7 +582,6 @@ unsafe impl const SliceIndex<str> for ops::RangeFrom<usize> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for range::RangeFrom<usize> {
     type Output = str;
     #[inline]
@@ -664,7 +654,6 @@ unsafe impl const SliceIndex<str> for range::RangeFrom<usize> {
 /// byte offset or equal to `len`), if `begin > end`, or if `end >= len`.
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for ops::RangeInclusive<usize> {
     type Output = str;
     #[inline]
@@ -723,7 +712,6 @@ unsafe impl const SliceIndex<str> for ops::RangeInclusive<usize> {
 
 #[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for range::RangeInclusive<usize> {
     type Output = str;
     #[inline]
@@ -770,7 +758,6 @@ unsafe impl const SliceIndex<str> for range::RangeInclusive<usize> {
 /// `is_char_boundary`, or equal to `len`), or if `end >= len`.
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for ops::RangeToInclusive<usize> {
     type Output = str;
     #[inline]
@@ -901,7 +888,6 @@ pub const trait FromStr: Sized {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl FromStr for bool {
     type Err = ParseBoolError;
 

@@ -226,7 +226,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn trailing_ones(self) -> u32 {
             (!self).trailing_zeros()
         }
@@ -249,7 +248,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn bit_width(self) -> u32 {
             Self::BITS - self.leading_zeros()
         }
@@ -271,7 +269,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn isolate_highest_one(self) -> Self {
             self & (((1 as $SelfT) << (<$SelfT>::BITS - 1)).wrapping_shr(self.leading_zeros()))
         }
@@ -293,7 +290,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn isolate_lowest_one(self) -> Self {
             self & self.wrapping_neg()
         }
@@ -315,7 +311,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn highest_one(self) -> Option<u32> {
             match NonZero::new(self) {
                 Some(v) => Some(v.highest_one()),
@@ -340,7 +335,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn lowest_one(self) -> Option<u32> {
             match NonZero::new(self) {
                 Some(v) => Some(v.lowest_one()),
@@ -365,7 +359,6 @@ pub const fn leading_ones(self) -> u32 {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn cast_signed(self) -> $SignedT {
             self as $SignedT
         }
@@ -458,7 +451,6 @@ pub const fn rotate_right(self, n: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn funnel_shl(self, rhs: Self, n: u32) -> Self {
             assert!(n < Self::BITS, "attempt to funnel shift left with overflow");
             // SAFETY: just checked that `shift` is in-range
@@ -494,7 +486,6 @@ pub const fn rotate_right(self, n: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn funnel_shr(self, rhs: Self, n: u32) -> Self {
             assert!(n < Self::BITS, "attempt to funnel shift right with overflow");
             // SAFETY: just checked that `shift` is in-range
@@ -553,7 +544,6 @@ pub const fn rotate_right(self, n: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn carryless_mul(self, rhs: Self) -> Self {
             intrinsics::carryless_mul(self, rhs)
         }
@@ -587,7 +577,6 @@ pub const fn swap_bytes(self) -> Self {
         /// assert_eq!(n.extract_bits(0b0010_0100), 0b0000_0011);
         /// assert_eq!(n.extract_bits(0xF0), 0b0000_1011);
         /// ```
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[unstable(feature = "uint_gather_scatter_bits", issue = "149069")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
@@ -605,7 +594,6 @@ pub const fn swap_bytes(self) -> Self {
         /// assert_eq!(n.deposit_bits(0b0101_0101), 0b0101_0001);
         /// assert_eq!(n.deposit_bits(0xF0), 0b1101_0000);
         /// ```
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[unstable(feature = "uint_gather_scatter_bits", issue = "149069")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
@@ -826,7 +814,6 @@ pub const fn checked_add(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_add(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_add(rhs);
             if b { overflow_panic::add() } else { a }
@@ -888,7 +875,6 @@ pub const unsafe fn unchecked_add(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_add_signed(self, rhs: $SignedT) -> Option<Self> {
             let (a, b) = self.overflowing_add_signed(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
@@ -924,7 +910,6 @@ pub const unsafe fn unchecked_add(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_add_signed(self, rhs: $SignedT) -> Self {
             let (a, b) = self.overflowing_add_signed(rhs);
             if b { overflow_panic::add() } else { a }
@@ -985,7 +970,6 @@ pub const fn checked_sub(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_sub(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_sub(rhs);
             if b { overflow_panic::sub() } else { a }
@@ -1072,7 +1056,6 @@ pub const unsafe fn unchecked_sub(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_sub_signed(self, rhs: $SignedT) -> Option<Self> {
             let (res, overflow) = self.overflowing_sub_signed(rhs);
 
@@ -1113,7 +1096,6 @@ pub const unsafe fn unchecked_sub(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_sub_signed(self, rhs: $SignedT) -> Self {
             let (a, b) = self.overflowing_sub_signed(rhs);
             if b { overflow_panic::sub() } else { a }
@@ -1167,7 +1149,6 @@ pub const unsafe fn unchecked_sub(self, rhs: Self) -> Self {
         #[stable(feature = "unsigned_signed_diff", since = "1.91.0")]
         #[rustc_const_stable(feature = "unsigned_signed_diff", since = "1.91.0")]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_signed_diff(self, rhs: Self) -> Option<$SignedT> {
             let res = self.wrapping_sub(rhs) as $SignedT;
             let overflow = (self >= rhs) == (res < 0);
@@ -1225,7 +1206,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_mul(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_mul(rhs);
             if b { overflow_panic::mul() } else { a }
@@ -1255,7 +1235,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const unsafe fn unchecked_mul(self, rhs: Self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
@@ -1286,7 +1265,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_div(self, rhs: Self) -> Option<Self> {
             if intrinsics::unlikely(rhs == 0) {
                 None
@@ -1324,7 +1302,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_div(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -1343,7 +1320,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_div_euclid(self, rhs: Self) -> Option<Self> {
             if intrinsics::unlikely(rhs == 0) {
                 None
@@ -1380,7 +1356,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_div_euclid(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -1404,7 +1379,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_div_exact(self, rhs: Self) -> Option<Self> {
             if intrinsics::unlikely(rhs == 0) {
                 None
@@ -1442,7 +1416,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn div_exact(self, rhs: Self) -> Option<Self> {
             if self % rhs != 0 {
                 None
@@ -1464,7 +1437,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const unsafe fn unchecked_div_exact(self, rhs: Self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
@@ -1492,7 +1464,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_rem(self, rhs: Self) -> Option<Self> {
             if intrinsics::unlikely(rhs == 0) {
                 None
@@ -1531,7 +1502,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_rem(self, rhs: Self) -> Self {
             self % rhs
         }
@@ -1550,7 +1520,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_rem_euclid(self, rhs: Self) -> Option<Self> {
             if intrinsics::unlikely(rhs == 0) {
                 None
@@ -1589,7 +1558,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_rem_euclid(self, rhs: Self) -> Self {
             self % rhs
         }
@@ -1624,7 +1592,6 @@ pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
         #[unstable(feature = "disjoint_bitor", issue = "135758")]
         #[rustc_const_unstable(feature = "disjoint_bitor", issue = "135758")]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const unsafe fn unchecked_disjoint_bitor(self, other: Self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,
@@ -1849,7 +1816,6 @@ pub const fn checked_ilog10(self) -> Option<u32> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_neg(self) -> Option<Self> {
             let (a, b) = self.overflowing_neg();
             if intrinsics::unlikely(b) { None } else { Some(a) }
@@ -1883,7 +1849,6 @@ pub const fn checked_ilog10(self) -> Option<u32> {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_neg(self) -> Self {
             let (a, b) = self.overflowing_neg();
             if b { overflow_panic::neg() } else { a }
@@ -1904,7 +1869,6 @@ pub const fn checked_ilog10(self) -> Option<u32> {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_shl(self, rhs: u32) -> Option<Self> {
             // Not using overflowing_shl as that's a wrapping shift
             if rhs < Self::BITS {
@@ -1941,7 +1905,6 @@ pub const fn checked_ilog10(self) -> Option<u32> {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_shl(self, rhs: u32) -> Self {
             let (a, b) = self.overflowing_shl(rhs);
             if b { overflow_panic::shl() } else { a }
@@ -2011,7 +1974,6 @@ pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn unbounded_shl(self, rhs: u32) -> $SelfT{
             if rhs < Self::BITS {
                 // SAFETY:
@@ -2040,7 +2002,6 @@ pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn shl_exact(self, rhs: u32) -> Option<$SelfT> {
             if rhs <= self.leading_zeros() && rhs < <$SelfT>::BITS {
                 // SAFETY: rhs is checked above
@@ -2065,7 +2026,6 @@ pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const unsafe fn unchecked_shl_exact(self, rhs: u32) -> $SelfT {
             assert_unsafe_precondition!(
                 check_library_ub,
@@ -2095,7 +2055,6 @@ pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_shr(self, rhs: u32) -> Option<Self> {
             // Not using overflowing_shr as that's a wrapping shift
             if rhs < Self::BITS {
@@ -2132,7 +2091,6 @@ pub const unsafe fn unchecked_shl(self, rhs: u32) -> Self {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_shr(self, rhs: u32) -> Self {
             let (a, b) = self.overflowing_shr(rhs);
             if b { overflow_panic::shr() } else { a }
@@ -2202,7 +2160,6 @@ pub const unsafe fn unchecked_shr(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn unbounded_shr(self, rhs: u32) -> $SelfT{
             if rhs < Self::BITS {
                 // SAFETY:
@@ -2231,7 +2188,6 @@ pub const unsafe fn unchecked_shr(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn shr_exact(self, rhs: u32) -> Option<$SelfT> {
             if rhs <= self.trailing_zeros() && rhs < <$SelfT>::BITS {
                 // SAFETY: rhs is checked above
@@ -2256,7 +2212,6 @@ pub const unsafe fn unchecked_shr(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const unsafe fn unchecked_shr_exact(self, rhs: u32) -> $SelfT {
             assert_unsafe_precondition!(
                 check_library_ub,
@@ -2335,7 +2290,6 @@ pub const fn checked_pow(self, mut exp: u32) -> Option<Self> {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_pow(self, mut exp: u32) -> Self {
             if exp == 0 {
                 return 1;
@@ -2390,7 +2344,6 @@ pub const fn saturating_add(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_add_signed(self, rhs: $SignedT) -> Self {
             let (res, overflow) = self.overflowing_add(rhs as Self);
             if overflow == (rhs < 0) {
@@ -2436,7 +2389,6 @@ pub const fn saturating_sub(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_sub_signed(self, rhs: $SignedT) -> Self {
             let (res, overflow) = self.overflowing_sub_signed(rhs);
 
@@ -2490,7 +2442,6 @@ pub const fn saturating_mul(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_div(self, rhs: Self) -> Self {
             // on unsigned types, there is no overflow in integer division
             self.wrapping_div(rhs)
@@ -2511,7 +2462,6 @@ pub const fn saturating_mul(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_pow(self, exp: u32) -> Self {
             match self.checked_pow(exp) {
                 Some(x) => x,
@@ -2592,7 +2542,6 @@ pub const fn wrapping_sub(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_sub_signed(self, rhs: $SignedT) -> Self {
             self.wrapping_sub(rhs as Self)
         }
@@ -2639,7 +2588,6 @@ pub const fn wrapping_mul(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_div(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -2667,7 +2615,6 @@ pub const fn wrapping_mul(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_div_euclid(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -2694,7 +2641,6 @@ pub const fn wrapping_mul(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_rem(self, rhs: Self) -> Self {
             self % rhs
         }
@@ -2723,7 +2669,6 @@ pub const fn wrapping_mul(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_rem_euclid(self, rhs: Self) -> Self {
             self % rhs
         }
@@ -2861,7 +2806,6 @@ pub const fn wrapping_shr(self, rhs: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_pow(self, mut exp: u32) -> Self {
             if exp == 0 {
                 return 1;
@@ -3059,7 +3003,6 @@ pub const fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn borrowing_sub(self, rhs: Self, borrow: bool) -> (Self, bool) {
             // note: longer-term this should be done via an intrinsic, but this has been shown
             //   to generate optimal code for now, and LLVM doesn't have an equivalent intrinsic
@@ -3090,7 +3033,6 @@ pub const fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_sub_signed(self, rhs: $SignedT) -> (Self, bool) {
             let (res, overflow) = self.overflowing_sub(rhs as Self);
 
@@ -3376,7 +3318,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_div(self, rhs: Self) -> (Self, bool) {
             (self / rhs, false)
         }
@@ -3406,7 +3347,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_div_euclid(self, rhs: Self) -> (Self, bool) {
             (self / rhs, false)
         }
@@ -3433,7 +3373,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_rem(self, rhs: Self) -> (Self, bool) {
             (self % rhs, false)
         }
@@ -3463,7 +3402,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_rem_euclid(self, rhs: Self) -> (Self, bool) {
             (self % rhs, false)
         }
@@ -3486,7 +3424,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[rustc_const_stable(feature = "const_wrapping_math", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_neg(self) -> (Self, bool) {
             ((!self).wrapping_add(1), self != 0)
         }
@@ -3511,7 +3448,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_shl(self, rhs: u32) -> (Self, bool) {
             (self.wrapping_shl(rhs), rhs >= Self::BITS)
         }
@@ -3535,7 +3471,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_shr(self, rhs: u32) -> (Self, bool) {
             (self.wrapping_shr(rhs), rhs >= Self::BITS)
         }
@@ -3557,7 +3492,6 @@ pub const fn carrying_mul_add(self, rhs: Self, carry: Self, add: Self) -> (Self,
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_pow(self, mut exp: u32) -> (Self, bool) {
             if exp == 0{
                 return (1,false);
@@ -3653,7 +3587,6 @@ pub const fn pow(self, mut exp: u32) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn isqrt(self) -> Self {
             let result = crate::num::int_sqrt::$ActualT(self as $ActualT) as $SelfT;
 
@@ -3696,7 +3629,6 @@ pub const fn pow(self, mut exp: u32) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn div_euclid(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -3725,7 +3657,6 @@ pub const fn pow(self, mut exp: u32) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn rem_euclid(self, rhs: Self) -> Self {
             self % rhs
         }
@@ -3749,7 +3680,6 @@ pub const fn pow(self, mut exp: u32) -> Self {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn div_floor(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -3806,7 +3736,6 @@ pub const fn div_ceil(self, rhs: Self) -> Self {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn next_multiple_of(self, rhs: Self) -> Self {
             match self % rhs {
                 0 => self,
@@ -3831,7 +3760,6 @@ pub const fn div_ceil(self, rhs: Self) -> Self {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_next_multiple_of(self, rhs: Self) -> Option<Self> {
             match try_opt!(self.checked_rem(rhs)) {
                 0 => Some(self),
@@ -3894,7 +3822,6 @@ pub const fn is_power_of_two(self) -> bool {
         // overflow cases it instead ends up returning the maximum value
         // of the type, and can return 0 for 0.
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         const fn one_less_than_next_power_of_two(self) -> Self {
             if self <= 1 { return 0; }
 
@@ -3926,7 +3853,6 @@ pub const fn is_power_of_two(self) -> bool {
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn next_power_of_two(self) -> Self {
             self.one_less_than_next_power_of_two() + 1
         }
@@ -3947,7 +3873,6 @@ pub const fn is_power_of_two(self) -> bool {
         #[rustc_const_stable(feature = "const_int_pow", since = "1.50.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_next_power_of_two(self) -> Option<Self> {
             self.one_less_than_next_power_of_two().checked_add(1)
         }
@@ -3970,7 +3895,6 @@ pub const fn is_power_of_two(self) -> bool {
                    reason = "needs decision on wrapping behavior")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_next_power_of_two(self) -> Self {
             self.one_less_than_next_power_of_two().wrapping_add(1)
         }
@@ -4172,7 +4096,6 @@ pub const fn from_ne_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
         #[rustc_const_stable(feature = "const_max_value", since = "1.32.0")]
         #[deprecated(since = "TBD", note = "replaced by the `MIN` associated constant on this type")]
         #[rustc_diagnostic_item = concat!(stringify!($SelfT), "_legacy_fn_min_value")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn min_value() -> Self { Self::MIN }
 
         /// New code should prefer to use
@@ -4185,7 +4108,6 @@ pub const fn from_ne_bytes(bytes: [u8; size_of::<Self>()]) -> Self {
         #[rustc_const_stable(feature = "const_max_value", since = "1.32.0")]
         #[deprecated(since = "TBD", note = "replaced by the `MAX` associated constant on this type")]
         #[rustc_diagnostic_item = concat!(stringify!($SelfT), "_legacy_fn_max_value")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn max_value() -> Self { Self::MAX }
     }
 }

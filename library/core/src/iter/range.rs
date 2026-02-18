@@ -1,11 +1,8 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, TrustedStep,
 };
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ascii::Char as AsciiChar;
 use crate::mem;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::net::{Ipv4Addr, Ipv6Addr};
 use crate::num::NonZero;
 use crate::ops::{self, Try};
@@ -16,14 +13,12 @@ use crate::ops::{self, Try};
 use super::TrustedStep;
 
 // Safety: All invariants are upheld.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! unsafe_impl_trusted_step {
     ($($type:ty)*) => {$(
         #[unstable(feature = "trusted_step", issue = "85731")]
         unsafe impl TrustedStep for $type {}
     )*};
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe_impl_trusted_step![AsciiChar char i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize Ipv4Addr Ipv6Addr];
 
 /// Objects that have a notion of *successor* and *predecessor* operations.
@@ -481,7 +476,6 @@ step_integer_impls! {
 }
 
 #[unstable(feature = "step_trait", issue = "42168")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Step for char {
     #[inline]
     fn steps_between(&start: &char, &end: &char) -> (usize, Option<usize>) {
@@ -569,7 +563,6 @@ impl Step for char {
 }
 
 #[unstable(feature = "step_trait", issue = "42168")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Step for AsciiChar {
     #[inline]
     fn steps_between(&start: &AsciiChar, &end: &AsciiChar) -> (usize, Option<usize>) {
@@ -611,7 +604,6 @@ impl Step for AsciiChar {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "step_trait", issue = "42168")]
 impl Step for Ipv4Addr {
     #[inline]
@@ -645,7 +637,6 @@ impl Step for Ipv4Addr {
 }
 
 #[unstable(feature = "step_trait", issue = "42168")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Step for Ipv6Addr {
     #[inline]
     fn steps_between(&start: &Ipv6Addr, &end: &Ipv6Addr) -> (usize, Option<usize>) {
@@ -686,7 +677,6 @@ macro_rules! range_exact_iter_impl {
 
 /// Safety: This macro must only be used on types that are `Copy` and result in ranges
 /// which have an exact `size_hint()` where the upper bound must not be `None`.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! unsafe_range_trusted_random_access_impl {
     ($($t:ty)*) => ($(
         #[doc(hidden)]
@@ -701,7 +691,6 @@ macro_rules! unsafe_range_trusted_random_access_impl {
     )*)
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! range_incl_exact_iter_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "inclusive_range", since = "1.26.0")]
@@ -810,7 +799,6 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     #[inline]
     fn spec_next(&mut self) -> Option<T> {
@@ -936,7 +924,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn min(mut self) -> Option<A>
     where
         A: Ord,
@@ -945,7 +932,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn max(mut self) -> Option<A>
     where
         A: Ord,
@@ -954,7 +940,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_sorted(self) -> bool {
         true
     }
@@ -966,7 +951,6 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -999,26 +983,22 @@ range_exact_iter_impl! {
     i32
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe_range_trusted_random_access_impl! {
     usize u8 u16
     isize i8 i16
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe_range_trusted_random_access_impl! {
     u32 i32
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe_range_trusted_random_access_impl! {
     u32 i32
     u64 i64
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 range_incl_exact_iter_impl! {
     u8
     i8
@@ -1072,15 +1052,12 @@ impl<A: Step> DoubleEndedIterator for ops::Range<A> {
 // then `(0, Some(0))` is returned by `ops::Range<A: Step>::size_hint`. As such
 // the second invariant is upheld.
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A: TrustedStep> TrustedLen for ops::Range<A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> FusedIterator for ops::Range<A> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> Iterator for ops::RangeFrom<A> {
     type Item = A;
 
@@ -1105,11 +1082,9 @@ impl<A: Step> Iterator for ops::RangeFrom<A> {
 
 // Safety: See above implementation for `ops::Range<A>`
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A: TrustedStep> TrustedLen for ops::RangeFrom<A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> FusedIterator for ops::RangeFrom<A> {}
 
 trait RangeInclusiveIteratorImpl {
@@ -1408,7 +1383,6 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next_back()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn min(mut self) -> Option<A>
     where
@@ -1417,7 +1391,6 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn max(mut self) -> Option<A>
     where
@@ -1426,7 +1399,6 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next_back()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn is_sorted(self) -> bool {
         true
@@ -1486,9 +1458,7 @@ impl<A: Step> DoubleEndedIterator for ops::RangeInclusive<A> {
 
 // Safety: See above implementation for `ops::Range<A>`
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A: TrustedStep> TrustedLen for ops::RangeInclusive<A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: Step> FusedIterator for ops::RangeInclusive<A> {}

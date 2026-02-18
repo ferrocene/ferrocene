@@ -15,6 +15,7 @@ const USIZE_BYTES: usize = size_of::<usize>();
 /// bytes where the borrow propagated all the way to the most significant
 /// bit."
 #[inline]
+#[ferrocene::prevalidated]
 const fn contains_zero_byte(x: usize) -> bool {
     x.wrapping_sub(LO_USIZE) & !x & HI_USIZE != 0
 }
@@ -22,6 +23,7 @@ const fn contains_zero_byte(x: usize) -> bool {
 /// Returns the first index matching the byte `x` in `text`.
 #[inline]
 #[must_use]
+#[ferrocene::prevalidated]
 pub const fn memchr(x: u8, text: &[u8]) -> Option<usize> {
     // Fast path for small slices.
     if text.len() < 2 * USIZE_BYTES {
@@ -32,6 +34,7 @@ pub const fn memchr(x: u8, text: &[u8]) -> Option<usize> {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 const fn memchr_naive(x: u8, text: &[u8]) -> Option<usize> {
     let mut i = 0;
 
@@ -48,6 +51,7 @@ const fn memchr_naive(x: u8, text: &[u8]) -> Option<usize> {
 }
 
 #[rustc_allow_const_fn_unstable(const_eval_select)] // fallback impl has same behavior
+#[ferrocene::prevalidated]
 const fn memchr_aligned(x: u8, text: &[u8]) -> Option<usize> {
     // The runtime version behaves the same as the compiletime version, it's
     // just more optimized.
@@ -107,7 +111,6 @@ const fn memchr_aligned(x: u8, text: &[u8]) -> Option<usize> {
 }
 
 /// Returns the last index matching the byte `x` in `text`.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 pub fn memrchr(x: u8, text: &[u8]) -> Option<usize> {
     // Scan for a single byte value by reading two `usize` words at a time.

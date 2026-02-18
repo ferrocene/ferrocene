@@ -93,6 +93,8 @@
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
 //
+// Ferrocene addition: require transitive closure of prevalidated functions.
+#![warn(ferrocene::unvalidated)]
 // Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
 // of conflicts we have when merging main.
 //
@@ -241,7 +243,6 @@ mod macros;
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
 #[unstable(feature = "assert_matches", issue = "82775")]
@@ -263,7 +264,6 @@ pub mod autodiff {
 }
 
 #[unstable(feature = "contracts", issue = "128044")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod contracts;
 
 #[unstable(feature = "cfg_select", issue = "115585")]
@@ -273,21 +273,17 @@ pub use crate::macros::cfg_select;
 mod internal_macros;
 
 #[path = "num/shells/legacy_int_modules.rs"]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod legacy_int_modules;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(clippy::useless_attribute)] // FIXME false positive (https://github.com/rust-lang/rust-clippy/issues/15636)
 #[allow(deprecated_in_future)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use legacy_int_modules::{i8, i16, i32, i64, isize, u8, u16, u32, u64, usize};
 #[stable(feature = "i128", since = "1.26.0")]
 #[allow(clippy::useless_attribute)] // FIXME false positive (https://github.com/rust-lang/rust-clippy/issues/15636)
 #[allow(deprecated_in_future)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use legacy_int_modules::{i128, u128};
 
 #[path = "num/f128.rs"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod f128;
 #[path = "num/f16.rs"]
 pub mod f16;
@@ -317,9 +313,7 @@ pub mod clone;
 pub mod cmp;
 pub mod convert;
 pub mod default;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod error;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod index;
 pub mod marker;
 pub mod ops;
@@ -329,10 +323,8 @@ pub mod ops;
 pub mod any;
 pub mod array;
 pub mod ascii;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod asserting;
 #[unstable(feature = "async_iterator", issue = "79024")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
 pub mod bstr;
@@ -340,31 +332,23 @@ pub mod cell;
 pub mod char;
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod io;
 pub mod iter;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod net;
 pub mod option;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod os;
 pub mod panic;
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod pat;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod random;
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
 pub mod range;
 pub mod result;
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod unsafe_binder;
 
 pub mod fmt;
@@ -373,15 +357,12 @@ pub mod slice;
 pub mod str;
 pub mod time;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod wtf8;
 
 pub mod unicode;
 
 /* Async */
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod future;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod task;
 
 /* Heap memory allocator trait */
@@ -395,7 +376,6 @@ mod tuple;
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod primitive;
 
 // Pull in the `core_arch` crate directly into core. The contents of
@@ -431,11 +411,9 @@ pub mod arch;
 #[allow(missing_debug_implementations, dead_code, unsafe_op_in_unsafe_fn)]
 #[allow(rustdoc::bare_urls)]
 #[unstable(feature = "portable_simd", issue = "86656")]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod core_simd;
 
 #[unstable(feature = "portable_simd", issue = "86656")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod simd {
     #![doc = include_str!("../../portable-simd/crates/core_simd/src/core_simd_docs.md")]
 

@@ -4,15 +4,10 @@
 // collections, resulting in having to optimize down excess IR multiple times.
 // Your performance intuition is useless. Run perf.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::{unchecked_add, unchecked_mul, unchecked_sub};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::SizedTypeProperties;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::{Alignment, NonNull};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{assert_unsafe_precondition, fmt, mem};
 
 // Ferrocene addition: imports for certified subset
@@ -37,6 +32,7 @@ use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, mem::Siz
 #[stable(feature = "alloc_layout", since = "1.28.0")]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[lang = "alloc_layout"]
+#[ferrocene::prevalidated]
 pub struct Layout {
     // size of the requested block of memory, measured in bytes.
     size: usize,
@@ -66,7 +62,6 @@ impl Layout {
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_size_align(size: usize, align: usize) -> Result<Self, LayoutError> {
         if Layout::is_size_align_valid(size, align) {
             // SAFETY: Layout::is_size_align_valid checks the preconditions for this call.
@@ -77,16 +72,19 @@ impl Layout {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn is_size_align_valid(size: usize, align: usize) -> bool {
         let Some(alignment) = Alignment::new(align) else { return false };
         Self::is_size_alignment_valid(size, alignment)
     }
 
+    #[ferrocene::prevalidated]
     const fn is_size_alignment_valid(size: usize, alignment: Alignment) -> bool {
         size <= Self::max_size_for_alignment(alignment)
     }
 
     #[inline(always)]
+    #[ferrocene::prevalidated]
     const fn max_size_for_alignment(alignment: Alignment) -> usize {
         // (power-of-two implies align != 0.)
 
@@ -115,7 +113,6 @@ impl Layout {
     /// * `size`, when rounded up to the nearest multiple of `alignment`,
     ///   must not overflow `isize` (i.e., the rounded value must be
     ///   less than or equal to `isize::MAX`).
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
     pub const fn from_size_alignment(
@@ -141,6 +138,7 @@ impl Layout {
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_size_align_unchecked(size: usize, align: usize) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -165,6 +163,7 @@ impl Layout {
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_size_alignment_unchecked(size: usize, alignment: Alignment) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -184,6 +183,7 @@ impl Layout {
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn size(&self) -> usize {
         self.size
     }
@@ -196,6 +196,7 @@ impl Layout {
     #[must_use = "this returns the minimum alignment, \
                   without modifying the layout"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn align(&self) -> usize {
         self.align.as_usize()
     }
@@ -203,7 +204,6 @@ impl Layout {
     /// The minimum byte alignment for a memory block of this layout.
     ///
     /// The returned alignment is guaranteed to be a power of two.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[must_use = "this returns the minimum alignment, without modifying the layout"]
     #[inline]
@@ -216,6 +216,7 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_const_new", since = "1.42.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new<T>() -> Self {
         <T as SizedTypeProperties>::LAYOUT
     }
@@ -227,7 +228,6 @@ impl Layout {
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn for_value<T: ?Sized>(t: &T) -> Self {
         let (size, alignment) = (size_of_val(t), Alignment::of_val(t));
         // SAFETY: see rationale in `new` for why this is using the unsafe variant
@@ -261,7 +261,6 @@ impl Layout {
     ///
     /// [trait object]: ../../book/ch17-02-trait-objects.html
     /// [extern type]: ../../unstable-book/language-features/extern-types.html
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "layout_for_ptr", issue = "69835")]
     #[must_use]
     #[inline]
@@ -282,7 +281,6 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn dangling_ptr(&self) -> NonNull<u8> {
         NonNull::without_provenance(self.align.as_nonzero())
     }
@@ -304,7 +302,6 @@ impl Layout {
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn align_to(&self, align: usize) -> Result<Self, LayoutError> {
         if let Some(alignment) = Alignment::new(align) {
             self.adjust_alignment_to(alignment)
@@ -327,7 +324,6 @@ impl Layout {
     ///
     /// Returns an error if the combination of `self.size()` and the given
     /// `alignment` violates the conditions listed in [`Layout::from_size_alignment`].
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
     pub const fn adjust_alignment_to(&self, alignment: Alignment) -> Result<Self, LayoutError> {
@@ -350,7 +346,6 @@ impl Layout {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[must_use = "this returns the padding needed, without modifying the `Layout`"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn padding_needed_for(&self, alignment: Alignment) -> usize {
         let len_rounded_up = self.size_rounded_up_to_custom_alignment(alignment);
         // SAFETY: Cannot overflow because the rounded-up value is never less
@@ -361,7 +356,6 @@ impl Layout {
     ///
     /// This can return at most `Alignment::MAX` (aka `isize::MAX + 1`)
     /// because the original size is at most `isize::MAX`.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     const fn size_rounded_up_to_custom_alignment(&self, alignment: Alignment) -> usize {
         // SAFETY:
@@ -398,7 +392,6 @@ impl Layout {
     #[must_use = "this returns a new `Layout`, \
                   without modifying the original"]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn pad_to_align(&self) -> Layout {
         // This cannot overflow. Quoting from the invariant of Layout:
         // > `size`, when rounded up to the nearest multiple of `align`,
@@ -447,7 +440,6 @@ impl Layout {
     #[stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn repeat(&self, n: usize) -> Result<(Self, usize), LayoutError> {
         // FIXME(const-hack): the following could be way shorter with `?`
         let padded = self.pad_to_align();
@@ -513,7 +505,6 @@ impl Layout {
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn extend(&self, next: Self) -> Result<(Self, usize), LayoutError> {
         let new_alignment = Alignment::max(self.align, next.align);
         let offset = self.size_rounded_up_to_custom_alignment(next.align);
@@ -546,7 +537,6 @@ impl Layout {
     #[stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn repeat_packed(&self, n: usize) -> Result<Self, LayoutError> {
         if let Some(size) = self.size.checked_mul(n) {
             // The safe constructor is called here to enforce the isize size limit.
@@ -565,7 +555,6 @@ impl Layout {
     #[stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn extend_packed(&self, next: Self) -> Result<Self, LayoutError> {
         // SAFETY: each `size` is at most `isize::MAX == usize::MAX/2`, so the
         // sum is at most `usize::MAX/2*2 == usize::MAX - 1`, and cannot overflow.
@@ -581,7 +570,6 @@ impl Layout {
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn array<T>(n: usize) -> Result<Self, LayoutError> {
         // Reduce the amount of code we need to monomorphize per `T`.
         return inner(T::LAYOUT, n);
@@ -620,7 +608,6 @@ impl Layout {
     note = "Name does not follow std convention, use LayoutError",
     suggestion = "LayoutError"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub type LayoutErr = LayoutError;
 
 /// The `LayoutError` is returned when the parameters given
@@ -630,16 +617,13 @@ pub type LayoutErr = LayoutError;
 #[stable(feature = "alloc_layout_error", since = "1.50.0")]
 #[non_exhaustive]
 #[derive(Clone, PartialEq, Eq, Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct LayoutError;
 
 #[stable(feature = "alloc_layout", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for LayoutError {}
 
 // (we need this for downstream impl of trait Error)
 #[stable(feature = "alloc_layout", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for LayoutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("invalid parameters to Layout::from_size_align")

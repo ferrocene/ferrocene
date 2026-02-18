@@ -1,0 +1,28 @@
+error: validated function calls an unvalidated function
+  --> $DIR/allow-still-recurses.rs:14:9
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+...
+LL |         unvalidated();
+   |         ^^^^^^^^^^^^^
+   |
+note: `reachable_allowed` is validated
+  --> $DIR/allow-still-recurses.rs:24:8
+   |
+LL | }
+   | - `Validated` dropped here, in `uninstantiated_generic_indirect::<Validated>`
+LL |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | #[allow(ferrocene::unvalidated)]
+LL | pub fn reachable_allowed() {
+   |        ^^^^^^^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/allow-still-recurses.rs:6:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

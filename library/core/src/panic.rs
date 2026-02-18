@@ -4,7 +4,6 @@
 
 mod location;
 mod panic_info;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod unwind_safe;
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
@@ -14,9 +13,7 @@ pub use self::panic_info::PanicInfo;
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 pub use self::panic_info::PanicMessage;
 #[stable(feature = "catch_unwind", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::unwind_safe::{AssertUnwindSafe, RefUnwindSafe, UnwindSafe};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::any::Any;
 
 #[doc(hidden)]
@@ -119,7 +116,6 @@ pub macro unreachable_2021 {
 /// convert unwinds to aborts, so using this function isn't necessary for FFI.
 #[unstable(feature = "abort_unwind", issue = "130338")]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn abort_unwind<F: FnOnce() -> R, R>(f: F) -> R {
     f()
 }
@@ -129,7 +125,6 @@ pub fn abort_unwind<F: FnOnce() -> R, R>(f: F) -> R {
 /// use.
 #[unstable(feature = "std_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait PanicPayload: crate::fmt::Display {
     /// Take full ownership of the contents.
     /// The return type is actually `Box<dyn Any + Send>`, but we cannot use `Box` in core.
@@ -168,7 +163,8 @@ pub macro const_panic {
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         #[inline(always)] // inline the wrapper
         #[track_caller]
-        const fn do_panic($($arg: $ty),*) -> ! {
+        #[ferrocene::prevalidated]
+const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:
                 if const #[track_caller] {

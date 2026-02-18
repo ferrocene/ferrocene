@@ -505,7 +505,6 @@ macro_rules! matches {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(since = "1.39.0", note = "use the `?` operator instead")]
 #[doc(alias = "?")]
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! r#try {
     ($expr:expr $(,)?) => {
         match $expr {
@@ -793,7 +792,6 @@ macro_rules! unreachable {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "unimplemented_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! unimplemented {
     () => {
         $crate::panicking::panic("not implemented")
@@ -874,7 +872,6 @@ macro_rules! unimplemented {
 #[stable(feature = "todo_macro", since = "1.40.0")]
 #[rustc_diagnostic_item = "todo_macro"]
 #[allow_internal_unstable(panic_internals)]
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! todo {
     () => {
         $crate::panicking::panic("not yet implemented")

@@ -1,6 +1,5 @@
 use crate::num::TryFromIntError;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod private {
     /// This trait being unreachable from outside the crate
     /// prevents other implementations of the `FloatToInt` trait,
@@ -11,7 +10,6 @@ mod private {
 
 /// Supporting trait for inherent methods of `f32` and `f64` such as `to_int_unchecked`.
 /// Typically doesn’t need to be used directly.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "convert_float_to_int", issue = "67057")]
 pub trait FloatToInt<Int>: private::Sealed + Sized {
     #[unstable(feature = "convert_float_to_int", issue = "67057")]
@@ -19,7 +17,6 @@ pub trait FloatToInt<Int>: private::Sealed + Sized {
     unsafe fn to_int_unchecked(self) -> Int;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_float_to_int {
     ($Float:ty => $($Int:ty),+) => {
         #[unstable(feature = "convert_float_to_int", issue = "67057")]
@@ -37,13 +34,9 @@ macro_rules! impl_float_to_int {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_to_int!(f16 => u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_to_int!(f32 => u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_to_int!(f64 => u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_to_int!(f128 => u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 /// Implement `From<bool>` for integers
@@ -64,7 +57,8 @@ macro_rules! impl_from_bool {
             #[doc = concat!("assert_eq!(", stringify!($int), "::from(true), 1);")]
             /// ```
             #[inline(always)]
-            fn from(b: bool) -> Self {
+            #[ferrocene::prevalidated]
+fn from(b: bool) -> Self {
                 b as Self
             }
         }
@@ -83,7 +77,8 @@ macro_rules! impl_from {
         impl const From<$small> for $large {
             #[doc = concat!("Converts from [`", stringify!($small), "`] to [`", stringify!($large), "`] losslessly.")]
             #[inline(always)]
-            fn from(small: $small) -> Self {
+            #[ferrocene::prevalidated]
+fn from(small: $small) -> Self {
                 debug_assert!(<$large>::MIN as i128 <= <$small>::MIN as i128);
                 debug_assert!(<$small>::MAX as u128 <= <$large>::MAX as u128);
                 small as Self
@@ -119,25 +114,15 @@ impl_from!(i32 => i128, #[stable(feature = "i128", since = "1.26.0")]);
 impl_from!(i64 => i128, #[stable(feature = "i128", since = "1.26.0")]);
 
 // unsigned integer -> signed integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => i16, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => i32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => i64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => i128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => i32, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => i64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => i128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u32 => i64, #[stable(feature = "lossless_int_conv", since = "1.5.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u32 => i128, #[stable(feature = "i128", since = "1.26.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u64 => i128, #[stable(feature = "i128", since = "1.26.0")]);
 
 // The C99 standard defines bounds on INTPTR_MIN, INTPTR_MAX, and UINTPTR_MAX
@@ -165,45 +150,27 @@ impl_from!(i16 => isize, #[stable(feature = "lossless_iusize_conv", since = "1.2
 // of the `f16`/`f128` impls can be used on stable as the `f16` and `f128` types are unstable).
 
 // signed integer -> float
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => f16, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => f32, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i8 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => f32, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(i32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 // FIXME(f128): This impl would allow using `f128` on stable before it is stabilised.
 // impl_from!(i64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 
 // unsigned integer -> float
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => f16, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => f32, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u8 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => f32, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(u32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 // FIXME(f128): This impl would allow using `f128` on stable before it is stabilised.
 // impl_from!(u64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
@@ -211,18 +178,12 @@ impl_from!(u32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0
 // float -> float
 // FIXME(f16,f128): adding additional `From<{float}>` impls to `f32` breaks inference. See
 // <https://github.com/rust-lang/rust/issues/123831>
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f16 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f16 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f32 => f64, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f32 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_from!(f64 => f128, #[stable(feature = "lossless_float_conv", since = "1.6.0")]);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_float_from_bool {
     (
         $float:ty $(;
@@ -256,7 +217,6 @@ macro_rules! impl_float_from_bool {
 }
 
 // boolean -> float
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_from_bool!(
     f16;
     doctest_prefix:
@@ -267,11 +227,8 @@ impl_float_from_bool!(
     doctest_suffix:
     ///# }
 );
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_from_bool!(f32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_from_bool!(f64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_float_from_bool!(
     f128;
     doctest_prefix:
@@ -294,7 +251,8 @@ macro_rules! impl_try_from_unbounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(value: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(value: $source) -> Result<Self, Self::Error> {
                 Ok(value as Self)
             }
         }
@@ -313,7 +271,8 @@ macro_rules! impl_try_from_lower_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u >= 0 {
                     Ok(u as Self)
                 } else {
@@ -336,7 +295,8 @@ macro_rules! impl_try_from_upper_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u > (Self::MAX as $source) {
                     Err(TryFromIntError(()))
                 } else {
@@ -359,7 +319,8 @@ macro_rules! impl_try_from_both_bounded {
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
             #[inline]
-            fn try_from(u: $source) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(u: $source) -> Result<Self, Self::Error> {
                 let min = Self::MIN as $source;
                 let max = Self::MAX as $source;
                 if u < min || u > max {
@@ -393,7 +354,8 @@ macro_rules! impl_try_from_integer_for_bool {
             #[doc = concat!("assert!(<", stringify!($int), " as TryInto<bool>>::try_into(2).is_err());")]
             /// ```
             #[inline]
-            fn try_from(i: $int) -> Result<Self, Self::Error> {
+            #[ferrocene::prevalidated]
+fn try_from(i: $int) -> Result<Self, Self::Error> {
                 match i {
                     0 => Ok(false),
                     1 => Ok(true),
@@ -421,49 +383,31 @@ impl_try_from_upper_bounded!(u64 => u8, u16, u32);
 impl_try_from_upper_bounded!(u128 => u8, u16, u32, u64);
 
 // signed integer -> signed integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i16 => i8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i32 => i8, i16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i64 => i8, i16, i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i128 => i8, i16, i32, i64);
 
 // unsigned integer -> signed integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_upper_bounded!(u8 => i8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_upper_bounded!(u16 => i8, i16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_upper_bounded!(u32 => i8, i16, i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_upper_bounded!(u64 => i8, i16, i32, i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_upper_bounded!(u128 => i8, i16, i32, i64, i128);
 
 // signed integer -> unsigned integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i8 => u8, u16, u32, u64, u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i16 => u8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i16 => u16, u32, u64, u128);
 impl_try_from_both_bounded!(i32 => u8, u16);
 impl_try_from_lower_bounded!(i32 => u32, u64, u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i64 => u8, u16, u32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i64 => u64, u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_both_bounded!(i128 => u8, u16, u32, u64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(i128 => u128);
 
 // usize/isize
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_upper_bounded!(usize => isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_try_from_lower_bounded!(isize => usize);
 
 #[cfg(target_pointer_width = "16")]
@@ -472,27 +416,19 @@ mod ptr_try_from_impls {
 
     impl_try_from_upper_bounded!(usize => u8);
     impl_try_from_unbounded!(usize => u16, u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_upper_bounded!(usize => i8, i16);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_unbounded!(usize => i32, i64, i128);
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_both_bounded!(isize => u8);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_lower_bounded!(isize => u16, u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_both_bounded!(isize => i8);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_unbounded!(isize => i16, i32, i64, i128);
 
     rev!(impl_try_from_upper_bounded, usize => u32, u64, u128);
     rev!(impl_try_from_lower_bounded, usize => i8, i16);
     rev!(impl_try_from_both_bounded, usize => i32, i64, i128);
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_upper_bounded, isize => u16, u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_both_bounded, isize => i32, i64, i128);
 }
 
@@ -502,18 +438,12 @@ mod ptr_try_from_impls {
 
     impl_try_from_upper_bounded!(usize => u8, u16);
     impl_try_from_unbounded!(usize => u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_upper_bounded!(usize => i8, i16, i32);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_unbounded!(usize => i64, i128);
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_both_bounded!(isize => u8, u16);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_lower_bounded!(isize => u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_both_bounded!(isize => i8, i16);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_unbounded!(isize => i32, i64, i128);
 
     rev!(impl_try_from_unbounded, usize => u32);
@@ -521,13 +451,9 @@ mod ptr_try_from_impls {
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32);
     rev!(impl_try_from_both_bounded, usize => i64, i128);
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_unbounded, isize => u16);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_upper_bounded, isize => u32, u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_unbounded, isize => i32);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_both_bounded, isize => i64, i128);
 }
 
@@ -537,18 +463,12 @@ mod ptr_try_from_impls {
 
     impl_try_from_upper_bounded!(usize => u8, u16, u32);
     impl_try_from_unbounded!(usize => u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_upper_bounded!(usize => i8, i16, i32, i64);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_unbounded!(usize => i128);
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_both_bounded!(isize => u8, u16, u32);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_lower_bounded!(isize => u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_both_bounded!(isize => i8, i16, i32);
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl_try_from_unbounded!(isize => i64, i128);
 
     rev!(impl_try_from_unbounded, usize => u32, u64);
@@ -556,21 +476,15 @@ mod ptr_try_from_impls {
     rev!(impl_try_from_lower_bounded, usize => i8, i16, i32, i64);
     rev!(impl_try_from_both_bounded, usize => i128);
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_unbounded, isize => u16, u32);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_upper_bounded, isize => u64, u128);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_unbounded, isize => i32, i64);
-    #[cfg(not(feature = "ferrocene_subset"))]
     rev!(impl_try_from_both_bounded, isize => i128);
 }
 
 // Conversion traits for non-zero integer types
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_nonzero_int_from_nonzero_int {
     ($Small:ty => $Large:ty) => {
         #[stable(feature = "nz_int_conv", since = "1.41.0")]
@@ -590,82 +504,46 @@ macro_rules! impl_nonzero_int_from_nonzero_int {
 }
 
 // non-zero unsigned integer -> non-zero unsigned integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => u16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => u32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => u64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => u32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => u64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u32 => u64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u32 => u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u64 => u128);
 
 // non-zero signed integer -> non-zero signed integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i8 => i16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i8 => i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i8 => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i8 => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i8 => isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i16 => i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i16 => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i16 => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i16 => isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i32 => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i32 => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(i64 => i128);
 
 // non-zero unsigned -> non-zero signed integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => i16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u8 => isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u16 => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u32 => i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u32 => i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_from_nonzero_int!(u64 => i128);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_nonzero_int_try_from_int {
     ($Int:ty) => {
         #[stable(feature = "nzint_try_from_int_conv", since = "1.46.0")]
@@ -686,32 +564,19 @@ macro_rules! impl_nonzero_int_try_from_int {
 }
 
 // integer -> non-zero integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(u8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(u16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(u32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(u64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(u128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(i8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(i16);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(i32);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(i64);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(i128);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_int!(isize);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_nonzero_int_try_from_nonzero_int {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "nzint_try_from_nzint_conv", since = "1.49.0")]
@@ -733,53 +598,31 @@ macro_rules! impl_nonzero_int_try_from_nonzero_int {
 }
 
 // unsigned non-zero integer -> unsigned non-zero integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u16 => u8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u32 => u8, u16, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u64 => u8, u16, u32, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u128 => u8, u16, u32, u64, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(usize => u8, u16, u32, u64, u128);
 
 // signed non-zero integer -> signed non-zero integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i16 => i8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i32 => i8, i16, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i64 => i8, i16, i32, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i128 => i8, i16, i32, i64, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(isize => i8, i16, i32, i64, i128);
 
 // unsigned non-zero integer -> signed non-zero integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u8 => i8);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u16 => i8, i16, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u32 => i8, i16, i32, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u64 => i8, i16, i32, i64, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(u128 => i8, i16, i32, i64, i128, isize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(usize => i8, i16, i32, i64, i128, isize);
 
 // signed non-zero integer -> unsigned non-zero integer
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i8 => u8, u16, u32, u64, u128, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i16 => u8, u16, u32, u64, u128, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i32 => u8, u16, u32, u64, u128, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i64 => u8, u16, u32, u64, u128, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(i128 => u8, u16, u32, u64, u128, usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_int_try_from_nonzero_int!(isize => u8, u16, u32, u64, u128, usize);

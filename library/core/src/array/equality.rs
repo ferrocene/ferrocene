@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::BytewiseEq;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -8,10 +7,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         SpecArrayEq::spec_eq(self, other)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         SpecArrayEq::spec_ne(self, other)
     }
@@ -24,6 +25,7 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U]) -> bool {
         match other.as_array::<N>() {
             Some(b) => *self == *b,
@@ -31,6 +33,7 @@ where
         }
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U]) -> bool {
         match other.as_array::<N>() {
             Some(b) => *self != *b,
@@ -46,6 +49,7 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         match self.as_array::<N>() {
             Some(b) => *b == *other,
@@ -53,6 +57,7 @@ where
         }
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         match self.as_array::<N>() {
             Some(b) => *b != *other,
@@ -68,10 +73,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &&[U]) -> bool {
         *self == **other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &&[U]) -> bool {
         *self != **other
     }
@@ -84,10 +91,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         **self == *other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         **self != *other
     }
@@ -100,10 +109,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &&mut [U]) -> bool {
         *self == **other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &&mut [U]) -> bool {
         *self != **other
     }
@@ -116,10 +127,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         **self == *other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         **self != *other
     }
@@ -141,16 +154,17 @@ const trait SpecArrayEq<Other, const N: usize>: Sized {
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T: [const] PartialEq<Other>, Other, const N: usize> const SpecArrayEq<Other, N> for T {
+    #[ferrocene::prevalidated]
     default fn spec_eq(a: &[Self; N], b: &[Other; N]) -> bool {
         a[..] == b[..]
     }
+    #[ferrocene::prevalidated]
     default fn spec_ne(a: &[Self; N], b: &[Other; N]) -> bool {
         a[..] != b[..]
     }
 }
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] BytewiseEq<U>, U, const N: usize> const SpecArrayEq<U, N> for T {
     fn spec_eq(a: &[T; N], b: &[U; N]) -> bool {
         // SAFETY: Arrays are compared element-wise, and don't add any padding

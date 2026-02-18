@@ -78,7 +78,8 @@ macro_rules! iterator {
             ///
             /// The iterator must not be empty
             #[inline]
-            unsafe fn next_back_unchecked(&mut self) -> $elem {
+            #[ferrocene::prevalidated]
+unsafe fn next_back_unchecked(&mut self) -> $elem {
                 // SAFETY: the caller promised it's not empty, so
                 // the offsetting is in-bounds and there's an element to return.
                 unsafe { self.pre_dec_end(1).$into_ref() }
@@ -88,7 +89,8 @@ macro_rules! iterator {
             #[inline(always)]
             // NOTE(dead_code): Method is used by Iter, but not IterMut
             #[cfg_attr(feature = "ferrocene_subset", allow(dead_code))]
-            fn make_slice(&self) -> &'a [T] {
+            #[ferrocene::prevalidated]
+fn make_slice(&self) -> &'a [T] {
                 // SAFETY: the iterator was created from a slice with pointer
                 // `self.ptr` and length `len!(self)`. This guarantees that all
                 // the prerequisites for `from_raw_parts` are fulfilled.
@@ -99,7 +101,8 @@ macro_rules! iterator {
             // returning the old start.
             // Unsafe because the offset must not exceed `self.len()`.
             #[inline(always)]
-            unsafe fn post_inc_start(&mut self, offset: usize) -> NonNull<T> {
+            #[ferrocene::prevalidated]
+unsafe fn post_inc_start(&mut self, offset: usize) -> NonNull<T> {
                 let old = self.ptr;
 
                 // SAFETY: the caller guarantees that `offset` doesn't exceed `self.len()`,
@@ -118,7 +121,8 @@ macro_rules! iterator {
             // returning the new end.
             // Unsafe because the offset must not exceed `self.len()`.
             #[inline(always)]
-            unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {
+            #[ferrocene::prevalidated]
+unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {
                 if_zst!(mut self,
                     // SAFETY: By our precondition, `offset` can be at most the
                     // current length, so the subtraction can never overflow.
@@ -141,12 +145,12 @@ macro_rules! iterator {
         #[stable(feature = "rust1", since = "1.0.0")]
         impl<T> ExactSizeIterator for $name<'_, T> {
             #[inline(always)]
-            fn len(&self) -> usize {
+            #[ferrocene::prevalidated]
+fn len(&self) -> usize {
                 len!(self)
             }
 
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn is_empty(&self) -> bool {
                 is_empty!(self)
             }
@@ -157,7 +161,8 @@ macro_rules! iterator {
             type Item = $elem;
 
             #[inline]
-            fn next(&mut self) -> Option<$elem> {
+            #[ferrocene::prevalidated]
+fn next(&mut self) -> Option<$elem> {
                 // intentionally not using the helpers because this is
                 // one of the most mono'd things in the library.
 
@@ -194,7 +199,6 @@ macro_rules! iterator {
                 }
             }
 
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn next_chunk<const N:usize>(&mut self) -> Result<[$elem; N], crate::array::IntoIter<$elem, N>> {
                 if T::IS_ZST {
                     return crate::array::iter_next_chunk(self);
@@ -219,19 +223,20 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let exact = len!(self);
                 (exact, Some(exact))
             }
 
             #[inline]
-            fn count(self) -> usize {
+            #[ferrocene::prevalidated]
+fn count(self) -> usize {
                 len!(self)
             }
 
             #[inline]
-            fn nth(&mut self, n: usize) -> Option<$elem> {
+            #[ferrocene::prevalidated]
+fn nth(&mut self, n: usize) -> Option<$elem> {
                 if n >= len!(self) {
                     // This iterator is now empty.
                     if_zst!(mut self,
@@ -248,7 +253,8 @@ macro_rules! iterator {
             }
 
             #[inline]
-            fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
+            #[ferrocene::prevalidated]
+fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let advance = cmp::min(len!(self), n);
                 // SAFETY: By construction, `advance` does not exceed `self.len()`.
                 unsafe { self.post_inc_start(advance) };
@@ -256,12 +262,14 @@ macro_rules! iterator {
             }
 
             #[inline]
-            fn last(mut self) -> Option<$elem> {
+            #[ferrocene::prevalidated]
+fn last(mut self) -> Option<$elem> {
                 self.next_back()
             }
 
             #[inline]
-            fn fold<B, F>(self, init: B, mut f: F) -> B
+            #[ferrocene::prevalidated]
+fn fold<B, F>(self, init: B, mut f: F) -> B
                 where
                     F: FnMut(B, Self::Item) -> B,
             {
@@ -297,7 +305,8 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            fn for_each<F>(mut self, mut f: F)
+            #[ferrocene::prevalidated]
+fn for_each<F>(mut self, mut f: F)
             where
                 Self: Sized,
                 F: FnMut(Self::Item),
@@ -311,7 +320,8 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            fn all<F>(&mut self, mut f: F) -> bool
+            #[ferrocene::prevalidated]
+fn all<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,
                 F: FnMut(Self::Item) -> bool,
@@ -328,7 +338,8 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            fn any<F>(&mut self, mut f: F) -> bool
+            #[ferrocene::prevalidated]
+fn any<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,
                 F: FnMut(Self::Item) -> bool,
@@ -345,7 +356,8 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
+            #[ferrocene::prevalidated]
+fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
             where
                 Self: Sized,
                 P: FnMut(&Self::Item) -> bool,
@@ -362,7 +374,6 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn find_map<B, F>(&mut self, mut f: F) -> Option<B>
             where
                 Self: Sized,
@@ -380,7 +391,8 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
-            fn position<P>(&mut self, mut predicate: P) -> Option<usize> where
+            #[ferrocene::prevalidated]
+fn position<P>(&mut self, mut predicate: P) -> Option<usize> where
                 Self: Sized,
                 P: FnMut(Self::Item) -> bool,
             {
@@ -402,7 +414,8 @@ macro_rules! iterator {
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
             #[inline]
-            fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
+            #[ferrocene::prevalidated]
+fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
                 P: FnMut(Self::Item) -> bool,
                 Self: Sized + ExactSizeIterator + DoubleEndedIterator
             {
@@ -421,7 +434,6 @@ macro_rules! iterator {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
                 // SAFETY: the caller must guarantee that `i` is in bounds of
                 // the underlying slice, so `i` cannot overflow an `isize`, and
@@ -442,7 +454,8 @@ macro_rules! iterator {
         #[stable(feature = "rust1", since = "1.0.0")]
         impl<'a, T> DoubleEndedIterator for $name<'a, T> {
             #[inline]
-            fn next_back(&mut self) -> Option<$elem> {
+            #[ferrocene::prevalidated]
+fn next_back(&mut self) -> Option<$elem> {
                 // could be implemented with slices, but this avoids bounds checks
 
                 // SAFETY: The call to `next_back_unchecked`
@@ -457,7 +470,8 @@ macro_rules! iterator {
             }
 
             #[inline]
-            fn nth_back(&mut self, n: usize) -> Option<$elem> {
+            #[ferrocene::prevalidated]
+fn nth_back(&mut self, n: usize) -> Option<$elem> {
                 if n >= len!(self) {
                     // This iterator is now empty.
                     if_zst!(mut self,
@@ -474,7 +488,8 @@ macro_rules! iterator {
             }
 
             #[inline]
-            fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
+            #[ferrocene::prevalidated]
+fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let advance = cmp::min(len!(self), n);
                 // SAFETY: By construction, `advance` does not exceed `self.len()`.
                 unsafe { self.pre_dec_end(advance) };
@@ -483,7 +498,6 @@ macro_rules! iterator {
         }
 
         #[stable(feature = "fused", since = "1.26.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl<T> FusedIterator for $name<'_, T> {}
 
         #[unstable(feature = "trusted_len", issue = "37572")]
@@ -491,7 +505,8 @@ macro_rules! iterator {
 
         impl<'a, T> UncheckedIterator for $name<'a, T> {
             #[inline]
-            unsafe fn next_unchecked(&mut self) -> $elem {
+            #[ferrocene::prevalidated]
+unsafe fn next_unchecked(&mut self) -> $elem {
                 // SAFETY: The caller promised there's at least one more item.
                 unsafe {
                     self.post_inc_start(1).$into_ref()
@@ -508,14 +523,14 @@ macro_rules! iterator {
             #[doc = concat!("let iter: ", stringify!($name<'_, u8>), " = Default::default();")]
             /// assert_eq!(iter.len(), 0);
             /// ```
-            fn default() -> Self {
+            #[ferrocene::prevalidated]
+fn default() -> Self {
                 (& $( $mut_ )? []).into_iter()
             }
         }
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! forward_iterator {
     ($name:ident: $elem:ident, $iter_of:ty) => {
         #[stable(feature = "rust1", since = "1.0.0")]

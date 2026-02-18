@@ -371,6 +371,7 @@ macro_rules! impl_fold_via_try_fold {
     };
     (@internal $fold:ident -> $try_fold:ident) => {
         #[inline]
+        #[ferrocene::prevalidated]
         fn $fold<AAA, FFF>(mut self, init: AAA, fold: FFF) -> AAA
         where
             FFF: FnMut(AAA, Self::Item) -> AAA,
@@ -382,51 +383,39 @@ macro_rules! impl_fold_via_try_fold {
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "iter_array_chunks", issue = "100450")]
 pub use self::adapters::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::ByRefSized;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 pub use self::adapters::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
 pub use self::adapters::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::Flatten;
 #[stable(feature = "iter_map_while", since = "1.57.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::MapWhile;
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "iter_map_windows", issue = "87155")]
 pub use self::adapters::MapWindows;
 #[unstable(feature = "inplace_iteration", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::SourceIter;
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::StepBy;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
 pub use self::adapters::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_chain", since = "1.91.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::chain;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use self::adapters::try_process;
 #[stable(feature = "iter_zip", since = "1.59.0")]
 pub use self::adapters::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::{
     Chain, Cycle, Enumerate, Filter, FilterMap, FlatMap, Fuse, Inspect, Map, Peekable, Rev, Scan,
     Skip, SkipWhile, Take, TakeWhile, Zip,
 };
 #[unstable(feature = "iter_intersperse", issue = "79524")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::adapters::{Intersperse, IntersperseWith};
 #[unstable(
     feature = "step_trait",
@@ -435,48 +424,36 @@ pub use self::adapters::{Intersperse, IntersperseWith};
 )]
 pub use self::range::Step;
 #[unstable(feature = "iter_macro", issue = "142269", reason = "generators are unstable")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::iter;
 #[stable(feature = "iter_empty", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{Empty, empty};
 #[unstable(
     feature = "iter_from_coroutine",
     issue = "43122",
     reason = "coroutines are unstable"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{FromCoroutine, from_coroutine};
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
 pub use self::sources::{FromFn, from_fn};
 #[stable(feature = "iter_once", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{Once, once};
 #[stable(feature = "iter_once_with", since = "1.43.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{OnceWith, once_with};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{Repeat, repeat};
 #[stable(feature = "iter_repeat_n", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{RepeatN, repeat_n};
 #[stable(feature = "iterator_repeat_with", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{RepeatWith, repeat_with};
 #[stable(feature = "iter_successors", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::sources::{Successors, successors};
 #[stable(feature = "fused", since = "1.26.0")]
 pub use self::traits::FusedIterator;
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::traits::InPlaceIterable;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::traits::Iterator;
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::traits::TrustedFused;
 #[unstable(feature = "trusted_len", issue = "37572")]
 pub use self::traits::TrustedLen;
@@ -484,7 +461,6 @@ pub use self::traits::TrustedLen;
 pub use self::traits::TrustedStep;
 pub(crate) use self::traits::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::traits::{
     DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
 };

@@ -1,10 +1,8 @@
 use crate::cmp;
 use crate::fmt::{self, Debug};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
     FusedIterator, InPlaceIterable, SourceIter, TrustedFused, TrustedLen, UncheckedIterator,
 };
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
 /// An iterator that iterates two other iterators simultaneously.
@@ -15,6 +13,7 @@ use crate::num::NonZero;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
+#[ferrocene::prevalidated]
 pub struct Zip<A, B> {
     a: A,
     b: B,
@@ -23,9 +22,11 @@ pub struct Zip<A, B> {
     len: usize,
 }
 impl<A: Iterator, B: Iterator> Zip<A, B> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(a: A, b: B) -> Zip<A, B> {
         ZipImpl::new(a, b)
     }
+    #[ferrocene::prevalidated]
     fn super_nth(&mut self, mut n: usize) -> Option<(A::Item, B::Item)> {
         while let Some(x) = Iterator::next(self) {
             if n == 0 {
@@ -67,6 +68,7 @@ impl<A: Iterator, B: Iterator> Zip<A, B> {
 /// assert!(iter.next().is_none());
 /// ```
 #[stable(feature = "iter_zip", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub fn zip<A, B>(a: A, b: B) -> Zip<A::IntoIter, B::IntoIter>
 where
     A: IntoIterator,
@@ -84,21 +86,25 @@ where
     type Item = (A::Item, B::Item);
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Self::Item> {
         ZipImpl::next(self)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         ZipImpl::size_hint(self)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         ZipImpl::nth(self, n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -107,7 +113,6 @@ where
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -119,7 +124,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> DoubleEndedIterator for Zip<A, B>
 where
     A: DoubleEndedIterator + ExactSizeIterator,
@@ -139,7 +143,6 @@ trait ZipImpl<A, B> {
     fn next(&mut self) -> Option<Self::Item>;
     fn size_hint(&self) -> (usize, Option<usize>);
     fn nth(&mut self, n: usize) -> Option<Self::Item>;
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_back(&mut self) -> Option<Self::Item>
     where
         A: DoubleEndedIterator + ExactSizeIterator,
@@ -148,7 +151,6 @@ trait ZipImpl<A, B> {
     where
         F: FnMut(Acc, Self::Item) -> Acc;
     // This has the same safety requirements as `Iterator::__iterator_get_unchecked`
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn get_unchecked(&mut self, idx: usize) -> <Self as Iterator>::Item
     where
         Self: Iterator + TrustedRandomAccessNoCoerce;
@@ -158,6 +160,7 @@ trait ZipImpl<A, B> {
 // in intermediary impls.
 macro_rules! zip_impl_general_defaults {
     () => {
+        #[ferrocene::prevalidated]
         default fn new(a: A, b: B) -> Self {
             Zip {
                 a,
@@ -168,6 +171,7 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         default fn next(&mut self) -> Option<(A::Item, B::Item)> {
             let x = self.a.next()?;
             let y = self.b.next()?;
@@ -175,12 +179,12 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         default fn nth(&mut self, n: usize) -> Option<Self::Item> {
             self.super_nth(n)
         }
 
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         default fn next_back(&mut self) -> Option<(A::Item, B::Item)>
         where
             A: DoubleEndedIterator + ExactSizeIterator,
@@ -225,6 +229,7 @@ where
     zip_impl_general_defaults! {}
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let (a_lower, a_upper) = self.a.size_hint();
         let (b_lower, b_upper) = self.b.size_hint();
@@ -241,7 +246,6 @@ where
         (lower, upper)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     default unsafe fn get_unchecked(&mut self, _idx: usize) -> <Self as Iterator>::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -250,6 +254,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -259,7 +264,6 @@ where
 }
 
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: TrustedRandomAccessNoCoerce + Iterator,
@@ -301,7 +305,6 @@ where
 }
 
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: TrustedRandomAccess + Iterator,
@@ -417,7 +420,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> ExactSizeIterator for Zip<A, B>
 where
     A: ExactSizeIterator,
@@ -427,7 +429,6 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A, B> TrustedRandomAccess for Zip<A, B>
 where
     A: TrustedRandomAccess,
@@ -437,7 +438,6 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A, B> TrustedRandomAccessNoCoerce for Zip<A, B>
 where
     A: TrustedRandomAccessNoCoerce,
@@ -447,7 +447,6 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> FusedIterator for Zip<A, B>
 where
     A: FusedIterator,
@@ -456,7 +455,6 @@ where
 }
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A, B> TrustedFused for Zip<A, B>
 where
     A: TrustedFused,
@@ -465,7 +463,6 @@ where
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A, B> TrustedLen for Zip<A, B>
 where
     A: TrustedLen,
@@ -473,7 +470,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, B> UncheckedIterator for Zip<A, B>
 where
     A: UncheckedIterator,
@@ -484,7 +480,6 @@ where
 // Arbitrarily selects the left side of the zip iteration as extractable "source"
 // it would require negative trait bounds to be able to try both
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A, B> SourceIter for Zip<A, B>
 where
     A: SourceIter,
@@ -500,7 +495,6 @@ where
 
 // Since SourceIter forwards the left hand side we do the same here
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A: InPlaceIterable, B> InPlaceIterable for Zip<A, B> {
     const EXPAND_BY: Option<NonZero<usize>> = A::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = A::MERGE_BY;
@@ -508,6 +502,7 @@ unsafe impl<A: InPlaceIterable, B> InPlaceIterable for Zip<A, B> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A: Debug, B: Debug> Debug for Zip<A, B> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         ZipFmt::fmt(self, f)
     }
@@ -518,6 +513,7 @@ trait ZipFmt<A, B> {
 }
 
 impl<A: Debug, B: Debug> ZipFmt<A, B> for Zip<A, B> {
+    #[ferrocene::prevalidated]
     default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Zip").field("a", &self.a).field("b", &self.b).finish()
     }
@@ -526,6 +522,7 @@ impl<A: Debug, B: Debug> ZipFmt<A, B> for Zip<A, B> {
 impl<A: Debug + TrustedRandomAccessNoCoerce, B: Debug + TrustedRandomAccessNoCoerce> ZipFmt<A, B>
     for Zip<A, B>
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // It's *not safe* to call fmt on the contained iterators, since once
         // we start iterating they're in strange, potentially unsafe, states.
@@ -589,7 +586,6 @@ impl<A: Debug + TrustedRandomAccessNoCoerce, B: Debug + TrustedRandomAccessNoCoe
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[rustc_specialization_trait]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait TrustedRandomAccess: TrustedRandomAccessNoCoerce {}
 
 /// Like [`TrustedRandomAccess`] but without any of the requirements / guarantees around
@@ -605,6 +601,7 @@ pub unsafe trait TrustedRandomAccess: TrustedRandomAccessNoCoerce {}
 #[rustc_specialization_trait]
 pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
     // Convenience method.
+    #[ferrocene::prevalidated]
     fn size(&self) -> usize
     where
         Self: Iterator,
@@ -624,7 +621,6 @@ pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
 /// Same requirements calling `get_unchecked` directly.
 #[doc(hidden)]
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(in crate::iter::adapters) unsafe fn try_get_unchecked<I>(it: &mut I, idx: usize) -> I::Item
 where
     I: Iterator,
@@ -634,21 +630,18 @@ where
     unsafe { it.try_get_unchecked(idx) }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe trait SpecTrustedRandomAccess: Iterator {
     /// If `Self: TrustedRandomAccess`, it must be safe to call
     /// `Iterator::__iterator_get_unchecked(self, index)`.
     unsafe fn try_get_unchecked(&mut self, index: usize) -> Self::Item;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: Iterator> SpecTrustedRandomAccess for I {
     default unsafe fn try_get_unchecked(&mut self, _: usize) -> Self::Item {
         panic!("Should only be called on TrustedRandomAccess iterators");
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: Iterator + TrustedRandomAccessNoCoerce> SpecTrustedRandomAccess for I {
     #[inline]
     unsafe fn try_get_unchecked(&mut self, index: usize) -> Self::Item {
@@ -668,6 +661,7 @@ trait SpecFold: Iterator {
 impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     // Adapted from default impl from the Iterator trait
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -680,7 +674,6 @@ impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A: TrustedLen, B: TrustedLen> SpecFold for Zip<A, B> {
     #[inline]
     fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc

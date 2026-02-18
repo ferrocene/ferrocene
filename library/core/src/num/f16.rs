@@ -11,13 +11,10 @@
 
 #![unstable(feature = "f16", issue = "116909")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::convert::FloatToInt;
 use crate::num::FpCategory;
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
 use crate::num::libm;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
 use crate::{intrinsics, mem};
 
@@ -270,7 +267,6 @@ impl f16 {
     pub const NEG_INFINITY: f16 = -1.0_f16 / 0.0_f16;
 
     /// Sign bit
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const SIGN_MASK: u16 = 0x8000;
 
     /// Exponent mask
@@ -280,11 +276,9 @@ impl f16 {
     pub(crate) const MAN_MASK: u16 = 0x03ff;
 
     /// Minimum representable positive value (min subnormal)
-    #[cfg(not(feature = "ferrocene_subset"))]
     const TINY_BITS: u16 = 0x1;
 
     /// Minimum representable negative value (min negative subnormal)
-    #[cfg(not(feature = "ferrocene_subset"))]
     const NEG_TINY_BITS: u16 = Self::TINY_BITS | Self::SIGN_MASK;
 
     /// Returns `true` if this value is NaN.
@@ -300,7 +294,6 @@ impl f16 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -328,7 +321,6 @@ impl f16 {
     /// assert!(neg_inf.is_infinite());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -354,7 +346,6 @@ impl f16 {
     /// assert!(!neg_inf.is_finite());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -387,7 +378,6 @@ impl f16 {
     /// # }
     /// ```
     /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -417,7 +407,6 @@ impl f16 {
     /// # }
     /// ```
     /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -444,6 +433,7 @@ impl f16 {
     /// ```
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
+    #[ferrocene::prevalidated]
     pub const fn classify(self) -> FpCategory {
         let b = self.to_bits();
         match (b & Self::MAN_MASK, b & Self::EXP_MASK) {
@@ -476,7 +466,6 @@ impl f16 {
     /// assert!(!g.is_sign_positive());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -505,7 +494,6 @@ impl f16 {
     /// assert!(g.is_sign_negative());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -547,7 +535,6 @@ impl f16 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[doc(alias = "nextUp")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -602,7 +589,6 @@ impl f16 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[doc(alias = "nextDown")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -638,7 +624,6 @@ impl f16 {
     /// assert!(abs_difference <= f16::EPSILON);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -665,7 +650,6 @@ impl f16 {
     /// assert!(abs_difference <= 0.5);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -696,7 +680,6 @@ impl f16 {
     /// assert!(abs_difference <= 0.01);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -730,7 +713,6 @@ impl f16 {
     /// assert_eq!(x.max(f16::NAN), x);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -762,7 +744,6 @@ impl f16 {
     /// assert_eq!(x.min(f16::NAN), x);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -795,7 +776,6 @@ impl f16 {
     /// assert!(x.maximum(f16::NAN).is_nan());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
@@ -828,7 +808,6 @@ impl f16 {
     /// assert!(x.minimum(f16::NAN).is_nan());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
@@ -852,7 +831,6 @@ impl f16 {
     /// assert_eq!((-5.5f16).midpoint(8.0), 1.25);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[doc(alias = "average")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -896,7 +874,6 @@ impl f16 {
     /// * Not be `NaN`
     /// * Not be infinite
     /// * Be representable in the return type `Int`, after truncating off its fractional part
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -931,6 +908,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[allow(unnecessary_transmutes)]
+    #[ferrocene::prevalidated]
     pub const fn to_bits(self) -> u16 {
         // SAFETY: `u16` is a plain old datatype so we can always transmute to it.
         unsafe { mem::transmute(self) }
@@ -978,6 +956,7 @@ impl f16 {
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     #[allow(unnecessary_transmutes)]
+    #[ferrocene::prevalidated]
     pub const fn from_bits(v: u16) -> Self {
         // It turns out the safety issues with sNaN were overblown! Hooray!
         // SAFETY: `u16` is a plain old datatype so we can always transmute from it.
@@ -1000,7 +979,6 @@ impl f16 {
     /// assert_eq!(bytes, [0x4a, 0x40]);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -1024,7 +1002,6 @@ impl f16 {
     /// assert_eq!(bytes, [0x40, 0x4a]);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -1061,7 +1038,6 @@ impl f16 {
     /// );
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -1084,7 +1060,6 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1107,7 +1082,6 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1141,7 +1115,6 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1212,7 +1185,6 @@ impl f16 {
     /// }
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1280,7 +1252,6 @@ impl f16 {
     /// assert!((-1.0f16).clamp(-0.0, 1.0).is_sign_negative());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1325,7 +1296,6 @@ impl f16 {
     /// assert_eq!((-2.0f16).clamp_magnitude(3.0), -2.0);
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "clamp_magnitude", issue = "148519")]
     #[must_use = "this returns the clamped value and does not modify the original"]
@@ -1358,6 +1328,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
+    #[ferrocene::prevalidated]
     pub const fn abs(self) -> Self {
         intrinsics::fabsf16(self)
     }
@@ -1382,7 +1353,6 @@ impl f16 {
     /// assert!(f16::NAN.signum().is_nan());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1421,7 +1391,6 @@ impl f16 {
     /// assert!(f16::NAN.copysign(1.0).is_nan());
     /// # }
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1433,7 +1402,6 @@ impl f16 {
     /// Float addition that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1445,7 +1413,6 @@ impl f16 {
     /// Float subtraction that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1457,7 +1424,6 @@ impl f16 {
     /// Float multiplication that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1469,7 +1435,6 @@ impl f16 {
     /// Float division that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1481,7 +1446,6 @@ impl f16 {
     /// Float remainder that allows optimizations based on algebraic rules.
     ///
     /// See [algebraic operators](primitive@f32#algebraic-operators) for more info.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
@@ -1493,7 +1457,6 @@ impl f16 {
 
 // Functions in this module fall into `core_float_math`
 // #[unstable(feature = "core_float_math", issue = "137578")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
 #[doc(test(attr(feature(cfg_target_has_reliable_f16_f128), expect(internal_features))))]
 impl f16 {

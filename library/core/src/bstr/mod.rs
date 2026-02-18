@@ -1,13 +1,10 @@
 //! The `ByteStr` type and trait implementations.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod traits;
 
 #[unstable(feature = "bstr_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use traits::{impl_partial_eq, impl_partial_eq_n, impl_partial_eq_ord};
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::borrow::{Borrow, BorrowMut};
 use crate::fmt;
 use crate::ops::{Deref, DerefMut, DerefPure};
@@ -43,6 +40,7 @@ use crate::ops::{Deref, DerefMut, DerefPure};
 #[unstable(feature = "bstr", issue = "134915")]
 #[repr(transparent)]
 #[doc(alias = "BStr")]
+#[ferrocene::prevalidated]
 pub struct ByteStr(pub [u8]);
 
 impl ByteStr {
@@ -64,7 +62,6 @@ impl ByteStr {
     /// assert_eq!(a, b);
     /// assert_eq!(a, c);
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "bstr", issue = "134915")]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
@@ -77,7 +74,6 @@ impl ByteStr {
     /// This method is redundant when used directly on `&ByteStr`, but
     /// it helps dereferencing other "container" types,
     /// for example `Box<ByteStr>` or `Arc<ByteStr>`.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     // #[unstable(feature = "str_as_str", issue = "130366")]
     #[unstable(feature = "bstr", issue = "134915")]
@@ -90,7 +86,6 @@ impl ByteStr {
     /// This method is redundant when used directly on `&mut ByteStr`, but
     /// it helps dereferencing other "container" types,
     /// for example `Box<ByteStr>` or `MutexGuard<ByteStr>`.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     // #[unstable(feature = "str_as_str", issue = "130366")]
     #[unstable(feature = "bstr", issue = "134915")]
@@ -102,13 +97,13 @@ impl ByteStr {
     #[unstable(feature = "bstr_internals", issue = "none")]
     #[inline]
     #[rustc_const_unstable(feature = "bstr_internals", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn from_bytes(slice: &[u8]) -> &Self {
         // SAFETY: `ByteStr` is a transparent wrapper around `[u8]`, so we can turn a reference to
         // the wrapped type into a reference to the wrapper type.
         unsafe { &*(slice as *const [u8] as *const Self) }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
     #[inline]
@@ -119,7 +114,6 @@ impl ByteStr {
         unsafe { &mut *(slice as *mut [u8] as *mut Self) }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
     #[inline]
@@ -128,7 +122,6 @@ impl ByteStr {
         &self.0
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
     #[inline]
@@ -144,6 +137,7 @@ impl const Deref for ByteStr {
     type Target = [u8];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &[u8] {
         &self.0
     }
@@ -153,6 +147,7 @@ impl const Deref for ByteStr {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const DerefMut for ByteStr {
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -163,6 +158,7 @@ unsafe impl DerefPure for ByteStr {}
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl fmt::Debug for ByteStr {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "\"")?;
         for chunk in self.utf8_chunks() {
@@ -180,7 +176,6 @@ impl fmt::Debug for ByteStr {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 impl fmt::Display for ByteStr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -225,7 +220,6 @@ impl fmt::Display for ByteStr {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsRef<[u8]> for ByteStr {
@@ -235,7 +229,6 @@ impl const AsRef<[u8]> for ByteStr {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsRef<ByteStr> for ByteStr {
@@ -247,7 +240,6 @@ impl const AsRef<ByteStr> for ByteStr {
 
 // `impl AsRef<ByteStr> for [u8]` omitted to avoid widespread inference failures
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsRef<ByteStr> for str {
@@ -257,7 +249,6 @@ impl const AsRef<ByteStr> for str {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsMut<[u8]> for ByteStr {
@@ -273,7 +264,6 @@ impl const AsMut<[u8]> for ByteStr {
 
 // `impl Borrow<ByteStr> for str` omitted to avoid widespread inference failures
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const Borrow<[u8]> for ByteStr {
@@ -285,7 +275,6 @@ impl const Borrow<[u8]> for ByteStr {
 
 // `impl BorrowMut<ByteStr> for [u8]` omitted to avoid widespread inference failures
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const BorrowMut<[u8]> for ByteStr {
@@ -295,7 +284,6 @@ impl const BorrowMut<[u8]> for ByteStr {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 impl<'a> Default for &'a ByteStr {
     fn default() -> Self {
@@ -303,7 +291,6 @@ impl<'a> Default for &'a ByteStr {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 impl<'a> Default for &'a mut ByteStr {
     fn default() -> Self {
@@ -357,7 +344,6 @@ impl<'a> Default for &'a mut ByteStr {
 //     }
 // }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<'a> const TryFrom<&'a ByteStr> for &'a str {
@@ -369,7 +355,6 @@ impl<'a> const TryFrom<&'a ByteStr> for &'a str {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "bstr", issue = "134915")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<'a> const TryFrom<&'a mut ByteStr> for &'a mut str {

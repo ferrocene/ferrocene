@@ -259,6 +259,7 @@ mod impls {
     where
         F: [const] Fn<A>,
     {
+        #[ferrocene::prevalidated]
         extern "rust-call" fn call(&self, args: A) -> F::Output {
             (**self).call(args)
         }
@@ -270,6 +271,7 @@ mod impls {
     where
         F: [const] Fn<A>,
     {
+        #[ferrocene::prevalidated]
         extern "rust-call" fn call_mut(&mut self, args: A) -> F::Output {
             (**self).call(args)
         }
@@ -283,6 +285,7 @@ mod impls {
     {
         type Output = F::Output;
 
+        #[ferrocene::prevalidated]
         extern "rust-call" fn call_once(self, args: A) -> F::Output {
             (*self).call(args)
         }
@@ -294,6 +297,7 @@ mod impls {
     where
         F: [const] FnMut<A>,
     {
+        #[ferrocene::prevalidated]
         extern "rust-call" fn call_mut(&mut self, args: A) -> F::Output {
             (*self).call_mut(args)
         }
@@ -306,6 +310,7 @@ mod impls {
         F: [const] FnMut<A>,
     {
         type Output = F::Output;
+        #[ferrocene::prevalidated]
         extern "rust-call" fn call_once(self, args: A) -> F::Output {
             (*self).call_mut(args)
         }

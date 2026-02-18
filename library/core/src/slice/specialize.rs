@@ -6,6 +6,7 @@ pub(super) trait SpecFill<T> {
 }
 
 impl<T: Clone> SpecFill<T> for [T] {
+    #[ferrocene::prevalidated]
     default fn spec_fill(&mut self, value: T) {
         if let Some((last, elems)) = self.split_last_mut() {
             for el in elems {
@@ -18,6 +19,7 @@ impl<T: Clone> SpecFill<T> for [T] {
 }
 
 impl<T: TrivialClone> SpecFill<T> for [T] {
+    #[ferrocene::prevalidated]
     default fn spec_fill(&mut self, value: T) {
         for item in self.iter_mut() {
             // SAFETY: `TrivialClone` indicates that this is equivalent to
@@ -27,7 +29,6 @@ impl<T: TrivialClone> SpecFill<T> for [T] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl SpecFill<u8> for [u8] {
     fn spec_fill(&mut self, value: u8) {
         // SAFETY: The pointer is derived from a reference, so it's writable.
@@ -37,7 +38,6 @@ impl SpecFill<u8> for [u8] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl SpecFill<i8> for [i8] {
     fn spec_fill(&mut self, value: i8) {
         // SAFETY: The pointer is derived from a reference, so it's writable.
@@ -47,7 +47,6 @@ impl SpecFill<i8> for [i8] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro spec_fill_int {
     ($($type:ty)*) => {$(
         impl SpecFill<$type> for [$type] {
@@ -73,5 +72,4 @@ macro spec_fill_int {
     )*}
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 spec_fill_int! { u16 i16 u32 i32 u64 i64 u128 i128 usize isize }

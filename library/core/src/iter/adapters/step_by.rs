@@ -1,5 +1,4 @@
 use crate::intrinsics;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{TrustedLen, TrustedRandomAccess, from_fn};
 use crate::num::NonZero;
 use crate::ops::{Range, Try};
@@ -19,6 +18,7 @@ use crate::iter::from_fn;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct StepBy<I> {
     /// This field is guaranteed to be preprocessed by the specialized `SpecRangeSetup::setup`
     /// in the constructor.
@@ -37,6 +37,7 @@ pub struct StepBy<I> {
 
 impl<I> StepBy<I> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, step: usize) -> StepBy<I> {
         assert!(step != 0);
         let iter = <I as SpecRangeSetup<I>>::setup(iter, step);
@@ -46,6 +47,7 @@ impl<I> StepBy<I> {
     /// The `step` that was originally passed to `Iterator::step_by(step)`,
     /// aka `self.step_minus_one + 1`.
     #[inline]
+    #[ferrocene::prevalidated]
     fn original_step(&self) -> NonZero<usize> {
         // SAFETY: By type invariant, `step_minus_one` cannot be `MAX`, which
         // means the addition cannot overflow and the result cannot be zero.
@@ -61,20 +63,24 @@ where
     type Item = I::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Self::Item> {
         self.spec_next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.spec_size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.spec_nth(n)
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, F, R>(&mut self, acc: Acc, f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
@@ -84,6 +90,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, acc: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -92,7 +99,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> StepBy<I>
 where
     I: ExactSizeIterator,
@@ -105,7 +111,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "double_ended_step_by_iterator", since = "1.38.0")]
 impl<I> DoubleEndedIterator for StepBy<I>
 where
@@ -140,7 +145,6 @@ where
 }
 
 // StepBy can only make the iterator shorter, so the len will still fit.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
 impl<I> ExactSizeIterator for StepBy<I> where I: ExactSizeIterator {}
 
@@ -149,7 +153,6 @@ impl<I> ExactSizeIterator for StepBy<I> where I: ExactSizeIterator {}
 // bound is never `None`. I: TrustedRandomAccess happens to provide this guarantee while
 // I: TrustedLen would not.
 // This also covers the Range specializations since the ranges also implement TRA
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<I> TrustedLen for StepBy<I> where I: Iterator + TrustedRandomAccess {}
 
@@ -159,6 +162,7 @@ trait SpecRangeSetup<T> {
 
 impl<T> SpecRangeSetup<T> for T {
     #[inline]
+    #[ferrocene::prevalidated]
     default fn setup(inner: T, _step: usize) -> T {
         inner
     }
@@ -203,7 +207,6 @@ unsafe trait StepByImpl<I> {
 /// where applicable. I.e. if `StepBy` does support backwards iteration
 /// for a given iterator and that is specialized for forward iteration then
 /// it must also be specialized for backwards iteration.
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe trait StepByBackImpl<I> {
     type Item;
 
@@ -231,6 +234,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     type Item = I::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_next(&mut self) -> Option<I::Item> {
         let step_size = if self.first_take { 0 } else { self.step_minus_one };
         self.first_take = false;
@@ -238,13 +242,16 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_size_hint(&self) -> (usize, Option<usize>) {
         #[inline]
+        #[ferrocene::prevalidated]
         fn first_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {
             move |n| if n == 0 { 0 } else { 1 + (n - 1) / step }
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         fn other_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {
             move |n| n / step
         }
@@ -261,6 +268,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_nth(&mut self, mut n: usize) -> Option<I::Item> {
         if self.first_take {
             self.first_take = false;
@@ -304,12 +312,14 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         }
     }
 
+    #[ferrocene::prevalidated]
     default fn spec_try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn nth<I: Iterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -327,11 +337,13 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         from_fn(nth(&mut self.iter, self.step_minus_one)).try_fold(acc, f)
     }
 
+    #[ferrocene::prevalidated]
     default fn spec_fold<Acc, F>(mut self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn nth<I: Iterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -350,7 +362,6 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for StepBy<I> {
     type Item = I::Item;
 
@@ -437,7 +448,8 @@ macro_rules! spec_int_ranges {
 
         impl SpecRangeSetup<Range<$t>> for Range<$t> {
             #[inline]
-            fn setup(mut r: Range<$t>, step: usize) -> Range<$t> {
+            #[ferrocene::prevalidated]
+fn setup(mut r: Range<$t>, step: usize) -> Range<$t> {
                 let inner_len = r.size_hint().0;
                 // If step exceeds $t::MAX, then the count will be at most 1 and
                 // thus always fit into $t.
@@ -450,7 +462,8 @@ macro_rules! spec_int_ranges {
 
         unsafe impl StepByImpl<Range<$t>> for StepBy<Range<$t>> {
             #[inline]
-            fn spec_next(&mut self) -> Option<$t> {
+            #[ferrocene::prevalidated]
+fn spec_next(&mut self) -> Option<$t> {
                 // if a step size larger than the type has been specified fall back to
                 // t::MAX, in which case remaining will be at most 1.
                 let step = <$t>::try_from(self.original_step().get()).unwrap_or(<$t>::MAX);
@@ -468,7 +481,8 @@ macro_rules! spec_int_ranges {
             }
 
             #[inline]
-            fn spec_size_hint(&self) -> (usize, Option<usize>) {
+            #[ferrocene::prevalidated]
+fn spec_size_hint(&self) -> (usize, Option<usize>) {
                 let remaining = self.iter.end as usize;
                 (remaining, Some(remaining))
             }
@@ -477,13 +491,15 @@ macro_rules! spec_int_ranges {
             // We have to repeat them here so that the specialization overrides the StepByImpl defaults
 
             #[inline]
-            fn spec_nth(&mut self, n: usize) -> Option<Self::Item> {
+            #[ferrocene::prevalidated]
+fn spec_nth(&mut self, n: usize) -> Option<Self::Item> {
                 self.advance_by(n).ok()?;
                 self.next()
             }
 
             #[inline]
-            fn spec_try_fold<Acc, F, R>(&mut self, init: Acc, mut f: F) -> R
+            #[ferrocene::prevalidated]
+fn spec_try_fold<Acc, F, R>(&mut self, init: Acc, mut f: F) -> R
                 where
                     F: FnMut(Acc, Self::Item) -> R,
                     R: Try<Output = Acc>
@@ -496,7 +512,8 @@ macro_rules! spec_int_ranges {
             }
 
             #[inline]
-            fn spec_fold<Acc, F>(self, init: Acc, mut f: F) -> Acc
+            #[ferrocene::prevalidated]
+fn spec_fold<Acc, F>(self, init: Acc, mut f: F) -> Acc
                 where
                     F: FnMut(Acc, Self::Item) -> Acc
             {
@@ -518,7 +535,6 @@ macro_rules! spec_int_ranges {
     )*)
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! spec_int_ranges_r {
     ($($t:ty)*) => ($(
         const _: () = assert!(usize::BITS >= <$t>::BITS);
@@ -580,18 +596,15 @@ macro_rules! spec_int_ranges_r {
 #[cfg(target_pointer_width = "64")]
 spec_int_ranges!(u8 u16 u32 u64 usize);
 // DoubleEndedIterator requires ExactSizeIterator, which isn't implemented for Range<u64>
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_pointer_width = "64")]
 spec_int_ranges_r!(u8 u16 u32 usize);
 
 #[cfg(target_pointer_width = "32")]
 spec_int_ranges!(u8 u16 u32 usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_pointer_width = "32")]
 spec_int_ranges_r!(u8 u16 u32 usize);
 
 #[cfg(target_pointer_width = "16")]
 spec_int_ranges!(u8 u16 usize);
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(target_pointer_width = "16")]
 spec_int_ranges_r!(u8 u16 usize);

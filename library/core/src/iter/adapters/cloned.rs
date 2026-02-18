@@ -1,11 +1,7 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::num::NonZero;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen, UncheckedIterator};
 use crate::ops::Try;
 
@@ -24,16 +20,19 @@ use crate::iter::{TrustedLen, UncheckedIterator};
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct Cloned<I> {
     it: I,
 }
 
 impl<I> Cloned<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(it: I) -> Cloned<I> {
         Cloned { it }
     }
 }
 
+#[ferrocene::prevalidated]
 fn clone_try_fold<T: Clone, Acc, R>(mut f: impl FnMut(Acc, T) -> R) -> impl FnMut(Acc, &T) -> R {
     move |acc, elt| f(acc, elt.clone())
 }
@@ -46,14 +45,17 @@ where
 {
     type Item = T;
 
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<T> {
         self.it.next().cloned()
     }
 
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.it.size_hint()
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -63,6 +65,7 @@ where
         self.it.try_fold(init, clone_try_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -70,7 +73,6 @@ where
         self.it.map(T::clone).fold(init, f)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> T
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -87,10 +89,12 @@ where
     I: DoubleEndedIterator<Item = &'a T>,
     T: Clone,
 {
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<T> {
         self.it.next_back().cloned()
     }
 
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -100,6 +104,7 @@ where
         self.it.try_rfold(init, clone_try_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -109,7 +114,6 @@ where
 }
 
 #[stable(feature = "iter_cloned", since = "1.1.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, I, T: 'a> ExactSizeIterator for Cloned<I>
 where
     I: ExactSizeIterator<Item = &'a T>,
@@ -125,7 +129,6 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, I, T: 'a> FusedIterator for Cloned<I>
 where
     I: FusedIterator<Item = &'a T>,
@@ -135,12 +138,10 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedRandomAccess for Cloned<I> where I: TrustedRandomAccess {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Cloned<I>
 where
     I: TrustedRandomAccessNoCoerce,
@@ -161,6 +162,7 @@ where
     I: UncheckedIterator<Item = &'a T>,
     T: Clone,
 {
+    #[ferrocene::prevalidated]
     unsafe fn next_unchecked(&mut self) -> T {
         // SAFETY: `Cloned` is 1:1 with the inner iterator, so if the caller promised
         // that there's an element left, the inner iterator has one too.
@@ -170,7 +172,6 @@ where
 }
 
 #[stable(feature = "default_iters", since = "1.70.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Default> Default for Cloned<I> {
     /// Creates a `Cloned` iterator from the default value of `I`
     /// ```
@@ -185,7 +186,6 @@ impl<I: Default> Default for Cloned<I> {
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> SourceIter for Cloned<I>
 where
     I: SourceIter,
@@ -200,7 +200,6 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Cloned<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;

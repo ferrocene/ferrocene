@@ -249,21 +249,14 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
 use crate::fmt::{self, Debug, Display};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, PhantomData, Unsize};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{self, ManuallyDrop};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{self, CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
 use crate::panic::const_panic;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::PinCoerceUnsized;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::{self, NonNull};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::range;
 
 // Ferrocene addition: imports for certified subset
@@ -276,16 +269,12 @@ use crate::{
     ptr::NonNull,
 };
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod lazy;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod once;
 
 #[stable(feature = "lazy_cell", since = "1.80.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use lazy::LazyCell;
 #[stable(feature = "once_cell", since = "1.70.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use once::OnceCell;
 
 /// A mutable memory location.
@@ -330,6 +319,7 @@ pub use once::OnceCell;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[repr(transparent)]
 #[rustc_pub_transparent]
+#[ferrocene::prevalidated]
 pub struct Cell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
@@ -346,7 +336,6 @@ unsafe impl<T: ?Sized> Send for Cell<T> where T: Send {}
 impl<T: ?Sized> !Sync for Cell<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Copy> Clone for Cell<T> {
     #[inline]
     fn clone(&self) -> Cell<T> {
@@ -356,7 +345,6 @@ impl<T: Copy> Clone for Cell<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Default> const Default for Cell<T> {
     /// Creates a `Cell<T>`, with the `Default` value for T.
     #[inline]
@@ -366,7 +354,6 @@ impl<T: [const] Default> const Default for Cell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PartialEq + Copy> PartialEq for Cell<T> {
     #[inline]
     fn eq(&self, other: &Cell<T>) -> bool {
@@ -375,11 +362,9 @@ impl<T: PartialEq + Copy> PartialEq for Cell<T> {
 }
 
 #[stable(feature = "cell_eq", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Eq + Copy> Eq for Cell<T> {}
 
 #[stable(feature = "cell_ord", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PartialOrd + Copy> PartialOrd for Cell<T> {
     #[inline]
     fn partial_cmp(&self, other: &Cell<T>) -> Option<Ordering> {
@@ -408,7 +393,6 @@ impl<T: PartialOrd + Copy> PartialOrd for Cell<T> {
 }
 
 #[stable(feature = "cell_ord", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Ord + Copy> Ord for Cell<T> {
     #[inline]
     fn cmp(&self, other: &Cell<T>) -> Ordering {
@@ -418,7 +402,6 @@ impl<T: Ord + Copy> Ord for Cell<T> {
 
 #[stable(feature = "cell_from", since = "1.12.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const From<T> for Cell<T> {
     /// Creates a new `Cell<T>` containing the given value.
     fn from(t: T) -> Cell<T> {
@@ -439,6 +422,7 @@ impl<T> Cell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_new", since = "1.24.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> Cell<T> {
         Cell { value: UnsafeCell::new(value) }
     }
@@ -458,6 +442,7 @@ impl<T> Cell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn set(&self, val: T)
     where
         T: [const] Destruct,
@@ -489,7 +474,6 @@ impl<T> Cell<T> {
     /// ```
     #[inline]
     #[stable(feature = "move_cell", since = "1.17.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_should_not_be_called_on_const_items]
     pub fn swap(&self, other: &Self) {
         // This function documents that it *will* panic, and intrinsics::is_nonoverlapping doesn't
@@ -536,6 +520,7 @@ impl<T> Cell<T> {
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     #[rustc_confusables("swap")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn replace(&self, val: T) -> T {
         // SAFETY: This can cause data races if called from a separate thread,
         // but `Cell` is `!Sync` so this won't happen.
@@ -557,7 +542,6 @@ impl<T> Cell<T> {
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn into_inner(self) -> T {
         self.value.into_inner()
     }
@@ -579,6 +563,7 @@ impl<T: Copy> Cell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn get(&self) -> T {
         // SAFETY: This can cause data races if called from a separate thread,
         // but `Cell` is `!Sync` so this won't happen.
@@ -599,7 +584,6 @@ impl<T: Copy> Cell<T> {
     #[inline]
     #[stable(feature = "cell_update", since = "1.88.0")]
     #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_should_not_be_called_on_const_items]
     pub const fn update(&self, f: impl [const] FnOnce(T) -> T)
     where
@@ -611,7 +595,6 @@ impl<T: Copy> Cell<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> Cell<T> {
     /// Returns a raw pointer to the underlying data in this cell.
     ///
@@ -684,7 +667,6 @@ impl<T: ?Sized> Cell<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Default> Cell<T> {
     /// Takes the value of the cell, leaving `Default::default()` in its place.
     ///
@@ -710,7 +692,6 @@ impl<T: Default> Cell<T> {
 }
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<Cell<U>> for Cell<T> {}
 
 // Allow types that wrap `Cell` to also implement `DispatchFromDyn`
@@ -721,10 +702,8 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<Cell<U>> for Cell<T> {}
 // `self: Cell<&Self>` won't work
 // `self: CellWrapper<Self>` becomes possible
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<Cell<U>> for Cell<T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> AsRef<[Cell<T>; N]> for Cell<[T; N]> {
     #[inline]
@@ -733,7 +712,6 @@ impl<T, const N: usize> AsRef<[Cell<T>; N]> for Cell<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T, const N: usize> AsRef<[Cell<T>]> for Cell<[T; N]> {
     #[inline]
@@ -742,7 +720,6 @@ impl<T, const N: usize> AsRef<[Cell<T>]> for Cell<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
 impl<T> AsRef<[Cell<T>]> for Cell<[T]> {
     #[inline]
@@ -751,7 +728,6 @@ impl<T> AsRef<[Cell<T>]> for Cell<[T]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Cell<[T]> {
     /// Returns a `&[Cell<T>]` from a `&Cell<[T]>`
     ///
@@ -774,7 +750,6 @@ impl<T> Cell<[T]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> Cell<[T; N]> {
     /// Returns a `&[Cell<T>; N]` from a `&Cell<[T; N]>`
     ///
@@ -837,35 +812,26 @@ impl<T, const N: usize> Cell<[T; N]> {
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
 // Allow potential overlapping implementations in user code
 #[marker]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait CloneFromCell: Clone {}
 
 // `CloneFromCell` can be implemented for types that don't have indirection and which don't access
 // `Cell`s in their `Clone` implementation. A commonly-used subset is covered here.
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: CloneFromCell, const N: usize> CloneFromCell for [T; N] {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for Option<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: CloneFromCell, E: CloneFromCell> CloneFromCell for Result<T, E> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: ?Sized> CloneFromCell for PhantomData<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for ManuallyDrop<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for ops::Range<T> {}
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: CloneFromCell> CloneFromCell for range::Range<T> {}
 
 #[unstable(feature = "cell_get_cloned", issue = "145329")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: CloneFromCell> Cell<T> {
     /// Get a clone of the `Cell` that contains a copy of the original value.
     ///
@@ -896,6 +862,7 @@ impl<T: CloneFromCell> Cell<T> {
 /// See the [module-level documentation](self) for more.
 #[rustc_diagnostic_item = "RefCell"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct RefCell<T: ?Sized> {
     borrow: Cell<BorrowCounter>,
     // Stores the location of the earliest currently active borrow.
@@ -911,6 +878,7 @@ pub struct RefCell<T: ?Sized> {
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
 #[derive(Debug)]
+#[ferrocene::prevalidated]
 pub struct BorrowError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
@@ -918,6 +886,7 @@ pub struct BorrowError {
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
 impl Display for BorrowError {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
         let res = write!(
@@ -937,6 +906,7 @@ impl Display for BorrowError {
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
 #[derive(Debug)]
+#[ferrocene::prevalidated]
 pub struct BorrowMutError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
@@ -944,6 +914,7 @@ pub struct BorrowMutError {
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
 impl Display for BorrowMutError {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
         let res = write!(f, "RefCell already borrowed; a previous borrow was at {}", self.location);
@@ -959,6 +930,7 @@ impl Display for BorrowMutError {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
+#[ferrocene::prevalidated]
 const fn panic_already_borrowed(err: BorrowMutError) -> ! {
     const_panic!(
         "RefCell already borrowed",
@@ -971,6 +943,7 @@ const fn panic_already_borrowed(err: BorrowMutError) -> ! {
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
+#[ferrocene::prevalidated]
 const fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
     const_panic!(
         "RefCell already mutably borrowed",
@@ -996,11 +969,13 @@ type BorrowCounter = isize;
 const UNUSED: BorrowCounter = 0;
 
 #[inline(always)]
+#[ferrocene::prevalidated]
 const fn is_writing(x: BorrowCounter) -> bool {
     x < UNUSED
 }
 
 #[inline(always)]
+#[ferrocene::prevalidated]
 const fn is_reading(x: BorrowCounter) -> bool {
     x > UNUSED
 }
@@ -1018,6 +993,7 @@ impl<T> RefCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_refcell_new", since = "1.24.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> RefCell<T> {
         RefCell {
             value: UnsafeCell::new(value),
@@ -1042,7 +1018,6 @@ impl<T> RefCell<T> {
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn into_inner(self) -> T {
         // Since this function takes `self` (the `RefCell`) by value, the
         // compiler statically verifies that it is not currently borrowed.
@@ -1073,6 +1048,7 @@ impl<T> RefCell<T> {
     #[rustc_confusables("swap")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn replace(&self, t: T) -> T {
         mem::replace(&mut self.borrow_mut(), t)
     }
@@ -1097,6 +1073,7 @@ impl<T> RefCell<T> {
     #[stable(feature = "refcell_replace_swap", since = "1.35.0")]
     #[track_caller]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
         let mut_borrow = &mut *self.borrow_mut();
         let replacement = f(mut_borrow);
@@ -1126,7 +1103,6 @@ impl<T> RefCell<T> {
     #[inline]
     #[stable(feature = "refcell_swap", since = "1.24.0")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_should_not_be_called_on_const_items]
     pub const fn swap(&self, other: &Self) {
         mem::swap(&mut *self.borrow_mut(), &mut *other.borrow_mut())
@@ -1170,6 +1146,7 @@ impl<T: ?Sized> RefCell<T> {
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn borrow(&self) -> Ref<'_, T> {
         match self.try_borrow() {
             Ok(b) => b,
@@ -1207,6 +1184,7 @@ impl<T: ?Sized> RefCell<T> {
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
         match BorrowRef::new(&self.borrow) {
             Some(b) => {
@@ -1270,6 +1248,7 @@ impl<T: ?Sized> RefCell<T> {
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn borrow_mut(&self) -> RefMut<'_, T> {
         match self.try_borrow_mut() {
             Ok(b) => b,
@@ -1304,6 +1283,7 @@ impl<T: ?Sized> RefCell<T> {
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
         match BorrowRefMut::new(&self.borrow) {
             Some(b) => {
@@ -1341,7 +1321,6 @@ impl<T: ?Sized> RefCell<T> {
     #[rustc_as_ptr]
     #[rustc_never_returns_null_ptr]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_ptr(&self) -> *mut T {
         self.value.get()
     }
@@ -1380,7 +1359,6 @@ impl<T: ?Sized> RefCell<T> {
     #[inline]
     #[stable(feature = "cell_get_mut", since = "1.11.0")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn get_mut(&mut self) -> &mut T {
         self.value.get_mut()
     }
@@ -1408,7 +1386,6 @@ impl<T: ?Sized> RefCell<T> {
     /// ```
     #[unstable(feature = "cell_leak", issue = "69099")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn undo_leak(&mut self) -> &mut T {
         *self.borrow.get_mut() = UNUSED;
         self.get_mut()
@@ -1444,7 +1421,6 @@ impl<T: ?Sized> RefCell<T> {
     #[stable(feature = "borrow_state", since = "1.37.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError> {
         if !is_writing(self.borrow.get()) {
             // SAFETY: We check that nobody is actively writing now, but it is
@@ -1483,6 +1459,7 @@ impl<T: Default> RefCell<T> {
     /// assert_eq!(c.into_inner(), 0);
     /// ```
     #[stable(feature = "refcell_take", since = "1.50.0")]
+    #[ferrocene::prevalidated]
     pub fn take(&self) -> T {
         self.replace(Default::default())
     }
@@ -1495,7 +1472,6 @@ unsafe impl<T: ?Sized> Send for RefCell<T> where T: Send {}
 impl<T: ?Sized> !Sync for RefCell<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> Clone for RefCell<T> {
     /// # Panics
     ///
@@ -1518,7 +1494,6 @@ impl<T: Clone> Clone for RefCell<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Default> const Default for RefCell<T> {
     /// Creates a `RefCell<T>`, with the `Default` value for T.
     #[inline]
@@ -1528,7 +1503,6 @@ impl<T: [const] Default> const Default for RefCell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + PartialEq> PartialEq for RefCell<T> {
     /// # Panics
     ///
@@ -1540,11 +1514,9 @@ impl<T: ?Sized + PartialEq> PartialEq for RefCell<T> {
 }
 
 #[stable(feature = "cell_eq", since = "1.2.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Eq> Eq for RefCell<T> {}
 
 #[stable(feature = "cell_ord", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
     ///
@@ -1588,7 +1560,6 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
 }
 
 #[stable(feature = "cell_ord", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + Ord> Ord for RefCell<T> {
     /// # Panics
     ///
@@ -1601,7 +1572,6 @@ impl<T: ?Sized + Ord> Ord for RefCell<T> {
 
 #[stable(feature = "cell_from", since = "1.12.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const From<T> for RefCell<T> {
     /// Creates a new `RefCell<T>` containing the given value.
     fn from(t: T) -> RefCell<T> {
@@ -1610,15 +1580,16 @@ impl<T> const From<T> for RefCell<T> {
 }
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<RefCell<U>> for RefCell<T> {}
 
+#[ferrocene::prevalidated]
 struct BorrowRef<'b> {
     borrow: &'b Cell<BorrowCounter>,
 }
 
 impl<'b> BorrowRef<'b> {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRef<'b>> {
         let b = borrow.get().wrapping_add(1);
         if !is_reading(b) {
@@ -1645,6 +1616,7 @@ impl<'b> BorrowRef<'b> {
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
 impl const Drop for BorrowRef<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_reading(borrow));
@@ -1653,7 +1625,6 @@ impl const Drop for BorrowRef<'_> {
 }
 
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl const Clone for BorrowRef<'_> {
     #[inline]
     fn clone(&self) -> Self {
@@ -1677,6 +1648,7 @@ impl const Clone for BorrowRef<'_> {
 #[must_not_suspend = "holding a Ref across suspend points can cause BorrowErrors"]
 #[rustc_diagnostic_item = "RefCellRef"]
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
+#[ferrocene::prevalidated]
 pub struct Ref<'b, T: ?Sized + 'b> {
     // NB: we use a pointer instead of `&'b T` to avoid `noalias` violations, because a
     // `Ref` argument doesn't hold immutability for its whole scope, only until it drops.
@@ -1691,6 +1663,7 @@ impl<T: ?Sized> const Deref for Ref<'_, T> {
     type Target = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_ref() }
@@ -1698,10 +1671,8 @@ impl<T: ?Sized> const Deref for Ref<'_, T> {
 }
 
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: ?Sized> DerefPure for Ref<'_, T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'b, T: ?Sized> Ref<'b, T> {
     /// Copies a `Ref`.
     ///
@@ -1891,18 +1862,15 @@ impl<'b, T: ?Sized> Ref<'b, T> {
 }
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'b, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Ref<'b, U>> for Ref<'b, T> {}
 
 #[stable(feature = "std_guard_impls", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + fmt::Display> fmt::Display for Ref<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         (**self).fmt(f)
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'b, T: ?Sized> RefMut<'b, T> {
     /// Makes a new `RefMut` for a component of the borrowed data, e.g., an enum
     /// variant.
@@ -2113,6 +2081,7 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
     }
 }
 
+#[ferrocene::prevalidated]
 struct BorrowRefMut<'b> {
     borrow: &'b Cell<BorrowCounter>,
 }
@@ -2120,6 +2089,7 @@ struct BorrowRefMut<'b> {
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
 impl const Drop for BorrowRefMut<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
@@ -2129,6 +2099,7 @@ impl const Drop for BorrowRefMut<'_> {
 
 impl<'b> BorrowRefMut<'b> {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRefMut<'b>> {
         // NOTE: Unlike BorrowRefMut::clone, new is called to create the initial
         // mutable reference, and so there must currently be no existing
@@ -2149,7 +2120,6 @@ impl<'b> BorrowRefMut<'b> {
     // reference to a distinct, nonoverlapping range of the original object.
     // This isn't in a Clone impl so that code doesn't call this implicitly.
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn clone(&self) -> BorrowRefMut<'b> {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
@@ -2167,6 +2137,7 @@ impl<'b> BorrowRefMut<'b> {
 #[must_not_suspend = "holding a RefMut across suspend points can cause BorrowErrors"]
 #[rustc_diagnostic_item = "RefCellRefMut"]
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
+#[ferrocene::prevalidated]
 pub struct RefMut<'b, T: ?Sized + 'b> {
     // NB: we use a pointer instead of `&'b mut T` to avoid `noalias` violations, because a
     // `RefMut` argument doesn't hold exclusivity for its whole scope, only until it drops.
@@ -2182,6 +2153,7 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
     type Target = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_ref() }
@@ -2192,6 +2164,7 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_mut() }
@@ -2199,15 +2172,12 @@ impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
 }
 
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: ?Sized> DerefPure for RefMut<'_, T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'b, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<RefMut<'b, U>> for RefMut<'b, T> {}
 
 #[stable(feature = "std_guard_impls", since = "1.20.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized + fmt::Display> fmt::Display for RefMut<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         (**self).fmt(f)
@@ -2396,6 +2366,7 @@ impl<T: ?Sized + fmt::Display> fmt::Display for RefMut<'_, T> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[repr(transparent)]
 #[rustc_pub_transparent]
+#[ferrocene::prevalidated]
 pub struct UnsafeCell<T: ?Sized> {
     value: T,
 }
@@ -2419,6 +2390,7 @@ impl<T> UnsafeCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unsafe_cell_new", since = "1.32.0")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> UnsafeCell<T> {
         UnsafeCell { value }
     }
@@ -2438,6 +2410,7 @@ impl<T> UnsafeCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[ferrocene::prevalidated]
     pub const fn into_inner(self) -> T {
         self.value
     }
@@ -2466,7 +2439,6 @@ impl<T> UnsafeCell<T> {
     /// ```
     #[inline]
     #[unstable(feature = "unsafe_cell_access", issue = "136327")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_should_not_be_called_on_const_items]
     pub const unsafe fn replace(&self, value: T) -> T {
         // SAFETY: pointer comes from `&self` so naturally satisfies invariants.
@@ -2491,7 +2463,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[inline(always)]
     #[stable(feature = "unsafe_cell_from_mut", since = "1.84.0")]
     #[rustc_const_stable(feature = "unsafe_cell_from_mut", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn from_mut(value: &mut T) -> &mut UnsafeCell<T> {
         // SAFETY: `UnsafeCell<T>` has the same memory layout as `T` due to #[repr(transparent)].
         unsafe { &mut *(value as *mut T as *mut UnsafeCell<T>) }
@@ -2518,6 +2489,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[rustc_as_ptr]
     #[rustc_never_returns_null_ptr]
     #[rustc_should_not_be_called_on_const_items]
+    #[ferrocene::prevalidated]
     pub const fn get(&self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)]. This exploits std's special status, there is
@@ -2543,6 +2515,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[inline(always)]
     #[stable(feature = "unsafe_cell_get_mut", since = "1.50.0")]
     #[rustc_const_stable(feature = "const_unsafecell_get_mut", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn get_mut(&mut self) -> &mut T {
         &mut self.value
     }
@@ -2578,6 +2551,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_const_stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_diagnostic_item = "unsafe_cell_raw_get"]
+    #[ferrocene::prevalidated]
     pub const fn raw_get(this: *const Self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)]. This exploits std's special status, there is
@@ -2607,7 +2581,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// ```
     #[inline]
     #[unstable(feature = "unsafe_cell_access", issue = "136327")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_should_not_be_called_on_const_items]
     pub const unsafe fn as_ref_unchecked(&self) -> &T {
         // SAFETY: pointer comes from `&self` so naturally satisfies ptr-to-ref invariants.
@@ -2637,7 +2610,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[inline]
     #[unstable(feature = "unsafe_cell_access", issue = "136327")]
     #[allow(clippy::mut_from_ref)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_should_not_be_called_on_const_items]
     pub const unsafe fn as_mut_unchecked(&self) -> &mut T {
         // SAFETY: pointer comes from `&self` so naturally satisfies ptr-to-ref invariants.
@@ -2647,7 +2619,6 @@ impl<T: ?Sized> UnsafeCell<T> {
 
 #[stable(feature = "unsafe_cell_default", since = "1.10.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Default> const Default for UnsafeCell<T> {
     /// Creates an `UnsafeCell`, with the `Default` value for T.
     fn default() -> UnsafeCell<T> {
@@ -2657,7 +2628,6 @@ impl<T: [const] Default> const Default for UnsafeCell<T> {
 
 #[stable(feature = "cell_from", since = "1.12.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const From<T> for UnsafeCell<T> {
     /// Creates a new `UnsafeCell<T>` containing the given value.
     fn from(t: T) -> UnsafeCell<T> {
@@ -2666,7 +2636,6 @@ impl<T> const From<T> for UnsafeCell<T> {
 }
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<UnsafeCell<U>> for UnsafeCell<T> {}
 
 // Allow types that wrap `UnsafeCell` to also implement `DispatchFromDyn`
@@ -2677,7 +2646,6 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<UnsafeCell<U>> for UnsafeCell<T> {}
 // `self: UnsafeCell<&Self>` won't work
 // `self: UnsafeCellWrapper<Self>` becomes possible
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<UnsafeCell<U>> for UnsafeCell<T> {}
 
 /// [`UnsafeCell`], but [`Sync`].
@@ -2696,6 +2664,7 @@ impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<UnsafeCell<U>> for UnsafeCell<T> 
 #[repr(transparent)]
 #[rustc_diagnostic_item = "SyncUnsafeCell"]
 #[rustc_pub_transparent]
+#[ferrocene::prevalidated]
 pub struct SyncUnsafeCell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
@@ -2704,7 +2673,6 @@ pub struct SyncUnsafeCell<T: ?Sized> {
 unsafe impl<T: ?Sized + Sync> Sync for SyncUnsafeCell<T> {}
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> SyncUnsafeCell<T> {
     /// Constructs a new instance of `SyncUnsafeCell` which will wrap the specified value.
     #[inline]
@@ -2721,7 +2689,6 @@ impl<T> SyncUnsafeCell<T> {
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: ?Sized> SyncUnsafeCell<T> {
     /// Gets a mutable pointer to the wrapped value.
     ///
@@ -2760,7 +2727,6 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Default> const Default for SyncUnsafeCell<T> {
     /// Creates an `SyncUnsafeCell`, with the `Default` value for T.
     fn default() -> SyncUnsafeCell<T> {
@@ -2770,7 +2736,6 @@ impl<T: [const] Default> const Default for SyncUnsafeCell<T> {
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const From<T> for SyncUnsafeCell<T> {
     /// Creates a new `SyncUnsafeCell<T>` containing the given value.
     fn from(t: T) -> SyncUnsafeCell<T> {
@@ -2780,7 +2745,6 @@ impl<T> const From<T> for SyncUnsafeCell<T> {
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
 //#[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<SyncUnsafeCell<U>> for SyncUnsafeCell<T> {}
 
 // Allow types that wrap `SyncUnsafeCell` to also implement `DispatchFromDyn`
@@ -2792,11 +2756,9 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<SyncUnsafeCell<U>> for SyncUnsafeCell
 // `self: SyncUnsafeCellWrapper<Self>` becomes possible
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
 //#[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<SyncUnsafeCell<U>> for SyncUnsafeCell<T> {}
 
 #[allow(unused)]
-#[cfg(not(feature = "ferrocene_subset"))]
 fn assert_coerce_unsized(
     a: UnsafeCell<&i32>,
     b: SyncUnsafeCell<&i32>,
@@ -2809,26 +2771,20 @@ fn assert_coerce_unsized(
     let _: RefCell<&dyn Send> = d;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for UnsafeCell<T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for SyncUnsafeCell<T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for Cell<T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for RefCell<T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<'b, T: ?Sized> PinCoerceUnsized for Ref<'b, T> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "150112")]
 unsafe impl<'b, T: ?Sized> PinCoerceUnsized for RefMut<'b, T> {}

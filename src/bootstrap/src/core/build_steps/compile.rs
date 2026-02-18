@@ -722,7 +722,7 @@ pub fn std_cargo(
 
     // Ferrocene additions
     if target.contains("ferrocene.subset") {
-        cargo.arg("--features=ferrocene_subset");
+        // cargo.arg("--features=ferrocene_subset");
     }
 
     if builder.config.rust_lto == RustcLto::Off {

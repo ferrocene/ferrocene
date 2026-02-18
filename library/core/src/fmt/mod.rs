@@ -24,6 +24,7 @@ mod rt;
 #[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub enum Alignment {
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
     /// Indication that contents should be left-aligned.
@@ -106,6 +107,7 @@ pub type Result = result::Result<(), Error>;
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[ferrocene::prevalidated]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -180,6 +182,7 @@ pub trait Write {
     /// # std::fmt::Result::Ok(())
     /// ```
     #[stable(feature = "fmt_write_char", since = "1.1.0")]
+    #[ferrocene::prevalidated]
     fn write_char(&mut self, c: char) -> Result {
         self.write_str(c.encode_utf8(&mut [0; char::MAX_LEN_UTF8]))
     }
@@ -209,6 +212,7 @@ pub trait Write {
     /// # std::fmt::Result::Ok(())
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         // We use a specialization for `Sized` types to avoid an indirection
         // through `&mut self`
@@ -218,6 +222,7 @@ pub trait Write {
 
         impl<W: Write + ?Sized> SpecWriteFmt for &mut W {
             #[inline]
+            #[ferrocene::prevalidated]
             default fn spec_write_fmt(mut self, args: Arguments<'_>) -> Result {
                 if let Some(s) = args.as_statically_known_str() {
                     self.write_str(s)
@@ -229,6 +234,7 @@ pub trait Write {
 
         impl<W: Write> SpecWriteFmt for &mut W {
             #[inline]
+            #[ferrocene::prevalidated]
             fn spec_write_fmt(self, args: Arguments<'_>) -> Result {
                 if let Some(s) = args.as_statically_known_str() {
                     self.write_str(s)
@@ -244,14 +250,17 @@ pub trait Write {
 
 #[stable(feature = "fmt_write_blanket_impl", since = "1.4.0")]
 impl<W: Write + ?Sized> Write for &mut W {
+    #[ferrocene::prevalidated]
     fn write_str(&mut self, s: &str) -> Result {
         (**self).write_str(s)
     }
 
+    #[ferrocene::prevalidated]
     fn write_char(&mut self, c: char) -> Result {
         (**self).write_char(c)
     }
 
+    #[ferrocene::prevalidated]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         (**self).write_fmt(args)
     }
@@ -260,6 +269,7 @@ impl<W: Write + ?Sized> Write for &mut W {
 /// The signedness of a [`Formatter`] (or of a [`FormattingOptions`]).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[ferrocene::prevalidated]
 pub enum Sign {
     /// Represents the `+` flag.
     Plus,
@@ -271,6 +281,7 @@ pub enum Sign {
 /// hexadecimal or normal integers.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[ferrocene::prevalidated]
 pub enum DebugAsHex {
     /// Use lower-case hexadecimal integers for the `Debug` trait (like [the `x?` type](../../std/fmt/index.html#formatting-traits)).
     Lower,
@@ -284,6 +295,7 @@ pub enum DebugAsHex {
 /// It is mainly used to construct `Formatter` instances.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[ferrocene::prevalidated]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///
@@ -341,6 +353,7 @@ impl FormattingOptions {
     /// - no precision, and
     /// - no [`DebugAsHex`] output mode.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn new() -> Self {
         Self { flags: ' ' as u32 | flags::ALIGN_UNKNOWN, width: 0, precision: 0 }
     }
@@ -354,6 +367,7 @@ impl FormattingOptions {
     ///   always be printed.
     /// - `-`: Currently not used
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn sign(&mut self, sign: Option<Sign>) -> &mut Self {
         let sign = match sign {
             None => 0,
@@ -367,6 +381,7 @@ impl FormattingOptions {
     ///
     /// This is used to indicate for integer formats that the padding to width should both be done with a 0 character as well as be sign-aware
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn sign_aware_zero_pad(&mut self, sign_aware_zero_pad: bool) -> &mut Self {
         if sign_aware_zero_pad {
             self.flags |= flags::SIGN_AWARE_ZERO_PAD_FLAG;
@@ -384,6 +399,7 @@ impl FormattingOptions {
     /// - [`Octal`] - precedes the argument with a `0o`
     /// - [`Binary`] - precedes the argument with a `0b`
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn alternate(&mut self, alternate: bool) -> &mut Self {
         if alternate {
             self.flags |= flags::ALTERNATE_FLAG;
@@ -399,6 +415,7 @@ impl FormattingOptions {
     /// being formatted is smaller than width some extra characters will be
     /// printed around it.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn fill(&mut self, fill: char) -> &mut Self {
         self.flags = self.flags & (u32::MAX << 21) | fill as u32;
         self
@@ -408,6 +425,7 @@ impl FormattingOptions {
     /// The alignment specifies how the value being formatted should be
     /// positioned if it is smaller than the width of the formatter.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn align(&mut self, align: Option<Alignment>) -> &mut Self {
         let align: u32 = match align {
             Some(Alignment::Left) => flags::ALIGN_LEFT,
@@ -425,6 +443,7 @@ impl FormattingOptions {
     /// the padding specified by [`FormattingOptions::fill`]/[`FormattingOptions::align`]
     /// will be used to take up the required space.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn width(&mut self, width: Option<u16>) -> &mut Self {
         if let Some(width) = width {
             self.flags |= flags::WIDTH_FLAG;
@@ -445,6 +464,7 @@ impl FormattingOptions {
     /// - For floating-point types, this indicates how many digits after the
     /// decimal point should be printed.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn precision(&mut self, precision: Option<u16>) -> &mut Self {
         if let Some(precision) = precision {
             self.flags |= flags::PRECISION_FLAG;
@@ -458,6 +478,7 @@ impl FormattingOptions {
     /// Specifies whether the [`Debug`] trait should use lower-/upper-case
     /// hexadecimal or normal integers
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn debug_as_hex(&mut self, debug_as_hex: Option<DebugAsHex>) -> &mut Self {
         let debug_as_hex = match debug_as_hex {
             None => 0,
@@ -471,6 +492,7 @@ impl FormattingOptions {
 
     /// Returns the current sign (the `+` or the `-` flag).
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_sign(&self) -> Option<Sign> {
         if self.flags & flags::SIGN_PLUS_FLAG != 0 {
             Some(Sign::Plus)
@@ -482,22 +504,26 @@ impl FormattingOptions {
     }
     /// Returns the current `0` flag.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_sign_aware_zero_pad(&self) -> bool {
         self.flags & flags::SIGN_AWARE_ZERO_PAD_FLAG != 0
     }
     /// Returns the current `#` flag.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_alternate(&self) -> bool {
         self.flags & flags::ALTERNATE_FLAG != 0
     }
     /// Returns the current fill character.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_fill(&self) -> char {
         // SAFETY: We only ever put a valid `char` in the lower 21 bits of the flags field.
         unsafe { char::from_u32_unchecked(self.flags & 0x1FFFFF) }
     }
     /// Returns the current alignment.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_align(&self) -> Option<Alignment> {
         match self.flags & flags::ALIGN_BITS {
             flags::ALIGN_LEFT => Some(Alignment::Left),
@@ -508,16 +534,19 @@ impl FormattingOptions {
     }
     /// Returns the current width.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_width(&self) -> Option<u16> {
         if self.flags & flags::WIDTH_FLAG != 0 { Some(self.width) } else { None }
     }
     /// Returns the current precision.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_precision(&self) -> Option<u16> {
         if self.flags & flags::PRECISION_FLAG != 0 { Some(self.precision) } else { None }
     }
     /// Returns the current precision.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn get_debug_as_hex(&self) -> Option<DebugAsHex> {
         if self.flags & flags::DEBUG_LOWER_HEX_FLAG != 0 {
             Some(DebugAsHex::Lower)
@@ -532,6 +561,7 @@ impl FormattingOptions {
     ///
     /// You may alternatively use [`Formatter::new()`].
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn create_formatter<'a>(self, write: &'a mut (dyn Write + 'a)) -> Formatter<'a> {
         Formatter { options: self, buf: write }
     }
@@ -540,6 +570,7 @@ impl FormattingOptions {
 #[unstable(feature = "formatting_options", issue = "118117")]
 impl Default for FormattingOptions {
     /// Same as [`FormattingOptions::new()`].
+    #[ferrocene::prevalidated]
     fn default() -> Self {
         // The `#[derive(Default)]` implementation would set `fill` to `\0` instead of space.
         Self::new()
@@ -558,6 +589,7 @@ impl Default for FormattingOptions {
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
+#[ferrocene::prevalidated]
 pub struct Formatter<'a> {
     options: FormattingOptions,
 
@@ -573,12 +605,14 @@ impl<'a> Formatter<'a> {
     ///
     /// You may alternatively use [`FormattingOptions::create_formatter()`].
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn new(write: &'a mut (dyn Write + 'a), options: FormattingOptions) -> Self {
         Formatter { options, buf: write }
     }
 
     /// Creates a new formatter based on this one with given [`FormattingOptions`].
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn with_options<'b>(&'b mut self, options: FormattingOptions) -> Formatter<'b> {
         Formatter { options, buf: self.buf }
     }
@@ -713,6 +747,7 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
+#[ferrocene::prevalidated]
 pub struct Arguments<'a> {
     template: NonNull<u8>,
     args: NonNull<rt::Argument<'a>>,
@@ -726,6 +761,7 @@ impl<'a> Arguments<'a> {
     // SAFETY: The caller must ensure that the provided template and args encode a valid
     // fmt::Arguments, as documented above.
     #[inline]
+    #[ferrocene::prevalidated]
     pub unsafe fn new<const N: usize, const M: usize>(
         template: &'a [u8; N],
         args: &'a [rt::Argument<'a>; M],
@@ -738,6 +774,7 @@ impl<'a> Arguments<'a> {
     // Used by format_args!() expansion when arguments are inlined,
     // e.g. format_args!("{}", 123), which is not allowed in const.
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn from_str_nonconst(s: &'static str) -> Arguments<'a> {
         Arguments::from_str(s)
     }
@@ -751,6 +788,7 @@ impl<'a> Arguments<'a> {
     /// This is intended to be used for setting initial `String` capacity
     /// when using `format!`. Note: this is neither the lower nor upper bound.
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn estimated_capacity(&self) -> usize {
         if let Some(s) = self.as_str() {
             return s.len();
@@ -812,6 +850,7 @@ impl<'a> Arguments<'a> {
     /// Formatting this `fmt::Arguments` will just produce the string as-is.
     #[inline]
     #[unstable(feature = "fmt_arguments_from_str", issue = "148905")]
+    #[ferrocene::prevalidated]
     pub const fn from_str(s: &'static str) -> Arguments<'a> {
         // SAFETY: This is the "static str" representation of fmt::Arguments; see above.
         unsafe {
@@ -868,6 +907,7 @@ impl<'a> Arguments<'a> {
     #[rustc_const_stable(feature = "const_arguments_as_str", since = "1.84.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> Option<&'static str> {
         // SAFETY: During const eval, `self.args` must have come from a usize,
         // not a pointer, because that's the only way to create a fmt::Arguments in const.
@@ -893,6 +933,7 @@ impl<'a> Arguments<'a> {
     #[must_use]
     #[inline]
     #[doc(hidden)]
+    #[ferrocene::prevalidated]
     pub fn as_statically_known_str(&self) -> Option<&'static str> {
         let s = self.as_str();
         if core::intrinsics::is_val_statically_known(s.is_some()) { s } else { None }
@@ -907,6 +948,7 @@ impl !Sync for Arguments<'_> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for Arguments<'_> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Display::fmt(self, fmt)
     }
@@ -914,6 +956,7 @@ impl Debug for Arguments<'_> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for Arguments<'_> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         write(fmt.buf, *self)
     }
@@ -1627,6 +1670,7 @@ pub trait UpperExp: PointeeSized {
 ///
 /// [`write!`]: crate::write!
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
     if let Some(s) = fmt.as_str() {
         return output.write_str(s);
@@ -1740,17 +1784,20 @@ pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {
 
 /// Padding after the end of something. Returned by `Formatter::padding`.
 #[must_use = "don't forget to write the post padding"]
+#[ferrocene::prevalidated]
 pub(crate) struct PostPadding {
     fill: char,
     padding: u16,
 }
 
 impl PostPadding {
+    #[ferrocene::prevalidated]
     fn new(fill: char, padding: u16) -> PostPadding {
         PostPadding { fill, padding }
     }
 
     /// Writes this post padding.
+    #[ferrocene::prevalidated]
     pub(crate) fn write(self, f: &mut Formatter<'_>) -> Result {
         for _ in 0..self.padding {
             f.buf.write_char(self.fill)?;
@@ -1760,6 +1807,7 @@ impl PostPadding {
 }
 
 impl<'a> Formatter<'a> {
+    #[ferrocene::prevalidated]
     fn wrap_buf<'b, 'c, F>(&'b mut self, wrap: F) -> Formatter<'c>
     where
         'b: 'c,
@@ -1822,6 +1870,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{:0>#8}", Foo::new(-1)), "00-Foo 1");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn pad_integral(&mut self, is_nonnegative: bool, prefix: &str, buf: &str) -> Result {
         let mut width = buf.len();
 
@@ -1843,6 +1892,7 @@ impl<'a> Formatter<'a> {
 
         // Writes the sign if it exists, and then the prefix if it was requested
         #[inline(never)]
+        #[ferrocene::prevalidated]
         fn write_prefix(f: &mut Formatter<'_>, sign: Option<char>, prefix: Option<&str>) -> Result {
             if let Some(c) = sign {
                 f.buf.write_char(c)?;
@@ -1906,6 +1956,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{Foo:0>4}"), "0Foo");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn pad(&mut self, s: &str) -> Result {
         // Make sure there's a fast path up front.
         if self.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
@@ -1948,6 +1999,7 @@ impl<'a> Formatter<'a> {
     ///
     /// Callers are responsible for ensuring post-padding is written after the
     /// thing that is being padded.
+    #[ferrocene::prevalidated]
     pub(crate) fn padding(
         &mut self,
         padding: u16,
@@ -1977,6 +2029,7 @@ impl<'a> Formatter<'a> {
     /// # Safety
     ///
     /// Any `numfmt::Part::Copy` parts in `formatted` must contain valid UTF-8.
+    #[ferrocene::prevalidated]
     unsafe fn pad_formatted_parts(&mut self, formatted: &numfmt::Formatted<'_>) -> Result {
         if self.options.width == 0 {
             // this is the common case and we take a shortcut
@@ -2021,7 +2074,9 @@ impl<'a> Formatter<'a> {
     /// # Safety
     ///
     /// Any `numfmt::Part::Copy` parts in `formatted` must contain valid UTF-8.
+    #[ferrocene::prevalidated]
     unsafe fn write_formatted_parts(&mut self, formatted: &numfmt::Formatted<'_>) -> Result {
+        #[ferrocene::prevalidated]
         unsafe fn write_bytes(buf: &mut dyn Write, s: &[u8]) -> Result {
             // SAFETY: This is used for `numfmt::Part::Num` and `numfmt::Part::Copy`.
             // It's safe to use for `numfmt::Part::Num` since every char `c` is between
@@ -2089,6 +2144,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{Foo:0>8}"), "Foo");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn write_str(&mut self, data: &str) -> Result {
         self.buf.write_str(data)
     }
@@ -2118,6 +2174,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result {
         if let Some(s) = fmt.as_statically_known_str() {
             self.buf.write_str(s)
@@ -2134,6 +2191,7 @@ impl<'a> Formatter<'a> {
         note = "use the `sign_plus`, `sign_minus`, `alternate`, \
                 or `sign_aware_zero_pad` methods instead"
     )]
+    #[ferrocene::prevalidated]
     pub fn flags(&self) -> u32 {
         // Extract the debug upper/lower hex, zero pad, alternate, and plus/minus flags
         // to stay compatible with older versions of Rust.
@@ -2169,6 +2227,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn fill(&self) -> char {
         self.options.get_fill()
     }
@@ -2204,6 +2263,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
+    #[ferrocene::prevalidated]
     pub fn align(&self) -> Option<Alignment> {
         self.options.get_align()
     }
@@ -2234,6 +2294,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn width(&self) -> Option<usize> {
         if self.options.flags & flags::WIDTH_FLAG == 0 {
             None
@@ -2269,6 +2330,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn precision(&self) -> Option<usize> {
         if self.options.flags & flags::PRECISION_FLAG == 0 {
             None
@@ -2305,6 +2367,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn sign_plus(&self) -> bool {
         self.options.flags & flags::SIGN_PLUS_FLAG != 0
     }
@@ -2334,6 +2397,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn sign_minus(&self) -> bool {
         self.options.flags & flags::SIGN_MINUS_FLAG != 0
     }
@@ -2362,6 +2426,7 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn alternate(&self) -> bool {
         self.options.flags & flags::ALTERNATE_FLAG != 0
     }
@@ -2388,15 +2453,18 @@ impl<'a> Formatter<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "fmt_flags", since = "1.5.0")]
+    #[ferrocene::prevalidated]
     pub fn sign_aware_zero_pad(&self) -> bool {
         self.options.flags & flags::SIGN_AWARE_ZERO_PAD_FLAG != 0
     }
 
     // FIXME: Decide what public API we want for these two flags.
     // https://github.com/rust-lang/rust/issues/48584
+    #[ferrocene::prevalidated]
     fn debug_lower_hex(&self) -> bool {
         self.options.flags & flags::DEBUG_LOWER_HEX_FLAG != 0
     }
+    #[ferrocene::prevalidated]
     fn debug_upper_hex(&self) -> bool {
         self.options.flags & flags::DEBUG_UPPER_HEX_FLAG != 0
     }
@@ -2438,6 +2506,7 @@ impl<'a> Formatter<'a> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct<'b>(&'b mut self, name: &str) -> DebugStruct<'b, 'a> {
         builders::debug_struct_new(self, name)
     }
@@ -2447,6 +2516,7 @@ impl<'a> Formatter<'a> {
     /// faster for 1 field.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct_field1_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2463,6 +2533,7 @@ impl<'a> Formatter<'a> {
     /// faster for 2 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct_field2_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2482,6 +2553,7 @@ impl<'a> Formatter<'a> {
     /// faster for 3 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct_field3_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2504,6 +2576,7 @@ impl<'a> Formatter<'a> {
     /// faster for 4 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct_field4_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2529,6 +2602,7 @@ impl<'a> Formatter<'a> {
     /// faster for 5 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct_field5_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2556,6 +2630,7 @@ impl<'a> Formatter<'a> {
     /// For the cases not covered by `debug_struct_field[12345]_finish`.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_struct_fields_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2597,6 +2672,7 @@ impl<'a> Formatter<'a> {
     /// );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple<'b>(&'b mut self, name: &str) -> DebugTuple<'b, 'a> {
         builders::debug_tuple_new(self, name)
     }
@@ -2606,6 +2682,7 @@ impl<'a> Formatter<'a> {
     /// for 1 field.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple_field1_finish<'b>(&'b mut self, name: &str, value1: &dyn Debug) -> Result {
         let mut builder = builders::debug_tuple_new(self, name);
         builder.field(value1);
@@ -2617,6 +2694,7 @@ impl<'a> Formatter<'a> {
     /// for 2 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple_field2_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2634,6 +2712,7 @@ impl<'a> Formatter<'a> {
     /// for 3 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple_field3_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2653,6 +2732,7 @@ impl<'a> Formatter<'a> {
     /// for 4 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple_field4_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2674,6 +2754,7 @@ impl<'a> Formatter<'a> {
     /// for 5 fields.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple_field5_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2696,6 +2777,7 @@ impl<'a> Formatter<'a> {
     /// binaries. For the cases not covered by `debug_tuple_field[12345]_finish`.
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug_tuple_fields_finish<'b>(
         &'b mut self,
         name: &str,
@@ -2727,6 +2809,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{:?}", Foo(vec![10, 11])), "[10, 11]");
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn debug_list<'b>(&'b mut self) -> DebugList<'b, 'a> {
         builders::debug_list_new(self)
     }
@@ -2785,6 +2868,7 @@ impl<'a> Formatter<'a> {
     /// }
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn debug_set<'b>(&'b mut self) -> DebugSet<'b, 'a> {
         builders::debug_set_new(self)
     }
@@ -2811,18 +2895,21 @@ impl<'a> Formatter<'a> {
     ///  );
     /// ```
     #[stable(feature = "debug_builders", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn debug_map<'b>(&'b mut self) -> DebugMap<'b, 'a> {
         builders::debug_map_new(self)
     }
 
     /// Returns the sign of this formatter (`+` or `-`).
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn sign(&self) -> Option<Sign> {
         self.options.get_sign()
     }
 
     /// Returns the formatting options this formatter corresponds to.
     #[unstable(feature = "formatting_options", issue = "118117")]
+    #[ferrocene::prevalidated]
     pub const fn options(&self) -> FormattingOptions {
         self.options
     }
@@ -2830,15 +2917,18 @@ impl<'a> Formatter<'a> {
 
 #[stable(since = "1.2.0", feature = "formatter_write")]
 impl Write for Formatter<'_> {
+    #[ferrocene::prevalidated]
     fn write_str(&mut self, s: &str) -> Result {
         self.buf.write_str(s)
     }
 
+    #[ferrocene::prevalidated]
     fn write_char(&mut self, c: char) -> Result {
         self.buf.write_char(c)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         if let Some(s) = args.as_statically_known_str() {
             self.buf.write_str(s)
@@ -2850,6 +2940,7 @@ impl Write for Formatter<'_> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for Error {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt("an error occurred when formatting an argument", f)
     }
@@ -2862,11 +2953,13 @@ macro_rules! fmt_refs {
         $(
         #[stable(feature = "rust1", since = "1.0.0")]
         impl<T: PointeeSized + $tr> $tr for &T {
-            fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
         }
         #[stable(feature = "rust1", since = "1.0.0")]
         impl<T: PointeeSized + $tr> $tr for &mut T {
-            fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
+            #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
         }
         )*
     }
@@ -2877,6 +2970,7 @@ fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperEx
 #[unstable(feature = "never_type", issue = "35121")]
 impl Debug for ! {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
         *self
     }
@@ -2885,6 +2979,7 @@ impl Debug for ! {
 #[unstable(feature = "never_type", issue = "35121")]
 impl Display for ! {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
         *self
     }
@@ -2893,6 +2988,7 @@ impl Display for ! {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for bool {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(self, f)
     }
@@ -2900,6 +2996,7 @@ impl Debug for bool {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for bool {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(if *self { "true" } else { "false" }, f)
     }
@@ -2907,12 +3004,14 @@ impl Display for bool {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for str {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_char('"')?;
 
         // substring we know is printable
         let mut printable_range = 0..0;
 
+        #[ferrocene::prevalidated]
         fn needs_escape(b: u8) -> bool {
             b > 0x7E || b < 0x20 || b == b'\\' || b == b'"'
         }
@@ -2956,6 +3055,7 @@ impl Debug for str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for str {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.pad(self)
     }
@@ -2963,6 +3063,7 @@ impl Display for str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for char {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_char('\'')?;
         let esc = self.escape_debug_ext(EscapeDebugExtArgs {
@@ -2977,6 +3078,7 @@ impl Debug for char {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for char {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if f.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
             f.write_char(*self)
@@ -2988,6 +3090,7 @@ impl Display for char {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Pointer for *const T {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if <<T as core::ptr::Pointee>::Metadata as core::unit::IsUnit>::is_unit() {
             pointer_fmt_inner(self.expose_provenance(), f)
@@ -3008,6 +3111,7 @@ impl<T: PointeeSized> Pointer for *const T {
 /// `fn(...) -> ...` without using [problematic] "Oxford Casts".
 ///
 /// [problematic]: https://github.com/rust-lang/rust/issues/95489
+#[ferrocene::prevalidated]
 pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Result {
     let old_options = f.options;
 
@@ -3033,6 +3137,7 @@ pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Resul
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Pointer for *mut T {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
     }
@@ -3040,6 +3145,7 @@ impl<T: PointeeSized> Pointer for *mut T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Pointer for &T {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
     }
@@ -3047,6 +3153,7 @@ impl<T: PointeeSized> Pointer for &T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Pointer for &mut T {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(&**self as *const T), f)
     }
@@ -3056,12 +3163,14 @@ impl<T: PointeeSized> Pointer for &mut T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Debug for *const T {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PointeeSized> Debug for *mut T {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
@@ -3079,7 +3188,8 @@ macro_rules! tuple {
             #[stable(feature = "rust1", since = "1.0.0")]
             impl<$($name:Debug),+> Debug for ($($name,)+) {
                 #[allow(non_snake_case, unused_assignments)]
-                fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+                #[ferrocene::prevalidated]
+fn fmt(&self, f: &mut Formatter<'_>) -> Result {
                     let mut builder = f.debug_tuple("");
                     let ($(ref $name,)+) = *self;
                     $(
@@ -3112,6 +3222,7 @@ tuple! { E, D, C, B, A, Z, Y, X, W, V, U, T, }
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Debug> Debug for [T] {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_list().entries(self.iter()).finish()
     }
@@ -3120,12 +3231,14 @@ impl<T: Debug> Debug for [T] {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for () {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.pad("()")
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Debug for PhantomData<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "PhantomData<{}>", crate::any::type_name::<T>())
     }
@@ -3133,6 +3246,7 @@ impl<T: ?Sized> Debug for PhantomData<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Copy + Debug> Debug for Cell<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("Cell").field("value", &self.get()).finish()
     }
@@ -3140,6 +3254,7 @@ impl<T: Copy + Debug> Debug for Cell<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized + Debug> Debug for RefCell<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let mut d = f.debug_struct("RefCell");
         match self.try_borrow() {
@@ -3152,6 +3267,7 @@ impl<T: ?Sized + Debug> Debug for RefCell<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&**self, f)
     }
@@ -3159,6 +3275,7 @@ impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&*(self.deref()), f)
     }
@@ -3166,6 +3283,7 @@ impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<T: ?Sized> Debug for UnsafeCell<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("UnsafeCell").finish_non_exhaustive()
     }
@@ -3173,6 +3291,7 @@ impl<T: ?Sized> Debug for UnsafeCell<T> {
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
 impl<T: ?Sized> Debug for SyncUnsafeCell<T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("SyncUnsafeCell").finish_non_exhaustive()
     }
@@ -3185,5 +3304,4 @@ impl<T: ?Sized> Debug for SyncUnsafeCell<T> {
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;

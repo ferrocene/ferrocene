@@ -1,7 +1,5 @@
 use crate::cmp;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, TrustedRandomAccess};
 use crate::num::NonZero;
 use crate::ops::{ControlFlow, Try};
@@ -16,12 +14,14 @@ use crate::ops::{ControlFlow, Try};
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Take<I> {
     iter: I,
     n: usize,
 }
 
 impl<I> Take<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, n: usize) -> Take<I> {
         Take { iter, n }
     }
@@ -35,6 +35,7 @@ where
     type Item = <I as Iterator>::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
         if self.n != 0 {
             self.n -= 1;
@@ -45,6 +46,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         if self.n > n {
             self.n -= n + 1;
@@ -59,6 +61,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.n == 0 {
             return (0, Some(0));
@@ -77,11 +80,13 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
+        #[ferrocene::prevalidated]
         fn check<'a, T, Acc, R: Try<Output = Acc>>(
             n: &'a mut usize,
             mut fold: impl FnMut(Acc, T) -> R + 'a,
@@ -102,6 +107,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<B, F>(self, init: B, f: F) -> B
     where
         Self: Sized,
@@ -111,12 +117,14 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn for_each<F: FnMut(Self::Item)>(self, f: F) {
         Self::spec_for_each(self, f)
     }
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let min = self.n.min(n);
         let rem = match self.iter.advance_by(min) {
@@ -130,7 +138,6 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> SourceIter for Take<I>
 where
     I: SourceIter,
@@ -145,14 +152,12 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Take<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }
 
 #[stable(feature = "double_ended_take_iterator", since = "1.38.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> DoubleEndedIterator for Take<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
@@ -243,19 +248,15 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> ExactSizeIterator for Take<I> where I: ExactSizeIterator {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> FusedIterator for Take<I> where I: FusedIterator {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: TrustedFused> TrustedFused for Take<I> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: TrustedLen> TrustedLen for Take<I> {}
 
 trait SpecTake: Iterator {
@@ -269,6 +270,7 @@ trait SpecTake: Iterator {
 
 impl<I: Iterator> SpecTake for Take<I> {
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_fold<B, F>(mut self, init: B, f: F) -> B
     where
         Self: Sized,
@@ -279,10 +281,12 @@ impl<I: Iterator> SpecTake for Take<I> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_for_each<F: FnMut(Self::Item)>(mut self, f: F) {
         // The default implementation would use a unit accumulator, so we can
         // avoid a stateful closure by folding over the remaining number
         // of items we wish to return instead.
+        #[ferrocene::prevalidated]
         fn check<'a, Item>(
             mut action: impl FnMut(Item) + 'a,
         ) -> impl FnMut(usize, Item) -> Option<usize> + 'a {
@@ -299,7 +303,6 @@ impl<I: Iterator> SpecTake for Take<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
     #[inline]
     fn spec_fold<B, F>(mut self, init: B, mut f: F) -> B
@@ -329,7 +332,6 @@ impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
 }
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -373,7 +375,6 @@ impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
 // by n-1st without remembering all results.
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> ExactSizeIterator for Take<crate::iter::Repeat<T>> {
     fn len(&self) -> usize {
         self.n
@@ -381,7 +382,6 @@ impl<T: Clone> ExactSizeIterator for Take<crate::iter::Repeat<T>> {
 }
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F: FnMut() -> A, A> ExactSizeIterator for Take<crate::iter::RepeatWith<F>> {
     fn len(&self) -> usize {
         self.n

@@ -1,12 +1,8 @@
 // See core/src/primitive_docs.rs for documentation.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cell::CloneFromCell;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering::{self, *};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{ConstParamTy_, StructuralPartialEq};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::ControlFlow::{self, Break, Continue};
 
 // Recursive macro for implementing n-ary tuple functions and operations
@@ -31,17 +27,18 @@ macro_rules! tuple_impls {
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
             impl<$($T: [const] PartialEq),+> const PartialEq for ($($T,)+) {
                 #[inline]
-                fn eq(&self, other: &($($T,)+)) -> bool {
+                #[ferrocene::prevalidated]
+fn eq(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} == other.${index()} )&&+
                 }
                 #[inline]
-                fn ne(&self, other: &($($T,)+)) -> bool {
+                #[ferrocene::prevalidated]
+fn ne(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} != other.${index()} )||+
                 }
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -50,7 +47,6 @@ macro_rules! tuple_impls {
             {}
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[unstable(feature = "adt_const_params", issue = "95174")]
@@ -59,7 +55,6 @@ macro_rules! tuple_impls {
             {}
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[unstable(feature = "structural_match", issue = "31434")]
@@ -67,7 +62,6 @@ macro_rules! tuple_impls {
             {}
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -113,7 +107,6 @@ macro_rules! tuple_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -127,7 +120,6 @@ macro_rules! tuple_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -139,7 +131,6 @@ macro_rules! tuple_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "array_tuple_conv", since = "1.71.0")]
@@ -154,7 +145,6 @@ macro_rules! tuple_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             #[stable(feature = "array_tuple_conv", since = "1.71.0")]
@@ -169,7 +159,6 @@ macro_rules! tuple_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         maybe_tuple_doc! {
             $($T)+ @
             // SAFETY: tuples introduce no additional indirection, so they can be copied whenever T
@@ -204,7 +193,6 @@ macro_rules! maybe_tuple_doc {
 //
 // `$chain_rel` is the chaining method from `PartialOrd` to use for all but the
 // final value, to produce better results for simple primitives.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! lexical_ord {
     ($rel: ident, $chain_rel: ident, $a:expr, $b:expr, $($rest_a:expr, $rest_b:expr),+) => {{
         match PartialOrd::$chain_rel(&$a, &$b) {
@@ -219,7 +207,6 @@ macro_rules! lexical_ord {
 }
 
 // Same parameter interleaving as `lexical_ord` above
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! lexical_chain {
     ($chain_rel: ident, $a:expr, $b:expr $(,$rest_a:expr, $rest_b:expr)*) => {{
         PartialOrd::$chain_rel(&$a, &$b)?;
@@ -230,7 +217,6 @@ macro_rules! lexical_chain {
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! lexical_partial_cmp {
     ($a:expr, $b:expr, $($rest_a:expr, $rest_b:expr),+) => {
         match ($a).partial_cmp(&$b) {
@@ -241,7 +227,6 @@ macro_rules! lexical_partial_cmp {
     ($a:expr, $b:expr) => { ($a).partial_cmp(&$b) };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! lexical_cmp {
     ($a:expr, $b:expr, $($rest_a:expr, $rest_b:expr),+) => {
         match ($a).cmp(&$b) {

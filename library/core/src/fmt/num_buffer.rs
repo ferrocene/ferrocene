@@ -36,6 +36,7 @@ impl_NumBufferTrait! {
 /// number of digits the associated integer can have.
 #[unstable(feature = "int_format_into", issue = "138215")]
 #[derive(Debug)]
+#[ferrocene::prevalidated]
 pub struct NumBuffer<T: NumBufferTrait> {
     // FIXME: Once const generics feature is working, use `T::BUF_SIZE` instead of 40.
     pub(crate) buf: [MaybeUninit<u8>; 40],
@@ -47,6 +48,7 @@ pub struct NumBuffer<T: NumBufferTrait> {
 impl<T: NumBufferTrait> NumBuffer<T> {
     /// Initializes internal buffer.
     #[unstable(feature = "int_format_into", issue = "138215")]
+    #[ferrocene::prevalidated]
     pub const fn new() -> Self {
         // FIXME: Once const generics feature is working, use `T::BUF_SIZE` instead of 40.
         NumBuffer { buf: [MaybeUninit::<u8>::uninit(); 40], phantom: core::marker::PhantomData }
@@ -54,6 +56,7 @@ impl<T: NumBufferTrait> NumBuffer<T> {
 
     /// Returns the length of the internal buffer.
     #[unstable(feature = "int_format_into", issue = "138215")]
+    #[ferrocene::prevalidated]
     pub const fn capacity(&self) -> usize {
         self.buf.len()
     }

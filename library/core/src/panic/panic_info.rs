@@ -12,6 +12,7 @@ use crate::panic::Location;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[derive(Debug)]
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
+#[ferrocene::prevalidated]
 pub struct PanicInfo<'a> {
     message: &'a fmt::Arguments<'a>,
     location: &'a Location<'a>,
@@ -26,12 +27,14 @@ pub struct PanicInfo<'a> {
 ///
 /// See [`PanicInfo::message`].
 #[stable(feature = "panic_info_message", since = "1.81.0")]
+#[ferrocene::prevalidated]
 pub struct PanicMessage<'a> {
     message: &'a fmt::Arguments<'a>,
 }
 
 impl<'a> PanicInfo<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn new(
         message: &'a fmt::Arguments<'a>,
         location: &'a Location<'a>,
@@ -59,6 +62,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_info_message", since = "1.81.0")]
+    #[ferrocene::prevalidated]
     pub fn message(&self) -> PanicMessage<'_> {
         PanicMessage { message: self.message }
     }
@@ -89,6 +93,7 @@ impl<'a> PanicInfo<'a> {
     /// ```
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
+    #[ferrocene::prevalidated]
     pub fn location(&self) -> Option<&Location<'_>> {
         // NOTE: If this is changed to sometimes return None,
         // deal with that case in std::panicking::default_hook and core::panicking::panic_fmt.
@@ -108,7 +113,6 @@ impl<'a> PanicInfo<'a> {
     #[deprecated(since = "1.81.0", note = "this never returns anything useful")]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[allow(deprecated, deprecated_in_future)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn payload(&self) -> &(dyn crate::any::Any + Send) {
         struct NoPayload;
         &NoPayload
@@ -126,7 +130,6 @@ impl<'a> PanicInfo<'a> {
     /// again.
     #[must_use]
     #[unstable(feature = "panic_can_unwind", issue = "92988")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn can_unwind(&self) -> bool {
         self.can_unwind
     }
@@ -138,7 +141,6 @@ impl<'a> PanicInfo<'a> {
     )]
     #[doc(hidden)]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn force_no_backtrace(&self) -> bool {
         self.force_no_backtrace
     }
@@ -146,6 +148,7 @@ impl<'a> PanicInfo<'a> {
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
 impl Display for PanicInfo<'_> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("panicked at ")?;
         self.location.fmt(formatter)?;
@@ -172,6 +175,7 @@ impl<'a> PanicMessage<'a> {
     #[rustc_const_stable(feature = "const_arguments_as_str", since = "1.84.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> Option<&'static str> {
         self.message.as_str()
     }
@@ -180,6 +184,7 @@ impl<'a> PanicMessage<'a> {
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 impl Display for PanicMessage<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_fmt(*self.message)
     }
@@ -188,6 +193,7 @@ impl Display for PanicMessage<'_> {
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 impl fmt::Debug for PanicMessage<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_fmt(*self.message)
     }

@@ -1,16 +1,10 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::array;
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::mem::MaybeUninit;
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::ops::ControlFlow;
 
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -29,18 +23,19 @@ use crate::iter::TrustedLen;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct Filter<I, P> {
     // Used for `SplitWhitespace` and `SplitAsciiWhitespace` `as_str` methods
     pub(crate) iter: I,
     predicate: P,
 }
 impl<I, P> Filter<I, P> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, predicate: P) -> Filter<I, P> {
         Filter { iter, predicate }
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, P> Filter<I, P>
 where
     I: Iterator,
@@ -79,11 +74,13 @@ where
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<I: fmt::Debug, P> fmt::Debug for Filter<I, P> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Filter").field("iter", &self.iter).finish()
     }
 }
 
+#[ferrocene::prevalidated]
 fn filter_fold<T, Acc>(
     mut predicate: impl FnMut(&T) -> bool,
     mut fold: impl FnMut(Acc, T) -> Acc,
@@ -91,6 +88,7 @@ fn filter_fold<T, Acc>(
     move |acc, item| if predicate(&item) { fold(acc, item) } else { acc }
 }
 
+#[ferrocene::prevalidated]
 fn filter_try_fold<'a, T, Acc, R: Try<Output = Acc>>(
     predicate: &'a mut impl FnMut(&T) -> bool,
     mut fold: impl FnMut(Acc, T) -> R + 'a,
@@ -106,11 +104,11 @@ where
     type Item = I::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<I::Item> {
         self.iter.find(&mut self.predicate)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn next_chunk<const N: usize>(
         &mut self,
@@ -128,6 +126,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the predicate
@@ -145,8 +144,10 @@ where
     // Using the branchless version will also simplify the LLVM byte code, thus
     // leaving more budget for LLVM optimizations.
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         #[inline]
+        #[ferrocene::prevalidated]
         fn to_usize<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut(T) -> usize {
             move |x| predicate(&x) as usize
         }
@@ -161,6 +162,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -171,6 +173,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -179,7 +182,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I: DoubleEndedIterator, P> DoubleEndedIterator for Filter<I, P>
 where
@@ -209,15 +211,12 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<I: FusedIterator, P> FusedIterator for Filter<I, P> where P: FnMut(&I::Item) -> bool {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "trusted_fused")]
 unsafe impl<I: TrustedFused, F> TrustedFused for Filter<I, F> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<P, I> SourceIter for Filter<I, P>
 where
@@ -232,7 +231,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I: InPlaceIterable, P> InPlaceIterable for Filter<I, P> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
@@ -253,6 +251,7 @@ trait SpecAssumeCount {
 impl<I: Iterator> SpecAssumeCount for I {
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     default unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {
         // In the default we can't trust the `upper` for soundness
         // because it came from an untrusted `size_hint`.
@@ -264,6 +263,7 @@ impl<I: Iterator> SpecAssumeCount for I {
 
 impl<I: TrustedLen> SpecAssumeCount for I {
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn assume_count_le_upper_bound(count: usize, upper: usize) {
         // SAFETY: The `upper` is trusted because it came from a `TrustedLen` iterator.
         unsafe { crate::hint::assert_unchecked(count <= upper) }

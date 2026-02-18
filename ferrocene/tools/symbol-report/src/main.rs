@@ -7,8 +7,6 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 
-extern crate tracing;
-
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{self, Write};
@@ -19,9 +17,7 @@ use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{
-    AttrId, Attribute, HirId, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
-};
+use rustc_hir::{AttrId, Attribute, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
@@ -30,7 +26,6 @@ use rustc_middle::ty::print::{
 use rustc_session::EarlyDiagCtxt;
 use rustc_session::config::ErrorOutputType;
 use rustc_span::{Span, Symbol};
-use tracing::info;
 
 static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =
     LazyLock::new(|| ["ferrocene", "annotation"].map(Symbol::intern));
@@ -138,15 +133,24 @@ fn main() {
     std::process::exit(exit_code);
 }
 
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
+
 fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {
     for def in tcx.hir_crate_items(()).definitions() {
-        if should_skip_item(tcx, def) {
-            continue;
+        match tcx.def_kind(def) {
+            DefKind::Mod | DefKind::Struct | DefKind::Enum | DefKind::Union => continue,
+            _ => {}
+        }
+
+        match item_is_validated(tcx, def.into()) {
+            ValidatedStatus::Validated { annotation: Some(_) } => {}
+            _ => continue,
         }
 
         let qualified_name = get_qualified_name(tcx, def);
 
         if should_filter_out(&qualified_name) {
+            // TODO: suggest exported_constraint
             continue;
         }
 
@@ -169,28 +173,12 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
     vis
 }
 
-/// These functions exist only to allow code using `.subset` targets to compile,
-/// and will be removed once `#[ferrocene::certified] is implemented.
-fn should_skip_item(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
-    let kind = tcx.def_kind(def);
-    if ![DefKind::Fn, DefKind::AssocFn, DefKind::Closure].contains(&kind) {
-        return true;
-    }
-    // Skip intrinsics, extern functions, and associated default functions provided by the trait.
-    match tcx.hir_node_by_def_id(def) {
-        Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
-        | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
-            info!("skipping item {def:?}");
-            true
-        }
-        _ => false,
-    }
-}
-
 fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
     with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))))
 }
 
+/// These functions exist only to allow code using `.subset` targets to compile,
+/// and will be removed once `#[ferrocene::certified] is implemented.
 fn should_filter_out(qualified_name: &str) -> bool {
     const FILTER_LIST: &[&str] = &["<core::core_arch::", "core::core_arch::"];
 

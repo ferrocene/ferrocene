@@ -117,6 +117,7 @@ pub const CACHED_POW10_FIRST_E: i16 = -1087;
 pub const CACHED_POW10_LAST_E: i16 = 1039;
 
 #[doc(hidden)]
+#[ferrocene::prevalidated]
 pub fn cached_power(alpha: i16, gamma: i16) -> (i16, Fp) {
     let offset = CACHED_POW10_FIRST_E as i32;
     let range = (CACHED_POW10.len() as i32) - 1;
@@ -129,6 +130,7 @@ pub fn cached_power(alpha: i16, gamma: i16) -> (i16, Fp) {
 
 /// Given `x > 0`, returns `(k, 10^k)` such that `10^k <= x < 10^(k+1)`.
 #[doc(hidden)]
+#[ferrocene::prevalidated]
 pub fn max_pow10_no_more_than(x: u32) -> (u8, u32) {
     debug_assert!(x > 0);
 
@@ -162,6 +164,7 @@ pub fn max_pow10_no_more_than(x: u32) -> (u8, u32) {
 /// The shortest mode implementation for Grisu.
 ///
 /// It returns `None` when it would return an inexact representation otherwise.
+#[ferrocene::prevalidated]
 pub fn format_shortest_opt<'a>(
     d: &Decoded,
     buf: &'a mut [MaybeUninit<u8>],
@@ -354,6 +357,7 @@ pub fn format_shortest_opt<'a>(
     // - `plus1v = (plus1 - v) * k` (and also, `threshold > plus1v` from prior invariants)
     // - `ten_kappa = 10^kappa * k`
     // - `ulp = 2^-e * k`
+    #[ferrocene::prevalidated]
     fn round_and_weed(
         buf: &mut [u8],
         exp: i16,
@@ -451,6 +455,7 @@ pub fn format_shortest_opt<'a>(
 /// The shortest mode implementation for Grisu with Dragon fallback.
 ///
 /// This should be used for most cases.
+#[ferrocene::prevalidated]
 pub fn format_shortest<'a>(
     d: &Decoded,
     buf: &'a mut [MaybeUninit<u8>],
@@ -468,6 +473,7 @@ pub fn format_shortest<'a>(
 /// The exact and fixed mode implementation for Grisu.
 ///
 /// It returns `None` when it would return an inexact representation otherwise.
+#[ferrocene::prevalidated]
 pub fn format_exact_opt<'a>(
     d: &Decoded,
     buf: &'a mut [MaybeUninit<u8>],
@@ -645,6 +651,7 @@ pub fn format_exact_opt<'a>(
     // - `ulp = 2^-e * k`
     //
     // SAFETY: the first `len` bytes of `buf` must be initialized.
+    #[ferrocene::prevalidated]
     unsafe fn possibly_round(
         buf: &mut [MaybeUninit<u8>],
         mut len: usize,
@@ -760,6 +767,7 @@ pub fn format_exact_opt<'a>(
 /// The exact and fixed mode implementation for Grisu with Dragon fallback.
 ///
 /// This should be used for most cases.
+#[ferrocene::prevalidated]
 pub fn format_exact<'a>(
     d: &Decoded,
     buf: &'a mut [MaybeUninit<u8>],

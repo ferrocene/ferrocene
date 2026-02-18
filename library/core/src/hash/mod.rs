@@ -83,15 +83,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated)]
 pub use self::sip::SipHasher;
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "hashmap_internals", issue = "none")]
 #[doc(hidden)]
 pub use self::sip::SipHasher13;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, marker};
 
 // Ferrocene addition: imports for certified subset
@@ -99,7 +96,6 @@ use crate::{fmt, marker};
 #[rustfmt::skip]
 use crate::marker;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod sip;
 
 /// A hashable type.
@@ -240,6 +236,7 @@ pub trait Hash: marker::PointeeSized {
     /// [`hash`]: Hash::hash
     /// [`hash_slice`]: Hash::hash_slice
     #[stable(feature = "hash_slice", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn hash_slice<H: Hasher>(data: &[Self], state: &mut H)
     where
         Self: Sized,
@@ -368,36 +365,42 @@ pub trait Hasher {
     /// Writes a single `u8` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_u8(&mut self, i: u8) {
         self.write(&[i])
     }
     /// Writes a single `u16` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_u16(&mut self, i: u16) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `u32` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_u32(&mut self, i: u32) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `u64` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_u64(&mut self, i: u64) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `u128` into this hasher.
     #[inline]
     #[stable(feature = "i128", since = "1.26.0")]
+    #[ferrocene::prevalidated]
     fn write_u128(&mut self, i: u128) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `usize` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_usize(&mut self, i: usize) {
         self.write(&i.to_ne_bytes())
     }
@@ -405,36 +408,42 @@ pub trait Hasher {
     /// Writes a single `i8` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_i8(&mut self, i: i8) {
         self.write_u8(i as u8)
     }
     /// Writes a single `i16` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_i16(&mut self, i: i16) {
         self.write_u16(i as u16)
     }
     /// Writes a single `i32` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_i32(&mut self, i: i32) {
         self.write_u32(i as u32)
     }
     /// Writes a single `i64` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_i64(&mut self, i: i64) {
         self.write_u64(i as u64)
     }
     /// Writes a single `i128` into this hasher.
     #[inline]
     #[stable(feature = "i128", since = "1.26.0")]
+    #[ferrocene::prevalidated]
     fn write_i128(&mut self, i: i128) {
         self.write_u128(i as u128)
     }
     /// Writes a single `isize` into this hasher.
     #[inline]
     #[stable(feature = "hasher_write", since = "1.3.0")]
+    #[ferrocene::prevalidated]
     fn write_isize(&mut self, i: isize) {
         self.write_usize(i as usize)
     }
@@ -489,6 +498,7 @@ pub trait Hasher {
     /// of the `len` provided in the name of increased performance.
     #[inline]
     #[unstable(feature = "hasher_prefixfree_extras", issue = "96762")]
+    #[ferrocene::prevalidated]
     fn write_length_prefix(&mut self, len: usize) {
         self.write_usize(len);
     }
@@ -556,13 +566,13 @@ pub trait Hasher {
     /// end up hashing the same sequence of things, introducing conflicts.
     #[inline]
     #[unstable(feature = "hasher_prefixfree_extras", issue = "96762")]
+    #[ferrocene::prevalidated]
     fn write_str(&mut self, s: &str) {
         self.write(s.as_bytes());
         self.write_u8(0xff);
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "indirect_hasher_impl", since = "1.22.0")]
 impl<H: Hasher + ?Sized> Hasher for &mut H {
     fn finish(&self) -> u64 {
@@ -642,7 +652,6 @@ impl<H: Hasher + ?Sized> Hasher for &mut H {
 ///
 /// [`build_hasher`]: BuildHasher::build_hasher
 /// [`HashMap`]: ../../std/collections/struct.HashMap.html
-#[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(not(test), rustc_diagnostic_item = "BuildHasher")]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 pub trait BuildHasher {
@@ -758,11 +767,9 @@ pub trait BuildHasher {
 /// [`HashMap`]: ../../std/collections/struct.HashMap.html
 /// [`HashSet`]: ../../std/collections/struct.HashSet.html
 /// [zero-sized]: https://doc.rust-lang.org/nomicon/exotic-sizes.html#zero-sized-types-zsts
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 pub struct BuildHasherDefault<H>(marker::PhantomData<fn() -> H>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<H> BuildHasherDefault<H> {
     /// Creates a new BuildHasherDefault for Hasher `H`.
     #[stable(feature = "build_hasher_default_const_new", since = "1.85.0")]
@@ -772,7 +779,6 @@ impl<H> BuildHasherDefault<H> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.9.0", feature = "core_impl_debug")]
 impl<H> fmt::Debug for BuildHasherDefault<H> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -780,7 +786,6 @@ impl<H> fmt::Debug for BuildHasherDefault<H> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 impl<H: Default + Hasher> BuildHasher for BuildHasherDefault<H> {
     type Hasher = H;
@@ -790,7 +795,6 @@ impl<H: Default + Hasher> BuildHasher for BuildHasherDefault<H> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 impl<H> Clone for BuildHasherDefault<H> {
     fn clone(&self) -> BuildHasherDefault<H> {
@@ -798,7 +802,6 @@ impl<H> Clone for BuildHasherDefault<H> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.7.0", feature = "build_hasher")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
 impl<H> const Default for BuildHasherDefault<H> {
@@ -807,7 +810,6 @@ impl<H> const Default for BuildHasherDefault<H> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.29.0", feature = "build_hasher_eq")]
 impl<H> PartialEq for BuildHasherDefault<H> {
     fn eq(&self, _other: &BuildHasherDefault<H>) -> bool {
@@ -815,7 +817,6 @@ impl<H> PartialEq for BuildHasherDefault<H> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(since = "1.29.0", feature = "build_hasher_eq")]
 impl<H> Eq for BuildHasherDefault<H> {}
 
@@ -828,12 +829,14 @@ mod impls {
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Hash for $ty {
                 #[inline]
-                fn hash<H: Hasher>(&self, state: &mut H) {
+                #[ferrocene::prevalidated]
+fn hash<H: Hasher>(&self, state: &mut H) {
                     state.$meth(*self)
                 }
 
                 #[inline]
-                fn hash_slice<H: Hasher>(data: &[$ty], state: &mut H) {
+                #[ferrocene::prevalidated]
+fn hash_slice<H: Hasher>(data: &[$ty], state: &mut H) {
                     let newlen = size_of_val(data);
                     let ptr = data.as_ptr() as *const u8;
                     // SAFETY: `ptr` is valid and aligned, as this macro is only used
@@ -864,6 +867,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Hash for bool {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_u8(*self as u8)
         }
@@ -872,6 +876,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Hash for char {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_u32(*self as u32)
         }
@@ -880,6 +885,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Hash for str {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_str(self);
         }
@@ -888,6 +894,7 @@ mod impls {
     #[stable(feature = "never_hash", since = "1.29.0")]
     impl Hash for ! {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, _: &mut H) {
             *self
         }
@@ -898,7 +905,8 @@ mod impls {
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Hash for () {
                 #[inline]
-                fn hash<H: Hasher>(&self, _state: &mut H) {}
+                #[ferrocene::prevalidated]
+fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
         );
 
@@ -909,7 +917,8 @@ mod impls {
                 impl<$($name: Hash),+> Hash for ($($name,)+) {
                     #[allow(non_snake_case)]
                     #[inline]
-                    fn hash<S: Hasher>(&self, state: &mut S) {
+                    #[ferrocene::prevalidated]
+fn hash<S: Hasher>(&self, state: &mut S) {
                         let ($(ref $name,)+) = *self;
                         $($name.hash(state);)+
                     }
@@ -949,6 +958,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: Hash> Hash for [T] {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_length_prefix(self.len());
             Hash::hash_slice(self, state)
@@ -958,6 +968,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + marker::PointeeSized + Hash> Hash for &T {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             (**self).hash(state);
         }
@@ -966,6 +977,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + marker::PointeeSized + Hash> Hash for &mut T {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             (**self).hash(state);
         }
@@ -974,6 +986,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + marker::PointeeSized> Hash for *const T {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             let (address, metadata) = self.to_raw_parts();
             state.write_usize(address.addr());
@@ -984,6 +997,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + marker::PointeeSized> Hash for *mut T {
         #[inline]
+        #[ferrocene::prevalidated]
         fn hash<H: Hasher>(&self, state: &mut H) {
             let (address, metadata) = self.to_raw_parts();
             state.write_usize(address.addr());

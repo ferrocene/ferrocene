@@ -85,8 +85,8 @@ ISO 26262 Applicable clauses
      - Yes
      -
    * - 6-C Configurable Software
-     - Yes
-     -
+     - No
+     - .. include:: ../../partials/na-no-config.rst
    * - 7-5 Planning for P, O, S, D
      - No
      - SW SEooC, no hardware level

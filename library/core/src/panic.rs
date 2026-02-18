@@ -4,7 +4,6 @@
 
 mod location;
 mod panic_info;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod unwind_safe;
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
@@ -14,12 +13,9 @@ pub use self::panic_info::PanicInfo;
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 pub use self::panic_info::PanicMessage;
 #[stable(feature = "catch_unwind", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::unwind_safe::{AssertUnwindSafe, RefUnwindSafe, UnwindSafe};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::any::Any;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use panic!() instead")]
 #[allow_internal_unstable(panic_internals, const_format_args)]
@@ -67,7 +63,6 @@ pub macro panic_2021 {
     }),
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
@@ -121,7 +116,6 @@ pub macro unreachable_2021 {
 /// convert unwinds to aborts, so using this function isn't necessary for FFI.
 #[unstable(feature = "abort_unwind", issue = "130338")]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn abort_unwind<F: FnOnce() -> R, R>(f: F) -> R {
     f()
 }
@@ -131,7 +125,6 @@ pub fn abort_unwind<F: FnOnce() -> R, R>(f: F) -> R {
 /// use.
 #[unstable(feature = "std_internals", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait PanicPayload: crate::fmt::Display {
     /// Take full ownership of the contents.
     /// The return type is actually `Box<dyn Any + Send>`, but we cannot use `Box` in core.

@@ -6,23 +6,18 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod variance;
 
 #[unstable(feature = "phantom_variance_markers", issue = "135806")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::variance::{
     PhantomContravariant, PhantomContravariantLifetime, PhantomCovariant, PhantomCovariantLifetime,
     PhantomInvariant, PhantomInvariantLifetime, Variance, variance,
 };
 use crate::cell::UnsafeCell;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp;
 use crate::fmt::Debug;
 use crate::hash::{Hash, Hasher};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::UnsafePinned;
 
 // NOTE: for consistent error messages between `core` and `minicore`, all `diagnostic` attributes
@@ -677,10 +672,8 @@ pub unsafe auto trait Sync {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> !Sync for *const T {}
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> !Sync for *mut T {}
 
 /// Zero-sized type used to mark things that "act like" they own a `T`.
@@ -829,7 +822,6 @@ impl<T: PointeeSized> Hash for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> cmp::PartialEq for PhantomData<T> {
     fn eq(&self, _other: &PhantomData<T>) -> bool {
         true
@@ -837,11 +829,9 @@ impl<T: PointeeSized> cmp::PartialEq for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> cmp::Eq for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> cmp::PartialOrd for PhantomData<T> {
     fn partial_cmp(&self, _other: &PhantomData<T>) -> Option<cmp::Ordering> {
         Option::Some(cmp::Ordering::Equal)
@@ -849,7 +839,6 @@ impl<T: PointeeSized> cmp::PartialOrd for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> cmp::Ord for PhantomData<T> {
     fn cmp(&self, _other: &PhantomData<T>) -> cmp::Ordering {
         cmp::Ordering::Equal
@@ -867,14 +856,12 @@ impl<T: PointeeSized> Clone for PhantomData<T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trivial_clone", issue = "none")]
 unsafe impl<T: PointeeSized> TrivialClone for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> const Default for PhantomData<T> {
     fn default() -> Self {
         Self
@@ -882,7 +869,6 @@ impl<T: PointeeSized> const Default for PhantomData<T> {
 }
 
 #[unstable(feature = "structural_match", issue = "31434")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: PointeeSized> StructuralPartialEq for PhantomData<T> {}
 
 /// Compiler-internal trait used to indicate the type of enum discriminants.
@@ -947,7 +933,6 @@ marker_impls! {
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
 pub unsafe auto trait UnsafeUnpin {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
 impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
 
@@ -1043,22 +1028,18 @@ pub auto trait Unpin {}
 // will likely eventually be deprecated, and all new code should be using `UnsafePinned` instead.
 #[stable(feature = "pin", since = "1.33.0")]
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct PhantomPinned;
 
 #[stable(feature = "pin", since = "1.33.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl !Unpin for PhantomPinned {}
 
 // This is a small hack to allow existing code which uses PhantomPinned to opt-out of noalias to
 // continue working. Ideally PhantomPinned could just wrap an `UnsafePinned<()>` to get the same
 // effect, but we can't add a new field to an already stable unit struct -- that would be a breaking
 // change.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
 impl !UnsafeUnpin for PhantomPinned {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 marker_impls! {
     #[stable(feature = "pin", since = "1.33.0")]
     Unpin for
@@ -1066,7 +1047,6 @@ marker_impls! {
         {T: PointeeSized} &mut T,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 marker_impls! {
     #[stable(feature = "pin_raw", since = "1.38.0")]
     Unpin for
@@ -1132,7 +1112,6 @@ marker_impls! {
         {T: ConstParamTy_, const N: usize} [T; N],
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 marker_impls! {
     #[unstable(feature = "unsized_const_params", issue = "95174")]
     #[unstable_feature_bound(unsized_const_params)]
@@ -1154,7 +1133,6 @@ marker_impls! {
 #[lang = "fn_ptr_trait"]
 #[rustc_deny_explicit_impl]
 #[rustc_dyn_incompatible_trait]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]
@@ -1354,7 +1332,6 @@ pub trait FnPtr: Copy + Clone {
 #[allow_internal_unstable(dispatch_from_dyn, coerce_unsized, unsize, coerce_pointee_validated)]
 #[rustc_diagnostic_item = "CoercePointee"]
 #[unstable(feature = "derive_coerce_pointee", issue = "123430")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub macro CoercePointee($item:item) {
     /* compiler built-in */
 }
@@ -1368,7 +1345,6 @@ pub macro CoercePointee($item:item) {
 #[lang = "coerce_pointee_validated"]
 #[unstable(feature = "coerce_pointee_validated", issue = "none")]
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait CoercePointeeValidated {
     /* compiler built-in */
 }

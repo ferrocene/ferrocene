@@ -1,5 +1,4 @@
 use crate::iter::Step;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 
 /// Same as FusedIterator
@@ -11,7 +10,6 @@ use crate::num::NonZero;
 #[unstable(issue = "none", feature = "trusted_fused")]
 #[doc(hidden)]
 #[rustc_specialization_trait]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait TrustedFused {}
 
 /// An iterator that always continues to yield `None` when exhausted.
@@ -89,7 +87,6 @@ unsafe impl<I: TrustedLen + ?Sized> TrustedLen for &mut I {}
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[doc(hidden)]
 #[rustc_specialization_trait]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait InPlaceIterable {
     /// The product of one-to-many item expansions that happen throughout the iterator pipeline.
     /// E.g. [[u8; 4]; 4].iter().flatten().flatten() would have a `EXPAND_BY` of 16.

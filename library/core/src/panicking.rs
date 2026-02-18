@@ -245,7 +245,6 @@ pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
     panic_nounwind_fmt(fmt::Arguments::from_str(expr), /* force_no_backtrace */ true);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 #[track_caller]
 #[rustc_diagnostic_item = "unreachable_display"] // needed for `non-fmt-panics` lint
@@ -255,7 +254,6 @@ pub fn unreachable_display<T: fmt::Display>(x: &T) -> ! {
 
 /// This exists solely for the 2015 edition `panic!` macro to trigger
 /// a lint on `panic!(my_str_variable);`.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 #[track_caller]
 #[rustc_diagnostic_item = "panic_str_2015"]
@@ -332,7 +330,6 @@ fn panic_null_pointer_dereference() -> ! {
 #[track_caller]
 #[lang = "panic_invalid_enum_construction"] // needed by codegen for panic on invalid enum construction.
 #[rustc_nounwind] // `CheckEnums` MIR pass requires this function to never unwind
-#[cfg(not(feature = "ferrocene_subset"))]
 fn panic_invalid_enum_construction(source: u128) -> ! {
     #[ferrocene::annotation(
         "The `immediate-abort` behavior is not certified, we only support `abort`."
@@ -386,7 +383,6 @@ fn panic_in_cleanup() -> ! {
 /// This function is used instead of panic_fmt in const eval.
 #[lang = "const_panic_fmt"] // needed by const-eval machine to replace calls to `panic_fmt` lang item
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn const_panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
     if let Some(msg) = fmt.as_str() {
         // The panic_display function is hooked by const eval.

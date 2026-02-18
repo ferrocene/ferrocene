@@ -3,7 +3,6 @@ use super::from_utf8_unchecked;
 use super::validations::utf8_char_width;
 use crate::fmt;
 use crate::fmt::{Formatter, Write};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::FusedIterator;
 
 impl [u8] {
@@ -305,7 +304,6 @@ impl<'a> Iterator for Utf8Chunks<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 impl FusedIterator for Utf8Chunks<'_> {}
 

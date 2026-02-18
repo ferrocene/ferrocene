@@ -1,15 +1,10 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
     Cloned, Copied, Empty, Filter, FilterMap, Fuse, FusedIterator, Map, Once, OnceWith,
     TrustedFused, TrustedLen,
 };
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{ControlFlow, Try};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{array, fmt, option, result};
 
 // Ferrocene addition: imports for the certified subset
@@ -70,7 +65,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I: Iterator, U: IntoIterator, F> Iterator for FlatMap<I, U, F>
 where
@@ -122,7 +116,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I: DoubleEndedIterator, U, F> DoubleEndedIterator for FlatMap<I, U, F>
 where
@@ -158,7 +151,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<I, U, F> FusedIterator for FlatMap<I, U, F>
 where
@@ -168,7 +160,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<I, U, F> TrustedLen for FlatMap<I, U, F>
 where
@@ -179,7 +170,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I, U, F> SourceIter for FlatMap<I, U, F>
 where
@@ -202,21 +192,18 @@ where
 /// documentation for more.
 ///
 /// [`flatten`]: Iterator::flatten()
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 pub struct Flatten<I: Iterator<Item: IntoIterator>> {
     inner: FlattenCompat<I, <I::Item as IntoIterator>::IntoIter>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator<Item: IntoIterator>> Flatten<I> {
     pub(in super::super) fn new(iter: I) -> Flatten<I> {
         Flatten { inner: FlattenCompat::new(iter) }
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 impl<I, U> fmt::Debug for Flatten<I>
 where
@@ -228,7 +215,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 impl<I, U> Clone for Flatten<I>
 where
@@ -240,7 +226,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 impl<I, U> Iterator for Flatten<I>
 where
@@ -293,7 +278,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 impl<I, U> DoubleEndedIterator for Flatten<I>
 where
@@ -329,7 +313,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
 impl<I, U> FusedIterator for Flatten<I>
 where
@@ -338,7 +321,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<I> TrustedLen for Flatten<I>
 where
@@ -347,7 +329,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I> SourceIter for Flatten<I>
 where
@@ -363,7 +344,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<I> Default for Flatten<I>
 where
@@ -403,7 +383,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, U> FlattenCompat<I, U>
 where
     I: Iterator<Item: IntoIterator<IntoIter = U>>,
@@ -473,7 +452,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, U> FlattenCompat<I, U>
 where
     I: DoubleEndedIterator<Item: IntoIterator<IntoIter = U>>,
@@ -544,7 +522,6 @@ where
 }
 
 // See also the `OneShot` specialization below.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, U> Iterator for FlattenCompat<I, U>
 where
     I: Iterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
@@ -660,7 +637,6 @@ where
 }
 
 // See also the `OneShot` specialization below.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, U> DoubleEndedIterator for FlattenCompat<I, U>
 where
     I: DoubleEndedIterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
@@ -730,7 +706,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<const N: usize, I, T> TrustedLen
     for FlattenCompat<I, <[T; N] as IntoIterator>::IntoIter>
 where
@@ -738,7 +713,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, const N: usize, I, T> TrustedLen
     for FlattenCompat<I, <&'a [T; N] as IntoIterator>::IntoIter>
 where
@@ -746,7 +720,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, const N: usize, I, T> TrustedLen
     for FlattenCompat<I, <&'a mut [T; N] as IntoIterator>::IntoIter>
 where
@@ -754,13 +727,11 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait ConstSizeIntoIterator: IntoIterator {
     // FIXME(#31844): convert to an associated const once specialization supports that
     fn size() -> Option<usize>;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ConstSizeIntoIterator for T
 where
     T: IntoIterator,
@@ -771,7 +742,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> ConstSizeIntoIterator for [T; N] {
     #[inline]
     fn size() -> Option<usize> {
@@ -779,7 +749,6 @@ impl<T, const N: usize> ConstSizeIntoIterator for [T; N] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> ConstSizeIntoIterator for &[T; N] {
     #[inline]
     fn size() -> Option<usize> {
@@ -787,7 +756,6 @@ impl<T, const N: usize> ConstSizeIntoIterator for &[T; N] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> ConstSizeIntoIterator for &mut [T; N] {
     #[inline]
     fn size() -> Option<usize> {
@@ -795,7 +763,6 @@ impl<T, const N: usize> ConstSizeIntoIterator for &mut [T; N] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
@@ -809,55 +776,36 @@ fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option
 ///
 /// Note that we still have to deal with the possibility that the iterator was
 /// already exhausted before it came into our control.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_specialization_trait]
 trait OneShot {}
 
 // These all have exactly one item, if not already consumed.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for Once<T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F> OneShot for OnceWith<F> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for array::IntoIter<T, 1> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for option::IntoIter<T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for option::Iter<'_, T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for option::IterMut<'_, T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for result::IntoIter<T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for result::Iter<'_, T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for result::IterMut<'_, T> {}
 
 // These are always empty, which is fine to optimize too.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for Empty<T> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> OneShot for array::IntoIter<T, 0> {}
 
 // These adapters never increase the number of items.
 // (There are more possible, but for now this matches BoundedSize above.)
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: OneShot> OneShot for Cloned<I> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: OneShot> OneShot for Copied<I> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: OneShot, P> OneShot for Filter<I, P> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: OneShot, P> OneShot for FilterMap<I, P> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: OneShot, F> OneShot for Map<I, F> {}
 
 // Blanket impls pass this property through as well
 // (but we can't do `Box<I>` unless we expose this trait to alloc)
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: OneShot> OneShot for &mut I {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 fn into_item<I>(inner: I) -> Option<I::Item>
 where
@@ -866,7 +814,6 @@ where
     inner.into_iter().next()
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 fn flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc>(
     mut fold: impl FnMut(Acc, I::Item) -> Acc,
@@ -877,7 +824,6 @@ fn flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc>(
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 fn try_flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc, R: Try<Output = Acc>>(
     mut fold: impl FnMut(Acc, I::Item) -> R,
@@ -888,7 +834,6 @@ fn try_flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc, R: Try<Output = Acc>
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 fn advance_by_one<I>(n: NonZero<usize>, inner: I) -> Option<NonZero<usize>>
 where
@@ -912,7 +857,6 @@ where
 //
 // An exception to that is `advance_by(0)` and `advance_back_by(0)`, where the generic impls may set
 // `frontiter` or `backiter` without consuming the item, so we **must** override those.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, U> Iterator for FlattenCompat<I, U>
 where
     I: Iterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
@@ -979,7 +923,6 @@ where
 
 // Note: We don't actually care about `U: DoubleEndedIterator`, since forward and backward are the
 // same for a one-shot iterator, but we have to keep that to match the default specialization.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, U> DoubleEndedIterator for FlattenCompat<I, U>
 where
     I: DoubleEndedIterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,

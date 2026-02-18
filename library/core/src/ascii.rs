@@ -11,7 +11,6 @@
 
 use crate::escape::{AlwaysEscaped, EscapeIterInner};
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::FusedIterator;
 use crate::num::NonZero;
 
@@ -149,7 +148,6 @@ impl Iterator for EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl DoubleEndedIterator for EscapeDefault {
     #[inline]
     fn next_back(&mut self) -> Option<u8> {
@@ -163,7 +161,6 @@ impl DoubleEndedIterator for EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDefault {
     #[inline]
     fn len(&self) -> usize {
@@ -172,7 +169,6 @@ impl ExactSizeIterator for EscapeDefault {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for EscapeDefault {}
 
 #[stable(feature = "ascii_escape_display", since = "1.39.0")]

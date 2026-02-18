@@ -14,11 +14,9 @@
 pub use self::c_str::CStr;
 #[doc(inline)]
 #[stable(feature = "cstr_from_bytes_until_nul", since = "1.69.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::c_str::FromBytesUntilNulError;
 #[doc(inline)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::c_str::FromBytesWithNulError;
 use crate::fmt;
 
@@ -30,7 +28,6 @@ pub mod c_str;
     issue = "44930",
     reason = "the `c_variadic` feature has not been properly tested on all supported platforms"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::va_list::{VaArgSafe, VaList};
 
 #[unstable(
@@ -38,7 +35,6 @@ pub use self::va_list::{VaArgSafe, VaList};
     issue = "44930",
     reason = "the `c_variadic` feature has not been properly tested on all supported platforms"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod va_list;
 
 mod primitives;

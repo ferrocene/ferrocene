@@ -333,9 +333,9 @@ fn panic_null_pointer_dereference() -> ! {
 #[lang = "panic_invalid_enum_construction"] // needed by codegen for panic on invalid enum construction.
 #[rustc_nounwind] // `CheckEnums` MIR pass requires this function to never unwind
 fn panic_invalid_enum_construction(source: u128) -> ! {
-    #[ferrocene::annotation(
-        "The `immediate-abort` behavior is not certified, we only support `abort`."
-    )]
+    // #[ferrocene::annotation(
+    //     "The `immediate-abort` behavior is not certified, we only support `abort`."
+    // )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort()
     }

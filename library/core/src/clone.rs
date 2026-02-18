@@ -38,7 +38,6 @@
 
 use crate::marker::{Destruct, PointeeSized};
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod uninit;
 
 /// A common trait that allows explicit creation of a duplicate value.
@@ -325,12 +324,10 @@ pub macro Clone($item:item) {
 /// This is similar to have a closure that you would call `.use` over each captured value.
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
 #[lang = "use_cloned"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub trait UseCloned: Clone {
     // Empty.
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_use_cloned {
     ($($t:ty)*) => {
         $(
@@ -340,7 +337,6 @@ macro_rules! impl_use_cloned {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_use_cloned! {
     usize u8 u16 u32 u64 u128
     isize i8 i16 i32 i64 i128
@@ -511,7 +507,6 @@ pub struct AssertParamIsCopy<T: Copy + PointeeSized> {
 /// [DST]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [trait object]: https://doc.rust-lang.org/reference/types/trait-object.html
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe trait CloneToUninit {
     /// Performs copy-assignment from `self` to `dest`.
     ///
@@ -552,7 +547,6 @@ pub unsafe trait CloneToUninit {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: Clone> CloneToUninit for T {
     #[inline]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -562,7 +556,6 @@ unsafe impl<T: Clone> CloneToUninit for T {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T: Clone> CloneToUninit for [T] {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -574,7 +567,6 @@ unsafe impl<T: Clone> CloneToUninit for [T] {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl CloneToUninit for str {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -585,7 +577,6 @@ unsafe impl CloneToUninit for str {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl CloneToUninit for crate::ffi::CStr {
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -598,7 +589,6 @@ unsafe impl CloneToUninit for crate::ffi::CStr {
 }
 
 #[unstable(feature = "bstr", issue = "134915")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl CloneToUninit for crate::bstr::ByteStr {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]

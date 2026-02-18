@@ -1,7 +1,5 @@
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::Hash;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::Destruct;
 /// An unbounded range (`..`).
 ///
@@ -155,7 +153,6 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     #[inline]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_empty(&self) -> bool
     where
         Idx: [const] PartialOrd<Idx>,
@@ -219,7 +216,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -306,7 +302,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -647,7 +642,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -966,7 +960,6 @@ pub const trait RangeBounds<T: ?Sized> {
     /// assert!( (Excluded(3), Excluded(1)).is_empty());
     /// ```
     #[unstable(feature = "range_bounds_is_empty", issue = "137300")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_empty(&self) -> bool
     where
         T: [const] PartialOrd,
@@ -1031,7 +1024,6 @@ pub const trait IntoBounds<T>: [const] RangeBounds<T> {
     /// assert!(!(-12..387).intersect(0..256).is_empty());
     /// assert!((1..5).intersect(6..).is_empty());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn intersect<R>(self, other: R) -> (Bound<T>, Bound<T>)
     where
         Self: Sized,
@@ -1258,7 +1250,6 @@ impl<T> const IntoBounds<T> for (Bound<T>, Bound<T>) {
 
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: ?Sized + 'a> const RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
     fn start_bound(&self) -> Bound<&T> {
         self.0

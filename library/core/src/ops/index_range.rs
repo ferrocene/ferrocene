@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::{NeverShortCircuit, Try};
@@ -237,7 +236,6 @@ impl DoubleEndedIterator for IndexRange {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for IndexRange {
     #[inline]
     fn len(&self) -> usize {
@@ -246,8 +244,6 @@ impl ExactSizeIterator for IndexRange {
 }
 
 // SAFETY: Because we only deal in `usize`, our `len` is always perfect.
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl TrustedLen for IndexRange {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for IndexRange {}

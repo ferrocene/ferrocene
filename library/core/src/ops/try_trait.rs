@@ -342,7 +342,6 @@ pub const trait FromResidual<R = <Self as Try>::Residual> {
 #[track_caller] // because `Result::from_residual` has it
 #[lang = "from_yeet"]
 #[allow(unreachable_pub)] // not-exposed but still used via lang-item
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn from_yeet<T, Y>(yeeted: Y) -> T
 where
     T: FromResidual<Yeet<Y>>,
@@ -482,5 +481,4 @@ impl<T: [const] Destruct> const Residual<T> for NeverShortCircuitResidual {
 /// `do yeet expr` syntax in functions returning your type.
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[derive(Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Yeet<T>(pub T);

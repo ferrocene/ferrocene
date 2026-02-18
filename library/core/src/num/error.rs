@@ -1,7 +1,6 @@
 //! Error types for conversion to integral types.
 
 use crate::convert::Infallible;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
 use crate::fmt;
 
@@ -20,7 +19,6 @@ impl fmt::Display for TryFromIntError {
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for TryFromIntError {}
 
 #[stable(feature = "try_from", since = "1.34.0")]
@@ -144,5 +142,4 @@ impl fmt::Display for ParseIntError {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for ParseIntError {}

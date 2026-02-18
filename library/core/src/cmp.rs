@@ -663,7 +663,6 @@ impl Ordering {
     #[must_use]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn then_with<F>(self, f: F) -> Ordering
     where
         F: [const] FnOnce() -> Ordering + [const] Destruct,
@@ -695,12 +694,10 @@ impl Ordering {
 #[derive_const(PartialEq, Eq, Default)]
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[repr(transparent)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] pub T);
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] PartialOrd> const PartialOrd for Reverse<T> {
     #[inline]
     fn partial_cmp(&self, other: &Reverse<T>) -> Option<Ordering> {
@@ -727,7 +724,6 @@ impl<T: [const] PartialOrd> const PartialOrd for Reverse<T> {
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Ord> const Ord for Reverse<T> {
     #[inline]
     fn cmp(&self, other: &Reverse<T>) -> Ordering {
@@ -736,7 +732,6 @@ impl<T: [const] Ord> const Ord for Reverse<T> {
 }
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> Clone for Reverse<T> {
     #[inline]
     fn clone(&self) -> Reverse<T> {
@@ -1634,7 +1629,6 @@ pub const fn min<T: [const] Ord + [const] Destruct>(v1: T, v2: T) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn min_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
     v1: T,
     v2: T,
@@ -1665,7 +1659,6 @@ pub const fn min_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn min_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> T
 where
     T: [const] Destruct,
@@ -1775,7 +1768,6 @@ pub const fn max_by<T: [const] Destruct, F: [const] FnOnce(&T, &T) -> Ordering>(
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn max_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> T
 where
     T: [const] Destruct,
@@ -1826,7 +1818,6 @@ where
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minmax<T>(v1: T, v2: T) -> [T; 2]
 where
     T: [const] Ord,
@@ -1862,7 +1853,6 @@ where
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minmax_by<T, F>(v1: T, v2: T, compare: F) -> [T; 2]
 where
     F: [const] FnOnce(&T, &T) -> Ordering,
@@ -1892,7 +1882,6 @@ where
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn minmax_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> [T; 2]
 where
     F: [const] FnMut(&T) -> K + [const] Destruct,
@@ -1907,7 +1896,6 @@ mod impls {
     use crate::hint::unreachable_unchecked;
     use crate::marker::PointeeSized;
     use crate::ops::ControlFlow::{self, Break, Continue};
-    #[cfg(not(feature = "ferrocene_subset"))]
     use crate::panic::const_assert;
 
     macro_rules! partial_eq_impl {
@@ -2069,7 +2057,6 @@ mod impls {
                     crate::intrinsics::three_way_compare(*self, *other)
                 }
 
-                #[cfg(not(feature = "ferrocene_subset"))]
                 #[inline]
                 #[track_caller]
                 fn clamp(self, min: Self, max: Self) -> Self
@@ -2253,7 +2240,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl<A: PointeeSized> const Ord for &A
     where
         A: [const] Ord,
@@ -2288,7 +2274,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialOrd<&mut B> for &mut A
     where
         A: [const] PartialOrd<B>,
@@ -2332,7 +2317,6 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     impl<A: PointeeSized> const Ord for &mut A
     where
         A: [const] Ord,

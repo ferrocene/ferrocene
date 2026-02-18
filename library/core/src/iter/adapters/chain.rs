@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
@@ -63,7 +62,6 @@ impl<A, B> Chain<A, B> {
 /// assert_eq!(iter.next(), Some(6));
 /// assert_eq!(iter.next(), None);
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_chain", since = "1.91.0")]
 pub fn chain<A, B>(a: A, b: B) -> Chain<A::IntoIter, B::IntoIter>
 where
@@ -214,7 +212,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A, B> DoubleEndedIterator for Chain<A, B>
 where
@@ -302,7 +299,6 @@ where
 }
 
 // Note: *both* must be fused to handle double-ended iterators.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<A, B> FusedIterator for Chain<A, B>
 where
@@ -311,7 +307,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<A, B> TrustedLen for Chain<A, B>
 where
@@ -320,7 +315,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<A: Default, B: Default> Default for Chain<A, B> {
     /// Creates a `Chain` from the default values for `A` and `B`.

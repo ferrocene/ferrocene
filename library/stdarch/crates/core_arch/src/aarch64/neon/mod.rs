@@ -10,7 +10,6 @@ pub use self::generated::*;
 
 // FIXME: replace neon with asimd
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{
     core_arch::{arm_shared::*, simd::*},
     hint::unreachable_unchecked,
@@ -18,7 +17,6 @@ use crate::{
     mem::transmute,
 };
 #[cfg(test)]
-#[cfg(not(feature = "ferrocene_subset"))]
 use stdarch_test::assert_instr;
 
 // Ferrocene addition: Imports used by the certified subset
@@ -78,7 +76,6 @@ pub struct float64x2x4_t(
 );
 
 /// Helper for the 'shift right and insert' functions.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! shift_right_and_insert {
     ($ty:ty, $width:literal, $N:expr, $a:expr, $b:expr) => {{
         type V = Simd<$ty, $width>;
@@ -100,7 +97,6 @@ macro_rules! shift_right_and_insert {
     }};
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use shift_right_and_insert;
 
 /// Duplicate vector element to vector or scalar
@@ -109,7 +105,6 @@ pub(crate) use shift_right_and_insert;
 #[cfg_attr(test, assert_instr(nop, N1 = 0, N2 = 0))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_lane_s64<const N1: i32, const N2: i32>(_a: int64x1_t, b: int64x1_t) -> int64x1_t {
     static_assert!(N1 == 0);
     static_assert!(N2 == 0);
@@ -122,7 +117,6 @@ pub fn vcopy_lane_s64<const N1: i32, const N2: i32>(_a: int64x1_t, b: int64x1_t)
 #[cfg_attr(test, assert_instr(nop, N1 = 0, N2 = 0))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_lane_u64<const N1: i32, const N2: i32>(_a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
     static_assert!(N1 == 0);
     static_assert!(N2 == 0);
@@ -135,7 +129,6 @@ pub fn vcopy_lane_u64<const N1: i32, const N2: i32>(_a: uint64x1_t, b: uint64x1_
 #[cfg_attr(test, assert_instr(nop, N1 = 0, N2 = 0))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_lane_p64<const N1: i32, const N2: i32>(_a: poly64x1_t, b: poly64x1_t) -> poly64x1_t {
     static_assert!(N1 == 0);
     static_assert!(N2 == 0);
@@ -148,7 +141,6 @@ pub fn vcopy_lane_p64<const N1: i32, const N2: i32>(_a: poly64x1_t, b: poly64x1_
 #[cfg_attr(test, assert_instr(nop, N1 = 0, N2 = 0))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_lane_f64<const N1: i32, const N2: i32>(
     _a: float64x1_t,
     b: float64x1_t,
@@ -164,7 +156,6 @@ pub fn vcopy_lane_f64<const N1: i32, const N2: i32>(
 #[cfg_attr(test, assert_instr(nop, LANE1 = 0, LANE2 = 1))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_laneq_s64<const LANE1: i32, const LANE2: i32>(
     _a: int64x1_t,
     b: int64x2_t,
@@ -180,7 +171,6 @@ pub fn vcopy_laneq_s64<const LANE1: i32, const LANE2: i32>(
 #[cfg_attr(test, assert_instr(nop, LANE1 = 0, LANE2 = 1))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_laneq_u64<const LANE1: i32, const LANE2: i32>(
     _a: uint64x1_t,
     b: uint64x2_t,
@@ -196,7 +186,6 @@ pub fn vcopy_laneq_u64<const LANE1: i32, const LANE2: i32>(
 #[cfg_attr(test, assert_instr(nop, LANE1 = 0, LANE2 = 1))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_laneq_p64<const LANE1: i32, const LANE2: i32>(
     _a: poly64x1_t,
     b: poly64x2_t,
@@ -212,7 +201,6 @@ pub fn vcopy_laneq_p64<const LANE1: i32, const LANE2: i32>(
 #[cfg_attr(test, assert_instr(nop, LANE1 = 0, LANE2 = 1))]
 #[rustc_legacy_const_generics(1, 3)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcopy_laneq_f64<const LANE1: i32, const LANE2: i32>(
     _a: float64x1_t,
     b: float64x2_t,
@@ -227,7 +215,6 @@ pub fn vcopy_laneq_f64<const LANE1: i32, const LANE2: i32>(
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn vld1_dup_f64(ptr: *const f64) -> float64x1_t {
     vld1_f64(ptr)
 }
@@ -237,7 +224,6 @@ pub unsafe fn vld1_dup_f64(ptr: *const f64) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ld1r))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn vld1q_dup_f64(ptr: *const f64) -> float64x2_t {
     let x = vld1q_lane_f64::<0>(ptr, transmute(f64x2::splat(0.)));
     simd_shuffle!(x, x, [0, 0])
@@ -249,7 +235,6 @@ pub unsafe fn vld1q_dup_f64(ptr: *const f64) -> float64x2_t {
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(ldr, LANE = 0))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn vld1_lane_f64<const LANE: i32>(ptr: *const f64, src: float64x1_t) -> float64x1_t {
     static_assert!(LANE == 0);
     simd_insert!(src, LANE as u32, *ptr)
@@ -261,7 +246,6 @@ pub unsafe fn vld1_lane_f64<const LANE: i32>(ptr: *const f64, src: float64x1_t) 
 #[rustc_legacy_const_generics(2)]
 #[cfg_attr(test, assert_instr(ld1, LANE = 1))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn vld1q_lane_f64<const LANE: i32>(ptr: *const f64, src: float64x2_t) -> float64x2_t {
     static_assert_uimm_bits!(LANE, 1);
     simd_insert!(src, LANE as u32, *ptr)
@@ -274,7 +258,6 @@ pub unsafe fn vld1q_lane_f64<const LANE: i32>(ptr: *const f64, src: float64x2_t)
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(bsl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vbsl_f64(a: uint64x1_t, b: float64x1_t, c: float64x1_t) -> float64x1_t {
     let not = int64x1_t::splat(-1);
     unsafe {
@@ -289,7 +272,6 @@ pub fn vbsl_f64(a: uint64x1_t, b: float64x1_t, c: float64x1_t) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(bsl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vbsl_p64(a: poly64x1_t, b: poly64x1_t, c: poly64x1_t) -> poly64x1_t {
     let not = int64x1_t::splat(-1);
     unsafe { simd_or(simd_and(a, b), simd_and(simd_xor(a, transmute(not)), c)) }
@@ -299,7 +281,6 @@ pub fn vbsl_p64(a: poly64x1_t, b: poly64x1_t, c: poly64x1_t) -> poly64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(bsl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vbslq_f64(a: uint64x2_t, b: float64x2_t, c: float64x2_t) -> float64x2_t {
     let not = int64x2_t::splat(-1);
     unsafe {
@@ -314,7 +295,6 @@ pub fn vbslq_f64(a: uint64x2_t, b: float64x2_t, c: float64x2_t) -> float64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(bsl))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vbslq_p64(a: poly64x2_t, b: poly64x2_t, c: poly64x2_t) -> poly64x2_t {
     let not = int64x2_t::splat(-1);
     unsafe { simd_or(simd_and(a, b), simd_and(simd_xor(a, transmute(not)), c)) }
@@ -325,7 +305,6 @@ pub fn vbslq_p64(a: poly64x2_t, b: poly64x2_t, c: poly64x2_t) -> poly64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(fadd))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vadd_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
     unsafe { simd_add(a, b) }
 }
@@ -335,7 +314,6 @@ pub fn vadd_f64(a: float64x1_t, b: float64x1_t) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(fadd))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vaddq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
     unsafe { simd_add(a, b) }
 }
@@ -345,7 +323,6 @@ pub fn vaddq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(add))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vadd_s64(a: int64x1_t, b: int64x1_t) -> int64x1_t {
     unsafe { simd_add(a, b) }
 }
@@ -355,7 +332,6 @@ pub fn vadd_s64(a: int64x1_t, b: int64x1_t) -> int64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(add))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vadd_u64(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
     unsafe { simd_add(a, b) }
 }
@@ -365,7 +341,6 @@ pub fn vadd_u64(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(add))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vaddd_s64(a: i64, b: i64) -> i64 {
     a.wrapping_add(b)
 }
@@ -375,7 +350,6 @@ pub fn vaddd_s64(a: i64, b: i64) -> i64 {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(add))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vaddd_u64(a: u64, b: u64) -> u64 {
     a.wrapping_add(b)
 }
@@ -386,7 +360,6 @@ pub fn vaddd_u64(a: u64, b: u64) -> u64 {
 #[cfg_attr(test, assert_instr(nop, N = 0))]
 #[rustc_legacy_const_generics(2)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vext_p64<const N: i32>(a: poly64x1_t, _b: poly64x1_t) -> poly64x1_t {
     static_assert!(N == 0);
     a
@@ -398,7 +371,6 @@ pub fn vext_p64<const N: i32>(a: poly64x1_t, _b: poly64x1_t) -> poly64x1_t {
 #[cfg_attr(test, assert_instr(nop, N = 0))]
 #[rustc_legacy_const_generics(2)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vext_f64<const N: i32>(a: float64x1_t, _b: float64x1_t) -> float64x1_t {
     static_assert!(N == 0);
     a
@@ -409,7 +381,6 @@ pub fn vext_f64<const N: i32>(a: float64x1_t, _b: float64x1_t) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(fmov))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vdup_n_p64(value: p64) -> poly64x1_t {
     unsafe { transmute(u64x1::new(value)) }
 }
@@ -419,7 +390,6 @@ pub fn vdup_n_p64(value: p64) -> poly64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(nop))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vdup_n_f64(value: f64) -> float64x1_t {
     float64x1_t::splat(value)
 }
@@ -429,7 +399,6 @@ pub fn vdup_n_f64(value: f64) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(dup))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vdupq_n_p64(value: p64) -> poly64x2_t {
     unsafe { transmute(u64x2::new(value, value)) }
 }
@@ -439,7 +408,6 @@ pub fn vdupq_n_p64(value: p64) -> poly64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(dup))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vdupq_n_f64(value: f64) -> float64x2_t {
     float64x2_t::splat(value)
 }
@@ -449,7 +417,6 @@ pub fn vdupq_n_f64(value: f64) -> float64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(fmov))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vmov_n_p64(value: p64) -> poly64x1_t {
     vdup_n_p64(value)
 }
@@ -459,7 +426,6 @@ pub fn vmov_n_p64(value: p64) -> poly64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(nop))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vmov_n_f64(value: f64) -> float64x1_t {
     vdup_n_f64(value)
 }
@@ -469,7 +435,6 @@ pub fn vmov_n_f64(value: f64) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(dup))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vmovq_n_p64(value: p64) -> poly64x2_t {
     vdupq_n_p64(value)
 }
@@ -479,7 +444,6 @@ pub fn vmovq_n_p64(value: p64) -> poly64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(dup))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vmovq_n_f64(value: f64) -> float64x2_t {
     vdupq_n_f64(value)
 }
@@ -489,7 +453,6 @@ pub fn vmovq_n_f64(value: f64) -> float64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(nop))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vget_high_f64(a: float64x2_t) -> float64x1_t {
     unsafe { float64x1_t([simd_extract!(a, 1)]) }
 }
@@ -499,7 +462,6 @@ pub fn vget_high_f64(a: float64x2_t) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ext))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vget_high_p64(a: poly64x2_t) -> poly64x1_t {
     unsafe { transmute(u64x1::new(simd_extract!(a, 1))) }
 }
@@ -509,7 +471,6 @@ pub fn vget_high_p64(a: poly64x2_t) -> poly64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(nop))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vget_low_f64(a: float64x2_t) -> float64x1_t {
     unsafe { float64x1_t([simd_extract!(a, 0)]) }
 }
@@ -519,7 +480,6 @@ pub fn vget_low_f64(a: float64x2_t) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(nop))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vget_low_p64(a: poly64x2_t) -> poly64x1_t {
     unsafe { transmute(u64x1::new(simd_extract!(a, 0))) }
 }
@@ -533,7 +493,6 @@ pub fn vget_low_p64(a: poly64x2_t) -> poly64x1_t {
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
     assert_instr(nop, IMM5 = 0)
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vget_lane_f64<const IMM5: i32>(v: float64x1_t) -> f64 {
     static_assert!(IMM5 == 0);
     unsafe { simd_extract!(v, IMM5 as u32) }
@@ -548,7 +507,6 @@ pub fn vget_lane_f64<const IMM5: i32>(v: float64x1_t) -> f64 {
     all(test, any(target_arch = "aarch64", target_arch = "arm64ec")),
     assert_instr(nop, IMM5 = 0)
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vgetq_lane_f64<const IMM5: i32>(v: float64x2_t) -> f64 {
     static_assert_uimm_bits!(IMM5, 1);
     unsafe { simd_extract!(v, IMM5 as u32) }
@@ -559,7 +517,6 @@ pub fn vgetq_lane_f64<const IMM5: i32>(v: float64x2_t) -> f64 {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(mov))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vcombine_f64(low: float64x1_t, high: float64x1_t) -> float64x2_t {
     unsafe { simd_shuffle!(low, high, [0, 1]) }
 }
@@ -570,7 +527,6 @@ pub fn vcombine_f64(low: float64x1_t, high: float64x1_t) -> float64x2_t {
 #[cfg_attr(test, assert_instr(nop, N = 2))]
 #[rustc_legacy_const_generics(1)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vshld_n_s64<const N: i32>(a: i64) -> i64 {
     static_assert_uimm_bits!(N, 6);
     a << N
@@ -582,7 +538,6 @@ pub fn vshld_n_s64<const N: i32>(a: i64) -> i64 {
 #[cfg_attr(test, assert_instr(nop, N = 2))]
 #[rustc_legacy_const_generics(1)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vshld_n_u64<const N: i32>(a: u64) -> u64 {
     static_assert_uimm_bits!(N, 6);
     a << N
@@ -594,7 +549,6 @@ pub fn vshld_n_u64<const N: i32>(a: u64) -> u64 {
 #[cfg_attr(test, assert_instr(nop, N = 2))]
 #[rustc_legacy_const_generics(1)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vshrd_n_s64<const N: i32>(a: i64) -> i64 {
     static_assert!(N >= 1 && N <= 64);
     let n: i32 = if N == 64 { 63 } else { N };
@@ -607,7 +561,6 @@ pub fn vshrd_n_s64<const N: i32>(a: i64) -> i64 {
 #[cfg_attr(test, assert_instr(nop, N = 2))]
 #[rustc_legacy_const_generics(1)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vshrd_n_u64<const N: i32>(a: u64) -> u64 {
     static_assert!(N >= 1 && N <= 64);
     let n: i32 = if N == 64 {
@@ -624,7 +577,6 @@ pub fn vshrd_n_u64<const N: i32>(a: u64) -> u64 {
 #[cfg_attr(test, assert_instr(nop, N = 2))]
 #[rustc_legacy_const_generics(2)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vsrad_n_s64<const N: i32>(a: i64, b: i64) -> i64 {
     static_assert!(N >= 1 && N <= 64);
     a.wrapping_add(vshrd_n_s64::<N>(b))
@@ -636,7 +588,6 @@ pub fn vsrad_n_s64<const N: i32>(a: i64, b: i64) -> i64 {
 #[cfg_attr(test, assert_instr(nop, N = 2))]
 #[rustc_legacy_const_generics(2)]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn vsrad_n_u64<const N: i32>(a: u64, b: u64) -> u64 {
     static_assert!(N >= 1 && N <= 64);
     a.wrapping_add(vshrd_n_u64::<N>(b))

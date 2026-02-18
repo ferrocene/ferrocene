@@ -1,7 +1,5 @@
 use crate::cmp;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, TrustedRandomAccess};
 use crate::num::NonZero;
 use crate::ops::{ControlFlow, Try};
@@ -140,7 +138,6 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> SourceIter for Take<I>
 where
     I: SourceIter,
@@ -155,14 +152,12 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Take<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
     const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }
 
 #[stable(feature = "double_ended_take_iterator", since = "1.38.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> DoubleEndedIterator for Take<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
@@ -253,19 +248,15 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> ExactSizeIterator for Take<I> where I: ExactSizeIterator {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> FusedIterator for Take<I> where I: FusedIterator {}
 
 #[unstable(issue = "none", feature = "trusted_fused")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: TrustedFused> TrustedFused for Take<I> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I: TrustedLen> TrustedLen for Take<I> {}
 
 trait SpecTake: Iterator {
@@ -312,7 +303,6 @@ impl<I: Iterator> SpecTake for Take<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
     #[inline]
     fn spec_fold<B, F>(mut self, init: B, mut f: F) -> B
@@ -342,7 +332,6 @@ impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
 }
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -386,7 +375,6 @@ impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
 // by n-1st without remembering all results.
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> ExactSizeIterator for Take<crate::iter::Repeat<T>> {
     fn len(&self) -> usize {
         self.n
@@ -394,7 +382,6 @@ impl<T: Clone> ExactSizeIterator for Take<crate::iter::Repeat<T>> {
 }
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F: FnMut() -> A, A> ExactSizeIterator for Take<crate::iter::RepeatWith<F>> {
     fn len(&self) -> usize {
         self.n

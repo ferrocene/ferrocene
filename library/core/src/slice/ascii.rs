@@ -3,7 +3,6 @@
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod ferrocene_test;
 
 use core::ascii::EscapeDefault;
@@ -11,7 +10,6 @@ use core::ascii::EscapeDefault;
 use crate::fmt::{self, Write};
 #[cfg(not(all(target_arch = "loongarch64", target_feature = "lsx")))]
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{ascii, iter, ops};
 
 // Ferrocene addition: imports for the certified subset
@@ -34,7 +32,6 @@ impl [u8] {
 
     /// If this slice [`is_ascii`](Self::is_ascii), returns it as a slice of
     /// [ASCII characters](`ascii::Char`), otherwise returns `None`.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
@@ -53,7 +50,6 @@ impl [u8] {
     /// # Safety
     ///
     /// Every byte in the slice must be in `0..=127`, or else this is UB.
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
     #[inline]
@@ -184,7 +180,6 @@ impl [u8] {
     /// [`to_ascii_uppercase`].
     ///
     /// [`to_ascii_uppercase`]: #method.to_ascii_uppercase
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
@@ -207,7 +202,6 @@ impl [u8] {
     /// [`to_ascii_lowercase`].
     ///
     /// [`to_ascii_lowercase`]: #method.to_ascii_lowercase
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
@@ -251,7 +245,6 @@ impl [u8] {
     /// assert_eq!(b"  ".trim_ascii_start(), b"");
     /// assert_eq!(b"".trim_ascii_start(), b"");
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
@@ -281,7 +274,6 @@ impl [u8] {
     /// assert_eq!(b"  ".trim_ascii_end(), b"");
     /// assert_eq!(b"".trim_ascii_end(), b"");
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
@@ -312,7 +304,6 @@ impl [u8] {
     /// assert_eq!(b"  ".trim_ascii(), b"");
     /// assert_eq!(b"".trim_ascii(), b"");
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[inline]
@@ -340,7 +331,6 @@ pub struct EscapeAscii<'a> {
     inner: iter::FlatMap<super::Iter<'a, u8>, ascii::EscapeDefault, EscapeByte>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::Iterator for EscapeAscii<'a> {
     type Item = u8;
@@ -373,14 +363,12 @@ impl<'a> iter::Iterator for EscapeAscii<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::DoubleEndedIterator for EscapeAscii<'a> {
     fn next_back(&mut self) -> Option<u8> {
         self.inner.next_back()
     }
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::FusedIterator for EscapeAscii<'a> {}
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]

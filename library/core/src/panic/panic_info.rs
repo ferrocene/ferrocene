@@ -113,7 +113,6 @@ impl<'a> PanicInfo<'a> {
     #[deprecated(since = "1.81.0", note = "this never returns anything useful")]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[allow(deprecated, deprecated_in_future)]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn payload(&self) -> &(dyn crate::any::Any + Send) {
         struct NoPayload;
         &NoPayload
@@ -131,7 +130,6 @@ impl<'a> PanicInfo<'a> {
     /// again.
     #[must_use]
     #[unstable(feature = "panic_can_unwind", issue = "92988")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn can_unwind(&self) -> bool {
         self.can_unwind
     }
@@ -143,7 +141,6 @@ impl<'a> PanicInfo<'a> {
     )]
     #[doc(hidden)]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn force_no_backtrace(&self) -> bool {
         self.force_no_backtrace
     }

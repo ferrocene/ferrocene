@@ -1,14 +1,9 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 use crate::ops::Try;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{array, ptr};
 
 /// An iterator that copies the elements of an underlying iterator.
@@ -32,7 +27,6 @@ impl<I> Copied<I> {
         Copied { it }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[doc(hidden)]
     #[unstable(feature = "copied_into_inner", issue = "none")]
     pub fn into_inner(self) -> I {
@@ -63,7 +57,6 @@ where
         self.it.next().copied()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -117,7 +110,6 @@ where
         self.it.advance_by(n)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> T
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -181,7 +173,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> FusedIterator for Copied<I>
 where
@@ -190,12 +181,10 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccess for Copied<I> where I: TrustedRandomAccess {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Copied<I>
@@ -205,7 +194,6 @@ where
     const MAY_HAVE_SIDE_EFFECT: bool = I::MAY_HAVE_SIDE_EFFECT;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 unsafe impl<'a, I, T: 'a> TrustedLen for Copied<I>
 where
@@ -214,7 +202,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait SpecNextChunk<'a, const N: usize, T: 'a>: Iterator<Item = &'a T>
 where
     T: Copy,
@@ -222,7 +209,6 @@ where
     fn spec_next_chunk(&mut self) -> Result<[T; N], array::IntoIter<T, N>>;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, const N: usize, I, T: 'a> SpecNextChunk<'a, N, T> for I
 where
     I: Iterator<Item = &'a T>,
@@ -233,7 +219,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, const N: usize, T: 'a> SpecNextChunk<'a, N, T> for crate::slice::Iter<'a, T>
 where
     T: Copy,
@@ -279,7 +264,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<I: Default> Default for Copied<I> {
     /// Creates a `Copied` iterator from the default value of `I`
@@ -294,7 +278,6 @@ impl<I: Default> Default for Copied<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I> SourceIter for Copied<I>
 where
@@ -309,7 +292,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Copied<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;

@@ -12,7 +12,6 @@
 // Total           :  9657 bytes
 
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn bitset_search<
     const N: usize,
     const CHUNK_SIZE: usize,
@@ -149,11 +148,9 @@ unsafe fn skip_search<const SOR: usize, const OFFSETS: usize>(
     offset_idx % 2 == 1
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const UNICODE_VERSION: (u8, u8, u8) = (17, 0, 0);
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod alphabetic {
     use super::ShortOffsetRunHeader;
 
@@ -266,7 +263,6 @@ pub mod alphabetic {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod case_ignorable {
     use super::ShortOffsetRunHeader;
 
@@ -349,7 +345,6 @@ pub mod case_ignorable {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod cased {
     use super::ShortOffsetRunHeader;
 
@@ -480,7 +475,6 @@ pub mod grapheme_extend {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod lowercase {
     static BITSET_CHUNKS_MAP: [u8; 123] = [
         12, 17, 0, 0, 9, 0, 0, 13, 14, 10, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -590,7 +584,6 @@ pub mod lowercase {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod n {
     use super::ShortOffsetRunHeader;
 
@@ -655,7 +648,6 @@ pub mod n {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod uppercase {
     static BITSET_CHUNKS_MAP: [u8; 125] = [
         3, 14, 6, 6, 0, 6, 6, 2, 5, 12, 6, 15, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -749,7 +741,6 @@ pub mod uppercase {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod white_space {
     static WHITESPACE_MAP: [u8; 256] = [
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -776,7 +767,6 @@ pub mod white_space {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod conversions {
 
 

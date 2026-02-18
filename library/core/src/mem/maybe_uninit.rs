@@ -1173,7 +1173,6 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_clone_of_slice`]: slice::write_clone_of_slice
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
     #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
     pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]
@@ -1235,7 +1234,6 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_copy_of_slice`]: slice::write_copy_of_slice
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
     pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]
     where
@@ -1291,7 +1289,6 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     #[doc(alias = "memset")]
     #[unstable(feature = "maybe_uninit_fill", issue = "117428")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write_filled(&mut self, value: T) -> &mut [T]
     where
         T: Clone,
@@ -1325,7 +1322,6 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(initialized, &mut [1, 2, 3, 4, 5]);
     /// ```
     #[unstable(feature = "maybe_uninit_fill", issue = "117428")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write_with<F>(&mut self, mut f: F) -> &mut [T]
     where
         F: FnMut(usize) -> T,
@@ -1402,7 +1398,6 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(iter.as_slice(), &[4, 5]);
     /// ```
     #[unstable(feature = "maybe_uninit_fill", issue = "117428")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write_iter<I>(&mut self, it: I) -> (&mut [T], &mut [MaybeUninit<T>])
     where
         I: IntoIterator<Item = T>,
@@ -1445,7 +1440,6 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(&[val1, val2], &[0x1234u16, 0x5678u16]);
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_bytes(&self) -> &[MaybeUninit<u8>] {
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
@@ -1476,7 +1470,6 @@ impl<T> [MaybeUninit<T>] {
     /// }
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_bytes_mut(&mut self) -> &mut [MaybeUninit<u8>] {
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
@@ -1577,7 +1570,6 @@ impl<T, const N: usize> MaybeUninit<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
 impl<T, const N: usize> From<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1586,7 +1578,6 @@ impl<T, const N: usize> From<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
 impl<T, const N: usize> AsRef<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1596,7 +1587,6 @@ impl<T, const N: usize> AsRef<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
 impl<T, const N: usize> AsRef<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1605,7 +1595,6 @@ impl<T, const N: usize> AsRef<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
 impl<T, const N: usize> AsMut<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1615,7 +1604,6 @@ impl<T, const N: usize> AsMut<[MaybeUninit<T>; N]> for MaybeUninit<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
 impl<T, const N: usize> AsMut<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     #[inline]
@@ -1624,7 +1612,6 @@ impl<T, const N: usize> AsMut<[MaybeUninit<T>]> for MaybeUninit<[T; N]> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
 impl<T, const N: usize> From<MaybeUninit<[T; N]>> for [MaybeUninit<T>; N] {
     #[inline]
@@ -1654,13 +1641,11 @@ impl<T, const N: usize> [MaybeUninit<T>; N] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 struct Guard<'a, T> {
     slice: &'a mut [MaybeUninit<T>],
     initialized: usize,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Drop for Guard<'a, T> {
     fn drop(&mut self) {
         let initialized_part = &mut self.slice[..self.initialized];
@@ -1671,12 +1656,10 @@ impl<'a, T> Drop for Guard<'a, T> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait SpecFill<T> {
     fn spec_fill(&mut self, value: T);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: Clone> SpecFill<T> for [MaybeUninit<T>] {
     default fn spec_fill(&mut self, value: T) {
         let mut guard = Guard { slice: self, initialized: 0 };
@@ -1693,7 +1676,6 @@ impl<T: Clone> SpecFill<T> for [MaybeUninit<T>] {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: TrivialClone> SpecFill<T> for [MaybeUninit<T>] {
     fn spec_fill(&mut self, value: T) {
         // SAFETY: because `T` is `TrivialClone`, this is equivalent to calling

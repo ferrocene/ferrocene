@@ -58,7 +58,6 @@ Core Library Certification
    norm-mapping/iso-26262/iso-26262-8-9
    norm-mapping/iso-26262/iso-26262-8-10
    norm-mapping/iso-26262/iso-26262-8-11
-   norm-mapping/iso-26262/iso-26262-9-6
 
 .. appendices::
    :numbered:

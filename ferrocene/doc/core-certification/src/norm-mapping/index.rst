@@ -35,4 +35,3 @@ Norm mapping of ISO 26262 standard requirements
 - :doc:`iso-26262/iso-26262-8-9`
 - :doc:`iso-26262/iso-26262-8-10`
 - :doc:`iso-26262/iso-26262-8-11`
-- :doc:`iso-26262/iso-26262-9-6`

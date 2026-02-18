@@ -38,6 +38,7 @@ Core Library Certification
    norm-mapping/iec-61508/iec-61508-3
    norm-mapping/iec-61508/iec-61508-3-annex-a
    norm-mapping/iec-61508/iec-61508-3-annex-b
+   norm-mapping/iso-26262/applicable-clauses
    norm-mapping/iso-26262/iso-26262-2-5
    norm-mapping/iso-26262/iso-26262-2-6
    norm-mapping/iso-26262/iso-26262-2-7

@@ -1,8 +1,37 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Testing Other Targets 
-=====================
+Cross-compiling
+===============
+
+Building
+--------
+
+This requires less setup than a full test environment (below), but doesn't allow running
+binaries for the target.
+
+Toolchain Setup
+^^^^^^^^^^^^^^^
+
+You need a compiler for the target.
+For a ``x86_64-unknown-linux-gnu`` target and a MacOS host, you can install a cross toolchain:
+
+.. code-block:: bash
+
+   brew install messense/macos-cross-toolchains/x86_64-unknown-linux-gnu
+
+If you have ``x86_64-unknown-linux-gnu-binutils`` already installed, you may need to
+also run ``brew link --overwrite x86_64-unknown-linux-gnu``.
+
+Running a build
+^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+  ./x.py build --target x86_64-unknown-linux-gnu
+
+Testing Other Targets
+---------------------
 
 It's often possible to test targets other than your host tuple.
 
@@ -18,13 +47,13 @@ setup inside a Linux based environment, native or one supporting nested virtuali
 Lima or WSL2.)
 
 Host Setup
-----------
+^^^^^^^^^^
 
 Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
 :target-with-tuple:`aarch64-apple-darwin`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""
 
 Install Lima, if you don't have it:
 
@@ -74,14 +103,14 @@ You can create a guest with the following commands:
 Start the guest:
 
 .. code-block:: bash
-    
+
     limactl start ferrocene
 
 
 Shell into the guest:
 
 .. code-block:: bash
-    
+
     limactl shell ferrocene
 
 You can also point `Visual Studio Code's SSH extension <https://code.visualstudio.com/docs/remote/ssh>`_ at it
@@ -124,14 +153,14 @@ The vm name is displayed in VS Code when trying to connect via ssh.
 Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
 .. Warning::
-    
+
     It is recommended to not share ``build/`` directories between multiple hosts, both for performance and correctness. To avoid this,
     you should ``cd ~`` in the guest and clone a new copy of the Ferrocene repository into the dedicated guest storage.
 
     Please ensure you always work from the guest-local repository.
 
 :target-with-tuple:`x86_64-pc-windows-msvc`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""
 
 Setup WSL2, if you don't have it:
 
@@ -152,28 +181,28 @@ configuration:
 
     [wsl2]
     nestedVirtualization=true
-    
+
 If you changed your configuration, make sure to restart the environment with ``wsl --shutdown``.
 
 Shell into the guest:
 
 .. code-block:: bash
-    
+
     wsl
-    
+
 You can also point `Visual Studio Code WSL extension <https://code.visualstudio.com/docs/remote/wsl-tutorial>`_ at it.
 
 Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
 .. Warning::
-    
+
     It is recommended to not share ``build/`` directories between multiple hosts, both for performance and correctness. To avoid this,
     you should ``cd ~`` in the guest and clone a new copy of the Ferrocene repository into the dedicated guest storage.
 
     Please ensure you always work from the guest-local repository.
 
 :target-with-tuple:`x86_64-unknown-linux-gnu`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""
 
 You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
 installed, as well as a few extras:
@@ -187,7 +216,7 @@ installed, as well as a few extras:
     These packages must also be installed in the VMs used on MacOS and Windows.
 
 Target Procedures
------------------
+^^^^^^^^^^^^^^^^^
 
 Currently bare metal targets have a similar procedure for testing.
 
@@ -197,17 +226,17 @@ Currently bare metal targets have a similar procedure for testing.
    This will eventually be an open source component, but for now, it's our little bit of arcane magic.
 
 :target-with-tuple:`aarch64-unknown-none`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""
 
 .. Warning::
-    
+
     In a :target:`aarch64-unknown-linux-gnu` environment -- such as a guest on
     :target:`aarch64-apple-darwin` -- you **must** skip to the final step, running the tests using::
-    
+
         export QEMU_CPU=cortex-a53
         ./x test --stage 1 --target aarch64-unknown-ferrocene.facade library/core
 
-    Incorrectly configuring your :target:`aarch64-unknown-linux-gnu` environment using the other steps 
+    Incorrectly configuring your :target:`aarch64-unknown-linux-gnu` environment using the other steps
     will damage to the environment and result in "Too many levels of symbolic links" errors.
 
 Install the necessary packages:
@@ -227,7 +256,7 @@ If you don't already have a ``/usr/share/binfmts/qemu-aarch64`` file, create one
     credentials no
     preserve no
     fix_binary no
-    
+
 Then make sure it's imported:
 
 .. code-block:: bash
@@ -251,7 +280,7 @@ After, you can run the tests:
     ./x test --stage 1 --target aarch64-unknown-ferrocene.facade library/core
 
 :target-with-tuple:`thumbv7em-none-eabihf` & :target-with-tuple:`thumbv7em-none-eabi`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Install the necessary packages:
 
@@ -270,11 +299,11 @@ If you don't already have a ``/usr/share/binfmts/qemu-arm`` file, create one:
     credentials no
     preserve no
     fix_binary no
-    
+
 Then make sure it's imported:
 
 .. code-block:: bash
-    
+
    sudo update-binfmts --import qemu-arm
 
 Now set the target:
@@ -282,7 +311,7 @@ Now set the target:
 .. code-block:: bash
 
     export TARGET="thumbv7em-ferrocene.facade-eabihf"
-    # or 
+    # or
     export TARGET="thumbv7em-ferrocene.facade-eabi"
 
 In order to test this target, the build process will acquire a copy of our *secret sauce* from AWS. Ensure you're authenticated, following the section in

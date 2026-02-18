@@ -150,6 +150,9 @@ impl Argument<'_> {
             // to calling the original function passed to `new` with the
             // original reference, which is sound.
             ArgumentType::Placeholder { formatter, value, .. } => unsafe { formatter(value, f) },
+            #[ferrocene::annotation(
+                "Cannot be covered as this code is unreachable. See the SAFETY comment."
+            )]
             // SAFETY: the caller promised this.
             ArgumentType::Count(_) => unsafe { unreachable_unchecked() },
         }

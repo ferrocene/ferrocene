@@ -15,6 +15,7 @@ Norm mapping of IEC 61508 standard requirements
 Norm mapping of ISO 26262 standard requirements
 -----------------------------------------------
 
+- :doc:`iso-26262/applicable-clauses`
 - :doc:`iso-26262/iso-26262-2-5`
 - :doc:`iso-26262/iso-26262-2-6`
 - :doc:`iso-26262/iso-26262-2-7`

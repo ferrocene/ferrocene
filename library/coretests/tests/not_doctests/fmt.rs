@@ -89,3 +89,14 @@ fn test_formatter_pad_formatted_parts() {
     fmt::Display::fmt(&123.456, &mut f).unwrap();
     assert_eq!(buffer, "123.456");
 }
+
+// Covers `core::fmt::num::<impl u128>::_fmt_inner`
+#[test]
+fn test_u128_fmt_inner() {
+    let mut buffer = String::new();
+    let mut f = fmt::Formatter::new(&mut buffer, fmt::FormattingOptions::new());
+
+    let n = 1_0000_0000_0000_0001_u128; // Needs to be greater or equal than 1_0000_0000_0000_0000
+    fmt::Display::fmt(&n, &mut f).unwrap();
+    assert_eq!(buffer, "10000000000000001");
+}

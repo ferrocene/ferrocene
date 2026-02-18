@@ -165,3 +165,29 @@ fn fmt_num_exp_u128() {
     assert_eq!(format!("{:+.5e}", 100_u128), "+1.00000e2");
     assert_eq!(format!("{:e}", 1_000_000_000_000_u128), "1e12");
 }
+
+// Covers
+// - `core::num::<impl i128>::abs_diff`
+// - `core::num::<impl i16>::abs_diff`
+// - `core::num::<impl i32>::abs_diff`
+// - `core::num::<impl i64>::abs_diff`
+// - `core::num::<impl i8>::abs_diff`
+macro_rules! test_int_abs_diff {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!((10 as $T).abs_diff(-10), 20);
+                assert_eq!((-10 as $T).abs_diff(10), 20);
+            }
+        )*
+    };
+}
+test_int_abs_diff! {
+    i8 => i8_abs_diff,
+    i16 => i16_abs_diff,
+    i32 => i32_abs_diff,
+    i64 => i64_abs_diff,
+    i128 => i128_abs_diff,
+    isize => isize_abs_diff,
+}

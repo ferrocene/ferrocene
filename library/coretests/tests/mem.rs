@@ -211,8 +211,7 @@ fn uninit_write_copy_of_slice() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "does not match destination slice length")]
+#[should_panic(expected = "source slice length (32) does not match destination slice length (64)")]
 fn uninit_write_copy_of_slice_panic_lt() {
     let mut dst = [MaybeUninit::uninit(); 64];
     let src = [0; 32];
@@ -221,8 +220,7 @@ fn uninit_write_copy_of_slice_panic_lt() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "does not match destination slice length")]
+#[should_panic(expected = "source slice length (128) does not match destination slice length (64)")]
 fn uninit_write_copy_of_slice_panic_gt() {
     let mut dst = [MaybeUninit::uninit(); 64];
     let src = [0; 128];

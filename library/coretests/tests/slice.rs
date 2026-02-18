@@ -1733,15 +1733,13 @@ fn select_nth_unstable() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "greater than length of slice")]
+#[should_panic(expected = "index 0 greater than length of slice")]
 fn select_nth_unstable_zero_length() {
     [0i32; 0].select_nth_unstable(0);
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "greater than length of slice")]
+#[should_panic(expected = "index 20 greater than length of slice")]
 fn select_nth_unstable_past_length() {
     [0i32; 10].select_nth_unstable(20);
 }
@@ -1996,8 +1994,7 @@ fn test_copy_within() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "out of range for slice of length")]
+#[should_panic(expected = "range end index 14 out of range for slice of length 13")]
 fn test_copy_within_panics_src_too_long() {
     let mut bytes = *b"Hello, World!";
     // The length is only 13, so 14 is out of bounds.
@@ -2013,8 +2010,7 @@ fn test_copy_within_panics_dest_too_long() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "slice index starts at")]
+#[should_panic(expected = "slice index starts at 2 but ends at 1")]
 fn test_copy_within_panics_src_inverted() {
     let mut bytes = *b"Hello, World!";
     // 2 is greater than 1, so this range is invalid.
@@ -2124,28 +2120,28 @@ fn test_swap() {
 
 mod swap_panics {
     #[test]
-    #[should_panic(expected = "index out of bounds")]
+    #[should_panic(expected = "index out of bounds: the len is 4 but the index is 4")]
     fn index_a_equals_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(4, 2);
     }
 
     #[test]
-    #[should_panic(expected = "index out of bounds")]
+    #[should_panic(expected = "index out of bounds: the len is 4 but the index is 4")]
     fn index_b_equals_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(2, 4);
     }
 
     #[test]
-    #[should_panic(expected = "index out of bounds")]
+    #[should_panic(expected = "index out of bounds: the len is 4 but the index is 5")]
     fn index_a_greater_than_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(5, 2);
     }
 
     #[test]
-    #[should_panic(expected = "index out of bounds")]
+    #[should_panic(expected = "index out of bounds: the len is 4 but the index is 5")]
     fn index_b_greater_than_len() {
         let mut x = ["a", "b", "c", "d"];
         x.swap(2, 5);

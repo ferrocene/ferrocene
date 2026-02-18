@@ -1467,8 +1467,7 @@ fn test_copy_from_slice() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "does not match destination slice length")]
+#[should_panic(expected = "source slice length (4) does not match destination slice length (5)")]
 fn test_copy_from_slice_dst_longer() {
     let src = [0, 1, 2, 3];
     let mut dst = [0; 5];
@@ -1476,8 +1475,7 @@ fn test_copy_from_slice_dst_longer() {
 }
 
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "does not match destination slice length")]
+#[should_panic(expected = "source slice length (4) does not match destination slice length (3)")]
 fn test_copy_from_slice_dst_shorter() {
     let src = [0, 1, 2, 3];
     let mut dst = [0; 3];

@@ -149,8 +149,7 @@ pub fn test_expect_ok() {
     assert_eq!(ok.expect("Unexpected error"), 100);
 }
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "Got expected error")]
+#[should_panic(expected = "Got expected error: \"All good\"")]
 pub fn test_expect_err() {
     let err: Result<isize, &'static str> = Err("All good");
     err.expect("Got expected error");
@@ -162,8 +161,7 @@ pub fn test_expect_err_err() {
     assert_eq!(ok.expect_err("Unexpected ok"), 100);
 }
 #[test]
-// Ferrocene addition: modified due to limitations of the certified runtime
-#[should_panic(expected = "Got expected ok")]
+#[should_panic(expected = "Got expected ok: \"All good\"")]
 pub fn test_expect_err_ok() {
     let err: Result<&'static str, isize> = Ok("All good");
     err.expect_err("Got expected ok");

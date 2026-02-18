@@ -850,8 +850,9 @@ where
 
     impl<T> Drop for DropOnPanic<T> {
         fn drop(&mut self) {
-            // SAFETY: Must be guaranteed on construction of local type `DropOnPanic`.
-            unsafe { self.inner.drop_in_place() }
+            // // SAFETY: Must be guaranteed on construction of local type `DropOnPanic`.
+            // unsafe { self.inner.drop_in_place() }
+            unreachable!("select_unpredictable")
         }
     }
 

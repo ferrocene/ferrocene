@@ -248,9 +248,10 @@ pub fn format_shortest<'a>(
         // but we are just being safe and consistent here.
         // SAFETY: we initialized that memory above.
         if let Some(c) = round_up(unsafe { buf[..i].assume_init_mut() }) {
-            buf[i] = MaybeUninit::new(c);
-            i += 1;
-            k += 1;
+            // buf[i] = MaybeUninit::new(c);
+            // i += 1;
+            // k += 1;
+            unreachable!("format_shortest")
         }
     }
 

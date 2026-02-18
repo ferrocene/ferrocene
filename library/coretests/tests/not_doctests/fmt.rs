@@ -58,6 +58,23 @@ fn test_arguments_estimated_capacity_n_128() {
     assert_eq!(args.estimated_capacity(), 380);
 }
 
+// Covers `core::fmt::write`
+#[test]
+fn test_fmt_write_n_128() {
+    fn how_dare_you() -> &'static str {
+        "How dare you!"
+    }
+    let args = format_args!(
+        "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. {}",
+        how_dare_you()
+    );
+
+    let mut buffer = String::new();
+    fmt::write(&mut buffer, args).unwrap();
+
+    assert!(buffer.starts_with("My message is that we'll be watching you."));
+}
+
 // Covers `core::fmt::Formatter::<'a>::pad_formatted_parts`
 #[test]
 fn test_formatter_pad_formatted_parts() {

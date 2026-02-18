@@ -395,7 +395,6 @@ macro_rules! define_callbacks {
         #[derive(Default)]
         pub struct QueryArenas<'tcx> {
             $(
-                $(#[$attr])*
                 pub $name: if_arena_cache!(
                     [$($modifiers)*]
                     // Use the `ArenaCached` helper trait to determine the arena's value type.
@@ -409,7 +408,7 @@ macro_rules! define_callbacks {
         #[derive(Default)]
         pub struct QueryCaches<'tcx> {
             $(
-                $(#[$attr])* pub $name: $name::Storage<'tcx>,
+                pub $name: $name::Storage<'tcx>,
             )*
         }
 

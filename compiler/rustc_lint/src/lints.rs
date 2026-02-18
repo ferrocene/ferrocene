@@ -1146,7 +1146,7 @@ pub(crate) struct ImplicitSysrootCrateImportDiag<'a> {
 #[derive(LintDiagnostic)]
 #[diag("use of `AttributeKind` in `find_attr!(...)` invocation")]
 #[note("`find_attr!(...)` already imports `AttributeKind::*`")]
-#[help("remote `AttributeKind`")]
+#[help("remove `AttributeKind`")]
 pub(crate) struct AttributeKindInFindAttr {}
 
 // let_underscore.rs

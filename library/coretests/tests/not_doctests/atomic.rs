@@ -2,7 +2,8 @@ use core::sync::atomic;
 
 #[test]
 fn atomic_methods() {
-    use atomic::{AtomicU32, Ordering::*};
+    use atomic::AtomicU32;
+    use atomic::Ordering::*;
     let atomic = AtomicU32::new(0);
 
     assert_eq!(unsafe { *atomic.as_ptr() }, 0);
